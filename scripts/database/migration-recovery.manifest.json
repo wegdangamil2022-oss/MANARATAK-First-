@@ -487,6 +487,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Source only, unapplied. Preserve P10 review and receipt/publication evidence; drain writers and use a reviewed compatible backup or forward fix. No destructive down SQL."
+    },
+    "20261013020000_university_program_workspace": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source only, unapplied. Preserve stable program/intake identities, language links and audit/outbox evidence. Drain writers and recover through a reviewed compatible backup or forward fix; no destructive rollback or backfill is authorized."
     }
   }
 }

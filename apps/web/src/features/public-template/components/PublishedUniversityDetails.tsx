@@ -1,3 +1,4 @@
+import { UniversityProgramDiscovery } from './UniversityProgramDiscovery';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -182,6 +183,7 @@ export function PublishedUniversityDetails({
   const graduateDocuments = dto.additionalGraduateRequirements ?? [];
   return (
     <div className="flex flex-col gap-6">
+      {dto.publicId && <UniversityProgramDiscovery universityPublicId={dto.publicId}/>}
       {section(
         'university-about',
         'نبذة عن الجامعة',

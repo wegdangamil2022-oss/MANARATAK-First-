@@ -35,6 +35,7 @@ export class MutationAuditPolicy {
     '/admin/academic-taxonomy',
     '/admin/international-tests',
     '/admin/universities',
+    '/admin/university-programs',
     '/admin/majors',
     '/admin/scholarships',
     '/admin/courses',

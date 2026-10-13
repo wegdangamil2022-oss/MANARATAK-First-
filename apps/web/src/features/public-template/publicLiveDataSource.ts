@@ -510,8 +510,8 @@ async function collectOffsetPages<T>(fetchPage: (page: number) => Promise<{ data
 }
 
 export async function loadPublishedUniversities(locale: PublicLiveLocale = 'ar'): Promise<University[]> {
-  const rows = await collectCursorPages((cursor) => ApiClient.getUniversities({ locale, cursor, limit: 100 }));
-  return rows.map(mapPublicUniversityDto);
+  const page=await ApiClient.getUniversities({locale,limit:25});
+  return page.data.map(mapPublicUniversityDto);
 }
 export async function loadPublishedMajors(locale: PublicLiveLocale = 'ar'): Promise<Major[]> {
   const page = await ApiClient.getMajors({ locale, limit: 20 });

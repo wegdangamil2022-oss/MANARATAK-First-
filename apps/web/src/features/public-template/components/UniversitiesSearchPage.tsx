@@ -1,4 +1,6 @@
-import React, { useState, useMemo, useRef } from 'react';
+import {ApiClient} from '../../../api/client';
+import {mapPublicUniversityDto} from '../publicLiveDataSource';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Search,
   X,
@@ -25,18 +27,28 @@ interface UniversitiesSearchPageProps {
 }
 
 export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
-  universities = [],
+  universities: initialUniversities = [],
   onBack,
   onSelectUniversity,
   favoriteIds,
   onToggleFavorite,
 }) => {
+  const[universities,setUniversities]=useState(initialUniversities);const[cursor,setCursor]=useState<string|undefined>();
+  const[nextCursor,setNextCursor]=useState<string|null>(null);const[cursorHistory,setCursorHistory]=useState<Array<string|undefined>>([]);
+  const[serverLoading,setServerLoading]=useState(false);const[serverError,setServerError]=useState('');
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContinent, setSelectedContinent] = useState('الكل');
   const [selectedCountry, setSelectedCountry] = useState('الكل');
   const [selectedCity, setSelectedCity] = useState('الكل');
 
+  useEffect(()=>{let active=true;setServerLoading(true);setServerError('');
+    const timer=window.setTimeout(()=>{void ApiClient.getUniversities({search:searchQuery.trim()||undefined,cursor,limit:25}).then(result=>{
+      if(active){setUniversities(result.data.map(mapPublicUniversityDto));setNextCursor(result.nextCursor??null);}
+    }).catch(()=>{if(active){setUniversities([]);setServerError('تعذر تحميل صفحة الجامعات من المالك؛ جرّب لاحقًا.');}}).finally(()=>{if(active)setServerLoading(false);});},300);
+    return()=>{active=false;window.clearTimeout(timer);};
+  },[searchQuery,cursor]);
+  useEffect(()=>{setCursor(undefined);setCursorHistory([]);},[searchQuery]);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [localSavedUniversities, setLocalSavedUniversities] = useState<string[]>([]);
   const savedUniversities = favoriteIds ?? localSavedUniversities;
@@ -104,35 +116,8 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
   };
 
   const filteredUniversities = useMemo(() => {
-    const query = searchQuery.trim().toLocaleLowerCase('ar');
 
     return universities.filter((university) => {
-      if (query) {
-        const searchableValues = [
-          university.name,
-          university.nameEn,
-          university.country,
-          university.city,
-          university.continent,
-          university.type,
-          university.ownership,
-          university.description,
-          ...university.topMajors,
-          ...(university.studyPrograms?.topKeyMajors ?? []),
-          ...(university.studyPrograms?.faculties ?? []),
-          ...(university.studyPrograms?.degrees ?? []),
-          ...(university.studyPrograms?.majorLinks?.flatMap((link) => [
-            link.label,
-            link.programLabel,
-            link.degreeLabel,
-          ]) ?? []),
-        ]
-          .filter((value): value is string => Boolean(value))
-          .map((value) => value.toLocaleLowerCase('ar'));
-
-        if (!searchableValues.some((value) => value.includes(query))) return false;
-      }
-
       if (selectedContinent !== 'الكل' && university.continent !== selectedContinent) {
         return false;
       }
@@ -157,6 +142,12 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
       dir="rtl"
     >
+      <section className="space-y-2 rounded border p-3" aria-label="صفحات الجامعات">
+        <p>البحث من خادم الجامعات. فلاتر القارة والبلد والمدينة أدناه تخص الصفحة المحملة، وليست أعداد العالم كاملة.</p>
+        {serverLoading&&<p role="status">جارٍ تحميل صفحة الجامعات</p>}{serverError&&<p role="status">{serverError}</p>}
+        <button type="button" disabled={serverLoading||!cursorHistory.length} onClick={()=>{setCursor(cursorHistory.at(-1));setCursorHistory(old=>old.slice(0,-1));}}>الصفحة السابقة</button>
+        <button type="button" disabled={serverLoading||!nextCursor} onClick={()=>{setCursorHistory(old=>[...old,cursor]);setCursor(nextCursor??undefined);setSelectedContinent('الكل');setSelectedCountry('الكل');setSelectedCity('الكل');}}>الصفحة التالية</button>
+      </section>
       {/* ========================================================================= */}
       {/* HERO EMERALD BANNER - COMPACT LUXURY ARABIC DESIGN WITH GOLD ACCENTS       */}
       {/* ========================================================================= */}

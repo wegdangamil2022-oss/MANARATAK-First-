@@ -1697,6 +1697,11 @@ export interface PublicGlobalSearchPage {
 }
 
 export class ApiClient {
+  static async getUniversityProgramPage<T>(params:URLSearchParams):Promise<T>{
+    const response=await apiFetch(`${API_BASE_URL}/public/university-programs?${params}`,{cache:'no-store'});
+    if(!response.ok)throw new Error('UNIVERSITY_PROGRAM_DISCOVERY_UNAVAILABLE');return response.json();
+  }
+
   static async searchPublicCatalog(input: {
     q: string;
     locale?: 'ar' | 'en';

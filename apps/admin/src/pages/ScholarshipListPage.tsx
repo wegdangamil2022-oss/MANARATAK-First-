@@ -1,3 +1,4 @@
+import {ScholarshipCanonicalFilters,emptyScholarshipCanonicalFilters,type ScholarshipCanonicalFilterState} from '../components/ScholarshipCanonicalFilters';
 import {
 AlertTriangle,
 ArrowLeft,
@@ -104,6 +105,7 @@ export function ScholarshipListPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Filters State
+  const [canonical,setCanonical]=useState<ScholarshipCanonicalFilterState>(()=>{const params=new URLSearchParams(typeof window==='undefined'?'':window.location.search);return {...emptyScholarshipCanonicalFilters,...Object.fromEntries(Object.keys(emptyScholarshipCanonicalFilters).map(key=>[key,params.get(key)?.slice(0,240)??emptyScholarshipCanonicalFilters[key as keyof ScholarshipCanonicalFilterState]]))};});
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [completenessFilter, setCompletenessFilter] = useState('');
@@ -126,16 +128,8 @@ export function ScholarshipListPage() {
       const res = await adminApiClient.request<ScholarshipSummary>('/admin/scholarships/summary');
       setSummary(res);
     } catch {
-      setSummary({
-        all: 0,
-        published: 0,
-        readyToPublish: 0,
-        needsVerification: 0,
-        imported: 0,
-        missingFields: 0,
-        needsTranslation: 0,
-        archived: 0,
-      });
+      setSummary(null);
+      setError(isArabic?'تعذر تحميل الإحصاءات؛ القيم غير متاحة وليست أصفارًا.':'Summary unavailable; missing counts are not zero.');
     } finally {
       setSummaryLoading(false);
     }
@@ -148,6 +142,7 @@ export function ScholarshipListPage() {
     setError(null);
     try {
       const params = new URLSearchParams({ page: page.toString(), pageSize: '24' });
+      for(const[key,value]of Object.entries(canonical))if(value)params.set(key,value);
       if (statusFilter) params.append('status', statusFilter);
       if (completenessFilter) params.append('completenessStatus', completenessFilter);
       if (searchTerm.trim()) params.append('query', searchTerm.trim());
@@ -177,8 +172,9 @@ export function ScholarshipListPage() {
   useEffect(() => {
     fetchScholarships();
     return () => { listRequest.current += 1; };
-  }, [page, statusFilter, completenessFilter, searchTerm, countryFilter, fundingFilter, degreeFilter, majorFilter, languageFilter, deadlineFilter]);
+  }, [page, statusFilter, completenessFilter, searchTerm, countryFilter, fundingFilter, degreeFilter, majorFilter, languageFilter, deadlineFilter,canonical]);
 
+  useEffect(()=>{const params=new URLSearchParams(window.location.search);for(const[key,value]of Object.entries(canonical)){if(value)params.set(key,value);else params.delete(key);}window.history.replaceState(null,'',`${window.location.pathname}${params.size?'?'+params:''}`);},[canonical]);
   const handleRefresh = () => {
     fetchSummary();
     fetchScholarships();
@@ -206,6 +202,7 @@ export function ScholarshipListPage() {
     setCompletenessFilter('');
     setCountryFilter('');
     setFundingFilter('');
+    setCanonical({...emptyScholarshipCanonicalFilters});
     setDegreeFilter('');
     setMajorFilter('');
     setLanguageFilter('');
@@ -214,7 +211,8 @@ export function ScholarshipListPage() {
   };
 
   return (
-    <div dir="rtl" className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+    <div dir={dir} className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+      <ScholarshipCanonicalFilters value={canonical} onChange={value=>{setCanonical(value);setPage(1);}} ar={isArabic}/>
       {/* Hero Header Banner with Manaratak Gradient */}
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-56 w-56 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-2xl" />
@@ -375,7 +373,7 @@ export function ScholarshipListPage() {
             {summaryLoading ? (
               <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
             ) : (
-              formatNumber((summary?.missingFields ?? 0) + (summary?.needsTranslation ?? 0))
+              formatNumber(summary?summary.missingFields+summary.needsTranslation:null)
             )}
           </div>
           <div className="mt-1 text-[11px] font-bold text-rose-600">
