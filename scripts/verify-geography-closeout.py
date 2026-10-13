@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Offline integrity: active geography and lossless university source quarantine."""
-import csv,io,json,hashlib,subprocess,collections
+import csv,io,json,hashlib,subprocess,collections,argparse
 from pathlib import Path
 import openpyxl
 ROOT=Path(__file__).resolve().parents[1]
@@ -20,11 +20,12 @@ def workbook_rows(raw):
    row=dict(zip(headers,values))
    if row.get('Reference ID'):result.append((s.title,row))
  w.close();return result
-def verify():
+def verify(snapshot=None):
+ def read(path):return subprocess.check_output(['git','show',snapshot+':'+path],cwd=ROOT) if snapshot else (ROOT/path).read_bytes()
  summary=json.loads((REPORT/'summary.json').read_text());regions={r['regionCode']:r for f in (ROOT/'workspace/reference-data/regions').glob('*/*.csv') for r in csvrows(f.read_bytes())};cities={};before={}
  corrections={r['cityId']:r for r in records('city-region-corrections.jsonl')};quarantine={r['cityId']:r for r in csvrows((REPORT/'city-quarantine.csv').read_bytes())}
  for artifact in summary['cityFiles']:
-  p=artifact['path'];old=subprocess.check_output(['git','show',summary['baseCommit']+':'+p],cwd=ROOT);new=(ROOT/p).read_bytes()
+  p=artifact['path'];old=subprocess.check_output(['git','show',summary['baseCommit']+':'+p],cwd=ROOT);new=read(p)
   check(hashlib.sha256(old).hexdigest()==artifact['beforeSha256'],'City baseline checksum');check(hashlib.sha256(new).hexdigest()==artifact['afterSha256'],'City current checksum')
   before.update({r['cityId']:r for r in csvrows(old)})
   for r in csvrows(new):
@@ -38,7 +39,7 @@ def verify():
   else:check(r==cities[cid],'Unrecorded city edit')
  decisions={r['referenceId']:r for r in records('university-geography-decisions.jsonl')};seen=set();counts=collections.Counter()
  for artifact in summary['universities']['files']:
-  p=artifact['path'];old=subprocess.check_output(['git','show',summary['baseCommit']+':'+p],cwd=ROOT);new=(ROOT/p).read_bytes();check(hashlib.sha256(old).hexdigest()==artifact['beforeSha256'],'University baseline checksum');check(hashlib.sha256(new).hexdigest()==artifact['afterSha256'],'University current checksum')
+  p=artifact['path'];old=subprocess.check_output(['git','show',summary['baseCommit']+':'+p],cwd=ROOT);new=read(p);check(hashlib.sha256(old).hexdigest()==artifact['beforeSha256'],'University baseline checksum');check(hashlib.sha256(new).hexdigest()==artifact['afterSha256'],'University current checksum')
   originals={r['Reference ID']:r for _,r in workbook_rows(old)};current=workbook_rows(new);check(set(originals)=={r['Reference ID'] for _,r in current},'University identity conservation')
   for sheet,r in current:
    ref=r['Reference ID'];check(ref not in seen,'Duplicate university');seen.add(ref);original=originals[ref];d=decisions[ref];check(d['before']==original,'University original receipt')
@@ -48,4 +49,5 @@ def verify():
    else:
     c=cities.get(r['City Source ID']);check(c and c['countryIso3']==r['ISO3'] and c['regionCode']==r['City Region Code'] and c['cityNameEn']==r['City'],'University city/country/region mismatch');check(r['Geography Status']=='SOURCE_MATCHED' and d['citySourceId']==c['cityId'],'University binding receipt');counts['matched']+=1
  check(seen==set(decisions),'Missing university decision');check(counts['matched']==summary['universities']['matched'] and counts['review']==summary['universities']['review'],'University count mismatch');print(json.dumps({'result':'PASS','activeCities':len(cities),'quarantinedCities':len(quarantine),'universities':dict(counts),'databaseWrites':0}))
-if __name__=='__main__':verify()
+if __name__=='__main__':
+ parser=argparse.ArgumentParser();parser.add_argument('--snapshot');verify(parser.parse_args().snapshot)

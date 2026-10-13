@@ -4,11 +4,11 @@
     "geography": {
       "total": 10723,
       "counts": {
-        "EXACT_SOURCE_CANDIDATE": 9353,
-        "SOURCE_REVIEW_REQUIRED": 1362,
+        "EXACT_SOURCE_CANDIDATE": 9834,
+        "SOURCE_REVIEW_REQUIRED": 881,
         "TERRITORY_MISMATCH": 8
       },
-      "sourceCandidateCount": 9353,
+      "sourceCandidateCount": 9834,
       "draftPolicy": "RAW_LABEL_AND_PENDING_MAPPING_ALLOWED_IN_DRAFT_ONLY; NO_GUESSED_FK; REQUIRED_GEOGRAPHY_BLOCKS_PUBLICATION",
       "databaseWrites": 0,
       "runtime": "RUNTIME_UNTESTED"

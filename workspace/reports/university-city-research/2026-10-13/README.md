@@ -1,0 +1,15 @@
+# Official university city research — 2026-10-13
+
+Reviewed the 1,370 university rows previously quarantined for geography. Ran a university-specific web search for every reference ID, attempted official HTTP pages and contact pages, and read blocked pages through the browser search service. Query receipts and response hashes are recorded in `research-coverage.jsonl`; current search/fetch coverage is recorded in `summary.json`. A search attempt alone is not proof of an address.
+
+Applied 481 additional source matches, including 258 city-label corrections. Added 297 missing source localities and 74 scoped aliases. All 9,834 accepted universities now have city source ID, city name, region code and country matching the active city catalog. All 10,723 university identities remain present exactly once. No university was deleted to raise the match percentage, and no valid city was deleted because a university moved elsewhere.
+
+Primary-source corrections include Universitas Baturaja → Baturaja, Universitas Hein Namotemo → Tobelo, Universitas Negeri Manado → Tondano, and UIN Bukittinggi → Kubang Putiah. These replace regency/province labels with the actual locality named in the official campus address. See the per-institution URL, address excerpt and change receipt in `decisions.jsonl`. New coordinates come only from the archived GeoNames place record; official-address-only localities have blank coordinates and timezone. Existing city names and positions remain unchanged; scoped aliases bridge documented alternative spellings.
+
+The remaining 889 universities are preserved in `Geography Review`, outside the accepted import sheet, with research results in `unresolved.jsonl` and a readable `remaining-review.csv`. They include unresolved addresses/institution identity, ambiguous same-name places, five conflicting existing city-region assignments, and eight Kosovo institutions whose ISO scope is absent from the canonical country registry. These records cannot honestly be marked as 100% verified. Their source cities have not been guessed or assigned to another country. Some public pages were inaccessible or returned only forms, navigation, historical text, postal addresses or multiple campuses; those did not establish a unique current main campus.
+
+This is source reconciliation. New city rows retain `NEEDS_MANUAL_REVIEW`; source matches are not canonical database FK assignments or runtime publication approval. No database writes or migrations occurred. Full plan section 12 remains deferred.
+
+Verify the current batch with `python scripts/verify-university-city-research.py`. The checker validates checksums, identity conservation, unchanged non-geography fields, aliases and source receipts, matching city/country/region, and absence of fabricated coordinates. Historical closeout verification now takes `--snapshot d0b4ec29` after later source changes.
+
+Validation: 35 targeted Vitest cases and three semantic integrity negative cases passed. Current source integrity, historical closeout snapshot and offline queue reproduction passed. No large test suite or connected database test ran.
