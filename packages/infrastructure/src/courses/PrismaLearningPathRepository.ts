@@ -51,7 +51,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
           learningPathId: path.id,
           versionNumber: 1,
           status: LearningPathStatus.DRAFT,
-          snapshot: json({ title: path.title, description: path.description, courses }),
+          snapshot: json({ title: path.title, description: path.description, isStrictlyOrdered: path.isStrictlyOrdered, completionLogic: path.completionLogic, courses }),
           courses: { create: courses.map(item => ({
             courseId: item.courseId,
             position: item.position,
@@ -102,7 +102,9 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
       this.prisma.learningPathVersion.findUnique({where:{learningPathId_versionNumber:{learningPathId:id,versionNumber}},include:{courses:true}}),
     ]);
     if(!path || !version) return null;
-    return this.map({...path,version:versionNumber,status:version.status},version.courses);
+    const facts = version.snapshot as {title?: unknown; description?: unknown; isStrictlyOrdered?: unknown; completionLogic?: unknown} | null;
+    if (!facts || typeof facts.title !== 'string' || typeof facts.isStrictlyOrdered !== 'boolean' || !['ALL','ALL_REQUIRED'].includes(String(facts.completionLogic)) || !(facts.description == null || typeof facts.description === 'string')) return null;
+    return this.map({...path, title: facts.title, description: typeof facts.description === 'string' ? facts.description : null, isStrictlyOrdered: facts.isStrictlyOrdered, completionLogic: String(facts.completionLogic), version:versionNumber,status:version.status},version.courses);
   }
 
   public async list(): Promise<LearningPathDto[]> {
@@ -133,7 +135,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
           learningPathId: id,
           versionNumber: nextVersion,
           status,
-          snapshot: json({ title: path.title, description: path.description, previousVersion: current.version }),
+          snapshot: json({ title: path.title, description: path.description, isStrictlyOrdered: path.isStrictlyOrdered, completionLogic: path.completionLogic, previousVersion: current.version }),
           courses: { create: currentVersion.courses.map(item => ({
             courseId: item.courseId,
             position: item.position,
