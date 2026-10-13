@@ -1,4 +1,4 @@
-import importlib.util,json,hashlib,shutil,tempfile,unittest,csv,io
+import importlib.util,json,hashlib,shutil,tempfile,unittest,csv,io,subprocess
 from pathlib import Path
 import openpyxl
 script=Path(__file__).resolve().parents[1]/'verify-university-city-research.py';spec=importlib.util.spec_from_file_location('city_research',script);checker=importlib.util.module_from_spec(spec);spec.loader.exec_module(checker);originalRoot,originalReport=checker.ROOT,checker.REPORT
@@ -6,6 +6,9 @@ class ResearchIntegrityTests(unittest.TestCase):
  def setUp(self):
   self.tmp=tempfile.TemporaryDirectory();checker.ROOT=Path(self.tmp.name);checker.REPORT=checker.ROOT/'workspace/reports/university-city-research/2026-10-13';(checker.ROOT/'.git').symlink_to(originalRoot/'.git',target_is_directory=True)
   shutil.copytree(originalRoot/'workspace/reference-data',checker.ROOT/'workspace/reference-data');shutil.copytree(originalRoot/'workspace/import-sources/universities/stage-1',checker.ROOT/'workspace/import-sources/universities/stage-1');shutil.copytree(originalReport,checker.REPORT)
+  # This checker covers the immutable research batch, before authorized exclusions.
+  for artifact in json.loads((checker.REPORT/'summary.json').read_text())['universityFiles']:
+   (checker.ROOT/artifact['path']).write_bytes(subprocess.check_output(['git','show','8a1bb4e6:'+artifact['path']],cwd=originalRoot))
  def tearDown(self):checker.ROOT,checker.REPORT=originalRoot,originalReport;self.tmp.cleanup()
  def updateHash(self,path,kind):
   summary=json.loads((checker.REPORT/'summary.json').read_text())

@@ -1,5 +1,7 @@
 # Official university city research — 2026-10-13
 
+This is the historical research batch at `8a1bb4e6`. Following explicit user authorization, unresolved rows have since moved to the separate archive documented in `../../active-geography-alignment/2026-10-13/README.md`. Current integrity uses `scripts/verify-active-geography-alignment.py`; verify this research batch with `python scripts/verify-university-city-research.py --snapshot 8a1bb4e6`.
+
 Reviewed the 1,370 university rows previously quarantined for geography. Ran a university-specific web search for every reference ID, attempted official HTTP pages and contact pages, and read blocked pages through the browser search service. Query receipts and response hashes are recorded in `research-coverage.jsonl`; current search/fetch coverage is recorded in `summary.json`. A search attempt alone is not proof of an address.
 
 Applied 481 additional source matches, including 258 city-label corrections. Added 297 missing source localities and 74 scoped aliases. All 9,834 accepted universities now have city source ID, city name, region code and country matching the active city catalog. All 10,723 university identities remain present exactly once. No university was deleted to raise the match percentage, and no valid city was deleted because a university moved elsewhere.
