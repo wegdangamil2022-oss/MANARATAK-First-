@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import shutil
 import tempfile
+import subprocess
 import unittest
 
 script=Path(__file__).resolve().parents[1]/'verify-city-verification.py'
@@ -20,6 +21,9 @@ class CityVerificationNegativeTests(unittest.TestCase):
         (checker.ROOT/'.git').symlink_to(original_root/'.git',target_is_directory=True)
         shutil.copytree(original_root/'workspace/reference-data',checker.ROOT/'workspace/reference-data')
         shutil.copytree(original_report,checker.REPORT)
+        summary=json.loads((checker.REPORT/'summary.json').read_text())
+        for artifact in summary['files']:
+            (checker.ROOT/artifact['path']).write_bytes(subprocess.check_output(['git','show','32ad8354:'+artifact['path']],cwd=original_root))
     def tearDown(self):
         checker.ROOT,checker.REPORT=original_root,original_report;self.temp.cleanup()
     def edit(self,edit,original=False):

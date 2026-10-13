@@ -100,19 +100,31 @@ export async function prepareSourceQuality(rootInput: string) {
   }
   const stage1: UniversityCitySourceRow[] = [];
   for (const relative of files('workspace/import-sources/universities/stage-1', '.xlsx')) {
-    const bytes = read(relative); const workbook = await readXlsxWorkbook(bytes); const sheet = workbook.sheets.get(workbook.sheetNames[0]);
-    if (!sheet) throw new Error('SOURCE_QC_UNIVERSITY_SHEET_MISSING');
-    const headerIndex = sheet.textRows.findIndex(row => row.includes('Reference ID'));
-    if (headerIndex < 0) throw new Error('SOURCE_QC_UNIVERSITY_HEADER_MISSING');
-    const headers = sheet.textRows[headerIndex];
-    sheet.textRows.slice(headerIndex + 1).forEach((values, index) => {
-      const row = Object.fromEntries(headers.map((header, column) => [header, values[column] ?? '']));
-      if (!text(row['Reference ID'])) return;
-      const sourceRowNumber = headerIndex + index + 2;
-      const hint = hints.get(text(row['Reference ID']));
-      const scoped = hint && hint.country === text(row.ISO3) && cityToken(hint.city) === cityToken(text(row.City));
-      stage1.push({ sourceKey: `${relative}#${sourceRowNumber}`, sourceHash: sourceReviewHash(row), sourceReferenceId: text(row['Reference ID']), countryIso3: text(row.ISO3), cityName: text(row.City), officialName: text(row['Official English Name']), ...(scoped ? { allowedRegionCodes: descendantCodes(hint.code), regionEvidence: hint.evidence } : {}) });
-    });
+    const workbook = await readXlsxWorkbook(read(relative));
+    const selectedSheets = [workbook.sheetNames[0], ...workbook.sheetNames.filter(name => name === 'Geography Review')];
+    for (const sheetName of selectedSheets) {
+      const sheet = workbook.sheets.get(sheetName);
+      if (!sheet) throw new Error('SOURCE_QC_UNIVERSITY_SHEET_MISSING');
+      const headerIndex = sheet.textRows.findIndex(row => row.includes('Reference ID'));
+      if (headerIndex < 0) throw new Error('SOURCE_QC_UNIVERSITY_HEADER_MISSING');
+      const headers = sheet.textRows[headerIndex];
+      sheet.textRows.slice(headerIndex + 1).forEach((values, index) => {
+        const row = Object.fromEntries(headers.map((header, column) => [header, values[column] ?? '']));
+        if (!text(row['Reference ID'])) return;
+        const sourceKey = `${relative}${sheetName === 'Geography Review' ? '#Geography Review' : ''}#${headerIndex + index + 2}`;
+        const sourceHash = sourceReviewHash(row);
+        const hint = hints.get(text(row['Reference ID']));
+        const scoped = hint && hint.country === text(row.ISO3) && cityToken(hint.city) === cityToken(text(row.City));
+        const sourceId = text(row['City Source ID']), region = text(row['City Region Code']);
+        const review = sheetName === 'Geography Review';
+        if (headers.includes('Geography Status') && !review && (!sourceId || !region || text(row['Geography Status']) !== 'SOURCE_MATCHED')) throw new Error('SOURCE_QC_CITY_BINDING_INVALID');
+        if (review && text(row['Geography Status']) !== 'REVIEW_REQUIRED') throw new Error('SOURCE_QC_QUARANTINE_STATUS_INVALID');
+        if (sourceId && (!region || text(row['Geography Status']) !== 'SOURCE_MATCHED' || review)) throw new Error('SOURCE_QC_CITY_BINDING_INVALID');
+        if (sourceId && !cities.some(city => city.sourceId === sourceId && city.countryIso3 === text(row.ISO3) && city.regionCode === region && city.names.some(name => cityToken(name) === cityToken(text(row.City))))) throw new Error('SOURCE_QC_CITY_BINDING_INVALID');
+        stage1.push({ sourceKey, sourceHash, sourceReferenceId: text(row['Reference ID']), countryIso3: text(row.ISO3), cityName: text(row.City), officialName: text(row['Official English Name']), geographyReviewRequired: review,
+          ...(sourceId ? { expectedSourceCityId: sourceId, allowedRegionCodes: [region], regionEvidence: { sourceKey, sourceHash } } : scoped ? { allowedRegionCodes: descendantCodes(hint.code), regionEvidence: hint.evidence } : {}) });
+      });
+    }
   }
   const geography = buildUniversityCitySourceQueue(stage1, cities, countries.map(row => text(row.iso_alpha3)));
   const universities = dataset('UNIVERSITY'); const universityBytes = read(universities.sourcePath, universities.sha256);

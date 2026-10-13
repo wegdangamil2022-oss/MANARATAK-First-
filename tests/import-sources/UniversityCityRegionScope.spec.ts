@@ -28,4 +28,16 @@ describe('university source region evidence', () => {
     const result = buildUniversityCitySourceQueue([{ ...row, countryIso3: 'XKX', allowedRegionCodes: ['US-CT'], regionEvidence: evidence }], cities, ['USA']);
     expect(result.queue[0]).toMatchObject({ state: 'TERRITORY_MISMATCH', candidateSourceIds: [], canonicalCityId: null });
   });
+  it('holds an unresolved workbook row even when its city name happens to match', () => {
+    const result = buildUniversityCitySourceQueue([{ ...row, geographyReviewRequired: true }], cities.slice(0, 1), ['USA']);
+    expect(result.queue[0].state).toBe('SOURCE_REVIEW_REQUIRED');
+    expect(result.sourceCandidateCount).toBe(0);
+  });
+  it('never substitutes a different source identity for an explicit binding', () => {
+    const result = buildUniversityCitySourceQueue([{ ...row, expectedSourceCityId: 'missing', allowedRegionCodes: ['US-CT'], regionEvidence: evidence }], cities, ['USA']);
+    expect(result.queue[0].candidateSourceIds).toEqual([]);
+  });
+  it('requires region evidence for an explicit source identity', () => {
+    expect(() => buildUniversityCitySourceQueue([{ ...row, expectedSourceCityId: 'ct' }], cities, ['USA'])).toThrow('UNIVERSITY_CITY_REGION_EVIDENCE_REQUIRED');
+  });
 });

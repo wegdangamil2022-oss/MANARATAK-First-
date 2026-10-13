@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Read-only verification of the follow-up source changes and their evidence."""
 import csv
+import argparse
 import hashlib
 import io
 import json
@@ -35,7 +36,7 @@ def distance(row, source):
     return 12742 * math.asin(min(1, math.sqrt(math.sin((a-b)/2)**2 + math.cos(a)*math.cos(b)*math.sin(lon/2)**2)))
 
 
-def verify():
+def verify(snapshot=None):
     summary = json.loads((REPORT / 'summary.json').read_text())
     removed = {r['removedCityId']: r for r in records('removals.jsonl')}
     added = {r['cityId']: r for r in records('additions.jsonl')}
@@ -61,7 +62,7 @@ def verify():
     for artifact in summary['files']:
         path = artifact['path']
         original = subprocess.check_output(['git', 'show', summary['baseCommit'] + ':' + path], cwd=ROOT)
-        current = (ROOT / path).read_bytes()
+        current = subprocess.check_output(['git', 'show', snapshot + ':' + path], cwd=ROOT) if snapshot else (ROOT / path).read_bytes()
         check(hashlib.sha256(original).hexdigest() == artifact['beforeSha256'], 'Baseline hash mismatch')
         check(hashlib.sha256(current).hexdigest() == artifact['afterSha256'], 'Current hash mismatch')
         old, new = csv_rows(original), csv_rows(current)
@@ -115,4 +116,6 @@ def verify():
 
 
 if __name__ == '__main__':
-    print(json.dumps(verify(), indent=2))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--snapshot')
+    print(json.dumps(verify(parser.parse_args().snapshot), indent=2))
