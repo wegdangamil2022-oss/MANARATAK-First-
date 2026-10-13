@@ -39,6 +39,7 @@ function fixture() {
       trackers as any,
       identities as any,
       roles as any,
+      {resolve:vi.fn().mockResolvedValue({id:'sch-1',available:true,deadlineAt:new Date(candidate.variables.deadlineAt)})},
     ),
   };
 }

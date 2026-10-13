@@ -985,7 +985,7 @@ export function registerDependencies(
       if(!baseUrl || !token)throw new Error('CERTIFICATE_AUTHORITY_CONFIGURATION_INCOMPLETE');
       return new HttpCertificateAuthorityResolver({baseUrl,token},universityRepository);
     }).scoped(),
-    certificateArtifactReadinessProbe: asFunction(({assetRecordRepository,processAssetLifecycleUseCase})=>new CertificateArtifactReadinessProbe(assetRecordRepository,processAssetLifecycleUseCase,()=>pollingWorkerRuntimeRegistry.snapshot('certificate-completion'),{assetId:readConfig<string>('CERTIFICATE_ARTIFACT_PROBE_ASSET_ID'),sha256:readConfig<string>('CERTIFICATE_ARTIFACT_PROBE_SHA256')})).scoped(),
+    certificateArtifactReadinessProbe: asFunction(({assetRecordRepository,processAssetLifecycleUseCase,pollingWorkerRuntimeRegistry})=>new CertificateArtifactReadinessProbe(assetRecordRepository,processAssetLifecycleUseCase,()=>pollingWorkerRuntimeRegistry.snapshot('certificate-completion'),{assetId:readConfig<string>('CERTIFICATE_ARTIFACT_PROBE_ASSET_ID'),sha256:readConfig<string>('CERTIFICATE_ARTIFACT_PROBE_SHA256')})).scoped(),
     certificateArtifactRecovery: asFunction(({certificateRepository,certificateArtifactStore})=>new CertificateArtifactRecovery(certificateRepository,certificateArtifactStore)).scoped(),
     certificateUseCases: asFunction(
       ({

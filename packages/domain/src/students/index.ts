@@ -416,7 +416,23 @@ export interface IStudentApplicationReminderGateway {
   cancel(trackerId: string, trackerVersion: number): Promise<void>;
 }
 
-export type StudentSupportTriageKind = 'SYNC_FAILED' | 'SYNC_PENDING' | 'APPLICATION_OVERDUE';
+export type StudentSupportOwnerDomain = 'learning' | 'certificates' | 'services';
+export type StudentSupportTriageKind = 'SYNC_FAILED' | 'SYNC_PENDING' | 'APPLICATION_OVERDUE' | 'OWNER_DEGRADED';
+export interface StudentSupportTriageFilters {
+  kind: StudentSupportTriageKind;
+  status?: StudentWorkspaceStatus;
+  from?: Date;
+  to?: Date;
+  ownerDomain?: StudentSupportOwnerDomain;
+  limit?: number;
+  cursor?: string;
+}
+export interface StudentSupportOwnerReadObservation {
+  studentReferenceId: string;
+  ownerDomain: StudentSupportOwnerDomain;
+  status: 'AVAILABLE' | 'DEGRADED';
+  checkedAt: Date;
+}
 
 export interface StudentSupportTriagePageDto {
   items: Array<{
@@ -425,10 +441,13 @@ export interface StudentSupportTriagePageDto {
     version: number;
     updatedAt: Date;
     triageKind: StudentSupportTriageKind;
+    observedAt?: Date | null;
   }>;
   total: number;
   hasMore: boolean;
   nextCursor: string | null;
+  coverage?: 'OBSERVED_OWNER_READS';
+  ownerDomain?: StudentSupportOwnerDomain;
 }
 
 export interface IStudentWorkspaceRepository {
@@ -440,7 +459,8 @@ export interface IStudentWorkspaceRepository {
   }): Promise<{ savedReference: string }>;
   readPrivateToolResult?(studentReferenceId: string, savedReference: string): Promise<unknown>;
   /** Only P15-owned inbox/tracker filters; no automatic P13/P14/P20 read. */
-  listSupportTriage(input:{kind:StudentSupportTriageKind;limit?:number;cursor?:string}):Promise<StudentSupportTriagePageDto>;
+  listSupportTriage(input:StudentSupportTriageFilters):Promise<StudentSupportTriagePageDto>;
+  recordSupportOwnerReadObservation?(input: StudentSupportOwnerReadObservation): Promise<void>;
   markNotificationRead?(studentReferenceId: string, notificationId: string): Promise<void>;
   findWorkspace(studentReferenceId: string): Promise<StudentWorkspaceDto | null>;
   listSupportWorkspaces(input: { query?: string; status?: StudentWorkspaceStatus; limit?: number; cursor?: string }): Promise<StudentSupportWorkspacePageDto>;

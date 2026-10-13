@@ -20,7 +20,8 @@ import {
   StudentWorkspaceIntegrationEventDto,
   StudentWorkspaceSnapshotDto,
   StudentSupportWorkspacePageDto,
-  StudentSupportTriageKind,
+  StudentSupportTriageFilters,
+  StudentSupportOwnerReadObservation,
   StudentSupportTriagePageDto,
   StudentSupportWorkspaceDetailDto,
   StudentWorkspaceStatus,
@@ -112,38 +113,87 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     return { items, total, hasMore, nextCursor: hasMore && last ? codec.encode(last,scope) : null };
   }
 
-  public async listSupportTriage(input:{kind:StudentSupportTriageKind;limit?:number;cursor?:string}):Promise<StudentSupportTriagePageDto>{
-    const limit=Math.min(50,Math.max(1,Math.trunc(input.limit??25)));
-    const conditions:Record<StudentSupportTriageKind,Record<string,unknown>>={
-      SYNC_FAILED:{integrationInbox:{some:{processedAt:null,failureCode:{not:null}}}},
-      SYNC_PENDING:{integrationInbox:{some:{processedAt:null,failureCode:null}}},
-      APPLICATION_OVERDUE:{applicationTrackers:{some:{status:'ACTIVE',deadlineAt:{lt:new Date()}}}},
+  public async listSupportTriage(input: StudentSupportTriageFilters): Promise<StudentSupportTriagePageDto> {
+    const limit = Math.min(50, Math.max(1, Math.trunc(input.limit ?? 25)));
+    for (const date of [input.from, input.to]) {
+      if (date && (!(date instanceof Date) || !Number.isFinite(date.getTime())))
+        throw new Error('STUDENT_SUPPORT_TRIAGE_WINDOW_INVALID');
+    }
+    if (input.from && input.to && input.from > input.to)
+      throw new Error('STUDENT_SUPPORT_TRIAGE_WINDOW_INVALID');
+    if (input.status && !Object.values(StudentWorkspaceStatus).includes(input.status))
+      throw new Error('STUDENT_SUPPORT_TRIAGE_STATUS_INVALID');
+    const window = {
+      ...(input.from ? {gte: input.from} : {}),
+      ...(input.to ? {lte: input.to} : {}),
     };
-    if(!Object.prototype.hasOwnProperty.call(conditions,input.kind))
+    const hasWindow = Boolean(input.from || input.to);
+    if (input.kind === 'OWNER_DEGRADED' &&
+      (!input.ownerDomain || !['learning','certificates','services'].includes(input.ownerDomain) || !input.from || !input.to))
+      throw new Error('STUDENT_SUPPORT_OWNER_WINDOW_REQUIRED');
+    if (input.kind !== 'OWNER_DEGRADED' && input.ownerDomain)
+      throw new Error('STUDENT_SUPPORT_TRIAGE_OWNER_INVALID');
+    const conditions: Record<string, Record<string, unknown>> = {
+      SYNC_FAILED: {integrationInbox: {some: {processedAt:null, failureCode:{not:null}, ...(hasWindow ? {receivedAt:window} : {})}}},
+      SYNC_PENDING: {integrationInbox: {some: {processedAt:null, failureCode:null, ...(hasWindow ? {receivedAt:window} : {})}}},
+      APPLICATION_OVERDUE: {applicationTrackers: {some: {status:'ACTIVE', deadlineAt:{lt:new Date()}, ...(hasWindow ? {updatedAt:window} : {})}}},
+      OWNER_DEGRADED: {supportOwnerReadObservations: {some: {ownerDomain:input.ownerDomain, status:'DEGRADED', checkedAt:window}}},
+    };
+    if (!Object.prototype.hasOwnProperty.call(conditions,input.kind))
       throw new Error('STUDENT_SUPPORT_TRIAGE_KIND_INVALID');
-    const where=conditions[input.kind];
-    const codec=new StudentSupportCursorCodec(this.cursorSigningSecret);
-    const scope=JSON.stringify({domain:'triage',kind:input.kind,limit});
-    const anchor=input.cursor?codec.decode(input.cursor,scope):null;
-    const total=await this.db.studentWorkspace.count({where});
-    const rows=await this.db.studentWorkspace.findMany({
+    const where = {...conditions[input.kind], ...(input.status ? {status:input.status} : {})};
+    const codec = new StudentSupportCursorCodec(this.cursorSigningSecret);
+    const scope = JSON.stringify({domain:'triage',kind:input.kind,limit,status:input.status??null,
+      from:input.from?.toISOString()??null,to:input.to?.toISOString()??null,owner:input.ownerDomain??null});
+    const anchor = input.cursor ? codec.decode(input.cursor,scope) : null;
+    const total = await this.db.studentWorkspace.count({where});
+    const rows = await this.db.studentWorkspace.findMany({
       where:{AND:[where,...(anchor?[{OR:[
         {updatedAt:{lt:anchor.updatedAt}},
         {updatedAt:anchor.updatedAt,id:{lt:anchor.id}},
       ]}]:[])]},
-      select:{id:true,studentReferenceId:true,status:true,version:true,updatedAt:true},
+      select:{id:true,studentReferenceId:true,status:true,version:true,updatedAt:true,
+        ...(input.kind==='OWNER_DEGRADED'?{supportOwnerReadObservations:{
+          where:{ownerDomain:input.ownerDomain,status:'DEGRADED',checkedAt:window},
+          select:{checkedAt:true},take:1,
+        }}:{}),
+      },
       orderBy:[{updatedAt:'desc'},{id:'desc'}],take:limit+1,
     });
-    const hasMore=rows.length>limit;
-    const selected=rows.slice(0,limit);
-    const last=selected[selected.length-1];
+    const hasMore = rows.length > limit;
+    const selected = rows.slice(0,limit);
+    const last = selected[selected.length-1];
     return {total,hasMore,
-      items:selected.map((row:any)=>({
-        studentReferenceId:row.studentReferenceId,status:row.status,version:row.version,
-        updatedAt:row.updatedAt,triageKind:input.kind,
+      ...(input.kind==='OWNER_DEGRADED'?{coverage:'OBSERVED_OWNER_READS' as const,ownerDomain:input.ownerDomain}:{}),
+      items:selected.map((row:any)=>({studentReferenceId:row.studentReferenceId,status:row.status,
+        version:row.version,updatedAt:row.updatedAt,triageKind:input.kind,
+        ...(input.kind==='OWNER_DEGRADED'?{observedAt:row.supportOwnerReadObservations?.[0]?.checkedAt??null}:{}),
       })),
       nextCursor:hasMore&&last?codec.encode(last,scope):null,
     };
+  }
+
+  public async recordSupportOwnerReadObservation(input: StudentSupportOwnerReadObservation): Promise<void> {
+    if (!['learning','certificates','services'].includes(input.ownerDomain) ||
+        !['AVAILABLE','DEGRADED'].includes(input.status) ||
+        !(input.checkedAt instanceof Date) || !Number.isFinite(input.checkedAt.getTime()))
+      throw new Error('STUDENT_SUPPORT_OWNER_OBSERVATION_INVALID');
+    await this.db.$transaction(async (tx:any) => {
+      await tx.$queryRaw`SELECT id FROM "StudentWorkspace" WHERE "studentReferenceId" = ${input.studentReferenceId} FOR UPDATE`;
+      const workspace = await tx.studentWorkspace.findUnique({where:{studentReferenceId:input.studentReferenceId},select:{id:true,status:true}});
+      if (!workspace) throw new Error('STUDENT_WORKSPACE_NOT_FOUND');
+      if (workspace.status === StudentWorkspaceStatus.ARCHIVED) return;
+      const previous = await tx.studentSupportOwnerReadObservation.findUnique({where:{studentReferenceId_ownerDomain:{studentReferenceId:input.studentReferenceId,ownerDomain:input.ownerDomain}}});
+      if (previous && previous.checkedAt >= input.checkedAt) return;
+      await tx.studentSupportOwnerReadObservation.upsert({
+        where:{studentReferenceId_ownerDomain:{studentReferenceId:input.studentReferenceId,ownerDomain:input.ownerDomain}},
+        create:input,update:{status:input.status,checkedAt:input.checkedAt},
+      });
+      await this.appendOutbox(tx,workspace.id,'StudentSupportOwnerReadObserved',{
+        studentReferenceId:input.studentReferenceId,ownerDomain:input.ownerDomain,
+        status:input.status,checkedAt:input.checkedAt.toISOString(),
+      },{actorId:'system:student-support-diagnostics',actorType:'SYSTEM',source:'student-support-owner-read'});
+    });
   }
 
   public async getSupportWorkspaceDetail(studentReferenceId: string): Promise<StudentSupportWorkspaceDetailDto | null> {
@@ -1087,7 +1137,24 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
         });
         return;
       }
-      const status = event.eventType === 'CertificateRevoked' ? 'REVOKED' :
+      // The replacement may arrive before the predecessor's issue event. Its
+      // processed owner receipt is a durable tombstone even when no predecessor
+      // projection existed to update. Scope to this student and trusted P14 types.
+      const replacementReceipt = ['CertificateIssued', 'CertificateRenewed', 'CertificateReissued', 'CertificateExpired'].includes(event.eventType)
+        ? await tx.studentWorkspaceEventInbox.findFirst({
+            where: {
+              studentReferenceId: event.studentReferenceId,
+              sourceDomain: 'CERTIFICATES',
+              eventType: { in: ['CertificateRenewed', 'CertificateReissued'] },
+              processedAt: { not: null },
+              failureCode: null,
+              payload: { path: ['metadata', 'replacesCertificateId'], equals: certificateId },
+            },
+            select: { eventId: true },
+          })
+        : null;
+      const status = replacementReceipt ? 'REISSUED' :
+        event.eventType === 'CertificateRevoked' ? 'REVOKED' :
         event.eventType === 'CertificateArchived' ? 'ARCHIVED' :
         event.eventType === 'CertificateExpired' ? 'EXPIRED' :
         event.eventType === 'CertificateRenewed' ? 'ACTIVE' :
@@ -1107,10 +1174,10 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
           expiresAt: metadata.expiresAt ? new Date(String(metadata.expiresAt)) : null,
           certificatePdfAssetId: metadata.certificatePdfAssetId ? String(metadata.certificatePdfAssetId) : null,
           previewImageAssetId: metadata.previewImageAssetId ? String(metadata.previewImageAssetId) : null,
-          sourceEventId: event.eventId,
+          sourceEventId: replacementReceipt?.eventId ?? event.eventId,
         },
         update: {
-          status, sourceEventId: event.eventId,
+          status, sourceEventId: replacementReceipt?.eventId ?? event.eventId,
           ...(metadata.publicId ? {publicId:String(metadata.publicId)} : {}),
           ...(metadata.serialNumber ? {serialNumber:String(metadata.serialNumber)} : {}),
           ...(metadata.verificationCode ? {verificationCode:String(metadata.verificationCode)} : {}),

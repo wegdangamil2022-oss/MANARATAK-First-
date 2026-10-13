@@ -86,7 +86,7 @@ describe('Phase 20 service request ownership and finance handoff', () => {
     requests.listSupportAwaitingPaymentStudents=vi.fn().mockResolvedValue(owner);
     const useCases=new AdminServiceFulfillmentUseCases(catalog,requests,finance);
     expect(await useCases.listSupportAwaitingPaymentStudents(1,20)).toEqual(owner);
-    expect(requests.listSupportAwaitingPaymentStudents).toHaveBeenCalledWith(1,20);
+    expect(requests.listSupportAwaitingPaymentStudents).toHaveBeenCalledWith(1,20,{});
     expect(()=>useCases.listSupportAwaitingPaymentStudents(1,51))
       .toThrow('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
   });

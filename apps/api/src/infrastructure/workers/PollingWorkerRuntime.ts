@@ -83,7 +83,12 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
           await observeWorkerIteration('student-workspace-outbox', async () => {
             await worker.runIdentityOnce(`${workerId}-identity`);
             await worker.runRoleOnce(`${workerId}-role`);
+            await worker.runCatchupOnce(`${workerId}-catchup`);
             await worker.runLearningOnce(`${workerId}-learning`);
+            await worker.runCertificatesOnce(`${workerId}-certificates`);
+            await worker.runReplayOnce(`${workerId}-replay`);
+            await worker.runRemindersOnce(`${workerId}-reminders`);
+            await worker.runTrackerOwnersOnce(`${workerId}-tracker-owners`);
           });
           pollingWorkerRuntimeRegistry.success('student-workspace-outbox');
         } catch (error) {

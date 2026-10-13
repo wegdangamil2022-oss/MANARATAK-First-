@@ -115,7 +115,7 @@ describe('PrismaStudentWorkspaceRepository', () => {
   it('deduplicates upstream events before projecting timeline and notifications', async () => {
     const tx = {
       $queryRaw:vi.fn().mockResolvedValue([]),
-      studentWorkspaceEventInbox: {
+      studentWorkspaceEventInbox: {findFirst:vi.fn().mockResolvedValue(null),
         findUnique: vi.fn().mockResolvedValue({ id: 'existing-inbox' }),
         create: vi.fn(),
         update: vi.fn(),
@@ -145,7 +145,7 @@ describe('PrismaStudentWorkspaceRepository', () => {
   it('initializes a workspace from StudentIdentityCreated exactly once', async () => {
     const tx = {
       $queryRaw:vi.fn().mockResolvedValue([]),
-      studentWorkspaceEventInbox: {
+      studentWorkspaceEventInbox: {findFirst:vi.fn().mockResolvedValue(null),
         findUnique: vi.fn().mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 'inbox-1' }),
         create: vi.fn().mockResolvedValue({}), update: vi.fn().mockResolvedValue({}),
       },
@@ -265,7 +265,7 @@ describe('PrismaStudentWorkspaceRepository', () => {
         findUnique: vi.fn().mockResolvedValue({sourceEventId:'evt-revoke',updatedAt:new Date('2026-01-06T00:00:00Z'),status:'REVOKED'}),
         upsert: vi.fn(),
       },
-      studentWorkspaceEventInbox: {
+      studentWorkspaceEventInbox: {findFirst:vi.fn().mockResolvedValue(null),
         findUnique: vi.fn().mockResolvedValue({eventType:'CertificateRevoked',payload:{occurredAt:'2026-01-06T00:00:00Z'}}),
       },
     };
@@ -285,11 +285,11 @@ describe('PrismaStudentWorkspaceRepository', () => {
       sourceDomain:'COURSES',eventType:'CourseCompleted',payload:event};
     const tx = {
       $queryRaw:vi.fn().mockResolvedValue([]),
-      studentWorkspaceEventInbox:{updateMany:vi.fn().mockResolvedValue({count:1})},
+      studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),updateMany:vi.fn().mockResolvedValue({count:1})},
       studentWorkspace:{findUnique:vi.fn().mockResolvedValue({status:'ACTIVE'})},
     };
     const db = {
-      studentWorkspaceEventInbox:{findMany:vi.fn().mockResolvedValue([row]),updateMany:vi.fn()},
+      studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),findMany:vi.fn().mockResolvedValue([row]),updateMany:vi.fn()},
       $transaction:(callback:(client:typeof tx)=>unknown)=>callback(tx),
     };
     const repository=new PrismaStudentWorkspaceRepository(db as any);
@@ -316,9 +316,9 @@ describe('PrismaStudentWorkspaceRepository', () => {
   it('does not replay a parked event when another worker already claimed it', async () => {
     const row={id:'inbox-1',eventId:'e-1',studentReferenceId:'student-1',sourceDomain:'COURSES',
       eventType:'CourseCompleted',payload:{eventId:'e-1'}};
-    const tx={$queryRaw:vi.fn().mockResolvedValue([]),studentWorkspaceEventInbox:{updateMany:vi.fn().mockResolvedValue({count:0})},
+    const tx={$queryRaw:vi.fn().mockResolvedValue([]),studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),updateMany:vi.fn().mockResolvedValue({count:0})},
       studentWorkspace:{findUnique:vi.fn()}};
-    const db={studentWorkspaceEventInbox:{findMany:vi.fn().mockResolvedValue([row]),updateMany:vi.fn()},
+    const db={studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),findMany:vi.fn().mockResolvedValue([row]),updateMany:vi.fn()},
       $transaction:(callback:(client:typeof tx)=>unknown)=>callback(tx)};
     const repo=new PrismaStudentWorkspaceRepository(db as any);
     const project=vi.fn();
@@ -331,9 +331,9 @@ describe('PrismaStudentWorkspaceRepository', () => {
     const row={id:'inbox-1',eventId:'e-1',studentReferenceId:'student-1',sourceDomain:'COURSES',
       eventType:'CourseCompleted',payload:{eventId:'other',studentReferenceId:'student-1',
         sourceDomain:'COURSES',eventType:'CourseCompleted',occurredAt:'2026-10-01'}};
-    const tx={$queryRaw:vi.fn().mockResolvedValue([]),studentWorkspaceEventInbox:{updateMany:vi.fn().mockResolvedValue({count:1})},
+    const tx={$queryRaw:vi.fn().mockResolvedValue([]),studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),updateMany:vi.fn().mockResolvedValue({count:1})},
       studentWorkspace:{findUnique:vi.fn().mockResolvedValue({status:'ACTIVE'})}};
-    const db={studentWorkspaceEventInbox:{findMany:vi.fn().mockResolvedValue([row]),
+    const db={studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),findMany:vi.fn().mockResolvedValue([row]),
       updateMany:vi.fn().mockResolvedValue({count:1})},
       $transaction:(callback:(client:typeof tx)=>unknown)=>callback(tx)};
     const repo=new PrismaStudentWorkspaceRepository(db as any);
@@ -403,7 +403,7 @@ describe('PrismaStudentWorkspaceRepository', () => {
 describe('P15 projection ordering and lifecycle recovery',()=>{
   it.each(['ARCHIVED','REVOKED'])('cannot reactivate a terminal %s certificate with a delayed or tied issue',async status=>{
     const tx={studentCertificateReadProjection:{findUnique:vi.fn().mockResolvedValue({status,sourceEventId:'terminal'}),upsert:vi.fn()},
-      studentWorkspaceEventInbox:{findUnique:vi.fn().mockResolvedValue({eventType:`Certificate${status==='ARCHIVED'?'Archived':'Revoked'}`,payload:{occurredAt:'2026-10-10'}})}};
+      studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),findUnique:vi.fn().mockResolvedValue({eventType:`Certificate${status==='ARCHIVED'?'Archived':'Revoked'}`,payload:{occurredAt:'2026-10-10'}})}};
     const repo=new PrismaStudentWorkspaceRepository(tx as any);
     await (repo as any).projectIntegrationEvent(tx,{eventId:'issue',studentReferenceId:'s-1',sourceDomain:'CERTIFICATES',
       eventType:'CertificateIssued',occurredAt:new Date('2026-10-10'),metadata:{certificateId:'c-1',status:'ACTIVE'}});
@@ -411,7 +411,7 @@ describe('P15 projection ordering and lifecycle recovery',()=>{
   });
   it('does not regress a completed enrollment when an older progress event arrives',async()=>{
     const tx={studentLearningProjection:{findUnique:vi.fn().mockResolvedValue({status:'COMPLETED',sourceEventId:'completed'}),upsert:vi.fn()},
-      studentWorkspaceEventInbox:{findUnique:vi.fn().mockResolvedValue({payload:{occurredAt:'2026-10-10'}})}};
+      studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),findUnique:vi.fn().mockResolvedValue({payload:{occurredAt:'2026-10-10'}})}};
     const repo=new PrismaStudentWorkspaceRepository(tx as any);
     await (repo as any).projectIntegrationEvent(tx,{eventId:'progress',studentReferenceId:'s-1',eventType:'CourseProgressUpdated',
       occurredAt:new Date('2026-10-09'),metadata:{enrollmentId:'e-1',courseId:'c-1',status:'ACTIVE',progressPercentage:20}});
@@ -419,9 +419,9 @@ describe('P15 projection ordering and lifecycle recovery',()=>{
   });
   it('leaves a temporarily re-suspended account parked instead of quarantining it',async()=>{
     const row={id:'row-1',eventId:'e-1',studentReferenceId:'s-1',sourceDomain:'COURSES',eventType:'CourseCompleted',payload:{}};
-    const tx={$queryRaw:vi.fn().mockResolvedValue([]),studentWorkspaceEventInbox:{updateMany:vi.fn().mockResolvedValue({count:1})},
+    const tx={$queryRaw:vi.fn().mockResolvedValue([]),studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),updateMany:vi.fn().mockResolvedValue({count:1})},
       studentWorkspace:{findUnique:vi.fn().mockResolvedValue({status:'SUSPENDED'})}};
-    const db={studentWorkspaceEventInbox:{findMany:vi.fn().mockResolvedValue([row]),updateMany:vi.fn()},
+    const db={studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),findMany:vi.fn().mockResolvedValue([row]),updateMany:vi.fn()},
       $transaction:(fn:any)=>fn(tx)};
     const result=await new PrismaStudentWorkspaceRepository(db as any).replayParkedEvents();
     expect(result).toEqual({processed:0,failed:0});
@@ -438,7 +438,7 @@ describe('P15 active-only support mutation and certificate renewal',()=>{
     expect(tx.studentWorkspace.updateMany).not.toHaveBeenCalled();expect(tx.auditRecord.create).not.toHaveBeenCalled();
   });
   it('marks a renewed replacement predecessor as REISSUED without reviving terminal originals',async()=>{
-    const tx={studentCertificateReadProjection:{findUnique:vi.fn().mockResolvedValue(null),upsert:vi.fn(),updateMany:vi.fn()}};
+    const tx={studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null)},studentCertificateReadProjection:{findUnique:vi.fn().mockResolvedValue(null),upsert:vi.fn(),updateMany:vi.fn()}};
     await (new PrismaStudentWorkspaceRepository(tx as any) as any).projectIntegrationEvent(tx,{
       eventId:'renewal',studentReferenceId:'s-1',eventType:'CertificateRenewed',occurredAt:new Date('2026-10-10'),
       metadata:{certificateId:'replacement',replacesCertificateId:'original',issuedAt:'2026-10-10'},
@@ -452,7 +452,7 @@ describe('P15 active-only support mutation and certificate renewal',()=>{
 
 it('retires parked owner payloads for an archived identity and stores no new personal snapshot',async()=>{
   const tx={$queryRaw:vi.fn().mockResolvedValue([]),studentWorkspace:{findUnique:vi.fn().mockResolvedValue({...workspace,status:'ARCHIVED'})},
-    studentWorkspaceEventInbox:{findUnique:vi.fn().mockResolvedValue(null),updateMany:vi.fn(),create:vi.fn()},studentTimelineEntry:{create:vi.fn()}};
+    studentWorkspaceEventInbox:{findFirst:vi.fn().mockResolvedValue(null),findUnique:vi.fn().mockResolvedValue(null),updateMany:vi.fn(),create:vi.fn()},studentTimelineEntry:{create:vi.fn()}};
   const repo=new PrismaStudentWorkspaceRepository({$transaction:(fn:any)=>fn(tx)} as any);
   expect(await repo.ingestIntegrationEvent({eventId:'archived-owner-event',studentReferenceId:'student-1',eventType:'CourseCompleted',sourceDomain:'COURSES',
     sourceReferenceId:'enroll-1',title:'Completed',occurredAt:new Date(),metadata:{enrollmentId:'enroll-1',courseId:'course-1'}})).toBe(false);
