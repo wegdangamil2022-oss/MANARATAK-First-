@@ -50,6 +50,13 @@ async function run(){
  await assert.rejects(()=>gateway.save({...review,status:'REJECTED',version:3},1),/REVIEW_CONFLICT/);
  await assert.rejects(()=>gateway.save({...review,status:'APPLIED',version:3,reviewer:null,reason:null},2));
  assert.equal((await gateway.get('review'))?.status,'APPROVED');
+ await db.exec(`CREATE TABLE "ImportBatch"(id text PRIMARY KEY,"dataType" text); CREATE TABLE "ImportRecord"(id text PRIMARY KEY,"batchId" text,"sourceDedupKey" text,status text); CREATE TABLE "ImportScreeningReceipt"(id text PRIMARY KEY,"ownerDomain" text,"requestHash" text,result jsonb);
+ INSERT INTO "ImportBatch" VALUES('batch','MAJORS'); INSERT INTO "ImportRecord" VALUES('original-record','batch','dedup','COMPLETE'); INSERT INTO "ImportScreeningReceipt" VALUES('receipt','MAJORS','hash','{"origin":{"batchId":"batch","sourceDedupKey":"dedup"}}');`);
+ reviewDb.importScreeningReceipt={findUnique:async({where}:any)=>(await db.query('SELECT * FROM "ImportScreeningReceipt" WHERE id=$1',[where.id])).rows[0]??null};
+ const {MajorImportPromotionUseCase}=await import(pathToFileURL(process.cwd()+'/packages/application/dist/index.js').href);
+ const originalPromote=MajorImportPromotionUseCase.prototype.promote;let sourceId:string|undefined;
+ MajorImportPromotionUseCase.prototype.promote=async(record:any)=>{sourceId=record.id;return {type:'CREATED',majorId:'major'} as any;};
+ try {await gateway.apply(review,{boundaryId:'fixture'});assert.equal(sourceId,'original-record');await db.exec(`UPDATE "ImportRecord" SET status='FAILED'`);await assert.rejects(()=>gateway.apply(review,{boundaryId:'fixture'}),/SOURCE_RECORD_UNAVAILABLE/);}finally{MajorImportPromotionUseCase.prototype.promote=originalPromote;}
  await db.close();console.log('MAJOR_SQL_FIXTURES_PASS: catalog filters/counts/identity/empty page/collisions; owner scope, degree/country and relation counts');
 }
 run().catch(error=>{console.error(error);process.exitCode=1;});

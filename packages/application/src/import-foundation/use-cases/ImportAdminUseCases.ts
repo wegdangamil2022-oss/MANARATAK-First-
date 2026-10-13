@@ -820,7 +820,7 @@ export class ImportAdminUseCases {
         idempotencyKey: identity.sourceDedupKey,
       },
       correlationId: input.handoffContext?.correlationId,
-      referenceMetadata: input.handoffContext?.referenceMetadata,
+      referenceMetadata: { ...input.handoffContext?.referenceMetadata, importBatchId: batchId, sourceRecordDedupKey: identity.sourceDedupKey },
     };
   }
 

@@ -14,9 +14,10 @@ export class MajorOwnerImportUseCases {
   const receipt=await gateway.screening(receiptId);const result=receipt?.result as any;
   if(!receipt||result?.owner!=='MAJORS'||result?.schemaVersion!==1||result?.state!=='NEEDS_OWNER_REVIEW'||result?.dryRun!==false)throw new Error('MAJOR_IMPORT_SCREENING_REQUIRED');
   if(typeof result.source?.artifactId!=='string'||!result.source.artifactId.trim()||typeof result.source?.sha256!=='string'||!/^[a-f0-9]{64}$/i.test(result.source.sha256))throw new Error('MAJOR_IMPORT_SOURCE_REQUIRED');
+  if(typeof result.origin?.batchId!=='string'||!result.origin.batchId.trim()||typeof result.origin?.sourceDedupKey!=='string'||!result.origin.sourceDedupKey.trim())throw new Error('MAJOR_IMPORT_SOURCE_RECORD_REQUIRED');
   await gateway.verifyArtifact(result.source.artifactId,result.source.sha256);
   const payload=parseMajorOwnerPayload(result.payload);const preview=await gateway.inspect(payload);
-  return {receipt,payload,preview,previewHash:hash({payload,preview,source:{artifactId:result.source.artifactId,sha256:result.source.sha256.toLowerCase()}})};
+  return {receipt,payload,preview,previewHash:hash({payload,preview,origin:result.origin,source:{artifactId:result.source.artifactId,sha256:result.source.sha256.toLowerCase()}})};
  }
  async preview(receiptId:string,context:AtomicMutationRequestContext){
   const id='major-import-'+hash(receiptId);

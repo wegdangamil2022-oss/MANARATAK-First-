@@ -16,7 +16,7 @@ export class MajorImportScreeningConsumer implements IImportHandoffConsumer {
       const payload=parseMajorOwnerPayload(handoff.normalizedPayload);
       const valid=handoff.validation.state!=='INVALID'&&!handoff.validation.issues.some(issue=>issue.severity==='ERROR');
       return {owner:'MAJORS',schemaVersion:1,state:valid?'NEEDS_OWNER_REVIEW':'INVALID',dryRun:handoff.execution.dryRun,payload,
-        source:{artifactId:handoff.artifact.artifactId??null,sha256:handoff.referenceMetadata?.artifactSha256??handoff.provenance.contentHash??null}};
+        origin:{batchId:handoff.referenceMetadata?.importBatchId??null,sourceDedupKey:handoff.referenceMetadata?.sourceRecordDedupKey??null},source:{artifactId:handoff.artifact.artifactId??null,sha256:handoff.referenceMetadata?.artifactSha256??handoff.provenance.contentHash??null}};
     }catch{return {owner:'MAJORS',schemaVersion:1,state:'INVALID',dryRun:handoff.execution.dryRun,payload:null};}
   }
 }
