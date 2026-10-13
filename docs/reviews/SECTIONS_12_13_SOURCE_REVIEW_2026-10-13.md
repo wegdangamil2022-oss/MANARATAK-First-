@@ -39,7 +39,7 @@ Original logs: `evidence/sections-12-13-review-20261013/`. Every target below ra
 
 Total: **51 distinct lightweight tests passed in 9 files**. They certify only their described mock/source contracts. There was no single combined final-tree rerun. The final public-image classification option and other tiny later UI changes were source-inspected; no repeated TypeScript/test run was used to claim blanket coverage. No unrelated sections 24–28 checks ran.
 
-## Remaining source work — not merely operational proof
+## Historical remaining source work before continuation — superseded below
 
 The matrices list every gap. Particularly:
 
@@ -58,3 +58,48 @@ DATABASE_URL='<isolated-disposable-postgresql-url>' npx prisma migrate deploy --
 ```
 
 It must be shown/authorized as a separate database test setup before execution; this round made no such request because all executed checks are independent of a database. Actual transactions/rollback/concurrency, migration/recovery, native query totals and public graph cursors, permissions/sessions, assets, providers, AR/EN/browser/E2E/load and Student/P14 consumers remain deferred, not successful. Legacy published destinations without independent current proof and historical paths without original snapshot facts require genuine review/reconciliation after authorized isolated activation. No production readiness, deployment or main merge is asserted.
+
+
+## Continuation delivered at source commit `1cc3b204`
+
+Branch remains `codex/review-sections-12-13-20261013`; base was `ae857a30`. No main merge. This continuation implements the source/UI changes recorded in the current per-section requirement tables; the earlier 51-test/399-registration observations above are historical, not results rerun on this source commit.
+
+Section 12 now has bounded live country search/pages, canonical active-city pages/UI, P3-approved signed image delivery/cards/detail, bulk canonical reference resolution, immutable same-transaction revision/proof/diff history, an administrative nullable evidence freshness policy, and distinct edit/review/publication route permissions. Actual original actor/time is stored; no legacy approval/history or policy duration was invented.
+
+Section 13 now has immutable independent source approvals with version/author/fact/provider/current-link checks and optional explicit expiry. Shared native catalogue/related-owner trust predicates cover rows/count and original version changes; detail and external launch recheck current eligibility. Manual pending/waitlist admission has owner API/UI, optimistic guards, independent actor/reason and actual finance/prerequisite/capacity checks. Withdrawal uses explicit original enrollment entitlement; current root publication check no longer silently defeats honor-after-withdrawal. Active quizzes cannot be skipped by an editorial false flag. Public search reads a bounded first page and cursor navigation; learner media uses browser-compatible signed delivery/MIME without full blob preloading. Course form preserves optional policy facts, signals dirty state and avoids false success after failed post-action reload. Review/publish/unpublish/archive/admission permissions are separate server guards, not UI hiding alone.
+
+### One-time checks, exact scope and failures
+
+Evidence: [`evidence/sections12-13-continuation-2026-10-13/`](evidence/sections12-13-continuation-2026-10-13/). All commands ran on the continuation worktree based on `ae857a30`, subsequently committed as `1cc3b204`; they were not run again against the final commit. Late detail freshness/search-anchor, dirty/readiness/form-preservation and additional withdrawal/review route guards were source-inspected, not certified by a repeated broad check.
+
+| Command / check | Actual result | Evidence / limits |
+|---|---|---|
+| `npx prisma generate --schema packages/infrastructure/prisma/schema.prisma` | PASS, client 5.22.0, 1.81s | `sections12-13-continuation-generate.log`; generates client only, no database or migration applied |
+| Single TypeScript `createSourceFile` syntax-diagnostic script over continuation files | PASS, 58 TS/TSX files | `sections12-13-continuation-syntax.log`; syntax only at that worktree stage, before later fixes |
+| `timeout 45s node /workspace/scratch/sections12-13-continuation-types.cjs` | PASS, 15 new source files, 0 reported diagnostics | `sections12-13-continuation-types.log` and copied `new-files-types-check.cjs`; excludes dependency and modified-file diagnostics; **not full-project TypeScript PASS** |
+| `npx vitest run packages/domain/tests/courses/ContinuationCompletionAndEvidencePolicy.spec.ts packages/application/tests/courses/ContinuationSourceReviewCommand.spec.ts packages/infrastructure/tests/courses/ContinuationTrustedCatalogBoundary.spec.ts packages/application/tests/study-destinations/ContinuationPublicDestinationEnrichment.spec.ts` | **16 PASS, 4 FAIL**, 4 files, 3.81s | `sections12-13-continuation-light.log`. All four native catalogue contract cases stopped before useful assertions: runtime `COURSE_SOURCE_FACT_KEYS` was undefined because `@manaratak/domain` resolved old `dist/index.js`. Root Vitest alias now points to current domain `src/index.ts`; **fixed but not rerun**, four cases remain unverified |
+| `npx vitest run packages/infrastructure/tests/courses/ContinuationSourceApprovalPersistence.spec.ts packages/infrastructure/tests/courses/ContinuationAdmissionDecisions.spec.ts packages/application/tests/courses/ContinuationWithdrawnEnrollmentAccess.spec.ts` | **16 PASS**, 3 files, 2.50s | `sections12-13-continuation-owner-tests.log`; actual new gateway/access functions exercised with isolated in-memory doubles. No SQL/database/finance provider called |
+| `node scripts/architecture/generate-di-reachability-manifest.mjs` | PASS, 406 registered and reachable | `sections12-13-continuation-di.log`; source graph generation, no runtime DI integration |
+| Targeted `buildAuditInventory(...)` extraction | 430 mounted mutation handlers recorded | `sections12-13-continuation-audit.log`; source artifact update, not a repeated global audit test. Added final withdrawal/reject route permission evidence reconciled directly |
+| `git diff --check` | PASS at source stage | Whitespace only, no behavioral verification |
+
+Continuation total: **32 passed / 4 failed** across **36 distinct lightweight cases / 7 files**, each run once. The failure cause was corrected without rerunning failed cases. Existing 51 tests, full TypeScript, integration, heavy and browser/E2E suites were not repeated. No production database, real provider, notification, payment or sections 24–28 test suite used.
+
+### Remaining source work — explicit and not disguised as runtime proof
+
+The current requirement tables retain partial states. This is substantial source completion, **not complete closure of either section**:
+
+- Section 12: STD-ADM-010 reusable country/official-authority approved-origin/exception governance; STD-ADM-017 fully database-native bounded administrative readiness/NO_PROFILE query; STD-ADM-014 remaining canonical locale keys/shared controls; STD-ADM-022 remaining generic suitability/opportunity presentation must be replaced by actual owner facts or explicit unavailability. Freshness configuration does not create a retention/destructive cleanup policy.
+- Section 13: CRS-ADM-025 complete per-field conflict/rebase and browser-history navigation/small-screen editor loading; CRS-ADM-026 stable provider changed-link/backlog checkpoint/retry/dead-letter reconciliation beyond bounded scans; CRS-ADM-016/027 complete canonical Arabic/English keys/editor contract/source-language disclosure. Existing configured custom eligibility rules still require an actual evaluation gateway and fail closed; no rules/evaluator was invented.
+- Native SQL, locking/rollback/concurrency, actual RBAC/roles, storage browser-compatible bridge, HTTP/browser/locale and large dataset behavior remain operationally unproved. Four corrected catalogue cases are separately unverified. Shared historical 15 architecture findings remain unchanged.
+
+### Source-only migration delta / activation limits
+
+New unapplied sources:
+
+- `20261013040000_course_source_approvals`: actual immutable independent source approvals, indexed course/version/review history; no fake approval/author backfill.
+- `20261013050000_study_destination_history_policy`: destination append-only revision/proof timeline and singleton nullable freshness policy; no invented historical events/durations.
+
+Together with earlier unapplied `20261013030000_study_destination_review_proof`, these make source **NOT_RUNTIME_SAFE on a database lacking the new structures**. Migration recovery metadata records backup/forward-fix recovery, no destructive down SQL. No migration applied, existing database altered, or temporary DB created. The isolated setup command shown above remains **not executed** and must be presented before any later authorized disposable database setup.
+
+Legacy course versions lacking the true original actor and original enrollment withdrawal policy, learning paths lacking original historical facts, and destinations lacking real independent proof require governed genuine reconciliation. Role grants and browser-compatible storage bridge must be deliberately configured later; source changes do not certify production readiness.
