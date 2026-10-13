@@ -1,3 +1,4 @@
+import { courseAdminErrorResponse } from './CourseAdminErrorPolicy';
 import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
@@ -677,14 +678,10 @@ export class CourseAdminRouter {
       res.status(200).json({ success: true });
     }));
 
-    router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      if (['COURSE_STALE_VERSION','LEARNING_PATH_STALE_VERSION','COURSE_PUBLICATION_STATE_CHANGED','COURSE_ASSESSMENT_REVIEW_CONFLICT','COURSE_ASSESSMENT_NOT_PENDING'].includes(err.message)) return res.status(409).json({error:err.message});
-      if (err.message === 'COURSE_VERSION_PRECONDITION_REQUIRED') return res.status(428).json({error:err.message});
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: 'Validation Error', details: err.issues });
-      }
-      if(typeof err.message==='string' && /^(COURSE_|NATIVE_COURSE_|LEARNING_PATH_|IMPORTED_COURSE_|AUTHENTICATED_ADMIN_)/.test(err.message)) return res.status(400).json({error:err.message});
-      res.status(500).json({error:'COURSE_OPERATION_FAILED'});
+    router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+      if (err instanceof z.ZodError) return res.status(400).json({error: 'Validation Error', details: err.issues});
+      const result = courseAdminErrorResponse(err);
+      return res.status(result.status).json({error: result.error});
     });
 
     return router;
