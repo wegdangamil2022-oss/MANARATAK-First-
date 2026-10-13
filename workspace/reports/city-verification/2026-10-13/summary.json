@@ -1,0 +1,102 @@
+{
+  "baseCommit": "19e8a604a6caa73ee10a93acf6a3be92a52371ee",
+  "enrichmentCounts": {
+    "Africa_Universities_Phase_1_FINAL_WEAK_RECORDS_REENRICHED.xlsx": 1656,
+    "Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx": 4154,
+    "Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx": 2399,
+    "North_America_Universities_Phase_1_Enrichment_COMPLETED_1566(3)(3)(1).xlsx": 1566
+  },
+  "enrichmentArtifacts": [
+    {
+      "path": "workspace/import-sources/universities/stage-2-enrichment/Africa_Universities_Phase_1_FINAL_WEAK_RECORDS_REENRICHED.xlsx",
+      "sha256": "d027fb76545ddafb97efb2456721f0bd61075d90fd76fd7d217794c528d53dce"
+    },
+    {
+      "path": "workspace/import-sources/universities/stage-2-enrichment/Asia_Universities_Phase_1_Enrichment_4154_FINAL_ENRICHED_COMPLETE(20260813-215654).xlsx",
+      "sha256": "b014e5bba8f648e66501258eb449d22fe923224a6fd4e7107c0dad19ce0e55ee"
+    },
+    {
+      "path": "workspace/import-sources/universities/stage-2-enrichment/Europe_Universities_Phase_1_Enrichment_2399_74_ENRICHED_FINAL_2026-08-10.xlsx",
+      "sha256": "9705e974bf8f8a9050d7ed74b21ae94eeae4c1eba96a69ded95966942a8bd67f"
+    },
+    {
+      "path": "workspace/import-sources/universities/stage-2-enrichment/North_America_Universities_Phase_1_Enrichment_COMPLETED_1566(3)(3)(1).xlsx",
+      "sha256": "058fa60cf7246f97fd6be4d88de4a7b305ef54d1db448a55e9df06a8f3374235"
+    }
+  ],
+  "scope": "SOURCE_FILES_ONLY; NO DATABASE MUTATION OR PUBLISHING",
+  "baselineCityRows": 9717,
+  "removedCityRows": 6,
+  "addedCityRows": 400,
+  "aliasLabels": 277,
+  "aliasCityRows": 273,
+  "finalCityRows": 10111,
+  "files": [
+    {
+      "path": "workspace/reference-data/cities/africa/MANARATAK_Africa_Cities_All_Combined.csv",
+      "beforeSha256": "a5d431effac7869bfe16e2dd3492d4b881fc7638747ceddebdd76622c2359084",
+      "afterSha256": "8087ba0b6dc3a0e8853a7eba8d7bc406984c9a968d18c83e2237c73230975fec",
+      "beforeRows": 1730,
+      "afterRows": 1738
+    },
+    {
+      "path": "workspace/reference-data/cities/americas/MANARATAK_Americas_Cities_All_Combined.csv",
+      "beforeSha256": "994223315a0907dd8fcb760647b18956dcf2a28673e6a0952d0079dfe78e5243",
+      "afterSha256": "d83fb92f12a938bf0dc467e2f163d70a646aaebb4ee962709e80ddc5cbb1ca90",
+      "beforeRows": 2182,
+      "afterRows": 2408
+    },
+    {
+      "path": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
+      "beforeSha256": "b0122e693984226459979514466a91ed7e0c5ed3c3681f2899b0eda55b11f7c5",
+      "afterSha256": "1ced2e7a4429f5b28078f3e46998720728af18d9cde44ef2c0154b412aa0016a",
+      "beforeRows": 3072,
+      "afterRows": 3226
+    },
+    {
+      "path": "workspace/reference-data/cities/europe/MANARATAK_Europe_Cities_All_Combined.csv",
+      "beforeSha256": "01ced98e07d0bace75a6a0589698ed8446d4958ddaa555f5d98e4d2b080a9311",
+      "afterSha256": "d34e35ffba94756abcc73deb3c1af8f776a521a200dde40018e5a2de565d681e",
+      "beforeRows": 2648,
+      "afterRows": 2654
+    },
+    {
+      "path": "workspace/reference-data/cities/oceania/22_cities_oceania.csv",
+      "beforeSha256": "30547f596ef3b2fbf130064b8498b83ecbeb7dd0d21fffda3c0fc9253d8283fd",
+      "afterSha256": "702de530243322fad0e81d2c2afcc49e75da9f752e2a8e9424b3fa06b436397a",
+      "beforeRows": 85,
+      "afterRows": 85
+    }
+  ],
+  "unresolvedCases": 977,
+  "previous726Verification": {
+    "SOURCE_CORROBORATED": 546,
+    "ADDITIONAL_CORROBORATION_PENDING": 99,
+    "GEOGRAPHICALLY_CORROBORATED": 81
+  },
+  "externalCityDatabase": {
+    "url": "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/countries+states+cities.json",
+    "sha256": "bd1c870ead57b90a9050d1c58de52949115c1d7b02dd9bb8dc1574a39cf41d9a"
+  },
+  "sourceQualityResult": {
+    "total": 10723,
+    "counts": {
+      "EXACT_SOURCE_CANDIDATE": 8865,
+      "NORMALIZED_SOURCE_CANDIDATE": 44,
+      "NOT_FOUND": 1797,
+      "AMBIGUOUS": 9,
+      "TERRITORY_MISMATCH": 8
+    },
+    "sourceCandidateCount": 8909,
+    "draftPolicy": "RAW_LABEL_AND_PENDING_MAPPING_ALLOWED_IN_DRAFT_ONLY; NO_GUESSED_FK; REQUIRED_GEOGRAPHY_BLOCKS_PUBLICATION",
+    "databaseWrites": 0,
+    "runtime": "RUNTIME_UNTESTED"
+  },
+  "verification": {
+    "sourceTests": 26,
+    "sourceTestFiles": 4,
+    "negativeTests": 8,
+    "applicationTypecheck": "PASS",
+    "sourceQualityVerifier": "PASS"
+  }
+}

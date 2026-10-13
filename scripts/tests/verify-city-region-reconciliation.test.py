@@ -6,6 +6,7 @@ import io
 import json
 from pathlib import Path
 import shutil
+import subprocess
 import tempfile
 import unittest
 
@@ -24,6 +25,11 @@ class CityIntegrityNegativeTests(unittest.TestCase):
         (checker.ROOT / ".git").symlink_to(ORIGINAL_ROOT / ".git", target_is_directory=True)
         shutil.copytree(ORIGINAL_ROOT / "workspace/reference-data", checker.ROOT / "workspace/reference-data")
         shutil.copytree(ORIGINAL_REPORT, checker.REPORT)
+        # This suite covers the first batch's immutable snapshot. Follow-up
+        # source edits have their own verifier and must not rewrite old evidence.
+        for artifact in json.loads((checker.REPORT / "summary.json").read_text())["files"]:
+            (checker.ROOT / artifact["path"]).write_bytes(subprocess.check_output(
+                ["git", "show", "19e8a604:" + artifact["path"]], cwd=ORIGINAL_ROOT))
 
     def tearDown(self):
         checker.ROOT, checker.REPORT = ORIGINAL_ROOT, ORIGINAL_REPORT

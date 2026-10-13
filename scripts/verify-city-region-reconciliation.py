@@ -17,6 +17,13 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / "workspace/reports/city-region-reconciliation/2026-10-13"
+SNAPSHOT_REF = None
+
+
+def artifact_bytes(path):
+    if SNAPSHOT_REF:
+        return subprocess.check_output(["git", "show", SNAPSHOT_REF + ":" + str(path.relative_to(ROOT))], cwd=ROOT)
+    return path.read_bytes()
 
 
 def require(condition, message):
@@ -25,7 +32,7 @@ def require(condition, message):
 
 
 def jsonl(name):
-    return [json.loads(line) for line in (REPORT / name).read_text().splitlines() if line]
+    return [json.loads(line) for line in artifact_bytes(REPORT / name).decode().splitlines() if line]
 
 
 def read_csv(raw):
@@ -47,7 +54,7 @@ def collision_pairs(rows):
 
 
 def verify():
-    summary = json.loads((REPORT / "summary.json").read_text())
+    summary = json.loads(artifact_bytes(REPORT / "summary.json"))
     changes = jsonl("region-changes.jsonl")
     holds = jsonl("unresolved-regions.jsonl")
     additions = jsonl("added-cities.jsonl")
@@ -56,14 +63,14 @@ def verify():
     geo = {g["id"]: g for g in jsonl("geonames-excerpts.jsonl")}
     regions = defaultdict(list)
     for path in sorted((ROOT / "workspace/reference-data/regions").glob("*/*.csv")):
-        for row in read_csv(path.read_bytes()):
+        for row in read_csv(artifact_bytes(path)):
             regions[(row["countryIso2"], row["regionCode"])].append(row)
     original = []
     current = []
     for artifact in summary["files"]:
         path = artifact["path"]
         old_bytes = subprocess.check_output(["git", "show", summary["baseCommit"] + ":" + path], cwd=ROOT)
-        new_bytes = (ROOT / path).read_bytes()
+        new_bytes = artifact_bytes(ROOT / path)
         require(hashlib.sha256(old_bytes).hexdigest() == artifact["beforeSha256"], "Baseline hash changed: " + path)
         require(hashlib.sha256(new_bytes).hexdigest() == artifact["afterSha256"], "Source hash changed: " + path)
         old_rows, new_rows = read_csv(old_bytes), read_csv(new_bytes)
@@ -121,4 +128,9 @@ def verify():
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--snapshot", help="Verify a historical committed source snapshot")
+    args = parser.parse_args()
+    SNAPSHOT_REF = args.snapshot
     print(json.dumps(verify(), indent=2))

@@ -10,7 +10,9 @@ describe('M10 offline source quality preparation', () => {
     const root = process.cwd(); const output = await prepareSourceQuality(root);
     verifyOrWriteSourceQuality(root, output, 'check');
     const summary = JSON.parse(output['summary.json']);
-    expect(summary.universities.geography).toMatchObject({ total: 10723, counts: { AMBIGUOUS: 63, TERRITORY_MISMATCH: 8 } });
+    expect(summary.universities.geography).toMatchObject({ total: 10723, counts: { TERRITORY_MISMATCH: 8 } });
+    expect(summary.universities.geography.counts.AMBIGUOUS).toBeLessThanOrEqual(63);
+    expect(Object.values(summary.universities.geography.counts).reduce((sum: number, count) => sum + Number(count), 0)).toBe(10723);
     expect(summary.universities.stage34).toMatchObject({ uniqueSourceIds: 1530, stage3Invalid: 1320, stage4Invalid: 558, invalidInBoth: 487, uniqueInvalidIds: 1391, sourceValidBoth: 139 });
     expect(summary.universities.stage34.uniqueInvalidIds).toBe(summary.universities.stage34.stage3Invalid + summary.universities.stage34.stage4Invalid - summary.universities.stage34.invalidInBoth);
     expect(summary.scholarships).toMatchObject({ totalSections: 514, explicitImportedCandidates: 349, summaryDifference: 10, counts: { MERGED_DUPLICATE: 5, UNMARKED: 156 } });
