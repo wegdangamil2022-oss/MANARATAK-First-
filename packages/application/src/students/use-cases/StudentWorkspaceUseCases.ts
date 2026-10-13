@@ -17,7 +17,8 @@ import {
   StudentWorkspaceDto,
   StudentWorkspaceIntegrationEventDto,
   StudentSupportWorkspacePageDto,
-  StudentSupportTriageKind,
+  StudentSupportTriageFilters,
+  StudentSupportOwnerReadObservation,
   StudentSupportTriagePageDto,
   StudentSupportWorkspaceDetailDto,
   StudentWorkspaceSnapshotDto,
@@ -50,8 +51,15 @@ export class StudentWorkspaceUseCases {
   }
 
   /** Bounded server-side support triage; never discloses event payloads or tracker notes. */
-  public listSupportTriage(input:{kind:StudentSupportTriageKind;limit?:number;cursor?:string}):Promise<StudentSupportTriagePageDto>{
+  public listSupportTriage(input:StudentSupportTriageFilters):Promise<StudentSupportTriagePageDto>{
     return this.repository.listSupportTriage(input);
+  }
+
+  /** Latest diagnostic status only; never store the owner's response or private error. */
+  public async recordSupportOwnerReadObservation(input: StudentSupportOwnerReadObservation): Promise<void> {
+    if (!this.repository.recordSupportOwnerReadObservation)
+      throw new Error('STUDENT_SUPPORT_OWNER_OBSERVATIONS_NOT_CONFIGURED');
+    return this.repository.recordSupportOwnerReadObservation(input);
   }
 
   public async getSupportWorkspaceDetail(studentReferenceId: string): Promise<StudentSupportWorkspaceDetailDto> {

@@ -42,6 +42,14 @@ export class StudentSupportAdminRouter {
         cursor: z.string().trim().max(2048).optional(),
       })
       .strict();
+    const triageWindow = {
+      status: z.nativeEnum(StudentWorkspaceStatus).optional(),
+      from: z.coerce.date().optional(),
+      to: z.coerce.date().optional(),
+    };
+    const validWindow = (input: {from?:Date;to?:Date}) =>
+      !(input.from && input.to && input.from > input.to) &&
+      !(input.to && input.to.getTime() > Date.now());
     const resetSchema = z
       .object({
         expectedVersion: z.number().int().positive(),
@@ -112,9 +120,11 @@ export class StudentSupportAdminRouter {
           const query=z.object({
             page:z.coerce.number().int().min(1).max(10000).optional(),
             limit:z.coerce.number().int().min(1).max(50).optional(),
-          }).strict().parse(req.query);
+            ...triageWindow,
+          }).strict().refine(validWindow, 'Invalid diagnostic window').parse(req.query);
           const result=await adminServiceFulfillmentUseCases.listSupportAwaitingPaymentStudents(
             query.page??1,query.limit??20,
+            {workspaceStatus:query.status,from:query.from,to:query.to},
           );
           await AuditHelper.recordMutation(auditRecordRepo,req,{
             action:'STUDENT_SUPPORT_SERVICE_TRIAGE_VIEW',category:'STUDENT_SUPPORT',
@@ -136,16 +146,29 @@ export class StudentSupportAdminRouter {
     router.get('/support/triage', requireSupportRead, async (req,res,next)=>{
       try{
         const input=z.object({
-          kind:z.enum(['SYNC_FAILED','SYNC_PENDING','APPLICATION_OVERDUE']),
+          kind:z.enum(['SYNC_FAILED','SYNC_PENDING','APPLICATION_OVERDUE','OWNER_DEGRADED']),
           limit:z.coerce.number().int().min(1).max(50).optional(),
           cursor:z.string().trim().max(2048).optional(),
-        }).strict().parse(req.query);
+          ownerDomain:z.enum(['learning','certificates','services']).optional(),
+          ...triageWindow,
+        }).strict().refine(validWindow, 'Invalid diagnostic window')
+          .refine(input => input.kind==='OWNER_DEGRADED'
+            ? Boolean(input.ownerDomain && input.from && input.to)
+            : !input.ownerDomain, 'Owner diagnostics require a source and explicit time window')
+          .parse(req.query);
+        if (input.kind==='OWNER_DEGRADED') {
+          const permission={learning:'admin:courses:manage',certificates:'admin:certificates:view',services:'admin:services:manage'}[input.ownerDomain!];
+          const decision=await authEvaluatorService.evaluatePermission(req.authUserId!,permission,{ip:req.ip,requestTime:new Date()});
+          if(!decision.isGranted) return void res.status(403).json({error:{code:'STUDENT_SUPPORT_OWNER_READ_DENIED'}});
+        }
         const result=await studentWorkspaceUseCases.listSupportTriage(input);
         await AuditHelper.recordMutation(auditRecordRepo,req,{
           action:'STUDENT_SUPPORT_TRIAGE_LIST_VIEW',category:'STUDENT_SUPPORT',
           targetType:'STUDENT_WORKSPACE_COLLECTION',targetId:'student-support-triage',
           result:'SUCCESS',metadata:{purpose:'student-support-triage',kind:input.kind,
-            returned:result.items.length},
+            returned:result.items.length,
+            ...(input.kind==='OWNER_DEGRADED'?{ownerDomain:input.ownerDomain,from:input.from?.toISOString(),to:input.to?.toISOString()}:{}),
+          },
         },{reliability:'REQUIRED',principal:'REQUIRED'});
         res.status(200).json(result);
       }catch(error){next(error);}
@@ -210,7 +233,22 @@ export class StudentSupportAdminRouter {
           targetType: 'STUDENT_WORKSPACE', targetId: studentReferenceId,
           result: 'SUCCESS', metadata: {purpose:'student-support-owner-tab', domain},
         }, {reliability:'REQUIRED',principal:'REQUIRED'});
-        res.status(200).json(payload);
+        // Audit was required before persisting or disclosing this diagnostic.
+        // Store only the latest status/time; no owner rows, error details or PII.
+        let diagnosticObservationStatus = 'RECORDED';
+        try {
+          if(!['AVAILABLE','TRUNCATED','DEGRADED'].includes(payload.status))
+            throw new Error('STUDENT_SUPPORT_OWNER_OBSERVATION_STATUS_INVALID');
+          await studentWorkspaceUseCases.recordSupportOwnerReadObservation({
+            studentReferenceId, ownerDomain:domain,
+            status:payload.status==='DEGRADED'?'DEGRADED':'AVAILABLE',
+            checkedAt: new Date(payload.provenance?.queriedAt ?? Date.now()),
+          });
+        } catch {
+          diagnosticObservationStatus = 'NOT_RECORDED';
+          console.warn('STUDENT_SUPPORT_OWNER_OBSERVATION_NOT_RECORDED');
+        }
+        res.status(200).json({...payload,diagnosticObservationStatus});
       } catch (error) {next(error);}
     });
 

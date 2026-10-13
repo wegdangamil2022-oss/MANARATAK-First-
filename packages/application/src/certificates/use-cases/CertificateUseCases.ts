@@ -130,10 +130,10 @@ export class CertificateUseCases {
       activeIssuer,
       trustedCompletionIssuanceReady: defaultCompletionReady,
       artifactRendererMode: 'EAP_ASYNC',
-      artifactRendererRuntimeReady: artifacts.status === 'READY' && Boolean(artifacts.verifiedAt),
+      artifactRendererRuntimeReady: artifacts.status === 'READY' && Boolean('verifiedAt' in artifacts && artifacts.verifiedAt),
       artifactRendererStatus: artifacts.status,
       artifactRendererReason: artifacts.reason,
-      artifactRendererVerifiedAt: artifacts.verifiedAt ?? null,
+      artifactRendererVerifiedAt: 'verifiedAt' in artifacts ? artifacts.verifiedAt ?? null : null,
       ...runtime,
     };
   }

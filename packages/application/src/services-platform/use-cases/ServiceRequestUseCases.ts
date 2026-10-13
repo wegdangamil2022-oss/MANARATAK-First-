@@ -1,3 +1,4 @@
+import { ServiceSupportTriageFilters } from '@manaratak/domain';
 import { serviceFingerprint, serviceInput } from '../ServiceSafety';
 import {
   AssetReferencePolicy,
@@ -146,7 +147,7 @@ export class AdminServiceFulfillmentUseCases {
   ) {}
 
   /** Owner-domain read for explicitly permitted staff triage only (P20). */
-  listSupportAwaitingPaymentStudents(page = 1, limit = 20) {
+  listSupportAwaitingPaymentStudents(page = 1, limit = 20, filters: ServiceSupportTriageFilters = {}) {
     if (
       !Number.isSafeInteger(page) ||
       page < 1 ||
@@ -158,7 +159,7 @@ export class AdminServiceFulfillmentUseCases {
       throw new Error('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
     if (!this.requests.listSupportAwaitingPaymentStudents)
       throw new Error('SERVICE_SUPPORT_TRIAGE_NOT_CONFIGURED');
-    return this.requests.listSupportAwaitingPaymentStudents(page, limit);
+    return this.requests.listSupportAwaitingPaymentStudents(page, limit, filters);
   }
 
   async listRequests(filters: ServiceRequestFilters): Promise<PaginatedServiceRequestResult> {

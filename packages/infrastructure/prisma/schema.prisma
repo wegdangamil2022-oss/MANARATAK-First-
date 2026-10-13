@@ -2923,6 +2923,7 @@ model StudentWorkspace {
   snapshots        StudentWorkspaceSnapshot[]
   notifications    StudentNotificationProjection[]
   integrationInbox StudentWorkspaceEventInbox[]
+  supportOwnerReadObservations StudentSupportOwnerReadObservation[]
   learningProjections StudentLearningProjection[]
   certificateProjections StudentCertificateReadProjection[]
   privacyConsentDecisions StudentPrivacyConsentDecision[]
@@ -2930,6 +2931,18 @@ model StudentWorkspace {
 
   @@index([status])
   @@index([lastActiveAt])
+}
+
+// Latest authorized support-read health, not an owner-data snapshot or history.
+model StudentSupportOwnerReadObservation {
+  studentReferenceId String
+  ownerDomain String
+  status String
+  checkedAt DateTime @db.Timestamp(3)
+  workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Cascade)
+
+  @@id([studentReferenceId, ownerDomain])
+  @@index([ownerDomain, status, checkedAt])
 }
 
 model StudentSavedItem {

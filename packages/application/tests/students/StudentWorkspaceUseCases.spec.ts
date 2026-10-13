@@ -93,7 +93,10 @@ describe('StudentWorkspaceUseCases', () => {
   });
 
   it('saves personal workspace references only', async () => {
-    const saved = await useCases.saveItem({
+    const owner={supports:(type:StudentSavedItemType)=>type===StudentSavedItemType.COURSE,
+      hydrate:vi.fn().mockResolvedValue({available:true,ownerId:'course-1',displayName:'Canonical Course',slug:'course-slug'})};
+    const ownerScoped=new StudentWorkspaceUseCases(repository,undefined,undefined,[owner]);
+    const saved = await ownerScoped.saveItem({
       studentReferenceId: 'student-1',
       entityType: StudentSavedItemType.COURSE,
       entityId: 'course-1',
@@ -101,7 +104,7 @@ describe('StudentWorkspaceUseCases', () => {
     });
 
     expect(saved.entityType).toBe(StudentSavedItemType.COURSE);
-    expect(repository.saveItem).toHaveBeenCalled();
+    expect(repository.saveItem).toHaveBeenCalledWith(expect.objectContaining({entityId:'course-1',displayName:'Canonical Course',entitySlug:'course-slug'}));
   });
 
   it('does not reactivate an archived workspace', async () => {

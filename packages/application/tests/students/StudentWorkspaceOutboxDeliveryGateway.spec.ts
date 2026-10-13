@@ -127,7 +127,8 @@ describe('Student certificate owner-outbox bridge', () => {
       createdAt:new Date(),metadata:{schemaVersion:'1.0.0'},aggregate:{aggregateType:'ROLE_ASSIGNMENT',aggregateId:'assignment-1'},payload:{assignmentId:'assignment-1',roleId:'student',identityId:'student-1'}};
     await expect(gateway.deliver(entry as any,{idempotencyKey:'role-2'} as any))
       .rejects.toThrow('STUDENT_LEARNING_CATCHUP_PAGINATION_REQUIRED');
-    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(1);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(2);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({eventType:'StudentIdentityActivated',eventId:'role-2:role-active'}));
   });
 
   it('reconciles more than 50 owner enrollments through bounded pages without dropping a tail',async()=>{
@@ -156,7 +157,8 @@ describe('Student certificate owner-outbox bridge', () => {
     await gateway.deliver(role as any,{idempotencyKey:role.id});
     expect(learning.listPageForStudent).toHaveBeenCalledTimes(2);
     expect(learning.listForStudent).not.toHaveBeenCalled();
-    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(63);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(64);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({eventType:'StudentIdentityActivated',eventId:'role-many:role-active'}));
     expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({
       eventId:'role-many:learning:e-61',sourceDomain:'COURSES',
       metadata:expect.objectContaining({courseName:'Course 61',progressPercentage:35}),
@@ -212,7 +214,8 @@ describe('Student certificate owner-outbox bridge', () => {
       roleEventId:'role-big',studentReferenceId:'student-1',
       roleAssignedAt:role.createdAt,domain:'COURSES',cursor:'4',
     });
-    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(5);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledTimes(6);
+    expect(students.consumeIntegrationEvent).toHaveBeenCalledWith(expect.objectContaining({eventType:'StudentIdentityActivated',eventId:role.id+':role-active'}));
   });
 
   it('refuses a forged continuation and never projects it',async()=>{

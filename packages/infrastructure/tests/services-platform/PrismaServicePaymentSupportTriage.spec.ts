@@ -33,3 +33,17 @@ describe('P20 owner-scoped support payment triage',()=>{
     expect(prisma.serviceRequestRecord.groupBy).not.toHaveBeenCalled();
   });
 });
+
+it('applies the same source/time/workspace predicates before DISTINCT paging and count',async()=>{
+  const queries:any[]=[];
+  const prisma={$queryRaw:vi.fn().mockImplementation((sql:any)=>{
+    queries.push(sql);return Promise.resolve(sql.strings.join('').includes('COUNT')?[{total:1n}]:[{studentReferenceId:'active-student'}]);
+  })};
+  const repo=new PrismaServicePlatformRepository(prisma as any);
+  const from=new Date('2026-10-10'),to=new Date('2026-10-12');
+  expect(await repo.listSupportAwaitingPaymentStudents(1,10,{workspaceStatus:'ACTIVE',from,to})).toEqual({items:[{studentReferenceId:'active-student'}],total:1,hasMore:false,nextPage:null});
+  for(const sql of queries){
+    expect(sql.strings.join('')).toContain('EXISTS');
+    expect(sql.values).toEqual(expect.arrayContaining(['AWAITING_PAYMENT',from,to,'ACTIVE']));
+  }
+});

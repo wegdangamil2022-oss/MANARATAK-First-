@@ -7,6 +7,7 @@ import { AuditHelper } from '../../../../src/presentation/audit/AuditHelper';
 function fixture(granted: string[], principalId:string|null = 'support-1') {
   const workspace = {
     listSupportWorkspaces: vi.fn().mockResolvedValue({ items: [], nextCursor: null, hasMore: false }),
+    recordSupportOwnerReadObservation:vi.fn().mockResolvedValue(undefined),
     listSupportTriage: vi.fn().mockResolvedValue({items:[],total:0,hasMore:false,nextCursor:null}),
     resetLayout: vi.fn().mockResolvedValue({studentReferenceId:'student-1',version:2}),
     getSupportWorkspaceDetail: vi.fn().mockResolvedValue({studentReferenceId:'student-1',status:'ACTIVE'}),
@@ -120,7 +121,7 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
       const {app,services}=fixture(['admin:students:support','admin:services:manage']);
       const response=await request(app).get('/admin/students/support/triage/service-awaiting-payment?page=2&limit=12');
       expect(response.status).toBe(200);
-      expect(services.listSupportAwaitingPaymentStudents).toHaveBeenCalledWith(2,12);
+      expect(services.listSupportAwaitingPaymentStudents).toHaveBeenCalledWith(2,12,{workspaceStatus:undefined,from:undefined,to:undefined});
       expect(response.body).toMatchObject({
         items:[{studentReferenceId:'student-1',triageKind:'SERVICE_AWAITING_PAYMENT',status:'AWAITING_PAYMENT'}],
         total:1,hasMore:false,nextPage:null,
@@ -316,5 +317,32 @@ describe('StudentSupportAdminRouter authorization boundary', () => {
     expect(workspace.resetLayout).toHaveBeenCalledWith('student-1',1,expect.objectContaining({
       actorId:'support-1',reason:'Approved by student',
     }));
+  });
+});
+
+describe('P15 owner health triage source boundary',()=>{
+  const query='kind=OWNER_DEGRADED&ownerDomain=certificates&status=ACTIVE&from=2026-10-10T00:00:00Z&to=2026-10-12T00:00:00Z';
+  it('requires the owner grant independently and does not disclose diagnostic student identities without it',async()=>{
+    const f=fixture(['admin:students:support']);
+    expect((await request(f.app).get('/admin/students/support/triage?'+query)).status).toBe(403);
+    expect(f.workspace.listSupportTriage).not.toHaveBeenCalled();
+  });
+  it('requires a valid explicit owner/window and audits a permitted filtered read',async()=>{
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try {
+      const f=fixture(['admin:students:support','admin:certificates:view']);
+      expect((await request(f.app).get('/admin/students/support/triage?kind=OWNER_DEGRADED')).status).toBe(400);
+      expect((await request(f.app).get('/admin/students/support/triage?'+query)).status).toBe(200);
+      expect(f.workspace.listSupportTriage).toHaveBeenCalledWith(expect.objectContaining({kind:'OWNER_DEGRADED',ownerDomain:'certificates',status:'ACTIVE',from:new Date('2026-10-10'),to:new Date('2026-10-12')}));
+      expect(audit).toHaveBeenCalledWith(expect.anything(),expect.anything(),expect.objectContaining({action:'STUDENT_SUPPORT_TRIAGE_LIST_VIEW'}),{reliability:'REQUIRED',principal:'REQUIRED'});
+    } finally {audit.mockRestore();}
+  });
+  it('passes payment time/status filters to P20 before totals and pagination',async()=>{
+    const audit=vi.spyOn(AuditHelper,'recordMutation').mockResolvedValue(undefined);
+    try {
+      const f=fixture(['admin:students:support','admin:services:manage']);
+      expect((await request(f.app).get('/admin/students/support/triage/service-awaiting-payment?status=ACTIVE&from=2026-10-10&to=2026-10-12')).status).toBe(200);
+      expect(f.services.listSupportAwaitingPaymentStudents).toHaveBeenCalledWith(1,20,{workspaceStatus:'ACTIVE',from:new Date('2026-10-10'),to:new Date('2026-10-12')});
+    } finally {audit.mockRestore();}
   });
 });

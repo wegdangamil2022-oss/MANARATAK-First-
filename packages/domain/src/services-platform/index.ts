@@ -245,11 +245,18 @@ export interface IServiceCatalogRepository {
   ): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>>;
 }
 
+export interface ServiceSupportTriageFilters {
+  workspaceStatus?: 'INITIALIZING' | 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED';
+  from?: Date;
+  to?: Date;
+}
+
 export interface IServiceRequestRepository {
   /** P20-owned support triage; only distinct student references, never request details. */
   listSupportAwaitingPaymentStudents?(
     page: number,
     limit: number,
+    filters?: ServiceSupportTriageFilters,
   ): Promise<{
     items: Array<{ studentReferenceId: string }>;
     total: number;

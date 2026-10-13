@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CreateServiceCatalogItemDto,
+  ServiceSupportTriageFilters,
   CreateServiceRequestDto,
   IServiceCatalogRepository,
   IServiceRequestRepository,
@@ -719,7 +720,7 @@ export class PrismaServicePlatformRepository
     const row = await this.requests().findUnique({ where: { publicId } });
     return row ? this.mapRequest(row) : null;
   }
-  async listSupportAwaitingPaymentStudents(page: number, limit: number) {
+  async listSupportAwaitingPaymentStudents(page: number, limit: number, filters: ServiceSupportTriageFilters = {}) {
     if (
       !Number.isSafeInteger(page) ||
       page < 1 ||
@@ -729,6 +730,27 @@ export class PrismaServicePlatformRepository
       limit > 50
     )
       throw new Error('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
+    if (filters.workspaceStatus && !['INITIALIZING','ACTIVE','SUSPENDED','ARCHIVED'].includes(filters.workspaceStatus))
+      throw new Error('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
+    if ([filters.from,filters.to].some(date => date && (!(date instanceof Date) || !Number.isFinite(date.getTime()))) ||
+        (filters.from && filters.to && filters.from > filters.to))
+      throw new Error('SERVICE_SUPPORT_TRIAGE_QUERY_INVALID');
+    // Read-only owner join: P20 owns payment status; P15 owns workspace lifecycle.
+    // Filter before pagination/count, never filter a paged result in the router.
+    if (filters.workspaceStatus || filters.from || filters.to) {
+      const predicate = Prisma.sql`r."status" = ${ServiceRequestStatus.AWAITING_PAYMENT}
+        ${filters.from ? Prisma.sql`AND r."updatedAt" >= ${filters.from}` : Prisma.empty}
+        ${filters.to ? Prisma.sql`AND r."updatedAt" <= ${filters.to}` : Prisma.empty}
+        ${filters.workspaceStatus ? Prisma.sql`AND EXISTS (SELECT 1 FROM "StudentWorkspace" w WHERE w."studentReferenceId" = r."studentReferenceId" AND w."status" = ${filters.workspaceStatus})` : Prisma.empty}`;
+      const [rows,counts] = await Promise.all([
+        this.prisma.$queryRaw<Array<{studentReferenceId:string}>>(Prisma.sql`SELECT DISTINCT r."studentReferenceId" FROM "ServiceRequestRecord" r WHERE ${predicate} ORDER BY r."studentReferenceId" ASC OFFSET ${(page-1)*limit} LIMIT ${limit+1}`),
+        this.prisma.$queryRaw<Array<{total:bigint}>>(Prisma.sql`SELECT COUNT(DISTINCT r."studentReferenceId") AS "total" FROM "ServiceRequestRecord" r WHERE ${predicate}`),
+      ]);
+      const total=Number(counts[0]?.total??0n);
+      if(!Number.isSafeInteger(total))throw new Error('SERVICE_SUPPORT_TRIAGE_COUNT_OVERFLOW');
+      const hasMore=rows.length>limit;
+      return {items:rows.slice(0,limit),total,hasMore,nextPage:hasMore?page+1:null};
+    }
     const status = ServiceRequestStatus.AWAITING_PAYMENT;
     // P20 retains ownership: no student metadata, parameters, payment details
     // or fulfillment notes cross the boundary. Distinct student counts are exact.

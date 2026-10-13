@@ -56,3 +56,37 @@ describe('server-composed owner domain polling runtime, isolated adapters', () =
     await vi.advanceTimersByTimeAsync(100); expect(f.registry.success).toHaveBeenCalledOnce(); expect(f.worker.runServicesOnce).toHaveBeenCalledOnce();
   });
 });
+
+describe('server-composed P15 polling routes', () => {
+  function studentFixture() {
+    const f=fixture(false);
+    const names=['runIdentityOnce','runRoleOnce','runCatchupOnce','runLearningOnce','runCertificatesOnce','runReplayOnce','runRemindersOnce','runTrackerOwnersOnce'];
+    const student=Object.fromEntries(names.map(name=>[name,vi.fn().mockResolvedValue(undefined)]));
+    f.container.register({studentWorkspaceOutboxWorker:asValue(student)});
+    const config={getOptional:(name:string)=>name==='STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED'?true:name==='STUDENT_WORKSPACE_OUTBOX_WORKER_INTERVAL_MS'?100:undefined} as IConfigurationService;
+    return {...f,student,names,config};
+  }
+  it('starts every P15 delivery/recovery path from the runtime actually imported by server',async()=>{
+    const f=studentFixture();
+    const handle=await startPollingWorkers(f.container,f.config);
+    await vi.advanceTimersByTimeAsync(0);
+    for(let i=0;i<f.names.length;i++) {
+      const call=f.student[f.names[i]];
+      expect(call).toHaveBeenCalledOnce();
+      if(i)expect(f.student[f.names[i-1]].mock.invocationCallOrder[0]).toBeLessThan(call.mock.invocationCallOrder[0]);
+    }
+    await handle.stop();await vi.advanceTimersByTimeAsync(300);
+    for(const name of f.names)expect(f.student[name]).toHaveBeenCalledOnce();
+  });
+  it('drains a pending catchup without overlapping another cycle',async()=>{
+    const f=studentFixture();let release!:()=>void;
+    f.student.runCatchupOnce.mockImplementation(()=>new Promise<void>(resolve=>{release=resolve;}));
+    const handle=await startPollingWorkers(f.container,f.config);
+    await vi.advanceTimersByTimeAsync(300);
+    expect(f.student.runCatchupOnce).toHaveBeenCalledOnce();
+    expect(f.student.runCertificatesOnce).not.toHaveBeenCalled();
+    let drained=false;const stop=handle.stop().then(()=>{drained=true;});
+    await Promise.resolve();expect(drained).toBe(false);
+    release();await stop;expect(f.student.runCertificatesOnce).toHaveBeenCalledOnce();
+  });
+});

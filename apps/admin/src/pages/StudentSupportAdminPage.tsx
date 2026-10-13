@@ -90,6 +90,7 @@ interface StudentSupportDetail extends StudentSupportItem {
 type OwnerDomain = 'learning' | 'certificates' | 'services';
 type OwnerReadState = 'AVAILABLE' | 'DEGRADED' | 'RESTRICTED' | 'TRUNCATED';
 interface OwnerTabResponse {
+  diagnosticObservationStatus?:'RECORDED'|'NOT_RECORDED';
   hasMore:boolean;nextCursor:string|null;nextPage?:number|null;
   domain: OwnerDomain;
   status: OwnerReadState;
@@ -117,9 +118,11 @@ interface SupportApplicationPage {
   hasMore: boolean;
   nextCursor: string|null;
 }
-type TriageKind='SYNC_FAILED'|'SYNC_PENDING'|'APPLICATION_OVERDUE'|'SERVICE_AWAITING_PAYMENT';
+type TriageKind='SYNC_FAILED'|'SYNC_PENDING'|'APPLICATION_OVERDUE'|'SERVICE_AWAITING_PAYMENT'|'OWNER_DEGRADED';
 interface TriagePage {
-  items: Array<{studentReferenceId:string;status:string;version?:number;updatedAt:string|null;triageKind:TriageKind}>;
+  coverage?:'OBSERVED_OWNER_READS';
+  ownerDomain?:OwnerDomain;
+  items: Array<{studentReferenceId:string;status:string;version?:number;updatedAt:string|null;observedAt?:string|null;triageKind:TriageKind}>;
   total:number;
   hasMore:boolean;
   nextCursor?:string|null;
@@ -285,6 +288,10 @@ export function StudentSupportAdminPage() {
   const [tab, setTab] = useState<Tab>('OVERVIEW');
   const [resetTarget, setResetTarget] = useState<StudentSupportItem | null>(null);
   const [triageKind,setTriageKind]=useState<TriageKind>('SYNC_FAILED');
+  const [triageStatus,setTriageStatus]=useState('');
+  const [triageFrom,setTriageFrom]=useState('');
+  const [triageTo,setTriageTo]=useState('');
+  const [triageOwner,setTriageOwner]=useState<OwnerDomain>('learning');
   const [triagePage,setTriagePage]=useState<TriagePage|null>(null);
   const [triageLoading,setTriageLoading]=useState(false);
   const [triageError,setTriageError]=useState<string|null>(null);
@@ -423,10 +430,11 @@ export function StudentSupportAdminPage() {
     void (async()=>{
       try {
         const result=await adminApiClient.request<OwnerTabResponse>(
-          `/admin/students/support/${encodeURIComponent(selectedId)}/owner/${domain}`,
+          `/admin/students/support/${encodeURIComponent(selectedId)}/owner/${domain}`, {cache:'no-store'},
         );
         if(request!==ownerRequest.current) return;
         loadedOwnerTabs.current.add(`${selectedId}:${domain}`);
+        if(result.diagnosticObservationStatus==='NOT_RECORDED')setOwnerError(t('stu_support_observation_warning'));
         setDetail(previous=>{
           if(!previous || previous.studentReferenceId!==selectedId) return previous;
           const provenance=previous.ownerReadProvenance;
@@ -476,7 +484,7 @@ export function StudentSupportAdminPage() {
       else if(page.nextCursor)query.set('cursor',page.nextCursor);
       else return;
       const result=await adminApiClient.request<OwnerTabResponse>(
-        `/admin/students/support/${encodeURIComponent(selectedId)}/owner/${domain}?${query}`,
+        `/admin/students/support/${encodeURIComponent(selectedId)}/owner/${domain}?${query}`, {cache:'no-store'},
       );
       if(request!==ownerRequest.current)return;
       setDetail(previous=>{
@@ -517,17 +525,32 @@ export function StudentSupportAdminPage() {
     }finally{if(req===diagnosticRequest.current)setDiagnosticLoading(false);}
   }
 
+  function invalidateTriage() {
+    ++triageRequest.current;
+    setTriagePage(null);setTriageLoading(false);setTriageError(null);
+  }
+  const triageOwnerPermission = {learning:'admin:courses:manage',certificates:'admin:certificates:view',services:'admin:services:manage'}[triageOwner];
+  const triageWindowValid = (!triageFrom || Number.isFinite(new Date(triageFrom).getTime())) &&
+    (!triageTo || Number.isFinite(new Date(triageTo).getTime())) &&
+    (!triageFrom || !triageTo || new Date(triageFrom)<=new Date(triageTo)) &&
+    (!triageTo || new Date(triageTo).getTime()<=Date.now());
+  const triageReady = triageWindowValid && (triageKind!=='OWNER_DEGRADED' ||
+    Boolean(triageFrom && triageTo && hasPermission(triageOwnerPermission)));
   async function loadTriage(nextCursor?:string){
-    if(triageLoading)return;
+    if(triageLoading || !triageReady)return;
     const request=++triageRequest.current;
     setTriageLoading(true);
     setTriageError(null);
     try{
       const serviceOnly=triageKind==='SERVICE_AWAITING_PAYMENT';
       const query=new URLSearchParams(serviceOnly?{limit:'20'}:{kind:triageKind,limit:'20'});
+      if(triageStatus)query.set('status',triageStatus);
+      if(triageFrom)query.set('from',new Date(triageFrom).toISOString());
+      if(triageTo)query.set('to',new Date(triageTo).toISOString());
+      if(triageKind==='OWNER_DEGRADED')query.set('ownerDomain',triageOwner);
       if(nextCursor)query.set(serviceOnly?'page':'cursor',nextCursor);
       const path=serviceOnly?'triage/service-awaiting-payment':'triage';
-      const page=await adminApiClient.request<TriagePage>(`/admin/students/support/${path}?${query}`);
+      const page=await adminApiClient.request<TriagePage>(`/admin/students/support/${path}?${query}`, {cache:'no-store'});
       if(request!==triageRequest.current)return;
       setTriagePage(previous=>nextCursor&&previous?{
         ...page,items:[...previous.items,...page.items],
@@ -604,7 +627,7 @@ export function StudentSupportAdminPage() {
   }
   async function resetLayout(event: FormEvent) {
     event.preventDefault();
-    if (!resetTarget || reason.trim().length < 6 || resetting) return;
+    if (!resetTarget || resetTarget.status !== 'ACTIVE' || reason.trim().length < 6 || resetting) return;
     setResetting(true);
     setError(null);
     setNotice(null);
@@ -622,11 +645,11 @@ export function StudentSupportAdminPage() {
       await load();
       if (selectedId === resetTarget.studentReferenceId) await inspect(selectedId);
     } catch (cause) {
-      const message = t('stu_support_reset_error');
-      if (message.includes('STUDENT_WORKSPACE_VERSION_CONFLICT') || message.includes('تغيرت بيانات الطالب')) {
+      const message = cause instanceof Error ? cause.message : '';
+      if (message.includes('STUDENT_WORKSPACE_VERSION_CONFLICT') || message.startsWith('[409]')) {
         try {
           const current = await adminApiClient.request<StudentSupportDetail>(
-            `/admin/students/support/${encodeURIComponent(resetTarget.studentReferenceId)}`,
+            `/admin/students/support/${encodeURIComponent(resetTarget.studentReferenceId)}`, {cache:'no-store'},
           );
           setDetail(current);
           setResetTarget(current);
@@ -766,25 +789,51 @@ export function StudentSupportAdminPage() {
             }} className="mt-2 block w-full rounded-lg border p-2 text-sm">
               <option value="SYNC_FAILED">{t('stu_support_triage_failed')}</option>
               <option value="SYNC_PENDING">{t('stu_support_triage_pending')}</option>
+              <option value="OWNER_DEGRADED">{t('stu_support_triage_owner_degraded')}</option>
               <option value="APPLICATION_OVERDUE">{t('stu_support_triage_overdue')}</option>
               {hasPermission('admin:services:manage')&&<option value="SERVICE_AWAITING_PAYMENT">{t('stu_support_service_triage')}</option>}
             </select>
           </label>
-          <button type="button" disabled={triageLoading} onClick={()=>void loadTriage()}
+          <button type="button" disabled={triageLoading || !triageReady} onClick={()=>void loadTriage()}
             className="mt-auto rounded-xl border px-4 py-2 text-sm font-bold disabled:opacity-50">
             {triageLoading?t('stu_support_triage_loading'):t('stu_support_triage_show')}
           </button>
         </div>
+        <div className="flex flex-wrap gap-3">
+          <label className="text-xs">{t('stu_support_account_status')}
+            <select value={triageStatus} onChange={event=>{invalidateTriage();setTriageStatus(event.target.value);}} className="block rounded-lg border p-2">
+              <option value="">{t('stu_support_all_statuses')}</option>
+              {['INITIALIZING','ACTIVE','SUSPENDED','ARCHIVED'].map(value=><option key={value} value={value}>{statusLabel(value,language)}</option>)}
+            </select>
+          </label>
+          <label className="text-xs">{t('stu_support_triage_from')}
+            <input type="datetime-local" dir="ltr" value={triageFrom} onChange={event=>{invalidateTriage();setTriageFrom(event.target.value);}} className="block rounded-lg border p-2"/>
+          </label>
+          <label className="text-xs">{t('stu_support_triage_to')}
+            <input type="datetime-local" dir="ltr" value={triageTo} onChange={event=>{invalidateTriage();setTriageTo(event.target.value);}} className="block rounded-lg border p-2"/>
+          </label>
+          {triageKind==='OWNER_DEGRADED'&&<label className="text-xs">{t('stu_support_triage_source')}
+            <select value={triageOwner} onChange={event=>{invalidateTriage();setTriageOwner(event.target.value as OwnerDomain);}} className="block rounded-lg border p-2">
+              <option value="learning">{t('stu_support_tab_learning')}</option>
+              <option value="certificates">{t('stu_support_tab_certificates')}</option>
+              <option value="services">{t('stu_support_triage_services')}</option>
+            </select>
+          </label>}
+        </div>
+        <p className="text-xs text-slate-500">{t('stu_support_triage_window_help')}</p>
+        {triageKind==='OWNER_DEGRADED'&&<p role="status" className="text-xs text-amber-700">{t('stu_support_triage_observed_help')}</p>}
+        {!triageReady&&<p role="alert" className="text-xs text-amber-700">{t('stu_support_triage_window_required')}</p>}
         {triageError&&<p role="alert" className="text-sm text-red-700">{triageError}</p>}
         {triagePage&&<div className="space-y-2">
           <p className="text-xs text-slate-500">{t('stu_support_triage_matches')} {triagePage.total}</p>
+          {triagePage.coverage==='OBSERVED_OWNER_READS'&&<p className="text-xs text-amber-700">{t('stu_support_triage_observed_help')}</p>}
           {triagePage.items.length===0&&<p className="text-sm text-slate-500">{t('stu_support_triage_no_matches')}</p>}
           {triagePage.items.map(item=><div key={item.studentReferenceId}
             className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-slate-50 p-3">
             <div>
               <code dir="ltr" className="text-sm">{item.studentReferenceId}</code>
               <p className="mt-1 text-xs text-slate-600">
-                {statusLabel(item.status,language)} · {t('stu_support_last_updated')} {date(item.updatedAt)}
+                {statusLabel(item.status,language)} · {item.triageKind==='OWNER_DEGRADED'?t('stu_support_triage_observed_at'):t('stu_support_last_updated')} {date(item.triageKind==='OWNER_DEGRADED'?item.observedAt:item.updatedAt)}
               </p>
             </div>
             <button type="button" className="rounded-lg border px-3 py-2 text-xs font-bold"
@@ -1384,7 +1433,7 @@ export function StudentSupportAdminPage() {
             )}
             <div className="flex gap-3">
               <button
-                disabled={resetting || reason.trim().length < 6}
+                disabled={resetting || resetTarget.status !== 'ACTIVE' || reason.trim().length < 6}
                 className="rounded-xl bg-[#142B5F] px-4 py-3 font-bold text-white disabled:opacity-50"
               >
                 {resetting ? t('stu_support_saving') : t('stu_support_confirm_reset')}
