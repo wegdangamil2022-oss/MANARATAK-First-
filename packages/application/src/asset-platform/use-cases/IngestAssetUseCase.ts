@@ -8,14 +8,16 @@ import {
   AssetMetadata,
   AssetRetentionMetadata,
   AssetRetentionCategory,
-  AssetStorageZone
+  AssetStorageZone,
+  AssetLifecycleState,
+  AssetSecurityClassification,
 } from '@manaratak/domain';
 
 import {
   RequestAssetUploadLocatorDto,
   AssetUploadLocatorDto,
   RegisterQuarantinedAssetDto,
-  AssetRecordDto
+  AssetRecordDto,
 } from '../dtos/AssetDtos';
 import { AssetRecordMapper } from '../mappers/AssetRecordMapper';
 import { AssetValidator } from '../utils/AssetValidator';
@@ -23,12 +25,20 @@ import { AssetValidator } from '../utils/AssetValidator';
 export class IngestAssetUseCase {
   constructor(
     private readonly assetRepository: IAssetRecordRepository,
-    private readonly storageGateway: IAssetStorageGateway
+    private readonly storageGateway: IAssetStorageGateway,
   ) {}
 
-  public async requestUploadLocator(input: RequestAssetUploadLocatorDto): Promise<AssetUploadLocatorDto> {
+  public async requestUploadLocator(
+    input: RequestAssetUploadLocatorDto,
+  ): Promise<AssetUploadLocatorDto> {
     AssetValidator.validate(input);
+    return this.allocateUpload(input);
+  }
 
+  private async allocateUpload(
+    input: RequestAssetUploadLocatorDto,
+    extraMetadata?: Record<string, unknown>,
+  ): Promise<AssetUploadLocatorDto> {
     const id = new AssetId(input.assetId);
     const existing = await this.assetRepository.findById(id);
     if (existing) {
@@ -37,34 +47,48 @@ export class IngestAssetUseCase {
 
     const reference = new AssetReference(input.assetReference);
     const uploadGrant = this.storageGateway.generateUploadGrant
-      ? await this.storageGateway.generateUploadGrant(AssetStorageZone.QUARANTINE, {
-          assetId: id.value,
-          originalFilename: input.originalFilename,
-          mimeType: input.mimeType,
-          byteSize: input.byteSize,
-        })
+      ? await this.storageGateway.generateUploadGrant(
+          AssetStorageZone.QUARANTINE,
+          {
+            assetId: id.value,
+            originalFilename: input.originalFilename,
+            mimeType: input.mimeType,
+            byteSize: input.byteSize,
+          },
+        )
       : undefined;
-    const quarantineLocator = uploadGrant?.locator
-      ?? await this.storageGateway.generateUploadLocator(AssetStorageZone.QUARANTINE, id.value);
+    const quarantineLocator =
+      uploadGrant?.locator ??
+      (await this.storageGateway.generateUploadLocator(
+        AssetStorageZone.QUARANTINE,
+        id.value,
+      ));
 
-    const record = new AssetRecord({
-      id,
-      reference,
-      locator: quarantineLocator,
-      metadata: new AssetMetadata(
-        input.originalFilename,
-        input.mimeType,
-        input.fileExtension,
-        input.byteSize
-      ),
-      retention: new AssetRetentionMetadata(
-        input.retentionCategory ?? AssetRetentionCategory.PERMANENT,
-        input.expiresAt ? new Date(input.expiresAt) : null
-      ),
-      owner: new AssetOwnerReference(input.ownerId, input.ownerType),
-      classification: input.classification,
-      state: undefined as any
-    }, true);
+    const record = new AssetRecord(
+      {
+        id,
+        reference,
+        locator: quarantineLocator,
+        metadata: new AssetMetadata(
+          input.originalFilename,
+          input.mimeType,
+          input.fileExtension,
+          input.byteSize,
+          undefined,
+          undefined,
+          undefined,
+          extraMetadata,
+        ),
+        retention: new AssetRetentionMetadata(
+          input.retentionCategory ?? AssetRetentionCategory.PERMANENT,
+          input.expiresAt ? new Date(input.expiresAt) : null,
+        ),
+        owner: new AssetOwnerReference(input.ownerId, input.ownerType),
+        classification: input.classification,
+        state: undefined as any,
+      },
+      true,
+    );
 
     record.assignQuarantineLocator(quarantineLocator);
     await this.assetRepository.save(record);
@@ -77,17 +101,111 @@ export class IngestAssetUseCase {
       bucketName: record.locator.bucketName,
       pathKey: record.locator.pathKey,
       lifecycleState: record.state,
-      uploadGrant: uploadGrant ? {
-        uploadUrl: uploadGrant.uploadUrl,
-        method: uploadGrant.method,
-        headers: uploadGrant.headers,
-        expiresAt: uploadGrant.expiresAt.toISOString(),
-      } : undefined,
+      uploadGrant: uploadGrant
+        ? {
+            uploadUrl: uploadGrant.uploadUrl,
+            method: uploadGrant.method,
+            headers: uploadGrant.headers,
+            expiresAt: uploadGrant.expiresAt.toISOString(),
+          }
+        : undefined,
+    };
+  }
+
+  /** Server-only P14 entry; no HTTP upload route accepts this generated-artifact contract. */
+  public async requestGeneratedCertificateUpload(
+    input: RequestAssetUploadLocatorDto & {
+      bytes: Uint8Array;
+      kind: 'PDF' | 'PREVIEW' | 'QR';
+      renderFingerprint: string;
+    },
+  ): Promise<AssetUploadLocatorDto> {
+    AssetValidator.validateGeneratedCertificate(input);
+    const expected =
+      input.kind === 'QR'
+        ? AssetSecurityClassification.PUBLIC
+        : AssetSecurityClassification.INTERNAL;
+    if (
+      input.classification !== expected ||
+      input.retentionCategory !== AssetRetentionCategory.PERMANENT ||
+      input.expiresAt !== undefined
+    )
+      throw new Error('CERTIFICATE_GENERATED_UPLOAD_POLICY_INVALID');
+    return this.allocateUpload(input, {
+      certificateGenerated: {
+        source: 'Phase14',
+        kind: input.kind,
+        renderFingerprint: input.renderFingerprint,
+      },
+      ...(input.kind === 'QR'
+        ? {
+            rights: {
+              rightsSource:
+                'Original MANARATAK-generated verification QR graphic',
+              attribution: 'MANARATAK',
+              usageScope: 'PUBLIC',
+              publicationPolicy: 'MANDATORY',
+            },
+          }
+        : {}),
+    });
+  }
+  /** Retry only an unverified generated upload, without allocating another EAP identity. */
+  public async resumeGeneratedUpload(
+    input: RequestAssetUploadLocatorDto & {
+      bytes: Uint8Array;
+      kind: 'PDF' | 'PREVIEW' | 'QR';
+      renderFingerprint: string;
+    },
+  ): Promise<AssetUploadLocatorDto> {
+    AssetValidator.validateGeneratedCertificate(input);
+    const record = await this.assetRepository.findById(
+      new AssetId(input.assetId),
+    );
+    if (
+      !record ||
+      record.reference.value !== input.assetReference ||
+      record.owner.ownerType !== 'Certificate' ||
+      record.owner.ownerId !== input.ownerId ||
+      input.ownerType !== 'Certificate' ||
+      record.state !== AssetLifecycleState.INITIATED ||
+      record.uploadVerification ||
+      record.metadata.mimeType !== input.mimeType ||
+      record.metadata.byteSize !== input.byteSize ||
+      record.classification !== input.classification
+    )
+      throw new Error('CERTIFICATE_UPLOAD_RESUME_INVALID');
+    if (!this.storageGateway.refreshUploadGrant)
+      throw new Error('EAP_GENERATED_ARTIFACT_UPLOAD_REFRESH_REQUIRED');
+    const grant = await this.storageGateway.refreshUploadGrant(record.locator, {
+      assetId: record.id.value,
+      originalFilename: record.metadata.originalFilename,
+      mimeType: record.metadata.mimeType,
+      byteSize: record.metadata.byteSize,
+    });
+    if (grant.locator.value !== record.locator.value)
+      throw new Error('CERTIFICATE_UPLOAD_RESUME_LOCATOR_CHANGED');
+    return {
+      assetId: record.id.value,
+      assetReference: record.reference.value,
+      storageLocator: record.locator.value,
+      storageZone: record.locator.storageZone,
+      bucketName: record.locator.bucketName,
+      pathKey: record.locator.pathKey,
+      lifecycleState: record.state,
+      uploadGrant: {
+        uploadUrl: grant.uploadUrl,
+        method: grant.method,
+        headers: grant.headers,
+        expiresAt: grant.expiresAt.toISOString(),
+      },
     };
   }
 
   /** Legacy compatibility allocation; uploaded bytes still require finalizeUploadedAsset. */
-  public async registerQuarantinedAsset(input: RegisterQuarantinedAssetDto): Promise<AssetRecordDto> {
+  public async registerQuarantinedAsset(
+    input: RegisterQuarantinedAssetDto,
+  ): Promise<AssetRecordDto> {
     AssetValidator.validate(input);
 
     const id = new AssetId(input.assetId);
@@ -97,26 +215,32 @@ export class IngestAssetUseCase {
     }
 
     const reference = new AssetReference(input.assetReference);
-    const initialLocator = await this.storageGateway.generateUploadLocator(AssetStorageZone.QUARANTINE, id.value);
+    const initialLocator = await this.storageGateway.generateUploadLocator(
+      AssetStorageZone.QUARANTINE,
+      id.value,
+    );
 
-    const record = new AssetRecord({
-      id,
-      reference,
-      locator: initialLocator,
-      metadata: new AssetMetadata(
-        input.originalFilename,
-        input.mimeType,
-        input.fileExtension,
-        input.byteSize
-      ),
-      retention: new AssetRetentionMetadata(
-        input.retentionCategory ?? AssetRetentionCategory.PERMANENT,
-        input.expiresAt ? new Date(input.expiresAt) : null
-      ),
-      owner: new AssetOwnerReference(input.ownerId, input.ownerType),
-      classification: input.classification,
-      state: undefined as any
-    }, true);
+    const record = new AssetRecord(
+      {
+        id,
+        reference,
+        locator: initialLocator,
+        metadata: new AssetMetadata(
+          input.originalFilename,
+          input.mimeType,
+          input.fileExtension,
+          input.byteSize,
+        ),
+        retention: new AssetRetentionMetadata(
+          input.retentionCategory ?? AssetRetentionCategory.PERMANENT,
+          input.expiresAt ? new Date(input.expiresAt) : null,
+        ),
+        owner: new AssetOwnerReference(input.ownerId, input.ownerType),
+        classification: input.classification,
+        state: undefined as any,
+      },
+      true,
+    );
 
     record.assignQuarantineLocator(initialLocator);
     await this.assetRepository.save(record);

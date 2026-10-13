@@ -38,7 +38,7 @@ const templateTransitions: Record<CertificateTemplateStatus, CertificateTemplate
 };
 
 export class PrismaCertificateRepository implements ICertificateRepository {
-  public constructor(private readonly prisma: PrismaClient) {}
+  public constructor(private readonly prisma: PrismaClient, private readonly verificationPolicy?: { read(): Promise<{retentionDays: number | null}> }) {}
   private get db(): any { return this.prisma as any; }
 
   private readonly templateInclude = {
@@ -49,8 +49,8 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async createIssuer(data: CreateCertificateIssuerDto, context: CertificateMutationContext): Promise<CertificateIssuerDto> {
     return this.db.$transaction(async (tx: any) => {
-      const issuer = await tx.certificateIssuer.create({ data: { ...data, status: 'PENDING_APPROVAL', metadata: json({ ...data.metadata, trust: { createdBy: context.actorId, approvedBy: null } }) } });
-      await this.appendGovernanceMutation(tx, 'CertificateIssuer', issuer.id, 'CERTIFICATE_ISSUER_CREATED', context, { issuerCode: issuer.code }, 'CertificateIssuerCreated');
+      const issuer = await tx.certificateIssuer.create({ data: { ...data, status: 'PENDING_APPROVAL', metadata: json({ ...data.metadata, authorityVersion: 1, trust: { createdBy: context.actorId, approvedBy: null } }) } });
+      await this.appendGovernanceMutation(tx, 'CertificateIssuer', issuer.id, 'CERTIFICATE_ISSUER_CREATED', context, { issuerCode: issuer.code, authorityVersion: 1, before: null, after: this.issuerAuthoritySnapshot(issuer) }, 'CertificateIssuerCreated');
       return this.issuer(issuer);
     });
   }
@@ -76,8 +76,10 @@ export class PrismaCertificateRepository implements ICertificateRepository {
         data = { ...data, status: 'PENDING_APPROVAL' };
       }
       const { metadata: _untrustedMetadata, ...fields } = data;
+      const authorityVersion = Number(current.metadata?.authorityVersion ?? 1) + 1;
+      metadata = { ...metadata, authorityVersion };
       const issuer = await tx.certificateIssuer.update({ where: { id }, data: { ...fields, metadata: json(metadata) } });
-      await this.appendGovernanceMutation(tx, 'CertificateIssuer', issuer.id, 'CERTIFICATE_ISSUER_UPDATED', context, { issuerCode: issuer.code }, 'CertificateIssuerUpdated');
+      await this.appendGovernanceMutation(tx, 'CertificateIssuer', issuer.id, 'CERTIFICATE_ISSUER_UPDATED', context, { issuerCode: issuer.code, authorityVersion, before: this.issuerAuthoritySnapshot(current), after: this.issuerAuthoritySnapshot(issuer) }, 'CertificateIssuerUpdated');
       return this.issuer(issuer);
     });
   }
@@ -94,6 +96,16 @@ export class PrismaCertificateRepository implements ICertificateRepository {
     return (await this.db.certificateIssuer.findMany({ orderBy: [{ status: 'asc' }, { name: 'asc' }] })).map((row: any) => this.issuer(row));
   }
 
+  public async templateReview(id:string) {
+    return this.db.$transaction(async(tx:any)=>{
+      const row=await tx.certificateTemplate.findUnique({where:{id},include:{currentVersion:true}});
+      if(!row?.currentVersion)throw new Error('CERTIFICATE_TEMPLATE_NOT_FOUND');
+      const pinned=row.currentVersion.metadata?.previousVersionId;
+      const previous=pinned ? await tx.certificateTemplateVersion.findFirst({where:{id:pinned,templateId:id}}) : await tx.certificateTemplateVersion.findFirst({where:{templateId:id,id:{not:row.currentVersionId},createdAt:{lte:row.currentVersion.createdAt}},orderBy:[{createdAt:'desc'},{id:'desc'}]});
+      if(pinned && !previous)throw new Error('CERTIFICATE_TEMPLATE_HISTORY_INVALID');
+      return {templateId:id,currentVersionId:row.currentVersionId,status:row.status as CertificateTemplateStatus,current:this.templateVersion(row.currentVersion),previous:previous?this.templateVersion(previous):null};
+    },{isolationLevel:'RepeatableRead'});
+  }
   public async createTemplate(data: CreateCertificateTemplateDto, context: CertificateMutationContext): Promise<CertificateTemplateDto> {
     return this.db.$transaction(async (tx: any) => {
       const issuer = await this.requireActiveIssuer(tx, data.issuerId);
@@ -109,7 +121,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
         },
       });
       const version = await tx.certificateTemplateVersion.create({
-        data: this.templateVersionCreateData(template.id, data.templateVersion, CertificateTemplateStatus.DRAFT, data, context.actorId),
+        data: this.templateVersionCreateData(template.id, data.templateVersion, CertificateTemplateStatus.DRAFT, {...data,metadata:{...data.metadata,previousVersionId:null}}, context.actorId),
       });
       const updated = await tx.certificateTemplate.update({
         where: { id: template.id },
@@ -143,6 +155,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
       const changed = after.findIndex((part, index) => part !== before[index]);
       if (changed < 0 || after[changed] < before[changed]) throw new Error('CERTIFICATE_TEMPLATE_VERSION_MUST_ADVANCE');
       const versionInput = this.mergeTemplateVersion(current.currentVersion, data, issuerId);
+      versionInput.metadata = {...versionInput.metadata, previousVersionId: current.currentVersionId};
       const version = await tx.certificateTemplateVersion.create({
         data: this.templateVersionCreateData(current.id, versionNumber, CertificateTemplateStatus.DRAFT, versionInput, context.actorId),
       });
@@ -217,6 +230,34 @@ export class PrismaCertificateRepository implements ICertificateRepository {
     return (await this.db.certificateTemplate.findMany({ orderBy: [{ status: 'asc' }, { updatedAt: 'desc' }], include: this.templateInclude })).map((row: any) => this.template(row));
   }
 
+  public async retryRender(id:string,expectedFingerprint:string,expectedUpdatedAt:string,context:CertificateMutationContext):Promise<void> {
+    await this.db.$transaction(async(tx:any)=>{
+      await tx.$queryRaw`SELECT id FROM "Certificate" WHERE id=${id} FOR UPDATE`;
+      const row=await tx.certificate.findUnique({where:{id}});
+      if(!row || row.status!=='ACTIVE' || row.expiresAt && row.expiresAt<=new Date())throw new Error('CERTIFICATE_ARTIFACT_STATE_INVALID');
+      if(row.updatedAt.toISOString()!==expectedUpdatedAt || row.metadata?.renderJob?.fingerprint!==expectedFingerprint)throw new Error('CERTIFICATE_RENDER_STALE');
+      if(row.metadata?.renderJob?.state!=='RECOVERY_REQUIRED')throw new Error('CERTIFICATE_RENDER_RETRY_STATE_INVALID');
+      if(!context.reason?.trim())throw new Error('CERTIFICATE_RENDER_RETRY_REASON_REQUIRED');
+      await tx.certificate.update({where:{id},data:{metadata:json({...row.metadata,renderJob:{...row.metadata.renderJob,attempts:0,state:'RETRY_QUEUED',updatedAt:new Date().toISOString()}})}});
+      await this.appendMutation(tx,id,'RENDER_RETRY_REQUESTED',context.actorId,context.reason,context.correlationId,{certificateId:id,renderFingerprint:expectedFingerprint},'CertificateRenderRequested');
+    });
+  }
+  public async listAbandonedRenderJobs(limit: number) {
+    if(!Number.isInteger(limit) || limit<1 || limit>50)throw new Error('CERTIFICATE_QUERY_INVALID');
+    const rows=await this.db.$queryRaw`SELECT id, metadata->'renderJob'->>'fingerprint' AS fingerprint, "certificatePdfAssetId", "previewImageAssetId", "verificationQrAssetId"
+      FROM "Certificate" WHERE status IN ('REVOKED','REISSUED','EXPIRED','ARCHIVED') AND metadata->'renderJob'->>'fingerprint' ~ '^[a-f0-9]{64}$'
+      AND metadata->'renderJob'->>'state' IS DISTINCT FROM 'COMPLETE'
+      ORDER BY COALESCE(metadata->'renderJob'->>'orphanCleanupAt',''), id LIMIT ${limit}`;
+    return rows.map((row:any)=>({id:row.id,fingerprint:row.fingerprint,attachedIds:[row.certificatePdfAssetId,row.previewImageAssetId,row.verificationQrAssetId].filter((value:unknown)=>typeof value==='string')}));
+  }
+  public async markRenderCleanup(id:string,fingerprint:string):Promise<void> {
+    await this.db.$transaction(async(tx:any)=>{
+      await tx.$queryRaw`SELECT id FROM "Certificate" WHERE id=${id} FOR UPDATE`;
+      const row=await tx.certificate.findUnique({where:{id}});
+      if(!row || row.status==='ACTIVE' || row.metadata?.renderJob?.fingerprint!==fingerprint)throw new Error('CERTIFICATE_ARTIFACT_CLEANUP_CONFLICT');
+      await tx.certificate.update({where:{id},data:{metadata:json({...row.metadata,renderJob:{...row.metadata.renderJob,orphanCleanupAt:new Date().toISOString()}})}});
+    });
+  }
   public async checkpointRender(id:string,fingerprint:string,stage:'BEGIN'|'PDF'|'PREVIEW'|'QR'|'FAILED'|'COMPLETE',assetId?:string): Promise<Record<string,string>> {
     return this.db.$transaction(async(tx:any)=>{
       await tx.$queryRaw`SELECT id FROM "Certificate" WHERE id = ${id} FOR UPDATE`;
@@ -371,7 +412,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
       if(page !== 1 || !Number.isInteger(pageSize) || pageSize<1 || pageSize>100) throw new Error('CERTIFICATE_QUERY_INVALID');
       const anchor=await this.db.certificate.findFirst({where:{id:cursor,studentReferenceId},select:{id:true,issuedAt:true}});
       if(!anchor) throw new Error('CERTIFICATE_CURSOR_INVALID');
-      return (await this.db.certificate.findMany({where:{studentReferenceId,OR:[{issuedAt:{lt:anchor.issuedAt}},{issuedAt:anchor.issuedAt,id:{lt:anchor.id}}]},orderBy:[{issuedAt:'desc'},{id:'desc'}],take:pageSize})).map((row:any)=>this.certificate(row));
+      return (await this.db.certificate.findMany({where:{studentReferenceId,OR:[{issuedAt:{lt:anchor.issuedAt}},{issuedAt:anchor.issuedAt,id:{lt:anchor.id}}]},orderBy:[{issuedAt:'desc'},{id:'desc'}],take:pageSize})).map((row:any)=>this.certificateRead(row));
     }
     const result = await this.list({ studentReferenceId, page, pageSize });
     return result.data;
@@ -382,12 +423,13 @@ export class PrismaCertificateRepository implements ICertificateRepository {
     const page = query.page ?? 1;
     const pageSize = Math.min(100, Math.max(1, query.pageSize ?? 25));
     const search = query.search?.trim();
+    const asOf=new Date();
     const where: any = {
       ...(query.issuerId ? { issuerId: query.issuerId } : {}),
       ...(query.studentReferenceId ? { studentReferenceId: query.studentReferenceId } : {}),
       ...(query.templateVersionId ? { templateVersionId: query.templateVersionId } : {}),
       ...(query.issuedFrom || query.issuedTo ? { issuedAt: { ...(query.issuedFrom ? { gte: new Date(query.issuedFrom) } : {}), ...(query.issuedTo ? { lte: new Date(query.issuedTo) } : {}) } } : {}),
-      ...(query.status === CertificateStatus.EXPIRED ? { OR: [{ status: CertificateStatus.EXPIRED }, { status: CertificateStatus.ACTIVE, expiresAt: {lte:new Date()} }] } : query.status === CertificateStatus.ACTIVE ? {status:CertificateStatus.ACTIVE, OR:[{expiresAt:null},{expiresAt:{gt:new Date()}}]} : query.status ? {status:query.status} : {}),
+      ...(query.status === CertificateStatus.EXPIRED ? { OR: [{ status: CertificateStatus.EXPIRED }, { status: CertificateStatus.ACTIVE, expiresAt: {lte:asOf} }] } : query.status === CertificateStatus.ACTIVE ? {status:CertificateStatus.ACTIVE, OR:[{expiresAt:null},{expiresAt:{gt:asOf}}]} : query.status ? {status:query.status} : {}),
       ...(query.templateId ? { templateId: query.templateId } : {}),
       ...(search ? { AND: [{ OR: [
         { serialNumber: { contains: search, mode: 'insensitive' } },
@@ -401,17 +443,18 @@ export class PrismaCertificateRepository implements ICertificateRepository {
       this.db.certificate.findMany({ where, orderBy: [{ issuedAt: 'desc' }, { id: 'desc' }], skip: (page - 1) * pageSize, take: pageSize }),
       this.db.certificate.count({ where }),
     ]);
-    return { data: rows.map((row: any) => this.certificate(row)), total, page, pageSize };
+    return { data: rows.map((row: any) => this.certificateRead(row,asOf)), total, page, pageSize };
   }
 
   public async analytics(): Promise<CertificateAnalyticsDto> {
-    const soon = new Date(Date.now() + 30 * 86400000);
+    const asOf=new Date();
+    const soon = new Date(asOf.getTime() + 30 * 86400000);
     const [total, active, revoked, archived, expiringSoon, templates, verifications] = await Promise.all([
       this.db.certificate.count(),
-      this.db.certificate.count({ where: { status: CertificateStatus.ACTIVE } }),
+      this.db.certificate.count({ where: { status: CertificateStatus.ACTIVE, OR: [{ expiresAt: null }, { expiresAt: { gt: asOf } }] } }),
       this.db.certificate.count({ where: { status: CertificateStatus.REVOKED } }),
       this.db.certificate.count({ where: { status: CertificateStatus.ARCHIVED } }),
-      this.db.certificate.count({ where: { status: CertificateStatus.ACTIVE, expiresAt: { lte: soon, gte: new Date() } } }),
+      this.db.certificate.count({ where: { status: CertificateStatus.ACTIVE, expiresAt: { lte: soon, gte: asOf } } }),
       this.db.certificateTemplate.count({ where: { status: CertificateTemplateStatus.ACTIVE } }),
       this.db.certificateVerificationLog.count(),
     ]);
@@ -470,11 +513,14 @@ export class PrismaCertificateRepository implements ICertificateRepository {
   }
 
   public async expireDue(asOf: Date, actorId: string, correlationId?: string | null): Promise<number> {
+    const retentionDays = (await this.verificationPolicy?.read())?.retentionDays ?? null;
     return this.db.$transaction(async (tx: any) => {
       const selected = await tx.$queryRaw`SELECT id FROM "Certificate" WHERE status = 'ACTIVE' AND "validityPolicy" IN ('EXPIRING','RENEWABLE') AND "expiresAt" <= ${asOf} ORDER BY "expiresAt", id LIMIT 100 FOR UPDATE SKIP LOCKED`;
       const due = selected.length ? await tx.certificate.findMany({where:{id:{in:selected.map((row: {id:string})=>row.id)}}}) : [];
-      const oldLogs = await tx.certificateVerificationLog.findMany({where:{occurredAt:{lt:new Date(asOf.getTime()-30*86400000)}},select:{id:true},take:100,orderBy:{occurredAt:'asc'}});
-      if(oldLogs.length) await tx.certificateVerificationLog.deleteMany({where:{id:{in:oldLogs.map((row:{id:string})=>row.id)}}});
+      if (retentionDays !== null) {
+        const oldLogs = await tx.certificateVerificationLog.findMany({where:{occurredAt:{lt:new Date(asOf.getTime()-retentionDays*86400000)}},select:{id:true},take:100,orderBy:[{occurredAt:'asc'},{id:'asc'}]});
+        if(oldLogs.length) await tx.certificateVerificationLog.deleteMany({where:{id:{in:oldLogs.map((row:{id:string})=>row.id)}}});
+      }
 
       let count = 0;
       for (const current of due) {
@@ -535,6 +581,8 @@ export class PrismaCertificateRepository implements ICertificateRepository {
     if (!template || template.status !== CertificateTemplateStatus.ACTIVE) throw new Error('ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED');
     if (!version || version.templateId !== template.id || template.currentVersionId !== version.id || version.versionNumber !== data.templateVersion || version.status !== CertificateTemplateStatus.ACTIVE) throw new Error('ACTIVE_CERTIFICATE_TEMPLATE_VERSION_REQUIRED');
     if (!issuer || issuer.status !== 'ACTIVE' || (issuer.issuerType !== 'MANARATAK' && !issuer.metadata?.trust?.approvedBy) || version.issuerId !== issuer.id || template.issuerId !== issuer.id) throw new Error('ACTIVE_ACCREDITED_CERTIFICATE_ISSUER_REQUIRED');
+    const authorityVersion=(data.metadata?.signedEnvelope as {issuer?:{authorityVersion?:number}}|undefined)?.issuer?.authorityVersion;
+    if(authorityVersion!==undefined && authorityVersion!==Number(issuer.metadata?.authorityVersion ?? 1))throw new Error('CERTIFICATE_ISSUER_STALE');
     if (issuer.signingKeyReference !== data.signingKeyReference) throw new Error('CERTIFICATE_ISSUER_SIGNING_KEY_MISMATCH');
     await this.assertFrozenVisualAssets(tx, version);
   }
@@ -773,6 +821,22 @@ export class PrismaCertificateRepository implements ICertificateRepository {
     };
   }
 
+  public async listIssuerHistory(id: string, cursor?: string, limit = 25) {
+    if (!Number.isInteger(limit) || limit < 1 || limit > 50) throw new Error('CERTIFICATE_QUERY_INVALID');
+    const where = {targetId: id, targetType: 'CertificateIssuer', category: 'CERTIFICATE_GOVERNANCE'};
+    const anchor = cursor ? await this.db.auditRecord.findFirst({where: {...where, id: cursor}, select: {id:true,timestamp:true}}) : null;
+    if (cursor && !anchor) throw new Error('CERTIFICATE_CURSOR_INVALID');
+    return this.db.auditRecord.findMany({where: {...where, ...(anchor ? {OR:[{timestamp:{lt:anchor.timestamp}},{timestamp:anchor.timestamp,id:{lt:anchor.id}}]} : {})},
+      select:{id:true,action:true,actorId:true,timestamp:true,contextMetadata:true},orderBy:[{timestamp:'desc'},{id:'desc'}],take:limit});
+  }
+  private issuerAuthoritySnapshot(row: any) {
+    const fields = ['code','name','issuerType','status','universityId','organizationId','issuerLogoAssetId','signingKeyReference','accreditationAuthority','accreditationReference'];
+    return {...Object.fromEntries(fields.map(key=>[key,row[key] ?? null])),authorityVersion:row.metadata?.authorityVersion ?? 1,trust:row.metadata?.trust ?? null};
+  }
+  private certificateRead(row: any,asOf=new Date()): CertificateDto {
+    const value = this.certificate(row);
+    return value.status === CertificateStatus.ACTIVE && value.expiresAt && new Date(value.expiresAt) <= asOf ? {...value,status:CertificateStatus.EXPIRED} : value;
+  }
   private certificate(row: any): CertificateDto {
     return { ...row, status: row.status as CertificateStatus, skills: Array.isArray(row.skills) ? row.skills : [], competencies: Array.isArray(row.competencies) ? row.competencies : [], metadata: row.metadata as Record<string, unknown> } as CertificateDto;
   }

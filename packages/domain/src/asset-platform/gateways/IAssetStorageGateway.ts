@@ -42,6 +42,7 @@ export interface AssetLifecycleReconciliationProof {
 export interface IAssetStorageGateway {
   verifyRenditionRelation?(source: AssetStorageLocator, rendition: AssetStorageLocator, expected: {sourceSha256:string;checksumSha256:string}): Promise<{sourceSha256:string;checksumSha256:string;byteSize:number;mimeType:string;width:number;height:number;verifiedAt:string}>;
   generateUploadLocator(zone?: AssetStorageZone, assetId?: string): Promise<AssetStorageLocator>;
+  refreshUploadGrant?(locator:AssetStorageLocator,request:AssetUploadGrantRequest):Promise<AssetUploadGrant>;
   generateUploadGrant?(zone: AssetStorageZone, request: AssetUploadGrantRequest): Promise<AssetUploadGrant>;
   generateDeliveryGrant?(locator: AssetStorageLocator, expiresInSeconds: number): Promise<AssetDeliveryGrant>;
   verifyUploadedObject?(locator: AssetStorageLocator, request: AssetUploadVerificationRequest): Promise<VerifiedAssetUpload>;

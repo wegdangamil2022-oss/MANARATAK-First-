@@ -116,6 +116,10 @@ export function CertificateDetailPage() {
   useEffect(() => { void load(); return ()=>{++requestVersion.current;}; }, [load]);
 
   const integrity = verification?.integrityVerified === true;
+  const [renderRetryReason,setRenderRetryReason]=useState('');
+  const [renderRetryBusy,setRenderRetryBusy]=useState(false);
+  const renderJob=certificate?.metadata?.renderJob as {state?:string;fingerprint?:string}|undefined;
+  const retryRendering=async()=>{if(!certificate || !renderJob?.fingerprint)return;setRenderRetryBusy(true);setError('');try{await adminApiClient.request(`/admin/certificates/${certificate.id}/render-retry`,{method:'POST',body:JSON.stringify({expectedFingerprint:renderJob.fingerprint,expectedUpdatedAt:certificate.updatedAt,reason:renderRetryReason})});setRenderRetryReason('');await load();}catch(e){setError(e instanceof Error?e.message:copy('تعذر استئناف تجهيز الملفات'));}finally{setRenderRetryBusy(false);}};
   const download = async () => {
     if (!certificate) return; setDownloadBusy(true); setError('');
     try { const grant = await adminApiClient.request<{url:string}>(`/admin/certificates/${certificate.id}/artifacts/pdf/delivery-grant`,{method:'POST',body:'{}'});
@@ -164,7 +168,8 @@ export function CertificateDetailPage() {
         </div>
       </header>
 
-      {error ? <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-bold text-rose-800">{error}</div> : null}
+      {renderJob?.state==='RECOVERY_REQUIRED' && certificate.status==='ACTIVE' && hasPermission('admin:certificates:lifecycle:manage')?<section className="rounded border p-4"><p>{copy('تعثر تجهيز الملفات؛ يمكن استئناف المحاولة مع الحفاظ على الأصول المكتملة.')}</p><label>{copy('سبب الاستئناف')}<input minLength={8} maxLength={2000} value={renderRetryReason} onChange={event=>setRenderRetryReason(event.target.value)} className="block rounded border p-2" /></label><button disabled={renderRetryBusy || !integrity || renderRetryReason.trim().length<8} onClick={()=>void retryRendering()}>{copy('استئناف تجهيز الملفات')}</button></section>:null}
+      {error ? <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-bold text-rose-800">{copy(error)}</div> : null}
 
       <section className="grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
         <div>{template ? <CertificatePreview template={template} certificate={certificate} /> : <div className="rounded-2xl border border-dashed bg-white p-10 text-center text-slate-400">{copy("النسخة التاريخية للقالب غير متاحة للمعاينة، لكن سجل الشهادة محفوظ.")}</div>}</div>
@@ -182,8 +187,8 @@ export function CertificateDetailPage() {
             <Info label={copy("السياسة")} value={certificate.validityPolicy} />
             <Info label={copy("الانتهاء")} value={certificate.expiresAt ? formatDateTime(certificate.expiresAt, language) : copy("دائمة")} />
             <Info label={copy("القالب")} value={`${certificate.templateId} · v${certificate.templateVersion}`} />
-            <Info label="Signing Key" value={certificate.signingKeyReference || 'Runtime KMS pending'} />
-            <Info label="PDF Asset" value={certificate.certificatePdfAssetId || 'Awaiting EAP renderer'} />
+            <Info label={copy("مرجع مفتاح التوقيع")} value={certificate.signingKeyReference || copy('مزوّد التوقيع غير متحقق')} />
+            <Info label={copy("ملف الشهادة")} value={certificate.certificatePdfAssetId || copy('ملف الشهادة قيد التجهيز')} />
           </article>
           <article className="rounded-2xl border bg-white p-5 shadow-sm">
             <h2 className="mb-3 font-black">{copy("المهارات والنتيجة")}</h2>

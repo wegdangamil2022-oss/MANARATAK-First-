@@ -5,6 +5,7 @@ export const ASSET_REFERENCE_OWNER_GUARDS = [
   { table: 'AssetRenditionRecord', fields: ['assetId','generatedAssetId'], attachments: false, seo: false },
   { table: 'Course', fields: ['thumbnailAssetId'], attachments: false, seo: false },
   { table: 'CourseLessonAsset', fields: ['assetId'], attachments: false, seo: false },
+  { table: 'CertificateAuthorityDelegation', fields: ['evidenceAssetId'], attachments: false, seo: false },
   { table: 'CertificateIssuer', fields: ['issuerLogoAssetId'], attachments: false, seo: false },
   { table: 'CertificateTemplateVersion', fields: ['logoAssetId', 'sealAssetId', 'signatureAssetId', 'designAssetId'], attachments: false, seo: false },
   { table: 'Certificate', fields: ['certificatePdfAssetId', 'previewImageAssetId', 'verificationQrAssetId', 'signatureAssetId'], attachments: false, seo: false },
@@ -40,13 +41,15 @@ export async function assertAssetReferenceIntegrityInstalled(prisma: Pick<Prisma
     FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid
       JOIN pg_namespace n ON n.oid = c.relnamespace JOIN pg_proc p ON p.oid = t.tgfoid
     WHERE n.nspname = current_schema() AND NOT t.tgisinternal
-      AND t.tgname IN ('eap_asset_reference_owner', 'eap_asset_reference_lifecycle', 'eap_asset_restore_barrier', 'eap_asset_archive_barrier')
+      AND t.tgname IN ('eap_asset_reference_owner', 'eap_asset_reference_lifecycle', 'eap_asset_restore_barrier', 'eap_asset_archive_barrier', 'eap_asset_lifecycle_certificate_delegation')
   `;
   const available = (table: string, name: string, type: number, fn: string, args: string, columns: readonly string[]) =>
     guards.some(guard => guard.tableName === table && guard.triggerName === name &&
       ['O', 'A'].includes(guard.enabled) && guard.replicationRole === 'origin' && guard.type === type &&
       guard.functionName === fn && guard.argumentsHex === args &&
       JSON.stringify(guard.columns) === JSON.stringify([...columns].sort()));
+  if (!available('AssetRecord', 'eap_asset_lifecycle_certificate_delegation', 27,
+    'manaratak_guard_certificate_delegation_evidence_lifecycle', '', ['lifecycleState'])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   if (!available('AssetRecord', 'eap_asset_reference_lifecycle', 27,
     'manaratak_protect_asset_references', '', [])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   if (!available('AssetRecord', 'eap_asset_restore_barrier', 27,

@@ -8133,6 +8133,71 @@
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
       "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
       "source": "apps/api/src/presentation/api/router/UniversityProgramWorkspaceRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/certificates/issuers/:id/delegations",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:issuers:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/certificates/delegations/:id/review",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:issuers:approve"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/certificates/delegations/:id/evidence-delivery-grant",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:issuers:manage",
+        "admin:certificates:issuers:approve"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/certificates/:id/render-retry",
+      "owner": "CertificateAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:certificates:lifecycle:manage"
+      ],
+      "conditionalPermissionReview": true,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
     }
   ],
   "knownRouteCollisions": [
@@ -8186,5 +8251,16 @@
     "baseCommit": "fce81dbb",
     "newUniversityProgramHandlers": 2,
     "sourceOnly": true
+  },
+  "section14SourceRemediation": {
+    "date": "2026-10-13",
+    "status": "SOURCE_DEFINED_NOT_TESTED",
+    "scope": "Certificate delegation workflow and guarded render recovery; no audit check rerun",
+    "addedRoutes": [
+      "/admin/certificates/issuers/:id/delegations",
+      "/admin/certificates/delegations/:id/review",
+      "/admin/certificates/delegations/:id/evidence-delivery-grant",
+      "/admin/certificates/:id/render-retry"
+    ]
   }
 }

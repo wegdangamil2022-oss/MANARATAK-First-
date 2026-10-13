@@ -1,0 +1,48 @@
+name: Certificates isolated runtime verification (manual)
+on:
+  workflow_dispatch:
+    inputs:
+      run_isolated_verification:
+        description: 'Run deferred certificate checks on a fresh disposable database and local provider doubles'
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+jobs:
+  isolated:
+    if: ${{ inputs.run_isolated_verification }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: certificate_fixture
+          POSTGRES_PASSWORD: certificate_fixture_only
+          POSTGRES_DB: manaratak_certificate_verification
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U certificate_fixture -d manaratak_certificate_verification"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      NODE_ENV: test
+      CERTIFICATE_RUNTIME_ISOLATED: '1'
+      DATABASE_URL: postgresql://certificate_fixture:certificate_fixture_only@127.0.0.1:5432/manaratak_certificate_verification
+      DIRECT_URL: postgresql://certificate_fixture:certificate_fixture_only@127.0.0.1:5432/manaratak_certificate_verification
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run db:generate
+      - name: Fresh database guard, isolated migrations and deferred certificate checks
+        run: node scripts/certificates/verify-isolated-runtime.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: certificates-isolated-${{ github.sha }}
+          path: certificate-isolated-results.json
+          if-no-files-found: warn

@@ -1,3 +1,4 @@
+import { assertCertificateVisualImage } from './CertificateVisualImagePolicy';
 import { createHash } from 'node:crypto';
 import { AssetId, AssetLifecycleState, IAssetRecordRepository } from '@manaratak/domain';
 import { ProcessAssetLifecycleUseCase } from '@manaratak/application';
@@ -43,6 +44,7 @@ export class EapCertificateVisualAssetResolver {
     const bytes = Buffer.concat(chunks);
     if (!bytes.byteLength || createHash('sha256').update(bytes).digest('hex') !== expectedHash)
       throw new Error('CERTIFICATE_VISUAL_ASSET_HASH_MISMATCH');
+    assertCertificateVisualImage(bytes,asset.metadata.mimeType);
     return { bytes, mimeType: asset.metadata.mimeType };
   }
 }

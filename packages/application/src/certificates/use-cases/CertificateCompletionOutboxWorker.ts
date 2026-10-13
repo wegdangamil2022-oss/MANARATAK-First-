@@ -18,6 +18,7 @@ export class CertificateCompletionOutboxWorker {
     private readonly options: CertificateCompletionOutboxWorkerOptions = {},
     private readonly maintenance?: {expireDue(asOf:Date,actor:string):Promise<number>},
     private readonly artifactDispatcher?: ITransactionalOutboxDispatcher,
+    private readonly artifactRecovery?: {sweep():Promise<void>},
   ) {}
 
   public async runOnce(workerId: string): Promise<OutboxDispatchResult> {
@@ -35,6 +36,7 @@ export class CertificateCompletionOutboxWorker {
     if (this.maintenance) await this.maintenance.expireDue(new Date(), workerId);
     if(!this.artifactDispatcher) return dispatched;
     const artifacts=await this.artifactDispatcher.dispatchBatch({workerId:workerId.trim()+':artifacts',batchSize:this.options.batchSize??25,claimDurationMs:this.options.claimDurationMs??30000,maxAttempts:this.options.maxAttempts??8,baseBackoffMs:this.options.baseBackoffMs??1000,maxBackoffMs:this.options.maxBackoffMs??60000,domain:'CERTIFICATES',eventTypes:['CertificateRenderRequested']});
+    if(this.artifactRecovery)await this.artifactRecovery.sweep();
     return {claimed:dispatched.claimed+artifacts.claimed,processed:dispatched.processed+artifacts.processed,failed:dispatched.failed+artifacts.failed,exhausted:dispatched.exhausted+artifacts.exhausted,leaseLost:(dispatched.leaseLost??0)+(artifacts.leaseLost??0)};
   }
 }

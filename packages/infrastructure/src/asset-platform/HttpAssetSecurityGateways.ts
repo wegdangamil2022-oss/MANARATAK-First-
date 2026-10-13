@@ -136,6 +136,15 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
     };
   }
 
+  async refreshUploadGrant(existing:AssetStorageLocator,request:AssetUploadGrantRequest):Promise<AssetUploadGrant> {
+    if(existing.storageZone!==AssetStorageZone.QUARANTINE || !request.assetId || !Number.isSafeInteger(request.byteSize) || request.byteSize<=0)throw new Error('ASSET_UPLOAD_REFRESH_INVALID');
+    const payload={locator:locatorPayload(existing),assetId:request.assetId,originalFilename:request.originalFilename,mimeType:request.mimeType,byteSize:request.byteSize};
+    const response=await this.client.json<UploadGrantWire>('POST','/v1/assets/upload-grants/refresh',payload,{idempotencyKey:operationIdempotencyKey('upload-grant-refresh',{...payload,requestId:randomUUID()})});
+    const locator=parseLocator(response.locator);
+    if(locator.value!==existing.value || (response.method!=='PUT' && response.method!=='POST'))throw new Error('ASSET_UPLOAD_REFRESH_LOCATOR_INVALID');
+    return {locator,uploadUrl:requireHttpsGrant(response.uploadUrl,'ASSET_PROVIDER_UPLOAD_URL_HTTPS_REQUIRED'),method:response.method,headers:sanitizeHeaders(response.headers),expiresAt:parseGrantExpiry(response.expiresAt,900)};
+  }
+
   async verifyUploadedObject(locator: AssetStorageLocator, request: AssetUploadVerificationRequest): Promise<VerifiedAssetUpload> {
     if (locator.storageZone !== AssetStorageZone.QUARANTINE) throw new Error('ASSET_UPLOAD_VERIFICATION_QUARANTINE_REQUIRED');
     const result = await this.client.json<VerifiedAssetUpload>('POST', '/v1/assets/verify-upload', {

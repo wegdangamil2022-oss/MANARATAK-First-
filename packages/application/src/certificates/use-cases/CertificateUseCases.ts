@@ -58,7 +58,7 @@ export class CertificateUseCases {
     private readonly learningPathRepository?: ILearningPathRepository,
     private readonly identityRepository?: IIdentityRepository,
     private readonly curriculumRepository?: ICourseCurriculumRepository,
-    private readonly authorityResolver?: { validate(issuer: CertificateIssuerDto): Promise<boolean> },
+    private readonly authorityResolver?: { validate(issuer: CertificateIssuerDto, evidence?: {authorityReference:string;evidenceChecksum:string;reviewerId:string}): Promise<boolean> },
   ) {
     this.trustPolicy = new CertificateTrustPolicy(signingRuntime);
   }
@@ -84,7 +84,15 @@ export class CertificateUseCases {
   public list(query: CertificateListQuery) { return this.certificateRepository.list(query); }
   public analytics() { return this.certificateRepository.analytics(); }
   public listTemplates() { return this.certificateRepository.listTemplates(); }
+  public templateReview(id:string) {
+    if(!this.certificateRepository.templateReview)throw new Error('CERTIFICATE_TEMPLATE_REVIEW_UNAVAILABLE');
+    return this.certificateRepository.templateReview(id);
+  }
   public listIssuers() { return this.certificateRepository.listIssuers(); }
+  public issuerHistory(id: string, cursor?: string) {
+    if (!this.certificateRepository.listIssuerHistory) throw new Error('CERTIFICATE_ISSUER_HISTORY_UNAVAILABLE');
+    return this.certificateRepository.listIssuerHistory(id, cursor, 25);
+  }
   public getCertificate(id: string) { return this.certificateRepository.findById(id); }
   public listLedger(id: string, page = 1, cursor?:string) { return this.certificateRepository.listLedger(id, page, cursor); }
   public getTemplateVersion(id: string) { return this.certificateRepository.findTemplateVersionById(id); }
@@ -102,19 +110,30 @@ export class CertificateUseCases {
   }
   public async readiness() {
     const [templates, issuers] = await Promise.all([this.certificateRepository.listTemplates(), this.certificateRepository.listIssuers()]);
-    const runtime = this.trustPolicy.runtimeReadiness();
+    const runtime = await this.trustPolicy.signingReadiness();
     const artifacts = await this.trustPolicy.artifactReadiness();
     const activeIssuerIds = new Set(issuers.filter(item => item.status === 'ACTIVE').map(item => item.id));
     const activeTemplate = templates.some((item) => item.status === CertificateTemplateStatus.ACTIVE && item.currentVersion.status === CertificateTemplateStatus.ACTIVE && activeIssuerIds.has(item.issuerId) && item.currentVersion.issuerId === item.issuerId);
     const activeIssuer = issuers.some((item) => item.status === 'ACTIVE');
+    let defaultCompletionReady=false;
+    try {
+      const template=await this.requireDefaultActiveTemplate();
+      const issuer=await this.requireActiveIssuer(template.issuerId);
+      if(issuer.issuerType!=='MANARATAK' || issuer.code!=='MANARATAK')throw new Error('CERTIFICATE_DEFAULT_ISSUER_BINDING_INVALID');
+      await this.trustPolicy.assertIssuerKeyAvailable(issuer.signingKeyReference,issuer.code);
+      await this.assertAssetProvenance(template.currentVersion);
+      defaultCompletionReady=runtime.signingProviderVerified && runtime.signingProviderConfigured && runtime.publicVerificationBaseUrlConfigured;
+    }catch{defaultCompletionReady=false;}
+
     return {
       activeTemplate,
       activeIssuer,
-      trustedCompletionIssuanceReady: activeTemplate && activeIssuer && (!runtime.productionLike || (runtime.signingProviderConfigured && runtime.signingKeyReferenceConfigured && runtime.publicVerificationBaseUrlConfigured)),
+      trustedCompletionIssuanceReady: defaultCompletionReady,
       artifactRendererMode: 'EAP_ASYNC',
       artifactRendererRuntimeReady: artifacts.status === 'READY' && Boolean(artifacts.verifiedAt),
       artifactRendererStatus: artifacts.status,
       artifactRendererReason: artifacts.reason,
+      artifactRendererVerifiedAt: artifacts.verifiedAt ?? null,
       ...runtime,
     };
   }
@@ -155,10 +174,11 @@ export class CertificateUseCases {
     if (!evidence || evidence.state !== AssetLifecycleState.ACTIVE || evidence.classification === AssetSecurityClassification.PUBLIC || evidence.owner.ownerType !== 'CertificateIssuer' || evidence.owner.ownerId !== id) throw new Error('CERTIFICATE_ISSUER_AUTHORITY_EVIDENCE_INVALID');
     if (issuer.issuerType === 'MANARATAK') {
       if (issuer.code !== 'MANARATAK' || issuer.universityId || issuer.organizationId) throw new Error('CERTIFICATE_OFFICIAL_ISSUER_BINDING_INVALID');
-    } else if (!this.authorityResolver || !await this.authorityResolver.validate(issuer)) {
+    } else if (!this.authorityResolver || !evidence.checksum?.hash || !await this.authorityResolver.validate(issuer, {authorityReference,evidenceChecksum:evidence.checksum.hash,reviewerId:context.actorId})) {
       throw new Error('CERTIFICATE_ISSUER_CANONICAL_AUTHORITY_UNVERIFIED');
     }
-    return this.certificateRepository.updateIssuer(id, { status: 'ACTIVE' }, { ...context, issuerApproval: { evidenceAssetId, authorityReference } });
+    await this.trustPolicy.assertIssuerKeyAvailable(issuer.signingKeyReference,issuer.code);
+    return this.certificateRepository.updateIssuer(id, { status: 'ACTIVE' }, { ...context, issuerApproval: { evidenceAssetId, authorityReference, evidenceChecksum: evidence.checksum?.hash ?? null } });
   }
 
   /** Bootstrap can create a draft only; issuance never auto-creates or auto-activates it. */
@@ -239,6 +259,12 @@ export class CertificateUseCases {
     return this.certificateRepository.archive(id, actorId, reason.trim(), correlationId);
   }
 
+  public async retryRendering(id:string,expectedFingerprint:string,expectedUpdatedAt:string,context:CertificateMutationContext):Promise<void> {
+    const certificate=await this.requireCertificate(id);
+    await this.assertRenderable(certificate);
+    if(!this.certificateRepository.retryRender)throw new Error('CERTIFICATE_RENDER_RETRY_UNAVAILABLE');
+    await this.certificateRepository.retryRender(id,expectedFingerprint,expectedUpdatedAt,context);
+  }
   public async expireDue(asOf = new Date(), actorId = 'phase14-system', correlationId?: string): Promise<number> {
     return this.certificateRepository.expireDue(asOf, actorId, correlationId);
   }
@@ -280,7 +306,7 @@ export class CertificateUseCases {
 
   public async assertRenderable(certificate: CertificateDto): Promise<void> {
     const envelope = this.readSignedEnvelope(certificate.metadata?.signedEnvelope);
-    if (!envelope || this.digest(this.canonicalJson(envelope)) !== certificate.verificationHash || !this.persistedIdentityMatchesEnvelope(certificate, envelope) || !this.trustPolicy.verifyHash(certificate.verificationHash, certificate.digitalSignature, envelope.issuer.signingKeyReference)) throw new Error('CERTIFICATE_INTEGRITY_INVALID');
+    if (!envelope || this.digest(this.canonicalJson(envelope)) !== certificate.verificationHash || !this.persistedIdentityMatchesEnvelope(certificate, envelope) || !await this.trustPolicy.verifyHash(certificate.verificationHash, certificate.digitalSignature, envelope.issuer.signingKeyReference)) throw new Error('CERTIFICATE_INTEGRITY_INVALID');
     if (certificate.status !== CertificateStatus.ACTIVE || (certificate.expiresAt && certificate.expiresAt <= new Date())) throw new Error('CERTIFICATE_ARTIFACT_STATE_INVALID');
     const review = certificate.metadata?.revalidation as {approvedBy?:string;validUntil?:string} | undefined;
     if (envelope.validity.requiresRevalidation && (!review?.approvedBy || !review.validUntil || !Number.isFinite(new Date(review.validUntil).getTime()) || new Date(review.validUntil)<=new Date())) throw new Error('CERTIFICATE_REVALIDATION_REQUIRED');
@@ -309,7 +335,7 @@ export class CertificateUseCases {
       canonical &&
       this.digest(canonical) === certificate.verificationHash &&
       this.persistedIdentityMatchesEnvelope(certificate, envelope) &&
-      this.trustPolicy.verifyHash(certificate.verificationHash, certificate.digitalSignature, envelope.issuer.signingKeyReference),
+      await this.trustPolicy.verifyHash(certificate.verificationHash, certificate.digitalSignature, envelope.issuer.signingKeyReference),
     );
     const expiresAt = envelope?.validity.expiresAt ? new Date(envelope.validity.expiresAt) : null;
     const expired = Boolean(expiresAt && expiresAt <= new Date());
@@ -442,7 +468,7 @@ export class CertificateUseCases {
     recipientDisplayName: string | null,
   ): Promise<CertificateDto> {
     const issuer = await this.requireActiveIssuer(template.issuerId);
-    this.trustPolicy.assertIssuerKeyAvailable(issuer.signingKeyReference);
+    await this.trustPolicy.assertIssuerKeyAvailable(issuer.signingKeyReference,issuer.code);
     const issuedAt = new Date();
     const expiresAt = this.expirationFor(template, issuedAt);
     const serialNumber = this.trustPolicy.generate({ issuerPrefix: issuer.code, certificateTypePrefix: achievement.type === 'COURSE' ? 'CRS' : 'LP', issuedAt, studentReferenceId: event.payload.studentReferenceId, completionIdentity: achievement.completionId });
@@ -500,7 +526,7 @@ export class CertificateUseCases {
       issuerId: issuer.id,
       issuerName: issuer.name,
       issuerReferenceId: issuer.publicId,
-      digitalSignature: this.trustPolicy.signHash(verificationHash, issuer.signingKeyReference),
+      digitalSignature: await this.trustPolicy.signHash(verificationHash, issuer.signingKeyReference),
       signingKeyReference: issuer.signingKeyReference,
       skills: [],
       competencies: [],
@@ -511,7 +537,7 @@ export class CertificateUseCases {
 
   private async buildReplacement(source: CertificateDto, template: CertificateTemplateDto, actorId: string, recipientDisplayName: string | undefined, sourceEventId: string, forcedDurationDays?: number) {
     const issuer = await this.requireActiveIssuer(template.issuerId);
-    this.trustPolicy.assertIssuerKeyAvailable(issuer.signingKeyReference);
+    await this.trustPolicy.assertIssuerKeyAvailable(issuer.signingKeyReference,issuer.code);
     const issuedAt = new Date();
     const expiresAt = forcedDurationDays
       ? new Date(issuedAt.getTime() + forcedDurationDays * 86400000)
@@ -586,7 +612,7 @@ export class CertificateUseCases {
       score: source.score,
       skills: [...source.skills],
       competencies: [...source.competencies],
-      digitalSignature: this.trustPolicy.signHash(verificationHash, issuer.signingKeyReference),
+      digitalSignature: await this.trustPolicy.signHash(verificationHash, issuer.signingKeyReference),
       signingKeyReference: issuer.signingKeyReference,
       metadata: { issuedBy:actorId, signedEnvelope: envelope, verificationQr, reissuedFromCertificateId: source.id },
       actorId,
@@ -620,7 +646,7 @@ export class CertificateUseCases {
       issuedAt: input.issuedAt.toISOString(),
       validity: { policy: input.template.validityPolicy, expiresAt: input.expiresAt?.toISOString() ?? null, renewalPolicy: input.template.renewalPolicy ?? null, requiresRevalidation: input.template.requiresRevalidation },
       template: { templateId: input.template.id, templateVersionId: input.template.currentVersionId, versionNumber: input.template.templateVersion },
-      issuer: { issuerId: input.issuer.id, issuerPublicId: input.issuer.publicId, issuerName: input.issuer.name, issuerType: input.issuer.issuerType, signingKeyReference: input.issuer.signingKeyReference },
+      issuer: { issuerId: input.issuer.id, issuerPublicId: input.issuer.publicId, issuerName: input.issuer.name, issuerType: input.issuer.issuerType, signingKeyReference: input.issuer.signingKeyReference, authorityVersion:Number(input.issuer.metadata?.authorityVersion ?? 1), ...((input.issuer.metadata?.trust as {evidenceChecksum?:string})?.evidenceChecksum ? {authorityEvidenceHash:(input.issuer.metadata?.trust as {evidenceChecksum:string}).evidenceChecksum} : {}) },
       grade: input.grade ?? null,
       score: input.score ?? null,
       skills: input.skills ?? [],
@@ -679,6 +705,11 @@ export class CertificateUseCases {
     const issuer = await this.certificateRepository.findIssuerById(id);
     if (!issuer || issuer.status !== 'ACTIVE' || (issuer.issuerType !== 'MANARATAK' && !(issuer.metadata?.trust as { approvedBy?: string } | undefined)?.approvedBy)) throw new Error('ACTIVE_CERTIFICATE_ISSUER_REQUIRED');
     if (!issuer.issuerLogoAssetId || !issuer.signingKeyReference) throw new Error('CERTIFICATE_ISSUER_AUTHORITY_INCOMPLETE');
+    if (issuer.issuerType !== 'MANARATAK') {
+      const trust=issuer.metadata?.trust as {authorityReference?:string;evidenceAssetId?:string;evidenceChecksum?:string;approvedBy?:string} | undefined;
+      const evidence=trust?.evidenceAssetId && this.assetRepository ? await this.assetRepository.findById(new AssetId(trust.evidenceAssetId)) : null;
+      if (!trust?.authorityReference || !trust.evidenceChecksum || !trust.approvedBy || !evidence || evidence.state!==AssetLifecycleState.ACTIVE || evidence.classification===AssetSecurityClassification.PUBLIC || evidence.owner.ownerType!=='CertificateIssuer' || evidence.owner.ownerId!==issuer.id || evidence.checksum?.hash!==trust.evidenceChecksum || !this.authorityResolver || !await this.authorityResolver.validate(issuer,{authorityReference:trust.authorityReference,evidenceChecksum:trust.evidenceChecksum,reviewerId:trust.approvedBy})) throw new Error('CERTIFICATE_ISSUER_CANONICAL_AUTHORITY_UNVERIFIED');
+    }
     return issuer;
   }
 

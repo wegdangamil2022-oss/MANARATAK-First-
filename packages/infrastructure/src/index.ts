@@ -247,3 +247,10 @@ export { PrismaMajorScholarshipUsageGateway } from './scholarships/PrismaMajorSc
 
 export { PrismaMajorImportReviewGateway } from './majors/PrismaMajorImportReviewGateway';
 export * from './universities/PrismaUniversityProgramWorkspaceGateway';
+
+export * from './certificates/CertificateVerificationPolicy';
+export * from './certificates/VaultTransitCertificateSignatureService';
+export * from './certificates/HttpCertificateAuthorityResolver';
+export * from './certificates/CertificateArtifactReadinessProbe';
+export * from './certificates/CertificateArtifactRecovery';
+export * from './certificates/PrismaCertificateAuthorityDirectory';

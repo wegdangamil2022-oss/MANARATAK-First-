@@ -1,3 +1,4 @@
+import { assertCertificateVisualImage } from './CertificateVisualImagePolicy';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
@@ -62,6 +63,7 @@ export class ProviderNeutralCertificateRenderingService implements ICertificateR
         createHash('sha256').update(asset.bytes).digest('hex') !== provenance[id]
       )
         throw new Error('CERTIFICATE_VISUAL_ASSET_INVALID');
+      assertCertificateVisualImage(asset.bytes,asset.mimeType);
       result[role] = asset;
     }
     return result;
