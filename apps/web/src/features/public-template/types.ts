@@ -377,6 +377,7 @@ export interface Service {
 }
 
 export interface Course {
+  contentLanguage?:{requestedLocale:string;sourceLanguage:string|null;titleFallback:boolean};
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;

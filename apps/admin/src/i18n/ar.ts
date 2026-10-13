@@ -1,4 +1,5 @@
 export const ar = {
+ course13_completion_label:"الاكتمال",
  course13_eligibility_disabled:"قواعد الأهلية المخصصة غير مفعلة دون محرك معتمد؛ لا يمكن حفظ قواعد جديدة غير مدعومة.",
  course13_eligibility_clear:"إزالة القواعد غير المدعومة من مسودة السياسة ثم حفظها",
  course13_save_metadata_first:"احفظ تعديلات بيانات الدورة قبل تعديل المنهج أو سياسة التسجيل.",

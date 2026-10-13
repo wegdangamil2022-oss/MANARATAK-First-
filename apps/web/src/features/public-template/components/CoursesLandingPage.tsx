@@ -1,3 +1,4 @@
+import {useTranslation} from '../../../i18n/I18nProvider';
 import React from 'react';
 import {
   ArrowLeft,
@@ -47,6 +48,7 @@ interface CoursePathCardProps {
 }
 
 function CoursePathCard({ title, eyebrow, description, icon: Icon, features, cta, isRestricted, onClick }: CoursePathCardProps) {
+ const {t,dir}=useTranslation();
   return (
     <div
       role="button"
@@ -58,7 +60,7 @@ function CoursePathCard({ title, eyebrow, description, icon: Icon, features, cta
         }
       }}
       onClick={onClick}
-      className="bg-[var(--mn-surface)] rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] dark:hover:border-[#D6A43B] shadow-sm hover:shadow-md transition-all relative overflow-hidden group mn-panel text-right cursor-pointer select-none w-full block active:scale-[0.99]"
+      className="bg-[var(--mn-surface)] rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] dark:hover:border-[#D6A43B] shadow-sm hover:shadow-md transition-all relative overflow-hidden group mn-panel text-start cursor-pointer select-none w-full block active:scale-[0.99]"
     >
       {/* Prominent Golden Top Line (خط ذهبي واضح أعلى كل بطاقة) */}
       <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-[#D6A43B] via-[#F3CE74] to-[#D6A43B] shadow-2xs" />
@@ -83,7 +85,7 @@ function CoursePathCard({ title, eyebrow, description, icon: Icon, features, cta
             {isRestricted && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-bold text-amber-600 dark:text-[#E5B54F]">
                 <Lock className="w-2.5 h-2.5" />
-                <span>غير متاح</span>
+                <span>{t('course13_extra_26')}</span>
               </span>
             )}
           </div>
@@ -97,7 +99,7 @@ function CoursePathCard({ title, eyebrow, description, icon: Icon, features, cta
         </div>
 
         {/* Middle: Balanced & Clear Description */}
-        <p className="text-[11.5px] sm:text-xs text-[var(--mn-text-muted)] font-medium leading-5 text-right">
+        <p className="text-[11.5px] sm:text-xs text-[var(--mn-text-muted)] font-medium leading-5 text-start">
           {description}
         </p>
 
@@ -131,10 +133,11 @@ function CoursePathCard({ title, eyebrow, description, icon: Icon, features, cta
 }
 
 export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, onOpenTrack, onRestrictedTrack }) => {
+ const {t,dir}=useTranslation();
   return (
     <div
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
-      dir="rtl"
+      dir={dir}
     >
       {/* ========================================================================= */}
       {/* HERO BANNER - AUTHENTIC MANARATAK FULL WIDTH WITH GOLD ACCENTS            */}
@@ -145,8 +148,8 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
           <button
             onClick={onBack}
             className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-8 h-8 bg-black/25 hover:bg-black/40 border border-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all z-30 cursor-pointer text-white shadow-xs active:scale-95"
-            title="العودة"
-            aria-label="العودة"
+            title={t('course13_extra_0')}
+            aria-label={t('course13_extra_0')}
           >
             <ChevronLeft className="w-4 h-4 rotate-180 text-white" />
           </button>
@@ -199,12 +202,12 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
           </svg>
         </div>
 
-        <div className="max-w-md sm:max-w-xl mx-auto relative z-10 space-y-3 pt-1 text-center sm:text-right">
+        <div className="max-w-md sm:max-w-xl mx-auto relative z-10 space-y-3 pt-1 text-center sm:text-start">
           {/* Top Pill / Badge */}
           <div className="flex items-center justify-center sm:justify-start">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-md text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-accent-text)] shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-              <span>مسارات التعلم والتطوير المهني</span>
+              <span>{t('course13_extra_27')}</span>
             </span>
           </div>
 
@@ -216,43 +219,39 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
               </div>
             </div>
 
-            <div className="space-y-1 sm:space-y-1.5 flex-1 text-center sm:text-right">
+            <div className="space-y-1 sm:space-y-1.5 flex-1 text-center sm:text-start">
               <h1 className="text-lg sm:text-xl mn-font-emphasis text-white leading-tight font-['Cairo',sans-serif] tracking-tight">
-                دليل <span className="text-[var(--mn-accent-text)]">الدورات والبرامج التدريبية</span>
+                {t('course13_extra_28')}<span className="text-[var(--mn-accent-text)]">{t('course13_extra_29')}</span>
               </h1>
               <p className="text-[11.5px] sm:text-[12px] leading-relaxed text-white/90 font-medium max-w-xl font-['Cairo',sans-serif]">
-                اختر المسار التدريبي المناسب لأهدافك، واستكشف مئات الدورات العالمية المعتمدة، وبرامج منارتك التفاعلية، والماستر كلاس المتقدم، مع أدوات بحث وتصفية متكاملة.
-              </p>
+                {t('course13_extra_30')}</p>
             </div>
           </div>
 
           {/* Micro Feature Pillars / Highlights */}
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/15 text-right">
-            <div className="rounded-xl bg-white/[0.08] border border-white/15 backdrop-blur-xs p-2 flex flex-col sm:flex-row items-center sm:items-center gap-1.5 text-center sm:text-right">
+          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/15 text-start">
+            <div className="rounded-xl bg-white/[0.08] border border-white/15 backdrop-blur-xs p-2 flex flex-col sm:flex-row items-center sm:items-center gap-1.5 text-center sm:text-start">
               <div className="w-6 h-6 rounded-lg bg-[#F2CD78]/20 flex items-center justify-center shrink-0">
                 <Globe2 className="w-3.5 h-3.5 text-[#F2CD78]" />
               </div>
               <span className="text-[10px] sm:text-[11px] font-bold text-white/95 leading-tight">
-                منصات عالمية
-              </span>
+                {t('course13_extra_31')}</span>
             </div>
 
-            <div className="rounded-xl bg-white/[0.08] border border-white/15 backdrop-blur-xs p-2 flex flex-col sm:flex-row items-center sm:items-center gap-1.5 text-center sm:text-right">
+            <div className="rounded-xl bg-white/[0.08] border border-white/15 backdrop-blur-xs p-2 flex flex-col sm:flex-row items-center sm:items-center gap-1.5 text-center sm:text-start">
               <div className="w-6 h-6 rounded-lg bg-[#F2CD78]/20 flex items-center justify-center shrink-0">
                 <Award className="w-3.5 h-3.5 text-[#F2CD78]" />
               </div>
               <span className="text-[10px] sm:text-[11px] font-bold text-white/95 leading-tight">
-                شهادات معتمدة
-              </span>
+                {t('course13_extra_32')}</span>
             </div>
 
-            <div className="rounded-xl bg-white/[0.08] border border-white/15 backdrop-blur-xs p-2 flex flex-col sm:flex-row items-center sm:items-center gap-1.5 text-center sm:text-right">
+            <div className="rounded-xl bg-white/[0.08] border border-white/15 backdrop-blur-xs p-2 flex flex-col sm:flex-row items-center sm:items-center gap-1.5 text-center sm:text-start">
               <div className="w-6 h-6 rounded-lg bg-[#F2CD78]/20 flex items-center justify-center shrink-0">
                 <TrendingUp className="w-3.5 h-3.5 text-[#F2CD78]" />
               </div>
               <span className="text-[10px] sm:text-[11px] font-bold text-white/95 leading-tight">
-                تتبع التقدم
-              </span>
+                {t('course13_extra_33')}</span>
             </div>
           </div>
         </div>
@@ -263,43 +262,43 @@ export const CoursesLandingPage: React.FC<CoursesLandingPageProps> = ({ onBack, 
         {/* Course Path Cards */}
         <div className="space-y-3.5 sm:space-y-4">
           <CoursePathCard
-            title="الدورات العالمية"
-            description="استكشف مئات الدورات والبرامج المعتمدة التي تجمعها لك منصة منارتك من كبرى الجامعات والمنصات التعليمية العالمية، مع توجيهك المباشر للتسجيل والدراسة من المصدر الرسمي بكل موثوقية."
+            title={t('course13_extra_34')}
+            description={t('course13_extra_35')}
             icon={Globe2}
             isRestricted={false}
             features={[
-              { label: 'منصات عالمية', icon: Layers3 },
-              { label: 'شهادات معتمدة', icon: BadgeCheck },
-              { label: 'مصدر رسمي', icon: ExternalLink },
+              { label: t('course13_extra_31'), icon: Layers3 },
+              { label: t('course13_extra_32'), icon: BadgeCheck },
+              { label: t('course13_extra_36'), icon: ExternalLink },
             ]}
-            cta="استكشف الدورات"
+            cta={t('course13_extra_37')}
             onClick={() => onOpenTrack?.('imported')}
           />
 
           <CoursePathCard
-            title="دورات منارتك"
-            description="برامج تعليمية ودورات تدريبية متكاملة مصممة ومبنية حصرياً داخل منصة منارتك، مقسمة إلى وحدات وفصول تفاعلية مع حفظ تقدمك الأكاديمي أولاً بأول وتوفير شهادات إتمام رقمية."
+            title={t('course13_extra_38')}
+            description={t('course13_extra_39')}
             icon={GraduationCap}
             features={[
-              { label: 'وحدات تفاعلية', icon: BookOpenCheck },
-              { label: 'حفظ التقدم', icon: TrendingUp },
-              { label: 'شهادة إنجاز', icon: Award },
+              { label: t('course13_extra_40'), icon: BookOpenCheck },
+              { label: t('course13_extra_41'), icon: TrendingUp },
+              { label: t('course13_extra_42'), icon: Award },
             ]}
-            cta="استكشف الدورات"
+            cta={t('course13_extra_37')}
             onClick={() => onOpenTrack?.('native')}
           />
 
           <CoursePathCard
-            title="الدورات المدفوعة"
-            description="مسار مخصص للبرامج التدريبية الاحترافية والماستر كلاس المتقدم، يقدم لك تفاصيل شفافة لرسوم الاشتراك والمميزات الحصرية وإمكانية معاينة محاور الدورة ونبذة المدربين قبل الانضمام."
+            title={t('course13_extra_43')}
+            description={t('course13_extra_44')}
             icon={CreditCard}
             isRestricted={false}
             features={[
-              { label: 'تسعير واضح', icon: Tag },
-              { label: 'مستوى متقدم', icon: Sparkles },
-              { label: 'ضمان الوصول', icon: ShieldCheck },
+              { label: t('course13_extra_45'), icon: Tag },
+              { label: t('course13_extra_46'), icon: Sparkles },
+              { label: t('course13_extra_47'), icon: ShieldCheck },
             ]}
-            cta="استكشف الدورات"
+            cta={t('course13_extra_37')}
             onClick={() => onOpenTrack?.('paid')}
           />
         </div>

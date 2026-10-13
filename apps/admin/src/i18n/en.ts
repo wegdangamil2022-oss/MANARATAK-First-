@@ -1,4 +1,5 @@
 export const en = {
+ course13_completion_label:"Completion",
  course13_eligibility_disabled:"Custom eligibility is disabled until an approved evaluator is integrated; unsupported rules cannot be configured.",
  course13_eligibility_clear:"Clear unsupported rules from the policy draft, then save",
  course13_save_metadata_first:"Save course metadata changes before modifying curriculum or enrollment policy.",

@@ -67,7 +67,7 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
  const levelLabel=(value:string)=>{const key=({'مبتدئ':'course13_level_beginner','متوسط':'course13_level_intermediate','متقدم':'course13_level_advanced','جميع المستويات':'course13_level_all','غير محدد رسميًا':'course13_level_unknown'} as const)[value as 'مبتدئ'];return key?t(key):value;};  const [course,setCourse]=useState(initialCourse);const [verifiedSlug,setVerifiedSlug]=useState('');const [availabilityError,setAvailabilityError]=useState('');
   useEffect(()=>{let active=true;setAvailabilityError('');setVerifiedSlug('');if(dataMode==='prototype'){setCourse(initialCourse);return;}
     if(!initialCourse.slug){setAvailabilityError('COURSE_CANONICAL_SLUG_REQUIRED');return;}
-    void ApiClient.getCourse(initialCourse.slug).then(dto=>{const latest=mapCourse(dto).imported;if(!latest)throw new Error('COURSE_NOT_ELIGIBLE');if(active){setCourse(latest);setVerifiedSlug(initialCourse.slug!);}}).catch(cause=>{if(active)setAvailabilityError(String(cause));});return()=>{active=false;};
+    void ApiClient.getCourseBySlug(initialCourse.slug).then(dto=>{const latest=mapCourse(dto).imported;if(!latest)throw new Error('COURSE_NOT_ELIGIBLE');if(active){setCourse(latest);setVerifiedSlug(initialCourse.slug!);}}).catch(cause=>{if(active)setAvailabilityError(String(cause));});return()=>{active=false;};
   },[initialCourse,dataMode]);
   useDetailSearchTarget(dataMode==='api'&&verifiedSlug!==initialCourse.slug?undefined:searchAnchor, searchTerm);
   if(dataMode==='api'&&verifiedSlug!==initialCourse.slug)return <section className="p-6"><button onClick={onBack}>{t('course13_copy_220')}</button><p role={availabilityError?'alert':'status'}>{availabilityError?t('course13_copy_221'):t('course13_copy_222')}</p></section>;
@@ -272,8 +272,8 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
           <div>
               <p className="mt-0.5 text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)]">
                 {course.freeCertificate
-                  ? `ستنتقل إلى صفحة الدورة المباشرة على ${course.provider} للدراسة وإكمال متطلبات الشهادة.`
-                  : `ستنتقل إلى صفحة الدورة المباشرة على ${course.provider} للدراسة من المصدر الرسمي.`}
+                  ? `${t('course13_launch_prefix')} ${course.provider} ${t('course13_launch_certificate_suffix')}`
+                  : `${t('course13_launch_prefix')} ${course.provider} ${t('course13_launch_source_suffix')}`}
               </p>
           </div>
 

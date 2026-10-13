@@ -1389,7 +1389,7 @@ export default function App() {
             }}
           />
         ) : selectedCourse ? (
-          isStudyingCourse ? (
+          isStudyingCourse && publicDataMode==='prototype' ? (
             <CourseStudyRoomView
               course={selectedCourse}
               onBack={() => {
@@ -1401,14 +1401,14 @@ export default function App() {
               onRestrictedAction={(msg) => triggerAccessDenied(msg || 'ليس لديك صلاحية الوصول')}
             />
           ) : (
-            <OwnerCourseDetail
+            <OwnerCourseDetail dataMode={publicDataMode}
               course={selectedCourse}
               track={selectedCourse.accessType === 'PAID' ? 'paid' : 'native'}
               onBack={goBack}
-              onStartStudy={() => {
+              onStartStudy={publicDataMode==='prototype'?() => {
                 setIsStudyingCourse(true);
                 window.scrollTo({ top: 0, behavior: 'instant' });
-              }}
+              }:undefined}
             />
           )
         ) : selectedImportedCourse ? (
@@ -1932,7 +1932,7 @@ export default function App() {
                   }}
                 />
               ) : selectedCourseTrack === 'paid' ? (
-                <CourseTrackPreview
+                <CourseTrackPreview dataMode={publicDataMode}
                   track="paid"
                   courses={paidCourses && paidCourses.length > 0 ? paidCourses : courses.filter((c) => !c.isFree)}
                   favoriteIds={favoriteKeys.filter((k) => k.startsWith('course:')).map((k) => k.replace(/^course:/, ''))}
@@ -1945,7 +1945,7 @@ export default function App() {
                   }}
                 />
               ) : selectedCourseTrack === 'native' ? (
-                <CourseTrackPreview
+                <CourseTrackPreview dataMode={publicDataMode}
                   track="native"
                   courses={courses.filter((course) => publicDataMode === 'api' || course.provider.includes('منارتك'))}
                   favoriteIds={favoriteKeys.filter((k) => k.startsWith('course:')).map((k) => k.replace(/^course:/, ''))}

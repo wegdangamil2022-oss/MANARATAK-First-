@@ -1,4 +1,7 @@
-import React from 'react';
+import {useTranslation} from '../../../i18n/I18nProvider';
+import {ApiClient} from '../../../api/client';
+import {mapCourse} from '../publicLiveDataSource';
+import React,{useState,useEffect} from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   ArrowRight,
@@ -21,16 +24,22 @@ import type { Course } from '../types';
 import { DetailBackButton, DetailSectionHeader } from './DetailUi';
 
 export function OwnerCourseDetail({
-  course,
+  course:initialCourse,
+  dataMode='api',
   track,
   onBack,
   onStartStudy,
 }: {
   course: Course;
+  dataMode?:'api'|'prototype';
   track: 'native' | 'paid';
   onBack: () => void;
   onStartStudy?: () => void;
 }) {
+ const {t,dir}=useTranslation();
+  const [course,setCourse]=useState(initialCourse);const [verified,setVerified]=useState(false);const [unavailable,setUnavailable]=useState(false);
+  useEffect(()=>{let active=true;setVerified(false);setUnavailable(false);if(dataMode==='prototype'){setCourse(initialCourse);setVerified(true);return;}
+    if(!initialCourse.slug){setUnavailable(true);return;}void ApiClient.getCourseBySlug(initialCourse.slug).then(dto=>{if(active){setCourse(mapCourse(dto).course);setVerified(true);}}).catch(()=>{if(active)setUnavailable(true);});return()=>{active=false;};},[initialCourse,dataMode]);
   const isNative = track === 'native';
   const { locale = 'ar' } = useParams<{ locale?: string }>();
 
@@ -40,11 +49,14 @@ export function OwnerCourseDetail({
     }
   };
 
+  if(!verified||course.id!==initialCourse.id)return <section><button onClick={onBack}>{t('course13_extra_0')}</button><p role={unavailable?'alert':'status'}>{unavailable?t('course13_extra_1'):t('course13_extra_2')}</p></section>;
+
   return (
     <div
-      className="w-full max-w-md mx-auto pt-0 pb-12 text-right font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--mn-surface-muted)] min-h-screen mn-panel"
-      dir="rtl"
+      className="w-full max-w-md mx-auto pt-0 pb-12 text-start font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--mn-surface-muted)] min-h-screen mn-panel"
+      dir={dir}
     >
+      {course.contentLanguage?.titleFallback&&<p role="note">{t('course13_source_fallback')} <bdi>{course.contentLanguage.sourceLanguage??t('course13_source_unknown')}</bdi></p>}
       {/* ========================================================================= */}
       {/* 1. TOP HERO CONTAINER (Matches Scholarship & University Detail Header) */}
       {/* ========================================================================= */}
@@ -102,7 +114,7 @@ export function OwnerCourseDetail({
           {/* Hero Content: Title positioned higher up, clean and elegant */}
           <div
             className="absolute inset-0 flex items-center justify-between px-4 sm:px-6 pt-1 pb-4 z-10"
-            dir="rtl"
+            dir={dir}
           >
             {/* Right Side: Graduation Cap Icon Badge */}
             <div className="flex items-center gap-2.5 shrink-0">
@@ -112,7 +124,7 @@ export function OwnerCourseDetail({
             </div>
 
             {/* Title & Provider details (Elevated higher, no extra badge) */}
-            <div className="flex flex-col text-right min-w-0 flex-1 pr-2">
+            <div className="flex flex-col text-start min-w-0 flex-1 pr-2">
               <h1
                 className="text-[15px] sm:text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm"
                 data-mn-design="827f35e03a"
@@ -134,7 +146,7 @@ export function OwnerCourseDetail({
         {/* 2. PROVIDER / AUTHORITY CARD */}
         <div
           className="relative w-full bg-[var(--mn-surface)] rounded-2xl py-3 px-3.5 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 flex items-center gap-3 overflow-hidden mn-panel"
-          dir="rtl"
+          dir={dir}
         >
           <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
 
@@ -145,18 +157,16 @@ export function OwnerCourseDetail({
 
           <div className="w-[1px] h-7 bg-[var(--mn-accent)]/40 shrink-0" />
 
-          <div className="space-y-0.5 min-w-0 flex-1 text-right">
+          <div className="space-y-0.5 min-w-0 flex-1 text-start">
             <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] block">
-              الجهة المقدمة
-            </span>
+              {t('course13_extra_3')}</span>
             <h2 className="text-[11.5px] sm:text-xs font-bold text-[var(--mn-heading)] leading-tight">
-              تقديم: منصة منارتك
-            </h2>
+              {t('course13_extra_4')}</h2>
           </div>
         </div>
 
         {/* 3. 2-COLUMN X 2-ROW SUMMARY GRID (Matching Scholarships / Universities Style) */}
-        <div className="space-y-2 pt-0.5" dir="rtl">
+        <div className="space-y-2 pt-0.5" dir={dir}>
           {/* ROW 1: المدة الإجمالية | المحاضرات */}
           <div className="flex items-center gap-2">
             {/* Right Card: المدة الإجمالية */}
@@ -164,12 +174,11 @@ export function OwnerCourseDetail({
               <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
                 <Clock className="w-4 h-4 text-[var(--mn-accent-text)]" />
               </div>
-              <div className="flex flex-col min-w-0 text-right">
+              <div className="flex flex-col min-w-0 text-start">
                 <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">
-                  المدة الإجمالية
-                </span>
+                  {t('course13_extra_5')}</span>
                 <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-tight truncate mt-0.5">
-                  {course.duration || (course.ownerId ? 'غير محددة' : '25 ساعة')}
+                  {course.duration || (course.ownerId ? t('course13_extra_6') : t('course13_extra_7'))}
                 </span>
               </div>
             </div>
@@ -182,12 +191,11 @@ export function OwnerCourseDetail({
               <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
                 <BookOpen className="w-4 h-4 text-[var(--mn-accent-text)]" />
               </div>
-              <div className="flex flex-col min-w-0 text-right">
+              <div className="flex flex-col min-w-0 text-start">
                 <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">
-                  المحاضرات
-                </span>
+                  {t('course13_extra_8')}</span>
                 <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-tight truncate mt-0.5">
-                  {course.lessonsCount ? `${course.lessonsCount} محاضرات` : (course.ownerId ? 'راجع منهج الدورة' : '8 محاضرات')}
+                  {course.lessonsCount ? `${course.lessonsCount} ${t('course13_extra_65')}` : (course.ownerId ? t('course13_extra_9') : t('course13_extra_10'))}
                 </span>
               </div>
             </div>
@@ -200,10 +208,9 @@ export function OwnerCourseDetail({
               <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
                 <GraduationCap className="w-4 h-4 text-[var(--mn-accent-text)]" />
               </div>
-              <div className="flex flex-col min-w-0 text-right">
+              <div className="flex flex-col min-w-0 text-start">
                 <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">
-                  المستوى
-                </span>
+                  {t('course13_extra_11')}</span>
                 <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-tight truncate mt-0.5">
                   {course.level || 'جميع المستويات'}
                 </span>
@@ -218,32 +225,31 @@ export function OwnerCourseDetail({
               <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
                 <DollarSign className="w-4 h-4 text-[var(--mn-accent-text)]" />
               </div>
-              <div className="flex flex-col min-w-0 text-right">
+              <div className="flex flex-col min-w-0 text-start">
                 <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">
-                  الرسوم
-                </span>
+                  {t('course13_extra_13')}</span>
                 <span className="text-[9.5px] font-bold text-[var(--mn-learning-success-600)] dark:text-[var(--mn-learning-success-400)] leading-tight truncate mt-0.5">
-                  {course.isFree ? 'متاحة للجميع' : 'مدفوعة'}
+                  {course.isFree ? t('course13_extra_14') : t('course13_extra_15')}
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {course.description && <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir="rtl"><DetailSectionHeader id="course-description-header" icon={BookOpen} title="نبذة الدورة" level={3} titleClassName="mn-imported-detail-title"/><p className="mt-3 text-xs leading-7 whitespace-pre-wrap">{course.description}</p></section>}
-        {[{title:'متطلبات الالتحاق',items:course.prerequisites},{title:'الفئات المستهدفة',items:course.targetAudience}].map(section=>section.items?.length ? <section key={section.title} className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir="rtl"><h3 className="mn-imported-detail-title">{section.title}</h3><ul className="mt-3 space-y-2 text-xs">{section.items.map((item,index)=><li key={index}>{item}</li>)}</ul></section>:null)}
-        {course.ownerId && <p className="text-xs font-bold text-[var(--mn-secondary)]">{course.certificateAvailable?'تتيح الدورة شهادة منارتك بعد استيفاء متطلبات الإتمام.':'لا توجد شهادة مفعّلة لهذه الدورة.'}</p>}
+        {course.description && <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir={dir}><DetailSectionHeader id="course-description-header" icon={BookOpen} title={t('course13_extra_16')} level={3} titleClassName="mn-imported-detail-title"/><p className="mt-3 text-xs leading-7 whitespace-pre-wrap">{course.description}</p></section>}
+        {[{title:t('course13_extra_17'),items:course.prerequisites},{title:t('course13_extra_18'),items:course.targetAudience}].map(section=>section.items?.length ? <section key={section.title} className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir={dir}><h3 className="mn-imported-detail-title">{section.title}</h3><ul className="mt-3 space-y-2 text-xs">{section.items.map((item,index)=><li key={index}>{item}</li>)}</ul></section>:null)}
+        {course.ownerId && <p className="text-xs font-bold text-[var(--mn-secondary)]">{course.certificateAvailable?t('course13_extra_19'):t('course13_extra_20')}</p>}
         {/* 4. BRIEF COURSE DESCRIPTION (وصف مختصر للدورة) */}
         {course.courseContent && (
           <div
             className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
-            dir="rtl"
+            dir={dir}
           >
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
             <DetailSectionHeader
               id="course-content-header"
               icon={BookOpen}
-              title="محتوى الدورة"
+              title={t('course13_extra_21')}
               level={3}
               titleClassName="mn-imported-detail-title"
             />
@@ -261,13 +267,13 @@ export function OwnerCourseDetail({
         {course.courseModules && course.courseModules.length > 0 && (
           <div
             className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
-            dir="rtl"
+            dir={dir}
           >
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
             <DetailSectionHeader
               id="course-modules-header"
               icon={BookOpen}
-              title="محاور الدورة"
+              title={t('course13_extra_22')}
               level={3}
               titleClassName="mn-imported-detail-title"
             />
@@ -276,7 +282,7 @@ export function OwnerCourseDetail({
               {course.courseModules.map((module, idx) => (
                 <div
                   key={idx}
-                  className="rounded-2xl bg-[var(--mn-page)]/80 border border-[var(--mn-border)] p-3 transition-colors text-right"
+                  className="rounded-2xl bg-[var(--mn-page)]/80 border border-[var(--mn-border)] p-3 transition-colors text-start"
                 >
                   <div className="flex items-start gap-2.5 mb-1.5">
                     <span className="w-5 h-5 rounded-full bg-[var(--mn-primary)] text-white text-[10px] font-bold flex items-center justify-center shrink-0 mn-inverse">
@@ -299,13 +305,13 @@ export function OwnerCourseDetail({
         {course.learningOutcomes && (
           <div
             className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel"
-            dir="rtl"
+            dir={dir}
           >
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
             <DetailSectionHeader
               id="course-outcomes-header"
               icon={GraduationCap}
-              title="ماذا سيتعلم الطالب في نهاية الدورة؟"
+              title={t('course13_extra_23')}
               level={3}
               titleClassName="mn-imported-detail-title"
             />
@@ -319,7 +325,7 @@ export function OwnerCourseDetail({
           </div>
         )}
 
-        {course.acquiredSkills && course.acquiredSkills.length > 0 && <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir="rtl"><DetailSectionHeader id="course-skills-header" icon={BookOpen} title="المهارات المكتسبة" level={3} titleClassName="mn-imported-detail-title"/><ul className="mt-3 space-y-2 text-xs">{course.acquiredSkills.map((skill,index)=><li key={index}>{skill}</li>)}</ul></section>}
+        {course.acquiredSkills && course.acquiredSkills.length > 0 && <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir={dir}><DetailSectionHeader id="course-skills-header" icon={BookOpen} title={t('course13_extra_24')} level={3} titleClassName="mn-imported-detail-title"/><ul className="mt-3 space-y-2 text-xs">{course.acquiredSkills.map((skill,index)=><li key={index}>{skill}</li>)}</ul></section>}
         {/* 7. ACTION CTA BUTTON */}
         <div className="pt-2">
           {onStartStudy ? (
@@ -329,15 +335,15 @@ export function OwnerCourseDetail({
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white text-xs font-bold mn-inverse shadow-sm transition-transform active:scale-[0.98] cursor-pointer"
             >
               <PlayCircle className="w-4 h-4 text-[#E5B54F]" />
-              <span>ادرس الدورة الان</span>
+              <span>{t('course13_extra_25')}</span>
             </button>
-          ) : isNative && course.ownerId ? (
+          ) : course.ownerId && ['NATIVE_MANARATAK_COURSE','PAID_COURSE'].includes(course.originType??'') ? (
             <Link
               to={`/${locale}/student/courses/${encodeURIComponent(course.ownerId)}`}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white text-xs font-bold mn-inverse shadow-sm transition-transform active:scale-[0.98]"
             >
               <PlayCircle className="w-4 h-4 text-[#E5B54F]" />
-              <span>ادرس الدورة الان</span>
+              <span>{t('course13_extra_25')}</span>
             </Link>
           ) : !isNative && course.directCourseUrl ? (
             <a
@@ -347,7 +353,7 @@ export function OwnerCourseDetail({
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white text-xs font-bold mn-inverse shadow-sm transition-transform active:scale-[0.98]"
             >
               <ExternalLink className="w-4 h-4 text-[#E5B54F]" />
-              <span>ادرس الدورة الان</span>
+              <span>{t('course13_extra_25')}</span>
             </a>
           ) : (
             <button
@@ -356,7 +362,7 @@ export function OwnerCourseDetail({
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white text-xs font-bold mn-inverse shadow-sm transition-transform active:scale-[0.98] cursor-pointer"
             >
               <PlayCircle className="w-4 h-4 text-[#E5B54F]" />
-              <span>ادرس الدورة الان</span>
+              <span>{t('course13_extra_25')}</span>
             </button>
           )}
         </div>

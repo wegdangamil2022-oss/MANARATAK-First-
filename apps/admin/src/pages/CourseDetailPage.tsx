@@ -908,7 +908,7 @@ export function CourseDetailPage() {
                 {t('course13_copy_056')}</button>
               {readiness && (
                 <div>
-                  <p>{readiness.ready ? t('course13_copy_057') : `الاكتمال ${readiness.percentage}%`}</p>
+                  <p>{readiness.ready ? t('course13_copy_057') : `${t('course13_completion_label')} ${readiness.percentage}%`}</p>
                   <ul>
                     {readiness.checks
                       .filter((check) => check.state === 'INCOMPLETE')

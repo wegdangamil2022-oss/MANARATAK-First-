@@ -216,6 +216,7 @@ export function mapCourse(dto: PublicCourseDto): { course: Course; imported: Imp
   const track = classifyCourseTrack(dto);
   const course: Course = {
     id: dto.slug,
+    contentLanguage:dto.contentLanguage,
     ownerId: dto.ownerId,
     publicId: dto.publicId,
     slug: dto.slug,

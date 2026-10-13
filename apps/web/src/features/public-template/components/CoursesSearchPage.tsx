@@ -297,7 +297,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
             }`}
           >
             <div className="flex items-center justify-center gap-1 font-semibold text-[10.5px] sm:text-xs font-['Cairo',sans-serif] w-full">
-              <span>{advancedFiltersCount > 0 ? `تصفية (${advancedFiltersCount})` : t('course13_copy_206')}</span>
+              <span>{advancedFiltersCount > 0 ? `${t('course13_filter_label')} (${advancedFiltersCount})` : t('course13_copy_206')}</span>
               <SlidersHorizontal className={`w-3.5 h-3.5 shrink-0 ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-accent-soft)]' : 'text-[#142B5F] dark:text-[#D6A43B]'}`} />
             </div>
             <span className={`mt-0.5 max-w-full truncate text-[8px] sm:text-[9px] font-bold ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-on-dark-muted)]' : 'text-[var(--mn-text-muted)]'}`}>
