@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "baseline": "40519a333607aa66bed0716cb5848de3242b4a5c",
   "scope": "Mounted canonical admin mutations; candidate permission sets for conditional policies, with policy fingerprints; source checks, not runtime or owner atomicity proof",
   "routes": [
@@ -4189,6 +4189,22 @@
       "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
     },
     {
+      "method": "PATCH",
+      "path": "/admin/courses/learning-paths/:pathId",
+      "owner": "CourseAdminRouter",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
+      "permissionEvidence": [
+        "admin:courses:manage"
+      ],
+      "conditionalPermissionReview": false,
+      "validationEvidence": "DIRECT_API_PARSE",
+      "idempotency": "GLOBAL_ADMIN_REQUIRED",
+      "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
+      "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
+      "atomicOutbox": "OWNER_VERIFICATION_REQUIRED",
+      "source": "apps/api/src/presentation/api/router/CourseAdminRouter.ts"
+    },
+    {
       "method": "POST",
       "path": "/admin/courses/learning-paths/:pathId/archive",
       "owner": "CourseAdminRouter",
@@ -7850,7 +7866,7 @@
       "method": "PUT",
       "path": "/admin/study-destinations/:iso2Code/profile",
       "owner": "StudyDestinationAdminRouter",
-      "classification": "STANDARD_AUDIT_REQUIRED",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:reference-data:manage"
       ],
@@ -7882,7 +7898,7 @@
       "method": "POST",
       "path": "/admin/study-destinations/:iso2Code/submit-review",
       "owner": "StudyDestinationAdminRouter",
-      "classification": "STANDARD_AUDIT_REQUIRED",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:reference-data:manage"
       ],
@@ -7898,12 +7914,12 @@
       "method": "POST",
       "path": "/admin/study-destinations/:iso2Code/verify-source",
       "owner": "StudyDestinationAdminRouter",
-      "classification": "STANDARD_AUDIT_REQUIRED",
+      "classification": "CRITICAL_AUDIT_REQUIRED",
       "permissionEvidence": [
         "admin:reference-data:manage"
       ],
       "conditionalPermissionReview": false,
-      "validationEvidence": "OWNER_OR_HANDLER_VERIFICATION_REQUIRED",
+      "validationEvidence": "DIRECT_API_PARSE",
       "idempotency": "GLOBAL_ADMIN_REQUIRED",
       "auditEvidence": "REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME",
       "atomicBusinessAudit": "OWNER_VERIFICATION_REQUIRED",
@@ -8148,5 +8164,6 @@
     "newHandlers": 4,
     "previewReadOnly": true,
     "ownerAtomicity": "New owner implementation reviewed; real database rollback is deferred"
-  }
+  },
+  "sourceReview": "Sections 12 and 13: StudyDestination atomic command boundary and LearningPath draft PATCH; runtime owner evidence remains required"
 }

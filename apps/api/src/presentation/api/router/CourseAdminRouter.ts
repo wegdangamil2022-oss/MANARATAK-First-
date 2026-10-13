@@ -265,6 +265,10 @@ export class CourseAdminRouter {
       res.setHeader('ETag', `"${path.version}"`);
       res.json(path);
     }));
+    router.patch('/learning-paths/:pathId', asyncHandler(async (req, res, scope) => {
+      const input = learningPathSchema.omit({slug: true}).strict().parse(req.body);
+      res.json(await scope.learningPathUseCases.updateDraft(req.params.pathId, input));
+    }));
     router.post('/learning-paths/:pathId/mark-publishable', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {learningPathUseCases}=scope;
       res.json(await learningPathUseCases.markReadyToPublish(req.params.pathId));

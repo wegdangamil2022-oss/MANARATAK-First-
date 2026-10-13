@@ -112,6 +112,7 @@ export function StudyDestinationsAdminPage() {
   const [region, setRegion] = useState('');
   const [status, setStatus] = useState('');
   const [completeness, setCompleteness] = useState('');
+  const [missingCheck, setMissingCheck] = useState('');
   const [cooldown, setCooldown] = useState<number | null>(null);
 
   const load = useCallback(async () => {
@@ -123,6 +124,7 @@ export function StudyDestinationsAdminPage() {
       if (query.trim()) params.set('q', query.trim());
       if (region) params.set('region', region);
       if (status) params.set('status', status);
+      if (missingCheck) params.set('missingCheck', missingCheck);
       if (completeness) params.set('completenessStatus', completeness);
       const next = await adminApiClient.request<PageResult>(`/admin/study-destinations?${params}`);
       if (request !== sequence.current) return;
@@ -144,7 +146,7 @@ export function StudyDestinationsAdminPage() {
     } finally {
       if (request === sequence.current) setLoading(false);
     }
-  }, [query, region, status, completeness, page]);
+  }, [query, region, status, completeness, missingCheck, page]);
 
   useEffect(() => {
     const id = window.setTimeout(load, 220);
@@ -178,6 +180,7 @@ export function StudyDestinationsAdminPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+      <label className="block text-sm">{isAr ? 'نقص القسم — العدد الكلي مطابق للفلتر، المؤشرات الأخرى للصفحة الحالية' : 'Missing section — total matches filters; other metrics cover current page'}<select value={missingCheck} onChange={event => {setMissingCheck(event.target.value); setPage(1);}} className="mx-2 rounded border p-2"><option value="">{isAr ? 'الكل' : 'All'}</option>{['OVERVIEW','ACADEMICS','VISA','LIVING_COST','OFFICIAL_LINKS','EVIDENCE'].map(check => <option key={check} value={check}>{check}</option>)}</select></label>
       <header className="rounded-3xl border border-[#142B5F]/15 bg-gradient-to-br from-[#142B5F] to-[#0E7C86] p-6 text-white shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>

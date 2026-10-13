@@ -690,7 +690,8 @@
         "mfaUseCases",
         "recoverAssetLifecycleUseCase",
         "referenceOwnerReviewUseCases",
-        "settingsGovernanceUseCases"
+        "settingsGovernanceUseCases",
+        "studyDestinationUseCases"
       ],
       "dependencies": [
         "atomicAuditedOutboxMutationExecutor"
@@ -5058,6 +5059,7 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "assetReferencePolicy",
+        "atomicDomainMutationCoordinator",
         "referenceDataRepository",
         "studyDestinationRepository"
       ]

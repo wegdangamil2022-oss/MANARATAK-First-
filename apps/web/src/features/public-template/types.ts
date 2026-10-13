@@ -89,6 +89,8 @@ export interface CountryDestination {
   publicId?: string;
   slug?: string;
   ownerId?: string;
+  isFeatured?: boolean;
+  monthlyLivingCostRange?: {min: number; max: number; currencyCode: string; period: 'MONTH'};
   name: string;
   nameEn: string;
   flag: string;

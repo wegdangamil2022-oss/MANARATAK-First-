@@ -487,6 +487,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Source only, unapplied. Preserve P10 review and receipt/publication evidence; drain writers and use a reviewed compatible backup or forward fix. No destructive down SQL."
+    },
+    "20261013030000_study_destination_review_proof": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source only; no migration applied or legacy verification backfill. Preserve actual review evidence when recovering; use pre-migration backup or disposable reprovisioning after authorization."
     }
   }
 }

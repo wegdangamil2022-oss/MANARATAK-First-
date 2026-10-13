@@ -388,7 +388,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, {id: 'asc'}],
       }),
       this.prisma.course.count({ where }),
     ]);

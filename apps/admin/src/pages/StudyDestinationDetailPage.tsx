@@ -65,6 +65,8 @@ type EvidenceItem = { label: string; url: string; sourceType: string; verifiedAt
 type CostItem = { label: string; value: string };
 
 type Profile = {
+  lastEditedBy?: string | null;
+  sourceReviewProof?: {actorId: string; reviewedAt: string; fingerprint: string; reason: string; approvedOrigins: string[]} | null;
   updatedAt: string;
   id: string;
   publicId: string;
@@ -240,7 +242,7 @@ const linkLines = (items?: LinkItem[]) =>
   (items ?? [])
     .map(
       (item) =>
-        `${item.labelAr} | ${item.url} | ${item.category}$ | ${item.labelEn ?? ''} | ${item.noteAr ?? ''} | ${item.noteEn ?? ''}`,
+        `${item.labelAr} | ${item.url} | ${item.category} | ${item.labelEn ?? ''} | ${item.noteAr ?? ''} | ${item.noteEn ?? ''}`,
     )
     .join('\n');
 const parseLinkLines = (value: string): LinkItem[] =>
@@ -474,7 +476,7 @@ export function StudyDestinationDetailPage() {
         : parseLinkLines(form.officialLinks),
     evidenceSources:
       form.evidenceSources === evidenceLines(aggregate?.profile?.evidenceSources)
-        ? (aggregate?.profile?.evidenceSources ?? [])
+        ? (aggregate?.profile?.evidenceSources ?? []).map(source => ({label: source.label, url: source.url, sourceType: source.sourceType}))
         : parseEvidenceLines(form.evidenceSources),
     sourceAuditDate:
       form.sourceAuditDate === dateInput(aggregate?.profile?.sourceAuditDate)
@@ -501,6 +503,8 @@ export function StudyDestinationDetailPage() {
     setNotice(null);
     let saved = false;
     try {
+      const reason = window.prompt(isAr ? 'سبب تعديل وجهة الدراسة' : 'Reason for this edit');
+      if (!reason?.trim()) return;
       const payload = buildPayload();
       for (const cost of [payload.averageMonthlyLivingCostMin, payload.averageMonthlyLivingCostMax])
         if (cost !== null && (!Number.isFinite(cost) || cost < 0))
@@ -513,7 +517,7 @@ export function StudyDestinationDetailPage() {
         throw new Error('الحد الأعلى للمعيشة يجب ألا يقل عن الحد الأدنى.');
       await adminApiClient.request<Aggregate>(
         `/admin/study-destinations/${encodeURIComponent(iso2)}/profile`,
-        { method: 'PUT', body: JSON.stringify(payload) },
+        { method: 'PUT', headers: {'X-Review-Reason': reason}, body: JSON.stringify(payload) },
       );
       saved = true;
       await readSaved();
@@ -558,6 +562,8 @@ export function StudyDestinationDetailPage() {
       )
     )
       return;
+    const reviewReason = window.prompt(isAr ? 'اكتب سبب اعتماد المصادر الرسمية بعد مراجعة أصل كل رابط. يجب أن يكون المراجع شخصًا آخر غير آخر محرر.' : 'Explain your official-source review. Reviewer must differ from the last editor.');
+    if (!reviewReason?.trim()) return;
     mutation.current = true;
     setAction(name);
     setError(null);
@@ -566,7 +572,7 @@ export function StudyDestinationDetailPage() {
     try {
       await adminApiClient.request<Aggregate>(
         `/admin/study-destinations/${encodeURIComponent(iso2)}/${name}`,
-        { method: 'POST', body: '{}' },
+        { method: 'POST', headers: {'X-Review-Reason': reviewReason}, body: name === 'verify-source' ? JSON.stringify({ expectedUpdatedAt: aggregate?.profile?.updatedAt, reason: reviewReason, approvedOrigins: [...new Set([...(aggregate?.profile?.evidenceSources ?? []).map(source => new URL(source.url).origin), ...(aggregate?.profile?.officialLinks ?? []).map(link => new URL(link.url).origin), ...(aggregate?.profile?.visaOfficialUrl ? [new URL(aggregate.profile.visaOfficialUrl).origin] : [])])] }) : JSON.stringify({expectedUpdatedAt: aggregate?.profile?.updatedAt}) },
       );
       applied = true;
       await readSaved();
@@ -1078,6 +1084,7 @@ function RelationsPanel({
   if (!graph)
     return <Empty text={isAr ? 'تعذر تحميل شبكة العلاقات.' : 'Relationship graph unavailable.'} />;
   const r = graph.relationships;
+  const scholarshipsHref = `/scholarships?countryReferenceId=${encodeURIComponent(country.id)}`;
   const universitiesHref = `/universities?countryReferenceId=${encodeURIComponent(country.id)}`;
   return (
     <section className="space-y-6">
@@ -1089,6 +1096,7 @@ function RelationsPanel({
           ? 'لا نخزن جامعة/منحة/اختبار/خدمة/وظيفة كقائمة JSON داخل ملف الدولة. كل علاقة تُقرأ من المجال المالك باستخدام Country Reference ID أو ISO2 Canonical.'
           : 'Universities, scholarships, tests, services, and jobs remain owned by their domains and are composed by canonical country identity.'}
       </div>
+      <div className="flex gap-3 text-sm"><Link to={universitiesHref}>{isAr ? 'كل جامعات الدولة' : 'All country universities'}</Link><Link to={scholarshipsHref}>{isAr ? 'كل منح الدولة' : 'All country scholarships'}</Link></div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
         <RelationMetric
           icon={Building2}
@@ -1281,6 +1289,7 @@ function SourcesPanel({
       <Title icon={FileCheck2}>
         {isAr ? 'المصادر الرسمية والروابط' : 'Official sources & links'}
       </Title>
+      {profile?.sourceReviewProof ? <dl className="rounded border p-3 text-sm"><dt>{isAr ? 'المراجع المستقل وتوقيت الاعتماد' : 'Independent reviewer and approval time'}</dt><dd>{profile.sourceReviewProof.actorId} · {profile.sourceReviewProof.reviewedAt}</dd><dt>{isAr ? 'سبب القرار' : 'Decision reason'}</dt><dd>{profile.sourceReviewProof.reason}</dd><dt>{isAr ? 'الأصول الرسمية التي راجعها' : 'Reviewed official origins'}</dt><dd>{profile.sourceReviewProof.approvedOrigins.join(', ')}</dd></dl> : <p>{isAr ? 'لا توجد مراجعة مستقلة صالحة محفوظة.' : 'No saved current independent review.'}</p>}
       <div
         className={`rounded-xl border p-4 text-sm font-bold ${profile?.sourceVerificationStatus === 'VERIFIED' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-amber-200 bg-amber-50 text-amber-900'}`}
       >

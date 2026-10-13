@@ -65,6 +65,22 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
     });
   }
 
+  public async updateDraft(id: string, data: Omit<CreateLearningPathDto, 'publicId'|'slug'>): Promise<LearningPathDto> {
+    if (!this.transactionBound) throw new Error('LEARNING_PATH_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    return this.serializable(async db => {
+      await db.$queryRaw`SELECT id FROM "LearningPath" WHERE id = ${id} FOR UPDATE`;
+      const current = await db.learningPath.findUnique({where: {id}});
+      if (!current) throw new Error('LEARNING_PATH_NOT_FOUND');
+      if (current.status !== LearningPathStatus.DRAFT) throw new Error('LEARNING_PATH_DRAFT_REQUIRED');
+      const courses = data.courses ?? [];
+      const path = await db.learningPath.update({where: {id}, data: {title: data.title.trim(), description: data.description, isStrictlyOrdered: data.isStrictlyOrdered ?? false, completionLogic: data.completionLogic ?? 'ALL_REQUIRED', version: current.version + 1}});
+      const version = await db.learningPathVersion.create({data: {learningPathId: id, versionNumber: path.version, status: LearningPathStatus.DRAFT,
+        snapshot: json({title: path.title, description: path.description, isStrictlyOrdered: path.isStrictlyOrdered, completionLogic: path.completionLogic, courses}),
+        courses: {create: courses.map(item => ({courseId: item.courseId, position: item.position, required: item.required, prerequisiteCourseIds: json(item.prerequisiteCourseIds)}))}}, include: {courses: true}});
+      return this.map(path, version.courses);
+    });
+  }
+
   public async findById(id: string): Promise<LearningPathDto | null> {
     const path = await this.prisma.learningPath.findUnique({ where: { id } });
     if (!path) return null;

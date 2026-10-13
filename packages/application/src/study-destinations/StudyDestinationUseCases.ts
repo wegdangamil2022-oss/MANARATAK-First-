@@ -1,8 +1,11 @@
+import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../event-foundation/use-cases/AtomicDomainMutationCoordinator';
+import { createHash } from 'node:crypto';
 import {
   AssetReferencePolicy,
   assertAssetReferenceUsable,
 } from '../asset-platform/AssetReferencePolicy';
 import {
+  AssetSecurityClassification,
   IReferenceDataRepository,
   IReferenceResolutionRepository,
   IStudyDestinationRepository,
@@ -39,14 +42,20 @@ export interface AdminStudyDestinationListFilters {
   region?: string;
   status?: StudyDestinationStatus | 'NO_PROFILE';
   completenessStatus?: StudyDestinationCompletenessStatus;
+  missingCheck?: 'OVERVIEW'|'ACADEMICS'|'VISA'|'LIVING_COST'|'OFFICIAL_LINKS'|'EVIDENCE';
   page?: number;
   pageSize?: number;
 }
 
-export interface PublicStudyDestinationDto extends StudyDestinationProfileDto {
-  country: ReferenceCountryDto;
-  studyLanguages: ReferenceLanguageDto[];
-  livingCostCurrency: ReferenceCurrencyDto | null;
+export type PublicStudyDestinationDto = Pick<StudyDestinationProfileDto,
+  'publicId' | 'slug' | 'overviewAr' | 'overviewEn' | 'studySystemSummaryAr' | 'studySystemSummaryEn' |
+  'admissionHighlightsAr' | 'admissionHighlightsEn' | 'visaSummaryAr' | 'visaSummaryEn' |
+  'visaRequirementsAr' | 'visaRequirementsEn' | 'visaOfficialUrl' | 'livingCostTier' |
+  'averageMonthlyLivingCostMin' | 'averageMonthlyLivingCostMax' | 'costHighlightsAr' | 'costHighlightsEn' |
+  'studentLifeHighlightsAr' | 'studentLifeHighlightsEn' | 'officialLinks' | 'isFeatured'> & {
+  country: Pick<ReferenceCountryDto, 'id'|'iso2Code'|'iso3Code'|'name'|'nameAr'|'officialName'|'region'|'subregion'|'defaultCurrencyCode'|'defaultLanguageCode'|'callingCode'|'isActive'>;
+  studyLanguages: Array<Pick<ReferenceLanguageDto, 'id'|'name'|'nameAr'|'isoCode'|'isActive'>>;
+  livingCostCurrency: Pick<ReferenceCurrencyDto, 'id'|'name'|'nameAr'|'isoCode'|'isActive'> | null;
 }
 
 const normalizeTextArray = (items: string[] | undefined): string[] | undefined =>
@@ -59,7 +68,26 @@ export class StudyDestinationUseCases {
     private readonly referenceResolution: IReferenceResolutionRepository,
     private readonly publishingPolicy = new StudyDestinationPublishingPolicy(),
     private readonly assetReferences?: AssetReferencePolicy,
+    private readonly atomicMutations?: AtomicDomainMutationCoordinator,
   ) {}
+
+  public async executeAdminMutation(iso2: string, action: string, context: AtomicMutationRequestContext & {reason: string; expectedUpdatedAt?: string}, operation: (owner: StudyDestinationUseCases) => Promise<StudyDestinationAggregateDto>) {
+    if (!context.actorId || context.reason.trim().length < 3) throw new Error('STUDY_DESTINATION_ACTOR_REASON_REQUIRED');
+    if (!this.atomicMutations || !this.repository.withTransaction) throw new Error('STUDY_DESTINATION_ATOMIC_PERSISTENCE_REQUIRED');
+    const country = await this.requireCountry(iso2);
+    return this.atomicMutations.execute({domain: 'STUDY_DESTINATIONS', aggregateType: 'STUDY_DESTINATION', aggregateId: country.id, action,
+      context, auditMetadata: {reason: context.reason, expectedUpdatedAt: context.expectedUpdatedAt},
+      outbox: {payload: {countryReferenceId: country.id, operation: action, requiresPublishedProfile: true}}}, async persistence => {
+      const repository = this.repository.withTransaction!(persistence);
+      if (!repository.lockCountry) throw new Error('STUDY_DESTINATION_OWNER_LOCK_REQUIRED');
+      await repository.lockCountry(country.id);
+      const current = await repository.findByCountryReferenceId(country.id);
+      if (current && !context.expectedUpdatedAt) throw new Error('STUDY_DESTINATION_EXPECTED_REVISION_REQUIRED');
+      if (current && current.updatedAt !== context.expectedUpdatedAt) throw new Error('STUDY_DESTINATION_VERSION_CONFLICT');
+      const owner = new StudyDestinationUseCases(repository, this.referenceData, this.referenceResolution, this.publishingPolicy, this.assetReferences);
+      return operation(owner);
+    });
+  }
 
   public async listAdmin(
     filters: AdminStudyDestinationListFilters = {},
@@ -69,9 +97,11 @@ export class StudyDestinationUseCases {
       q: filters.q,
       region: filters.region,
     });
+    const batch = this.repository.findByCountryReferenceIds ? await this.repository.findByCountryReferenceIds(countries.map(country => country.id)) : null;
+    const byCountry = new Map(batch?.map(profile => [profile.countryReferenceId, profile]));
     const items = await Promise.all(
       countries.map(async (country) => {
-        const profile = await this.repository.findByCountryReferenceId(country.id);
+        const profile = batch ? (byCountry.get(country.id) ?? null) : await this.repository.findByCountryReferenceId(country.id);
         return {
           country,
           profile,
@@ -80,6 +110,7 @@ export class StudyDestinationUseCases {
       }),
     );
     const filtered = items.filter((item) => {
+      if (filters.missingCheck && item.readiness && !item.readiness.checks.some(check => check.section === filters.missingCheck && !check.complete)) return false;
       if (filters.status === 'NO_PROFILE' && item.profile) return false;
       if (
         filters.status &&
@@ -116,7 +147,9 @@ export class StudyDestinationUseCases {
     iso2Code: string,
     input: StudyDestinationProfileInput,
     expectedUpdatedAt?: string,
+    actorId?: string,
   ): Promise<StudyDestinationAggregateDto> {
+    if (!actorId?.trim()) throw new Error('STUDY_DESTINATION_ACTOR_REQUIRED');
     await assertAssetReferenceUsable(this.assetReferences, input.imageAssetId, {
       purpose: 'STUDY_DESTINATION_IMAGE',
     });
@@ -129,6 +162,7 @@ export class StudyDestinationUseCases {
     if (!existing) {
       saved = await this.repository.create({
         ...normalized,
+        lastEditedBy: actorId,
         publicId: `std-${country.iso2Code.toUpperCase()}`,
         slug: country.iso2Code.toLowerCase(),
         countryReferenceId: country.id,
@@ -136,8 +170,10 @@ export class StudyDestinationUseCases {
         completenessStatus: StudyDestinationCompletenessStatus.INCOMPLETE,
       });
     } else {
+      if (!expectedUpdatedAt) throw new Error('STUDY_DESTINATION_EXPECTED_REVISION_REQUIRED');
       await this.normalizeAndValidateInput({ ...existing, ...normalized });
       const sourceSensitiveChanged = this.hasSourceSensitiveChange(existing, normalized);
+      if (!sourceSensitiveChanged && normalized.evidenceSources && existing.sourceReviewProof && existing.sourceVerificationStatus === StudyDestinationVerificationStatus.VERIFIED) normalized.evidenceSources = existing.evidenceSources;
       const provisional = {
         ...existing,
         ...normalized,
@@ -152,6 +188,7 @@ export class StudyDestinationUseCases {
         existing.id,
         {
           ...normalized,
+          ...(sourceSensitiveChanged ? { lastEditedBy: actorId, sourceReviewProof: null } : {}),
           ...(sourceSensitiveChanged
             ? { sourceVerificationStatus: StudyDestinationVerificationStatus.UNVERIFIED }
             : {}),
@@ -190,9 +227,15 @@ export class StudyDestinationUseCases {
     return this.aggregate(country, saved);
   }
 
-  public async verifySources(iso2Code: string): Promise<StudyDestinationAggregateDto> {
+  public async verifySources(iso2Code: string, review?: {actorId: string; reason: string; approvedOrigins: string[]}): Promise<StudyDestinationAggregateDto> {
     const country = await this.requireCountry(iso2Code);
     const profile = await this.requireProfile(country.id);
+    if (!review?.actorId || !review.reason.trim() || !profile.lastEditedBy) throw new Error('STUDY_DESTINATION_REVIEW_PROOF_REQUIRED');
+    if (review.actorId === profile.lastEditedBy) throw new Error('STUDY_DESTINATION_INDEPENDENT_REVIEW_REQUIRED');
+    if (profile.status !== StudyDestinationStatus.IN_REVIEW) throw new Error('STUDY_DESTINATION_REVIEW_REQUIRED');
+    const origins = this.sourceOrigins(profile);
+    if (origins.some(origin => !review.approvedOrigins.includes(origin))) throw new Error('STUDY_DESTINATION_OFFICIAL_ORIGIN_REVIEW_REQUIRED');
+    if (profile.sourceAuditDate && (!Number.isFinite(Date.parse(profile.sourceAuditDate)) || Date.parse(profile.sourceAuditDate) > Date.now())) throw new Error('STUDY_DESTINATION_INVALID_SOURCE_AUDIT_DATE');
     if (!profile.evidenceSources.length || !profile.sourceAuditDate)
       throw new Error('STUDY_DESTINATION_EVIDENCE_REQUIRED');
     profile.evidenceSources.forEach((source) => this.assertUrl(source.url, 'INVALID_EVIDENCE_URL'));
@@ -202,19 +245,17 @@ export class StudyDestinationUseCases {
       sourceVerificationStatus: StudyDestinationVerificationStatus.VERIFIED,
       evidenceSources: profile.evidenceSources.map((source) => ({
         ...source,
-        verifiedAt: source.verifiedAt ?? verifiedAt,
+        verifiedAt,
       })),
     };
     const readiness = this.publishingPolicy.evaluate(verified);
     const final = await this.repository.update(
       profile.id,
       {
+        sourceReviewProof: { actorId: review.actorId, reviewedAt: verifiedAt, fingerprint: this.sourceFingerprint(profile), reason: review.reason.trim(), approvedOrigins: origins },
         sourceVerificationStatus: verified.sourceVerificationStatus,
         evidenceSources: verified.evidenceSources,
-        completenessStatus:
-          profile.status === StudyDestinationStatus.PUBLISHED
-            ? StudyDestinationCompletenessStatus.COMPLETE
-            : readiness.completenessStatus,
+        completenessStatus: readiness.completenessStatus,
       },
       profile.updatedAt,
     );
@@ -225,6 +266,8 @@ export class StudyDestinationUseCases {
     const country = await this.requireCountry(iso2Code);
     const profile = await this.requireProfile(country.id);
     await this.normalizeAndValidateInput(profile);
+    this.assertReviewProof(profile);
+    await assertAssetReferenceUsable(this.assetReferences, profile.imageAssetId, {purpose: 'STUDY_DESTINATION_IMAGE', publicPublication: true, allowedClassifications: [AssetSecurityClassification.PUBLIC], allowedMimeTypePrefixes: ['image/']});
     if (profile.status !== StudyDestinationStatus.IN_REVIEW)
       throw new Error('STUDY_DESTINATION_REVIEW_REQUIRED');
     const readiness = this.publishingPolicy.evaluate(profile);
@@ -262,8 +305,11 @@ export class StudyDestinationUseCases {
           const match = await this.referenceResolution.resolveCountryCandidate({
             id: profile.countryReferenceId,
           });
-          if (!match?.record?.isActive) return null;
-          return this.publicDto(match.record, profile);
+          if (!match?.record?.isActive || !this.hasReviewProof(profile)) return null;
+          try { return await this.publicDto(match.record, profile); } catch (error) {
+            if (error instanceof Error && error.message === 'STUDY_DESTINATION_NOT_FOUND') return null;
+            throw error;
+          }
         }),
       )
     ).filter((item): item is PublicStudyDestinationDto => Boolean(item));
@@ -277,7 +323,7 @@ export class StudyDestinationUseCases {
     const match = await this.referenceResolution.resolveCountryCandidate({
       id: profile.countryReferenceId,
     });
-    if (!match?.record?.isActive) throw new Error('STUDY_DESTINATION_NOT_FOUND');
+    if (!match?.record?.isActive || !this.hasReviewProof(profile)) throw new Error('STUDY_DESTINATION_NOT_FOUND');
     return this.publicDto(match.record, profile);
   }
 
@@ -320,12 +366,29 @@ export class StudyDestinationUseCases {
     profile: StudyDestinationProfileDto,
   ): Promise<PublicStudyDestinationDto> {
     const aggregate = await this.aggregate(country, profile);
-    return {
-      ...profile,
-      country,
-      studyLanguages: aggregate.studyLanguages,
-      livingCostCurrency: aggregate.livingCostCurrency,
-    };
+    if (aggregate.studyLanguages.some(item => !item.isActive) || (profile.livingCostCurrencyReferenceId && !aggregate.livingCostCurrency?.isActive)) throw new Error('STUDY_DESTINATION_NOT_FOUND');
+    const allowed = ['publicId','slug','overviewAr','overviewEn','studySystemSummaryAr','studySystemSummaryEn','admissionHighlightsAr','admissionHighlightsEn','visaSummaryAr','visaSummaryEn','visaRequirementsAr','visaRequirementsEn','visaOfficialUrl','livingCostTier','averageMonthlyLivingCostMin','averageMonthlyLivingCostMax','costHighlightsAr','costHighlightsEn','studentLifeHighlightsAr','studentLifeHighlightsEn','officialLinks','isFeatured'] as const;
+    const content = Object.fromEntries(allowed.map(key => [key, profile[key]])) as Pick<PublicStudyDestinationDto, typeof allowed[number]>;
+    return { ...content, country: { id: country.id, iso2Code: country.iso2Code, iso3Code: country.iso3Code, name: country.name, nameAr: country.nameAr, officialName: country.officialName, region: country.region, subregion: country.subregion, defaultCurrencyCode: country.defaultCurrencyCode, defaultLanguageCode: country.defaultLanguageCode, callingCode: country.callingCode, isActive: true },
+      studyLanguages: aggregate.studyLanguages.map(item => ({id: item.id, name: item.name, nameAr: item.nameAr, isoCode: item.isoCode, isActive: true})),
+      livingCostCurrency: aggregate.livingCostCurrency ? {id: aggregate.livingCostCurrency.id, name: aggregate.livingCostCurrency.name, nameAr: aggregate.livingCostCurrency.nameAr, isoCode: aggregate.livingCostCurrency.isoCode, isActive: true} : null };
+  }
+
+  private sourceOrigins(profile: StudyDestinationProfileDto): string[] {
+    return [...new Set([...profile.evidenceSources.map(source => source.url), ...profile.officialLinks.map(link => link.url), ...(profile.visaOfficialUrl ? [profile.visaOfficialUrl] : [])].map(url => new URL(url).origin))].sort();
+  }
+  private sourceFingerprint(profile: StudyDestinationProfileDto): string {
+    const keys = ['publicId','slug','countryReferenceId','overviewAr','overviewEn','studySystemSummaryAr','studySystemSummaryEn','admissionHighlightsAr','admissionHighlightsEn','visaSummaryAr','visaSummaryEn','visaRequirementsAr','visaRequirementsEn','visaOfficialUrl','livingCostTier','averageMonthlyLivingCostMin','averageMonthlyLivingCostMax','livingCostCurrencyReferenceId','costHighlightsAr','costHighlightsEn','studentLifeHighlightsAr','studentLifeHighlightsEn','officialLinks','sourceAuditDate','imageAssetId','studyLanguageReferenceIds','isFeatured'] as const;
+    const facts = Object.fromEntries(keys.map(key => [key, profile[key]]));
+    const evidenceSources = profile.evidenceSources.map(({verifiedAt, ...fact}) => fact);
+    return createHash('sha256').update(JSON.stringify({...facts, evidenceSources})).digest('hex');
+  }
+  private hasReviewProof(profile: StudyDestinationProfileDto): boolean {
+    const proof = profile.sourceReviewProof;
+    return Boolean(proof && profile.sourceVerificationStatus === StudyDestinationVerificationStatus.VERIFIED && profile.lastEditedBy && proof.actorId !== profile.lastEditedBy && proof.fingerprint === this.sourceFingerprint(profile) && Number.isFinite(Date.parse(proof.reviewedAt)) && Date.parse(proof.reviewedAt) <= Date.now());
+  }
+  private assertReviewProof(profile: StudyDestinationProfileDto): void {
+    if (!this.hasReviewProof(profile)) throw new Error('STUDY_DESTINATION_CURRENT_INDEPENDENT_REVIEW_REQUIRED');
   }
 
   private async requireCountry(iso2Code: string): Promise<ReferenceCountryDto> {
@@ -367,9 +430,7 @@ export class StudyDestinationUseCases {
         url: link.url.trim(),
       })),
       evidenceSources: input.evidenceSources?.map((source) => ({
-        ...source,
-        label: source.label.trim(),
-        url: source.url.trim(),
+        label: source.label.trim(), url: source.url.trim(), sourceType: source.sourceType,
       })),
     };
 
@@ -433,6 +494,7 @@ export class StudyDestinationUseCases {
     input: StudyDestinationProfileInput,
   ): boolean {
     const keys: Array<keyof StudyDestinationProfileInput> = [
+      'imageAssetId', 'isFeatured',
       'overviewAr',
       'overviewEn',
       'studySystemSummaryAr',
@@ -459,6 +521,10 @@ export class StudyDestinationUseCases {
     ];
     return keys.some((key) => {
       if (!(key in input)) return false;
+      if (key === 'evidenceSources') {
+        const editable = (sources: typeof existing.evidenceSources) => sources.map(source => ({label: source.label, url: source.url, sourceType: source.sourceType}));
+        return JSON.stringify(editable(existing.evidenceSources)) !== JSON.stringify(editable(input.evidenceSources ?? []));
+      }
       if (key === 'studyLanguageReferenceIds') return JSON.stringify([...existing.studyLanguageReferenceIds].sort()) !== JSON.stringify([...(input.studyLanguageReferenceIds ?? [])].sort());
       return (
         JSON.stringify(existing[key as keyof StudyDestinationProfileDto] ?? null) !==
@@ -470,7 +536,7 @@ export class StudyDestinationUseCases {
   private assertUrl(value: string, code: string): void {
     try {
       const url = new URL(value);
-      if (!['https:', 'http:'].includes(url.protocol)) throw new Error(code);
+      if (url.protocol !== 'https:' || url.username || url.password) throw new Error(code);
     } catch {
       throw new Error(code);
     }

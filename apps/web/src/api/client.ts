@@ -27,12 +27,8 @@ export interface ReferenceCountryDto {
 }
 
 export interface PublicStudyDestinationDto {
-  id: string;
   publicId: string;
   slug: string;
-  countryReferenceId: string;
-  status: 'PUBLISHED';
-  completenessStatus: 'COMPLETE' | 'READY_TO_PUBLISH' | string;
   overviewAr?: string | null;
   overviewEn?: string | null;
   studySystemSummaryAr?: string | null;
@@ -47,18 +43,12 @@ export interface PublicStudyDestinationDto {
   livingCostTier?: 'LOW' | 'MODERATE' | 'HIGH' | 'VERY_HIGH' | null;
   averageMonthlyLivingCostMin?: number | null;
   averageMonthlyLivingCostMax?: number | null;
-  livingCostCurrencyReferenceId?: string | null;
   costHighlightsAr: Array<{ label: string; value: string }>;
   costHighlightsEn: Array<{ label: string; value: string }>;
   studentLifeHighlightsAr: string[];
   studentLifeHighlightsEn: string[];
   officialLinks: Array<{ labelAr: string; labelEn?: string; url: string; category: string; noteAr?: string; noteEn?: string }>;
-  sourceVerificationStatus: 'VERIFIED';
-  sourceAuditDate?: string | null;
-  imageAssetId?: string | null;
-  studyLanguageReferenceIds: string[];
   isFeatured: boolean;
-  publishedAt?: string | null;
   country: ReferenceCountryDto;
   studyLanguages: Array<{ id: string; name: string; nameAr?: string | null; languageCode?: string; iso6391Code?: string | null }>;
   livingCostCurrency: { id: string; name: string; nameAr?: string | null; isoCode?: string; currencyCode?: string } | null;

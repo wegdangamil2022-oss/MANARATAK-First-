@@ -381,6 +381,32 @@ export function CourseDetailPage() {
       setSaving(false);
     }
   };
+  const manageStructure = async (kind: 'modules'|'lessons', rowId: string, action: 'edit'|'delete'|'up'|'down', parentId?: string) => {
+    if (!id || !snapshot || saving || course?.status === 'PUBLISHED' || course?.status === 'ARCHIVED') return;
+    if (JSON.stringify(formData) !== savedForm || editingLesson) {setError('احفظ أو أغلق التعديلات قبل تغيير ترتيب المنهج.'); return;}
+    const rows = kind === 'modules' ? snapshot.modules : (lessonsByModule[parentId ?? ''] ?? []);
+    const ordered = [...rows].sort((a,b) => a.position-b.position || a.id.localeCompare(b.id));
+    const index = ordered.findIndex(row => row.id === rowId);
+    await mutateCurriculum(async () => {
+      if (action === 'edit') {
+        const title = window.prompt('اسم الوحدة', ordered[index]?.title);
+        if (!title?.trim()) return;
+        const description = window.prompt('وصف الوحدة', (ordered[index] as CourseModule)?.description ?? '');
+        if (description === null) return;
+        await adminApiClient.request(`/admin/courses/${id}/modules/${rowId}`, {method: 'PATCH', body: JSON.stringify({title: title.trim(), description})});
+      } else if (action === 'delete') {
+        if (!window.confirm('أرشفة هذا العنصر؟ سيبقى معرّفه وسجل النسخ محفوظين.')) return;
+        await adminApiClient.request(`/admin/courses/${id}/${kind}/${rowId}`, {method: 'DELETE'});
+      } else {
+        const target = index + (action === 'up' ? -1 : 1);
+        if (index < 0 || target < 0 || target >= ordered.length) return;
+        [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
+        const endpoint = kind === 'modules' ? `modules/reorder` : `modules/${parentId}/lessons/reorder`;
+        await adminApiClient.request(`/admin/courses/${id}/${endpoint}`, {method: 'PUT', body: JSON.stringify({positions: ordered.map((row, position) => ({id: row.id, position: position+1}))})});
+      }
+      await refreshCurriculum();
+    });
+  };
   const saveLesson = async () => {
     if (!id || !editingLesson) return;
     await adminApiClient.request(`/admin/courses/${id}/lessons/${editingLesson.id}`, {
@@ -966,7 +992,7 @@ export function CourseDetailPage() {
                           <h4 className="font-medium">
                             {module.position}. {module.title}
                           </h4>
-                          <p className="text-xs text-gray-500">{module.status}</p>
+                          <p className="text-xs text-gray-500">{module.status}</p><div className="flex gap-2">{(['edit','delete','up','down'] as const).map(action => <button key={action} type="button" aria-label={`${action}: ${module.title}`} disabled={saving || course?.status === 'PUBLISHED' || course?.status === 'ARCHIVED'} onClick={() => void manageStructure('modules', module.id, action)}>{({edit:'تعديل',delete:'أرشفة',up:'↑',down:'↓'})[action]}</button>)}</div>
                         </div>
                       </div>
                       <div className="mt-3 space-y-2">
@@ -979,7 +1005,7 @@ export function CourseDetailPage() {
                               <span>
                                 {lesson.position}. {lesson.title}
                               </span>
-                              <span className="text-xs text-gray-500">{lesson.lessonType}</span>
+                              <span className="text-xs text-gray-500">{lesson.lessonType}</span>{(['delete','up','down'] as const).map(action => <button key={action} type="button" aria-label={`${action}: ${lesson.title}`} disabled={saving || course?.status === 'PUBLISHED' || course?.status === 'ARCHIVED'} onClick={() => void manageStructure('lessons',lesson.id,action,module.id)}>{({delete:'أرشفة',up:'↑',down:'↓'})[action]}</button>)}
                               <button
                                 disabled={saving}
                                 onClick={() => setEditingLesson({ ...lesson })}

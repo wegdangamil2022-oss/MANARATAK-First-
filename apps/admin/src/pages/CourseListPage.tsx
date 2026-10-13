@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { courseProviderRegistryApi, type ProviderRegistryRecord } from '../api/courseProviders';
@@ -77,7 +77,7 @@ interface PaginatedResponse {
 }
 
 export function CourseListPage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const navigate = useNavigate();
   const [data, setData] = useState<PaginatedResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -232,7 +232,7 @@ export function CourseListPage() {
     };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6"><Link to="/courses/learning-paths" className="inline-flex rounded border p-3">{language === 'ar' ? 'إدارة مسارات التعلم' : 'Manage learning paths'}</Link>
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-52 w-52 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none" />
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">

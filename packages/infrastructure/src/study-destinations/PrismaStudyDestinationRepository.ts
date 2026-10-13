@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import {
   IStudyDestinationRepository,
+  AtomicPersistenceContext,
   PaginatedStudyDestinationResult,
   StudyDestinationCompletenessStatus,
   StudyDestinationFilters,
@@ -22,10 +23,27 @@ const num = (value: unknown): number | null =>
   value === null || value === undefined ? null : Number(value);
 
 export class PrismaStudyDestinationRepository implements IStudyDestinationRepository {
-  public constructor(private readonly prisma: PrismaClient) {}
+  public constructor(private readonly prisma: PrismaClient | Prisma.TransactionClient, private readonly transactionBound = false) {}
+  public withTransaction(context: AtomicPersistenceContext): IStudyDestinationRepository {
+    const transactionClient = (context as AtomicPersistenceContext & {transactionClient?: Prisma.TransactionClient}).transactionClient;
+    if (!context.boundaryId || !transactionClient) throw new Error('STUDY_DESTINATION_ATOMIC_TRANSACTION_REQUIRED');
+    return new PrismaStudyDestinationRepository(transactionClient, true);
+  }
+  public async lockCountry(countryReferenceId: string): Promise<void> {
+    if (!this.transactionBound) throw new Error('STUDY_DESTINATION_ATOMIC_TRANSACTION_REQUIRED');
+    await this.prisma.$queryRaw`SELECT id FROM "ReferenceCountry" WHERE id = ${countryReferenceId} FOR UPDATE`;
+  }
+  private inTransaction<T>(operation: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+    return this.transactionBound ? operation(this.prisma) : (this.prisma as PrismaClient).$transaction(operation);
+  }
 
-  private get profiles(): any {
-    return (this.prisma as any).studyDestinationProfile;
+  private get profiles() {
+    return this.prisma.studyDestinationProfile;
+  }
+
+  public async findByCountryReferenceIds(ids: string[]): Promise<StudyDestinationProfileDto[]> {
+    const rows = await this.profiles.findMany({where: {countryReferenceId: {in: ids}}, include: {studyLanguages: true}});
+    return rows.map(row => this.map(row));
   }
 
   public async findById(id: string): Promise<StudyDestinationProfileDto | null> {
@@ -72,14 +90,14 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
   ): Promise<PaginatedStudyDestinationResult<StudyDestinationProfileDto>> {
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 30));
-    const where: any = {
+    const where: Prisma.StudyDestinationProfileWhereInput = {
       status: publishedOnly ? StudyDestinationStatus.PUBLISHED : filters.status,
       completenessStatus: filters.completenessStatus,
       countryReferenceId: filters.countryReferenceId,
       isFeatured: filters.isFeatured,
       countryReference: publishedOnly ? { isActive: true } : undefined,
+      ...(publishedOnly ? { sourceVerificationStatus: 'VERIFIED', sourceReviewProof: {not: Prisma.DbNull}, studyLanguages: {every: {language: {isActive: true}}}, OR: [{livingCostCurrencyReferenceId: null}, {livingCostCurrency: {isActive: true}}] } : {}),
     };
-    Object.keys(where).forEach((key) => where[key] === undefined && delete where[key]);
     const [rows, total] = await Promise.all([
       this.profiles.findMany({
         where,
@@ -91,7 +109,7 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
       this.profiles.count({ where }),
     ]);
     return {
-      data: rows.map((row: any) => this.map(row)),
+      data: rows.map((row) => this.map(row)),
       total,
       page,
       pageSize,
@@ -130,7 +148,7 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
     expectedUpdatedAt?: string,
   ): Promise<StudyDestinationProfileDto> {
     const { studyLanguageReferenceIds, ...profile } = data;
-    return this.prisma.$transaction(async (tx) => {
+    return this.inTransaction(async (tx) => {
       if (expectedUpdatedAt) {
         const result = await tx.studyDestinationProfile.updateMany({
           where: { id, updatedAt: new Date(expectedUpdatedAt) },
@@ -174,14 +192,17 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
       if (result[key] === undefined) continue;
       result[key] = result[key] ?? [];
     }
+    if (result.sourceReviewProof === null) result.sourceReviewProof = Prisma.DbNull;
     if (typeof result.sourceAuditDate === 'string')
       result.sourceAuditDate = new Date(result.sourceAuditDate);
     if (typeof result.publishedAt === 'string') result.publishedAt = new Date(result.publishedAt);
     return result;
   }
 
-  private map(row: any): StudyDestinationProfileDto {
+  private map(row: Prisma.StudyDestinationProfileGetPayload<{include: {studyLanguages: true}}>): StudyDestinationProfileDto {
     return {
+      lastEditedBy: row.lastEditedBy,
+      sourceReviewProof: row.sourceReviewProof as unknown as StudyDestinationProfileDto['sourceReviewProof'],
       id: row.id,
       publicId: row.publicId,
       slug: row.slug,
@@ -213,7 +234,7 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
       evidenceSources: array<StudyDestinationEvidenceSource>(row.evidenceSources),
       imageAssetId: row.imageAssetId,
       studyLanguageReferenceIds: (row.studyLanguages ?? []).map(
-        (item: any) => item.languageReferenceId,
+        (item) => item.languageReferenceId,
       ),
       isFeatured: Boolean(row.isFeatured),
       publishedAt: iso(row.publishedAt),

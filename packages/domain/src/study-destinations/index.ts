@@ -1,3 +1,4 @@
+import type { AtomicPersistenceContext } from '../event-foundation/outbox/TransactionalOutbox';
 export enum StudyDestinationStatus {
   DRAFT = 'DRAFT',
   IN_REVIEW = 'IN_REVIEW',
@@ -59,7 +60,13 @@ export interface StudyDestinationCostHighlight {
   value: string;
 }
 
+export interface StudyDestinationSourceReviewProof {
+  actorId: string; reviewedAt: string; fingerprint: string; reason: string; approvedOrigins: string[];
+}
+
 export interface StudyDestinationProfileDto {
+  lastEditedBy?: string | null;
+  sourceReviewProof?: StudyDestinationSourceReviewProof | null;
   id: string;
   publicId: string;
   slug: string;
@@ -127,6 +134,7 @@ export interface StudyDestinationProfileInput {
 }
 
 export interface StudyDestinationRepositoryCreateInput extends StudyDestinationProfileInput {
+  lastEditedBy?: string;
   publicId: string;
   slug: string;
   countryReferenceId: string;
@@ -135,6 +143,8 @@ export interface StudyDestinationRepositoryCreateInput extends StudyDestinationP
 }
 
 export interface StudyDestinationRepositoryUpdateInput extends StudyDestinationProfileInput {
+  lastEditedBy?: string;
+  sourceReviewProof?: StudyDestinationSourceReviewProof | null;
   status?: StudyDestinationStatus;
   completenessStatus?: StudyDestinationCompletenessStatus;
   publishedAt?: string | null;
@@ -174,6 +184,9 @@ export interface StudyDestinationReadinessReport {
 }
 
 export interface IStudyDestinationRepository {
+  withTransaction?(context: AtomicPersistenceContext): IStudyDestinationRepository;
+  lockCountry?(countryReferenceId: string): Promise<void>;
+  findByCountryReferenceIds?(ids: string[]): Promise<StudyDestinationProfileDto[]>;
   findById(id: string): Promise<StudyDestinationProfileDto | null>;
   findBySlug(slug: string): Promise<StudyDestinationProfileDto | null>;
   findByCountryReferenceId(countryReferenceId: string): Promise<StudyDestinationProfileDto | null>;
@@ -239,7 +252,7 @@ export class StudyDestinationPublishingPolicy {
         key: 'admission-highlights',
         section: 'ACADEMICS',
         label: 'Admission highlights',
-        complete: nonEmpty(profile.admissionHighlightsAr),
+        complete: nonEmpty(profile.admissionHighlightsAr) && nonEmpty(profile.admissionHighlightsEn),
         blocking: true,
       },
       {
@@ -267,7 +280,7 @@ export class StudyDestinationPublishingPolicy {
         key: 'visa-requirements',
         section: 'VISA',
         label: 'Visa requirements',
-        complete: nonEmpty(profile.visaRequirementsAr),
+        complete: nonEmpty(profile.visaRequirementsAr) && nonEmpty(profile.visaRequirementsEn),
         blocking: true,
       },
       {

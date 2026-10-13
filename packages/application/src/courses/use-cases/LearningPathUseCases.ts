@@ -22,6 +22,21 @@ export class LearningPathUseCases {
   ) {}
 
   public async create(input: Omit<CreateLearningPathDto, 'publicId' | 'slug'> & { slug?: string }): Promise<LearningPathDto> {
+    await this.validateDraft(input);
+    const courses = input.courses ?? [];
+    const identity = randomUUID().replace(/-/g, '');
+    const slug = input.slug?.trim() || `${this.slug(input.title)}-${identity.slice(0, 8)}`;
+    return this.repository.create({ ...input, courses, publicId: `LP-${identity.slice(0, 12).toUpperCase()}`, slug });
+  }
+
+  public async updateDraft(id: string, input: Omit<CreateLearningPathDto, 'publicId'|'slug'>): Promise<LearningPathDto> {
+    const path = await this.get(id);
+    if (path.status !== LearningPathStatus.DRAFT) throw new Error('LEARNING_PATH_DRAFT_REQUIRED');
+    await this.validateDraft(input);
+    if (!this.repository.updateDraft) throw new Error('LEARNING_PATH_DRAFT_WRITER_REQUIRED');
+    return this.repository.updateDraft(id, input);
+  }
+  private async validateDraft(input: Omit<CreateLearningPathDto, 'publicId'|'slug'>): Promise<void> {
     const courses = input.courses ?? [];
     if (!input.title.trim()) throw new Error('LEARNING_PATH_TITLE_REQUIRED');
     this.assertCourseGraph(courses);
@@ -33,9 +48,6 @@ export class LearningPathUseCases {
         throw new Error(`LEARNING_PATH_NATIVE_COURSE_REQUIRED:${item.courseId}`);
       }
     }
-    const identity = randomUUID().replace(/-/g, '');
-    const slug = input.slug?.trim() || `${this.slug(input.title)}-${identity.slice(0, 8)}`;
-    return this.repository.create({ ...input, courses, publicId: `LP-${identity.slice(0, 12).toUpperCase()}`, slug });
   }
 
   public async list(): Promise<LearningPathDto[]> {

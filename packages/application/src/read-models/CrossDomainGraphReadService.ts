@@ -1,3 +1,4 @@
+import { budgetedOwnerCursorPage } from './BudgetedOwnerCursorPage';
 import {
   createGraphReadScope,
   graphOwnerRead,
@@ -462,14 +463,14 @@ export class CrossDomainGraphReadService {
         readScope,
         'universities',
         () =>
-          this.universityRepository.listPublished({ countryReferenceId: country.id, limit: pageSize }),
+          budgetedOwnerCursorPage(cursor => this.universityRepository.listPublished({ countryReferenceId: country.id, limit: pageSize, cursor }), page, pageSize),
         empty,
       ),
       graphOwnerRead(
         readScope,
         'scholarships',
         () =>
-          this.scholarshipRepository.listPublished({ countryReferenceId: country.id, limit: pageSize }),
+          budgetedOwnerCursorPage(cursor => this.scholarshipRepository.listPublished({ countryReferenceId: country.id, limit: pageSize, cursor }), page, pageSize),
         empty,
       ),
       graphOwnerRead(

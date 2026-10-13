@@ -1578,6 +1578,8 @@ export default function App() {
                     {/* 4. Featured Countries */}
                     <div className="relative w-full">
                       <FeaturedCountries
+                        countries={countriesForView}
+                        locale={language}
                         onSelectCountry={(country) => {
                           setCountryNavigationName(country);
                           setSelectedCategory('countries');

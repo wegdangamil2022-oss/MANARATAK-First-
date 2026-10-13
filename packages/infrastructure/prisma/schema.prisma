@@ -3871,6 +3871,8 @@ model ReferenceLanguage {
 }
 
 model StudyDestinationProfile {
+  lastEditedBy                     String?
+  sourceReviewProof                 Json?
   id                               String   @id @default(uuid())
   publicId                         String   @unique
   slug                             String   @unique

@@ -148,7 +148,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
   const costItems = country.costHighlights?.length
     ? country.costHighlights
     : [
-        { label: 'متوسط المعيشة', value: country.averageLivingCostUsd },
+        { label: 'متوسط المعيشة', value: country.monthlyLivingCostRange ? `${country.monthlyLivingCostRange.min.toLocaleString()}–${country.monthlyLivingCostRange.max.toLocaleString()} ${country.monthlyLivingCostRange.currencyCode}` : country.averageLivingCostUsd },
         { label: 'تصنيف التكلفة', value: country.livingCost },
       ];
 
@@ -648,7 +648,6 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
         <RelatedArticlesStrip articles={country.relatedArticles} onOpenArticle={onOpenArticle} />
 
         {/* 10. Official links; source/audit and SEO stay admin-only */}
-        {country.sourceAuditDate && <p className="text-xs text-[var(--mn-text-muted)]">آخر تدقيق للمصادر: {country.sourceAuditDate.slice(0, 10)}</p>}
         {country.officialLinks && country.officialLinks.length > 0 && (
           <section className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] dark:border-[var(--mn-border)] bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] px-3 py-3 shadow-2xs mn-panel dark:mn-panel ">
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />

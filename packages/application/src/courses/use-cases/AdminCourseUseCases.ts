@@ -20,6 +20,10 @@ const IMPORT_LINEAGE_FIELDS: ReadonlyArray<keyof UpdateCourseDto> = [
   'officialSourceUrl',
   'externalProviderId',
   'originalSourceTitle',
+  'accessType', 'isStudyFree', 'isFreeCertificate', 'certificateType',
+  'certificateAvailable', 'learningLanguageRaw', 'learningLanguage',
+  'studyLevelRaw', 'studyDurationRaw', 'studyDuration', 'shortCourseTopicsRaw',
+  'platformName', 'providerName', 'sourceImportRecordId',
 ];
 
 export class AdminCourseUseCases {

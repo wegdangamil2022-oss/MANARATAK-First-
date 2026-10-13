@@ -286,6 +286,8 @@ export function mapCountry(dto: PublicStudyDestinationDto, locale: PublicLiveLoc
   }
   return {
     id: country.id,
+    isFeatured: dto.isFeatured,
+    monthlyLivingCostRange: typeof costMin === 'number' && typeof costMax === 'number' ? {min: costMin, max: costMax, currencyCode, period: 'MONTH'} : undefined,
     ownerId: country.id,
     publicId: dto.publicId,
     slug: dto.slug,
@@ -307,8 +309,7 @@ export function mapCountry(dto: PublicStudyDestinationDto, locale: PublicLiveLoc
       : '',
     languageOfStudy: studyLanguages,
     visaSummary: (isAr ? dto.visaSummaryAr : dto.visaSummaryEn) ?? dto.visaSummaryAr ?? dto.visaSummaryEn ?? undefined,
-    sourceAuditDate: dto.sourceAuditDate ?? undefined,
-    visaEase: dto.sourceVerificationStatus === 'VERIFIED' ? (isAr ? 'المصادر موثقة' : 'Sources verified') : (isAr ? 'راجع الجهة الرسمية' : 'Check official sources'),
+    visaEase: isAr ? 'راجع شروط الجهة الرسمية' : 'Check official requirements',
     iso2Code: country.iso2Code,
     iso3Code: country.iso3Code,
     subregion: country.subregion ?? undefined,

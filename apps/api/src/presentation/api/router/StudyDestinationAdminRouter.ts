@@ -1,3 +1,4 @@
+import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import {
@@ -48,8 +49,7 @@ const evidenceSources = z
         'OFFICIAL_STATISTICS',
         'OTHER_OFFICIAL',
       ]),
-      verifiedAt: z.string().datetime().optional(),
-    }),
+    }).strict(),
   )
   .max(50);
 
@@ -63,6 +63,13 @@ export class StudyDestinationAdminRouter {
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
       Promise.resolve(fn(req, res, next)).catch(next);
 
+    const mutation = (req: Request, action: string, operation: (owner: StudyDestinationUseCases) => Promise<unknown>) => {
+      const context = {actorId: requireAuthenticatedPrincipal(req).principalId, actorType: 'IDENTITY', source: 'admin-study-destinations-api',
+        reason: z.string().trim().min(3).max(2000).parse(req.get('X-Review-Reason')),
+        expectedUpdatedAt: z.string().datetime().optional().parse(req.body?.expectedUpdatedAt), correlationId: req.get('X-Correlation-ID')};
+      return studyDestinationUseCases.executeAdminMutation(req.params.iso2Code, action, context, operation as Parameters<StudyDestinationUseCases['executeAdminMutation']>[3]);
+    };
+
     const listSchema = z.object({
       q: z.string().trim().optional(),
       region: z.string().trim().optional(),
@@ -71,6 +78,7 @@ export class StudyDestinationAdminRouter {
         z.union([z.nativeEnum(StudyDestinationStatus), z.literal('NO_PROFILE')]).optional(),
       ),
       completenessStatus: z.nativeEnum(StudyDestinationCompletenessStatus).optional(),
+      missingCheck: z.enum(['OVERVIEW','ACADEMICS','VISA','LIVING_COST','OFFICIAL_LINKS','EVIDENCE']).optional(),
       page: z.coerce.number().int().min(1).optional(),
       pageSize: z.coerce.number().int().min(1).max(100).optional(),
     });
@@ -141,11 +149,7 @@ export class StudyDestinationAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         const { expectedUpdatedAt, ...input } = profileSchema.parse(req.body);
         res.json(
-          await studyDestinationUseCases.upsertProfile(
-            req.params.iso2Code,
-            input,
-            expectedUpdatedAt,
-          ),
+          await mutation(req, 'STUDY_DESTINATION_PROFILE_UPDATED', owner => owner.upsertProfile(req.params.iso2Code, input, expectedUpdatedAt, requireAuthenticatedPrincipal(req).principalId)),
         );
       }),
     );
@@ -153,28 +157,29 @@ export class StudyDestinationAdminRouter {
     router.post(
       '/:iso2Code/submit-review',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await studyDestinationUseCases.submitForReview(req.params.iso2Code));
+        res.json(await mutation(req, 'STUDY_DESTINATION_SUBMITTED_FOR_REVIEW', owner => owner.submitForReview(req.params.iso2Code)));
       }),
     );
 
     router.post(
       '/:iso2Code/verify-source',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await studyDestinationUseCases.verifySources(req.params.iso2Code));
+        const review = z.object({expectedUpdatedAt: z.string().datetime().optional(), reason: z.string().trim().min(3).max(2000), approvedOrigins: z.array(z.string().url()).min(1).max(100)}).strict().parse(req.body);
+        res.json(await mutation(req, 'STUDY_DESTINATION_SOURCES_VERIFIED', owner => owner.verifySources(req.params.iso2Code, {...review, actorId: requireAuthenticatedPrincipal(req).principalId})));
       }),
     );
 
     router.post(
       '/:iso2Code/publish',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await studyDestinationUseCases.publish(req.params.iso2Code));
+        res.json(await mutation(req, 'STUDY_DESTINATION_PUBLISHED', owner => owner.publish(req.params.iso2Code)));
       }),
     );
 
     router.post(
       '/:iso2Code/archive',
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await studyDestinationUseCases.archive(req.params.iso2Code));
+        res.json(await mutation(req, 'STUDY_DESTINATION_ARCHIVED', owner => owner.archive(req.params.iso2Code)));
       }),
     );
 
@@ -184,6 +189,8 @@ export class StudyDestinationAdminRouter {
         return res.status(400).json({ error: 'Validation Error', details: validationError.issues });
       }
       if (err instanceof Error) {
+        if (err.message === 'STUDY_DESTINATION_ATOMIC_PERSISTENCE_REQUIRED') return res.status(503).json({error: err.message});
+        if (err.message === 'STUDY_DESTINATION_EXPECTED_REVISION_REQUIRED') return res.status(428).json({error: err.message});
         if (err.message === 'STUDY_DESTINATION_VERSION_CONFLICT')
           return res.status(409).json({ error: err.message });
         const notFound = [

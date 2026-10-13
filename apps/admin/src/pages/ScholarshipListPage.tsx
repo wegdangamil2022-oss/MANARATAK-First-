@@ -108,7 +108,7 @@ export function ScholarshipListPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [completenessFilter, setCompletenessFilter] = useState('');
   const [countryOptions, setCountryOptions] = useState<CanonicalPickerOption[]>([]);
-  const [countryFilter, setCountryFilter] = useState('');
+  const [countryFilter, setCountryFilter] = useState(() => new URLSearchParams(window.location.search).get('countryReferenceId') ?? '');
   const [fundingFilter, setFundingFilter] = useState('');
   const [degreeFilter, setDegreeFilter] = useState('');
   const [majorFilter, setMajorFilter] = useState('');
@@ -152,7 +152,7 @@ export function ScholarshipListPage() {
       if (completenessFilter) params.append('completenessStatus', completenessFilter);
       if (searchTerm.trim()) params.append('query', searchTerm.trim());
       const selectedCountry = countryOptions.find(item => item.id === countryFilter);
-      if (selectedCountry) params.set('countryReferenceId', selectedCountry.id);
+      if (countryFilter) params.set('countryReferenceId', selectedCountry?.id ?? countryFilter);
       for (const [key, value] of Object.entries({ fundingType: fundingFilter, degreeLabel: degreeFilter, majorLabel: majorFilter, languageLabel: languageFilter, deadlineStatus: deadlineFilter })) if (value) params.set(key, value);
 
       const res = await adminApiClient.request<PaginatedResponse>(`/admin/scholarships?${params.toString()}`);
@@ -460,6 +460,7 @@ export function ScholarshipListPage() {
                 className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
               >
                 <option value="">جميع الدول والوجهات</option>
+                {countryFilter && !countryOptions.some(item => item.id === countryFilter) && <option value={countryFilter}>{isArabic ? 'الدولة المحددة من ملف الوجهة — الاسم غير محمّل' : 'Country selected from destination — name not loaded'}</option>}
                 {countryOptions.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
               </select>
             </div>
