@@ -3,10 +3,10 @@
     "result": "PASS",
     "countries": 194,
     "regions": 5003,
-    "cities": 10428,
+    "cities": 10451,
     "universities": 10723,
-    "sourceMatchedUniversities": 10156,
-    "reviewUniversities": 567,
+    "sourceMatchedUniversities": 10193,
+    "reviewUniversities": 530,
     "missingCountryCityCoverage": 0,
     "scopedCityCollisions": 0,
     "fuzzyRegionLinks": 0,
@@ -30,7 +30,8 @@
   },
   "sourceQualityPrepare": "PASS",
   "sourceQualityReproduction": "PASS",
-  "factualCampusVerification": "INCOMPLETE; 567 source review cases and registry-corroborated city scope limits are explicit",
+  "factualCampusVerification": "INCOMPLETE; 530 source review cases and 214 registry-corroborated city scope limits are explicit",
   "databaseWrites": 0,
-  "runtime": "RUNTIME_UNTESTED"
+  "runtime": "RUNTIME_UNTESTED",
+  "factualCityRegionVerification": "INCOMPLETE; same-country joins and known corrections pass, but full independent verification of all settlements and current administrative boundaries remains open"
 }

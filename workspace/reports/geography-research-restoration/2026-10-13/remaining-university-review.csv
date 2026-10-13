@@ -1,29 +1,19 @@
 ﻿referenceId,name,countryIso3,city,reason,sourcePath
-INS-EGY-0023,University of Sadat City,EGY,Sadat City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0026,Matrouh University,EGY,Marsa Matrouh,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0040,Nahda University in Beni Suef,EGY,New Beni Suef,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
-INS-EGY-0042,Delta University for Science and Technology,EGY,Gamasa,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
-INS-EGY-0044,Deraya University,EGY,New Minia,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0050,New Salhiya University,EGY,New Salhiya,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
-INS-EGY-0054,May University in Cairo,EGY,15th of May City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0057,Al Madina University in Cairo,EGY,Cairo,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
-INS-EGY-0059,Lotus University in Minya,EGY,New Minia,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0062,Obour University for Science and Technology,EGY,Obour City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0065,East Capital University,EGY,New Administrative Capital,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0068,King Salman International University,EGY,Al-Tor,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
-INS-EGY-0074,Benha National University,EGY,Obour City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0077,Menoufia National University,EGY,Sadat City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
-INS-EGY-0078,Minia National University,EGY,New Minia,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0079,Beni-Suef National University,EGY,New Beni Suef,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
-INS-EGY-0080,New Ismailia National University,EGY,New Ismailia,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0081,Assiut National University,EGY,New Assiut,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0082,East Port Said National University,EGY,Salam City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
-INS-EGY-0091,Damanhour National University,EGY,Damanhour,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0093,Ain Shams National University,EGY,New Administrative Capital,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0094,Sohag National University,EGY,New Sohag,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0099,Sadat City National University,EGY,Sadat City,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0100,"International University for Sciences, Arts and Technology",EGY,New Administrative Capital,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
-INS-EGY-0104,Egypt-Japan University of Science and Technology,EGY,New Borg El Arab,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0113,Beni-Suef Technological University,EGY,Beni Suef,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0114,New Assiut Technological University,EGY,New Assiut,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-EGY-0115,Borg El Arab Technological University,EGY,New Borg El Arab,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
@@ -49,7 +39,6 @@ INS-CIV-0088,Université Saint Paul,CIV,Abidjan,OFFICIAL_ADDRESS_NOT_YET_CORROBO
 INS-GMB-0005,Euclid University,GMB,Brusubi,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-GMB-0007,Al Ihsan University,GMB,Banjulinding,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-GMB-0008,Al-Hikma University,GMB,Tallinding,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
-INS-GHA-0008,Ashesi University,GHA,Berekuso,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-GHA-0012,Catholic Institute of Business and Technology,GHA,Accra North,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-GHA-0016,Christian Service University,GHA,Santasi-Kumasi,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
 INS-GHA-0022,Ghana Baptist University College,GHA,Abuakwa-Kumasi,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx
@@ -200,11 +189,9 @@ INS-YEM-0075,Yemeni University,YEM,Sana'a,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,
 INS-SAU-0001,Al Baha University,SAU,Al Baha,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-SAU-0006,Al-Rayan Colleges,SAU,Madinah,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-SAU-0049,Taif University,SAU,Taif,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
-INS-SAU-0050,Umm Al-Qura University,SAU,Makkah,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-ARE-0045,Ocean University,ARE,Dubai,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-ARE-0057,University of Al Dhaid,ARE,Al Dhaid,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-OMN-0023,Oman College of Management and Technology,OMN,Barka,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
-INS-OMN-0028,Sur University College,OMN,Sur,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-QAT-0002,Ahmed Bin Mohammed Military College,QAT,Doha,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-QAT-0011,Hamad Bin Khalifa University,QAT,Al Rayyan,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-KWT-0004,American University of the Middle East,KWT,Egaila,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
@@ -373,7 +360,6 @@ INS-IDN-0037,Universitas Al-washliyah Labuhan Batu,IDN,Labuhan Batu,OFFICIAL_ADD
 INS-IDN-0039,Universitas Amir Hamzah,IDN,Deli Serdang,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0042,Universitas Antakusuma,IDN,Pangkalan Bun,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0081,Universitas Bumi Hijrah,IDN,Tidore Kepulauan,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
-INS-IDN-0090,Universitas Cordova,IDN,Sumbawa Barat,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0095,Universitas Darunnajah,IDN,Jakarta Selatan,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0099,Universitas Dayanu Ikhsanuddin,IDN,Baubau,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0102,Universitas Dharmas Indonesia,IDN,Dharmasraya,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
@@ -383,7 +369,6 @@ INS-IDN-0114,Universitas Dumoga Kotamobagu,IDN,Kotamobagu,OFFICIAL_ADDRESS_NOT_Y
 INS-IDN-0117,Universitas Efarina,IDN,Raya,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0123,Universitas Gajah Putih,IDN,Aceh Tengah,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0132,Universitas Gunung Leuser Aceh,IDN,Aceh Tenggara,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
-INS-IDN-0136,Universitas Hamzanwadi,IDN,Lombok Timur,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0175,Universitas Islam Kuantan Singingi,IDN,Kuantan Singingi,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0176,Universitas Islam Labuhan Batu,IDN,Labuhan Batu,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0192,Universitas Islam Negeri Raden Mas Said Surakarta,IDN,Sukoharjo,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
@@ -440,9 +425,7 @@ INS-IDN-0589,Universitas Wahidiyah,IDN,Kediri,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUO
 INS-IDN-0592,Universitas Widya Dharma,IDN,Klaten,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0601,Universitas Winaya Mukti,IDN,Sumedang,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-IDN-0610,Universitas Yudharta Pasuruan,IDN,Pasuruan,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
-INS-PHL-0017,Baliuag University,PHL,Baliuag,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0018,Bataan Peninsula State University,PHL,Balanga City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
-INS-PHL-0026,Cagayan State University,PHL,Tuguegarao City,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0037,Central Luzon State University,PHL,Science City of Muñoz,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0053,Guimaras State University,PHL,Buenavista,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0063,Laguna State Polytechnic University,PHL,Sta. Cruz,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
@@ -450,17 +433,12 @@ INS-PHL-0069,Manuel L. Quezon University,PHL,Quiapo,OFFICIAL_ADDRESS_NOT_YET_COR
 INS-PHL-0072,Mariano Marcos State University,PHL,Batac,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0083,Notre Dame of Dadiangas University,PHL,City of General Santos,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0088,Our Lady of Fatima University,PHL,Valenzuela City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
-INS-PHL-0114,St. Paul University Philippines,PHL,Tuguegarao City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
-INS-PHL-0129,University of Abra,PHL,Lagangilang,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
-INS-PHL-0135,University of Cagayan Valley,PHL,Tuguegarao City,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0139,University of La Salette,PHL,Santiago City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0149,University of Saint Louis,PHL,Tuguegarao City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0160,University of the Assumption,PHL,City of San Fernando,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0167,Urdaneta City University,PHL,Urdaneta City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
 INS-PHL-0168,Virgen Milagrosa University Foundation,PHL,San Carlos City,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx
-INS-ITA-0060,University of Urbino Carlo Bo,ITA,Urbino,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-HRV-0004,Libertas International University,HRV,Zagreb,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
-INS-CZE-0026,Škoda Auto University,CZE,Mladá Boleslav,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-FRA-0006,Bordeaux Montaigne University,FRA,Pessac,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-FRA-0069,University of French Guiana,FRA,Cayenne,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-FRA-0071,University of French Polynesia,FRA,Punaauia,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
@@ -469,7 +447,6 @@ INS-FRA-0072,University of the Antilles,FRA,Pointe-à-Pitre,OFFICIAL_ADDRESS_NOT
 INS-ISL-0001,Agricultural University of Iceland,ISL,Hvanneyri,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-ISL-0002,Bifröst University,ISL,Bifröst,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-ISL-0003,Hólar University,ISL,Hólar,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
-INS-LTU-0023,SMK University of Applied Sciences,LTU,Klaipėda,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-MCO-0002,Pavillon Bosio – Higher School of Visual Arts of Monaco,MCO,Monaco,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-MKD-0003,Europa Prima International University,MKD,Skopje,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-MKD-0002,European University Skopje,MKD,Skopje,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
@@ -485,7 +462,6 @@ INS-SVN-0015,Faculty of Design,SVN,Trzin,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,w
 INS-ESP-0065,Fernando Pessoa University – Canary Islands,ESP,Santa María de Guía,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-ESP-0021,Jaume I University,ESP,Castelló de la Plana,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-CHE-0019,University of Applied Sciences and Arts of Southern Switzerland,CHE,Manno,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
-INS-UKR-0091,National University of Ostroh Academy,UKR,Ostroh,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-GBR-0117,University of Law,GBR,Guildford,CITY_BINDING_REGION_CONFLICT,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-BLR-0021,Belarusian Trade and Economics University of Consumer Cooperatives,BLR,Gomel,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-BLR-0025,Francisk Skorina Gomel State University,BLR,Gomel,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
@@ -506,15 +482,6 @@ INS-XKX-0007,University of Pristina Hasan Prishtina,XKX,Pristina,OFFICIAL_ADDRES
 INS-XKX-0008,University of Prizren Ukshin Hoti,XKX,Prizren,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-RUS-0222,State University of Education,RUS,Mytishchi,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx
 INS-CAN-0069,Université Sainte-Anne,CAN,Pointe-de-l'Église,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-USA-0202,DeSales University,USA,Center Valley,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-USA-0230,Eastern University,USA,St. Davids,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-USA-0263,Florida Memorial University,USA,Miami Gardens,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-USA-0276,Freed-Hardeman University,USA,Henderson,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-USA-0357,Keystone University,USA,La Plume,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-USA-0429,Milligan University,USA,Elizabethton,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-USA-0554,Roger Williams University,USA,Bristol,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-USA-0591,Siena University,USA,Loudonville,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-USA-0898,Villanova University,USA,Villanova,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-MEX-0013,Instituto Tecnológico de Atitalaquia,MEX,Atitalaquia,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-MEX-0014,Instituto Tecnológico de Bahía de Banderas,MEX,Bahía de Banderas,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-MEX-0016,Instituto Tecnológico de Campeche,MEX,Campeche,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
@@ -534,13 +501,10 @@ INS-MEX-0153,Universidad Tecnológica de la Mixteca,MEX,Huajuapan de León,OFFIC
 INS-MEX-0154,Universidad Tecnológica de León,MEX,León,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-MEX-0156,Universidad Tecnológica de Matamoros,MEX,Matamoros,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-CRI-0036,Universidad Internacional San Isidro Labrador,CRI,Pérez Zeledón,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-SLV-0012,Universidad Dr. José Matías Delgado,SLV,Antiguo Cuscatlán,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-ATG-0001,American University of Antigua College of Medicine,ATG,Coolidge,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-ATG-0002,University of Health Sciences Antigua School of Medicine,ATG,Piccadilly,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-BRB-0004,Victoria University of Barbados School of Medicine,BRB,Warrens,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-DOM-0012,Pontificia Universidad Católica Madre y Maestra,DOM,Santiago de los Caballeros,CITY_BINDING_REGION_CONFLICT,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-DOM-0031,Universidad ISA,DOM,Santiago,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
-INS-DOM-0037,Universidad Tecnológica de Santiago,DOM,Santiago,CITY_BINDING_REGION_CONFLICT,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-DOM-0039,Universidad Tecnológica del Sur,DOM,Azua de Compostela,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-HTI-0003,Université Adventiste d'Haïti,HTI,Diquini,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
 INS-HTI-0014,Université G.O.C.,HTI,Titanyen,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx
@@ -560,7 +524,6 @@ INS-BOL-0013,Universidad Indígena Boliviana Guaraní y Pueblos de Tierras Bajas
 INS-BRA-0133,Universidade do Grande Rio,BRA,Duque de Caxias,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx
 INS-PRY-0038,Universidad Nacional de Canindeyú,PRY,Saltos del Guairá,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx
 INS-PRY-0056,Universidad Santa Clara de Asís,PRY,Caaguazú,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx
-INS-PER-0028,Universidad Nacional Agraria de la Selva,PER,Tingo María,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx
 INS-PER-0032,Universidad Nacional Intercultural de Quillabamba,PER,Quillabamba,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx
 INS-PER-0093,Universidad Nacional Autónoma de Huanta,PER,Huanta,OFFICIAL_ADDRESS_GEOGRAPHY_AMBIGUOUS,workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx
 INS-VEN-0020,Universidad Nacional Experimental Sur del Lago Jesús María Semprum,VEN,Santa Bárbara del Zulia,OFFICIAL_ADDRESS_NOT_YET_CORROBORATED,workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx

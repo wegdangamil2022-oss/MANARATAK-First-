@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Apply frozen source locality decisions and retain all unresolved institutions."""
-import csv, json, hashlib, io, re, unicodedata, math
+import argparse, csv, json, hashlib, re, unicodedata
 from pathlib import Path
 import openpyxl
 
@@ -16,11 +16,20 @@ def records(name):
 def save_records(name, rows):
     (REPORT / name).write_text(''.join(json.dumps(row, ensure_ascii=False) + '\n' for row in rows))
 
-def apply():
+def apply(additional_decisions=None):
     summary = json.loads((REPORT / 'summary.json').read_text())
-    if summary.get('restorationsApplied'):
+    if summary.get('restorationsApplied') and additional_decisions is None:
         raise ValueError('Restorations already applied')
-    decisions = {row['referenceId']: row for row in json.loads((REPORT / 'proposed-university-restorations.json').read_text())}
+    previous = json.loads((REPORT / 'proposed-university-restorations.json').read_text())
+    selected = json.loads(Path(additional_decisions).read_text()) if additional_decisions else previous
+    decisions = {row['referenceId']: row for row in selected}
+    if len(decisions) != len(selected):
+        raise ValueError('Duplicate decision identity')
+    if additional_decisions and set(decisions) & {row['referenceId'] for row in previous}:
+        raise ValueError('Already restored university decision')
+    for artifact in summary['artifacts']:
+        if hashlib.sha256((ROOT / artifact['path']).read_bytes()).hexdigest() != artifact['afterSha256']:
+            raise ValueError('Source changed after the reviewed snapshot')
     region_rows = [row for artifact in summary['artifacts'] if artifact['kind'] == 'regions' for row in csv.DictReader((ROOT / artifact['path']).open(encoding='utf-8-sig'))]
     regions = {row['regionCode']: row for row in region_rows}
     city_files = {artifact['path']: list(csv.DictReader((ROOT / artifact['path']).open(encoding='utf-8-sig'))) for artifact in summary['artifacts'] if artifact['kind'] == 'cities'}
@@ -29,6 +38,10 @@ def apply():
     university_changes = records('university-changes.jsonl')
     def bind_city(decision):
         place = decision['place']
+        if regions[place['regionCode']]['countryIso3'] != decision['countryIso3']:
+            raise ValueError('Cross-country source region decision')
+        if not decision['source'].get('url'):
+            raise ValueError('Missing decision evidence')
         if place.get('existingCityId'):
             city = cities[place['existingCityId']]
             if city['countryIso3'] != decision['countryIso3']:
@@ -70,6 +83,8 @@ def apply():
         return city
     remaining = []
     accepted = 0
+    prepared_workbooks = []
+    applied_refs = set()
     for artifact in summary['artifacts']:
         if artifact['kind'] != 'universities':
             continue
@@ -81,10 +96,13 @@ def apply():
         review_header_index = next(i for i, values in enumerate(review.values, 1) if 'Reference ID' in values)
         review_headers = [cell.value for cell in review[review_header_index]]
         archive_path = ROOT / 'workspace/reports/active-geography-alignment/2026-10-13' / path.name
-        archive = openpyxl.load_workbook(archive_path, read_only=True, data_only=True)
-        archive_sheet = archive['Geography Review']
+        archive = openpyxl.load_workbook(archive_path, read_only=True, data_only=True) if not additional_decisions else None
+        archive_sheet = archive['Geography Review'] if archive else review
+        source_rows = list(archive_sheet.values)
+        if additional_decisions:
+            review.delete_rows(review_header_index + 1, review.max_row - review_header_index)
         headers = None
-        for values in archive_sheet.values:
+        for values in source_rows:
             if 'Reference ID' in values:
                 headers = list(values)
                 continue
@@ -105,10 +123,17 @@ def apply():
                                            'citySourceId': city['cityId'], 'method': decision['method'], 'scope': decision['scope'], 'source': decision['source'], 'addressExcerpt': decision.get('addressExcerpt'),
                                            'registryRecord': decision.get('registryRecord')})
                 accepted += 1
+                applied_refs.add(ref)
             else:
                 review.append([row.get(header) for header in review_headers])
                 remaining.append({'referenceId': ref, 'name': original['Official English Name'], 'countryIso3': original['ISO3'], 'city': original['City'], 'reason': original['Geography Review Reason'], 'sourcePath': artifact['path']})
-        archive.close()
+        if archive:
+            archive.close()
+        prepared_workbooks.append((path, workbook))
+    if applied_refs != set(decisions):
+        raise ValueError('Decision does not identify an unresolved university')
+    # Validate every decision before writing any source workbook.
+    for path, workbook in prepared_workbooks:
         workbook.save(path)
         workbook.close()
     for filename, rows in city_files.items():
@@ -121,12 +146,20 @@ def apply():
         artifact['afterSha256'] = hashlib.sha256(path.read_bytes()).hexdigest()
         if artifact['kind'] == 'cities':
             artifact['afterRows'] = len(city_files[artifact['path']])
-    summary.update({'restorationsApplied': True, 'restoredUniversities': accepted, 'remainingReviewUniversities': len(remaining), 'originalUniversityRows': 10723})
+    summary.update({'restorationsApplied': True, 'restoredUniversities': accepted + (summary['restoredUniversities'] if additional_decisions else 0), 'remainingReviewUniversities': len(remaining), 'originalUniversityRows': 10723})
     (REPORT / 'summary.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2) + '\n')
     save_records('city-changes.jsonl', city_changes)
     save_records('university-changes.jsonl', university_changes)
     save_records('remaining-university-review.jsonl', remaining)
+    if additional_decisions:
+        (REPORT / 'proposed-university-restorations.json').write_text(json.dumps(previous + selected, ensure_ascii=False, indent=2) + '\n')
+    with (REPORT / 'remaining-university-review.csv').open('w', encoding='utf-8-sig', newline='') as handle:
+        writer = csv.DictWriter(handle, fieldnames=['referenceId', 'name', 'countryIso3', 'city', 'reason', 'sourcePath'], lineterminator='\n')
+        writer.writeheader()
+        writer.writerows(remaining)
     print(json.dumps({'restoredUniversities': accepted, 'remainingReview': len(remaining), 'activeCities': len(cities), 'databaseWrites': 0}))
 
 if __name__ == '__main__':
-    apply()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--additional-decisions', type=Path)
+    apply(parser.parse_args().additional_decisions)
