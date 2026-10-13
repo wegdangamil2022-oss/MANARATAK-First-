@@ -1,0 +1,3 @@
+/workspace/MANARATAK-First-/apps/web/src/features/public-template/components/OwnerCourseDetail.tsx:42 TS2551: Property 'getCourse' does not exist on type 'typeof ApiClient'. Did you mean 'getCourses'?
+/workspace/MANARATAK-First-/apps/web/src/features/public-template/components/OwnerCourseDetail.tsx:42 TS7006: Parameter 'dto' implicitly has an 'any' type.
+NEW_PUBLIC_SURFACES_ONLY=6; DIAGNOSTICS=2; dependency diagnostics excluded; not whole-project certification
