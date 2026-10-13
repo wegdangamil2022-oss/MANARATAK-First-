@@ -27,6 +27,7 @@ export interface ReferenceCountryDto {
 }
 
 export interface PublicStudyDestinationDto {
+  image?: {url:string;expiresAt:string}|null;
   publicId: string;
   slug: string;
   overviewAr?: string | null;
@@ -201,6 +202,8 @@ export interface MajorFilters {
 }
 
 export interface CourseFilters {
+  search?: string;
+  majorId?:string;
   accessType?: string;
   originType?: string;
   platformName?: string;
@@ -877,6 +880,7 @@ export interface StudentOwnedAssetPageDto {
 }
 
 export interface StudentAssetDeliveryGrantDto {
+  mimeType: string;
   assetId: string;
   url: string;
   headers?: Record<string, string>;
@@ -1712,7 +1716,12 @@ export class ApiClient {
     return res.json();
   }
 
-  static async getStudyDestinations(filters: { isFeatured?: boolean; page?: number; pageSize?: number } = {}): Promise<PaginatedResult<PublicStudyDestinationDto>> {
+  static async getStudyDestinationCities(slug:string,page=1):Promise<{data:Array<{id:string;name:string;nameAr?:string|null}>;total:number;totalPages:number}>{
+    const res=await apiFetch(`${API_BASE_URL}/study-destinations/${encodeURIComponent(slug)}/cities?page=${page}`,{cache:'no-store'});
+    if(!res.ok)throw new Error('STUDY_DESTINATION_CITIES_UNAVAILABLE');return res.json();
+  }
+
+  static async getStudyDestinations(filters: { isFeatured?: boolean; q?:string;region?:string;page?: number; pageSize?: number } = {}): Promise<PaginatedResult<PublicStudyDestinationDto>> {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => { if (value !== undefined && value !== null) params.set(key, String(value)); });
     const res = await apiFetch(`${API_BASE_URL}/study-destinations?${params.toString()}`);
@@ -2059,6 +2068,8 @@ export class ApiClient {
     }
     return res.json();
   }
+
+  static getCourseLaunchUrl(slug:string){return `${API_BASE_URL}/public/courses/${encodeURIComponent(slug)}/launch`;}
 
   static async getCourses(
     filters: CourseFilters,

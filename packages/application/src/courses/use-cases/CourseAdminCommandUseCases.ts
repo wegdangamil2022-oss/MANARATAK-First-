@@ -57,6 +57,7 @@ export class CourseAdminCommandUseCases {
       if(!id) {
         if(value && typeof value==='object' && 'id' in value && typeof value.id==='string') {
           entityReference.id=value.id;
+          if(kind==='COURSE' && courses.stampVersionActor){const created=await courses.findById(value.id);if(created)await courses.stampVersionActor(value.id,created.version,context.actorId);}
           payload.entityId=value.id;
         }
         return {value};
@@ -64,6 +65,7 @@ export class CourseAdminCommandUseCases {
       if(kind==='COURSE'){
         let current=await courses.findById(id);
         if(current?.version===context.expectedVersion) current=await courses.update(id,{});
+        if(current && courses.stampVersionActor)await courses.stampVersionActor(id,current.version,context.actorId);
         return {value,version:current?.version};
       }
       return {value,version:(await paths.findById(id))?.version};

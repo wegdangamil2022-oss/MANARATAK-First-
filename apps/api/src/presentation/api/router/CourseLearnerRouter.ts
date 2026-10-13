@@ -29,7 +29,7 @@ export class CourseLearnerRouter {
 
     router.post('/:courseId/lessons/:lessonId/assets/:assetReferenceId/delivery-grant', asyncHandler(async (req: Request, res: Response) => {
       const assetId = await courseProgressUseCases.resolveLearningAsset(req.params.courseId, req.params.lessonId, req.params.assetReferenceId, student(req));
-      res.json(await cradle.processAssetLifecycleUseCase.requestDeliveryGrant({assetId, expiresInSeconds:300}));
+      res.json(await cradle.processAssetLifecycleUseCase.requestDeliveryGrant({assetId, expiresInSeconds:300,browserCompatible:true}));
     }));
     router.post('/:courseId/enroll', asyncHandler(async (req: Request, res: Response) => res.status(201).json(await courseProgressUseCases.enroll(req.params.courseId, student(req)))));
     router.get('/:courseId/workspace', asyncHandler(async (req: Request, res: Response) => res.json(await courseProgressUseCases.getLearningWorkspace(req.params.courseId, student(req)))));

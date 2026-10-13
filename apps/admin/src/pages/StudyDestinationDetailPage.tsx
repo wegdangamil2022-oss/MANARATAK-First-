@@ -1,3 +1,4 @@
+import {DestinationGovernanceWorkspace} from '../components/DestinationGovernanceWorkspace';
 import { listAllReferenceData } from '../api/referenceData';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -759,6 +760,7 @@ export function StudyDestinationDetailPage() {
               </div>
             </>
           )}
+          {tab === 'sources' && <DestinationGovernanceWorkspace iso2={iso2}/>}
           {tab === 'sources' && (
             <SourcesPanel form={form} setForm={setForm} profile={profile} isAr={isAr} />
           )}

@@ -74,11 +74,13 @@ export interface ActivateAssetDto {
 }
 
 export interface RequestAssetDeliveryGrantDto {
+  browserCompatible?: boolean;
   assetId: string;
   expiresInSeconds?: number;
 }
 
 export interface AssetDeliveryGrantDto {
+  mimeType: string;
   assetId: string;
   url: string;
   headers: Readonly<Record<string, string>>;

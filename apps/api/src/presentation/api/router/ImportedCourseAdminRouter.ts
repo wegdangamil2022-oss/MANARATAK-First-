@@ -1,3 +1,4 @@
+import {SecurityMiddlewareFactory} from '../../security/SecurityMiddlewareFactory';
 import type {CourseAdminCommandUseCases,CourseAdminContext,AdminCourseUseCases} from '@manaratak/application';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
@@ -131,7 +132,7 @@ export class ImportedCourseAdminRouter {
       res.json(await useCases.markReady(req.params.id));
     }));
 
-    router.post('/:id/publish', asyncHandler(async (req, res, useCases) => {
+    router.post('/:id/publish', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req, res, useCases) => {
       res.json(await useCases.publish(req.params.id,mutationContext(req)));
     }));
 

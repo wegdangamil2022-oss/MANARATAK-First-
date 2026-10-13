@@ -1,4 +1,6 @@
-import React from 'react';
+import {ApiClient} from '../../../api/client';
+import {mapCourse} from '../publicLiveDataSource';
+import React,{useEffect,useState} from 'react';
 import {
   ArrowLeft,
   Award,
@@ -21,6 +23,7 @@ import { FavoriteButton } from './FavoriteButton';
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
 
 interface ImportedCourseDetailProps {
+  dataMode?: 'api'|'prototype';
   course: ImportedCourse;
   onBack?: () => void;
   onOpenMajor?: (majorId: string) => void;
@@ -45,7 +48,8 @@ const Fact = ({ icon: Icon, label, value }: { icon: React.ElementType; label: st
 );
 
 export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
-  course,
+  course:initialCourse,
+  dataMode='api',
   onBack,
   onOpenMajor,
   onOpenUniversity,
@@ -57,7 +61,13 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
   searchAnchor,
   searchTerm,
 }) => {
-  useDetailSearchTarget(searchAnchor, searchTerm);
+  const [course,setCourse]=useState(initialCourse);const [verifiedSlug,setVerifiedSlug]=useState('');const [availabilityError,setAvailabilityError]=useState('');
+  useEffect(()=>{let active=true;setAvailabilityError('');setVerifiedSlug('');if(dataMode==='prototype'){setCourse(initialCourse);return;}
+    if(!initialCourse.slug){setAvailabilityError('COURSE_CANONICAL_SLUG_REQUIRED');return;}
+    void ApiClient.getCourse(initialCourse.slug).then(dto=>{const latest=mapCourse(dto).imported;if(!latest)throw new Error('COURSE_NOT_ELIGIBLE');if(active){setCourse(latest);setVerifiedSlug(initialCourse.slug!);}}).catch(cause=>{if(active)setAvailabilityError(String(cause));});return()=>{active=false;};
+  },[initialCourse,dataMode]);
+  useDetailSearchTarget(dataMode==='api'&&verifiedSlug!==initialCourse.slug?undefined:searchAnchor, searchTerm);
+  if(dataMode==='api'&&verifiedSlug!==initialCourse.slug)return <section className="p-6"><button onClick={onBack}>العودة / Back</button><p role={availabilityError?'alert':'status'}>{availabilityError?'تعذر تأكيد أهلية الدورة الحالية؛ لا يُعرض رابط انتقال خارجي. / Current course eligibility unavailable.':'التحقق من أهلية الدورة الحالية… / Checking current eligibility…'}</p></section>;
   return (
     <div className="min-h-screen bg-[var(--mn-page)] pb-24 text-[var(--mn-heading)] mn-panel " dir="rtl">
       <div className="relative overflow-hidden border-b border-[var(--mn-accent)]/20 bg-gradient-to-br from-[var(--mn-primary)] via-[var(--mn-primary)] to-[var(--mn-primary)] px-4 pb-8 pt-4 text-white shadow-sm mn-inverse ">
@@ -266,7 +276,7 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
           </div>
 
           <a
-            href={course.directCourseUrl}
+            href={dataMode==='api'&&course.slug?ApiClient.getCourseLaunchUrl(course.slug):course.directCourseUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="mn-external-link inline-flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-white shadow-[0_8px_18px_rgba(20,43,95,0.22)] transition-transform active:scale-[0.99] mn-inverse "

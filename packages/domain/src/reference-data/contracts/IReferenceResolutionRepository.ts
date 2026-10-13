@@ -17,6 +17,7 @@ export interface ReferenceResolutionMatch<T> {
  * database-side candidate lookup rather than materializing whole reference tables.
  */
 export interface IReferenceResolutionRepository {
+  resolveActiveStudyReferences?(ids:{countryIds:string[];languageIds:string[];currencyIds:string[]}):Promise<{countries:ReferenceCountryDto[];languages:ReferenceLanguageDto[];currencies:ReferenceCurrencyDto[]}>;
   resolveCountryCandidate(lookup: ReferenceLookup): Promise<ReferenceResolutionMatch<ReferenceCountryDto> | null>;
   resolveRegionCandidate(lookup: ReferenceLookup): Promise<ReferenceResolutionMatch<AdministrativeRegionDto> | null>;
   resolveCityCandidate(lookup: ReferenceLookup): Promise<ReferenceResolutionMatch<ReferenceCityDto> | null>;

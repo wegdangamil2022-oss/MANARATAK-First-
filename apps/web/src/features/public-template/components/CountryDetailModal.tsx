@@ -1,3 +1,5 @@
+import {CountryCitiesPanel} from './CountryCitiesPanel';
+import {useTranslation} from '../../../i18n/I18nProvider';
 import React from 'react';
 import {
   ArrowLeft,
@@ -101,46 +103,48 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
   searchAnchor,
   searchTerm,
 }) => {
+  const {language}=useTranslation();
+  const copy=(ar:string,en:string)=>language==='ar'?ar:en;
   useDetailSearchTarget(searchAnchor, searchTerm);
   const facts = [
     {
-      label: 'العاصمة',
-      value: country.capitalCity || 'غير متوفر',
+      label: copy("العاصمة","Capital"),
+      value: country.capitalCity || copy("غير متوفر","Not available"),
       icon: <MapPin className="w-3.5 h-3.5" />,
     },
     {
-      label: 'العملة',
-      value: country.currencyCode || 'غير متوفر',
+      label: copy("العملة","Currency"),
+      value: country.currencyCode || copy("غير متوفر","Not available"),
       icon: <Banknote className="w-3.5 h-3.5" />,
     },
     {
-      label: 'رمز الدولة',
-      value: [country.iso2Code, country.iso3Code].filter(Boolean).join(' / ') || 'غير متوفر',
+      label: copy("رمز الدولة","Country code"),
+      value: [country.iso2Code, country.iso3Code].filter(Boolean).join(' / ') || copy("غير متوفر","Not available"),
       icon: <Flag className="w-3.5 h-3.5" />,
     },
     {
-      label: 'الاتصال',
-      value: country.callingCode || 'غير متوفر',
+      label: copy("الاتصال","Calling code"),
+      value: country.callingCode || copy("غير متوفر","Not available"),
       icon: <Phone className="w-3.5 h-3.5" />,
     },
     {
-      label: 'اللغة المرجعية',
-      value: country.officialLanguages?.join('، ') || 'غير متوفر',
+      label: copy("اللغة المرجعية","Reference language"),
+      value: country.officialLanguages?.join('، ') || copy("غير متوفر","Not available"),
       icon: <Languages className="w-3.5 h-3.5" />,
     },
     {
-      label: 'المنطقة',
+      label: copy("المنطقة","Region"),
       value: country.subregion || country.continent,
       icon: <Globe2 className="w-3.5 h-3.5" />,
     },
     {
-      label: 'التوقيت',
-      value: country.timezones?.join('، ') || 'غير متوفر',
+      label: copy("التوقيت","Timezone"),
+      value: country.timezones?.join('، ') || copy("غير متوفر","Not available"),
       icon: <Globe2 className="w-3.5 h-3.5" />,
     },
     {
-      label: 'لغات الدراسة',
-      value: country.languageOfStudy.join('، ') || 'غير متوفر',
+      label: copy("لغات الدراسة","Study languages"),
+      value: country.languageOfStudy.join('، ') || copy("غير متوفر","Not available"),
       icon: <Languages className="w-3.5 h-3.5" />,
     },
   ];
@@ -148,8 +152,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
   const costItems = country.costHighlights?.length
     ? country.costHighlights
     : [
-        { label: 'متوسط المعيشة', value: country.monthlyLivingCostRange ? `${country.monthlyLivingCostRange.min.toLocaleString()}–${country.monthlyLivingCostRange.max.toLocaleString()} ${country.monthlyLivingCostRange.currencyCode}` : country.averageLivingCostUsd },
-        { label: 'تصنيف التكلفة', value: country.livingCost },
+        { label: copy("متوسط المعيشة","Monthly living cost"), value: country.monthlyLivingCostRange ? `${country.monthlyLivingCostRange.min.toLocaleString()}–${country.monthlyLivingCostRange.max.toLocaleString()} ${country.monthlyLivingCostRange.currencyCode}` : country.averageLivingCostUsd },
+        { label: copy("تصنيف التكلفة","Cost category"), value: country.livingCost },
       ];
 
   const extendedUniversities = country.featuredUniversities ?? [];
@@ -158,7 +162,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
   return (
     <div
       className="w-full bg-[var(--mn-page)] overflow-y-auto animate-fade-in font-['Cairo',sans-serif] pb-12 mn-panel "
-      dir="rtl"
+      dir={language==='ar'?'rtl':'ltr'}
     >
       {/* 1. TOP HERO CONTAINER (Compact horizontal layout with flag + title + tags) */}
       <div className="relative w-full overflow-hidden shrink-0">
@@ -179,6 +183,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             className="text-white hover:bg-white/10"
           />
         </div>
+
+        {country.imageUrl && <img src={country.imageUrl} alt={country.name} className="w-full max-h-56 object-cover" loading="lazy" referrerPolicy="no-referrer" />}
 
         {/* SVG background with matching vibrant 3-stop emerald gradient, subtle gold waves */}
         <div className="relative w-full h-[140px] sm:h-[145px]">
@@ -256,8 +262,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                 </h1>
                 <div className="flex items-center gap-1 text-[8px] sm:text-[8.5px] font-bold text-[var(--mn-accent-text)] bg-black/20 border border-white/10 rounded-full px-1.5 py-0.5 shadow-sm">
                   <Sparkles className="w-2.5 h-2.5" />
-                  <span className="hidden sm:inline">وجهة دراسية</span>
-                  <span className="sm:hidden">وجهة</span>
+                  <span className="hidden sm:inline">{copy("وجهة دراسية","Study destination")}</span>
+                  <span className="sm:hidden">{copy("وجهة","Destination")}</span>
                 </div>
               </div>
               <p className="text-[11.5px] sm:text-[12px] font-bold text-white/90 font-['Cairo',sans-serif] mt-0.5 tracking-wider truncate">
@@ -271,12 +277,12 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                 </span>
                 <span className="px-1.5 py-0.5 rounded border border-white/20 bg-white/10 text-[9px] sm:text-[9.5px] font-bold text-white shadow-sm backdrop-blur-sm">
                   {country.universitiesCount == null
-                    ? 'غير متوفر'
+                    ? copy("غير متوفر","Not available")
                     : `${country.universitiesCount} جامعة`}
                 </span>
                 <span className="px-1.5 py-0.5 rounded border border-white/20 bg-white/10 text-[9px] sm:text-[9.5px] font-bold text-white shadow-sm backdrop-blur-sm">
                   {country.scholarshipsCount == null
-                    ? 'غير متوفر'
+                    ? copy("غير متوفر","Not available")
                     : `${country.scholarshipsCount} منحة`}
                 </span>
               </div>
@@ -313,7 +319,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             icon={<Globe2 className="w-4 h-4" />}
             id="country-about"
             title={`الدراسة في ${country.name}`}
-            subtitle="نظرة سريعة تساعد الطالب على تقييم الوجهة"
+            subtitle={copy("نظرة سريعة تساعد الطالب على تقييم الوجهة","Published destination overview")}
           />
           <div className="rounded-xl border border-[var(--mn-border)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] p-3 mn-panel dark:mn-panel ">
             <p className="whitespace-pre-wrap text-[11.5px] sm:text-xs leading-[1.9] font-semibold text-[var(--mn-text)] dark:text-[var(--mn-text)]">
@@ -335,8 +341,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
               <SectionTitle
                 icon={<Building2 className="w-4 h-4" />}
                 id="country-universities"
-                title="جامعات بارزة"
-                subtitle="أهم الجامعات للطلاب الدوليين"
+                title={copy("جامعات بارزة","Universities")}
+                subtitle={copy("أهم الجامعات للطلاب الدوليين","Published universities for international students")}
               />
               <button
                 type="button"
@@ -348,7 +354,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                 data-mn-design="45c440a9fe"
                 className="absolute left-0 top-0 h-6.5 px-2.5 sm:px-3 text-[10.5px] font-bold text-[var(--mn-link)] border border-[var(--mn-border)] bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-surface-elevated)] transition-colors rounded-full flex items-center gap-1.5 justify-center whitespace-nowrap cursor-pointer hover:shadow-2xs active:scale-95"
               >
-                <span>عرض الكل</span>
+                <span>{copy("عرض الكل","View all")}</span>
                 <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-link)] shrink-0" />
               </button>
             </div>
@@ -404,8 +410,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
               <SectionTitle
                 icon={<GraduationCap className="w-4 h-4" />}
                 id="country-scholarships"
-                title="منح دراسية"
-                subtitle="منح مرتبطة بهذه الدولة"
+                title={copy("منح دراسية","Scholarships")}
+                subtitle={copy("منح مرتبطة بهذه الدولة","Scholarships linked to this country")}
               />
               {onBrowseScholarships && (
                 <button
@@ -414,7 +420,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                   data-mn-design="45c440a9fe"
                   className="absolute left-0 top-0 h-6.5 px-2.5 sm:px-3 text-[10.5px] font-bold text-[var(--mn-link)] border border-[var(--mn-border)] bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-surface-elevated)] transition-colors rounded-full flex items-center gap-1.5 justify-center whitespace-nowrap cursor-pointer hover:shadow-2xs active:scale-95"
                 >
-                  <span>عرض الكل</span>
+                  <span>{copy("عرض الكل","View all")}</span>
                   <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-link)] shrink-0" />
                 </button>
               )}
@@ -471,8 +477,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
               <SectionTitle
                 icon={<BookOpen className="w-4 h-4" />}
                 id="country-study"
-                title="تخصصات بارزة للدراسة"
-                subtitle="علاقة مشتقة من برامج الجامعات في الدولة"
+                title={copy("تخصصات بارزة للدراسة","Study majors")}
+                subtitle={copy("علاقة مشتقة من برامج الجامعات في الدولة","Derived from university programmes in this country")}
               />
             </div>
             <div
@@ -525,8 +531,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           <SectionTitle
             icon={<FileCheck2 className="w-4 h-4" />}
             id="country-exams"
-            title="القبول والاختبارات"
-            subtitle="المتطلبات النهائية تختلف حسب الجامعة والبرنامج"
+            title={copy("القبول والاختبارات","Admission and tests")}
+            subtitle={copy("المتطلبات النهائية تختلف حسب الجامعة والبرنامج","Final requirements vary by university and programme")}
           />
           {country.admissionHighlights && country.admissionHighlights.length > 0 && (
             <div className="grid grid-cols-2 gap-2 mb-2.5">
@@ -563,7 +569,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           <SectionTitle
             icon={<ShieldCheck className="w-4 h-4" />}
             id="country-visa"
-            title="التأشيرة وشروط الدراسة"
+            title={copy("التأشيرة وشروط الدراسة","Visa and study requirements")}
             subtitle={country.visaEase}
           />
           {country.visaSummary && (
@@ -592,7 +598,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           <SectionTitle
             icon={<WalletCards className="w-4 h-4" />}
             id="country-costs"
-            title="تكاليف المعيشة والدراسة"
+            title={copy("تكاليف المعيشة والدراسة","Living and study costs")}
           />
           <div className="grid grid-cols-2 gap-2">
             {costItems.map((item) => (
@@ -615,7 +621,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           <SectionTitle
             icon={<Users className="w-4 h-4" />}
             id="country-cities"
-            title="المدن والحياة الطلابية"
+            title={copy("المدن والحياة الطلابية","Cities and student life")}
           />
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none mb-2.5">
             {country.popularCities.map((city) => (
@@ -628,6 +634,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
               </div>
             ))}
           </div>
+          {country.slug && <CountryCitiesPanel slug={country.slug} locale={language}/>}
           {country.studentLifeHighlights && (
             <div className="grid grid-cols-2 gap-2">
               {country.studentLifeHighlights.map((item, index) => (
@@ -654,8 +661,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             <SectionTitle
               icon={<ExternalLink className="w-4 h-4" />}
               id="country-official-links"
-              title="روابط رسمية"
-              subtitle="مصادر حكومية أو رسمية مرتبطة بالدراسة"
+              title={copy("روابط رسمية","Official links")}
+              subtitle={copy("مصادر حكومية أو رسمية مرتبطة بالدراسة","Government or official study sources")}
             />
             <div className="grid grid-cols-2 gap-2">
               {country.officialLinks.map((link) => (
@@ -690,7 +697,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             className="w-full min-h-11 rounded-xl bg-gradient-to-r from-[var(--mn-primary)] via-[var(--mn-hero-secondary)] to-[var(--mn-primary)] text-white font-bold text-[11px] flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] mn-inverse "
           >
             <GraduationCap className="w-4 h-4 text-[var(--mn-accent-text)]" />
-            <span>استعرض جميع منح {country.name}</span>
+            <span>{language==='ar'?'استعرض جميع منح':'Browse scholarships for'} {country.name}</span>
             <ArrowLeft className="w-3.5 h-3.5" />
           </button>
         )}

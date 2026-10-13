@@ -45,6 +45,7 @@ export class PublicCourseUseCases {
       throw new Error('Course not found');
     }
 
+    if (course.originType === CourseOriginType.EXTERNAL_LINKED_COURSE && (!this.repository.isPubliclyEligible || !await this.repository.isPubliclyEligible(course.id))) throw new Error('Course not found');
     const result = this.mapToPublicDto(course, locale);
     if (course.originType !== CourseOriginType.EXTERNAL_LINKED_COURSE && this.curriculumRepository) {
       const curriculum = await this.curriculumRepository.getCurriculumSnapshot(course.id);

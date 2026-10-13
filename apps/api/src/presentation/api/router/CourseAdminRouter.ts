@@ -1,3 +1,4 @@
+import {SecurityMiddlewareFactory} from '../../security/SecurityMiddlewareFactory';
 import { courseAdminErrorResponse } from './CourseAdminErrorPolicy';
 import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
 import { Router, Request, Response, NextFunction } from 'express';
@@ -270,15 +271,15 @@ export class CourseAdminRouter {
       const input = learningPathSchema.omit({slug: true}).strict().parse(req.body);
       res.json(await scope.learningPathUseCases.updateDraft(req.params.pathId, input));
     }));
-    router.post('/learning-paths/:pathId/mark-publishable', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/learning-paths/:pathId/mark-publishable', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:review'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {learningPathUseCases}=scope;
       res.json(await learningPathUseCases.markReadyToPublish(req.params.pathId));
     }));
-    router.post('/learning-paths/:pathId/publish', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/learning-paths/:pathId/publish', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {learningPathUseCases}=scope;
       res.json(await learningPathUseCases.publish(req.params.pathId));
     }));
-    router.post('/learning-paths/:pathId/archive', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/learning-paths/:pathId/archive', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {learningPathUseCases}=scope;
       res.json(await learningPathUseCases.archive(req.params.pathId));
     }));
@@ -644,7 +645,7 @@ export class CourseAdminRouter {
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/mark-publishable', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/:id/mark-publishable', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:review'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases, nativeCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
       if (course.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) await nativeCourseUseCases.markReadyToPublish(req.params.id);
@@ -652,7 +653,7 @@ export class CourseAdminRouter {
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/publish', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/:id/publish', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases, nativeCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
       if (course.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) await nativeCourseUseCases.publish(req.params.id, mutationContext(req));
@@ -660,19 +661,19 @@ export class CourseAdminRouter {
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/unpublish', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/:id/unpublish', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases}=scope;
       await adminCourseUseCases.unpublish(req.params.id);
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/reject', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/:id/reject', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:review'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases}=scope;
       await adminCourseUseCases.reject(req.params.id);
       res.status(200).json({ success: true });
     }));
 
-    router.post('/:id/archive', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
+    router.post('/:id/archive', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:courses:publish'), asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases}=scope;
       await adminCourseUseCases.archive(req.params.id);
       res.status(200).json({ success: true });

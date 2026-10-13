@@ -155,10 +155,10 @@ export class HttpAssetStorageGateway implements IAssetStorageGateway {
     return { ...result, checksumSha256: result.checksumSha256.toLowerCase() };
   }
 
-  async generateDeliveryGrant(locator: AssetStorageLocator, expiresInSeconds: number): Promise<AssetDeliveryGrant> {
+  async generateDeliveryGrant(locator: AssetStorageLocator, expiresInSeconds: number, options?: {browserCompatible?:boolean}): Promise<AssetDeliveryGrant> {
     if (!Number.isSafeInteger(expiresInSeconds) || expiresInSeconds < 1 || expiresInSeconds > 3600) throw new Error('ASSET_DELIVERY_EXPIRY_INVALID');
     if (locator.storageZone !== AssetStorageZone.CLEAN) throw new Error('ASSET_DELIVERY_CLEAN_LOCATOR_REQUIRED');
-    const payload = { locator: locatorPayload(locator), expiresInSeconds };
+    const payload = { locator: locatorPayload(locator), expiresInSeconds, ...(options?.browserCompatible?{browserCompatible:true}:{}) };
     const response = await this.client.json<DeliveryGrantWire>('POST', '/v1/assets/delivery-grants', payload, {
       idempotencyKey: operationIdempotencyKey('delivery-grant', payload),
     });

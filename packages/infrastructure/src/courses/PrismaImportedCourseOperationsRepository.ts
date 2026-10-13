@@ -1,3 +1,6 @@
+import {courseSourceApprovalPredicate} from './CoursePublicTrustPredicate';
+import {createHash} from 'node:crypto';
+import {courseSourceFacts} from '@manaratak/domain';
 import type {AtomicPersistenceContext} from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -72,6 +75,10 @@ function pageSize(value: unknown, fallback: number): number {
 
 export class PrismaImportedCourseOperationsRepository implements IImportedCourseOperationsRepository {
   public constructor(private readonly prisma: PrismaClient) {}
+  public async hasCurrentSourceApproval(id:string):Promise<boolean>{
+    const rows=await this.prisma.$queryRaw<Array<{id:string}>>(Prisma.sql`SELECT c.id FROM "Course" c WHERE c.id=${id} AND ${courseSourceApprovalPredicate()} LIMIT 1`);
+    return rows.length===1;
+  }
   public withTransaction(context:AtomicPersistenceContext):IImportedCourseOperationsRepository {
     const tx=(context as AtomicPersistenceContext & {transactionClient?:unknown}).transactionClient;
     if(!context.boundaryId||!tx) throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
@@ -127,6 +134,8 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
     if (!record) return null;
 
     const mapped = this.mapCourse(record) as ImportedCourseAdminDetail;
+    mapped.sourceVerified=await this.hasCurrentSourceApproval(record.id);
+    mapped.sourceVerificationReason=mapped.sourceVerified?'INDEPENDENT_CURRENT_SOURCE_APPROVAL':'INDEPENDENT_CURRENT_SOURCE_APPROVAL_REQUIRED';
     const analysis = record.sourceImportRecordId
       ? await this.prisma.courseImportAnalysis.findUnique({
           where: { importRecordId: record.sourceImportRecordId },
@@ -628,6 +637,7 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
 
   private courseIncludes(): any {
     return {
+      sourceApprovals: {orderBy: [{reviewedAt:'desc'},{id:'asc'}],take:1},
       externalProvider: {
         include: {
           aliases: true,
@@ -653,7 +663,9 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
     const provider = record.externalProvider ?? null;
     const sourceIdentity = record.sourceIdentities?.[0] ?? null;
     const urlState = sourceIdentity?.urlHistory?.[0] ?? null;
-    const sourceVerified = this.sourceVerified(record.directCourseUrl, provider);
+    const approval=record.sourceApprovals?.[0];
+    const factsHash=createHash('sha256').update(JSON.stringify(courseSourceFacts(record))).digest('hex');
+    const sourceVerified = this.sourceVerified(record.directCourseUrl, provider) && Boolean(approval && approval.courseVersion<=record.version && (!(approval.facts as {validUntil?:string|null})?.validUntil || Date.parse((approval.facts as {validUntil:string}).validUntil)>Date.now()) && approval.providerId===record.externalProviderId && new Date(approval.providerRevision).getTime()===new Date(provider.updatedAt).getTime() && approval.factsHash===factsHash);
     const missingFields = this.missingFields(record);
 
     return {
@@ -681,9 +693,9 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
       sourceImportRecordId: record.sourceImportRecordId,
       sourceVerified,
       sourceVerificationReason: sourceVerified
-        ? 'APPROVED_PROVIDER_AND_DOMAIN'
+        ? 'INDEPENDENT_CURRENT_SOURCE_APPROVAL'
         : provider
-          ? 'PROVIDER_OR_DOMAIN_NOT_APPROVED'
+          ? 'INDEPENDENT_REVIEW_OR_PROVIDER_APPROVAL_REQUIRED'
           : 'PROVIDER_NOT_LINKED',
       linkHealth: mapVerificationState(urlState?.verificationState),
       linkResponseCode: urlState?.responseCode,

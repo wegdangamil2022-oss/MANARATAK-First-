@@ -66,6 +66,7 @@ export class CoursePublicationService {
 
     const detail = await this.importedOperations.getImportedCourseById(course.id);
     if (!detail) throw new Error('IMPORTED_COURSE_PUBLICATION_EVIDENCE_NOT_FOUND');
+    if (!this.importedOperations.hasCurrentSourceApproval || !await this.importedOperations.hasCurrentSourceApproval(course.id)) throw new Error('IMPORTED_COURSE_CURRENT_SOURCE_APPROVAL_REQUIRED');
     if (!detail.sourceVerified) throw new Error('IMPORTED_COURSE_SOURCE_VERIFICATION_REQUIRED');
     if (!VERIFIED_LINK_STATES.has(detail.linkHealth)) {
       throw new Error(`IMPORTED_COURSE_DIRECT_LINK_VERIFICATION_REQUIRED:${detail.linkHealth}`);

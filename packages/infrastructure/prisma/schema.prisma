@@ -303,6 +303,7 @@ model Course {
 
   externalProvider           ExternalCourseProvider?        @relation(fields: [externalProviderId], references: [id], onDelete: SetNull)
   learningLanguageReference  ReferenceLanguage?             @relation("CourseLearningLanguageReference", fields: [learningLanguageReferenceId], references: [id], onDelete: SetNull)
+  sourceApprovals            CourseSourceApproval[]
   sourceIdentities           CourseSourceIdentity[]
   importAnalyses             CourseImportAnalysis[]
   fieldProvenance            CourseFieldProvenance[]
@@ -3873,6 +3874,7 @@ model ReferenceLanguage {
 model StudyDestinationProfile {
   lastEditedBy                     String?
   sourceReviewProof                 Json?
+  revisions                         StudyDestinationRevision[]
   id                               String   @id @default(uuid())
   publicId                         String   @unique
   slug                             String   @unique
@@ -5936,4 +5938,38 @@ model MajorImportOwnerReview {
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
  @@index([status, updatedAt])
+}
+
+model CourseSourceApproval {
+ id String @id @default(uuid())
+ courseId String
+ courseVersion Int
+ providerId String
+ providerRevision DateTime
+ reviewedBy String
+ reviewedAt DateTime @default(now())
+ reason String
+ facts Json
+ factsHash String
+ evidenceUrls Json
+ course Course @relation(fields: [courseId], references: [id], onDelete: Restrict)
+ @@index([courseId, courseVersion, reviewedAt])
+}
+
+model StudyDestinationRevision {
+ id String @id @default(uuid())
+ profileId String
+ actorId String
+ action String
+ reason String
+ diff Json
+ proof Json?
+ createdAt DateTime @default(now())
+ profile StudyDestinationProfile @relation(fields:[profileId],references:[id],onDelete:Restrict)
+ @@index([profileId,createdAt,id])
+}
+model StudyDestinationReviewPolicy {
+ id String @id
+ maxEvidenceAgeDays Int?
+ updatedAt DateTime @updatedAt
 }

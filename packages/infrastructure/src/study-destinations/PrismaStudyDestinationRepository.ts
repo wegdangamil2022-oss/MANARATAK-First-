@@ -37,6 +37,16 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
     return this.transactionBound ? operation(this.prisma) : (this.prisma as PrismaClient).$transaction(operation);
   }
 
+  async reviewPolicy(){const row=await this.prisma.studyDestinationReviewPolicy.findUnique({where:{id:'source-review'}});return row?{maxEvidenceAgeDays:row.maxEvidenceAgeDays,updatedAt:row.updatedAt.toISOString()}:null;}
+  async saveReviewPolicy(days:number|null,expectedUpdatedAt:string|null){
+    if(!this.transactionBound)throw new Error('STUDY_DESTINATION_ATOMIC_TRANSACTION_REQUIRED');
+    await this.prisma.$queryRaw`SELECT id FROM "StudyDestinationReviewPolicy" WHERE id='source-review' FOR UPDATE`;
+    const current=await this.reviewPolicy();if((current?.updatedAt??null)!==expectedUpdatedAt)throw new Error('STUDY_DESTINATION_VERSION_CONFLICT');
+    const row=await this.prisma.studyDestinationReviewPolicy.upsert({where:{id:'source-review'},create:{id:'source-review',maxEvidenceAgeDays:days},update:{maxEvidenceAgeDays:days}});return {maxEvidenceAgeDays:row.maxEvidenceAgeDays,updatedAt:row.updatedAt.toISOString()};
+  }
+  async appendRevision(profileId:string,actorId:string,action:string,reason:string,diff:unknown,proof:unknown){if(!this.transactionBound)throw new Error('STUDY_DESTINATION_ATOMIC_TRANSACTION_REQUIRED');await this.prisma.studyDestinationRevision.create({data:{profileId,actorId,action,reason,diff:diff as Prisma.InputJsonValue,proof:proof===null?Prisma.DbNull:proof as Prisma.InputJsonValue}});}
+  async revisionPage(profileId:string,page:number){const where={profileId};const [rows,total]=await Promise.all([this.prisma.studyDestinationRevision.findMany({where,orderBy:[{createdAt:'desc'},{id:'asc'}],skip:(page-1)*20,take:20}),this.prisma.studyDestinationRevision.count({where})]);return {data:rows.map(row=>({...row,createdAt:row.createdAt.toISOString()})),total,page,totalPages:Math.ceil(total/20)};}
+
   private get profiles() {
     return this.prisma.studyDestinationProfile;
   }
@@ -90,12 +100,14 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
   ): Promise<PaginatedStudyDestinationResult<StudyDestinationProfileDto>> {
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 30));
+    const policy=publishedOnly?await this.reviewPolicy():null;
     const where: Prisma.StudyDestinationProfileWhereInput = {
       status: publishedOnly ? StudyDestinationStatus.PUBLISHED : filters.status,
       completenessStatus: filters.completenessStatus,
       countryReferenceId: filters.countryReferenceId,
       isFeatured: filters.isFeatured,
-      countryReference: publishedOnly ? { isActive: true } : undefined,
+      ...(policy?.maxEvidenceAgeDays!=null?{AND:[{sourceReviewProof:{path:['reviewedAt'],gte:new Date(Date.now()-policy.maxEvidenceAgeDays*86400000).toISOString()}}]}:{}),
+      countryReference: publishedOnly ? { isActive: true, ...(filters.region?{region:filters.region}:{}), ...(filters.q?{OR:[{name:{contains:filters.q,mode:'insensitive'}},{nameAr:{contains:filters.q,mode:'insensitive'}},{iso2Code:{contains:filters.q,mode:'insensitive'}}]}:{}) } : undefined,
       ...(publishedOnly ? { sourceVerificationStatus: 'VERIFIED', sourceReviewProof: {not: Prisma.DbNull}, studyLanguages: {every: {language: {isActive: true}}}, OR: [{livingCostCurrencyReferenceId: null}, {livingCostCurrency: {isActive: true}}] } : {}),
     };
     const [rows, total] = await Promise.all([

@@ -7,6 +7,7 @@ import { parseRequestLocale, toApiValidationErrorPayload } from '../locale/Local
 export class CoursePublicRouter {
   public static create(cradle: { publicCourseUseCases: PublicCourseUseCases; courseRelationshipQueryService: CourseRelationshipQueryService }): Router {
     const router = Router();
+    router.use((_req,res,next)=>{res.set('Cache-Control','no-store');next();});
     const { publicCourseUseCases, courseRelationshipQueryService } = cradle;
 
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
@@ -14,6 +15,7 @@ export class CoursePublicRouter {
     };
 
     const listQuerySchema = z.object({
+      search: z.string().trim().max(200).optional(),
       accessType: z.nativeEnum(CourseAccessType).optional(),
       originType: z.nativeEnum(CourseOriginType).optional(),
       platformName: z.string().optional(),
@@ -58,6 +60,10 @@ export class CoursePublicRouter {
         }
         throw err;
       }
+    }));
+
+    router.get('/:slug/launch',asyncHandler(async(req:Request,res:Response)=>{
+      try{const course=await publicCourseUseCases.getCourse(req.params.slug,parseRequestLocale(req.query));if(course.originType!=='EXTERNAL_LINKED_COURSE')return res.status(404).json({error:'Not found'});const url=new URL(course.directCourseUrl);if(url.protocol!=='https:'||url.username||url.password)return res.status(404).json({error:'Not found'});res.set('Cache-Control','no-store');return res.redirect(303,url.toString());}catch(error){if(error instanceof Error&&error.message==='Course not found')return res.status(404).json({error:'Not found'});throw error;}
     }));
 
     router.use((err: any, req: Request, res: Response, next: NextFunction) => {

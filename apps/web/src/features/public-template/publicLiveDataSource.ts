@@ -302,10 +302,10 @@ export function mapCountry(dto: PublicStudyDestinationDto, locale: PublicLiveLoc
     scholarshipsCount: null,
     universitiesCount: null,
     description: (isAr ? dto.overviewAr : dto.overviewEn) ?? dto.overviewAr ?? dto.overviewEn ?? '',
-    imageUrl: '',
+    imageUrl: dto.image && Date.parse(dto.image.expiresAt)>Date.now() ? dto.image.url : '',
     popularCities: [],
     averageLivingCostUsd: typeof costMin === 'number' && typeof costMax === 'number'
-      ? `${costMin.toLocaleString()}–${costMax.toLocaleString()} ${currencyCode}`.trim()
+      ? `${costMin.toLocaleString(locale === 'ar' ? 'ar' : 'en')}–${costMax.toLocaleString(locale === 'ar' ? 'ar' : 'en')} ${currencyCode}`.trim()
       : '',
     languageOfStudy: studyLanguages,
     visaSummary: (isAr ? dto.visaSummaryAr : dto.visaSummaryEn) ?? dto.visaSummaryAr ?? dto.visaSummaryEn ?? undefined,
@@ -523,7 +523,7 @@ export async function searchPublishedMajors(filters: { search?: string; degreeLe
   return {data:page.data.map(mapPublicMajorDto),total:page.total,nextCursor:page.nextCursor};
 }
 export async function loadPublishedCountries(locale: PublicLiveLocale = 'ar'): Promise<CountryDestination[]> {
-  const rows = await collectOffsetPages((page) => ApiClient.getStudyDestinations({ page, pageSize: 100 }));
+  const rows = (await ApiClient.getStudyDestinations({page:1,pageSize:24})).data;
   return rows.map((item) => mapCountry(item, locale));
 }
 export async function loadPublishedExams(locale: PublicLiveLocale = 'ar'): Promise<Exam[]> {
@@ -531,7 +531,7 @@ export async function loadPublishedExams(locale: PublicLiveLocale = 'ar'): Promi
   return result.data.map(mapExam);
 }
 export async function loadPublishedCourses(): Promise<{ courses: Course[]; paidCourses: Course[]; importedCourses: ImportedCourse[] }> {
-  const rows = await collectCursorPages((cursor) => ApiClient.getCourses({ cursor, limit: 100 }));
+  const rows = (await ApiClient.getCourses({limit:24})).data;
   const mapped = rows.map(mapCourse);
   return {
     courses: mapped.filter((item) => item.track === 'native').map((item) => item.course),

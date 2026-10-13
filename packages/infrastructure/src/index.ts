@@ -246,3 +246,5 @@ export { PrismaMajorProgramUsageGateway } from './universities/PrismaMajorProgra
 export { PrismaMajorScholarshipUsageGateway } from './scholarships/PrismaMajorScholarshipUsageGateway';
 
 export { PrismaMajorImportReviewGateway } from './majors/PrismaMajorImportReviewGateway';
+export * from './courses/PrismaCourseSourceReviewGateway';
+export * from './courses/PrismaCourseAdmissionGateway';

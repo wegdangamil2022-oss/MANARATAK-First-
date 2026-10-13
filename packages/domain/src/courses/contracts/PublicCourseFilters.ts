@@ -2,6 +2,7 @@ import { CourseAccessType } from '../enums/CourseAccessType';
 import { CourseOriginType } from '../enums/CourseOriginType';
 
 export interface PublicCourseFilters {
+  search?: string;
   accessType?: CourseAccessType;
   originType?: CourseOriginType;
   platformName?: string;

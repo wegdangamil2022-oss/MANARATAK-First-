@@ -229,9 +229,11 @@ export class ProcessAssetLifecycleUseCase {
     const deadline=record.classification==='PUBLIC'&&rights?.publicationPolicy==='MANDATORY'&&rights.expiresAt?Date.parse(rights.expiresAt):null;
     const ttl=deadline===null?(dto.expiresInSeconds??300):Math.min(dto.expiresInSeconds??300,Math.floor((deadline-Date.now())/1000));
     if(ttl<1)throw new Error('ASSET_PUBLIC_RIGHTS_REQUIRED');
-    const grant = await this.storageGateway.generateDeliveryGrant(record.locator, ttl);
+    const grant = await this.storageGateway.generateDeliveryGrant(record.locator, ttl, {browserCompatible:dto.browserCompatible});
     if(deadline!==null&&grant.expiresAt.getTime()>deadline)throw new Error('ASSET_PUBLIC_RIGHTS_REQUIRED');
+    if(dto.browserCompatible&&Object.keys(grant.headers).length)throw new Error('ASSET_BROWSER_DELIVERY_NOT_CONFIGURED');
     return {
+      mimeType: record.metadata.mimeType,
       assetId: dto.assetId,
       url: grant.url,
       headers: grant.headers,

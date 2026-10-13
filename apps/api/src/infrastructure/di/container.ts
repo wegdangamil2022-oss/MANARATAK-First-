@@ -1,3 +1,10 @@
+import {CourseAdmissionRouter} from '../../presentation/api/router/CourseAdmissionRouter';
+import {CourseAdmissionUseCases} from '@manaratak/application';
+import {PrismaCourseAdmissionGateway} from '@manaratak/infrastructure';
+import {StudyDestinationPublicEnrichment} from '@manaratak/application';
+import { CourseSourceReviewRouter } from '../../presentation/api/router/CourseSourceReviewRouter';
+import { CourseSourceReviewUseCases } from '@manaratak/application';
+import { PrismaCourseSourceReviewGateway } from '@manaratak/infrastructure';
 import { SettingsGovernanceUseCases } from '@manaratak/application';
 import { PrismaSettingsGovernanceGateway } from '@manaratak/infrastructure';
 import { GovernanceApprovalUseCases } from '@manaratak/application';
@@ -1071,8 +1078,9 @@ export function registerDependencies(
     referenceOwnerReviewUseCases: asFunction(({ referenceOwnerReviewGateway, atomicDomainMutationCoordinator }) => new ReferenceOwnerReviewUseCases(referenceOwnerReviewGateway, atomicDomainMutationCoordinator)).scoped(),
     referenceDataUseCases: asFunction(({ referenceDataRepository, atomicAuditedOutboxMutationExecutor, referenceDataValidationService, assetReferencePolicy }) =>
       new ReferenceDataUseCases(referenceDataRepository, undefined, undefined, atomicAuditedOutboxMutationExecutor, referenceDataValidationService, assetReferencePolicy)).scoped(),
-    studyDestinationUseCases: asFunction(({ studyDestinationRepository, referenceDataRepository, assetReferencePolicy, atomicDomainMutationCoordinator }) =>
-      new StudyDestinationUseCases(studyDestinationRepository, referenceDataRepository, referenceDataRepository, undefined, assetReferencePolicy, atomicDomainMutationCoordinator)).scoped(),
+    studyDestinationPublicEnrichment: asFunction(({referenceDataRepository,assetReferencePolicy,processAssetLifecycleUseCase})=>new StudyDestinationPublicEnrichment(referenceDataRepository,assetReferencePolicy,processAssetLifecycleUseCase)).scoped(),
+    studyDestinationUseCases: asFunction(({ studyDestinationRepository, referenceDataRepository, assetReferencePolicy, atomicDomainMutationCoordinator, studyDestinationPublicEnrichment }) =>
+      new StudyDestinationUseCases(studyDestinationRepository, referenceDataRepository, referenceDataRepository, undefined, assetReferencePolicy, atomicDomainMutationCoordinator, studyDestinationPublicEnrichment)).scoped(),
     referenceResolver: asFunction(({ referenceDataRepository }) => new ReferenceResolverService(referenceDataRepository)).scoped(),
     serviceReferenceGateway: asFunction(({ referenceResolver }) => new CanonicalServiceReferenceGateway(referenceResolver)).scoped(),
     adminServiceCatalogUseCases: asFunction(({ serviceCatalogRepository, serviceReferenceGateway, assetReferencePolicy, serviceOperationsRepository }) => new AdminServiceCatalogUseCases(serviceCatalogRepository, serviceReferenceGateway, assetReferencePolicy, serviceOperationsRepository)).scoped(),
@@ -1253,6 +1261,12 @@ export function registerDependencies(
     universityPublicRouter: asFunction((cradle) => UniversityPublicRouter.create(cradle)).singleton(),
     majorAdminRouter: asFunction((cradle) => MajorAdminRouter.create(cradle)).scoped(),
     majorPublicRouter: asFunction((cradle) => MajorPublicRouter.create(cradle)).singleton(),
+    courseAdmissionGateway: asFunction(({prisma,courseFinancialClearanceGateway})=>new PrismaCourseAdmissionGateway(prisma,courseFinancialClearanceGateway)).scoped(),
+    courseAdmissionUseCases: asFunction(({courseAdmissionGateway,atomicDomainMutationCoordinator})=>new CourseAdmissionUseCases(courseAdmissionGateway,atomicDomainMutationCoordinator)).scoped(),
+    courseAdmissionRouter: asFunction(cradle=>CourseAdmissionRouter.create(cradle)).singleton(),
+    courseSourceReviewGateway: asFunction(({prisma})=>new PrismaCourseSourceReviewGateway(prisma)).scoped(),
+    courseSourceReviewUseCases: asFunction(({courseSourceReviewGateway,atomicDomainMutationCoordinator})=>new CourseSourceReviewUseCases(courseSourceReviewGateway,atomicDomainMutationCoordinator)).scoped(),
+    courseSourceReviewRouter: asFunction(cradle=>CourseSourceReviewRouter.create(cradle)).singleton(),
     courseAdminRouter: asFunction((cradle) => CourseAdminRouter.create(cradle)).singleton(),
     courseLearnerRouter: asFunction((cradle) => CourseLearnerRouter.create(cradle)).singleton(),
     importedCourseAdminRouter: asFunction((cradle) => ImportedCourseAdminRouter.create(cradle)).singleton(),

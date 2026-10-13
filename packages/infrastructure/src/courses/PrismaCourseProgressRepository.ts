@@ -63,7 +63,8 @@ export class PrismaCourseProgressRepository implements ITransactionalCourseProgr
       const definition = await new PrismaCourseCurriculumRepository(db as PrismaClient).getLearningVersion(data.courseId, owner.version, new Date());
       if (!definition) throw new Error('COURSE_ENROLLMENT_VERSION_NOT_FOUND');
 
-      let status = CourseEnrollmentStatus.ACTIVE;
+      const currentPolicy=await db.courseEnrollmentPolicy.findUnique({where:{courseId:data.courseId}});
+      let status = currentPolicy?.requiresApproval ? CourseEnrollmentStatus.PENDING : CourseEnrollmentStatus.ACTIVE;
       if (maximumSeats !== null) {
         const active = await db.courseEnrollment.count({
           where: { courseId: data.courseId, status: { in: [CourseEnrollmentStatus.ACTIVE, CourseEnrollmentStatus.PENDING] } },

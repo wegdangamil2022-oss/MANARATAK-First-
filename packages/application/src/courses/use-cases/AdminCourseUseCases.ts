@@ -14,7 +14,7 @@ import { assertNoTranslationPayloadFields } from '@manaratak/shared';
 import { AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { CoursePublicationService } from '../services/CoursePublicationService';
 
-const IMPORT_LINEAGE_FIELDS: ReadonlyArray<keyof UpdateCourseDto> = [
+const IMPORT_LINEAGE_FIELDS: ReadonlyArray<keyof UpdateCourseDto|'sourceImportRecordId'> = [
   'directCourseUrl',
   'sourceUrl',
   'officialSourceUrl',
@@ -45,8 +45,8 @@ export class AdminCourseUseCases {
 
   public async updateCourse(id: string, updates: UpdateCourseDto): Promise<CourseDto> {
     await assertAssetReferenceUsable(this.assetReferences, updates.thumbnailAssetId, { purpose: 'COURSE_THUMBNAIL' });
-    assertNoTranslationPayloadFields('COURSE', updates.optionalFields, ['localizedNames', 'titleEn']);
     const existing = await this.getCourse(id);
+    if(updates.optionalFields){const editorial={...updates.optionalFields};for(const key of ['localizedNames','titleEn'])if(key in editorial && JSON.stringify(editorial[key])===JSON.stringify(existing.optionalFields?.[key]))delete editorial[key];assertNoTranslationPayloadFields('COURSE',editorial,['localizedNames','titleEn']);updates={...updates,optionalFields:editorial};}
     if ([CourseStatus.ARCHIVED, CourseStatus.REJECTED].includes(existing.status)) throw new Error('COURSE_INACTIVE_IMMUTABLE');
     if (updates.originType && updates.originType !== existing.originType) {
       throw new Error('COURSE_ORIGIN_TYPE_MUTATION_FORBIDDEN');
@@ -57,7 +57,7 @@ export class AdminCourseUseCases {
 
     if (existing.originType === CourseOriginType.EXTERNAL_LINKED_COURSE) {
       for (const field of IMPORT_LINEAGE_FIELDS) {
-        if (updates[field] !== undefined && !this.equal(updates[field], existing[field as keyof CourseDto])) {
+        if ((updates as Record<string,unknown>)[field] !== undefined && !this.equal((updates as Record<string,unknown>)[field], existing[field as keyof CourseDto])) {
           throw new Error(`IMPORTED_COURSE_${String(field).toUpperCase()}_CHANGE_REQUIRES_CONTROLLED_IMPORT`);
         }
       }

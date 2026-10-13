@@ -1,3 +1,6 @@
+import {ApiClient} from '../../../api/client';
+import {mapCountry} from '../publicLiveDataSource';
+import {useTranslation} from '../../../i18n/I18nProvider';
 import { publicRelationshipRouteKey } from '../PublicGraphNavigationPolicy';
 import React, { useState, useMemo, useEffect } from 'react';
 import {
@@ -24,6 +27,7 @@ import { CountryDetailModal } from './CountryDetailModal';
 import { FavoriteButton } from './FavoriteButton';
 
 interface CountriesSearchPageProps {
+  dataMode?: 'api'|'prototype';
   detailId?: string;
   onDetailChange?: (id: string) => void;
   countries: CountryDestination[];
@@ -165,7 +169,8 @@ const CountryFlagImage: React.FC<{
 export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
   detailId,
   onDetailChange,
-  countries,
+  countries:initialCountries,
+  dataMode='api',
   onBack,
   onSelectCountryScholarships,
   onOpenUniversity,
@@ -180,6 +185,9 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
   searchAnchor,
   searchTerm,
 }) => {
+  const {language}=useTranslation();
+  const [countries,setCountries]=useState(initialCountries);
+  const [page,setPage]=useState(1);const [totalPages,setTotalPages]=useState(1);const [total,setTotal]=useState(initialCountries.length);const [loadError,setLoadError]=useState('');const [loadingPage,setLoadingPage]=useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContinent, setSelectedContinent] = useState('الكل');
   const [selectedCountryName, setSelectedCountryName] = useState('الكل');
@@ -212,6 +220,10 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
     setActiveCountryModal(target);
   }, [countries, detailId, initialCountryIdentity]);
 
+  useEffect(()=>{if(dataMode==='prototype')setCountries(initialCountries);},[initialCountries,dataMode]);
+  useEffect(()=>{setPage(1);},[searchQuery,selectedContinent,selectedCountryName]);
+  useEffect(()=>{if(dataMode!=='api')return;let active=true;setLoadingPage(true);setLoadError('');const timer=window.setTimeout(()=>{void ApiClient.getStudyDestinations({page,pageSize:24,q:selectedCountryName!=='الكل'?selectedCountryName:searchQuery.trim()||undefined,region:selectedContinent!=='الكل'?selectedContinent:undefined}).then(result=>{if(active){setCountries(result.data.map(row=>mapCountry(row,language)));setTotalPages(result.totalPages);setTotal(result.total);}}).catch(cause=>{if(active){setCountries([]);setLoadError(String(cause));}}).finally(()=>{if(active)setLoadingPage(false);});},300);return()=>{active=false;window.clearTimeout(timer);};},[page,searchQuery,selectedContinent,selectedCountryName,dataMode,language]);
+
   // Extract unique continents and countries
   const continents = useMemo(() => {
     const list = Array.from(new Set(countries.map((c) => c.continent)));
@@ -227,7 +239,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
   const filteredCountries = useMemo(() => {
     return countries.filter((c) => {
       const matchesSearch =
-        !searchQuery ||
+        dataMode==='api' || !searchQuery ||
         c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.continent.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -237,9 +249,9 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
       const matchesContinent = selectedContinent === 'الكل' || c.continent === selectedContinent;
       const matchesCountry = selectedCountryName === 'الكل' || c.name === selectedCountryName;
 
-      return matchesSearch && matchesContinent && matchesCountry;
+      return dataMode==='api'||(matchesSearch && matchesContinent && matchesCountry);
     });
-  }, [countries, searchQuery, selectedContinent, selectedCountryName]);
+  }, [countries, searchQuery, selectedContinent, selectedCountryName,dataMode]);
 
   const activeFiltersCount =
     (selectedContinent !== 'الكل' ? 1 : 0) +
@@ -335,8 +347,9 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
   return (
     <div
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
-      dir="rtl"
+      dir={language==='ar'?'rtl':'ltr'}
     >
+      {dataMode==='api'&&<nav className="flex gap-3 p-3" aria-label="Destination pages"><button disabled={loadingPage||page<=1} onClick={()=>setPage(page-1)}>{language==='ar'?'السابق':'Previous'}</button><span>{page}/{Math.max(1,totalPages)}</span><button disabled={loadingPage||page>=totalPages} onClick={()=>setPage(page+1)}>{language==='ar'?'التالي':'Next'}</button>{loadingPage&&<span>{language==='ar'?'تحميل…':'Loading…'}</span>}{loadError&&<p role="alert">{loadError}</p>}</nav>}
       {/* ========================================================================= */}
       {/* HERO EMERALD BANNER - COMPACT ROYAL DESIGN                                */}
       {/* ========================================================================= */}
@@ -524,7 +537,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-sm font-['Cairo',sans-serif]">
             <Globe2 className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-            <span>الدول المتاحة ({filteredCountries.length})</span>
+            <span>{language==='ar'?'الدول المتاحة':'Available destinations'} ({dataMode==='api'?total:filteredCountries.length})</span>
           </div>
 
           <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-accent-text)] bg-[var(--mn-accent)]/10 px-2 py-0.5 rounded-full border border-[var(--mn-accent)]/30">

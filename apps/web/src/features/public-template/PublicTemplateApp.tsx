@@ -1412,7 +1412,7 @@ export default function App() {
             />
           )
         ) : selectedImportedCourse ? (
-          <ImportedCourseDetail
+          <ImportedCourseDetail dataMode={publicDataMode}
             course={selectedImportedCourse}
             searchAnchor={detailSearchAnchor}
             searchTerm={detailSearchTerm}
@@ -1778,7 +1778,7 @@ export default function App() {
               />
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'countries' ? (
-              <CountriesSearchPage detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)}
+              <CountriesSearchPage dataMode={publicDataMode} detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)}
                 searchAnchor={detailSearchAnchor}
                 searchTerm={detailSearchTerm}
                 countries={countriesForView}
@@ -1919,7 +1919,7 @@ export default function App() {
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'courses' ? (
               selectedCourseTrack === 'imported' ? (
-                <CoursesSearchPage
+                <CoursesSearchPage dataMode={publicDataMode}
                   importedCourses={importedCourses}
                   initialQuery={searchQuery}
                   initialField={courseNavigationField}

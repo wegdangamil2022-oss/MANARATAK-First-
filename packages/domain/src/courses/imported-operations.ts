@@ -183,6 +183,7 @@ export interface ImportedCourseLinkCheckResult {
 }
 
 export interface IImportedCourseOperationsRepository {
+  hasCurrentSourceApproval?(id:string):Promise<boolean>;
   listImportedCourses(filters: ImportedCourseAdminFilters): Promise<ImportedCoursePage>;
   getImportedCourseById(id: string): Promise<ImportedCourseAdminDetail | null>;
   getOverview(): Promise<ImportedCourseOverview>;

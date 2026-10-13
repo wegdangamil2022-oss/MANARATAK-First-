@@ -1,3 +1,4 @@
+import {SecurityMiddlewareFactory} from '../../security/SecurityMiddlewareFactory';
 import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
@@ -121,6 +122,13 @@ export class StudyDestinationAdminRouter {
       }),
     );
 
+    router.get('/review-policy',asyncHandler(async(_req:Request,res:Response)=>{res.json(await studyDestinationUseCases.reviewPolicy());}));
+    router.put('/review-policy',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:publish'),asyncHandler(async(req:Request,res:Response)=>{
+      const body=z.object({maxEvidenceAgeDays:z.number().int().min(1).max(36500).nullable(),expectedUpdatedAt:z.string().datetime().nullable()}).strict().parse(req.body);
+      res.json(await studyDestinationUseCases.configureReviewPolicy(body.maxEvidenceAgeDays,body.expectedUpdatedAt,{actorId:requireAuthenticatedPrincipal(req).principalId,source:'admin-study-destinations-api',reason:z.string().trim().min(3).max(2000).parse(req.get('X-Review-Reason'))}));
+    }));
+    router.get('/:iso2Code/history',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:review'),asyncHandler(async(req:Request,res:Response)=>{const page=z.coerce.number().int().min(1).max(10000).parse(req.query.page??1);res.set('Cache-Control','no-store');res.json(await studyDestinationUseCases.history(req.params.iso2Code,page));}));
+
     router.get(
       '/:iso2Code',
       asyncHandler(async (req: Request, res: Response) => {
@@ -146,6 +154,7 @@ export class StudyDestinationAdminRouter {
 
     router.put(
       '/:iso2Code/profile',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:edit'),
       asyncHandler(async (req: Request, res: Response) => {
         const { expectedUpdatedAt, ...input } = profileSchema.parse(req.body);
         res.json(
@@ -156,6 +165,7 @@ export class StudyDestinationAdminRouter {
 
     router.post(
       '/:iso2Code/submit-review',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:edit'),
       asyncHandler(async (req: Request, res: Response) => {
         res.json(await mutation(req, 'STUDY_DESTINATION_SUBMITTED_FOR_REVIEW', owner => owner.submitForReview(req.params.iso2Code)));
       }),
@@ -163,6 +173,7 @@ export class StudyDestinationAdminRouter {
 
     router.post(
       '/:iso2Code/verify-source',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:review'),
       asyncHandler(async (req: Request, res: Response) => {
         const review = z.object({expectedUpdatedAt: z.string().datetime().optional(), reason: z.string().trim().min(3).max(2000), approvedOrigins: z.array(z.string().url()).min(1).max(100)}).strict().parse(req.body);
         res.json(await mutation(req, 'STUDY_DESTINATION_SOURCES_VERIFIED', owner => owner.verifySources(req.params.iso2Code, {...review, actorId: requireAuthenticatedPrincipal(req).principalId})));
@@ -171,6 +182,7 @@ export class StudyDestinationAdminRouter {
 
     router.post(
       '/:iso2Code/publish',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:publish'),
       asyncHandler(async (req: Request, res: Response) => {
         res.json(await mutation(req, 'STUDY_DESTINATION_PUBLISHED', owner => owner.publish(req.params.iso2Code)));
       }),
@@ -178,6 +190,7 @@ export class StudyDestinationAdminRouter {
 
     router.post(
       '/:iso2Code/archive',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:publish'),
       asyncHandler(async (req: Request, res: Response) => {
         res.json(await mutation(req, 'STUDY_DESTINATION_ARCHIVED', owner => owner.archive(req.params.iso2Code)));
       }),

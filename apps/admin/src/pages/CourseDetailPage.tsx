@@ -1,3 +1,5 @@
+import {CourseAdmissionsPanel} from '../components/CourseAdmissionsPanel';
+import {CourseSourceApprovalPanel} from '../components/CourseSourceApprovalPanel';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { adminApiClient, setCourseReviewReason } from '../api/client';
@@ -18,6 +20,7 @@ import { AssetPicker } from '../components/AssetPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 
 interface CourseDetail {
+  version: number;
   id: string;
   displayName: string;
   status: string;
@@ -201,6 +204,9 @@ export function CourseDetailPage() {
     points: 1,
   });
 
+  const hasUnsavedChanges = !!savedForm && (JSON.stringify(formData)!==savedForm || !!editingLesson || !!moduleDraft.title || !!lessonDraft.title || !!assetDraft.assetId || !!quizDraft.title || !!questionDraft.prompt || financialClearance!==(policyData?.requiresFinancialClearance===true));
+  useEffect(()=>{if(!hasUnsavedChanges)return;const unload=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};const navigateAway=(event:MouseEvent)=>{const anchor=(event.target as Element|null)?.closest?.('a[href]');if(anchor && !window.confirm('توجد تعديلات غير محفوظة. مغادرة الصفحة؟ / Discard unsaved changes?')){event.preventDefault();event.stopPropagation();}};window.addEventListener('beforeunload',unload);document.addEventListener('click',navigateAway,true);return()=>{window.removeEventListener('beforeunload',unload);document.removeEventListener('click',navigateAway,true);};},[hasUnsavedChanges]);
+
   const isExternalLinkedCourse = course?.originType === 'EXTERNAL_LINKED_COURSE';
 
   const lessonsByModule = useMemo(() => {
@@ -256,6 +262,7 @@ export function CourseDetailPage() {
         .then(setRelationships)
         .catch(() => setRelationships(null));
       const editable = {
+        optionalFields: courseResponse.optionalFields ?? {},
         displayName: courseResponse.displayName,
         accessType: courseResponse.accessType,
         thumbnailAssetId: courseResponse.thumbnailAssetId,
@@ -298,8 +305,10 @@ export function CourseDetailPage() {
       } else {
         setSnapshot(null);
       }
+      return true;
     } catch (err: any) {
       setError(err.message);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -330,6 +339,8 @@ export function CourseDetailPage() {
       });
       setCourse(await adminApiClient.request<CourseDetail>(`/admin/courses/${id}`));
       setSavedForm(JSON.stringify(formData));
+      setReadiness(null);
+      if(!isExternalLinkedCourse) setReadiness(await adminApiClient.request<typeof readiness>(`/admin/courses/${id}/readiness`));
       setSuccessMsg('Course metadata saved.');
     } catch (err: any) {
       setError(err.message);
@@ -358,8 +369,7 @@ export function CourseDetailPage() {
     setSuccessMsg(null);
     try {
       await adminApiClient.request(`/admin/courses/${id}/${endpoint}`, { method: 'POST' });
-      setSuccessMsg(`Successfully executed: ${actionName}`);
-      await fetchCourse();
+      if(await fetchCourse()) setSuccessMsg(`Successfully executed: ${actionName}`);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -596,13 +606,17 @@ export function CourseDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <label className="block text-sm font-semibold">سبب التعديل أو المراجعة
+      {hasUnsavedChanges && <p role="status">توجد تعديلات غير محفوظة / Unsaved changes</p>}
+      <div className="block text-sm font-semibold">سبب التعديل أو المراجعة
+        {course && course.originType!=='EXTERNAL_LINKED_COURSE' && id && <CourseAdmissionsPanel id={id} version={course.version}/>}
+        {course?.originType === 'EXTERNAL_LINKED_COURSE' && id && <CourseSourceApprovalPanel id={id} version={course.version}/> }
+        <label className="block text-xs">الوصول بعد سحب النشر / Withdrawal access<select value={String(formData.optionalFields?.withdrawalAccessPolicy ?? '')} onChange={event=>setFormData({...formData,optionalFields:{...formData.optionalFields,withdrawalAccessPolicy:event.target.value}})} disabled={course?.status==='PUBLISHED'}><option value="">غير محدد — يلزم قرار صريح</option><option value="REVOKE">إيقاف الوصول بعد سحب النشر</option><option value="HONOR_ENROLLED_VERSION">الحفاظ على نسخة الطلاب المسجلين</option></select></label>
         <input value={reviewReason} onChange={event=>setReviewReason(event.target.value)} maxLength={2000}
           placeholder="اكتب سببًا واضحًا قبل حفظ التعديلات" className="mt-2 w-full rounded-lg border p-3" />
-      </label>
+      </div>
       <div className="flex items-center justify-between gap-4">
         <button
-          onClick={() => navigate('/courses')}
+          onClick={() => {if(!hasUnsavedChanges || window.confirm('توجد تعديلات غير محفوظة. مغادرة الصفحة؟ / Discard unsaved changes?')) navigate('/courses');}}
           className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> {t('back_to_courses')}

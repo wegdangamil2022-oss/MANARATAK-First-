@@ -492,6 +492,16 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Source only; no migration applied or legacy verification backfill. Preserve actual review evidence when recovering; use pre-migration backup or disposable reprovisioning after authorization."
+    },
+    "20261013040000_course_source_approvals": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/SECTIONS_12_13_SOURCE_REVIEW_2026-10-13.md",
+      "decision": "Source only, unapplied. No approval, actor, expiry or history backfill. Drain writers, preserve actual immutable approval/revision evidence and use a reviewed compatible backup or forward fix; no destructive down SQL authorized."
+    },
+    "20261013050000_study_destination_history_policy": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/reviews/SECTIONS_12_13_SOURCE_REVIEW_2026-10-13.md",
+      "decision": "Source only, unapplied. No approval, actor, expiry or history backfill. Drain writers, preserve actual immutable approval/revision evidence and use a reviewed compatible backup or forward fix; no destructive down SQL authorized."
     }
   }
 }

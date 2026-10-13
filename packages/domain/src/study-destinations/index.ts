@@ -1,3 +1,4 @@
+import type {DestinationReviewPolicy,DestinationRevisionPage} from './StudyDestinationRevision';
 import type { AtomicPersistenceContext } from '../event-foundation/outbox/TransactionalOutbox';
 export enum StudyDestinationStatus {
   DRAFT = 'DRAFT',
@@ -155,6 +156,8 @@ export interface StudyDestinationFilters {
   completenessStatus?: StudyDestinationCompletenessStatus;
   countryReferenceId?: string;
   isFeatured?: boolean;
+  q?: string;
+  region?: string;
   page?: number;
   pageSize?: number;
 }
@@ -184,6 +187,11 @@ export interface StudyDestinationReadinessReport {
 }
 
 export interface IStudyDestinationRepository {
+  reviewPolicy?():Promise<DestinationReviewPolicy|null>;
+  saveReviewPolicy?(days:number|null,expectedUpdatedAt:string|null):Promise<DestinationReviewPolicy>;
+  appendRevision?(profileId:string,actorId:string,action:string,reason:string,diff:unknown,proof:unknown):Promise<void>;
+  revisionPage?(profileId:string,page:number):Promise<DestinationRevisionPage>;
+
   withTransaction?(context: AtomicPersistenceContext): IStudyDestinationRepository;
   lockCountry?(countryReferenceId: string): Promise<void>;
   findByCountryReferenceIds?(ids: string[]): Promise<StudyDestinationProfileDto[]>;

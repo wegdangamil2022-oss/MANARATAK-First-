@@ -1,3 +1,4 @@
+import type {StudyDestinationPublicEnrichment} from './StudyDestinationPublicEnrichment';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { createHash } from 'node:crypto';
 import {
@@ -5,6 +6,7 @@ import {
   assertAssetReferenceUsable,
 } from '../asset-platform/AssetReferencePolicy';
 import {
+  destinationRevisionDiff,
   AssetSecurityClassification,
   IReferenceDataRepository,
   IReferenceResolutionRepository,
@@ -55,6 +57,7 @@ export type PublicStudyDestinationDto = Pick<StudyDestinationProfileDto,
   'studentLifeHighlightsAr' | 'studentLifeHighlightsEn' | 'officialLinks' | 'isFeatured'> & {
   country: Pick<ReferenceCountryDto, 'id'|'iso2Code'|'iso3Code'|'name'|'nameAr'|'officialName'|'region'|'subregion'|'defaultCurrencyCode'|'defaultLanguageCode'|'callingCode'|'isActive'>;
   studyLanguages: Array<Pick<ReferenceLanguageDto, 'id'|'name'|'nameAr'|'isoCode'|'isActive'>>;
+  image?: {url:string;expiresAt:string}|null;
   livingCostCurrency: Pick<ReferenceCurrencyDto, 'id'|'name'|'nameAr'|'isoCode'|'isActive'> | null;
 }
 
@@ -69,6 +72,7 @@ export class StudyDestinationUseCases {
     private readonly publishingPolicy = new StudyDestinationPublishingPolicy(),
     private readonly assetReferences?: AssetReferencePolicy,
     private readonly atomicMutations?: AtomicDomainMutationCoordinator,
+    private readonly publicEnrichment?: StudyDestinationPublicEnrichment,
   ) {}
 
   public async executeAdminMutation(iso2: string, action: string, context: AtomicMutationRequestContext & {reason: string; expectedUpdatedAt?: string}, operation: (owner: StudyDestinationUseCases) => Promise<StudyDestinationAggregateDto>) {
@@ -85,8 +89,19 @@ export class StudyDestinationUseCases {
       if (current && !context.expectedUpdatedAt) throw new Error('STUDY_DESTINATION_EXPECTED_REVISION_REQUIRED');
       if (current && current.updatedAt !== context.expectedUpdatedAt) throw new Error('STUDY_DESTINATION_VERSION_CONFLICT');
       const owner = new StudyDestinationUseCases(repository, this.referenceData, this.referenceResolution, this.publishingPolicy, this.assetReferences);
-      return operation(owner);
+      const result=await operation(owner);
+      if(!repository.appendRevision)throw new Error('STUDY_DESTINATION_HISTORY_PERSISTENCE_REQUIRED');
+      if(result.profile)await repository.appendRevision(result.profile.id,context.actorId,action,context.reason,destinationRevisionDiff(current,result.profile),result.profile.sourceReviewProof??null);
+      return result;
     });
+  }
+
+  async history(iso2:string,page=1){const country=await this.requireCountry(iso2);const profile=await this.requireProfile(country.id);if(!this.repository.revisionPage)throw new Error('STUDY_DESTINATION_HISTORY_UNAVAILABLE');return this.repository.revisionPage(profile.id,page);}
+  async reviewPolicy(){return this.repository.reviewPolicy?.() ?? null;}
+  async configureReviewPolicy(days:number|null,expectedUpdatedAt:string|null,context:AtomicMutationRequestContext & {reason:string}){
+    if(days!==null&&(!Number.isSafeInteger(days)||days<1||days>36500))throw new Error('STUDY_DESTINATION_INVALID_REVIEW_POLICY');
+    if(!this.atomicMutations||!this.repository.withTransaction||!context.actorId||context.reason.trim().length<3)throw new Error('STUDY_DESTINATION_ATOMIC_PERSISTENCE_REQUIRED');
+    return this.atomicMutations.execute({domain:'STUDY_DESTINATIONS',aggregateType:'REVIEW_POLICY',aggregateId:'source-review',action:'STUDY_DESTINATION_REVIEW_POLICY_CHANGED',context,auditMetadata:{reason:context.reason,days}},async persistence=>{const repo=this.repository.withTransaction!(persistence);if(!repo.saveReviewPolicy)throw new Error('STUDY_DESTINATION_REVIEW_POLICY_UNAVAILABLE');return repo.saveReviewPolicy(days,expectedUpdatedAt);});
   }
 
   public async listAdmin(
@@ -266,7 +281,7 @@ export class StudyDestinationUseCases {
     const country = await this.requireCountry(iso2Code);
     const profile = await this.requireProfile(country.id);
     await this.normalizeAndValidateInput(profile);
-    this.assertReviewProof(profile);
+    this.assertReviewProof(profile,await this.reviewPolicy());
     await assertAssetReferenceUsable(this.assetReferences, profile.imageAssetId, {purpose: 'STUDY_DESTINATION_IMAGE', publicPublication: true, allowedClassifications: [AssetSecurityClassification.PUBLIC], allowedMimeTypePrefixes: ['image/']});
     if (profile.status !== StudyDestinationStatus.IN_REVIEW)
       throw new Error('STUDY_DESTINATION_REVIEW_REQUIRED');
@@ -298,15 +313,18 @@ export class StudyDestinationUseCases {
   public async listPublic(
     filters: Omit<StudyDestinationFilters, 'status' | 'completenessStatus'> = {},
   ): Promise<PaginatedStudyDestinationResult<PublicStudyDestinationDto>> {
+    const policy=await this.reviewPolicy();
     const result = await this.repository.listPublished(filters);
+    const batch=this.referenceResolution.resolveActiveStudyReferences?await this.referenceResolution.resolveActiveStudyReferences({countryIds:result.data.map(profile=>profile.countryReferenceId),languageIds:[...new Set(result.data.flatMap(profile=>profile.studyLanguageReferenceIds))],currencyIds:[...new Set(result.data.flatMap(profile=>profile.livingCostCurrencyReferenceId?[profile.livingCostCurrencyReferenceId]:[]))]}):null;
+    const countryById=new Map(batch?.countries.map(country=>[country.id,country]));
+    const languageById=new Map(batch?.languages.map(language=>[language.id,language]));
+    const currencyById=new Map(batch?.currencies.map(currency=>[currency.id,currency]));
     const data = (
       await Promise.all(
         result.data.map(async (profile) => {
-          const match = await this.referenceResolution.resolveCountryCandidate({
-            id: profile.countryReferenceId,
-          });
-          if (!match?.record?.isActive || !this.hasReviewProof(profile)) return null;
-          try { return await this.publicDto(match.record, profile); } catch (error) {
+          const match=batch?{record:countryById.get(profile.countryReferenceId)}:await this.referenceResolution.resolveCountryCandidate({id:profile.countryReferenceId});
+          if (!match?.record?.isActive || !this.hasReviewProof(profile,policy)) return null;
+          try { return await this.publicDto(match.record, profile,batch?{studyLanguages:profile.studyLanguageReferenceIds.map(id=>languageById.get(id)).filter((item):item is ReferenceLanguageDto=>!!item),livingCostCurrency:profile.livingCostCurrencyReferenceId?currencyById.get(profile.livingCostCurrencyReferenceId)??null:null}:undefined); } catch (error) {
             if (error instanceof Error && error.message === 'STUDY_DESTINATION_NOT_FOUND') return null;
             throw error;
           }
@@ -323,8 +341,14 @@ export class StudyDestinationUseCases {
     const match = await this.referenceResolution.resolveCountryCandidate({
       id: profile.countryReferenceId,
     });
-    if (!match?.record?.isActive || !this.hasReviewProof(profile)) throw new Error('STUDY_DESTINATION_NOT_FOUND');
+    if (!match?.record?.isActive || !this.hasReviewProof(profile,await this.reviewPolicy())) throw new Error('STUDY_DESTINATION_NOT_FOUND');
     return this.publicDto(match.record, profile);
+  }
+
+  public async getPublicCities(slug:string,page=1){
+    const destination=await this.getPublicBySlug(slug);
+    if(!this.publicEnrichment)throw new Error('STUDY_DESTINATION_CITIES_UNAVAILABLE');
+    return this.publicEnrichment.cities(destination.country.iso2Code,page);
   }
 
   private async aggregate(
@@ -364,12 +388,14 @@ export class StudyDestinationUseCases {
   private async publicDto(
     country: ReferenceCountryDto,
     profile: StudyDestinationProfileDto,
+    resolved?:{studyLanguages:ReferenceLanguageDto[];livingCostCurrency:ReferenceCurrencyDto|null},
   ): Promise<PublicStudyDestinationDto> {
-    const aggregate = await this.aggregate(country, profile);
-    if (aggregate.studyLanguages.some(item => !item.isActive) || (profile.livingCostCurrencyReferenceId && !aggregate.livingCostCurrency?.isActive)) throw new Error('STUDY_DESTINATION_NOT_FOUND');
+    const aggregate = resolved ?? await this.aggregate(country, profile);
+    if (aggregate.studyLanguages.length!==profile.studyLanguageReferenceIds.length || aggregate.studyLanguages.some(item => !item.isActive) || (profile.livingCostCurrencyReferenceId && !aggregate.livingCostCurrency?.isActive)) throw new Error('STUDY_DESTINATION_NOT_FOUND');
     const allowed = ['publicId','slug','overviewAr','overviewEn','studySystemSummaryAr','studySystemSummaryEn','admissionHighlightsAr','admissionHighlightsEn','visaSummaryAr','visaSummaryEn','visaRequirementsAr','visaRequirementsEn','visaOfficialUrl','livingCostTier','averageMonthlyLivingCostMin','averageMonthlyLivingCostMax','costHighlightsAr','costHighlightsEn','studentLifeHighlightsAr','studentLifeHighlightsEn','officialLinks','isFeatured'] as const;
     const content = Object.fromEntries(allowed.map(key => [key, profile[key]])) as Pick<PublicStudyDestinationDto, typeof allowed[number]>;
-    return { ...content, country: { id: country.id, iso2Code: country.iso2Code, iso3Code: country.iso3Code, name: country.name, nameAr: country.nameAr, officialName: country.officialName, region: country.region, subregion: country.subregion, defaultCurrencyCode: country.defaultCurrencyCode, defaultLanguageCode: country.defaultLanguageCode, callingCode: country.callingCode, isActive: true },
+    const image=await this.publicEnrichment?.image(profile.imageAssetId) ?? null;
+    return { ...content, image, country: { id: country.id, iso2Code: country.iso2Code, iso3Code: country.iso3Code, name: country.name, nameAr: country.nameAr, officialName: country.officialName, region: country.region, subregion: country.subregion, defaultCurrencyCode: country.defaultCurrencyCode, defaultLanguageCode: country.defaultLanguageCode, callingCode: country.callingCode, isActive: true },
       studyLanguages: aggregate.studyLanguages.map(item => ({id: item.id, name: item.name, nameAr: item.nameAr, isoCode: item.isoCode, isActive: true})),
       livingCostCurrency: aggregate.livingCostCurrency ? {id: aggregate.livingCostCurrency.id, name: aggregate.livingCostCurrency.name, nameAr: aggregate.livingCostCurrency.nameAr, isoCode: aggregate.livingCostCurrency.isoCode, isActive: true} : null };
   }
@@ -383,12 +409,13 @@ export class StudyDestinationUseCases {
     const evidenceSources = profile.evidenceSources.map(({verifiedAt, ...fact}) => fact);
     return createHash('sha256').update(JSON.stringify({...facts, evidenceSources})).digest('hex');
   }
-  private hasReviewProof(profile: StudyDestinationProfileDto): boolean {
+  private hasReviewProof(profile: StudyDestinationProfileDto,policy?:{maxEvidenceAgeDays:number|null}|null): boolean {
     const proof = profile.sourceReviewProof;
+    if(proof&&policy?.maxEvidenceAgeDays!=null&&Date.now()-Date.parse(proof.reviewedAt)>policy.maxEvidenceAgeDays*86400000)return false;
     return Boolean(proof && profile.sourceVerificationStatus === StudyDestinationVerificationStatus.VERIFIED && profile.lastEditedBy && proof.actorId !== profile.lastEditedBy && proof.fingerprint === this.sourceFingerprint(profile) && Number.isFinite(Date.parse(proof.reviewedAt)) && Date.parse(proof.reviewedAt) <= Date.now());
   }
-  private assertReviewProof(profile: StudyDestinationProfileDto): void {
-    if (!this.hasReviewProof(profile)) throw new Error('STUDY_DESTINATION_CURRENT_INDEPENDENT_REVIEW_REQUIRED');
+  private assertReviewProof(profile: StudyDestinationProfileDto,policy?:{maxEvidenceAgeDays:number|null}|null): void {
+    if (!this.hasReviewProof(profile,policy)) throw new Error('STUDY_DESTINATION_CURRENT_INDEPENDENT_REVIEW_REQUIRED');
   }
 
   private async requireCountry(iso2Code: string): Promise<ReferenceCountryDto> {

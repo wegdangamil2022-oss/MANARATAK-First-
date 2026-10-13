@@ -1,3 +1,4 @@
+import {queryTrustedCoursePage} from './QueryTrustedCoursePage';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -20,7 +21,6 @@ import {
   CourseRelationshipPublicFilters,
   PublicCourseFilters,
 } from '@manaratak/domain';
-import { queryStableCursorPage } from '../api-foundation/StableCursor';
 
 function normalize(value: string): string {
   return value.normalize('NFKC').trim().toLocaleLowerCase('en-US').replace(/\s+/g, ' ');
@@ -737,71 +737,15 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
   public async listPublishedRelatedCourses(
     filters: CourseRelationshipPublicFilters,
   ): Promise<PaginatedCourseResult<CourseRelationshipPublicCourseDto>> {
-    const where: Prisma.CourseWhereInput = {
-      status: 'PUBLISHED',
-      completenessStatus: 'COMPLETE',
-      AND: [{
-        OR: [
-          { originType: { not: 'EXTERNAL_LINKED_COURSE' } },
-          {
-            originType: 'EXTERNAL_LINKED_COURSE',
-            accessType: 'FREE_STUDY_AND_CERTIFICATE',
-            isStudyFree: true,
-            isFreeCertificate: true,
-          },
-        ],
-      }],
-    };
-
-    if (filters.accessType) where.accessType = filters.accessType;
-    if (filters.originType) where.originType = filters.originType;
-    if (filters.platformName) where.platformName = filters.platformName;
-    if (filters.category) where.category = filters.category;
-    if (filters.learningLanguage) where.learningLanguage = filters.learningLanguage;
-    if (filters.learningLanguageReferenceId) {
-      where.learningLanguageReferenceId = filters.learningLanguageReferenceId;
-    }
-    if (filters.taxonomyNodeId) {
-      where.academicTaxonomyLinks = {
-        some: {
-          taxonomyNodeId: filters.taxonomyNodeId,
-          reviewState: 'APPROVED',
-        },
-      };
-    }
-    if (filters.majorId) {
-      where.majorProjections = {
-        some: {
-          majorId: filters.majorId,
-          projectionState: 'APPROVED',
-        },
-      };
-    }
-    if (filters.providerHeadquartersCountryReferenceId) {
-      where.externalProvider = {
-        is: {
-          headquartersCountryReferenceId: filters.providerHeadquartersCountryReferenceId,
-        },
-      };
-    }
-    if (filters.internationalTestId) {
-      where.internationalTestRelationships = {
-        some: {
-          internationalTestId: filters.internationalTestId,
-          reviewState: 'APPROVED',
-        },
-      };
-    }
-
     const select = {
       id: true, publicId: true, slug: true, displayName: true, accessType: true, originType: true,
       directCourseUrl: true, externalProviderId: true, providerName: true, learningLanguageRaw: true,
       learningLanguageReferenceId: true, isStudyFree: true, isFreeCertificate: true, certificateType: true,
       category: true, optionalFields: true,
     };
-    return queryStableCursorPage({
-      delegate: this.prisma.course as any, where, select, cursor: filters.cursor, limit: filters.limit,
-      map: (row: any) => {
+    return queryTrustedCoursePage(this.prisma, filters, async(tx,ids) => {
+      const rows = await tx.course.findMany({where:{id:{in:ids}},orderBy:{id:'asc'},select});
+      return rows.map(row => {
         const { id, optionalFields, ...record } = row;
         const optional = optionalFields && typeof optionalFields === 'object' && !Array.isArray(optionalFields)
           ? optionalFields as Record<string, unknown> : {};
@@ -810,7 +754,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
           ? Object.fromEntries(Object.entries(rawNames as Record<string, unknown>).filter((entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1].trim().length > 0))
           : undefined;
         return { ownerId: id, ...record, ...(localizedNames ? { localizedNames } : {}) };
-      },
+      });
     });
   }
 

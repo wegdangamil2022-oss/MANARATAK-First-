@@ -28,12 +28,12 @@ export function CourseLearnerPage() {
   const assetRequest = useRef(0);
   const [media, setMedia] = useState<{
     url: string;
-    type: 'video' | 'audio' | 'image';
+    type: 'video' | 'audio' | 'image' | 'document';
     title: string;
   } | null>(null);
   useEffect(
     () => () => {
-      if (media) URL.revokeObjectURL(media.url);
+      if (media?.url.startsWith('blob:')) URL.revokeObjectURL(media.url);
     },
     [media],
   );
@@ -156,27 +156,10 @@ export function CourseLearnerPage() {
         assetReferenceId,
       );
       if (!/^https?:\/\//i.test(grant.url)) throw new Error('رابط المحتوى غير صالح.');
-      const response = await fetch(grant.url, { headers: grant.headers });
-      if (!response.ok) throw new Error('تعذر تحميل محتوى الدرس.');
-      const blob = await response.blob();
-      if (request !== assetRequest.current) return;
-      const assetUrl = URL.createObjectURL(blob);
-      const type = blob.type.startsWith('video/')
-        ? 'video'
-        : blob.type.startsWith('audio/')
-          ? 'audio'
-          : blob.type.startsWith('image/')
-            ? 'image'
-            : null;
-      if (type) {
-        setMedia({ url: assetUrl, type, title });
-        return;
-      }
-      const link = document.createElement('a');
-      link.href = assetUrl;
-      link.download = `${title || 'course-content'}${blob.type === 'application/pdf' ? '.pdf' : ''}`;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(assetUrl), 60000);
+      if (Object.keys(grant.headers??{}).length || Date.parse(grant.expiresAt)<=Date.now()) throw new Error('يلزم رابط بث صالح لا يتطلب رؤوسًا خاصة.');
+      if(request!==assetRequest.current)return;
+      const type=grant.mimeType.startsWith('video/')?'video':grant.mimeType.startsWith('audio/')?'audio':grant.mimeType.startsWith('image/')?'image':'document';
+      setMedia({url:grant.url,type,title});
     } catch (error) {
       setError(error instanceof Error ? error.message : 'تعذر فتح محتوى الدرس');
     } finally {
@@ -444,7 +427,7 @@ export function CourseLearnerPage() {
             <video src={media.url} controls className="mt-3 w-full max-h-[70vh]" />
           ) : media.type === 'audio' ? (
             <audio src={media.url} controls className="mt-3 w-full" />
-          ) : (
+          ) : media.type === 'document' ? <a href={media.url} target="_blank" rel="noopener noreferrer">فتح الملف برابط مؤقت / Open temporary document link</a> : (
             <img src={media.url} alt={media.title} className="mt-3 max-h-[70vh] mx-auto" />
           )}
         </section>

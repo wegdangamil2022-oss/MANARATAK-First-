@@ -122,6 +122,12 @@ interface PrismaReferenceDataPersistenceContext extends AtomicPersistenceContext
 export class PrismaReferenceDataRepository implements ITransactionalReferenceDataRepository, IReferenceResolutionRepository {
   constructor(private readonly prisma: PrismaClient, private readonly inTransaction = false, private readonly mutationActorId?: string, private readonly mutationCorrelationId?: string) {}
 
+  public async resolveActiveStudyReferences(ids:{countryIds:string[];languageIds:string[];currencyIds:string[]}){
+    if(Math.max(ids.countryIds.length,ids.languageIds.length,ids.currencyIds.length)>5000)throw new Error('REFERENCE_BATCH_LIMIT_EXCEEDED');
+    const [countries,languages,currencies]=await Promise.all([this.prisma.referenceCountry.findMany({where:{id:{in:ids.countryIds},isActive:true}}),this.prisma.referenceLanguage.findMany({where:{id:{in:ids.languageIds},isActive:true}}),this.prisma.referenceCurrency.findMany({where:{id:{in:ids.currencyIds},isActive:true}})]);
+    return {countries:countries.map(row=>this.mapToCountryDto(row as unknown as DbCountry)),languages:languages.map(row=>this.mapToLanguageDto(row as unknown as DbLanguage)),currencies:currencies.map(row=>this.mapToCurrencyDto(row as unknown as DbCurrency))};
+  }
+
   public async resolveCountryCandidate(
     lookup: ReferenceLookup,
   ): Promise<ReferenceResolutionMatch<ReferenceCountryDto> | null> {

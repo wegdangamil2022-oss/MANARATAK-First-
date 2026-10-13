@@ -402,3 +402,5 @@ export * from './asset-platform/value-objects/AssetRights';
 export * from './settings/services/SettingsDependencyPolicy';
 
 export * from './majors/MajorConsumerRead';
+export * from './courses/CourseSourceTrust';
+export * from './study-destinations/StudyDestinationRevision';
