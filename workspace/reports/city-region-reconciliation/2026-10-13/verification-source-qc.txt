@@ -1,0 +1,5 @@
+
+> manaratak-2.0-monorepo@0.0.0 imports:qc:verify
+> tsx scripts/import/source-quality.ts check
+
+{"mode":"SOURCE_QC_CHECK","outputs":["universities-geography.jsonl","universities-stage34-quarantine.jsonl","scholarships-sections.jsonl","courses-url-decisions.json","courses-relationships.jsonl","summary.json","manifest.json"],"databaseWrites":0,"runtime":"RUNTIME_UNTESTED"}

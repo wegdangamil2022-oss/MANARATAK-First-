@@ -1,0 +1,120 @@
+﻿cityId,countryIso2,cityNameEn,regionNameEn,reason,geonameId
+city_et_sodo,ET,Sodo,YeDebub Bihēroch Bihēreseboch na Hizboch,HISTORICAL_SUBDIVISION_SPLIT_NOT_IN_REFERENCE,7910079
+city_et_arba_minch,ET,Arba Minch',YeDebub Bihēroch Bihēreseboch na Hizboch,HISTORICAL_SUBDIVISION_SPLIT_NOT_IN_REFERENCE,343663
+city_et_hosa_ina,ET,Hosa'ina,YeDebub Bihēroch Bihēreseboch na Hizboch,HISTORICAL_SUBDIVISION_SPLIT_NOT_IN_REFERENCE,334609
+city_et_dila,ET,Dila,YeDebub Bihēroch Bihēreseboch na Hizboch,HISTORICAL_SUBDIVISION_SPLIT_NOT_IN_REFERENCE,338998
+city_et_boditi,ET,Boditi,YeDebub Bihēroch Bihēreseboch na Hizboch,HISTORICAL_SUBDIVISION_SPLIT_NOT_IN_REFERENCE,
+city_yt_mamoudzou,YT,Mamoudzou,,NO_SAME_COUNTRY_REGION_CATALOG,921815
+city_re_saint_denis,RE,Saint-Denis,,NO_SAME_COUNTRY_REGION_CATALOG,935264
+city_aw_oranjestad,AW,Oranjestad,,NO_SAME_COUNTRY_REGION_CATALOG,3577154
+city_ky_george_town,KY,George Town,,NO_SAME_COUNTRY_REGION_CATALOG,3580661
+city_cw_willemstad,CW,Willemstad,,NO_SAME_COUNTRY_REGION_CATALOG,3513090
+city_gf_cayenne,GF,Cayenne,,NO_SAME_COUNTRY_REGION_CATALOG,3382160
+city_gf_saint_laurent_du_maroni,GF,Saint-Laurent-du-Maroni,,NO_SAME_COUNTRY_REGION_CATALOG,3380387
+city_gf_kourou,GF,Kourou,,NO_SAME_COUNTRY_REGION_CATALOG,3381303
+city_gp_pointe_a_pitre,GP,Pointe-a-Pitre,,NO_SAME_COUNTRY_REGION_CATALOG,3578599
+city_mq_fort_de_france,MQ,Fort-de-France,,NO_SAME_COUNTRY_REGION_CATALOG,3570675
+city_pr_san_juan,PR,San Juan,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4568127
+city_pr_aguadilla,PR,Aguadilla,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4562506
+city_pr_bayamon,PR,Bayamon,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4562831
+city_pr_carolina,PR,Carolina,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4563243
+city_pr_arecibo,PR,Arecibo,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4562635
+city_pr_ponce,PR,Ponce,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4566880
+city_pr_san_german,PR,San German,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4568104
+city_pr_mayaguez,PR,Mayaguez,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4566385
+city_pr_caguas,PR,Caguas,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4563008
+city_pr_guaynabo,PR,Guaynabo,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4565119
+city_pr_juana_diaz,PR,Juana Diaz,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4565712
+city_pr_fajardo,PR,Fajardo,Puerto Rico,NO_SAME_COUNTRY_REGION_CATALOG,4564946
+city_vg_road_town,VG,Road Town,,NO_SAME_COUNTRY_REGION_CATALOG,3577430
+city_hk_central,HK,Central District,,NO_SAME_COUNTRY_REGION_CATALOG,
+city_hk_hong_kong,HK,Hong Kong,,NO_SAME_COUNTRY_REGION_CATALOG,1819729
+city_hk_kennedy_town,HK,Kennedy Town,,NO_SAME_COUNTRY_REGION_CATALOG,1819638
+city_hk_kowloon,HK,Kowloon,,NO_SAME_COUNTRY_REGION_CATALOG,1819609
+city_hk_kowloon_000061,HK,Kowloon City,,NO_SAME_COUNTRY_REGION_CATALOG,1819607
+city_hk_lam_tin,HK,Lam Tin,,NO_SAME_COUNTRY_REGION_CATALOG,1819554
+city_hk_san_tung_chung_hang,HK,San Tung Chung Hang,,NO_SAME_COUNTRY_REGION_CATALOG,1819283
+city_hk_sha_tin,HK,Sha Tin,,NO_SAME_COUNTRY_REGION_CATALOG,1818920
+city_hk_sham_shui_po,HK,Sham Shui Po,,NO_SAME_COUNTRY_REGION_CATALOG,1818953
+city_hk_tin_shui_wai,HK,Tin Shui Wai,,NO_SAME_COUNTRY_REGION_CATALOG,1818558
+city_hk_tsing_yi_town,HK,Tsing Yi Town,,NO_SAME_COUNTRY_REGION_CATALOG,1818483
+city_mo_macau,MO,Macau,,NO_SAME_COUNTRY_REGION_CATALOG,1821274
+city_sg_singapore,SG,Singapore,,NO_SUPPORTED_REGION_CANDIDATE,1880252
+city_tw_bade,TW,Bade,Taoyuan,NO_SAME_COUNTRY_REGION_CATALOG,1670909
+city_tw_caotun,TW,Caotun,Nantou,NO_SAME_COUNTRY_REGION_CATALOG,1666855
+city_tw_changhua,TW,Changhua,Changhua,NO_SAME_COUNTRY_REGION_CATALOG,1993459
+city_tw_chaozhou,TW,Chaozhou,Pingtung,NO_SAME_COUNTRY_REGION_CATALOG,1679047
+city_tw_chiayi,TW,Chiayi,Chiayi,NO_SAME_COUNTRY_REGION_CATALOG,1678836
+city_tw_dongshan,TW,Dongshan,Yilan,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_douliu,TW,Douliu,Yunlin,NO_SAME_COUNTRY_REGION_CATALOG,1665196
+city_tw_hemei,TW,Hemei,Changhua,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_hsinchu,TW,Hsinchu,Hsinchu,NO_SAME_COUNTRY_REGION_CATALOG,1675151
+city_tw_hualien,TW,Hualien,Hualien,NO_SAME_COUNTRY_REGION_CATALOG,1674504
+city_tw_hukou,TW,Hukou,Hsinchu,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_huwei,TW,Huwei,Yunlin,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_jian,TW,Ji'an,Hualien,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_jincheng,TW,Jincheng,Kinmen,NO_SAME_COUNTRY_REGION_CATALOG,1678008
+city_tw_kaohsiung,TW,Kaohsiung,Kaohsiung,NO_SAME_COUNTRY_REGION_CATALOG,1673820
+city_tw_keelung,TW,Keelung,Keelung,NO_SAME_COUNTRY_REGION_CATALOG,1678228
+city_tw_lugang,TW,Lugang,Changhua,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_luodong,TW,Luodong,Yilan,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_magong,TW,Magong,Penghu,NO_SAME_COUNTRY_REGION_CATALOG,1672228
+city_tw_miaoli,TW,Miaoli,Miaoli,NO_SAME_COUNTRY_REGION_CATALOG,1671971
+city_tw_minxiong,TW,Minxiong,Chiayi,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_nantou,TW,Nantou,Nantou,NO_SAME_COUNTRY_REGION_CATALOG,1671566
+city_tw_neibu,TW,Neibu,Pingtung,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_pingtung,TW,Pingtung,Pingtung,NO_SAME_COUNTRY_REGION_CATALOG,1670481
+city_tw_pingzhen,TW,Pingzhen,Taoyuan,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_puli,TW,Puli,Nantou,NO_SAME_COUNTRY_REGION_CATALOG,1670310
+city_tw_taibao,TW,Taibao,Chiayi,NO_SAME_COUNTRY_REGION_CATALOG,1668347
+city_tw_taichung,TW,Taichung,Taichung,NO_SAME_COUNTRY_REGION_CATALOG,1668399
+city_tw_tainan,TW,Tainan,Tainan,NO_SAME_COUNTRY_REGION_CATALOG,1668355
+city_tw_taipei,TW,Taipei,Taipei,NO_SAME_COUNTRY_REGION_CATALOG,1668341
+city_tw_taitung,TW,Taitung,Taitung,NO_SAME_COUNTRY_REGION_CATALOG,1668295
+city_tw_taoyuan_district,TW,Taoyuan District,Taoyuan,NO_SAME_COUNTRY_REGION_CATALOG,6696918
+city_tw_toufen,TW,Toufen,Miaoli,NO_SAME_COUNTRY_REGION_CATALOG,1667027
+city_tw_xihu,TW,Xihu,Changhua,NO_SAME_COUNTRY_REGION_CATALOG,1675281
+city_tw_xinfeng,TW,Xinfeng,Hsinchu,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_yangmei,TW,Yangmei,Taoyuan,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_yilan,TW,Yilan,Yilan,NO_SAME_COUNTRY_REGION_CATALOG,1674199
+city_tw_yuanlin,TW,Yuanlin,Changhua,NO_SAME_COUNTRY_REGION_CATALOG,1665443
+city_tw_zhongli,TW,Zhongli,Taoyuan,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_zhubei,TW,Zhubei,Hsinchu,NO_SAME_COUNTRY_REGION_CATALOG,1677112
+city_tw_zhudong,TW,Zhudong,Hsinchu,NO_SAME_COUNTRY_REGION_CATALOG,1677053
+city_tw_zhunan,TW,Zhunan,Miaoli,NO_SAME_COUNTRY_REGION_CATALOG,
+city_tw_zhushan,TW,Zhushan,Nantou,NO_SAME_COUNTRY_REGION_CATALOG,1677099
+city_fo_torshavn,FO,Torshavn,Tórshavn,NO_SAME_COUNTRY_REGION_CATALOG,2611396
+city_gg_saint_peter_port,GG,Saint Peter Port,,NO_SAME_COUNTRY_REGION_CATALOG,3042287
+city_im_douglas,IM,Douglas,,NO_SAME_COUNTRY_REGION_CATALOG,3042237
+city_je_saint_helier,JE,Saint Helier,,NO_SAME_COUNTRY_REGION_CATALOG,3042091
+city_xk_pristina,XK,Pristina,Prishtinë,NO_SAME_COUNTRY_REGION_CATALOG,786714
+city_xk_prizren,XK,Prizren,Prizren,NO_SAME_COUNTRY_REGION_CATALOG,786712
+city_xk_ferizaj,XK,Ferizaj,Ferizaj,NO_SAME_COUNTRY_REGION_CATALOG,784759
+city_xk_peje,XK,Peje,Pejë,NO_SAME_COUNTRY_REGION_CATALOG,787157
+city_xk_gjakove,XK,Gjakove,Gjakovë,NO_SAME_COUNTRY_REGION_CATALOG,791646
+city_xk_gjilan,XK,Gjilan,Gjilan,NO_SAME_COUNTRY_REGION_CATALOG,790674
+city_xk_podujeve,XK,Podujeve,Podujevë,NO_SAME_COUNTRY_REGION_CATALOG,786950
+city_xk_mitrovice,XK,Mitrovice,,NO_SAME_COUNTRY_REGION_CATALOG,789225
+city_xk_lipjan,XK,Lipjan,Lipjan,NO_SAME_COUNTRY_REGION_CATALOG,788652
+city_xk_vushtrri,XK,Vushtrri,Vushtrri,NO_SAME_COUNTRY_REGION_CATALOG,784097
+city_xk_suhareke,XK,Suhareke,Suharekë,NO_SAME_COUNTRY_REGION_CATALOG,785238
+city_xk_gllogovc,XK,Gllogovc,Gllogovc,NO_SAME_COUNTRY_REGION_CATALOG,790701
+city_xk_rahovec,XK,Rahovec,Rahovec,NO_SAME_COUNTRY_REGION_CATALOG,787456
+city_xk_skenderaj,XK,Skenderaj,Skenderaj,NO_SAME_COUNTRY_REGION_CATALOG,785642
+city_xk_viti,XK,Viti,Viti,NO_SAME_COUNTRY_REGION_CATALOG,784372
+city_xk_fushe_kosove,XK,Fushe Kosove,Fushë Kosovë,NO_SAME_COUNTRY_REGION_CATALOG,789228
+city_xk_istog,XK,Istog,Istog,NO_SAME_COUNTRY_REGION_CATALOG,789996
+city_xk_kline,XK,Kline,Klinë,NO_SAME_COUNTRY_REGION_CATALOG,789455
+city_xk_kamenice,XK,Kamenice,Kamenicë,NO_SAME_COUNTRY_REGION_CATALOG,789227
+city_xk_dragash,XK,Dragash,Dragash,NO_SAME_COUNTRY_REGION_CATALOG,791122
+city_xk_kacanik,XK,Kacanik,Kaçanik,NO_SAME_COUNTRY_REGION_CATALOG,789721
+city_xk_shtime,XK,Shtime,Shtime,NO_SAME_COUNTRY_REGION_CATALOG,785485
+city_xk_leposaviq,XK,Leposaviq,Leposaviq,NO_SAME_COUNTRY_REGION_CATALOG,788731
+city_xk_zvecan,XK,Zvecan,Zveçan,NO_SAME_COUNTRY_REGION_CATALOG,783770
+city_xk_zubin_potok,XK,Zubin Potok,Zubin Potok,NO_SAME_COUNTRY_REGION_CATALOG,783802
+city_xk_shterpce,XK,Shterpce,Shtërpcë,NO_SAME_COUNTRY_REGION_CATALOG,785388
+city_mc_monaco,MC,Monaco,,NO_SUPPORTED_REGION_CANDIDATE,2993458
+city_mk_skopje,MK,Skopje,Skopje,NO_SUPPORTED_REGION_CANDIDATE,785842
+city_no_tromso,NO,Tromso,Troms og Finnmark,HISTORICAL_SUBDIVISION_SPLIT_NOT_IN_REFERENCE,3133895
+city_no_harstad,NO,Harstad,Troms og Finnmark,HISTORICAL_SUBDIVISION_SPLIT_NOT_IN_REFERENCE,3153823
+city_no_alta,NO,Alta,Troms og Finnmark,HISTORICAL_SUBDIVISION_SPLIT_NOT_IN_REFERENCE,847633

@@ -1,6 +1,8 @@
 # M10-12 / M10-13 / M10-14 — governed source review queues
 
-These are deterministic, **offline source artifacts**, not DB contents or permission to import. The raw source files are unchanged. Canonical IDs remain `null` until an explicit reviewed choice against a verified canonical snapshot and live owner validation.
+These are deterministic, **offline source artifacts**, not DB contents or permission to import. Canonical IDs remain `null` until an explicit reviewed choice against a verified canonical snapshot and live owner validation.
+
+2026-10-13: the city CSVs were deliberately corrected and extended in [the city source reconciliation](../../../reports/city-region-reconciliation/2026-10-13/README.md). These derived queues and their source hashes were regenerated against the changed files; upstream university workbooks, course and scholarship inputs remain unchanged.
 
 From the repository root:
 
@@ -27,8 +29,8 @@ On a clean checkout, first run `npm run build -w @manaratak/application` to comp
 
 ## University decisions and differences from the planning baseline
 
-- 10,723 source identities: 7,129 exact candidates, 45 conservative normalized candidates, 3,478 city-name correction requests, 63 ambiguous city holds, 8 territory holds.
-- The plan records 64 normalized / 3,459 missing matches; its row-level decisions are not part of the available source queue. This implementation uses exact aliases plus Unicode/case/whitespace/diacritic normalization, without punctuation/fuzzy fallback, and produces 45 / 3,478. **19 additional rows stay held** rather than being assumed to be valid matches. The difference remains explicit. These are missing **city matches**, not 3,459 missing official university names.
+- 10,723 source identities after the 2026-10-13 city corrections: 8,029 exact candidates, 45 conservative normalized candidates, 2,578 city-name correction requests, 63 ambiguous city holds, 8 territory holds.
+- The original queue had 7,129 exact / 45 normalized / 3,478 missing matches. The original plan's 64 normalized / 3,459 missing counts were not row-level authority. The new source files improve 900 university matches without changing the matching policy. These remain source candidates and missing **city matches**, not missing official university names or approved database relationships.
 - All 63 ambiguous decisions are `HOLD_SCOPED_MANUAL_CITY_SELECTION`. All 8 territory decisions are `HOLD_COUNTRY_POLICY_NO_PARENT_INFERENCE`; `XKX` is not silently reassigned to `SRB` or another country. A country/territory policy decision requires reviewed authoritative evidence.
 - Stage 3 invalid: **1,320**. Stage 4 invalid: **558**. There are 61 non-finite engineering-fee payloads, 37 already overlapping the old accommodation errors; the historical 534 therefore omitted 24 additional invalid rows. The typed QC quarantines them with `SOURCE_PAYLOAD_SHAPE_INVALID`; the legacy dry-run validator also rejects non-finite money. No undefined/NaN financial write is permitted.
 - Invalid in both: **487**. Unique invalid: **1,391**. Source-valid in both: **139**, still requiring canonical identities and relationships in the connected environment.
