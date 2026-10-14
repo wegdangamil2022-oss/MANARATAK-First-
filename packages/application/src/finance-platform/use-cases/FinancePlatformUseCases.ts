@@ -790,8 +790,8 @@ export class FinancePlatformUseCases {
     const policy = financeApprovalPolicy(input.actionType);
     if (input.requiredApprovals < policy.requiredApprovals)
       throw new Error('FINANCE_APPROVAL_QUORUM_INVALID');
-    if (input.expiresAt && input.expiresAt.getTime() <= Date.now())
-      throw new Error('Approval expiry must be in the future');
+    if (input.expiresAt && (!Number.isFinite(input.expiresAt.getTime()) || input.expiresAt.getTime() <= Date.now()))
+      throw new Error('FINANCE_APPROVAL_EXPIRY_INVALID');
     let effectivePayload: unknown = input.commandPayload;
     let effectiveAmount = input.amount;
     if (input.actionType === 'TRANSFER_APPROVE') {
@@ -860,12 +860,20 @@ export class FinancePlatformUseCases {
     if (input.sourceCurrencyCode === input.targetCurrencyCode)
       throw new Error('FX corridor must use different currencies');
     if (
-      !/^\d+$/.test(input.rateNumerator) ||
-      !/^\d+$/.test(input.rateDenominator) ||
+      !/^[1-9]\d{0,29}$/.test(input.rateNumerator) ||
+      !/^[1-9]\d{0,29}$/.test(input.rateDenominator) ||
       BigInt(input.rateNumerator) <= 0n ||
       BigInt(input.rateDenominator) <= 0n
     )
       throw new Error('Exchange rate numerator and denominator must be positive');
+    if (
+      !Number.isFinite(input.effectiveFrom.getTime()) ||
+      (input.effectiveTo && !Number.isFinite(input.effectiveTo.getTime())) ||
+      (input.marginBasisPoints !== undefined &&
+        (!Number.isSafeInteger(input.marginBasisPoints) || input.marginBasisPoints < 0 || input.marginBasisPoints > 10000)) ||
+      input.rateNumerator.length > 30 || input.rateDenominator.length > 30
+    )
+      throw new Error('FINANCE_FX_RATE_INVALID');
     if (input.effectiveTo && input.effectiveTo.getTime() <= input.effectiveFrom.getTime())
       throw new Error('Exchange-rate effectiveTo must be later than effectiveFrom');
     if (input.source === 'MANUAL_OVERRIDE' && !identity.reason?.trim())

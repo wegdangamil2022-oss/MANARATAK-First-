@@ -85,6 +85,7 @@ export function FinanceAdminPage() {
     [setParams],
   );
   const searchFilter = params.get('search') || '';
+  useEffect(() => { setSearch(searchFilter); }, [searchFilter]);
   useEffect(() => {
     const timer = window.setTimeout(() => {
       if (search !== searchFilter) update('search', search.trim());

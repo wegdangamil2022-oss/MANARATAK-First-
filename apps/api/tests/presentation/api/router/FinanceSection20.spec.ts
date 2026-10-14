@@ -120,4 +120,14 @@ describe('P19 API safety', () => {
       (await request(setup({ listRecords })).get('/finance/refunds?pageSize=1000')).status,
     ).toBe(400);
   });
+  it.each(['0', '01', '1'.repeat(31)])('rejects noncanonical FX ratio %s at the HTTP boundary', async rateNumerator => {
+    const saveExchangeRate = vi.fn();
+    const response = await request(setup({ saveExchangeRate }))
+      .post('/finance/exchange-rates')
+      .set('Idempotency-Key', 'rate-intent')
+      .send({ sourceCurrencyCode: 'USD', targetCurrencyCode: 'SAR', rateNumerator, rateDenominator: '100', source: 'MANUAL_OVERRIDE', effectiveFrom: '2026-10-14T00:00:00Z', reason: 'Reviewed corridor' });
+    expect(response.status).toBe(400);
+    expect(saveExchangeRate).not.toHaveBeenCalled();
+  });
+
 });

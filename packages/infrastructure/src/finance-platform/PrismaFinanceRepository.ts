@@ -1270,12 +1270,19 @@ export class PrismaFinanceRepository implements IFinanceRepository {
   async saveExchangeRate(data: any, ctx: FinanceMutationContext) {
     return this.tx(async (tx) => {
       if (
-        !/^\d+$/.test(data.rateNumerator) ||
-        !/^\d+$/.test(data.rateDenominator) ||
+        !/^[1-9]\d{0,29}$/.test(data.rateNumerator) ||
+        !/^[1-9]\d{0,29}$/.test(data.rateDenominator) ||
         BigInt(data.rateNumerator) <= 0n ||
         BigInt(data.rateDenominator) <= 0n
       )
         throw new Error('Invalid exact exchange rate');
+      if (
+        !Number.isFinite(new Date(data.effectiveFrom).getTime()) ||
+        (data.effectiveTo && !Number.isFinite(new Date(data.effectiveTo).getTime())) ||
+        !Number.isSafeInteger(data.marginBasisPoints ?? 0) ||
+        (data.marginBasisPoints ?? 0) < 0 || (data.marginBasisPoints ?? 0) > 10000
+      )
+        throw new Error('FINANCE_FX_RATE_INVALID');
       if (
         data.effectiveTo &&
         new Date(data.effectiveTo).getTime() <= new Date(data.effectiveFrom).getTime()
@@ -1703,6 +1710,13 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     return this.tx(async (tx) => {
       if (!data.payloadHash || !data.policyReference)
         throw new Error('Approval payload and policy binding are required');
+      const policy = financeApprovalPolicy(data.actionType);
+      if (data.requiredApprovals !== policy.requiredApprovals || data.policyReference !== policy.reference || data.status !== 'PENDING')
+        throw new Error('FINANCE_APPROVAL_POLICY_MISMATCH');
+      const expiry = data.expiresAt ? new Date(data.expiresAt).getTime() : NaN;
+      const now = Date.now();
+      if (!Number.isFinite(expiry) || expiry <= now || expiry > now + policy.maxAgeMs)
+        throw new Error('FINANCE_APPROVAL_EXPIRY_INVALID');
       const row = await tx.financeApprovalRecord.create({
         data: {
           publicId: data.publicId,
@@ -1751,7 +1765,8 @@ export class PrismaFinanceRepository implements IFinanceRepository {
       if (!current || current.status !== 'PENDING') throw new Error('Approval is not pending');
       this.checkVersion(current.version, ctx);
       assertCheckerEligible(current.makerId, checkerId, current.decisions);
-      if (current.expiresAt && current.expiresAt <= new Date()) throw new Error('Approval expired');
+      if (!current.expiresAt || !Number.isFinite(new Date(current.expiresAt).getTime()) || new Date(current.expiresAt).getTime() <= Date.now())
+        throw new Error('FINANCE_APPROVAL_EXPIRY_INVALID');
       await tx.financeApprovalDecisionRecord.create({
         data: { approvalId: current.id, approverId: checkerId, decision, reason },
       });
@@ -1766,7 +1781,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
           ? 'APPROVED'
           : 'PENDING';
       const updated = await tx.financeApprovalRecord.updateMany({
-        where: { id: current.id, status: 'PENDING' },
+        where: { id: current.id, status: 'PENDING', expiresAt: { gt: new Date() } },
         data: { status, version: { increment: 1 } },
       });
       if (updated.count !== 1) throw new Error('Approval decision lost a concurrent state race');
@@ -3266,9 +3281,10 @@ export class PrismaFinanceRepository implements IFinanceRepository {
       if (
         approval.requiredApprovals !== policy.requiredApprovals ||
         approval.policyReference !== policy.reference ||
-        approval.decisions.filter(
-          (d: any) => d.decision === 'APPROVE' && d.approverId !== approval.makerId,
-        ).length < policy.requiredApprovals
+        approval.decisions.some((d: any) => d.decision === 'REJECT') ||
+        new Set(approval.decisions.filter(
+          (d: any) => d.decision === 'APPROVE' && d.approverId && d.approverId !== approval.makerId,
+        ).map((d: any) => d.approverId)).size < policy.requiredApprovals
       )
         throw new Error('FINANCE_APPROVAL_POLICY_MISMATCH');
     }
@@ -3282,8 +3298,8 @@ export class PrismaFinanceRepository implements IFinanceRepository {
       approval.policyReference !== binding.policyReference
     )
       throw new Error('Financial approval binding mismatch');
-    if (approval.expiresAt && approval.expiresAt <= new Date())
-      throw new Error('Financial approval expired');
+    if (!approval.expiresAt || !Number.isFinite(new Date(approval.expiresAt).getTime()) || new Date(approval.expiresAt).getTime() <= Date.now())
+      throw new Error('FINANCE_APPROVAL_EXPIRY_INVALID');
     if (binding.amount) {
       if (
         approval.amountMinorUnits !== binding.amount.amountMinorUnits ||
@@ -3293,7 +3309,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
         throw new Error('Financial approval amount binding mismatch');
     }
     const consumed = await tx.financeApprovalRecord.updateMany({
-      where: { id: approval.id, status: 'APPROVED', consumedAt: null },
+      where: { id: approval.id, status: 'APPROVED', consumedAt: null, expiresAt: { gt: new Date() } },
       data: { consumedAt: new Date() },
     });
     if (consumed.count !== 1)

@@ -66,6 +66,10 @@ export function FinanceInvoiceDetailPage() {
     const request = ++sequence.current;
     setLoading(true);
     setError('');
+    setInvoice(null);
+    setPayments([]);
+    setLines([]);
+    setEditing(false);
     try {
       const [record, paymentRows] = await Promise.all([
         adminApiClient.request<Invoice>(`/admin/finance/invoices/${encodeURIComponent(id)}`),

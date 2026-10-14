@@ -1,3 +1,5 @@
+> Current follow-up (2026-10-14): [Section 20 completion](SECTION_20_COMPLETION_2026-10-14.md), 100 isolated tests and Node 22 typecheck passed. Source closed; runtime remains deferred. Historical report below.
+
 # Section 20 / P19 — finance source remediation
 
 Scope: the supplied `MANARATAK_ADMIN_REVIEW_CODEX.md`, section 20, FIN-ADM-001–029 and FGA-20-001–002. Base main: `f8efbc52`; branch: `fix/codex-section-20-finance`. Section 21 is not started.

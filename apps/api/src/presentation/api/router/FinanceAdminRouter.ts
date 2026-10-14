@@ -512,8 +512,8 @@ export class FinanceAdminRouter {
           .object({
             sourceCurrencyCode: z.string().regex(/^[A-Z]{3}$/),
             targetCurrencyCode: z.string().regex(/^[A-Z]{3}$/),
-            rateNumerator: z.string().regex(/^\d+$/),
-            rateDenominator: z.string().regex(/^[1-9]\d*$/),
+            rateNumerator: z.string().max(30).regex(/^[1-9]\d{0,29}$/),
+            rateDenominator: z.string().max(30).regex(/^[1-9]\d{0,29}$/),
             source: z.literal('MANUAL_OVERRIDE'),
             providerReference: z.never().optional(),
             effectiveFrom: z.coerce.date(),
