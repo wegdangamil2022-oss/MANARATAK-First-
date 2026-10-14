@@ -1,0 +1,58 @@
+{
+  "sourceIntegrity": {
+    "result": "PASS",
+    "countries": 194,
+    "regions": 5003,
+    "cities": 10676,
+    "universities": 10723,
+    "sourceMatchedUniversities": 10553,
+    "reviewUniversities": 170,
+    "universityCityMismatches": 0,
+    "scopedCityCollisions": 0,
+    "countryCityCoverageGaps": 0
+  },
+  "workbookBatchAudit": {
+    "result": "PASS",
+    "reviewedRows": 274,
+    "appliedSourceBindings": 104,
+    "heldRows": 170,
+    "nonGeographyUniversityEdits": 0,
+    "inventedCoordinates": 0,
+    "verificationUpgrades": 0
+  },
+  "targetedVitest": {
+    "result": "PASS",
+    "files": 5,
+    "tests": 38,
+    "nodeVersion": "22.23.3",
+    "note": "All five files / 38 tests passed together on the main integration tree; previously stale expected queue counts updated."
+  },
+  "pythonIntegrityNegativeTests": {
+    "result": "PASS",
+    "tests": 3
+  },
+  "sourceQualityPrepare": "PASS",
+  "sourceQualityReproduction": "PASS",
+  "gitDiffCheck": "PASS",
+  "liveSourceRechecks": {
+    "requestedUrls": 147,
+    "http200": 121,
+    "failedRequests": 26,
+    "note": "HTTP receipt only; not a blanket factual location verification. Four Unicode URLs retried after URL encoding; two succeeded."
+  },
+  "databaseWrites": 0,
+  "runtime": "RUNTIME_UNTESTED",
+  "factualGeographyVerification": "INCOMPLETE; source joins and receipts pass; owner review of supplied primary-address research, current boundaries and campus scope remains required",
+  "mainIntegration": {
+    "result": "PASS",
+    "baseMainCommit": "0b9366cec99897517bfc4db5ee1f69872d034b04",
+    "includedPreviousCodexCommit": "a84d8fe3033715074f87a4d8342e36b5f7dde45c",
+    "includesPreviousSourceBindings": 68,
+    "conflicts": 0,
+    "sourceIntegrityAfterMerge": "PASS",
+    "sourceQualityAfterMerge": "PASS",
+    "targetedTestsAfterMerge": "38/38 PASS"
+  },
+  "localPackageTypeBuild": "PASS: shared/domain/application on Node 22.23.3",
+  "node22Verification": "PASS"
+}

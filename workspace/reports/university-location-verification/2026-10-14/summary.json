@@ -1,0 +1,19 @@
+{
+  "baseCommit": "4e203a88ac766a5da6af3e726fe7f6547c531ae0",
+  "destinationBranch": "codex/city-region-source-reconciliation-20261013",
+  "researchedRows": 342,
+  "searchQueries": 780,
+  "appliedUniversityBindings": 68,
+  "livePrimaryAddressDecisions": 39,
+  "searchIndexPrimaryAddressDecisions": 29,
+  "addedCities": 36,
+  "countries": 194,
+  "regions": 5003,
+  "cities": 10610,
+  "universities": 10723,
+  "sourceMatchedUniversities": 10449,
+  "remainingReviewUniversities": 274,
+  "databaseWrites": 0,
+  "runtime": "RUNTIME_UNTESTED",
+  "factualGeographyVerification": "INCOMPLETE"
+}

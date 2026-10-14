@@ -10,9 +10,9 @@ describe('M10 offline source quality preparation', () => {
     const root = process.cwd(); const output = await prepareSourceQuality(root);
     verifyOrWriteSourceQuality(root, output, 'check');
     const summary = JSON.parse(output['summary.json']);
-    expect(summary.universities.geography).toMatchObject({ total: 10723, sourceCandidateCount: 10381, counts: { EXACT_SOURCE_CANDIDATE: 10381, SOURCE_REVIEW_REQUIRED: 334, TERRITORY_MISMATCH: 8 } });
+    expect(summary.universities.geography).toMatchObject({ total: 10723, sourceCandidateCount: 10553, counts: { EXACT_SOURCE_CANDIDATE: 10553, SOURCE_REVIEW_REQUIRED: 162, TERRITORY_MISMATCH: 8 } });
     const geographyQueue = output['universities-geography.jsonl'].trim().split('\n').map(row => JSON.parse(row));
-    expect(geographyQueue).toHaveLength(342);
+    expect(geographyQueue).toHaveLength(170);
     expect(geographyQueue.every(row => row.geographyReviewRequired && row.canonicalCityId === null)).toBe(true);
     const excluded = fs.readFileSync(path.join(root, 'workspace/reports/active-geography-alignment/2026-10-13/excluded-universities.jsonl'), 'utf8').trim().split('\n').map(row => JSON.parse(row));
     expect(new Set(excluded.map(row => row.referenceId)).size).toBe(889);

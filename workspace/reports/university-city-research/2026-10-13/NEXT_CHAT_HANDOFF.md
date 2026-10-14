@@ -1,3 +1,5 @@
+> Historical snapshot. Latest continuation: `workspace/reports/university-location-verification/2026-10-14/NEXT_CHAT_HANDOFF.md` (68 additional bindings; 274 remaining).
+
 # تسليم العمل للدردشة الجديدة
 
 ## تحديث التحقق من المواقع — 2026-10-13
