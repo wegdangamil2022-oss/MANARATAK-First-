@@ -10,6 +10,8 @@ import {
   Search,
   ShieldCheck,
 } from 'lucide-react';
+import { STUDY_DESTINATION_READINESS_KEYS } from '@manaratak/domain';
+import { studyDestinationCheckLabels } from './StudyDestinationUiLabels';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
@@ -112,6 +114,7 @@ export function StudyDestinationsAdminPage() {
   const [region, setRegion] = useState('');
   const [status, setStatus] = useState('');
   const [completeness, setCompleteness] = useState('');
+  const [missingCheck, setMissingCheck] = useState('');
   const [cooldown, setCooldown] = useState<number | null>(null);
 
   const load = useCallback(async () => {
@@ -123,6 +126,7 @@ export function StudyDestinationsAdminPage() {
       if (query.trim()) params.set('q', query.trim());
       if (region) params.set('region', region);
       if (status) params.set('status', status);
+      if (missingCheck) params.set('missingCheck', missingCheck);
       if (completeness) params.set('completenessStatus', completeness);
       const next = await adminApiClient.request<PageResult>(`/admin/study-destinations?${params}`);
       if (request !== sequence.current) return;
@@ -144,7 +148,7 @@ export function StudyDestinationsAdminPage() {
     } finally {
       if (request === sequence.current) setLoading(false);
     }
-  }, [query, region, status, completeness, page]);
+  }, [query, region, status, completeness, missingCheck, page]);
 
   useEffect(() => {
     const id = window.setTimeout(load, 220);
@@ -266,6 +270,22 @@ export function StudyDestinationsAdminPage() {
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <label className="mb-3 block">
+              {isAr ? 'النقص المطلوب معالجته' : 'Missing requirement'}
+              <select
+                className="mx-2 rounded border p-2"
+                value={missingCheck}
+                onChange={(event) => {
+                  setMissingCheck(event.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">{isAr ? 'كل النواقص' : 'Any requirement'}</option>
+                {STUDY_DESTINATION_READINESS_KEYS.map((key) => (
+                  <option key={key} value={key}>{studyDestinationCheckLabels[key]?.[isAr ? 0 : 1] ?? key}</option>
+                ))}
+              </select>
+            </label>
             <div className="grid gap-3 lg:grid-cols-[2fr_1fr_1fr_1fr]">
               <label className="relative block">
                 <Search
@@ -388,7 +408,7 @@ export function StudyDestinationsAdminPage() {
                       </div>
                     )}
                     <Link
-                      to={`/study-destinations/${country.iso2Code}`}
+                      to={`/study-destinations/${country.iso2Code}${missingCheck ? '?section=' + (missingCheck.startsWith('visa') ? 'visa' : missingCheck.startsWith('living') || missingCheck.startsWith('cost') ? 'living' : missingCheck.startsWith('source') || missingCheck.startsWith('evidence') || missingCheck.startsWith('official') ? 'sources' : missingCheck.startsWith('study') || missingCheck.startsWith('admission') ? 'study' : 'overview') : ''}`}
                       className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#142B5F] px-4 py-2.5 text-sm font-black text-white transition hover:bg-[#142B5F]"
                     >
                       {profile

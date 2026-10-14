@@ -8,14 +8,29 @@ const major = {
 const university = {
   id: 'university-1', publicId: 'INS-0001', slug: 'example-university', displayName: 'Example University',
   canonicalName: 'Example University', canonicalDedupKey: 'example-university', status: 'PUBLISHED', completenessStatus: 'COMPLETE', countryReferenceId: 'country-ye',
-  academicPrograms: [{ id: 'program-1', universityId: 'university-1', sourceProgramName: 'BSc Computer Science', normalizedName: 'bsc computer science', degreeLevelId: 'degree-bachelor', majorId: 'major-1', majorMappingState: 'CANONICALLY_MAPPED', status: 'ACTIVE', campusIds: [], admissionRequirements: [] }],
+  academicPrograms: [{ id: 'program-1', universityId: 'university-1', sourceProgramName: 'BSc Computer Science', normalizedName: 'bsc computer science', degreeLevelId: 'degree-bachelor', majorId: 'major-1', majorMappingState: 'CANONICALLY_MAPPED', status: 'ACTIVE',
+      major: {
+        status: 'PUBLISHED',
+        levelProfiles: [
+          {
+            degreeLevelId: 'degree-bachelor',
+            status: 'PUBLISHED',
+            currentPublishedVersionId: 'version-1',
+          },
+        ],
+      },
+      campusIds: [], admissionRequirements: [] }],
 };
 const scholarship = {
   id: 'scholarship-1', publicId: 'SCH-0001', slug: 'example-scholarship', displayName: 'Example Scholarship',
   canonicalName: 'Example Scholarship', canonicalDedupKey: 'example-scholarship', status: 'PUBLISHED', completenessStatus: 'COMPLETE',
   publicationStatus: 'PUBLISHED', verificationStatus: 'VERIFIED', countryReferenceId: 'country-ye',
   majorTargets: [{ targetKey: 'major-1', majorId: 'major-1' }],
-  eligibilityItems: [], universityLinks: [{ linkKey: 'program', academicProgramId: 'program-1' }],
+  eligibilityItems: [], universityLinks: [{ linkKey: 'program', academicProgramId: 'program-1',
+      resolutionStatus: 'RESOLVED',
+      academicProgram: { ...university.academicPrograms[0], university: { status: 'PUBLISHED' } },
+    },
+  ],
 };
 
 const page = <T>(data: T[]) => ({ data, total: data.length, page: 1, pageSize: 12, totalPages: data.length ? 1 : 0 });
@@ -29,6 +44,22 @@ function build() {
     findBySlug: vi.fn().mockResolvedValue(university),
     listPublished: vi.fn().mockResolvedValue(page([university])),
     findPublishedByIds: vi.fn().mockResolvedValue([university]),
+    listPublishedProgramGraph: vi
+      .fn()
+      .mockResolvedValue({
+        data: [
+          {
+            ownerId: 'program-1',
+            universityOwnerId: 'university-1',
+            sourceProgramName: 'BSc Computer Science',
+            majorId: 'major-1',
+          },
+        ],
+        total: 1,
+        majorTotal: 1,
+        hasMore: false,
+        nextCursor: null,
+      }),
     findPublishedAcademicProgramsByIds: vi.fn().mockResolvedValue([{
       ownerId: 'program-1', universityOwnerId: 'university-1', universityPublicId: 'INS-0001', universitySlug: 'example-university', universityDisplayName: 'Example University',
       sourceProgramName: 'BSc Computer Science', degreeLevelId: 'degree-bachelor', majorId: 'major-1', majorMappingState: 'CANONICALLY_MAPPED', status: 'MATCHED',
@@ -94,6 +125,32 @@ describe('CrossDomainGraphReadService P4 canonical projections', () => {
     expect(graph.subject).toMatchObject({ ownerId: 'country-ye', canonicalCode: 'YE' });
   });
 
+  it('passes independent country edge cursors without repeated first-page queries', async () => {
+    const ctx = build();
+    await ctx.service.getCountryGraphByIso2Code('YE', {
+      universityCursor: 'uni-next',
+      scholarshipCursor: 'sch-next',
+      programCursor: 'program-next',
+      courseCursor: 'course-next',
+      testPage: 3,
+    });
+    expect(ctx.universityRepository.listPublished).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: 'uni-next' }),
+    );
+    expect(ctx.scholarshipRepository.listPublished).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: 'sch-next' }),
+    );
+    expect(ctx.universityRepository.listPublishedProgramGraph).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: 'program-next' }),
+    );
+    expect(ctx.courseRelationshipRepository.listPublishedRelatedCourses).toHaveBeenCalledWith(
+      expect.objectContaining({ cursor: 'course-next' }),
+    );
+    expect(ctx.internationalTestRepository.listPublished).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 3 }),
+    );
+  });
+
   it('rejects inactive Country graph subjects before cross-domain owner queries run', async () => {
     const ctx = build();
     ctx.referenceDataRepository.getCountry.mockResolvedValue({ id: 'country-ye', iso2Code: 'YE', iso3Code: 'YEM', name: 'Yemen', isActive: false });
@@ -131,17 +188,26 @@ describe('CrossDomainGraphReadService P4 canonical projections', () => {
 
   it('builds International Test reverse relationships from owning University and Scholarship domains', async () => {
     const ctx = build();
-    ctx.universityRepository.list = vi.fn().mockResolvedValue(page([{
+    ctx.universityRepository.listPublished = vi.fn().mockResolvedValue(page([{
       ...university,
       academicPrograms: [{
         ...university.academicPrograms[0],
-        admissionRequirements: [{ internationalTestId: 'test-1', minimumScore: 6.5, status: 'ACTIVE' }],
+        admissionRequirements: [{ internationalTestId: 'test-1', minimumScore: 6.5, status: 'ACTIVE',
+                  internationalTest: {
+                    status: 'PUBLISHED',
+                    currentPublishedVersion: {
+                      id: 'test-version',
+                      status: 'PUBLISHED',
+                      scoreScales: [{ overallMinimum: 0, overallMaximum: 9 }],
+                    },
+                  },
+                }],
       }],
     }]));
-    ctx.scholarshipRepository.list = vi.fn().mockResolvedValue(page([scholarship]));
+    ctx.scholarshipRepository.listPublished = vi.fn().mockResolvedValue(page([scholarship]));
     const graph = await ctx.service.getInternationalTestGraphById('test-1');
-    expect(ctx.universityRepository.list).toHaveBeenCalledWith(expect.objectContaining({ internationalTestId: 'test-1' }));
-    expect(ctx.scholarshipRepository.list).toHaveBeenCalledWith(expect.objectContaining({ internationalTestId: 'test-1' }));
+    expect(ctx.universityRepository.listPublished).toHaveBeenCalledWith(expect.objectContaining({ internationalTestId: 'test-1' }));
+    expect(ctx.scholarshipRepository.listPublished).toHaveBeenCalledWith(expect.objectContaining({ internationalTestId: 'test-1' }));
     expect(graph.relationships.universities.data[0].matchingPrograms[0]).toMatchObject({ ownerId: 'program-1', minimumScore: 6.5 });
     expect(ctx.courseRelationshipRepository.listPublishedCoursesForInternationalTest).toHaveBeenCalledWith('test-1', expect.any(Object));
     expect(graph.relationships.preparationCourses.data[0]).toMatchObject({ ownerId: 'course-test-1', slug: 'ielts-preparation' });

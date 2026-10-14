@@ -290,8 +290,18 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
         ORDER BY "id" LIMIT 5001
       `);
       if (legacy.length > 5000) throw new Error('REFERENCE_ALIAS_SCOPE_RECONCILIATION_REQUIRED');
-      const ids = [...new Set(legacy.filter(row => this.normalizeResolutionAlias(row.alias) === normalizedAlias || this.normalizeResolutionAlias(row.normalizedAlias) === normalizedAlias).map(row => row.referenceId))];
-      const rows = ids.map(referenceId => ({ referenceId }));
+      const ids = [
+        ...new Set(
+          legacy
+            .filter(
+              (row) =>
+                this.normalizeResolutionAlias(row.alias) === normalizedAlias ||
+                this.normalizeResolutionAlias(row.normalizedAlias) === normalizedAlias,
+            )
+            .map((row) => row.referenceId),
+        ),
+      ];
+      const rows = ids.map((referenceId) => ({ referenceId }));
       if (rows.length > 1) return null;
       if (rows.length === 1) {
         const record = await load(rows[0].referenceId);
@@ -305,22 +315,50 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     return normalizeReferenceIdentityToken(value);
   }
 
+  public async resolveDestinationReferences(ids: {
+    countryIds: string[];
+    languageIds: string[];
+    currencyIds: string[];
+    cityIds: string[];
+  }) {
+    if (Object.values(ids).some((list) => list.length > 5000))
+      throw new Error('REFERENCE_BATCH_LIMIT');
+    const [countries, languages, currencies, cities] = await Promise.all([
+      this.prisma.referenceCountry.findMany({ where: { id: { in: ids.countryIds } } }),
+      this.prisma.referenceLanguage.findMany({ where: { id: { in: ids.languageIds } } }),
+      this.prisma.referenceCurrency.findMany({ where: { id: { in: ids.currencyIds } } }),
+      this.prisma.referenceCity.findMany({
+        where: { id: { in: ids.cityIds } },
+        include: { administrativeRegion: true },
+      }),
+    ]);
+    return {
+      countries: countries.map((row) => this.mapToCountryDto(row as unknown as DbCountry)),
+      languages: languages.map((row) => this.mapToLanguageDto(row as unknown as DbLanguage)),
+      currencies: currencies.map((row) => this.mapToCurrencyDto(row as unknown as DbCurrency)),
+      cities: cities.map((row) => this.mapToCityDto(row as unknown as DbCity)),
+    };
+  }
+
   public async listCountries(filters?: ReferenceDataFilters): Promise<ReferenceCountryDto[]> {
-    if (filters?.updatedFrom || filters?.mappingStatus) return (await this.governedFilteredRecords('COUNTRY',filters)).map(row => this.mapToCountryDto(row));
+    if (filters?.updatedFrom || filters?.mappingStatus)
+      return (await this.governedFilteredRecords('COUNTRY', filters)).map((row) =>
+        this.mapToCountryDto(row),
+      );
     const where = this.countryWhere(filters);
 
     const records = await this.prisma.referenceCountry.findMany({
       where,
       orderBy: [{ name: 'asc' }, { id: 'asc' }],
-      ...this.pagination(filters)
+      ...this.pagination(filters),
     });
 
-    return (records as unknown as DbCountry[]).map(record => this.mapToCountryDto(record));
+    return (records as unknown as DbCountry[]).map((record) => this.mapToCountryDto(record));
   }
 
   public async getCountry(iso2Code: string): Promise<ReferenceCountryDto | null> {
     const record = await this.prisma.referenceCountry.findUnique({
-      where: { iso2Code }
+      where: { iso2Code },
     });
     return record ? this.mapToCountryDto(record as unknown as DbCountry) : null;
   }
@@ -331,7 +369,9 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     // Recheck & hold eligible parent rows until the owner transaction commits
     // so a concurrent lifecycle change cannot invalidate newly stored defaults.
     if (this.inTransaction && data.defaultCurrencyCode) {
-      const rows = await this.prisma.$queryRaw<Array<{ id: string; isActive: boolean; lifecycleState: string }>>(Prisma.sql`
+      const rows = await this.prisma.$queryRaw<
+        Array<{ id: string; isActive: boolean; lifecycleState: string }>
+      >(Prisma.sql`
         SELECT "id", "isActive", "lifecycleState" FROM "ReferenceCurrency"
         WHERE "isoCode" = ${data.defaultCurrencyCode} FOR SHARE
       `);

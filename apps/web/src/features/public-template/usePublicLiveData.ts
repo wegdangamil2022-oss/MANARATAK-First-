@@ -40,6 +40,29 @@ export function usePublicLiveData(value: unknown, locale: PublicLiveLocale = 'ar
     return () => { active = false; };
   }, [mode, locale, reloadVersion]);
 
+  // Renew only destination image grants while this live view stays open.
+  useEffect(() => {
+    if (mode !== 'api') return;
+    let active = true;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'hidden') return;
+      void refreshPublishedCountries(locale)
+        .then((countries) => {
+          if (active)
+            setResult((old) => ({
+              ...old,
+              data: { ...old.data, countries },
+              statuses: { ...old.statuses, countries: countries.length ? 'ready' : 'empty' },
+            }));
+        })
+        .catch(() => {});
+    }, 180000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [mode, locale]);
+
   // Recheck publication on return from admin, without reloading every other section.
   useEffect(() => {
     if (mode !== 'api') return;

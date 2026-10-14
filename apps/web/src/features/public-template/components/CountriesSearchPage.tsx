@@ -1,6 +1,7 @@
+import { searchPublishedCountries } from '../publicLiveDataSource';
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import { publicRelationshipRouteKey } from '../PublicGraphNavigationPolicy';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
   Search,
   Globe2,
@@ -9,14 +10,8 @@ import {
   ChevronLeft,
   RotateCcw,
   Coins,
-  GraduationCap,
-  Users,
-  Building2,
-  BookOpen,
   Compass,
-  CheckCircle2,
   X,
-  ExternalLink,
   Sparkles,
 } from 'lucide-react';
 import { CountryDestination } from '../types';
@@ -25,6 +20,7 @@ import { CountryDetailModal } from './CountryDetailModal';
 import { FavoriteButton } from './FavoriteButton';
 
 interface CountriesSearchPageProps {
+  dataMode?: 'api' | 'prototype';
   detailId?: string;
   onDetailChange?: (id: string) => void;
   countries: CountryDestination[];
@@ -167,6 +163,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
   detailId,
   onDetailChange,
   countries,
+  dataMode = 'api',
   onBack,
   onSelectCountryScholarships,
   onOpenUniversity,
@@ -181,15 +178,24 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
   searchAnchor,
   searchTerm,
 }) => {
-  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+  const { t: publicT, dir: publicDir, language: publicLanguage } = usePublicTemplateTranslation();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContinent, setSelectedContinent] = useState('الكل');
   const [selectedCountryName, setSelectedCountryName] = useState('الكل');
   const [localDetail, setLocalDetail] = useState<CountryDestination | null>(null);
+  const [serverPage, setServerPage] = useState(1);
+  const [serverResult, setServerResult] = useState<{
+    data: CountryDestination[];
+    totalPages: number;
+    total: number;
+  } | null>(null);
+  const [serverLoading, setServerLoading] = useState(false),
+    [serverError, setServerError] = useState(false);
+  const availableCountries = [...countries, ...(serverResult?.data ?? [])];
   const activeCountryModal =
     detailId !== undefined
-      ? countries.find(
+      ? availableCountries.find(
           (item) =>
             item.id === detailId ||
             item.publicId === detailId ||
@@ -198,7 +204,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
         ) || null
       : localDetail;
   const setActiveCountryModal = (value: CountryDestination | null) =>
-    onDetailChange ? onDetailChange(value?.id || '') : setLocalDetail(value);
+    onDetailChange ? onDetailChange(value?.slug || value?.id || '') : setLocalDetail(value);
 
   useEffect(() => {
     if (detailId || !initialCountryIdentity) return;
@@ -215,11 +221,80 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
     setActiveCountryModal(target);
   }, [countries, detailId, initialCountryIdentity]);
 
+  const [refreshTick, setRefreshTick] = useState(0);
+  useEffect(() => {
+    if (dataMode !== 'api') return;
+
+  const timer = window.setInterval(() => {
+      if (document.visibilityState !== 'hidden') setRefreshTick((value) => value + 1);
+    }, 180000);
+    return () => window.clearInterval(timer);
+  }, [dataMode]);
+
+  const filterIdentity = `${searchQuery}|${selectedContinent}|${selectedCountryName}|${publicLanguage}`;
+  const previousFilter = useRef(filterIdentity);
+  useEffect(() => {
+    if (dataMode !== 'api') return;
+    if (previousFilter.current !== filterIdentity) {
+      previousFilter.current = filterIdentity;
+      if (serverPage !== 1) {
+        setServerPage(1);
+        return;
+      }
+    }
+    let active = true;
+    const timer = window.setTimeout(() => {
+      setServerLoading(true);
+      setServerError(false);
+      setServerResult(null);
+      const country = countries.find((item) => item.name === selectedCountryName);
+      void searchPublishedCountries(
+        {
+          q:
+            searchQuery.trim() ||
+            (!country && selectedCountryName !== 'الكل' ? selectedCountryName : undefined),
+          region: selectedContinent === 'الكل' ? undefined : selectedContinent,
+          countryReferenceId: country?.ownerId,
+          page: serverPage,
+        },
+        publicLanguage === 'en' ? 'en' : 'ar',
+      )
+        .then((result) => {
+          if (active)
+            setServerResult({
+              ...result,
+              totalPages: result.totalPages ?? Math.ceil(result.total / 20),
+            });
+        })
+        .catch(() => {
+          if (active) setServerError(true);
+        })
+        .finally(() => {
+          if (active) setServerLoading(false);
+        });
+    }, 220);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [
+    dataMode,
+    refreshTick,
+    filterIdentity,
+    serverPage,
+    countries,
+    searchQuery,
+    selectedContinent,
+    selectedCountryName,
+    publicLanguage,
+  ]);
   // Extract unique continents and countries
   const continents = useMemo(() => {
-    const list = Array.from(new Set(countries.map((c) => c.continent)));
+    const list = dataMode === 'api' ? ['Asia','Africa','Europe','Americas','Oceania'] : Array.from(new Set(countries.map((c) => c.continent)));
     return ['الكل', ...list];
-  }, [countries]);
+  }, [countries,dataMode]);
+
+  const regionLabel=(region:string)=>publicLanguage === 'ar' ? ({Asia:'آسيا',Africa:'أفريقيا',Europe:'أوروبا',Americas:'الأمريكتان',Oceania:'أوقيانوسيا'} as Record<string,string>)[region] ?? region : region;
 
   const countryNames = useMemo(() => {
     const list = Array.from(new Set(countries.map((c) => c.name)));
@@ -228,6 +303,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
 
   // Filtering
   const filteredCountries = useMemo(() => {
+    if (dataMode === 'api') return serverResult?.data ?? [];
     return countries.filter((c) => {
       const matchesSearch =
         !searchQuery ||
@@ -242,7 +318,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
 
       return matchesSearch && matchesContinent && matchesCountry;
     });
-  }, [countries, searchQuery, selectedContinent, selectedCountryName]);
+  }, [countries, searchQuery, selectedContinent, selectedCountryName, dataMode, serverResult]);
 
   const activeFiltersCount =
     (selectedContinent !== 'الكل' ? 1 : 0) +
@@ -265,34 +341,44 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
     ? {
         ...activeCountryModal,
         scholarshipsCount: graphMatchesActiveCountry
-          ? relationshipGraph!.readScope?.collections.scholarships?.state === 'AVAILABLE' ? relationshipGraph!.relationships.scholarships.total : null
+          ? relationshipGraph!.readScope?.collections.scholarships?.state === 'AVAILABLE'
+            ? relationshipGraph!.relationships.scholarships.total
+            : null
           : activeCountryModal.scholarshipsCount,
         universitiesCount: graphMatchesActiveCountry
-          ? relationshipGraph!.readScope?.collections.universities?.state === 'AVAILABLE' ? relationshipGraph!.relationships.universities.total : null
+          ? relationshipGraph!.readScope?.collections.universities?.state === 'AVAILABLE'
+            ? relationshipGraph!.relationships.universities.total
+            : null
           : activeCountryModal.universitiesCount,
         featuredScholarships: graphMatchesActiveCountry
-          ? relationshipGraph!.relationships.scholarships.data.filter(item => Boolean(publicRelationshipRouteKey(item))).map((item) => ({
-              id: publicRelationshipRouteKey(item)!,
-              name: item.displayName,
-              nameEn: item.displayName,
-              meta: 'منحة منشورة مرتبطة بهذه الدولة',
-            }))
+          ? relationshipGraph!.relationships.scholarships.data
+              .filter((item) => Boolean(publicRelationshipRouteKey(item)))
+              .map((item) => ({
+                id: publicRelationshipRouteKey(item)!,
+                name: item.displayName,
+                nameEn: item.displayName,
+                meta: publicLanguage === 'ar' ? 'منحة منشورة مرتبطة بهذه الدولة' : 'Published scholarship linked to this country',
+              }))
           : activeCountryModal.featuredScholarships,
         featuredUniversities: graphMatchesActiveCountry
-          ? relationshipGraph!.relationships.universities.data.filter(item => Boolean(publicRelationshipRouteKey(item))).map((item) => ({
-              id: publicRelationshipRouteKey(item)!,
-              name: item.displayName,
-              nameEn: item.displayName,
-              meta: 'جامعة منشورة في هذه الدولة',
-            }))
+          ? relationshipGraph!.relationships.universities.data
+              .filter((item) => Boolean(publicRelationshipRouteKey(item)))
+              .map((item) => ({
+                id: publicRelationshipRouteKey(item)!,
+                name: item.displayName,
+                nameEn: item.displayName,
+                meta: publicLanguage === 'ar' ? 'جامعة منشورة في هذه الدولة' : 'Published university in this country',
+              }))
           : activeCountryModal.featuredUniversities,
         featuredMajors: graphMatchesActiveCountry
-          ? relationshipGraph!.relationships.majors.filter(item => Boolean(publicRelationshipRouteKey(item))).map((item) => ({
-              id: publicRelationshipRouteKey(item)!,
-              name: item.displayName,
-              nameEn: item.displayName,
-              meta: 'تخصص Canonical مرتبط عبر برامج جامعات الدولة',
-            }))
+          ? relationshipGraph!.relationships.majors
+              .filter((item) => Boolean(publicRelationshipRouteKey(item)))
+              .map((item) => ({
+                id: publicRelationshipRouteKey(item)!,
+                name: item.displayName,
+                nameEn: item.displayName,
+                meta: publicLanguage === 'ar' ? 'تخصص مرتبط ببرامج جامعات الدولة' : 'Major linked through university programs',
+              }))
           : activeCountryModal.featuredMajors,
         relatedArticles: graphMatchesActiveCountry
           ? relationshipGraph!.relationships.editorialContent.map((item) => ({
@@ -302,12 +388,14 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
             }))
           : activeCountryModal.relatedArticles,
         requiredExams: graphMatchesActiveCountry
-          ? relationshipGraph!.relationships.internationalTests.data.filter(item => Boolean(publicRelationshipRouteKey(item))).map((item) => ({
-              id: publicRelationshipRouteKey(item)!,
-              name: item.displayName,
-              nameEn: item.displayName,
-              meta: item.providerName,
-            }))
+          ? relationshipGraph!.relationships.internationalTests.data
+              .filter((item) => Boolean(publicRelationshipRouteKey(item)))
+              .map((item) => ({
+                id: publicRelationshipRouteKey(item)!,
+                name: item.displayName,
+                nameEn: item.displayName,
+                meta: item.providerName,
+              }))
           : activeCountryModal.requiredExams,
       }
     : null;
@@ -412,7 +500,11 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
 
           {/* Main Title */}
           <div className="space-y-0.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">{publicT('public_find')}{' '}<span className="text-[var(--mn-accent-text)]">{publicT('public_your_study_destination')}</span>
+            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
+              {publicT('public_find')}{' '}
+              <span className="text-[var(--mn-accent-text)]">
+                {publicT('public_your_study_destination')}
+              </span>
             </h1>
 
             {/* Small Gold Horizontal Divider */}
@@ -421,7 +513,9 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
             </div>
 
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-xs sm:max-w-sm mx-auto">{publicT('public_discover_study_destinations_worldwide_and_find_the_best')}</p>
+            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-xs sm:max-w-sm mx-auto">
+              {publicT('public_discover_study_destinations_worldwide_and_find_the_best')}
+            </p>
           </div>
 
           {/* Integrated Clean White Search Bar in Hero */}
@@ -455,7 +549,10 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
               className="text-[10px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-surface-elevated)]/95 px-2.5 py-0.5 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-panel "
             >
               <RotateCcw className="w-3 h-3" />
-              <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>
+              <span>
+                {publicT('public_reset_filters')}
+                {activeFiltersCount})
+              </span>
             </button>
           </div>
         )}
@@ -469,7 +566,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
               <div className="flex items-center justify-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-[13px] font-['Cairo',sans-serif] w-full">
                 <Globe2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
                 <span className="truncate">
-                  {selectedContinent === 'الكل' ? publicT('public_continent') : selectedContinent}
+                  {selectedContinent === 'الكل' ? publicT('public_continent') : regionLabel(selectedContinent)}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
@@ -481,7 +578,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
               >
                 {continents.map((c) => (
                   <option key={c} value={c}>
-                    {c === 'الكل' ? publicT('public_all_continents') : c}
+                    {c === 'الكل' ? publicT('public_all_continents') : regionLabel(c)}
                   </option>
                 ))}
               </select>
@@ -500,7 +597,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
                 value={selectedCountryName}
                 onChange={(e) => setSelectedCountryName(e.target.value)}
                 className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                title={publicT('public_choose_country')}
+                title={publicLanguage === 'ar' ? 'اختيار من الدول المعروضة؛ ابحث بالاسم للوصول إلى بقية الدول' : 'Choose a displayed country; search by name to find other countries'}
               >
                 {countryNames.map((cnt) => (
                   <option key={cnt} value={cnt}>
@@ -524,7 +621,10 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-sm font-['Cairo',sans-serif]">
             <Globe2 className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-            <span>{publicT('public_available_countries')}{filteredCountries.length})</span>
+            <span>
+              {publicT('public_available_countries')}
+              {filteredCountries.length})
+            </span>
           </div>
 
           <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-accent-text)] bg-[var(--mn-accent)]/10 px-2 py-0.5 rounded-full border border-[var(--mn-accent)]/30">
@@ -534,17 +634,33 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
         </div>
 
         {/* Empty state */}
-        {filteredCountries.length === 0 && (
+        {serverLoading && (
+          <p role="status">{publicLanguage === 'ar' ? 'جار التحميل…' : 'Loading…'}</p>
+        )}
+        {serverError && (
+          <p role="alert">
+            {publicLanguage === 'ar'
+              ? 'تعذر تحميل الدول. حاول مجددًا.'
+              : 'Could not load countries. Try again.'}
+          </p>
+        )}
+        {!serverLoading && !serverError && filteredCountries.length === 0 && (
           <div className="bg-[var(--mn-surface)] rounded-2xl p-6 text-center border border-[var(--mn-border)] shadow-xs space-y-2.5 mn-panel ">
             <div className="w-10 h-10 rounded-full bg-[var(--mn-gold-surface)] border border-[var(--mn-border-gold)] flex items-center justify-center mx-auto text-[var(--mn-accent-text)] mn-panel ">
               <Compass className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-[var(--mn-heading)] text-xs sm:text-sm">{publicT('public_no_matching_destinations_found')}</h3>
-            <p className="text-[11px] text-[var(--mn-text-muted)] max-w-xs mx-auto">{publicT('public_try_changing_the_search_criteria_or_choosing_another')}</p>
+            <h3 className="font-bold text-[var(--mn-heading)] text-xs sm:text-sm">
+              {publicT('public_no_matching_destinations_found')}
+            </h3>
+            <p className="text-[11px] text-[var(--mn-text-muted)] max-w-xs mx-auto">
+              {publicT('public_try_changing_the_search_criteria_or_choosing_another')}
+            </p>
             <button
               onClick={handleResetFilters}
               className="text-xs font-bold text-[var(--mn-heading)] hover:underline"
-            >{publicT('public_clear_all_filters_2')}</button>
+            >
+              {publicT('public_clear_all_filters_2')}
+            </button>
           </div>
         )}
 
@@ -599,13 +715,15 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
                     className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse "
                     data-mn-design="26ecd1db9e"
                   >
-                    <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">{publicT('public_explore_country')}</span>
+                    <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">
+                      {publicT('public_explore_country')}
+                    </span>
                     <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[var(--mn-accent-soft)]" />
                   </button>
                 </div>
               </div>
 
-              {/* Bottom Row: 4 Pill Badges (Continent, Cost, Scholarships, Suitability) */}
+              {/* Reviewed destination region and living-cost category */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-0.5">
                 {/* 1. Continent */}
                 <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
@@ -616,25 +734,41 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
                 {/* 2. Living Cost */}
                 <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
                   <Coins className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
-                  <span className="truncate">{publicT('public_living_costs')}{' '}{country.livingCost}</span>
+                  <span className="truncate">
+                    {publicT('public_living_costs')} {country.livingCost}
+                  </span>
                 </div>
 
                 {/* 3. Scholarship Availability */}
-                <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
-                  <GraduationCap className="w-3 h-3 text-[var(--mn-heading)] shrink-0" />
-                  <span className="truncate">{publicT('public_scholarships')}{' '}{country.scholarshipAvailability}</span>
-                </div>
 
                 {/* 4. Student Suitability */}
-                <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
-                  <Users className="w-3 h-3 text-[var(--mn-link)] shrink-0" />
-                  <span className="truncate">{publicT('public_student_suitability')}{' '}{country.studentSuitability}</span>
-                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+      {dataMode === 'api' && serverResult ? (
+        <nav
+          aria-label={publicLanguage === 'en' ? 'Destination pages' : 'صفحات الوجهات'}
+          className="flex justify-center gap-4 py-4"
+        >
+          <button
+            disabled={serverLoading || serverPage === 1}
+            onClick={() => setServerPage((page) => page - 1)}
+          >
+            {publicLanguage === 'en' ? 'Previous' : 'السابق'}
+          </button>
+          <span>
+            {serverPage} / {Math.max(1, serverResult.totalPages)}
+          </span>
+          <button
+            disabled={serverLoading || serverPage >= serverResult.totalPages}
+            onClick={() => setServerPage((page) => page + 1)}
+          >
+            {publicLanguage === 'en' ? 'Next' : 'التالي'}
+          </button>
+        </nav>
+      ) : null}
     </div>
   );
 };

@@ -320,8 +320,8 @@ function AdminLayout() {
                       </RequireAdminPermission>
                     }
                   />
-                  <Route path="/study-destinations" element={<RequireAdminPermission permission="admin:reference-data:manage"><StudyDestinationsAdminPage /></RequireAdminPermission>} />
-                  <Route path="/study-destinations/:countryIso2Code" element={<RequireAdminPermission permission="admin:reference-data:manage"><StudyDestinationDetailPage /></RequireAdminPermission>} />
+                  <Route path="/study-destinations" element={<RequireAdminPermission permission="admin:study-destinations:read"><StudyDestinationsAdminPage /></RequireAdminPermission>} />
+                  <Route path="/study-destinations/:countryIso2Code" element={<RequireAdminPermission permission="admin:study-destinations:read"><StudyDestinationDetailPage /></RequireAdminPermission>} />
                   <Route path="/identities" element={<RequireAdminPermission permission="admin:identities:manage"><IdentityAdminPage /></RequireAdminPermission>} />
                   <Route path="/security" element={<AccountSecurityPage />} />
                   <Route path="/authorization" element={<RequireAdminPermission permission="admin:authorization:manage"><AuthorizationAdminPage /></RequireAdminPermission>} />

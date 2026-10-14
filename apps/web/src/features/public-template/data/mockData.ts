@@ -2299,7 +2299,7 @@ export const MOCK_COUNTRIES: CountryDestination[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=800&q=80',
     popularCities: ['بكين', 'شنغهاي', 'هانغتشو', 'قوانغتشو'],
-    averageLivingCostUsd: '350 - 600 $ / شهر',
+    monthlyLivingCostLabel: '350 - 600 $ / شهر',
     languageOfStudy: ['الإنجليزية', 'الصينية'],
     visaEase: 'منظمة للطلاب بعد الحصول على قبول رسمي',
     iso2Code: 'CN',
@@ -2387,7 +2387,7 @@ export const MOCK_COUNTRIES: CountryDestination[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=800&q=80',
     popularCities: ['إسطنبول', 'أنقرة', 'إزمير', 'بورصة'],
-    averageLivingCostUsd: '400 - 750 $ / شهر',
+    monthlyLivingCostLabel: '400 - 750 $ / شهر',
     languageOfStudy: ['التركية', 'الإنجليزية'],
     visaEase: 'ميسرة للغاية للطلاب الدوليين',
   },
@@ -2408,7 +2408,7 @@ export const MOCK_COUNTRIES: CountryDestination[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&w=800&q=80',
     popularCities: ['كوالالمبور', 'بينانغ', 'جوهور بهرو'],
-    averageLivingCostUsd: '350 - 550 $ / شهر',
+    monthlyLivingCostLabel: '350 - 550 $ / شهر',
     languageOfStudy: ['الإنجليزية'],
     visaEase: 'إلكترونية سريعة ومباشرة',
   },
@@ -2429,7 +2429,7 @@ export const MOCK_COUNTRIES: CountryDestination[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1560969184-10fe8719e047?auto=format&fit=crop&w=800&q=80',
     popularCities: ['برلين', 'ميونخ', 'فرانكفورت', 'آخن'],
-    averageLivingCostUsd: '850 - 1100 $ / شهر (حساب مغلق)',
+    monthlyLivingCostLabel: '850 - 1100 $ / شهر (حساب مغلق)',
     languageOfStudy: ['الألمانية', 'الإنجليزية'],
     visaEase: 'تتطلب موعد مسبق وإثبات مالي',
   },
@@ -2450,7 +2450,7 @@ export const MOCK_COUNTRIES: CountryDestination[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80',
     popularCities: ['لندن', 'مانشستر', 'إدنبرة', 'أكسفورد'],
-    averageLivingCostUsd: '1100 - 1600 $ / شهر',
+    monthlyLivingCostLabel: '1100 - 1600 $ / شهر',
     languageOfStudy: ['الإنجليزية'],
     visaEase: 'نظام نقاط إلكتروني منتظم',
   },
@@ -2471,7 +2471,7 @@ export const MOCK_COUNTRIES: CountryDestination[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?auto=format&fit=crop&w=800&q=80',
     popularCities: ['الرياض', 'جدة', 'الظهران', 'المدينة المنورة'],
-    averageLivingCostUsd: '400 - 800 $ / شهر',
+    monthlyLivingCostLabel: '400 - 800 $ / شهر',
     languageOfStudy: ['العربية', 'الإنجليزية'],
     visaEase: 'من خلال تأشيرة تعليمية إلكترونية',
   },
@@ -2492,7 +2492,7 @@ export const MOCK_COUNTRIES: CountryDestination[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80',
     popularCities: ['باريس', 'ليون', 'مرسيليا', 'تولوز'],
-    averageLivingCostUsd: '700 - 1100 $ / شهر',
+    monthlyLivingCostLabel: '700 - 1100 $ / شهر',
     languageOfStudy: ['الفرنسية', 'الإنجليزية'],
     visaEase: 'عبر إجراءات منصة Campus France',
   },
@@ -2513,7 +2513,7 @@ export const MOCK_COUNTRIES: CountryDestination[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=80',
     popularCities: ['طوكيو', 'كيوتو', 'أوساكا', 'ناغويا'],
-    averageLivingCostUsd: '750 - 1100 $ / شهر',
+    monthlyLivingCostLabel: '750 - 1100 $ / شهر',
     languageOfStudy: ['اليابانية', 'الإنجليزية'],
     visaEase: 'منظمة ومضمونة للمقبولين في المنح',
   },

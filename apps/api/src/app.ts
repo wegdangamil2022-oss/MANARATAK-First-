@@ -943,8 +943,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/admin/reference-data', requireAdminPermission('admin:reference-data:manage'), container.resolve<Router>('referenceDataAdminRouter'));
       v1Router.use('/reference-data', container.resolve<Router>('referenceDataPublicRouter'));
     // Study Destinations are an editorial/domain profile layered on canonical country references.
-    // Authorization reuses the existing reference-data management capability without moving profile ownership into P7.
-    v1Router.use('/admin/study-destinations', requireAdminPermission('admin:reference-data:manage'), container.resolve<Router>('studyDestinationAdminRouter'));
+    // Endpoint guards separate study-destination read/edit/verify/publish capabilities; P7 geography remains read-only.
+    v1Router.use('/admin/study-destinations', container.resolve<Router>('studyDestinationAdminRouter'));
     v1Router.use('/study-destinations', container.resolve<Router>('studyDestinationPublicRouter'));
     v1Router.use('/admin/academic-taxonomy', requireAdminPermission('admin:academic-taxonomy:manage'), container.resolve<Router>('academicTaxonomyAdminRouter'));
     v1Router.use('/academic-taxonomy', container.resolve<Router>('academicTaxonomyPublicRouter'));

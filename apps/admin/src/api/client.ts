@@ -165,8 +165,14 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
 
   const method = (options.method || 'GET').toUpperCase();
   const cacheKey = `${method}:${endpoint}`;
-  const freshRead = options.cache === 'no-store' || options.cache === 'reload' || /^\/admin\/(international-tests|majors|universities|scholarships|courses)(?:\/|\?|$)/.test(endpoint);
-  const coalesce = method === 'GET' && !freshRead && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
+  const freshRead =
+    options.cache === 'no-store' ||
+    options.cache === 'reload' ||
+    /^\/admin\/(international-tests|majors|universities|scholarships|courses|study-destinations)(?:\/|\?|$)/.test(
+      endpoint,
+    );
+  const coalesce =
+    method === 'GET' && !freshRead && (!isPublicAuthRoute || endpoint.includes('/auth/me'));
 
   if (method === 'GET' && !isPublicAuthRoute) {
     if (rateLimitResetTime > Date.now()) {
@@ -179,7 +185,6 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
     if (cached && cached.expiresAt > Date.now()) {
       return cached.data as T;
     }
-
   }
   if (coalesce) {
     const inFlight = inFlightRequests.get(cacheKey);
@@ -195,7 +200,8 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
     const requestGeneration = sessionGeneration;
     try {
       const responseData = await executeRequest<T>(endpoint, options);
-      if (!isPublicAuthRoute && requestGeneration !== sessionGeneration) throw new Error('REQUEST_ABORTED: Admin session changed.');
+      if (!isPublicAuthRoute && requestGeneration !== sessionGeneration)
+        throw new Error('REQUEST_ABORTED: Admin session changed.');
       if (method === 'GET' && !isPublicAuthRoute && !freshRead) {
         getCache.set(cacheKey, { data: responseData, expiresAt: Date.now() + 6000 });
       }
@@ -204,8 +210,9 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
       if (error?.message?.includes('[429]')) {
         const parts = error.message.split('|');
         const retryAfterSeconds = parts.length > 1 ? Number(parts[1]) : 2;
-        const delaySeconds = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0 ? retryAfterSeconds : 2;
-        rateLimitResetTime = Date.now() + (delaySeconds * 1000);
+        const delaySeconds =
+          Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0 ? retryAfterSeconds : 2;
+        rateLimitResetTime = Date.now() + delaySeconds * 1000;
       }
       throw error;
     } finally {
@@ -224,7 +231,10 @@ async function adminRequest<T>(endpoint: string, options: AdminRequestOptions = 
 }
 
 async function executeRequest<T>(endpoint: string, options: AdminRequestOptions = {}): Promise<T> {
-  assertLocalReadOnlyRequestAllowed(options.method, (typeof import.meta !== 'undefined' && import.meta.env?.VITE_LOCAL_ADMIN_READ_ONLY) === 'true');
+  assertLocalReadOnlyRequestAllowed(
+    options.method,
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_LOCAL_ADMIN_READ_ONLY) === 'true',
+  );
   const url = `${API_BASE_URL}${endpoint}`;
   const requestGeneration = sessionGeneration;
   const headers = new Headers(options.headers);

@@ -170,12 +170,38 @@ export function buildGlobalSearchDocuments(input: {
   }
 
   for (const item of input.countries) {
-    const base = createBase('countries', 'الدول', item, item.name, item.nameEn, [item.iso2Code || '', item.iso3Code || '', item.capitalCity || '', item.continent, ...(item.popularCities || [])], `${item.flagEmoji || item.flag || ''} ${item.continent}`.trim(), item.currencyCode);
-    docs.push(...sectionDocs(base, [
-      { title: 'نبذة عن الدولة', anchor: 'country-about', content: [item.description, item.capitalCity, item.subregion, item.officialLanguages] },
-      { title: 'الدراسة والتعليم', anchor: 'country-study', content: [item.studySystemSummary, item.admissionHighlights, item.languageOfStudy, item.featuredMajors?.map((m) => m.name)] },
-      { title: 'التأشيرة والقبول', anchor: 'country-visa', content: [item.visaEase, item.visaHighlights] },
-      { title: 'التكاليف', anchor: 'country-costs', content: [item.livingCost, item.averageLivingCostUsd, item.costHighlights?.map((c) => `${c.label} ${c.value}`)] },
+    const base = createBase('countries', 'الدول', item, item.name, item.nameEn, [item.iso2Code || '', item.iso3Code || '', item.capitalCity || '', item.continent, ...(item.popularCities || [])], `${item.flagEmoji || item.flag || ''} ${item.continent}`.trim(),
+      item.currencyCode,
+    );
+    docs.push(
+      ...sectionDocs(base, [
+        {
+          title: 'نبذة عن الدولة',
+          anchor: 'country-about',
+          content: [item.description, item.capitalCity, item.subregion, item.officialLanguages],
+        },
+        {
+          title: 'الدراسة والتعليم',
+          anchor: 'country-study',
+          content: [
+            item.studySystemSummary,
+            item.admissionHighlights,
+            item.languageOfStudy,
+            item.featuredMajors?.map((m) => m.name),
+          ],
+        },
+        {
+          title: 'التأشيرة والقبول',
+          anchor: 'country-visa',
+          content: [item.visaEase, item.visaHighlights],
+        },
+        {
+          title: 'التكاليف',
+          anchor: 'country-costs',
+          content: [
+            item.livingCost,
+            item.monthlyLivingCostLabel,
+            item.costHighlights?.map((c) => `${c.label} ${c.value}`)] },
       { title: 'الجامعات', anchor: 'country-universities', content: [item.featuredUniversities?.map((u) => `${u.name} ${u.nameEn || ''}`)] },
       { title: 'المنح', anchor: 'country-scholarships', content: [item.featuredScholarships?.map((s) => `${s.name} ${s.nameEn || ''}`)] },
       { title: 'الاختبارات المطلوبة', anchor: 'country-exams', content: [item.requiredExams?.map((e) => `${e.name} ${e.nameEn || ''}`)] },

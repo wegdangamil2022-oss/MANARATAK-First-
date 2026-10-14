@@ -57,8 +57,9 @@ export function auditTargetLink(
     COURSE: ['admin:courses:manage', '/courses/'],
     CERTIFICATE: ['admin:certificates:view', '/certificates/'],
     INVOICE: ['admin:finance:manage', '/finance/invoices/'],
-    STUDY_DESTINATION: ['admin:reference-data:manage', '/study-destinations/'],
+    STUDY_DESTINATION: ['admin:study-destinations:read', '/study-destinations/'],
   };
+  if(type === 'COUNTRY_STUDY_PROFILE') return can('admin:study-destinations:read') ? '/study-destinations' : null;
   if (type === 'IDENTITY' && can('admin:identities:manage'))
     return `/identities?search=${encodeURIComponent(id)}`;
   const target = targets[type];

@@ -55,7 +55,8 @@ const groups: NavigationGroup[] = [
       { to: '/majors', labelKey: 'admin_nav_majors', icon: GraduationCap, requiredPermission: 'admin:majors:manage' },
       { to: '/international-tests', labelKey: 'admin_nav_tests', icon: FileText, requiredPermission: 'admin:international-tests:manage' },
       { to: '/courses', labelKey: 'admin_nav_courses', icon: BookOpen, requiredPermission: 'admin:courses:manage' },
-      { to: '/study-destinations', labelKey: 'admin_nav_study_destinations', icon: MapPinned, requiredPermission: 'admin:reference-data:manage' },
+      { to: '/study-destinations', labelKey: 'admin_nav_study_destinations', icon: MapPinned, requiredPermission: 'admin:study-destinations:read',
+      },
     ],
   },
   {

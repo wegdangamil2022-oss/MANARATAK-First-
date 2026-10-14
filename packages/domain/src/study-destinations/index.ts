@@ -59,7 +59,56 @@ export interface StudyDestinationCostHighlight {
   value: string;
 }
 
+export interface StudyDestinationAuthorityDecision {
+  origin: string;
+  authorityName: string;
+  evidenceUrl: string;
+  exceptionReason?: string;
+}
+export interface StudyDestinationSourceProof {
+  fingerprint: string;
+  authorId: string;
+  reviewerId: string;
+  reviewedRevision: number;
+  reviewedAt: string;
+  reason: string;
+  authorities: StudyDestinationAuthorityDecision[];
+}
+export interface StudyDestinationGovernance {
+  lastEditorId?: string;
+  proof?: StudyDestinationSourceProof | null;
+  readiness?: Record<string, boolean>;
+}
+export const STUDY_DESTINATION_READINESS_KEYS = [
+  'overview-ar',
+  'overview-en',
+  'study-system-ar',
+  'study-system-en',
+  'admission-highlights',
+  'admission-highlights-en',
+  'study-languages',
+  'visa-summary-ar',
+  'visa-summary-en',
+  'visa-requirements',
+  'visa-requirements-en',
+  'visa-official-url',
+  'living-cost-range',
+  'living-cost-currency',
+  'official-links',
+  'official-links-en',
+  'evidence-sources',
+  'source-audit-date',
+  'source-verification',
+  'image',
+  'cost-highlights-en',
+  'student-life-en',
+] as const;
+export type StudyDestinationMissingCheck = (typeof STUDY_DESTINATION_READINESS_KEYS)[number];
+
 export interface StudyDestinationProfileDto {
+  revision: number;
+  governance: StudyDestinationGovernance;
+  cityReferenceIds: string[];
   id: string;
   publicId: string;
   slug: string;
@@ -98,6 +147,7 @@ export interface StudyDestinationProfileDto {
 }
 
 export interface StudyDestinationProfileInput {
+  cityReferenceIds?: string[];
   overviewAr?: string | null;
   overviewEn?: string | null;
   studySystemSummaryAr?: string | null;
@@ -127,6 +177,7 @@ export interface StudyDestinationProfileInput {
 }
 
 export interface StudyDestinationRepositoryCreateInput extends StudyDestinationProfileInput {
+  governance?: StudyDestinationGovernance;
   publicId: string;
   slug: string;
   countryReferenceId: string;
@@ -135,12 +186,15 @@ export interface StudyDestinationRepositoryCreateInput extends StudyDestinationP
 }
 
 export interface StudyDestinationRepositoryUpdateInput extends StudyDestinationProfileInput {
+  governance?: StudyDestinationGovernance;
   status?: StudyDestinationStatus;
   completenessStatus?: StudyDestinationCompletenessStatus;
   publishedAt?: string | null;
 }
 
 export interface StudyDestinationFilters {
+  q?: string;
+  region?: string;
   status?: StudyDestinationStatus;
   completenessStatus?: StudyDestinationCompletenessStatus;
   countryReferenceId?: string;
@@ -174,6 +228,30 @@ export interface StudyDestinationReadinessReport {
 }
 
 export interface IStudyDestinationRepository {
+  withTransaction?(
+    context: import('../event-foundation/outbox/TransactionalOutbox').AtomicPersistenceContext,
+  ): IStudyDestinationRepository;
+  lockCountry?(countryReferenceId: string): Promise<void>;
+  lockReferences?(
+    profile: Pick<
+      StudyDestinationProfileDto,
+      | 'countryReferenceId'
+      | 'studyLanguageReferenceIds'
+      | 'livingCostCurrencyReferenceId'
+      | 'cityReferenceIds'
+    >,
+  ): Promise<void>;
+  listAdminCountries?(
+    filters: Omit<StudyDestinationFilters, 'status'> & {
+      status?: StudyDestinationStatus | 'NO_PROFILE';
+      missingCheck?: StudyDestinationMissingCheck;
+    },
+  ): Promise<
+    PaginatedStudyDestinationResult<{
+      country: import('../reference-data/dto/ReferenceDataContracts').ReferenceCountryDto;
+      profile: StudyDestinationProfileDto | null;
+    }>
+  >;
   findById(id: string): Promise<StudyDestinationProfileDto | null>;
   findBySlug(slug: string): Promise<StudyDestinationProfileDto | null>;
   findByCountryReferenceId(countryReferenceId: string): Promise<StudyDestinationProfileDto | null>;
@@ -188,6 +266,7 @@ export interface IStudyDestinationRepository {
     id: string,
     data: StudyDestinationRepositoryUpdateInput,
     expectedUpdatedAt?: string,
+    expectedRevision?: number,
   ): Promise<StudyDestinationProfileDto>;
 }
 
@@ -196,7 +275,18 @@ const meaningful = (value: unknown): boolean =>
 const nonEmpty = (value: readonly unknown[] | undefined | null): boolean =>
   Array.isArray(value) && value.length > 0;
 
+export const STUDY_DESTINATION_REVIEW_MAX_AGE_DAYS = 180;
+
 export class StudyDestinationPublishingPolicy {
+  public constructor(
+    private readonly maxAuditAgeDays = STUDY_DESTINATION_REVIEW_MAX_AGE_DAYS,
+    private readonly now: () => number = Date.now,
+  ) {}
+  public isAuditDateFresh(value: string | null | undefined): boolean {
+    const date = Date.parse(value ?? ''),
+      now = this.now();
+    return Number.isFinite(date) && date <= now && date >= now - this.maxAuditAgeDays * 86400000;
+  }
   public evaluate(profile: StudyDestinationProfileDto): StudyDestinationReadinessReport {
     const costRangeValid =
       typeof profile.averageMonthlyLivingCostMin === 'number' &&
@@ -207,6 +297,13 @@ export class StudyDestinationPublishingPolicy {
       profile.averageMonthlyLivingCostMax >= profile.averageMonthlyLivingCostMin;
 
     const checks: StudyDestinationReadinessCheck[] = [
+      {
+        key: 'image',
+        section: 'OVERVIEW',
+        label: 'Destination image',
+        complete: meaningful(profile.imageAssetId),
+        blocking: false,
+      },
       {
         key: 'overview-ar',
         section: 'OVERVIEW',
@@ -309,17 +406,72 @@ export class StudyDestinationPublishingPolicy {
         key: 'source-audit-date',
         section: 'EVIDENCE',
         label: 'Source audit date',
-        complete: meaningful(profile.sourceAuditDate),
+        complete: meaningful(profile.sourceAuditDate) &&
+          Date.parse(profile.sourceAuditDate!) <= this.now() &&
+          Date.parse(profile.sourceAuditDate!) >= this.now() - this.maxAuditAgeDays * 86400000,
         blocking: true,
       },
       {
         key: 'source-verification',
         section: 'EVIDENCE',
         label: 'Source verification',
-        complete: profile.sourceVerificationStatus === StudyDestinationVerificationStatus.VERIFIED,
+        complete: profile.sourceVerificationStatus === StudyDestinationVerificationStatus.VERIFIED &&
+          Boolean(
+            profile.governance?.proof?.fingerprint &&
+            profile.governance.proof.authorId &&
+            profile.governance.proof.reviewerId &&
+            Number.isSafeInteger(profile.governance.proof.reviewedRevision) &&
+            profile.governance.proof.reviewedRevision >= 1 &&
+            profile.governance.proof.reviewerId !== profile.governance.proof.authorId &&
+            profile.governance.proof.authorId === profile.governance.lastEditorId &&
+            Date.parse(profile.governance.proof.reviewedAt) <= this.now() &&
+            Date.parse(profile.governance.proof.reviewedAt) >=
+              this.now() - this.maxAuditAgeDays * 86400000,
+          ),
         blocking: true,
       },
     ];
+    checks.push(
+      {
+        key: 'admission-highlights-en',
+        section: 'ACADEMICS',
+        label: 'English admission highlights',
+        complete: nonEmpty(profile.admissionHighlightsEn),
+        blocking: true,
+      },
+      {
+        key: 'visa-requirements-en',
+        section: 'VISA',
+        label: 'English visa requirements',
+        complete: nonEmpty(profile.visaRequirementsEn),
+        blocking: true,
+      },
+      {
+        key: 'official-links-en',
+        section: 'OFFICIAL_LINKS',
+        label: 'English official link labels',
+        complete: profile.officialLinks.every((link) => meaningful(link.labelEn)),
+        blocking: true,
+      },
+      {
+        key: 'cost-highlights-en',
+        section: 'LIVING_COST',
+        label: 'English cost highlights',
+        complete:
+          profile.costHighlightsEn.length === profile.costHighlightsAr.length &&
+          [...profile.costHighlightsAr,...profile.costHighlightsEn].every(item => meaningful(item.label) && meaningful(item.value)),
+        blocking: true,
+      },
+      {
+        key: 'student-life-en',
+        section: 'ACADEMICS',
+        label: 'English student life',
+        complete:
+          profile.studentLifeHighlightsEn.length === profile.studentLifeHighlightsAr.length &&
+          [...profile.studentLifeHighlightsAr,...profile.studentLifeHighlightsEn].every(meaningful),
+        blocking: true,
+      },
+    );
 
     const reviewKeys = new Set([
       'overview-ar',
@@ -335,6 +487,11 @@ export class StudyDestinationPublishingPolicy {
       'living-cost-currency',
       'official-links',
       'evidence-sources',
+      'admission-highlights-en',
+      'visa-requirements-en',
+      'official-links-en',
+      'cost-highlights-en',
+      'student-life-en',
     ]);
     const readyForReview = checks
       .filter((check) => reviewKeys.has(check.key))

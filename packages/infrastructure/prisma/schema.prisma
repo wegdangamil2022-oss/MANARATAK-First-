@@ -3919,6 +3919,9 @@ model ReferenceLanguage {
 }
 
 model StudyDestinationProfile {
+  revision                         Int      @default(1)
+  governance                       Json     @default("{}")
+  cityReferenceIds                 Json     @default("[]")
   id                               String   @id @default(uuid())
   publicId                         String   @unique
   slug                             String   @unique

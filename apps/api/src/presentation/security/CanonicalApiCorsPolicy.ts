@@ -7,6 +7,8 @@ export const CANONICAL_API_REQUEST_HEADERS = Object.freeze([
   'X-CSRF-Token',
   'X-Second-Approver-ID',
   'X-Change-Ticket',
+  'If-Match',
+  'X-Review-Reason',
   'X-Governance-Approval-ID',
   'X-Student-Tools-Session',
   'Idempotency-Key',

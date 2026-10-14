@@ -108,27 +108,28 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
   const facts = [
     {
       label: publicT('public_capital'),
-      value: country.capitalCity || 'غير متوفر',
+      value: country.capitalCity || publicT('public_unavailable_2'),
       icon: <MapPin className="w-3.5 h-3.5" />,
     },
     {
       label: publicT('public_currency_2'),
-      value: country.currencyCode || 'غير متوفر',
+      value: country.currencyCode || publicT('public_unavailable_2'),
       icon: <Banknote className="w-3.5 h-3.5" />,
     },
     {
       label: publicT('public_country_code'),
-      value: [country.iso2Code, country.iso3Code].filter(Boolean).join(' / ') || 'غير متوفر',
+      value: [country.iso2Code, country.iso3Code].filter(Boolean).join(' / ') ||
+        publicT('public_unavailable_2'),
       icon: <Flag className="w-3.5 h-3.5" />,
     },
     {
       label: publicT('public_contact'),
-      value: country.callingCode || 'غير متوفر',
+      value: country.callingCode || publicT('public_unavailable_2'),
       icon: <Phone className="w-3.5 h-3.5" />,
     },
     {
       label: publicT('public_reference_language'),
-      value: country.officialLanguages?.join('، ') || 'غير متوفر',
+      value: country.officialLanguages?.join('، ') || publicT('public_unavailable_2'),
       icon: <Languages className="w-3.5 h-3.5" />,
     },
     {
@@ -138,12 +139,12 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
     },
     {
       label: publicT('public_time_zone'),
-      value: country.timezones?.join('، ') || 'غير متوفر',
+      value: country.timezones?.join('، ') || publicT('public_unavailable_2'),
       icon: <Globe2 className="w-3.5 h-3.5" />,
     },
     {
       label: publicT('public_study_languages_2'),
-      value: country.languageOfStudy.join('، ') || 'غير متوفر',
+      value: country.languageOfStudy.join('، ') || publicT('public_unavailable_2'),
       icon: <Languages className="w-3.5 h-3.5" />,
     },
   ];
@@ -151,7 +152,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
   const costItems = country.costHighlights?.length
     ? country.costHighlights
     : [
-        { label: publicT('public_average_living_costs'), value: country.averageLivingCostUsd },
+        { label: publicT('public_average_living_costs'), value: country.monthlyLivingCostLabel },
         { label: publicT('public_cost_category'), value: country.livingCost },
       ];
 
@@ -316,7 +317,11 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             icon={<Globe2 className="w-4 h-4" />}
             id="country-about"
             title={publicT('public_study_in_country', { v0: country.name })}
-            subtitle="نظرة سريعة تساعد الطالب على تقييم الوجهة"
+            subtitle={
+              publicDir === 'rtl'
+                ? 'نظرة سريعة تساعد الطالب على تقييم الوجهة'
+                : 'A quick overview to help students assess this destination'
+            }
           />
           <div className="rounded-xl border border-[var(--mn-border)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] p-3 mn-panel dark:mn-panel ">
             <p className="whitespace-pre-wrap text-[11.5px] sm:text-xs leading-[1.9] font-semibold text-[var(--mn-text)] dark:text-[var(--mn-text)]">
@@ -529,7 +534,11 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             icon={<FileCheck2 className="w-4 h-4" />}
             id="country-exams"
             title={publicT('public_admission_and_exams')}
-            subtitle="المتطلبات النهائية تختلف حسب الجامعة والبرنامج"
+            subtitle={
+              publicDir === 'rtl'
+                ? 'المتطلبات النهائية تختلف حسب الجامعة والبرنامج'
+                : 'Final requirements vary by university and program'
+            }
           />
           {country.admissionHighlights && country.admissionHighlights.length > 0 && (
             <div className="grid grid-cols-2 gap-2 mb-2.5">
@@ -621,6 +630,13 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             title={publicT('public_cities_and_student_life')}
           />
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none mb-2.5">
+            {!country.popularCities.length && (
+              <p>
+                {publicDir === 'rtl'
+                  ? 'لم تُحدد مدن لهذه الوجهة بعد.'
+                  : 'No cities have been selected for this destination yet.'}
+              </p>
+            )}
             {country.popularCities.map((city) => (
               <div
                 key={city}
@@ -650,8 +666,15 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
 
         <RelatedArticlesStrip articles={country.relatedArticles} onOpenArticle={onOpenArticle} />
 
-        {/* 10. Official links; source/audit and SEO stay admin-only */}
-        {country.sourceAuditDate && <p className="text-xs text-[var(--mn-text-muted)]">{publicT('public_last_source_review')}{' '}{country.sourceAuditDate.slice(0, 10)}</p>}
+        {/* 10. Reviewed official links; only the server-approved review date is public */}
+        {!!country.referenceWarnings?.length && (
+          <p role="status" className="text-xs">
+            {publicDir === 'rtl'
+              ? 'بعض المعلومات قيد إعادة المراجعة؛ أُخفيت المراجع غير السارية.'
+              : 'Some information is under review; inactive references have been omitted.'}
+          </p>
+        )}
+        {country.lastReviewedAt && <p className="text-xs text-[var(--mn-text-muted)]">{publicT('public_last_source_review')}{' '}{country.lastReviewedAt.slice(0, 10)}</p>}
         {country.officialLinks && country.officialLinks.length > 0 && (
           <section className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] dark:border-[var(--mn-border)] bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] px-3 py-3 shadow-2xs mn-panel dark:mn-panel ">
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />

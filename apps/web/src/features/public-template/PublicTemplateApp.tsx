@@ -154,9 +154,10 @@ export default function App() {
       try { const country = mapCountry(await ApiClient.getStudyDestinationBySlug(directCountry.slug!), language); if (active) setDirectCountry(country); }
       catch (cause) { if (active && cause instanceof Error && cause.message === 'Study destination not found') setDirectCountry(null); }
     };
+    const imageRefreshTimer = window.setInterval(refresh, 180000);
     window.addEventListener('focus', refresh);
     document.addEventListener('visibilitychange', refresh);
-    return () => { active = false; window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
+    return () => { active = false; window.clearInterval(imageRefreshTimer); window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
   }, [publicDataMode, directCountry?.slug, language]);
 
   const directRouteHydrated = useRef(false);
@@ -475,7 +476,7 @@ export default function App() {
     majorSlug: selectedMajor?.slug || (selectedMajor ? selectedMajor.id : undefined),
     universitySlug: selectedUniversity?.slug || (selectedUniversity ? selectedUniversity.id : undefined),
     scholarshipSlug: selectedScholarship?.slug || (selectedScholarship ? selectedScholarship.id : undefined),
-    countryIso2Code: activeCountryForGraph?.iso2Code,
+    countryIso2Code: activeCountryForGraph?.iso2Code ?? (/^[a-z]{2}$/i.test(activeCountryIdentity) ? activeCountryIdentity.toUpperCase() : undefined),
     locale: language,
   });
 
@@ -1577,6 +1578,8 @@ export default function App() {
                     {/* 4. Featured Countries */}
                     <div className="relative w-full">
                       <FeaturedCountries
+                        countries={countries}
+                        dataMode={publicDataMode}
                         onSelectCountry={(country) => {
                           setCountryNavigationName(country);
                           setSelectedCategory('countries');
@@ -1775,7 +1778,7 @@ export default function App() {
               />
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'countries' ? (
-              <CountriesSearchPage detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)}
+              <CountriesSearchPage dataMode={publicDataMode} detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)}
                 searchAnchor={detailSearchAnchor}
                 searchTerm={detailSearchTerm}
                 countries={countriesForView}

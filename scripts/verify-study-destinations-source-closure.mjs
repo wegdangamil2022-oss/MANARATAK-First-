@@ -60,7 +60,8 @@ check('Migration creates profile and language join only', migration.includes('St
 check('Migration does not contain DML backfill', !/\bINSERT\s+INTO\s+"?ReferenceCountry|\bUPDATE\s+"?ReferenceCountry/i.test(migration));
 
 check('Repository has published-only query', repo.includes('listPublished') && repo.includes('StudyDestinationStatus.PUBLISHED'));
-check('Published repository excludes inactive canonical countries', repo.includes('countryReference: publishedOnly ? { isActive: true }'));
+check('Published repository excludes inactive canonical countries', repo.includes('countryReference: this.countryWhere(filters)') &&
+    /isActive:\s*true,\s*lifecycleState:\s*'ACTIVE'/.test(repo));
 check('Use case resolves canonical currency before save', useCases.includes('resolveCurrencyCandidate'));
 check('Use case resolves canonical languages before save', useCases.includes('resolveLanguageCandidate'));
 check('Editor cannot author source verification directly', useCases.includes('delete normalized.sourceVerificationStatus') && !adminRouter.includes('sourceVerificationStatus:'));
@@ -70,7 +71,9 @@ check('Source-sensitive edits reset verification', useCases.includes('hasSourceS
 check('Source-sensitive edits remove a published profile from public delivery', useCases.includes('mustLeavePublishedState') && useCases.includes('publishedAt: null'));
 check('Publication requires review state', useCases.includes('STUDY_DESTINATION_REVIEW_REQUIRED'));
 check('Publication requires readiness', useCases.includes('STUDY_DESTINATION_NOT_READY_TO_PUBLISH'));
-check('Public detail requires published status', useCases.includes('profile.status !== StudyDestinationStatus.PUBLISHED'));
+check('Public detail requires published status',
+  useCases.includes("profile.status !== 'PUBLISHED'") ||
+    useCases.includes('profile.status !== StudyDestinationStatus.PUBLISHED'));
 
 check('Admin API is mounted', app.includes("'/admin/study-destinations'"));
 check('Public Study Destination API is mounted', app.includes("'/study-destinations'"));
@@ -129,6 +132,34 @@ check('Country detail renders official links', countryModal.includes('country.of
 
 check('Admin navigation order is Tests then Courses then Study Destinations', adminNav.indexOf("to: '/international-tests'") < adminNav.indexOf("to: '/courses'") && adminNav.indexOf("to: '/courses'") < adminNav.indexOf("to: '/study-destinations'"));
 check('International Test admin no longer claims preparation courses are unintegrated', testDetail.includes('الدورات التحضيرية المعتمدة') && !testDetail.includes('غير موصولة بعد. الملكية ستكون لمجال الدورات'));
+
+// Structural regressions supplement the focused behavioral suite; they do not certify runtime.
+check('Editor schema cannot certify evidence time', !adminRouter.slice(adminRouter.indexOf('const evidenceSources'),adminRouter.indexOf('export class')).includes('verifiedAt'));
+check('Authenticated revision/reason contract is required', ['If-Match','X-Review-Reason','req.authUserId','STUDY_DESTINATION_PRECONDITION_REQUIRED'].every(key=>adminRouter.includes(key)));
+check('Distinct owner permissions replace P7 publication rights', ['read','edit','verify','publish'].every(action=>adminRouter.includes(`guard('${action}')`)) && !app.includes("'/admin/study-destinations', requireAdminPermission('admin:reference-data:manage')"));
+check('Independent source approval uses fingerprint and reviewed revision', ['STUDY_DESTINATION_INDEPENDENT_REVIEWER_REQUIRED','STUDY_DESTINATION_REVIEW_FINGERPRINT_CONFLICT','reviewedRevision: profile.revision'].every(key=>useCases.includes(key)));
+check('Every mutation uses atomic business/audit/outbox owner context', useCases.includes('this.atomic.execute') && useCases.includes('snapshots.after = value.profile') && useCases.includes('STUDY_DESTINATION_OWNER_LOCK_REQUIRED'));
+check('Profile updates enforce numeric CAS in a bound transaction', repo.includes('revision: expectedRevision') && repo.includes('revision: { increment: 1 }') && repo.includes('this.assertBound()'));
+check('Concurrent first profile creation has an owner lock', repo.includes('pg_advisory_xact_lock') && repo.includes('FOR SHARE') && repo.includes('FOR UPDATE'));
+check('Public profile is an explicit allowlist', useCases.includes('PublicContentKey') && !useCases.slice(useCases.indexOf('private async publicDto'),useCases.indexOf('private assertFreshDate')).includes('...profile'));
+check('Asset is rechecked for publication and delivery', useCases.slice(useCases.indexOf('public async publish'),useCases.indexOf('public async archive')).includes('assertAssetReferenceUsable') && useCases.includes('requestDeliveryGrant') && useCases.includes('IMAGE_REVIEW_REQUIRED'));
+check('Public delivery grants are never cached by shared clients', publicRouter.includes("res.set('Cache-Control', 'no-store')"));
+check('Authority approval covers normalized origins and explicit exceptions', ['STUDY_DESTINATION_UNAPPROVED_AUTHORITY','STUDY_DESTINATION_AUTHORITY_EXCEPTION_REVIEW_REQUIRED','INVALID_AUTHORITY_ORIGIN'].every(key=>useCases.includes(key)));
+check('Freshness is enforced in readiness, commands and repository queries', domain.includes('isAuditDateFresh') && useCases.includes('this.publishingPolicy.isAuditDateFresh') && repo.includes('reviewMaxAgeDays'));
+check('Bilingual structural coverage has mandatory English checks', ['admission-highlights-en','visa-requirements-en','official-links-en','cost-highlights-en','student-life-en'].every(key=>domain.includes(key)));
+check('Canonical city curation is distinct from geographic ownership', adminDetail.includes('CanonicalCityPicker') && useCases.includes('INVALID_STUDY_CITY_COUNTRY') && useCases.includes('CITY_REFERENCES_REVIEW_REQUIRED'));
+check('References are batch-resolved and lifecycle checked', useCases.includes('resolveDestinationReferences') && useCases.includes("reference.lifecycleState === 'ACTIVE'"));
+check('Admin work queue filters before paging with a bounded join/count', repo.includes('listAdminCountries') && repo.includes('this.missingWhere') && repo.includes('studyDestinationProfile: { include }') && adminList.includes('missingCheck'));
+check('Public country discovery is server paged', countriesPage.includes('searchPublishedCountries') && countriesPage.includes('serverPage') && publicRouter.includes('q:'));
+check('Featured grid uses published profile identities rather than fixed counts', read('apps/web/src/features/public-template/components/FeaturedCountries.tsx').includes('item.isFeatured') && !read('apps/web/src/features/public-template/components/FeaturedCountries.tsx').includes('scholarshipsCount:'));
+check('Country graph has independent owner cursors throughout the stack', ['universityCursor','scholarshipCursor','serviceCursor','courseCursor','programCursor'].every(key=>graph.includes(key)&&adminRouter.includes(key)&&adminDetail.includes(key)));
+check('Monthly living costs preserve original currency without USD fiction', publicData.includes('monthlyLivingCostRange') && !publicData.includes('averageLivingCostUsd'));
+check('Scholarship owner list accepts canonical country deep links', read('apps/admin/src/pages/ScholarshipListPage.tsx').includes("get('countryReferenceId')") && adminDetail.includes('All country scholarships'));
+check('Prisma repository no longer bypasses generated schema with any', !/\bany\b/.test(repo) && repo.includes('StudyDestinationProfileGetPayload') && repo.includes('Prisma.StudyDestinationProfileWhereInput'));
+check('Owner application regressions are committed', exists('packages/application/tests/study-destinations/StudyDestinationGovernance.spec.ts'));
+check('Owner API negative regressions are committed', exists('apps/api/tests/presentation/api/router/StudyDestinationGovernanceRouter.spec.ts'));
+check('Owner persistence query contracts are committed', exists('packages/infrastructure/tests/study-destinations/StudyDestinationRepositoryContract.spec.ts'));
+check('Owner public mapping contracts are committed', exists('apps/web/src/features/public-template/tests/StudyDestinationPublicMapping.spec.ts'));
 
 const passed = checks.filter((item) => item.passed).length;
 console.log(JSON.stringify({ suite: 'STUDY_DESTINATIONS_SOURCE_CLOSURE', passed, total: checks.length, failed: checks.filter((item) => !item.passed).map((item) => item.name) }, null, 2));

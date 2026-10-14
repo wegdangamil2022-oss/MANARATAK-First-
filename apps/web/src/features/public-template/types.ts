@@ -102,7 +102,17 @@ export interface CountryDestination {
   description: string;
   imageUrl: string;
   popularCities: string[];
-  averageLivingCostUsd: string;
+  monthlyLivingCostLabel: string;
+  monthlyLivingCostRange?: {
+    min: number;
+    max: number;
+    currencyReferenceId: string;
+    currencyCode: string;
+    period: 'MONTH';
+  } | null;
+  isFeatured?: boolean;
+  referenceWarnings?: string[];
+  cityReferences?: Array<{ id: string; name: string }>;
   languageOfStudy: string[];
   visaEase: string;
 
@@ -119,7 +129,7 @@ export interface CountryDestination {
   studySystemSummary?: string;
   admissionHighlights?: string[];
   visaSummary?: string;
-  sourceAuditDate?: string;
+  lastReviewedAt?: string;
   visaHighlights?: string[];
   costHighlights?: Array<{ label: string; value: string }>;
   studentLifeHighlights?: string[];

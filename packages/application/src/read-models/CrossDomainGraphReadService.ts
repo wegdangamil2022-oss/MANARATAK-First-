@@ -57,6 +57,8 @@ export interface AcademicProgramGraphIdentity {
 }
 
 export interface PaginatedGraphCollection<T> {
+  nextCursor?: string | null;
+  hasMore?: boolean;
   data: T[];
   total: number;
   page: number;
@@ -179,6 +181,12 @@ export interface CrossDomainGraphReadOptions {
   courseFilters?: PublicCourseFilters;
   locale?: 'ar' | 'en';
   programCursor?: string;
+  universityCursor?: string;
+  scholarshipCursor?: string;
+  serviceCursor?: string;
+  courseCursor?: string;
+  testPage?: number;
+  careerPage?: number;
 }
 
 /**
@@ -462,21 +470,25 @@ export class CrossDomainGraphReadService {
         readScope,
         'universities',
         () =>
-          this.universityRepository.listPublished({ countryReferenceId: country.id, limit: pageSize }),
+          this.universityRepository.listPublished({ countryReferenceId: country.id,
+            cursor: options.universityCursor,
+            limit: pageSize }),
         empty,
       ),
       graphOwnerRead(
         readScope,
         'scholarships',
         () =>
-          this.scholarshipRepository.listPublished({ countryReferenceId: country.id, limit: pageSize }),
+          this.scholarshipRepository.listPublished({ countryReferenceId: country.id,
+            cursor: options.scholarshipCursor,
+            limit: pageSize }),
         empty,
       ),
       graphOwnerRead(
         readScope,
         'internationalTests',
         () =>
-          this.internationalTestRepository.listPublished({ countryIso2Code: normalizedCode, page, pageSize }),
+          this.internationalTestRepository.listPublished({ countryIso2Code: normalizedCode, page: options.testPage ?? 1, pageSize }),
         { data: [], total: 0, page, limit: pageSize },
       ),
       graphOwnerRead(
@@ -484,7 +496,9 @@ export class CrossDomainGraphReadService {
         'services',
         this.serviceCatalogRepository
         ? () =>
-              this.serviceCatalogRepository!.listPublished({ supportedCountryReferenceId: country.id, limit: pageSize })
+              this.serviceCatalogRepository!.listPublished({ supportedCountryReferenceId: country.id,
+                cursor: options.serviceCursor,
+                limit: pageSize })
         : undefined,
         empty,
       ),
@@ -493,7 +507,7 @@ export class CrossDomainGraphReadService {
         'careerJobs',
       this.careerRepository
         ? () =>
-              this.careerRepository!.listPublishedJobs({ countryReferenceId: country.id, page, pageSize })
+              this.careerRepository!.listPublishedJobs({ countryReferenceId: country.id, page: options.careerPage ?? 1, pageSize })
         : undefined,
         empty,
       ),
@@ -504,6 +518,7 @@ export class CrossDomainGraphReadService {
           this.courseRelationshipRepository.listPublishedRelatedCourses({
         ...options.courseFilters,
         providerHeadquartersCountryReferenceId: country.id,
+            cursor: options.courseCursor,
         limit: pageSize,
       }),
         empty,

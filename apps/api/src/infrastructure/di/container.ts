@@ -1087,8 +1087,8 @@ export function registerDependencies(
     referenceOwnerReviewUseCases: asFunction(({ referenceOwnerReviewGateway, atomicDomainMutationCoordinator }) => new ReferenceOwnerReviewUseCases(referenceOwnerReviewGateway, atomicDomainMutationCoordinator)).scoped(),
     referenceDataUseCases: asFunction(({ referenceDataRepository, atomicAuditedOutboxMutationExecutor, referenceDataValidationService, assetReferencePolicy }) =>
       new ReferenceDataUseCases(referenceDataRepository, undefined, undefined, atomicAuditedOutboxMutationExecutor, referenceDataValidationService, assetReferencePolicy)).scoped(),
-    studyDestinationUseCases: asFunction(({ studyDestinationRepository, referenceDataRepository, assetReferencePolicy }) =>
-      new StudyDestinationUseCases(studyDestinationRepository, referenceDataRepository, referenceDataRepository, undefined, assetReferencePolicy)).scoped(),
+    studyDestinationUseCases: asFunction(({ studyDestinationRepository, referenceDataRepository, assetReferencePolicy, atomicDomainMutationCoordinator, processAssetLifecycleUseCase }) =>
+      new StudyDestinationUseCases(studyDestinationRepository, referenceDataRepository, referenceDataRepository, undefined, assetReferencePolicy, atomicDomainMutationCoordinator, processAssetLifecycleUseCase)).scoped(),
     referenceResolver: asFunction(({ referenceDataRepository }) => new ReferenceResolverService(referenceDataRepository)).scoped(),
     serviceReferenceGateway: asFunction(({ referenceResolver }) => new CanonicalServiceReferenceGateway(referenceResolver)).scoped(),
     adminServiceCatalogUseCases: asFunction(({ serviceCatalogRepository, serviceReferenceGateway, assetReferencePolicy, serviceOperationsRepository }) => new AdminServiceCatalogUseCases(serviceCatalogRepository, serviceReferenceGateway, assetReferencePolicy, serviceOperationsRepository)).scoped(),

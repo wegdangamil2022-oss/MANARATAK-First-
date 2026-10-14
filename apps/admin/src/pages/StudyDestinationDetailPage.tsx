@@ -1,6 +1,6 @@
 import { listAllReferenceData } from '../api/referenceData';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
   AlertCircle,
   ArrowLeft,
@@ -22,7 +22,14 @@ import {
   Stamp,
   WalletCards,
 } from 'lucide-react';
+import { CanonicalCityPicker } from '../components/CanonicalCityPicker';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { AssetPicker } from '../components/AssetPicker';
+import {
+  studyDestinationFieldLabels,
+  studyDestinationEdgeLabels,
+  studyDestinationCheckLabels,
+} from './StudyDestinationUiLabels';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
@@ -65,6 +72,8 @@ type EvidenceItem = { label: string; url: string; sourceType: string; verifiedAt
 type CostItem = { label: string; value: string };
 
 type Profile = {
+  revision: number;
+  cityReferenceIds: string[];
   updatedAt: string;
   id: string;
   publicId: string;
@@ -111,7 +120,16 @@ type Readiness = {
     message?: string;
   }>;
 };
+type AuthorityDecision = {
+  origin: string;
+  authorityName: string;
+  evidenceUrl: string;
+  exceptionReason?: string;
+};
 type Aggregate = {
+  fingerprint?: string;
+  referenceWarnings?: string[];
+  cities?: RefOption[];
   country: ReferenceCountry;
   profile: Profile | null;
   studyLanguages: RefOption[];
@@ -126,8 +144,10 @@ type GraphPage<T> = {
   page: number;
   pageSize: number;
   totalPages: number;
+  nextCursor?: string | null;
 };
 type CountryGraph = {
+  readScope?: { collections: Record<string, { state: string; nextCursor?: string | null }> };
   subject: GraphIdentity & { canonicalCode: string };
   relationships: {
     universities: GraphPage<GraphIdentity>;
@@ -183,7 +203,8 @@ type FormState = {
   costHighlightsEn: string;
   studentLifeHighlightsAr: string;
   studentLifeHighlightsEn: string;
-  officialLinks: string;
+  officialLinks: LinkItem[];
+  cityReferenceIds: string[];
   evidenceSources: string;
   sourceAuditDate: string;
   studyLanguageReferenceIds: string[];
@@ -211,7 +232,8 @@ const emptyForm: FormState = {
   costHighlightsEn: '',
   studentLifeHighlightsAr: '',
   studentLifeHighlightsEn: '',
-  officialLinks: '',
+  officialLinks: [],
+  cityReferenceIds: [],
   evidenceSources: '',
   sourceAuditDate: '',
   studyLanguageReferenceIds: [],
@@ -234,33 +256,6 @@ const parseCostLines = (value: string): CostItem[] =>
     })
     .map((item) => {
       if (!item.label || !item.value) throw new Error('أكمل كل سطر تكلفة: العنصر | القيمة.');
-      return item;
-    });
-const linkLines = (items?: LinkItem[]) =>
-  (items ?? [])
-    .map(
-      (item) =>
-        `${item.labelAr} | ${item.url} | ${item.category}$ | ${item.labelEn ?? ''} | ${item.noteAr ?? ''} | ${item.noteEn ?? ''}`,
-    )
-    .join('\n');
-const parseLinkLines = (value: string): LinkItem[] =>
-  lines(value)
-    .map((row) => {
-      const [labelAr, url, category = 'OTHER', labelEn, noteAr, noteEn] = row
-        .split('|')
-        .map((x) => x.trim());
-      return {
-        labelAr,
-        url,
-        category,
-        ...(labelEn ? { labelEn } : {}),
-        ...(noteAr ? { noteAr } : {}),
-        ...(noteEn ? { noteEn } : {}),
-      };
-    })
-    .map((item) => {
-      if (!item.labelAr || !item.url)
-        throw new Error('أكمل كل رابط رسمي: الاسم | الرابط | التصنيف.');
       return item;
     });
 const evidenceLines = (items?: EvidenceItem[]) =>
@@ -302,12 +297,18 @@ function flagEmoji(code: string) {
 export function StudyDestinationDetailPage() {
   const { countryIso2Code = '' } = useParams();
   const iso2 = countryIso2Code.toUpperCase();
+  const [searchParams] = useSearchParams();
+  const { hasPermission, permissions } = useAdminAuthorization();
+  const canEdit = hasPermission('admin:study-destinations:edit');
+  const [reason, setReason] = useState('');
+  const [authorities, setAuthorities] = useState<AuthorityDecision[]>([]);
   const { language } = useTranslation();
   const isAr = language === 'ar';
   const baseline = useRef(JSON.stringify(emptyForm));
   const mutation = useRef(false);
   const sequence = useRef(0);
-  const [graphPage, setGraphPage] = useState(1);
+  const [edgeParams, setEdgeParams] = useState<Record<string, string>>({});
+  const [edgeHistory, setEdgeHistory] = useState<Record<string, string[]>>({});
   const [graphLoading, setGraphLoading] = useState(false);
   const [graphError, setGraphError] = useState<string | null>(null);
   const [aggregate, setAggregate] = useState<Aggregate | null>(null);
@@ -315,7 +316,13 @@ export function StudyDestinationDetailPage() {
   const [languages, setLanguages] = useState<RefOption[]>([]);
   const [currencies, setCurrencies] = useState<RefOption[]>([]);
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [tab, setTab] = useState<TabKey>('overview');
+  const [tab, setTab] = useState<TabKey>(
+    (
+      ['overview', 'study', 'visa', 'living', 'relations', 'sources', 'publish'] as string[]
+    ).includes(searchParams.get('section') ?? '')
+      ? (searchParams.get('section') as TabKey)
+      : 'overview',
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [action, setAction] = useState<string | null>(null);
@@ -355,7 +362,8 @@ export function StudyDestinationDetailPage() {
       costHighlightsEn: costLines(profile.costHighlightsEn),
       studentLifeHighlightsAr: stringifyLines(profile.studentLifeHighlightsAr),
       studentLifeHighlightsEn: stringifyLines(profile.studentLifeHighlightsEn),
-      officialLinks: linkLines(profile.officialLinks),
+      officialLinks: profile.officialLinks ?? [],
+      cityReferenceIds: profile.cityReferenceIds ?? [],
       evidenceSources: evidenceLines(profile.evidenceSources),
       sourceAuditDate: dateInput(profile.sourceAuditDate),
       studyLanguageReferenceIds: profile.studyLanguageReferenceIds ?? [],
@@ -397,9 +405,12 @@ export function StudyDestinationDetailPage() {
   }, [hydrateForm, iso2]);
 
   useEffect(() => {
-    setGraphPage(1);
+    setEdgeParams({});
+    setEdgeHistory({});
+    setReason('');
+    setAuthorities([]);
     void load();
-  }, [load]);
+  }, [load, permissions.join('|')]);
   useEffect(() => {
     let active = true;
     setGraphLoading(true);
@@ -407,7 +418,7 @@ export function StudyDestinationDetailPage() {
     setGraph(null);
     adminApiClient
       .request<CountryGraph>(
-        `/admin/study-destinations/${encodeURIComponent(iso2)}/relationships?page=${graphPage}&pageSize=20&locale=${language}`,
+        `/admin/study-destinations/${encodeURIComponent(iso2)}/relationships?pageSize=20&locale=${language}&${new URLSearchParams(edgeParams)}`,
       )
       .then((next) => {
         if (active) setGraph(next);
@@ -421,7 +432,7 @@ export function StudyDestinationDetailPage() {
     return () => {
       active = false;
     };
-  }, [iso2, graphPage, language]);
+  }, [iso2, edgeParams, language]);
   const dirty = JSON.stringify(form) !== baseline.current;
   useEffect(() => {
     if (!dirty) return;
@@ -468,10 +479,8 @@ export function StudyDestinationDetailPage() {
         : parseCostLines(form.costHighlightsEn),
     studentLifeHighlightsAr: lines(form.studentLifeHighlightsAr),
     studentLifeHighlightsEn: lines(form.studentLifeHighlightsEn),
-    officialLinks:
-      form.officialLinks === linkLines(aggregate?.profile?.officialLinks)
-        ? (aggregate?.profile?.officialLinks ?? [])
-        : parseLinkLines(form.officialLinks),
+    officialLinks: form.officialLinks,
+    cityReferenceIds: form.cityReferenceIds,
     evidenceSources:
       form.evidenceSources === evidenceLines(aggregate?.profile?.evidenceSources)
         ? (aggregate?.profile?.evidenceSources ?? [])
@@ -494,7 +503,11 @@ export function StudyDestinationDetailPage() {
     hydrateForm(next.profile);
   };
   const save = async () => {
-    if (mutation.current) return;
+    if (mutation.current || !canEdit) return;
+    if (!reason.trim()) {
+      setError(isAr ? 'اكتب سبب التعديل أو الإجراء.' : 'Enter a reason for the change.');
+      return;
+    }
     mutation.current = true;
     setSaving(true);
     setError(null);
@@ -513,7 +526,13 @@ export function StudyDestinationDetailPage() {
         throw new Error('الحد الأعلى للمعيشة يجب ألا يقل عن الحد الأدنى.');
       await adminApiClient.request<Aggregate>(
         `/admin/study-destinations/${encodeURIComponent(iso2)}/profile`,
-        { method: 'PUT', body: JSON.stringify(payload) },
+        {
+          method: 'PUT',
+          headers: {
+            'If-Match': String(aggregate?.profile?.revision ?? 0),
+          },
+          body: JSON.stringify({ ...payload, reason: reason.trim() }),
+        },
       );
       saved = true;
       await readSaved();
@@ -539,6 +558,17 @@ export function StudyDestinationDetailPage() {
 
   const execute = async (name: 'submit-review' | 'verify-source' | 'publish' | 'archive') => {
     if (mutation.current) return;
+    const capability =
+      name === 'verify-source'
+        ? 'verify'
+        : ['publish', 'archive'].includes(name)
+          ? 'publish'
+          : 'edit';
+    if (!hasPermission(`admin:study-destinations:${capability}`)) return;
+    if (!reason.trim()) {
+      setError(isAr ? 'اكتب سبب الإجراء.' : 'Enter a reason.');
+      return;
+    }
     if (dirty) {
       setError(
         isAr
@@ -566,7 +596,24 @@ export function StudyDestinationDetailPage() {
     try {
       await adminApiClient.request<Aggregate>(
         `/admin/study-destinations/${encodeURIComponent(iso2)}/${name}`,
-        { method: 'POST', body: '{}' },
+        {
+          method: 'POST',
+          headers: {
+            'If-Match': String(aggregate?.profile?.revision ?? 0),
+          },
+          body: JSON.stringify({
+            reason: reason.trim(),
+            ...(name === 'verify-source'
+              ? {
+                  fingerprint: aggregate?.fingerprint,
+                  authorities: authorities.map(({ exceptionReason, ...authority }) => ({
+                    ...authority,
+                    ...(exceptionReason?.trim() ? { exceptionReason: exceptionReason.trim() } : {}),
+                  })),
+                }
+              : {}),
+          }),
+        },
       );
       applied = true;
       await readSaved();
@@ -649,7 +696,7 @@ export function StudyDestinationDetailPage() {
               <RefreshCw className="h-4 w-4" />
             </button>
             <button
-              disabled={saving || Boolean(action) || !dirty}
+              disabled={!canEdit || !reason.trim() || saving || Boolean(action) || !dirty}
               onClick={save}
               className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] px-4 py-2.5 text-sm font-black text-white disabled:opacity-50"
             >
@@ -681,6 +728,12 @@ export function StudyDestinationDetailPage() {
           {error}
         </div>
       )}
+      {!!aggregate.referenceWarnings?.length && (
+        <p role="status" className="text-amber-800">
+          {isAr ? 'مراجع تحتاج إعادة المراجعة: ' : 'References requiring review: '}
+          {aggregate.referenceWarnings.join(', ')}
+        </p>
+      )}
       {notice && (
         <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
           <CheckCircle2 className="h-5 w-5" />
@@ -688,6 +741,54 @@ export function StudyDestinationDetailPage() {
         </div>
       )}
 
+      <div className="rounded-xl border bg-white p-4 space-y-3">
+        <TextArea
+          label={isAr ? 'سبب التعديل / قرار المراجعة' : 'Change / review reason'}
+          value={reason}
+          onChange={setReason}
+          rows={2}
+        />
+        {tab === 'publish' && hasPermission('admin:study-destinations:verify') && (
+          <div className="space-y-3">
+            <p>
+              {isAr
+                ? 'أضف كل نطاق مصدر، اسم الجهة، ورابط إثبات اعتمادها. الاستثناء لجهة غير حكومية يحتاج تبريرًا صريحًا.'
+                : 'Approve every source origin with authority name and supporting URL. Non-government authorities require an explicit exception reason.'}
+            </p>
+            {authorities.map((item, index) => (
+              <div key={index} className="grid gap-2 sm:grid-cols-2">
+                {(['origin', 'authorityName', 'evidenceUrl', 'exceptionReason'] as const).map(
+                  (key) => (
+                    <Input
+                      key={key}
+                      label={studyDestinationFieldLabels[key]?.[isAr ? 0 : 1] ?? key}
+                      value={item[key] ?? ''}
+                      onChange={(value) =>
+                        setAuthorities((old) =>
+                          old.map((row, i) => (i === index ? { ...row, [key]: value } : row)),
+                        )
+                      }
+                    />
+                  ),
+                )}
+                <button onClick={() => setAuthorities((old) => old.filter((_, i) => i !== index))}>
+                  {isAr ? 'إزالة الجهة' : 'Remove authority'}
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() =>
+                setAuthorities((old) => [
+                  ...old,
+                  { origin: '', authorityName: '', evidenceUrl: '' },
+                ])
+              }
+            >
+              {isAr ? 'إضافة اعتماد جهة' : 'Add authority approval'}
+            </button>
+          </div>
+        )}
+      </div>
       <div className="grid gap-5 xl:grid-cols-[220px_minmax(0,1fr)]">
         <nav className="h-fit rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
           {tabs.map(({ key, label, icon: Icon }) => (
@@ -702,9 +803,49 @@ export function StudyDestinationDetailPage() {
           ))}
         </nav>
         <fieldset
-          disabled={saving || Boolean(action)}
+          disabled={
+            saving || Boolean(action) || (!canEdit && tab !== 'publish' && tab !== 'relations')
+          }
           className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
         >
+          {tab === 'overview' && (
+            <div className="mb-5 space-y-3">
+              <CanonicalCityPicker
+                countryIso2Code={iso2}
+                regionId={null}
+                value={null}
+                onChange={(id) => {
+                  if (id)
+                    setForm((old) => ({
+                      ...old,
+                      cityReferenceIds: [...new Set([...old.cityReferenceIds, id])].slice(0, 25),
+                    }));
+                }}
+              />
+              {form.cityReferenceIds.map((id) => (
+                <button
+                  key={id}
+                  onClick={() =>
+                    setForm((old) => ({
+                      ...old,
+                      cityReferenceIds: old.cityReferenceIds.filter((value) => value !== id),
+                    }))
+                  }
+                  aria-label={isAr ? 'إزالة المدينة' : 'Remove city'}
+                >
+                  {aggregate.cities?.find((city) => city.id === id)
+                    ? optionLabel(
+                        aggregate.cities.find((city) => city.id === id)!,
+                        isAr,
+                      )
+                    : isAr
+                      ? 'مدينة مختارة'
+                      : 'Selected city'}{' '}
+                  ×
+                </button>
+              ))}
+            </div>
+          )}
           {tab === 'overview' && (
             <OverviewPanel country={country} form={form} setForm={setForm} isAr={isAr} />
           )}
@@ -727,30 +868,87 @@ export function StudyDestinationDetailPage() {
               ) : (
                 <RelationsPanel graph={graph} country={country} isAr={isAr} />
               )}
-              <div className="mt-4 flex gap-4">
-                <button
-                  disabled={graphLoading || graphPage <= 1}
-                  onClick={() => setGraphPage((value) => value - 1)}
-                >
-                  السابق
-                </button>
-                <span>صفحة {graphPage}</span>
-                <button
-                  disabled={
-                    graphLoading ||
-                    !graph ||
-                    !Object.values(graph.relationships).some(
-                      (value) =>
-                        !Array.isArray(value) &&
-                        'totalPages' in value &&
-                        value.totalPages > graphPage,
-                    )
-                  }
-                  onClick={() => setGraphPage((value) => value + 1)}
-                >
-                  التالي
-                </button>
-              </div>
+              {(
+                [
+                  'universities',
+                  'scholarships',
+                  'services',
+                  'providerHeadquartersCourses',
+                  'academicPrograms',
+                  'internationalTests',
+                  'careerJobs',
+                ] as const
+              ).map((edge) => {
+                const param = {
+                  universities: 'universityCursor',
+                  scholarships: 'scholarshipCursor',
+                  services: 'serviceCursor',
+                  providerHeadquartersCourses: 'courseCursor',
+                  academicPrograms: 'programCursor',
+                  internationalTests: 'testPage',
+                  careerJobs: 'careerPage',
+                }[edge];
+                const collection = graph?.relationships[edge];
+                const page = Number(edgeParams[param] ?? 1);
+                const offset = param.endsWith('Page');
+                const nextCursor =
+                  graph?.readScope?.collections[edge]?.nextCursor ??
+                  (!Array.isArray(collection) ? collection?.nextCursor : null);
+                const history = edgeHistory[param] ?? [];
+                const unavailable = graph?.readScope?.collections[edge]?.state === 'UNAVAILABLE';
+                return (
+                  <div
+                    key={edge}
+                    className="mt-3 flex items-center gap-3"
+                    aria-label={studyDestinationEdgeLabels[edge]?.[isAr ? 0 : 1]}
+                  >
+                    <span>
+                      {studyDestinationEdgeLabels[edge]?.[isAr ? 0 : 1] ?? edge}
+                      {unavailable ? (isAr ? ' — تعذر قراءة القسم' : ' — unavailable') : ''}
+                    </span>
+                    <button
+                      disabled={
+                        graphLoading || unavailable || (offset ? page <= 1 : !history.length)
+                      }
+                      onClick={() => {
+                        const previous = history.at(-1) ?? '';
+                        setEdgeParams((old) => ({
+                          ...old,
+                          [param]: offset ? String(page - 1) : previous,
+                        }));
+                        if (!offset)
+                          setEdgeHistory((old) => ({ ...old, [param]: history.slice(0, -1) }));
+                      }}
+                    >
+                      {isAr ? 'السابق' : 'Previous'}
+                    </button>
+                    <button
+                      disabled={
+                        graphLoading ||
+                        unavailable ||
+                        (offset
+                          ? !collection ||
+                            Array.isArray(collection) ||
+                            page >= collection.totalPages
+                          : !nextCursor)
+                      }
+                      onClick={() => {
+                        if (!offset)
+                          setEdgeHistory((old) => ({
+                            ...old,
+                            [param]: [...history, edgeParams[param] ?? ''],
+                          }));
+                        setEdgeParams((old) => ({
+                          ...old,
+                          [param]: offset ? String(page + 1) : nextCursor!,
+                        }));
+                      }}
+                    >
+                      {isAr ? 'التالي' : 'Next'}
+                    </button>
+                  </div>
+                );
+              })}
             </>
           )}
           {tab === 'sources' && (
@@ -764,6 +962,7 @@ export function StudyDestinationDetailPage() {
               action={action || (saving ? 'saving' : dirty ? 'unsaved' : null)}
               execute={execute}
               isAr={isAr}
+              hasPermission={hasPermission}
             />
           )}
         </fieldset>
@@ -1075,15 +1274,23 @@ function RelationsPanel({
   country: ReferenceCountry;
   isAr: boolean;
 }) {
+  const { hasPermission } = useAdminAuthorization();
   if (!graph)
     return <Empty text={isAr ? 'تعذر تحميل شبكة العلاقات.' : 'Relationship graph unavailable.'} />;
   const r = graph.relationships;
+  const scholarshipsHref = `/scholarships?countryReferenceId=${encodeURIComponent(country.id)}`;
   const universitiesHref = `/universities?countryReferenceId=${encodeURIComponent(country.id)}`;
   return (
     <section className="space-y-6">
       <Title icon={Building2}>
         {isAr ? 'العلاقات المملوكة للمجالات الأخرى' : 'Owner-domain relationships'}
       </Title>
+      {hasPermission('admin:scholarships:manage') &&
+        graph.readScope?.collections.scholarships?.state !== 'UNAVAILABLE' && (
+          <Link to={scholarshipsHref} className="text-blue-700 underline">
+            {isAr ? 'كل منح الدولة' : 'All country scholarships'}
+          </Link>
+        )}
       <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
         {isAr
           ? 'لا نخزن جامعة/منحة/اختبار/خدمة/وظيفة كقائمة JSON داخل ملف الدولة. كل علاقة تُقرأ من المجال المالك باستخدام Country Reference ID أو ISO2 Canonical.'
@@ -1093,7 +1300,11 @@ function RelationsPanel({
         <RelationMetric
           icon={Building2}
           label={isAr ? 'جامعات' : 'Universities'}
-          value={r.universities.total}
+          value={
+            graph.readScope?.collections.universities?.state === 'AVAILABLE'
+              ? r.universities.total
+              : null
+          }
         />
         <RelationMetric
           icon={GraduationCap}
@@ -1103,22 +1314,36 @@ function RelationsPanel({
         <RelationMetric
           icon={BadgeCheck}
           label={isAr ? 'منح' : 'Scholarships'}
-          value={r.scholarships.total}
+          value={
+            graph.readScope?.collections.scholarships?.state === 'AVAILABLE'
+              ? r.scholarships.total
+              : null
+          }
         />
         <RelationMetric
           icon={ScrollText}
           label={isAr ? 'اختبارات' : 'Tests'}
-          value={r.internationalTests.total}
+          value={
+            graph.readScope?.collections.internationalTests?.state === 'AVAILABLE'
+              ? r.internationalTests.total
+              : null
+          }
         />
         <RelationMetric
           icon={ShieldCheck}
           label={isAr ? 'خدمات' : 'Services'}
-          value={r.services.total}
+          value={
+            graph.readScope?.collections.services?.state === 'AVAILABLE' ? r.services.total : null
+          }
         />
         <RelationMetric
           icon={BriefcaseBusiness}
           label={isAr ? 'وظائف' : 'Jobs'}
-          value={r.careerJobs.total}
+          value={
+            graph.readScope?.collections.careerJobs?.state === 'AVAILABLE'
+              ? r.careerJobs.total
+              : null
+          }
         />
       </div>
 
@@ -1134,14 +1359,17 @@ function RelationsPanel({
                 : 'This list is read directly from University Domain using the canonical Country Reference ID.'}
             </p>
           </div>
-          <Link
-            to={universitiesHref}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 text-xs font-black text-white hover:bg-[#033b2d]"
-          >
-            <Building2 className="h-4 w-4" />
-            {isAr ? 'فتح قسم جامعات هذه الدولة' : 'Open this country’s universities'}
-            <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
+          {hasPermission('admin:universities:manage') &&
+            graph.readScope?.collections.universities?.state !== 'UNAVAILABLE' && (
+              <Link
+                to={universitiesHref}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#142B5F] px-4 text-xs font-black text-white hover:bg-[#033b2d]"
+              >
+                <Building2 className="h-4 w-4" />
+                {isAr ? 'فتح قسم جامعات هذه الدولة' : 'Open this country’s universities'}
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            )}
         </div>
         <RelationList
           title=""
@@ -1294,21 +1522,77 @@ function SourcesPanel({
         onChange={(value) => setForm((x) => ({ ...x, sourceAuditDate: value }))}
         type="date"
       />
-      <LineEditor
-        label={
-          isAr
-            ? 'الروابط الرسمية — سطر: الاسم | الرابط | التصنيف | الاسم الإنجليزي | ملاحظة عربية | ملاحظة إنجليزية'
-            : 'Official links: label | URL | category | English label | Arabic note | English note'
-        }
-        value={form.officialLinks}
-        onChange={(value) => setForm((x) => ({ ...x, officialLinks: value }))}
-        rows={8}
-        dir="ltr"
-      />
-      <p className="text-xs text-slate-500">
-        Categories: GOVERNMENT_STUDY, IMMIGRATION_VISA, EDUCATION_AUTHORITY, SCHOLARSHIP_PORTAL,
-        COST_OF_LIVING, STUDENT_SUPPORT, OTHER
-      </p>
+      <div className="space-y-3">
+        <h3>{isAr ? 'الروابط الرسمية' : 'Official links'}</h3>
+        {form.officialLinks.map((item, index) => (
+          <div key={index} className="grid gap-2 sm:grid-cols-2">
+            {(['labelAr', 'labelEn', 'url', 'noteAr', 'noteEn'] as const).map((key) => (
+              <Input
+                key={key}
+                label={studyDestinationFieldLabels[key]?.[isAr ? 0 : 1] ?? key}
+                value={item[key] ?? ''}
+                onChange={(value) =>
+                  setForm((old) => ({
+                    ...old,
+                    officialLinks: old.officialLinks.map((row, i) =>
+                      i === index ? { ...row, [key]: value } : row,
+                    ),
+                  }))
+                }
+              />
+            ))}
+            <label>
+              {isAr ? 'التصنيف' : 'Category'}
+              <select
+                value={item.category}
+                onChange={(event) =>
+                  setForm((old) => ({
+                    ...old,
+                    officialLinks: old.officialLinks.map((row, i) =>
+                      i === index ? { ...row, category: event.target.value } : row,
+                    ),
+                  }))
+                }
+              >
+                {[
+                  'GOVERNMENT_STUDY',
+                  'IMMIGRATION_VISA',
+                  'EDUCATION_AUTHORITY',
+                  'SCHOLARSHIP_PORTAL',
+                  'COST_OF_LIVING',
+                  'STUDENT_SUPPORT',
+                  'OTHER',
+                ].map((category) => (
+                  <option key={category}>{category}</option>
+                ))}
+              </select>
+            </label>
+            <button
+              onClick={() =>
+                setForm((old) => ({
+                  ...old,
+                  officialLinks: old.officialLinks.filter((_, i) => i !== index),
+                }))
+              }
+            >
+              {isAr ? 'إزالة الرابط' : 'Remove link'}
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={() =>
+            setForm((old) => ({
+              ...old,
+              officialLinks: [
+                ...old.officialLinks,
+                { labelAr: '', labelEn: '', url: '', category: 'OTHER' },
+              ],
+            }))
+          }
+        >
+          {isAr ? 'إضافة رابط' : 'Add link'}
+        </button>
+      </div>
       <LineEditor
         label={
           isAr
@@ -1334,6 +1618,7 @@ function SourcesPanel({
 }
 
 function PublishPanel({
+  hasPermission,
   profile,
   readiness,
   blocking,
@@ -1345,6 +1630,7 @@ function PublishPanel({
   readiness: Readiness | null;
   blocking: Readiness['checks'];
   action: string | null;
+  hasPermission: (permission: string) => boolean;
   execute: (name: 'submit-review' | 'verify-source' | 'publish' | 'archive') => Promise<void>;
   isAr: boolean;
 }) {
@@ -1384,7 +1670,9 @@ function PublishPanel({
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             )}
             <div>
-              <div className="font-black">{check.label}</div>
+              <div className="font-black">
+                {studyDestinationCheckLabels[check.key]?.[isAr ? 0 : 1] ?? check.label}
+              </div>
               <div className="text-xs opacity-80">{check.message || check.key}</div>
             </div>
           </div>
@@ -1394,6 +1682,7 @@ function PublishPanel({
         <ActionButton
           disabled={
             Boolean(action) ||
+            !hasPermission('admin:study-destinations:edit') ||
             !readiness.readyForReview ||
             profile.status === 'PUBLISHED' ||
             profile.status === 'IN_REVIEW'
@@ -1402,19 +1691,32 @@ function PublishPanel({
           label={isAr ? 'إرسال للمراجعة' : 'Submit for review'}
         />
         <ActionButton
-          disabled={Boolean(action)}
+          disabled={
+            Boolean(action) ||
+            profile.status !== 'IN_REVIEW' ||
+            !hasPermission('admin:study-destinations:verify')
+          }
           onClick={() => execute('verify-source')}
           label={isAr ? 'توثيق المصادر' : 'Verify sources'}
           gold
         />
         <ActionButton
-          disabled={Boolean(action) || profile.status !== 'IN_REVIEW' || !readiness.readyForPublish}
+          disabled={
+            Boolean(action) ||
+            !hasPermission('admin:study-destinations:publish') ||
+            profile.status !== 'IN_REVIEW' ||
+            !readiness.readyForPublish
+          }
           onClick={() => execute('publish')}
           label={isAr ? 'نشر وجهة الدراسة' : 'Publish destination'}
           primary
         />
         <ActionButton
-          disabled={Boolean(action) || profile.status === 'ARCHIVED'}
+          disabled={
+            Boolean(action) ||
+            !hasPermission('admin:study-destinations:publish') ||
+            profile.status === 'ARCHIVED'
+          }
           onClick={() => execute('archive')}
           label={isAr ? 'أرشفة' : 'Archive'}
           danger
@@ -1559,12 +1861,12 @@ function RelationMetric({
 }: {
   icon: typeof Building2;
   label: string;
-  value: number;
+  value: number | null;
 }) {
   return (
     <div className="rounded-xl border border-slate-200 p-3">
       <Icon className="h-4 w-4 text-[#142B5F]" />
-      <div className="mt-2 text-xl font-black">{value}</div>
+      <div className="mt-2 text-xl font-black">{value ?? '—'}</div>
       <div className="text-[11px] font-bold text-slate-500">{label}</div>
     </div>
   );

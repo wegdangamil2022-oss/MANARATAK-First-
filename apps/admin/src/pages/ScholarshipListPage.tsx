@@ -110,7 +110,9 @@ export function ScholarshipListPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [completenessFilter, setCompletenessFilter] = useState('');
   const [countryOptions, setCountryOptions] = useState<CanonicalPickerOption[]>([]);
-  const [countryFilter, setCountryFilter] = useState('');
+  const [countryFilter, setCountryFilter] = useState(
+    () => new URLSearchParams(window.location.search).get('countryReferenceId') ?? '',
+  );
   const [fundingFilter, setFundingFilter] = useState('');
   const [degreeFilter, setDegreeFilter] = useState('');
   const [majorFilter, setMajorFilter] = useState('');
@@ -147,12 +149,16 @@ export function ScholarshipListPage() {
       if (completenessFilter) params.append('completenessStatus', completenessFilter);
       if (searchTerm.trim()) params.append('query', searchTerm.trim());
       const selectedCountry = countryOptions.find(item => item.id === countryFilter);
-      if (selectedCountry) params.set('countryReferenceId', selectedCountry.id);
+      if (selectedCountry || /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(countryFilter)) params.set('countryReferenceId', selectedCountry?.id ?? countryFilter);
       for (const [key, value] of Object.entries({ fundingType: fundingFilter, degreeLabel: degreeFilter, majorLabel: majorFilter, languageLabel: languageFilter, deadlineStatus: deadlineFilter })) if (value) params.set(key, value);
 
-      const res = await adminApiClient.request<PaginatedResponse>(`/admin/scholarships?${params.toString()}`);
+      const res = await adminApiClient.request<PaginatedResponse>(`/admin/scholarships?${params.toString()}`,
+      );
       if (request !== listRequest.current) return;
-      if (res.total > 0 && page > res.totalPages) { setPage(Math.max(1, res.totalPages)); return; }
+      if (res.total > 0 && page > res.totalPages) {
+        setPage(Math.max(1, res.totalPages));
+        return;
+      }
       setData(res ?? { data: [], total: 0, page: 1, pageSize: 24, totalPages: 0 });
     } catch (err) {
       if (request !== listRequest.current) return;
@@ -165,16 +171,50 @@ export function ScholarshipListPage() {
   useEffect(() => {
     fetchSummary();
     let active = true;
-    void canonicalPickerApi.countries().then(options => { if (active) setCountryOptions(options); }).catch(() => undefined);
-    return () => { active = false; };
+    void canonicalPickerApi
+      .countries()
+      .then((options) => {
+        if (active) setCountryOptions(options);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
     fetchScholarships();
-    return () => { listRequest.current += 1; };
-  }, [page, statusFilter, completenessFilter, searchTerm, countryFilter, fundingFilter, degreeFilter, majorFilter, languageFilter, deadlineFilter,canonical]);
+    return () => {
+      listRequest.current += 1;
+    };
+  }, [
+    page,
+    statusFilter,
+    completenessFilter,
+    searchTerm,
+    countryFilter,
+    fundingFilter,
+    degreeFilter,
+    majorFilter,
+    languageFilter,
+    deadlineFilter,
+    canonical,
+  ]);
 
-  useEffect(()=>{const params=new URLSearchParams(window.location.search);for(const[key,value]of Object.entries(canonical)){if(value)params.set(key,value);else params.delete(key);}window.history.replaceState(null,'',`${window.location.pathname}${params.size?'?'+params:''}`);},[canonical]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    for (const [key, value] of Object.entries(canonical)) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
+    if (countryFilter) params.set('countryReferenceId', countryFilter);
+    else params.delete('countryReferenceId');
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${params.size?'?'+params:''}`,
+    );
+  }, [canonical, countryFilter]);
   const handleRefresh = () => {
     fetchSummary();
     fetchScholarships();
@@ -193,7 +233,15 @@ export function ScholarshipListPage() {
   const filteredItems = data?.data ?? [];
 
   const hasActiveFilters = Boolean(
-    searchTerm || statusFilter || completenessFilter || countryFilter || fundingFilter || degreeFilter || majorFilter || languageFilter || deadlineFilter
+    searchTerm ||
+    statusFilter ||
+    completenessFilter ||
+    countryFilter ||
+    fundingFilter ||
+    degreeFilter ||
+    majorFilter ||
+    languageFilter ||
+    deadlineFilter,
   );
 
   const handleResetFilters = () => {
@@ -202,7 +250,7 @@ export function ScholarshipListPage() {
     setCompletenessFilter('');
     setCountryFilter('');
     setFundingFilter('');
-    setCanonical({...emptyScholarshipCanonicalFilters});
+    setCanonical({ ...emptyScholarshipCanonicalFilters });
     setDegreeFilter('');
     setMajorFilter('');
     setLanguageFilter('');
@@ -212,7 +260,14 @@ export function ScholarshipListPage() {
 
   return (
     <div dir={dir} className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
-      <ScholarshipCanonicalFilters value={canonical} onChange={value=>{setCanonical(value);setPage(1);}} ar={isArabic}/>
+      <ScholarshipCanonicalFilters
+        value={canonical}
+        onChange={(value) => {
+          setCanonical(value);
+          setPage(1);
+        }}
+        ar={isArabic}
+      />
       {/* Hero Header Banner with Manaratak Gradient */}
       <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-l from-[#142B5F] via-[#0E7C86] to-[#21A7B4] p-6 text-white shadow-xl sm:p-8">
         <div className="absolute -top-20 end-0 h-56 w-56 rounded-full bg-[#F2CD78] opacity-20 pointer-events-none blur-2xl" />
@@ -222,7 +277,12 @@ export function ScholarshipListPage() {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-bold text-[#F2CD78] backdrop-blur-md">
               <GraduationCap className="h-4 w-4" />
-              <span>{tr('الكتالوج الأكاديمي · إدارة المنح الدراسية المعتمدة', 'Scholarship Catalog & Management')}</span>
+              <span>
+                {tr(
+                  'الكتالوج الأكاديمي · إدارة المنح الدراسية المعتمدة',
+                  'Scholarship Catalog & Management',
+                )}
+              </span>
             </div>
             <h1 className="text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl text-white">
               {tr('إدارة كتالوج المنح الدراسية', 'Scholarship Catalog Management')}
@@ -230,7 +290,7 @@ export function ScholarshipListPage() {
             <p className="max-w-2xl text-xs font-medium leading-relaxed text-[#DDEFF2] sm:text-sm">
               {tr(
                 'استعراض المنح الدراسية الدولية المعتمدة، فلترة الفرص المتاحة حسب الدولة والتخصص ونوع التمويل ولغة الدراسة، وإدارة معايير الأهلية والمستندات والتفاصيل الكاملة.',
-                'Manage accredited international scholarships, filter opportunities by country, major, funding type, and language, and manage eligibility and application details.'
+                'Manage accredited international scholarships, filter opportunities by country, major, funding type, and language, and manage eligibility and application details.',
               )}
             </p>
           </div>

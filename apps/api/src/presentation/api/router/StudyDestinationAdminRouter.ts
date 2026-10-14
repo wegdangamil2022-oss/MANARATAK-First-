@@ -1,9 +1,13 @@
+import type {} from '../../middleware/AuthMiddleware.js';
+import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import {
+  AuthorizationEvaluatorService,
   StudyDestinationCompletenessStatus,
   StudyDestinationLivingCostTier,
   StudyDestinationStatus,
+  STUDY_DESTINATION_READINESS_KEYS,
 } from '@manaratak/domain';
 import { CrossDomainGraphReadService, StudyDestinationUseCases } from '@manaratak/application';
 
@@ -48,8 +52,7 @@ const evidenceSources = z
         'OFFICIAL_STATISTICS',
         'OTHER_OFFICIAL',
       ]),
-      verifiedAt: z.string().datetime().optional(),
-    }),
+      }).strict(),
   )
   .max(50);
 
@@ -57,15 +60,73 @@ export class StudyDestinationAdminRouter {
   public static create(cradle: {
     studyDestinationUseCases: StudyDestinationUseCases;
     crossDomainGraphReadService: CrossDomainGraphReadService;
-  }): Router {
+  },
+    evaluatorOverride?: AuthorizationEvaluatorService,
+  ): Router {
     const router = Router();
     const { studyDestinationUseCases, crossDomainGraphReadService } = cradle;
     const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
       Promise.resolve(fn(req, res, next)).catch(next);
 
+    const guard = (action: string) =>
+      SecurityMiddlewareFactory.createAdminPermissionGuard(
+        'admin:study-destinations:' + action,
+        evaluatorOverride,
+      );
+    const commandSchema = z.object({
+      expectedRevision: z.number().int().nonnegative().optional(),
+      reason: z.string().trim().min(1).max(2000).optional(),
+    });
+    const context = (req: Request) => {
+      if (!req.authUserId) throw new Error('STUDY_DESTINATION_ACTOR_REASON_REQUIRED');
+      const body = commandSchema.parse(req.body ?? {}),
+        header = req.get('If-Match');
+      const expectedRevision =
+        header && /^(?:"[0-9]+"|[0-9]+)$/.test(header)
+          ? Number(header.replace(/"/g, ''))
+          : body.expectedRevision;
+      if (
+        header &&
+        (!/^(?:"[0-9]+"|[0-9]+)$/.test(header) ||
+          (body.expectedRevision !== undefined && body.expectedRevision !== expectedRevision))
+      )
+        throw new Error('STUDY_DESTINATION_PRECONDITION_REQUIRED');
+      if (!Number.isSafeInteger(expectedRevision))
+        throw new Error('STUDY_DESTINATION_PRECONDITION_REQUIRED');
+      return {
+        actorId: req.authUserId,
+        reason: z
+          .string()
+          .trim()
+          .min(1)
+          .max(2000)
+          .parse(req.get('X-Review-Reason') ?? body.reason),
+        expectedRevision: expectedRevision!,
+        correlationId: req.get('X-Correlation-Id'),
+      };
+    };
+    const decisionSchema = z
+      .object({
+        fingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+        authorities: z
+          .array(
+            z
+              .object({
+                origin: z.string().url().max(500),
+                authorityName: z.string().trim().min(1).max(200),
+                evidenceUrl: z.string().url().max(2000),
+                exceptionReason: z.string().trim().min(30).max(2000).optional(),
+              })
+              .strict(),
+          )
+          .min(1)
+          .max(100),
+      })
+      .strict();
     const listSchema = z.object({
-      q: z.string().trim().optional(),
-      region: z.string().trim().optional(),
+      q: z.string().trim().max(200).optional(),
+      region: z.string().trim().max(100).optional(),
+      missingCheck: z.enum(STUDY_DESTINATION_READINESS_KEYS).optional(),
       status: z.preprocess(
         (value) => (value === '' || value === 'ALL' || value === 'all' ? undefined : value),
         z.union([z.nativeEnum(StudyDestinationStatus), z.literal('NO_PROFILE')]).optional(),
@@ -78,6 +139,7 @@ export class StudyDestinationAdminRouter {
     const profileSchema = z
       .object({
         expectedUpdatedAt: z.string().datetime().optional(),
+        cityReferenceIds: z.array(z.string().uuid()).max(25).optional(),
         overviewAr: z.string().max(12000).nullable().optional(),
         overviewEn: z.string().max(12000).nullable().optional(),
         studySystemSummaryAr: z.string().max(12000).nullable().optional(),
@@ -108,6 +170,7 @@ export class StudyDestinationAdminRouter {
 
     router.get(
       '/',
+      guard('read'),
       asyncHandler(async (req: Request, res: Response) => {
         res.json(await studyDestinationUseCases.listAdmin(listSchema.parse(req.query)));
       }),
@@ -115,6 +178,7 @@ export class StudyDestinationAdminRouter {
 
     router.get(
       '/:iso2Code',
+      guard('read'),
       asyncHandler(async (req: Request, res: Response) => {
         res.json(await studyDestinationUseCases.getAdminByCountryIso2(req.params.iso2Code));
       }),
@@ -122,12 +186,20 @@ export class StudyDestinationAdminRouter {
 
     router.get(
       '/:iso2Code/relationships',
+      guard('read'),
       asyncHandler(async (req: Request, res: Response) => {
         const query = z
           .object({
             page: z.coerce.number().int().min(1).optional(),
             pageSize: z.coerce.number().int().min(1).max(50).optional(),
             locale: z.enum(['ar', 'en']).optional(),
+            universityCursor: z.string().max(2000).optional(),
+            scholarshipCursor: z.string().max(2000).optional(),
+            serviceCursor: z.string().max(2000).optional(),
+            courseCursor: z.string().max(2000).optional(),
+            programCursor: z.string().max(2000).optional(),
+            testPage: z.coerce.number().int().min(1).max(10000).optional(),
+            careerPage: z.coerce.number().int().min(1).max(10000).optional(),
           })
           .parse(req.query);
         res.json(
@@ -138,13 +210,17 @@ export class StudyDestinationAdminRouter {
 
     router.put(
       '/:iso2Code/profile',
+      guard('edit'),
       asyncHandler(async (req: Request, res: Response) => {
-        const { expectedUpdatedAt, ...input } = profileSchema.parse(req.body);
+        const command = context(req);
+        const { reason: _reason, expectedRevision: _revision, ...payload } = req.body;
+        const { expectedUpdatedAt, ...input } = profileSchema.parse(payload);
         res.json(
           await studyDestinationUseCases.upsertProfile(
             req.params.iso2Code,
             input,
             expectedUpdatedAt,
+            command,
           ),
         );
       }),
@@ -152,29 +228,39 @@ export class StudyDestinationAdminRouter {
 
     router.post(
       '/:iso2Code/submit-review',
+      guard('edit'),
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await studyDestinationUseCases.submitForReview(req.params.iso2Code));
+        res.json(await studyDestinationUseCases.submitForReview(req.params.iso2Code, context(req)));
       }),
     );
 
     router.post(
       '/:iso2Code/verify-source',
+      guard('verify'),
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await studyDestinationUseCases.verifySources(req.params.iso2Code));
+        const command = context(req);
+        const { reason: _reason, expectedRevision: _revision, ...decision } = req.body;
+        res.json(await studyDestinationUseCases.verifySources(req.params.iso2Code,
+            command,
+            decisionSchema.parse(decision),
+          ),
+        );
       }),
     );
 
     router.post(
       '/:iso2Code/publish',
+      guard('publish'),
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await studyDestinationUseCases.publish(req.params.iso2Code));
+        res.json(await studyDestinationUseCases.publish(req.params.iso2Code, context(req)));
       }),
     );
 
     router.post(
       '/:iso2Code/archive',
+      guard('publish'),
       asyncHandler(async (req: Request, res: Response) => {
-        res.json(await studyDestinationUseCases.archive(req.params.iso2Code));
+        res.json(await studyDestinationUseCases.archive(req.params.iso2Code, context(req)));
       }),
     );
 
@@ -184,7 +270,16 @@ export class StudyDestinationAdminRouter {
         return res.status(400).json({ error: 'Validation Error', details: validationError.issues });
       }
       if (err instanceof Error) {
-        if (err.message === 'STUDY_DESTINATION_VERSION_CONFLICT')
+        if (err.message === 'STUDY_DESTINATION_PRECONDITION_REQUIRED')
+          return res.status(428).json({ error: err.message });
+        if (err.message.includes('INDEPENDENT_'))
+          return res.status(403).json({ error: err.message });
+        if (
+          [
+            'STUDY_DESTINATION_VERSION_CONFLICT',
+            'STUDY_DESTINATION_REVIEW_FINGERPRINT_CONFLICT',
+          ].includes(err.message)
+        )
           return res.status(409).json({ error: err.message });
         const notFound = [
           'STUDY_DESTINATION_COUNTRY_NOT_FOUND',
