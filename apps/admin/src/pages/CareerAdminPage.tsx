@@ -29,10 +29,11 @@ export function CareerAdminPage() {
   const [countryCode, setCountryCode] = useState(''), [applicationDetail, setApplicationDetail] = useState<CareerApplicationDto | null>(null);
   const [studentMessage, setStudentMessage] = useState(''), [interviewAt, setInterviewAt] = useState('');
   const [reviewChecked, setReviewChecked] = useState(false), [sourceEvidence, setSourceEvidence] = useState(''), [evidenceExpiry, setEvidenceExpiry] = useState('');
+  const detailSequence = useRef(0);
   const sequence = useRef(0), mutation = useRef(false), intent = useRef<{ payload: string; key: string } | null>(null);
   const navigatePage = (value: number) => setParams(previous => { const next = new URLSearchParams(previous); next.set('page', String(value)); return next; });
   const load = useCallback(async () => {
-    const generation = ++sequence.current; setLoading(true); setNotice('');
+    const generation = ++sequence.current; setLoading(true); setNotice(''); setResult(null); setApplicationDetail(null);
     try {
       const query = new URLSearchParams({ page: String(page), pageSize: '20' });
       if (search && ['jobs','employers'].includes(tab)) query.set('search', search);
@@ -44,7 +45,15 @@ export function CareerAdminPage() {
     } catch { if (generation === sequence.current) setNotice(language === 'ar' ? 'تعذر التحميل؛ تحقق من صلاحية النطاق.' : 'Could not load this scope.'); }
     finally { if (generation === sequence.current) setLoading(false); }
   }, [tab, page, search, status, type, employerFilter, cityFilter, filterCountry, jobFilter, language]);
-  useEffect(() => { const timer = setTimeout(() => void load(),250); return () => { clearTimeout(timer); ++sequence.current; }; }, [load,reload]);
+  useEffect(() => { const timer = setTimeout(() => void load(),250); return () => { clearTimeout(timer); ++sequence.current; ++detailSequence.current; }; }, [load,reload]);
+  const inspectApplication = async(row: Row) => {
+    const request = ++detailSequence.current;
+    setApplicationDetail(null);
+    try {
+      const detail = await adminApiClient.request<CareerApplicationDto>(`/admin/careers/applications/${row.id}`);
+      if (request === detailSequence.current) setApplicationDetail(detail);
+    } catch { if (request === detailSequence.current) setNotice(c('تعذر فتح التفاصيل','Could not open details')); }
+  };
   const write = async(path: string, body: Record<string, unknown>, method = 'POST') => {
     if (mutation.current || reason.trim().length < 3) return;
     mutation.current = true; setBusy(true); setNotice('');
@@ -65,8 +74,11 @@ export function CareerAdminPage() {
     return data.data.map(row => ({ id: row.id, label: row.title, lifecycle: 'ACTIVE' }));
   };
   const edit = async(row: Row) => {
+    const generation = sequence.current;
+    try {
     let data: any = row;
     if (tab === 'jobs') data = await adminApiClient.request<CareerJobPostingDto>(`/admin/careers/jobs/${row.id}`);
+    if (generation !== sequence.current) return;
     const meta = data.metadata || {}, salary = data.salaryRange || {};
     setForm({ ...fresh(), ...Object.fromEntries(Object.entries(data).filter(([,v]) => typeof v === 'string')),
       titleEn: meta.localizedContent?.en?.title || '', descriptionEn: meta.localizedContent?.en?.description || '',
@@ -74,7 +86,8 @@ export function CareerAdminPage() {
       applicationDeadline: data.applicationDeadline ? new Date(data.applicationDeadline).toISOString().slice(0,16) : '',
       requiredSkills: (data.requiredSkills || []).join(','), salaryMin: salary.minMinorUnits || '', salaryMax: salary.maxMinorUnits || '',
       currencyCode: salary.currencyCode || 'USD', scale: String(salary.scale ?? 2), period: salary.period || 'MONTH', basis: salary.basis || 'GROSS' });
-    setCountryCode(''); setEditing(row); setEditor(true);
+    setCountryCode(''); setEditing(data); setEditor(true);
+    } catch { if (generation === sequence.current) setNotice(c('تعذر تحميل السجل','Could not load the record')); }
   };
   const save = (event: FormEvent) => {
     event.preventDefault();
@@ -113,7 +126,7 @@ export function CareerAdminPage() {
       {tab==='jobs' && hasPermission('admin:careers:publish') && <>{row.status==='READY_TO_PUBLISH' && <button disabled={busy} onClick={()=>void write(`jobs/${row.id}/publish`,{expectedVersion:row.version})}>{c('نشر','Publish')}</button>}{(row.status==='PUBLISHED') && <button disabled={busy} onClick={()=>void write(`jobs/${row.id}/unpublish`,{expectedVersion:row.version})}>{c('إلغاء النشر','Unpublish')}</button>}{row.status!=='ARCHIVED' && <button disabled={busy} onClick={()=>void write(`jobs/${row.id}/archive`,{expectedVersion:row.version})}>{c('أرشفة','Archive')}</button>}</>}
       {tab==='jobs' && ['READY_TO_REVIEW','READY_TO_PUBLISH'].includes(row.status||'') && hasPermission('admin:careers:review') && <button disabled={busy} onClick={()=>void write(`jobs/${row.id}/reject`,{expectedVersion:row.version})}>{c('رفض','Reject')}</button>}
       {tab==='employers' && hasPermission('admin:careers:employers:verify') && <><button disabled={busy||!reviewChecked||!sourceEvidence||!evidenceExpiry} onClick={()=>void write(`employers/${row.id}/verify`,{expectedVersion:row.version,sourceUrl:sourceEvidence,expiresAt:new Date(evidenceExpiry).toISOString()})}>{c('توثيق مستقل','Verify independently')}</button><button disabled={busy} onClick={()=>void write(`employers/${row.id}/suspend`,{expectedVersion:row.version})}>{c('تعليق','Suspend')}</button></>}
-      {tab==='applications' && <><button disabled={busy} onClick={()=>{setJobFilter(row.jobId||''); if(hasPermission('admin:careers:applications:pii')) void adminApiClient.request<CareerApplicationDto>(`/admin/careers/applications/${row.id}`).then(setApplicationDetail).catch(()=>setNotice(c('تعذر فتح التفاصيل','Could not open details')));}}>{c('التفاصيل','Details')}</button>{(row.status==='SUBMITTED'?['UNDER_REVIEW']:row.status==='UNDER_REVIEW'?['SHORTLISTED','REJECTED']:row.status==='SHORTLISTED'?['ACCEPTED','REJECTED']:[]).map(next=><button key={next} disabled={busy} onClick={()=>void write(`applications/${row.id}/review`,{expectedVersion:row.version,nextStatus:next,studentMessage,interviewAt:interviewAt?new Date(interviewAt).toISOString():undefined})}>{next}</button>)}</>}
+      {tab==='applications' && <><button disabled={busy} onClick={()=>{if(hasPermission('admin:careers:applications:pii')) void inspectApplication(row);}}>{c('التفاصيل','Details')}</button>{(row.status==='SUBMITTED'?['UNDER_REVIEW']:row.status==='UNDER_REVIEW'?['SHORTLISTED','REJECTED']:row.status==='SHORTLISTED'?['ACCEPTED','REJECTED']:[]).map(next=><button key={next} disabled={busy} onClick={()=>void write(`applications/${row.id}/review`,{expectedVersion:row.version,nextStatus:next,studentMessage,interviewAt:interviewAt?new Date(interviewAt).toISOString():undefined})}>{next}</button>)}</>}
     </li>)}</ul>
     <div className="flex gap-4"><button disabled={loading||page<=1} onClick={()=>navigatePage(page-1)}>{c('السابق','Previous')}</button><span>{page}</span><button disabled={loading||page>=(result?.totalPages||1)} onClick={()=>navigatePage(page+1)}>{c('التالي','Next')}</button><button onClick={()=>setReload(value=>value+1)}>{c('تحديث','Refresh')}</button></div>
     {tab==='jobs'||tab==='employers'?<label className="block"><input type="checkbox" checked={reviewChecked} onChange={event=>setReviewChecked(event.target.checked)} /> {c('راجعت المصدر والهوية ورابط التقديم والخصوصية والشروط','I reviewed source, identity, application destination, privacy and terms')}</label>:null}

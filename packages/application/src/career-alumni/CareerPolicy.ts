@@ -9,7 +9,8 @@ export function publishedCareerJob(job: CareerJobPostingDto): CareerJobPostingDt
 export function safeCareerUrl(value: string): string {
   let url: URL;
   try { url = new URL(value); } catch { throw new Error('CAREER_URL_INVALID'); }
-  const host = url.hostname.toLowerCase();
+  const host = url.hostname.toLowerCase().replace(/\.$/, '');
+  url.hostname = host;
   if (url.protocol !== 'https:' || url.username || url.password || url.port && url.port !== '443' ||
       !host.includes('.') || host === 'localhost' || /(?:\.local|\.localhost|\.internal)$/.test(host) ||
       /^[\d.]+$/.test(host) || host.includes(':')) throw new Error('CAREER_URL_INVALID');

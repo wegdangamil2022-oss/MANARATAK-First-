@@ -1,3 +1,5 @@
+> Current follow-up (2026-10-14): [Section 22 completion](SECTION_22_COMPLETION_2026-10-14.md), 38 lightweight tests and Node 22 compilation passed. CODE_CLOSED — RUNTIME_DEFERRED within the supported contracts. Historical preparation report below.
+
 # Section 22 / P21 — expedited source preparation
 
 Branch: `fix/codex-section-22-careers`. Started from the section-21 merge `e5efbbe240b90b7ecb0c05204d538fa407c53243`, with a clean working tree. The existing career domain, Prisma tables, canonical references, application state machine and public contracts were extended.

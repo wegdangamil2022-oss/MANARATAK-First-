@@ -52,7 +52,7 @@ export class PrismaCareerRepository implements ICareerRepository {
         const existing = await this.employers(tx).findUnique({ where: { id } });
         if (!existing || existing.version !== expectedVersion) throw new Error('CAREER_EMPLOYER_VERSION_CONFLICT');
         const governance = careerGovernance(existing);
-        const material = ['displayName', 'employerType', 'websiteUrl', 'countryReferenceId', 'cityReferenceId'].some(key => key in data && (data as any)[key] !== existing[key]);
+        const material = ['displayName', 'employerType', 'websiteUrl', 'countryReferenceId', 'cityReferenceId', 'industry', 'description', 'logoAssetId'].some(key => key in data && (data as any)[key] !== existing[key]);
         let metadata = existing.metadata;
         if (data.verificationStatus === 'VERIFIED') {
           const proof = careerGovernance({ metadata: data.metadata }).verification;
@@ -72,7 +72,7 @@ export class PrismaCareerRepository implements ICareerRepository {
     const { page, pageSize } = paging(filters.page, filters.pageSize);
     const where: any = { verificationStatus: filters.verificationStatus, employerType: filters.employerType, countryReferenceId: filters.countryReferenceId, ...(filters.search ? { OR: [{ displayName: { contains: filters.search, mode: 'insensitive' } }, { publicId: { contains: filters.search, mode: 'insensitive' } }] } : {}) };
     Object.keys(where).forEach(k => where[k] === undefined && delete where[k]);
-    const [rows,total] = await Promise.all([this.employers().findMany({ where, orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }], skip:(page-1)*pageSize, take:pageSize }), this.employers().count({where})]);
+    const [rows,total] = await this.prisma.$transaction(async tx => Promise.all([this.employers(tx).findMany({ where, orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }], skip:(page-1)*pageSize, take:pageSize }), this.employers(tx).count({where})]), { isolationLevel: 'RepeatableRead' });
     return { data: rows.map((r:any)=>this.mapEmployer(r)), total, page, pageSize, totalPages: Math.ceil(total/pageSize) };
   }
 
@@ -195,7 +195,7 @@ export class PrismaCareerRepository implements ICareerRepository {
       where.employer = { verificationStatus: CareerEmployerStatus.VERIFIED };
       where.OR = [{ applicationDeadline: null }, { applicationDeadline: { gt: new Date() } }];
     }
-    const [rows,total]=await Promise.all([this.jobs().findMany({where,include:{employer:true},orderBy:[{updatedAt:'desc'},{id:'asc'}],skip:(page-1)*pageSize,take:pageSize}),this.jobs().count({where})]);
+    const [rows,total]=await this.prisma.$transaction(async tx => Promise.all([this.jobs(tx).findMany({where,include:{employer:true},orderBy:[{updatedAt:'desc'},{id:'asc'}],skip:(page-1)*pageSize,take:pageSize}),this.jobs(tx).count({where})]), { isolationLevel: 'RepeatableRead' });
     return {data:rows.map((r:any)=>this.mapJob(r)),total,page,pageSize,totalPages:Math.ceil(total/pageSize)};
   }
 

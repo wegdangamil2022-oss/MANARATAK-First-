@@ -52,6 +52,12 @@ export class CareerEngagementUseCases {
   async assertCvForReview(id: string) {
     const row = await this.requireApplication(id);
     if (row.status === CareerApplicationStatus.WITHDRAWN) throw new Error('CAREER_ACCESS_DENIED');
+    await this.students.assertActiveStudent(row.studentReferenceId);
+    const consent = row.jobSnapshot;
+    const consentTime = Date.parse(String(consent?.cvConsentAt ?? ''));
+    if (consent?.consentActorStudentReferenceId !== row.studentReferenceId || !Number.isFinite(consentTime) || consentTime > Date.now())
+      throw new Error('CAREER_CV_CONSENT_REQUIRED');
+    if (!row.cvAssetId?.trim()) throw new Error('CAREER_APPLICATION_CV_REQUIRED');
     await assertAssetReferenceUsable(this.assetReferences, row.cvAssetId, { purpose: 'CAREER_APPLICATION_CV', allowedMimeTypePrefixes: ['application/pdf'], expectedOwnerId: row.studentReferenceId,
       allowedClassifications: Object.values(AssetSecurityClassification) });
     return row.cvAssetId;
