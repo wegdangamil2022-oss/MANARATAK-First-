@@ -1,3 +1,5 @@
+> Historical snapshot. Latest continuation: `workspace/reports/university-location-verification/2026-10-14/NEXT_CHAT_HANDOFF.md` (68 additional bindings; 274 remaining).
+
 # Geography corrections and university restoration — 2026-10-13
 
 > **Latest follow-up:** 188 further source bindings were applied after researching all 530 remaining rows; 117 city names changed and 123 locality rows were added. Current totals: 10,381 matched universities, 342 review universities and 10,574 cities. See [the primary-address follow-up report](../../university-location-verification/2026-10-13/README.md). The batch counts below describe the earlier 359-restoration snapshot, not the current inventory. Full factual verification remains incomplete.

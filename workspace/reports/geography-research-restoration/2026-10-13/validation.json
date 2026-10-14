@@ -3,34 +3,31 @@
     "result": "PASS",
     "countries": 194,
     "regions": 5003,
-    "cities": 10574,
+    "cities": 10610,
     "universities": 10723,
-    "sourceMatchedUniversities": 10381,
-    "reviewUniversities": 342,
+    "sourceMatchedUniversities": 10449,
+    "reviewUniversities": 274,
     "universityCityMismatches": 0,
     "scopedCityCollisions": 0,
     "countryCityCoverageGaps": 0
   },
   "targetedVitest": {
+    "result": "PASS",
     "files": 4,
     "tests": 35,
-    "result": "PASS",
-    "note": "34 passed in initial run; updated count expectation then re-ran the two preparation tests successfully.",
-    "nodeVersion": "24.19.0"
+    "nodeVersion": "24.19.0",
+    "note": "Passed after building local shared/domain/application packages."
   },
   "pythonIntegrityNegativeTests": {
-    "tests": 3,
-    "result": "PASS"
-  },
-  "historicalSnapshotVerification": {
-    "ecc5123d": "PASS",
-    "8a1bb4e6": "PASS"
+    "result": "PASS",
+    "tests": 3
   },
   "sourceQualityPrepare": "PASS",
   "sourceQualityReproduction": "PASS",
-  "factualCampusVerification": "INCOMPLETE; 342 unresolved rows; 43 applied decisions use primary-source search-index addresses",
+  "gitDiffCheck": "PASS",
+  "factualCampusVerification": "INCOMPLETE; 274 unresolved rows; this batch contains 29 explicitly labelled search-index primary-address decisions",
+  "factualCityRegionVerification": "INCOMPLETE; source joins pass; independent verification of all settlements and current administrative boundaries remains open",
+  "node22Verification": "NOT_RUN",
   "databaseWrites": 0,
-  "runtime": "RUNTIME_UNTESTED",
-  "factualCityRegionVerification": "INCOMPLETE; same-country joins and known corrections pass, but full independent verification of all settlements and current administrative boundaries remains open",
-  "node22Verification": "NOT_RUN; registry.npmjs.org/node and nodejs.org downloads returned HTTP 503"
+  "runtime": "RUNTIME_UNTESTED"
 }

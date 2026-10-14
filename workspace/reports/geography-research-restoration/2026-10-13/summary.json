@@ -48,24 +48,24 @@
       "path": "workspace/reference-data/cities/africa/MANARATAK_Africa_Cities_All_Combined.csv",
       "beforeSha256": "c3789f96cc41e4e560778e22f095dccbf3fa80e487de85a0722a164fe90694ad",
       "beforeRows": 1788,
-      "afterSha256": "ff482acc42c76f91e51d6f8a3a5db1871167dab195706b8c8bf5b7ea2beafc3e",
-      "afterRows": 1854
+      "afterSha256": "55d20099fd1093f2808c2baa6048bff3dc8042cdfc04333568b8b09f1b231214",
+      "afterRows": 1869
     },
     {
       "kind": "cities",
       "path": "workspace/reference-data/cities/americas/MANARATAK_Americas_Cities_All_Combined.csv",
       "beforeSha256": "d9708fe4fef4751060c7b349ce88c2d4ce5ef4772d72e335c3f76c354f8f7a44",
       "beforeRows": 2463,
-      "afterSha256": "9ca55883ab066006d51cc8cb30f8a7c412ba60bd1790f9fa97f8427650b445b8",
-      "afterRows": 2534
+      "afterSha256": "347a84110c8a2d906043badca5686f13b25e7d189e8d4d8e3210e4bac6cbb929",
+      "afterRows": 2540
     },
     {
       "kind": "cities",
       "path": "workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv",
       "beforeSha256": "7379dce0749e309cb5b23f41d86318db4c2c8af8bcfd6d8c1bcfe6ac94fe1773",
       "beforeRows": 3318,
-      "afterSha256": "764cef9f86d03496c41c24e2c57ea80161d3db35e01b3d87d812e269abdd8311",
-      "afterRows": 3428
+      "afterSha256": "789133a942995ea0b6a2fc8fdf0630f35ba076d3e8e7198dc2acab4af52c89aa",
+      "afterRows": 3443
     },
     {
       "kind": "cities",
@@ -87,42 +87,42 @@
       "kind": "universities",
       "path": "workspace/import-sources/universities/stage-1/Africa_Universities_Import_English_Complete_54_Countries(1).xlsx",
       "beforeSha256": "c02d6729195556d7a9ad3e60962fc9fb89e8b1a7b42915521ad28a227857d8ec",
-      "afterSha256": "f8496b4f7225499ef008680163e2e3658683c0f41ffd57c97c49174edde0474b"
+      "afterSha256": "825e841c669422fec3bdd2ed865ce355f844501f2b8a0fa0f334bf8b42ed0390"
     },
     {
       "kind": "universities",
       "path": "workspace/import-sources/universities/stage-1/Asia_Universities_Import_English_Complete_Asia.xlsx",
       "beforeSha256": "9a36739d2902d7dae85577cf5ec34d71cae36c8af229e5bd59f2ecab07cad873",
-      "afterSha256": "a50858dd0a75654ace2efa7c72ae4c2cd99b60395ca3941119436628709bb69f"
+      "afterSha256": "06d7cdcbf2bf9b1e011eb50b373da016abde751f8600d8e3f3b3cb8279077af5"
     },
     {
       "kind": "universities",
       "path": "workspace/import-sources/universities/stage-1/Europe_Universities_Import_English_Complete.xlsx",
       "beforeSha256": "dddc379c78d5f3d79ffc1cf1f3ea9dd097d2724d4edd7e6cf31f7f9465fbce3b",
-      "afterSha256": "141cc61387dfe1c6d5a55bf24eea659d8781a038a762b4734bd07d4f6d947efe"
+      "afterSha256": "82dc763db9f188b7227cfce91c6f7fa71d14f5611451897cc2aa71ab2731f797"
     },
     {
       "kind": "universities",
       "path": "workspace/import-sources/universities/stage-1/North_America_Universities_Import_English_23_Countries_COMPLETE.xlsx",
       "beforeSha256": "b941b9f412a1ccd8038c178319dfb104996ff0ee3f283aa29739effcad8cdbde",
-      "afterSha256": "6e6ff266f728525f926f8231e4e28592e5255ffde3a9aa5a5732822cb4e2c4c6"
+      "afterSha256": "13ec76903f708f24a260b11b3204020e6024ee609c71beea7d411f25d7aa9bf9"
     },
     {
       "kind": "universities",
       "path": "workspace/import-sources/universities/stage-1/Oceania_Universities_Import_English_14_Countries_COMPLETE.xlsx",
       "beforeSha256": "9b99d80d807052bfd224b972f5319d367c2c8d46b79d440e4647c5d31dd3ae19",
-      "afterSha256": "1246cb1fbab1e4473288823a695401e9b0c1126bc1a3c0d342e3404c026cc0ac"
+      "afterSha256": "2c345127d770f43f7758e23a79d2cdc13d37e7bb5429b085f573973039a0d4a8"
     },
     {
       "kind": "universities",
       "path": "workspace/import-sources/universities/stage-1/South_America_Universities_Import_English_12_Countries_COMPLETE.xlsx",
       "beforeSha256": "648350758b2c66540af4f69f0a6ecb401abb599e4e9332e15184a3564411d4a6",
-      "afterSha256": "2806f020a5acf7b08ff0ad5aba77b51cdeca3bc3e8e6afd6d520cf48a3c881af"
+      "afterSha256": "ba0aeb8876da0c791e21ca3bd130e833e579693f35cf03d13092122d4c97e194"
     }
   ],
   "databaseWrites": 0,
   "restorationsApplied": true,
-  "restoredUniversities": 547,
-  "remainingReviewUniversities": 342,
+  "restoredUniversities": 615,
+  "remainingReviewUniversities": 274,
   "originalUniversityRows": 10723
 }
