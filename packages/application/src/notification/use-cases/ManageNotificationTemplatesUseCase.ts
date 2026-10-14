@@ -19,11 +19,13 @@ export class ManageNotificationTemplatesUseCase {
       throw new Error('NOTIFICATION_CHANNEL_NOT_APPROVED');
     if (
       !dto.localizations.length ||
+      new Set(dto.localizations).size !== dto.localizations.length ||
       dto.localizations.some((locale) => !['ar', 'en'].includes(locale))
     )
       throw new Error('NOTIFICATION_LOCALE_NOT_SUPPORTED');
     if (
       dto.requiredVariables.length > 40 ||
+      new Set(dto.requiredVariables).size !== dto.requiredVariables.length ||
       dto.requiredVariables.some(
         (name) =>
           !/^[a-zA-Z][a-zA-Z0-9_]{0,119}$/.test(name) ||

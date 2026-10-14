@@ -93,10 +93,18 @@ export function NotificationOperationsPage() {
   } | null>(null);
   const [previewTemplateId, setPreviewTemplateId] = useState('');
   const [samples, setSamples] = useState('{}');
+  const previewGeneration = useRef(0), receiptGeneration = useRef(0);
+  const [previewBusy, setPreviewBusy] = useState(false);
+  useEffect(() => {
+    ++previewGeneration.current;
+    setPreview(null);
+    return () => { ++previewGeneration.current; };
+  }, [previewTemplateId, samples, language]);
   const guard = useRef(false),
     keys = useRef(new Map<string, string>()),
     generation = useRef(0);
   const can = (action: string) => hasPermission(`admin:notifications:${action}`);
+  const recipientLookupAllowed = can('intents:create') && can('recipients:pii');
   const selected = templates.find((t) => t.id === draft?.templateId);
   const date = (value?: string) =>
     value ? new Date(value).toLocaleString(language, { timeZone: 'UTC' }) + ' UTC' : '—';
@@ -120,6 +128,8 @@ export function NotificationOperationsPage() {
     const id = ++generation.current;
     setLoading(true);
     setNotice('');
+    setResult({ items: [] });
+    setReceipts(null);
     const query = new URLSearchParams({
       limit: '25',
       ...(cursor ? { cursor } : {}),
@@ -155,10 +165,12 @@ export function NotificationOperationsPage() {
       });
     return () => {
       ++generation.current;
+      ++receiptGeneration.current;
     };
   }, [cursor, search, state, filterTemplate, reload, language, fromDate, toDate, recipientFilter]);
   useEffect(() => {
     let active = true;
+    setSummary(null);
     const to = new Date(),
       from = new Date(to.getTime() - 86400000);
     adminApiClient
@@ -176,7 +188,9 @@ export function NotificationOperationsPage() {
     };
   }, [reload]);
   useEffect(() => {
-    if (!draft || !can('intents:create') || !can('recipients:pii')) return;
+    setRecipients([]);
+    setRecipientNext(null);
+    if (!draft || !recipientLookupAllowed) return;
     let active = true;
     const timer = setTimeout(() => {
       const query = new URLSearchParams({
@@ -205,7 +219,7 @@ export function NotificationOperationsPage() {
       active = false;
       clearTimeout(timer);
     };
-  }, [!!draft, recipientQuery, recipientCursor, language, hasPermission]);
+  }, [!!draft, recipientQuery, recipientCursor, language, recipientLookupAllowed]);
   useEffect(() => {
     const prevent = (e: BeforeUnloadEvent) => {
       if (draft || templateForm) {
@@ -612,10 +626,13 @@ export function NotificationOperationsPage() {
           </label>
           <button
             type="button"
-            disabled={busy || !previewTemplateId}
+            disabled={busy || previewBusy || !previewTemplateId}
             onClick={() => {
               try {
                 const variables = JSON.parse(samples);
+                const request = ++previewGeneration.current;
+                setPreview(null);
+                setPreviewBusy(true);
                 void adminApiClient
                   .request<typeof preview>(
                     `/notifications/templates/${encodeURIComponent(previewTemplateId)}/preview`,
@@ -625,8 +642,9 @@ export function NotificationOperationsPage() {
                       headers: { 'Idempotency-Key': createAdminIdempotencyKey() },
                     },
                   )
-                  .then(setPreview)
+                  .then((value) => { if (request === previewGeneration.current) setPreview(value); })
                   .catch(() => {
+                    if (request !== previewGeneration.current) return;
                     setPreview(null);
                     setNotice(
                       c(
@@ -634,7 +652,7 @@ export function NotificationOperationsPage() {
                         'Preview unavailable. Check the variables and content.',
                       ),
                     );
-                  });
+                  }).finally(() => setPreviewBusy(false));
               } catch {
                 setNotice(c('JSON غير صالح', 'Invalid JSON'));
               }
@@ -775,12 +793,15 @@ export function NotificationOperationsPage() {
                     <button
                       disabled={busy}
                       onClick={() => {
+                        const request = ++receiptGeneration.current;
+                        setReceipts(null);
                         void adminApiClient
                           .request<Page<Receipt>>(
                             `/notifications/intents/${encodeURIComponent(row.id)}/receipts`,
                           )
-                          .then((p) => setReceipts({ id: row.id, items: p.items }))
+                          .then((p) => { if (request === receiptGeneration.current) setReceipts({ id: row.id, items: p.items }); })
                           .catch(() => {
+                            if (request !== receiptGeneration.current) return;
                             setReceipts(null);
                             setNotice(c('تعذر تحميل المحاولات', 'Receipts could not be loaded'));
                           });
