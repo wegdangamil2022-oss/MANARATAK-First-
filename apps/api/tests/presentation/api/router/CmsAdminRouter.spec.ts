@@ -378,4 +378,43 @@ describe('Phase 16 CMS admin router', () => {
     expect(response.status).toBe(200);
     expect(cms.submitForReview).toHaveBeenCalledWith('content-1', 'ar', 'editor-1', 2, undefined);
   });
+  it('requires independent publication permission and a bounded reason to retire a live announcement', async () => {
+    const cms = useCases();
+    const path = '/cms/announcements/notice/archive';
+    const body = { expectedVersion: 2, reason: 'Retire public notice' };
+    for (const grants of [['admin:cms:view'], ['admin:cms:author'], ['admin:cms:review']])
+      expect(
+        (
+          await request(app(cms, 'limited', grants))
+            .post(path)
+            .send(body)
+        ).status,
+      ).toBe(403);
+    expect(cms.archiveAnnouncement).not.toHaveBeenCalled();
+    const publisher = app(cms, 'publisher', ['admin:cms:publish']);
+    for (const payload of [
+      { expectedVersion: 2 },
+      { ...body, reason: 'short' },
+      { ...body, reason: 'x'.repeat(1001) },
+      { ...body, expectedVersion: 0 },
+    ])
+      expect((await request(publisher).post(path).send(payload)).status).toBe(400);
+    expect(cms.archiveAnnouncement).not.toHaveBeenCalled();
+    cms.archiveAnnouncement.mockResolvedValue({ id: 'notice', status: 'ARCHIVED' });
+    expect(
+      (
+        await request(publisher)
+          .post(path)
+          .send({ ...body, actorId: 'spoofed' })
+      ).status,
+    ).toBe(200);
+    expect(cms.archiveAnnouncement).toHaveBeenCalledWith(
+      'notice',
+      2,
+      'publisher',
+      'Retire public notice',
+    );
+    cms.archiveAnnouncement.mockRejectedValue(new Error('CMS_VERSION_CONFLICT'));
+    expect((await request(publisher).post(path).send(body)).status).toBe(409);
+  });
 });

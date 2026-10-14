@@ -262,4 +262,25 @@ describe('Phase 16 CMS use cases', () => {
       'ar',
     );
   });
+  it('rejects unreasoned retirement before owner mutation and invalidates the site after valid retirement', async () => {
+    await expect(admin.archiveAnnouncement('notice', 2, 'publisher', 'short')).rejects.toThrow(
+      'CMS_ARCHIVE_REASON_REQUIRED',
+    );
+    expect(repository.archiveAnnouncement).not.toHaveBeenCalled();
+    const invalidateSite = vi.fn();
+    const service = new AdminCmsUseCases(repository, { invalidateSite } as any);
+    vi.mocked(repository.archiveAnnouncement).mockResolvedValue({
+      id: 'notice',
+      siteIdentifier: 'site',
+      status: CmsContentStatus.ARCHIVED,
+    } as any);
+    await service.archiveAnnouncement('notice', 2, 'publisher', 'Retire public notice');
+    expect(repository.archiveAnnouncement).toHaveBeenCalledWith(
+      'notice',
+      2,
+      'publisher',
+      'Retire public notice',
+    );
+    expect(invalidateSite).toHaveBeenCalledWith('site', 'announcement-archived');
+  });
 });

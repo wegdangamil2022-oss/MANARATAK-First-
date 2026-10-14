@@ -517,9 +517,12 @@ export class AdminCmsUseCases {
     id: string,
     expectedVersion: number,
     actorId: string,
+    reason: string,
   ): Promise<CmsAnnouncementDto> {
     this.ensureActor(actorId);
-    const result = await this.repository.archiveAnnouncement(id, expectedVersion, actorId);
+    if (!reason || reason.trim().length < 6 || reason.trim().length > 1000)
+      throw new Error('CMS_ARCHIVE_REASON_REQUIRED');
+    const result = await this.repository.archiveAnnouncement(id, expectedVersion, actorId, reason);
     await this.deliveryCache?.invalidateSite(result.siteIdentifier, 'announcement-archived');
     return result;
   }

@@ -198,6 +198,7 @@ export interface ICmsRepository {
     id: string,
     expectedVersion: number,
     actorId: string,
+    reason: string,
   ): Promise<CmsAnnouncementDto>;
   listFailedSchedules(
     siteIdentifier: string,

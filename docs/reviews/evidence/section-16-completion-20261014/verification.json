@@ -1,0 +1,59 @@
+{
+  "section": 16,
+  "sourceBaseline": "cb3c9b592b6722ee869a863c5640d62ceffe3fb5",
+  "node": "22.23.3",
+  "status": "CODE_CLOSED_RUNTIME_DEFERRED",
+  "vitest": {
+    "config": ".section16-vitest.config.ts",
+    "exitCode": 0,
+    "filesPassed": 28,
+    "testsPassed": 148,
+    "durationSeconds": 15.41,
+    "testExecutionSeconds": 1.41
+  },
+  "newTests": {
+    "repository": 21,
+    "reactInteractions": 7,
+    "httpBoundary": 1,
+    "applicationBoundary": 1,
+    "includedIn148": true
+  },
+  "initialFocused": {
+    "files": 4,
+    "passed": 59,
+    "failed": 3,
+    "cause": "Invalid publication fixture state APPROVED; corrected to canonical READY_TO_PUBLISH without changing production transition policy."
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "command": "tsc -b packages/infrastructure apps/api apps/admin --pretty false"
+  },
+  "eslint": {
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 21
+  },
+  "staticChecks": {
+    "phase16Passed": 20,
+    "cmsPassed": 20
+  },
+  "diffCheck": {
+    "exitCode": 0
+  },
+  "runtime": {
+    "databaseConnected": false,
+    "migrationsApplied": 0,
+    "workerStarted": false,
+    "browserE2E": false,
+    "liveProviderCalls": 0,
+    "deployment": false
+  },
+  "logs": {
+    "initial-focused.txt": "72f87c2e3ba3ba113467e62df801457cf19d6fe9bfe9ca4c5be3b9553dc13a54",
+    "cms-source.txt": "ca13af059df0ff680390d9966c1646fca551c9ed240c289341ad36ae589835a3",
+    "vitest.txt": "2aae6fbb635af96bc6ca5d0366d5f555437053e6344c3dca7112402bf159c22e",
+    "typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "eslint.txt": "502c7eebd12a0684179ca4cf7b3670b15037d3f93796f66c8133104de32cbfea",
+    "phase16-source.txt": "75e46af9b38179d50b7c75aaedef8069262b07e7f4ddb8444eb977bb0ad20a58"
+  }
+}

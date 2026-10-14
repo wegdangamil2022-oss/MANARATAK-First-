@@ -1,5 +1,7 @@
 # Section 16 — Enterprise CMS & Site Experience
 
+**Current source completion (14 October 2026):** [Section 16 completion](SECTION_16_COMPLETION_2026-10-14.md) records the five follow-up repairs on current main and 148 passing lightweight tests. The branch/baseline and executed checks below remain historical evidence; runtime remains deferred.
+
 **Status: CODE_CLOSED — RUNTIME_DEFERRED**
 **Branch:** `codex/section-16-cms`
 **Reviewed starting commit:** `9ee538cd7479357877d6c80b599487a5b9ee2f1a`

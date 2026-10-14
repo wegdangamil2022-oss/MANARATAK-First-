@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /workspace/manaratak
+
+ ❯ packages/infrastructure/tests/cms/CmsSection16Gaps.spec.ts (21 tests | 3 failed) 197ms
+     × refuses prohibited or invalid rights at the real publication boundary 64ms
+     × refuses prohibited or invalid rights at the real publication boundary 9ms
+     × refuses prohibited or invalid rights at the real publication boundary 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/infrastructure/tests/cms/CmsSection16Gaps.spec.ts > Section 16 owner publication and retirement boundaries > refuses prohibited or invalid rights at the real publication boundary
+ FAIL  packages/infrastructure/tests/cms/CmsSection16Gaps.spec.ts > Section 16 owner publication and retirement boundaries > refuses prohibited or invalid rights at the real publication boundary
+ FAIL  packages/infrastructure/tests/cms/CmsSection16Gaps.spec.ts > Section 16 owner publication and retirement boundaries > refuses prohibited or invalid rights at the real publication boundary
+AssertionError: expected [Function] to throw error including 'CMS_PUBLIC_MEDIA_ASSET_TRUST_EVIDENCE…' but got 'Cannot read properties of undefined (…'
+
+Expected: "CMS_PUBLIC_MEDIA_ASSET_TRUST_EVIDENCE_REQUIRED"
+Received: "Cannot read properties of undefined (reading 'includes')"
+
+ ❯ packages/infrastructure/tests/cms/CmsSection16Gaps.spec.ts:223:5
+    221|         expectedVersion: 4,
+    222|       }),
+    223|     ).rejects.toThrow('CMS_PUBLIC_MEDIA_ASSET_TRUST_EVIDENCE_REQUIRED'…
+       |     ^
+    224|     expect(tx.cmsPublishedContent.upsert).not.toHaveBeenCalled();
+    225|     expect(tx.cmsLocalizedContent.update).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  3 failed | 59 passed (62)
+   Start at  16:01:42
+   Duration  10.89s (transform 11.11s, setup 0ms, import 17.53s, tests 1.61s, environment 1ms)

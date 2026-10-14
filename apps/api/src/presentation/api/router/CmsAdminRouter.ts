@@ -679,12 +679,18 @@ export class CmsAdminRouter {
     router.post(
       '/announcements/:id/archive',
       asyncHandler(async (req, res) => {
-        const body = z.object({ expectedVersion: z.number().int().positive() }).parse(req.body);
+        const body = z
+          .object({
+            expectedVersion: z.number().int().positive(),
+            reason: z.string().trim().min(6).max(1000),
+          })
+          .parse(req.body);
         res.json(
           await adminCmsUseCases.archiveAnnouncement(
             req.params.id,
             body.expectedVersion,
             actor(req),
+            body.reason,
           ),
         );
       }),

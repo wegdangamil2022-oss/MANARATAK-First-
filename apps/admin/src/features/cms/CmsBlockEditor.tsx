@@ -294,6 +294,7 @@ export function CmsBlockEditor({
           {ar ? 'المخطط المعتمد' : 'Approved schema'}
           <select
             value={draft.schemaId}
+            disabled={Boolean(draft.id)}
             onChange={(event) => {
               const next = schemas.find((item) => item.id === event.target.value)!;
               setDraft({

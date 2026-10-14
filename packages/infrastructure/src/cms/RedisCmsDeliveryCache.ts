@@ -10,33 +10,73 @@ interface RedisCmsClient {
 }
 
 export class RedisCmsDeliveryCache implements ICmsDeliveryCache {
-  public constructor(private readonly client: RedisCmsClient, private readonly ttlSeconds = 300) {}
+  public constructor(
+    private readonly client: RedisCmsClient,
+    private readonly ttlSeconds = 300,
+  ) {}
 
-  public async getPublished(siteIdentifier: string, locale: string, slug: string): Promise<PublicCmsContentDto | null> {
+  public async getPublished(
+    siteIdentifier: string,
+    locale: string,
+    slug: string,
+  ): Promise<PublicCmsContentDto | null> {
     if (!this.client.isReady) return null;
     try {
       const value = await this.client.get(await this.contentKey(siteIdentifier, locale, slug));
       return value ? (JSON.parse(value) as PublicCmsContentDto) : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   public async setPublished(content: PublicCmsContentDto): Promise<void> {
     if (!this.client.isReady) return;
-    try { await this.client.set(await this.contentKey(content.siteIdentifier, content.locale, content.slug), JSON.stringify(content), { EX: this.ttlSeconds }); }
-    catch { /* Public delivery falls back to the relational projection. */ }
+    try {
+      await this.client.set(
+        await this.contentKey(content.siteIdentifier, content.locale, content.slug),
+        JSON.stringify(content),
+        { EX: this.ttlSeconds },
+      );
+    } catch {
+      /* Public delivery falls back to the relational projection. */
+    }
   }
 
   public async invalidateSite(siteIdentifier: string, reason: string): Promise<void> {
-    if (!this.client.isReady) return;
+    if (!this.client.isReady) {
+      console.warn('CMS_CACHE_INVALIDATION_UNAVAILABLE', {
+        strategy: 'CANONICAL_OWNER_READ_WITH_TTL',
+        ttlSeconds: this.ttlSeconds,
+      });
+      return;
+    }
     try {
       await this.client.incr(this.versionKey(siteIdentifier));
-      await this.client.publish(this.client.buildKey('cms-events', encodeURIComponent(siteIdentifier)), JSON.stringify({ type: 'CmsDeliveryInvalidated', siteIdentifier, reason, occurredAt: new Date().toISOString() }));
-    } catch { /* Invalidation is fail-open; the short TTL remains a safety net. */ }
+      await this.client.publish(
+        this.client.buildKey('cms-events', encodeURIComponent(siteIdentifier)),
+        JSON.stringify({
+          type: 'CmsDeliveryInvalidated',
+          siteIdentifier,
+          reason,
+          occurredAt: new Date().toISOString(),
+        }),
+      );
+    } catch {
+      // Canonical public owner reads are authoritative. Redis is an optimization
+      // with bounded TTL, not a claim of CDN purge or durable dispatch.
+      console.warn('CMS_CACHE_INVALIDATION_FAILED', {
+        strategy: 'CANONICAL_OWNER_READ_WITH_TTL',
+        ttlSeconds: this.ttlSeconds,
+      });
+    }
   }
 
   private async contentKey(siteIdentifier: string, locale: string, slug: string): Promise<string> {
     const version = (await this.client.get(this.versionKey(siteIdentifier))) ?? '0';
-    return this.client.buildKey('cms-delivery', `${encodeURIComponent(siteIdentifier)}:${version}:${encodeURIComponent(locale)}:${encodeURIComponent(slug)}`);
+    return this.client.buildKey(
+      'cms-delivery',
+      `${encodeURIComponent(siteIdentifier)}:${version}:${encodeURIComponent(locale)}:${encodeURIComponent(slug)}`,
+    );
   }
 
   private versionKey(siteIdentifier: string): string {
