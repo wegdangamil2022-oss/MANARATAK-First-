@@ -44,8 +44,8 @@ def apply(additional_decisions=None):
             raise ValueError('Missing decision evidence')
         if place.get('existingCityId'):
             city = cities[place['existingCityId']]
-            if city['countryIso3'] != decision['countryIso3']:
-                raise ValueError('Cross-country source decision')
+            if city['countryIso3'] != decision['countryIso3'] or city['regionCode'] != place['regionCode']:
+                raise ValueError('Existing city country/region conflicts with reviewed decision')
             return city
         name, code = decision['name'], place['regionCode']
         candidates = [city for city in cities.values() if city['countryIso3'] == decision['countryIso3'] and city['regionCode'] == code and norm(name) in {norm(city[k]) for k in ('cityNameEn', 'cityAscii', 'localName')} | {norm(a) for a in city['cityAliases'].split('|') if a}]
@@ -116,8 +116,12 @@ def apply(additional_decisions=None):
             decision = decisions.get(ref)
             if decision:
                 city = bind_city(decision)
+                review_reason = {
+                    'USER_CITY_AND_ROR_REGISTRY_CORROBORATED': 'REGISTRY_CITY_CORROBORATED_MAIN_CAMPUS_NOT_LIVE_VERIFIED',
+                    'SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED': 'PRIMARY_ADDRESS_SEARCH_INDEX_NOT_LIVE_VERIFIED',
+                }.get(decision['method'])
                 row.update({'City': city['cityNameEn'], 'City Source ID': city['cityId'], 'City Region Code': city['regionCode'], 'Geography Status': 'SOURCE_MATCHED',
-                            'Geography Review Reason': 'REGISTRY_CITY_CORROBORATED_MAIN_CAMPUS_NOT_LIVE_VERIFIED' if decision['method'] == 'USER_CITY_AND_ROR_REGISTRY_CORROBORATED' else None})
+                            'Geography Review Reason': review_reason})
                 active.append([row.get(header) for header in active_headers])
                 university_changes.append({'referenceId': ref, 'action': 'RESTORE_CORROBORATED_LOCALITY', 'before': original, 'after': row, 'afterSheet': active.title,
                                            'citySourceId': city['cityId'], 'method': decision['method'], 'scope': decision['scope'], 'source': decision['source'], 'addressExcerpt': decision.get('addressExcerpt'),

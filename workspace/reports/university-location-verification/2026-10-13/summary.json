@@ -1,0 +1,38 @@
+{
+  "baseCommit": "0f708407660638d62f823da49e6615d53ed4c613",
+  "researchedUniversityRows": 530,
+  "loggedSearchQueries": 1466,
+  "appliedUniversities": 188,
+  "changedCityNames": 117,
+  "addedCityRows": 123,
+  "before": {
+    "universities": 10723,
+    "sourceMatchedUniversities": 10193,
+    "reviewUniversities": 530,
+    "cities": 10451
+  },
+  "after": {
+    "universities": 10723,
+    "sourceMatchedUniversities": 10381,
+    "reviewUniversities": 342,
+    "cities": 10574,
+    "countries": 194,
+    "regions": 5003
+  },
+  "evidenceKinds": {
+    "LIVE_HTTP_PRIMARY_ADDRESS": 145,
+    "SEARCH_INDEX_PRIMARY_ADDRESS": 43
+  },
+  "pendingDispositions": {
+    "HOLD_ADDITIONAL_PRIMARY_LOCALITY_OR_REGION_REVIEW": 317,
+    "HOLD_CONFLICTING_OR_MULTICAMPUS_LOCATION": 6,
+    "HOLD_CURRENT_ADMINISTRATIVE_REGION_EVIDENCE": 6,
+    "HOLD_COUNTRY_TERRITORY_SCOPE": 5,
+    "HOLD_COUNTRY_REGISTRY_POLICY": 8
+  },
+  "fullFactualCampusVerification": "INCOMPLETE; 342 rows remain unresolved; 43 applied decisions use primary search-index addresses rather than new live page verification.",
+  "databaseWrites": 0,
+  "deployment": false,
+  "universitiesUsingExistingCities": 63,
+  "universitiesUsingAddedCities": 125
+}

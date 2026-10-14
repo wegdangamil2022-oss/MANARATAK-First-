@@ -3,25 +3,23 @@
     "result": "PASS",
     "countries": 194,
     "regions": 5003,
-    "cities": 10451,
+    "cities": 10574,
     "universities": 10723,
-    "sourceMatchedUniversities": 10193,
-    "reviewUniversities": 530,
-    "missingCountryCityCoverage": 0,
+    "sourceMatchedUniversities": 10381,
+    "reviewUniversities": 342,
+    "universityCityMismatches": 0,
     "scopedCityCollisions": 0,
-    "fuzzyRegionLinks": 0,
-    "activeUniversityCityMismatches": 0
+    "countryCityCoverageGaps": 0
   },
   "targetedVitest": {
     "files": 4,
     "tests": 35,
     "result": "PASS",
-    "nodeVersion": "22.23.3"
+    "note": "34 passed in initial run; updated count expectation then re-ran the two preparation tests successfully.",
+    "nodeVersion": "24.19.0"
   },
   "pythonIntegrityNegativeTests": {
-    "currentBatch": 3,
-    "historicalAlignment": 3,
-    "historicalResearch": 3,
+    "tests": 3,
     "result": "PASS"
   },
   "historicalSnapshotVerification": {
@@ -30,8 +28,9 @@
   },
   "sourceQualityPrepare": "PASS",
   "sourceQualityReproduction": "PASS",
-  "factualCampusVerification": "INCOMPLETE; 530 source review cases and 214 registry-corroborated city scope limits are explicit",
+  "factualCampusVerification": "INCOMPLETE; 342 unresolved rows; 43 applied decisions use primary-source search-index addresses",
   "databaseWrites": 0,
   "runtime": "RUNTIME_UNTESTED",
-  "factualCityRegionVerification": "INCOMPLETE; same-country joins and known corrections pass, but full independent verification of all settlements and current administrative boundaries remains open"
+  "factualCityRegionVerification": "INCOMPLETE; same-country joins and known corrections pass, but full independent verification of all settlements and current administrative boundaries remains open",
+  "node22Verification": "NOT_RUN; registry.npmjs.org/node and nodejs.org downloads returned HTTP 503"
 }

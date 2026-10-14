@@ -1,0 +1,31 @@
+{
+  "sourceIntegrity": {
+    "result": "PASS",
+    "countries": 194,
+    "regions": 5003,
+    "cities": 10574,
+    "universities": 10723,
+    "sourceMatchedUniversities": 10381,
+    "reviewUniversities": 342,
+    "universityCityMismatches": 0,
+    "scopedCityCollisions": 0,
+    "countryCityCoverageGaps": 0
+  },
+  "pythonIntegrityNegativeTests": {
+    "tests": 3,
+    "result": "PASS"
+  },
+  "targetedVitest": {
+    "files": 4,
+    "tests": 35,
+    "result": "PASS",
+    "note": "34 passed in initial run; updated count expectation then re-ran the two preparation tests successfully.",
+    "nodeVersion": "24.19.0"
+  },
+  "sourceQualityPrepare": "PASS",
+  "sourceQualityReproduction": "PASS",
+  "node22Verification": "NOT_RUN; registry.npmjs.org/node and nodejs.org downloads returned HTTP 503",
+  "factualCampusVerification": "INCOMPLETE; 342 unresolved rows; 43 applied decisions use primary-source search-index addresses",
+  "databaseWrites": 0,
+  "runtime": "RUNTIME_UNTESTED"
+}

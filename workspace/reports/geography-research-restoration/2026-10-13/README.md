@@ -1,5 +1,7 @@
 # Geography corrections and university restoration — 2026-10-13
 
+> **Latest follow-up:** 188 further source bindings were applied after researching all 530 remaining rows; 117 city names changed and 123 locality rows were added. Current totals: 10,381 matched universities, 342 review universities and 10,574 cities. See [the primary-address follow-up report](../../university-location-verification/2026-10-13/README.md). The batch counts below describe the earlier 359-restoration snapshot, not the current inventory. Full factual verification remains incomplete.
+
 The user authorized city and region additions, corrections and removals and requested research of all 889 excluded university rows. This batch returns all **10,723 institutions** to the original six workbooks: **10,193** have a source city binding, and **530** remain visible in `Geography Review`. No institution was deleted to improve a matching percentage.
 
 ## Cities and regions
