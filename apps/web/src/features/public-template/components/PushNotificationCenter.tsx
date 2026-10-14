@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState } from 'react';
 import { useOverlayDialog } from '../useOverlayDialog';
 import { PushNotificationItem } from '../types';
@@ -45,11 +46,11 @@ const typeIcon = (notification: PushNotificationItem) => {
 };
 
 const FILTERS: Array<{ id: NotificationFilter; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-  { id: 'all', label: 'الكل', icon: Bell },
-  { id: 'urgent', label: 'عاجل', icon: AlertTriangle },
-  { id: 'opportunity', label: 'فرص', icon: GraduationCap },
-  { id: 'deadline', label: 'مواعيد', icon: Clock },
-  { id: 'course', label: 'دورات', icon: BookOpen },
+  { id: 'all', label: "public_all", icon: Bell },
+  { id: 'urgent', label: "public_urgent", icon: AlertTriangle },
+  { id: 'opportunity', label: "public_opportunities", icon: GraduationCap },
+  { id: 'deadline', label: "public_deadlines", icon: Clock },
+  { id: 'course', label: "public_courses_2", icon: BookOpen },
 ];
 
 export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
@@ -63,6 +64,8 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
   activeToast,
   onDismissToast,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   useOverlayDialog(isOpen, onClose, 'mn-notification-dialog');
   const [filter, setFilter] = useState<NotificationFilter>('all');
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -81,11 +84,11 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
               </span>
               <button
                 type="button"
-                className="min-w-0 flex-1 text-right cursor-pointer"
+                className="min-w-0 flex-1 text-start cursor-pointer"
                 onClick={() => { onSelectAction?.(activeToast.actionType, activeToast.targetId); onDismissToast(); }}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-bold text-[#D6A43B] dark:text-[#F3CE74]">منارتك · تنبيه فوري</span>
+                  <span className="text-[11px] font-bold text-[#D6A43B] dark:text-[#F3CE74]">{publicT('public_manaratak_instant_notification')}</span>
                   <span className="text-[10px] text-[var(--mn-text-muted)]">{activeToast.timestamp}</span>
                 </div>
                 <h4 className="mt-0.5 text-xs font-bold leading-snug text-[var(--mn-heading)]">{notificationTitle(activeToast.title)}</h4>
@@ -95,7 +98,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                 type="button"
                 onClick={onDismissToast}
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)] cursor-pointer"
-                aria-label="إغلاق التنبيه"
+                aria-label={publicT('public_close_notification')}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -111,13 +114,13 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
           onKeyDown={(event) => { if (event.key === 'Escape') onClose(); }}
           onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
           className="fixed inset-0 z-[80] flex items-start justify-center pt-2 sm:pt-8 pb-4 px-2 sm:px-4 bg-black/60 backdrop-blur-xs font-['Cairo',sans-serif]"
-          dir="rtl"
+          dir={publicDir}
         >
           <div
             id="mn-notification-dialog"
             role="dialog"
             aria-modal="true"
-            aria-label="مركز التنبيهات"
+            aria-label={publicT('public_notification_center')}
             tabIndex={-1}
             className="flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-[#D6A43B]/40 bg-[var(--mn-surface)] dark:bg-[#0c1a3b] shadow-2xl transition-all"
           >
@@ -132,15 +135,14 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                 </span>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-bold text-white tracking-wide">مركز التنبيهات</h2>
-                    <span className="text-xs" data-source="prototype">محاكاة تجريبية / Prototype simulation</span>
+                    <h2 className="text-sm font-bold text-white tracking-wide">{publicT('public_notification_center')}</h2>
+                    <span className="text-xs" data-source="prototype">{publicT('public_prototype_simulation')}</span>
                     {unreadCount > 0 && (
                       <span className="rounded-full bg-gradient-to-r from-[#B8841B] to-[#E2B040] px-2 py-0.5 text-[11px] font-bold text-[#0E1F44] shadow-xs">
-                        {unreadCount} جديد
-                      </span>
+                        {unreadCount}{' '}{publicT('public_new')}</span>
                     )}
                   </div>
-                  <p className="text-[11px] text-white/70 font-medium mt-0.5">منح، جامعات، دورات ومواعيد مهمة</p>
+                  <p className="text-[11px] text-white/70 font-medium mt-0.5">{publicT('public_scholarships_universities_courses_and_important_deadlines')}</p>
                 </div>
               </div>
 
@@ -149,14 +151,14 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                   type="button"
                   onClick={() => setSoundEnabled((value) => !value)}
                   className="flex h-9 w-9 items-center justify-center rounded-xl text-white/80 hover:text-white hover:bg-white/15 transition cursor-pointer"
-                  aria-label={soundEnabled ? 'كتم صوت التنبيهات' : 'تفعيل صوت التنبيهات'}
-                  title={soundEnabled ? 'صوت التنبيهات مفعل' : 'صوت التنبيهات صامت'}
+                  aria-label={soundEnabled ? publicT('public_mute_notifications') : publicT('public_enable_notification_sound')}
+                  title={soundEnabled ? publicT('public_notification_sound_enabled') : publicT('public_notification_sound_muted')}
                 >
                   {soundEnabled ? <Volume2 className="h-4 w-4 text-[#F3CE74]" /> : <VolumeX className="h-4 w-4" />}
                 </button>
                 <button
                   type="button"
-                  aria-label="إغلاق"
+                  aria-label={publicT('public_close')}
                   onClick={onClose}
                   className="flex h-9 w-9 items-center justify-center rounded-xl text-white/80 hover:text-white hover:bg-white/15 transition cursor-pointer"
                 >
@@ -184,7 +186,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                     }`}
                   >
                     <Icon className={`h-3.5 w-3.5 ${isSelected ? 'text-[#F3CE74]' : 'text-[var(--mn-text-muted)]'}`} />
-                    <span data-mn-design="28bfae757f">{item.label}</span>
+                    <span data-mn-design="28bfae757f">{publicT(item.label)}</span>
                   </button>
                 );
               })}
@@ -193,9 +195,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
             {/* Notifications List - Unified, consistent, elegant cards */}
             <div className="flex-1 space-y-3 overflow-y-auto p-3.5 sm:p-4">
               {filteredNotifications.length === 0 ? (
-                <div className="py-16 text-center text-xs text-[var(--mn-text-muted)] font-medium">
-                  لا توجد تنبيهات في هذا التصنيف حاليًا.
-                </div>
+                <div className="py-16 text-center text-xs text-[var(--mn-text-muted)] font-medium">{publicT('public_there_are_currently_no_notifications_in_this_category')}</div>
               ) : (
                 filteredNotifications.map((notification) => {
                   const Icon = typeIcon(notification);
@@ -211,7 +211,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                           onClose();
                         }
                       }}
-                      className={`w-full rounded-2xl border p-3.5 text-right transition cursor-pointer relative overflow-hidden group ${
+                      className={`w-full rounded-2xl border p-3.5 text-start transition cursor-pointer relative overflow-hidden group ${
                         isUnread
                           ? 'border-[var(--mn-accent)]/50 bg-gradient-to-br from-[#FFFDF9] to-[#FBF7EE] dark:from-[#132347] dark:to-[#0f1c3a] shadow-xs'
                           : 'border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] dark:bg-[#11203d]/60 hover:border-[#D6A43B]/40 shadow-xs'
@@ -249,7 +249,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                           {notification.actionType && (
                             <div className="mt-2.5 flex items-center justify-start">
                               <span data-mn-design="88a8f9d359" className="inline-flex items-center gap-1 text-[11px] font-bold text-[#D6A43B] dark:text-[#F3CE74] group-hover:translate-x-[-2px] transition-transform">
-                                <span>عرض التفاصيل</span>
+                                <span>{publicT('public_view_details')}</span>
                                 <ChevronLeft className="h-3.5 w-3.5" />
                               </span>
                             </div>
@@ -257,7 +257,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
                         </div>
 
                         {isUnread && (
-                          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#D6A43B] ring-2 ring-[#D6A43B]/30" aria-label="غير مقروء" />
+                          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#D6A43B] ring-2 ring-[#D6A43B]/30" aria-label={publicT('public_unread')} />
                         )}
                       </div>
                     </button>

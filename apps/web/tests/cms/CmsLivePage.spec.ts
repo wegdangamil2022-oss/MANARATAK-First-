@@ -45,10 +45,16 @@ describe('CMS progressive HTML and owner SEO', () => {
   it('uses distinct published translated slugs and rejects canonical mismatch', () => {
     const item = article();
     item.cmsSeo!.availableLocales.push({ locale: 'en', slug: 'english-news' });
-    expect(cmsArticleSeoProjection(item, 'https://manaratak.example')?.alternates[1].href).toBe(
-      'https://manaratak.example/en/news/english-news',
-    );
+    expect(cmsArticleSeoProjection(item, 'https://manaratak.example')?.alternates).toEqual([
+      {locale:'ar',href:'https://manaratak.example/ar/news/news'},
+    ]);
     item.canonicalUrl = '/ar/news/old';
     expect(cmsArticleSeoProjection(item, 'https://manaratak.example')).toBeNull();
   });
+  it('never indexes a gated English CMS page even with a published owner locale',()=>{
+    const item=article();item.cmsSeo!.locale='en';item.cmsSeo!.noIndex=false;
+    item.canonicalUrl='/en/news/news';
+    expect(cmsArticleSeoProjection(item,'https://manaratak.example')?.robots).toBe('noindex,nofollow');
+  });
+
 });

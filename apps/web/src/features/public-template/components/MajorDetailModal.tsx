@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { PublishedMajorSections } from './PublishedMajorSections';
 import {
@@ -71,6 +72,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
   searchAnchor,
   searchTerm,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   useDetailSearchTarget(searchAnchor, searchTerm);
   // Determine degree level
   const isFellowship =
@@ -226,12 +229,12 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
   const alertPoints = major.academicAlertPoints || [
     {
       num: '١',
-      title: 'ممارسة المهنة والتراخيص',
+      title: publicT('public_professional_practice_and_licensing'),
       desc: 'الحصول على الدرجة الطبية الأولى لا يمنح الحق في الممارسة المستقلة مباشرة؛ بل يتطلب إتمام سنة الامتياز واجتياز اختبارات مزاولة المهنة والتسجيل في الهيئة الصحية المعنية.',
     },
     {
       num: '٢',
-      title: 'ألقاب الاختصاص والجراحة',
+      title: publicT('public_specialist_and_surgical_titles'),
       desc: 'حمل لقب طبيب اختصاصي أو جرّاح يتطلب الالتحاق ببرنامج إقامة طبية (Residency) وتدريب سريري تخصصي بعد التخرج من كلية الطب.',
     },
   ];
@@ -245,7 +248,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto pt-0 pb-12 text-right font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--mn-page)] min-h-screen relative ">
+    <div className="w-full max-w-md mx-auto pt-0 pb-12 text-start font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--mn-page)] min-h-screen relative ">
       {/* 1. TOP HERO CONTAINER */}
       <div className="relative w-full overflow-hidden">
         {/* Close & Favorite Buttons Side-by-Side on Top-Left */}
@@ -309,7 +312,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
           <div
             className="absolute inset-0 flex items-center justify-between px-3.5 sm:px-5 pt-1 pb-4 z-10 -mt-2 sm:-mt-2.5"
-            dir="rtl"
+            dir={publicDir}
           >
             {/* Right Side: Glowing Gold Graduation Badge + Arrow + Title & Tag */}
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -359,11 +362,11 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-accent-text)] shrink-0 opacity-90 drop-shadow-[0_0_4px_rgba(214,164,59,0.4)]" />
 
               {/* Title (e.g. الطب والجراحة) and underneath: Degree Tag (e.g. برنامج بكالوريوس طبي) */}
-              <div className="flex flex-col text-right min-w-0 flex-1 pr-1 pl-18 sm:pl-20">
+              <div className="flex flex-col text-start min-w-0 flex-1 pr-1 pl-18 sm:pl-20">
                 <h1 className="text-sm sm:text-base font-bold text-white leading-snug truncate drop-shadow-md">
                   {major.name}
                 </h1>
-                <p dir="ltr" className="text-[10px] text-white/85 text-right">{major.nameEn}</p>
+                <p dir="ltr" className="text-[10px] text-white/85 text-start">{major.nameEn}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="text-[9.5px] sm:text-[10px] font-bold text-white px-1.5 py-0.5 rounded bg-white/15 backdrop-blur-xs border border-white/25">
                     {getDegreeTag()}
@@ -382,7 +385,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
         <FellowshipDetailView major={major} onOpenMajor={onOpenMajor} />
       ) : (
         /* MAIN CONTENT WRAPPER (Bordered full-width cards touching side edges) */
-        <div className="px-0 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3" dir="rtl">
+        <div className="px-0 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3" dir={publicDir}>
           {/* 1. BASIC MAJOR INFORMATION CARD */}
           <div className="relative w-full bg-[var(--mn-surface)] rounded-none border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
             {/* Top Green Accent Line */}
@@ -392,17 +395,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               id="major-requirements"
               icon={BookOpen}
               className="px-3.5 pt-3.5 pb-2.5"
-              title={`1. ${isDoctorate ? 'معلومات تخصص الدكتوراه الأساسية' : isMaster ? 'معلومات تخصص الماجستير الأساسية' : 'معلومات التخصص الأساسية'}`}
+              title={`1. ${isDoctorate ? publicT('public_basic_doctoral_specialization_information') : isMaster ? publicT('public_basic_masters_specialization_information') : publicT('public_basic_major_information')}`}
             />
 
             {/* Table Header Row */}
             <div className="grid grid-cols-12 bg-[var(--mn-surface-muted)] border-y border-[var(--mn-border)] py-2.5 px-3.5 sm:px-4 items-center">
-              <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] text-right">
-                البند
-              </div>
-              <div className="col-span-8 text-[12px] font-bold text-[var(--mn-heading)] text-right">
-                التفاصيل
-              </div>
+              <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] text-start">{publicT('public_item')}</div>
+              <div className="col-span-8 text-[12px] font-bold text-[var(--mn-heading)] text-start">{publicT('public_details_2')}</div>
             </div>
 
             {/* Table Body Rows */}
@@ -410,9 +409,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               {/* Reference Code */}
               {major.code && (
                 <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-                    الرمز المرجعي
-                  </div>
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_reference_code')}</div>
                   <div className="col-span-8 text-[11px] font-bold text-[var(--mn-text)] font-mono tracking-wider">
                     {major.code}
                   </div>
@@ -421,17 +418,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
               {/* Arabic Name */}
               <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-                  الاسم بالعربية
-                </div>
+                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_arabic_name')}</div>
                 <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)]">{major.name}</div>
               </div>
 
               {/* Name in English */}
               <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-                  الاسم بالإنجليزية
-                </div>
+                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_english_name')}</div>
                 <div className="col-span-8 text-[11px] font-bold text-[var(--mn-accent-text)] font-['Cairo',sans-serif] tracking-wide">
                   {major.nameEn}
                 </div>
@@ -441,7 +434,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               {major.associatedMajor && (
                 <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
                   <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-                    {isDoctorate ? 'التخصص الأساسي المرتبط' : 'التخصص المرتبط'}
+                    {isDoctorate ? publicT('public_related_primary_major') : publicT('public_related_major')}
                   </div>
                   <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
                     {major.associatedMajor}
@@ -452,21 +445,14 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               {/* Master Majoring Links for PhD */}
               {isDoctorate && (
                 <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-                    تخصصات الماجستير المرتبطة
-                  </div>
-                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
-                    MAS-0001 — العلوم الطبية، مع إمكان الارتباط بالعلوم الطبية الحيوية والبحوث
-                    السريرية
-                  </div>
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_related_masters_specializations')}</div>
+                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">{publicT('public_mas_0001_medical_sciences_with_potential_links_to')}</div>
                 </div>
               )}
 
               {/* College / Academic Field */}
               <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-                  المجال الأكاديمي
-                </div>
+                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_academic_domain')}</div>
                 <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)]">
                   {major.academicField || major.category}
                 </div>
@@ -474,9 +460,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
               {/* Degree Level */}
               <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-                  مستوى الدرجة
-                </div>
+                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_degree_level')}</div>
                 <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)]">
                   {major.degreeLevelName || major.degreeLevels?.join('، ')}
                 </div>
@@ -486,7 +470,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               {major.programTypes && (
                 <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
                   <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-                    {isDoctorate ? 'نوع الدكتوراه' : 'نوع البرنامج'}
+                    {isDoctorate ? publicT('public_doctorate_type') : publicT('public_program_type')}
                   </div>
                   <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
                     {major.programTypes}
@@ -497,9 +481,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               {/* Common Degrees */}
               {(major.commonDegrees || (major.degreeLevels && major.degreeLevels.length > 0)) && (
                 <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-                    أسماء الدرجات الشائعة
-                  </div>
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_common_degree_names')}</div>
                   <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
                     {major.commonDegrees || major.degreeLevels?.join('، ')}
                   </div>
@@ -509,9 +491,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               {/* Common Duration */}
               {major.duration && (
                 <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-                    المدة الشائعة
-                  </div>
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_typical_duration')}</div>
                   <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
                     {major.duration}
                   </div>
@@ -522,7 +502,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               {major.studyModes && (
                 <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
                   <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-                    {isDoctorate ? 'مسار الدخول الشائع' : 'أنماط الدراسة'}
+                    {isDoctorate ? publicT('public_common_entry_path') : publicT('public_study_arrangements_2')}
                   </div>
                   <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
                     {major.studyModes}
@@ -533,9 +513,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               {/* Availability Nature */}
               {major.availabilityNature && (
                 <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-                    طبيعة التوفر
-                  </div>
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_availability_2')}</div>
                   <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
                     {major.availabilityNature}
                   </div>
@@ -545,9 +523,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               {/* Short Description */}
               {major.description && (
                 <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-                    الوصف المختصر
-                  </div>
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_brief_description')}</div>
                   <div className="col-span-8 text-[11px] font-bold text-[var(--mn-text)] leading-relaxed">
                     {major.description}
                   </div>
@@ -565,24 +541,21 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               id="major-about"
               icon={FileText}
               className="mb-3"
-              title={`2. ${isDoctorate ? 'طبيعة الدكتوراه وهدفها' : isMaster ? 'نبذة عن تخصص الماجستير' : 'نبذة عن التخصص'}`}
+              title={`2. ${isDoctorate ? publicT('public_doctorate_nature_and_purpose') : isMaster ? publicT('public_masters_specialization_overview') : publicT('public_major_overview')}`}
             />
 
             {/* Section Content */}
             <div className="space-y-2.5">
               {/* Main Overview Paragraph */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-right space-y-2 ">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start space-y-2 ">
                 <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">
                   {isDoctorate
-                    ? 'تهدف دكتوراه العلوم الطبية إلى تدريب الباحث على إنتاج معرفة أصلية تربط بين الأسس البيولوجية للمرض والتطبيقات الطبية والصحية. وقد تجمع بين علوم المختبر والبيانات السريرية والطب الانتقالي.'
+                    ? publicT('public_a_medical_sciences_doctorate_trains_researchers_to_produce')
                     : major.aboutMajor ||
-                      'البرنامج الأكاديمي المتقدم الذي يركز على تزويد الطالب بالمعرفة العلمية الشاملة والمهارات التطبيقية والبحثية المتقدمة لإعداده للمسارات المهنية والأكاديمية.'}
+                      publicT('public_an_advanced_academic_program_providing_comprehensive_scientific_knowledge')}
                 </p>
                 {isDoctorate && (
-                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify pt-1 border-t border-[var(--mn-border)]">
-                    يختلف المستوى الدكتورالي عن الماجستير في أن الطالب يقود برنامج بحث مستقلًا،
-                    ويعالج فجوة حقيقية في الأدلة، ويقدم مساهمة قابلة للفحص والنشر.
-                  </p>
+                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify pt-1 border-t border-[var(--mn-border)]">{publicT('public_at_doctoral_level_students_lead_independent_research_address')}</p>
                 )}
               </div>
 
@@ -592,10 +565,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                   <div className="w-6 h-6 rounded-full bg-[var(--mn-primary)]/8 border border-[var(--mn-border)] flex items-center justify-center shrink-0 mt-0.5">
                     <Info className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
                   </div>
-                  <div className="flex-1 min-w-0 pr-1 text-right">
-                    <span className="block text-[11px] font-bold text-[var(--mn-heading)] mb-0.5">
-                      ملاحظة توضيحية هامة:
-                    </span>
+                  <div className="flex-1 min-w-0 pr-1 text-start">
+                    <span className="block text-[11px] font-bold text-[var(--mn-heading)] mb-0.5">{publicT('public_important_clarification')}</span>
                     <p className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-text-muted)] leading-[1.85]">
                       {major.aboutMajorNote}
                     </p>
@@ -610,13 +581,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
               <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
-              <DetailSectionHeader id="major-doctorate-types" icon={Layers} className="mb-3" title="3. أنواع الدكتوراه الشائعة" />
+              <DetailSectionHeader id="major-doctorate-types" icon={Layers} className="mb-3" title={publicT('public_3_common_types_of_doctorate')} />
 
-              <div className="mn-detail-small-grid pt-0.5 text-right">
+              <div className="mn-detail-small-grid pt-0.5 text-start">
                 {major.doctorateTypes.map((typeItem, tIdx) => (
                   <div
                     key={tIdx}
-                    className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-right "
+                    className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
                   >
                     <div className="w-5 h-5 rounded-lg bg-[var(--mn-primary)]/10 text-[var(--mn-primary)] dark:bg-[var(--mn-accent)]/15 dark:text-[var(--mn-accent)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px] group-hover:bg-[var(--mn-primary)] group-hover:text-white dark:group-hover:bg-[var(--mn-accent)] dark:group-hover:text-[var(--mn-primary)] transition-colors">
                       <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -638,21 +609,18 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
               <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
-              <DetailSectionHeader id="major-target-backgrounds" icon={Users} className="mb-3" title="3. الفئات والخلفيات الأكاديمية المستهدفة للقبول" />
+              <DetailSectionHeader id="major-target-backgrounds" icon={Users} className="mb-3" title={publicT('public_3_target_academic_backgrounds_for_admission')} />
 
-              <div className="space-y-3 text-right">
-                <div className="p-3 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-right ">
-                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.9]">
-                    يستهدف برنامج الماجستير الخريجين من التخصصات الطبية والصحية والعلمية التالية
-                    المؤهلين للالتحاق:
-                  </p>
+              <div className="space-y-3 text-start">
+                <div className="p-3 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start ">
+                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.9]">{publicT('public_this_masters_program_is_intended_for_qualified_graduates')}</p>
                 </div>
 
                 <div className="mn-detail-small-grid pt-0.5">
                   {major.targetBackgrounds.map((bg, idx) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-right "
+                      className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
                     >
                       <div className="w-5 h-5 rounded-lg bg-[var(--mn-primary)]/10 text-[var(--mn-primary)] dark:bg-[var(--mn-accent)]/15 dark:text-[var(--mn-accent)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px] group-hover:bg-[var(--mn-primary)] group-hover:text-white dark:group-hover:bg-[var(--mn-accent)] dark:group-hover:text-[var(--mn-primary)] transition-colors">
                         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -672,15 +640,15 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
               <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
-              <DetailSectionHeader id="major-program-stages" icon={ListChecks} className="mb-3" title="5. مراحل برنامج الدكتوراه" />
+              <DetailSectionHeader id="major-program-stages" icon={ListChecks} className="mb-3" title={publicT('public_5_doctoral_program_stages')} />
 
-              <div className="grid grid-cols-2 gap-2 sm:gap-2.5 text-right">
+              <div className="grid grid-cols-2 gap-2 sm:gap-2.5 text-start">
                 {major.programStages.map((stage, sIdx) => {
                   const cleanText = stage.replace(/^\d+\.\s*/, '');
                   return (
                     <div
                       key={sIdx}
-                      className="flex flex-row items-start gap-2 sm:gap-2.5 p-2 sm:p-2.5 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-200 group text-right h-full "
+                      className="flex flex-row items-start gap-2 sm:gap-2.5 p-2 sm:p-2.5 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-200 group text-start h-full "
                     >
                       <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] group-hover:bg-[var(--mn-accent)] dark:group-hover:bg-[var(--mn-primary)] shrink-0 mt-1.5 shadow-sm transition-colors" />
                       <span className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors flex-1">
@@ -698,17 +666,15 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
               <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
-              <DetailSectionHeader id="major-study" icon={GraduationCap} className="mb-3" title="6. المعرفة والمقررات المتقدمة" />
+              <DetailSectionHeader id="major-study" icon={GraduationCap} className="mb-3" title={publicT('public_6_advanced_knowledge_and_coursework')} />
 
-              <div className="space-y-4 text-right">
+              <div className="space-y-4 text-start">
                 {/* Block 1: المعرفة النظرية المتقدمة */}
                 {major.advancedTheory && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-1.5">
                       <BookOpen className="w-4 h-4 text-[var(--mn-heading)]" />
-                      <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">
-                        المعرفة النظرية المتقدمة:
-                      </h3>
+                      <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_advanced_theoretical_knowledge')}</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {major.advancedTheory.map((item, idx) => (
@@ -731,9 +697,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                   <div className="space-y-2 pt-2 border-t border-[var(--mn-border)]">
                     <div className="flex items-center gap-1.5">
                       <FlaskConical className="w-4 h-4 text-[var(--mn-accent-text)]" />
-                      <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">
-                        مناهج البحث والتحليل:
-                      </h3>
+                      <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_research_and_analytical_methods')}</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {major.researchMethodologies.map((item, idx) => (
@@ -756,9 +720,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                   <div className="space-y-2 pt-2 border-t border-[var(--mn-border)]">
                     <div className="flex items-center gap-1.5">
                       <Scale className="w-4 h-4 text-[var(--mn-heading)]" />
-                      <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">
-                        الأخلاقيات والنزاهة العلمية:
-                      </h3>
+                      <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_ethics_and_academic_integrity')}</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {major.ethicsAndIntegrity.map((item, idx) => (
@@ -784,17 +746,17 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
             <DetailSectionHeader id="major-tracks" icon={Compass} className="mb-3" title={isDoctorate
-                    ? '7. مجالات البحث والتخصصات الدقيقة'
+                    ? publicT('public_7_research_areas_and_subspecialties')
                     : isMaster
-                      ? '4. المسارات والتخصصات الدقيقة الشائعة'
-                      : '3. المسارات والتخصصات الدقيقة'} />
+                      ? publicT('public_4_common_paths_and_subspecialties')
+                      : publicT('public_3_paths_and_subspecialties')} />
 
-            <div className="space-y-3 text-right">
+            <div className="space-y-3 text-start">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-0.5">
                 {tracksList.map((track, index) => (
                   <div
                     key={index}
-                    className="flex items-center p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-right overflow-hidden relative min-h-[44px] "
+                    className="flex items-center p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start overflow-hidden relative min-h-[44px] "
                   >
                     <div className="absolute right-0 top-0 bottom-0 w-1 bg-[var(--mn-primary)]/80 dark:bg-[var(--mn-accent)]/80 group-hover:bg-[var(--mn-primary)] dark:group-hover:bg-[var(--mn-accent)] transition-colors" />
                     <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors pr-2">
@@ -811,9 +773,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
               <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
-              <DetailSectionHeader id="major-qualifying-exam" icon={Award} className="mb-3" title="8. الامتحان التأهيلي أو الشامل عند وجوده" />
+              <DetailSectionHeader id="major-qualifying-exam" icon={Award} className="mb-3" title={publicT('public_8_qualifying_or_comprehensive_exam_where_applicable')} />
 
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-right ">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start ">
                 <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">
                   {major.qualifyingExamInfo}
                 </p>
@@ -826,9 +788,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
               <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
-              <DetailSectionHeader id="major-research-proposal" icon={Target} className="mb-3" title="9. مقترح البحث ومرحلة الترشح" />
+              <DetailSectionHeader id="major-research-proposal" icon={Target} className="mb-3" title={publicT('public_9_research_proposal_and_candidacy')} />
 
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-right ">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start ">
                 <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">
                   {major.researchProposalInfo}
                 </p>
@@ -841,9 +803,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
               <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
-              <DetailSectionHeader id="major-original-contribution" icon={Sparkles} className="mb-3" title="10. الأطروحة والمساهمة الأصلية" />
+              <DetailSectionHeader id="major-original-contribution" icon={Sparkles} className="mb-3" title={publicT('public_10_dissertation_and_original_contribution')} />
 
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-right ">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start ">
                 <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">
                   {major.originalContributionInfo}
                 </p>
@@ -856,13 +818,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
               <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
-              <DetailSectionHeader id="major-supervision" icon={Building} className="mb-3" title="11. الإشراف والبيئة البحثية" />
+              <DetailSectionHeader id="major-supervision" icon={Building} className="mb-3" title={publicT('public_11_supervision_and_research_environment')} />
 
-              <div className="grid grid-cols-2 gap-2 sm:gap-2.5 text-right">
+              <div className="grid grid-cols-2 gap-2 sm:gap-2.5 text-start">
                 {major.supervisionEnvironment.map((item, sIdx) => (
                   <div
                     key={sIdx}
-                    className="flex flex-col justify-center p-2.5 sm:p-3 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-300 group text-right h-full relative overflow-hidden"
+                    className="flex flex-col justify-center p-2.5 sm:p-3 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-300 group text-start h-full relative overflow-hidden"
                   >
                     <div className="relative z-10 flex items-start gap-2">
                       <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-primary)] dark:text-[var(--mn-accent)] opacity-70 group-hover:text-[var(--mn-accent-text)] shrink-0 mt-0.5 transition-colors" />
@@ -881,13 +843,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
               <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
-              <DetailSectionHeader id="major-research-publishing" icon={Library} className="mb-3" title="12. متطلبات البحث والنشر والتدريس" />
+              <DetailSectionHeader id="major-research-publishing" icon={Library} className="mb-3" title={publicT('public_12_research_publication_and_teaching_requirements')} />
 
-              <div className="grid grid-cols-2 gap-2 sm:gap-2.5 text-right">
+              <div className="grid grid-cols-2 gap-2 sm:gap-2.5 text-start">
                 {major.researchPublishingTeaching.map((item, pIdx) => (
                   <div
                     key={pIdx}
-                    className="flex items-start gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-300 group text-right h-full "
+                    className="flex items-start gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-300 group text-start h-full "
                   >
                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-sm bg-[var(--mn-accent)] group-hover:bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] shrink-0 mt-1.5 shadow-sm transition-colors rotate-45" />
                     <span className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors flex-1">
@@ -907,15 +869,15 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               id="major-skills"
               icon={Award}
               className="mb-3"
-              title={isDoctorate ? '13. المهارات البحثية والمهنية المتقدمة' : isMaster ? '5. المهارات التخصصية المكتسبة' : '4. المهارات التخصصية التي يكتسبها الطالب'}
+              title={isDoctorate ? publicT('public_13_advanced_research_and_professional_skills') : isMaster ? publicT('public_5_specialist_skills_gained') : publicT('public_4_specialist_skills_students_acquire')}
             />
 
-            <div className="space-y-2.5 text-right">
+            <div className="space-y-2.5 text-start">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-0.5">
                 {skillsList.map((skill, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-right "
+                    className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] group-hover:bg-[var(--mn-accent)] dark:group-hover:bg-[var(--mn-primary)] transition-all shrink-0 mt-1.5 shadow-2xs" />
                     <span className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors">
@@ -935,14 +897,14 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               id="major-careers"
               icon={Briefcase}
               className="mb-4"
-              title={isDoctorate ? '14. مجالات العمل بعد الدكتوراه' : isMaster ? '6. مجالات العمل والفرص المهنية بعد التخرج' : '5. مجالات العمل بعد التخرج'}
+              title={isDoctorate ? publicT('public_14_careers_after_a_doctorate') : isMaster ? publicT('public_6_careers_and_opportunities_after_graduation') : publicT('public_5_careers_after_graduation')}
             />
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-right pt-0.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-start pt-0.5">
               {workFieldsList.map((job, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-right "
+                  className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
                 >
                   <div className="w-2 h-[2.5px] bg-[var(--mn-primary)]/80 dark:bg-[var(--mn-accent)]/80 group-hover:bg-[var(--mn-primary)] dark:group-hover:bg-[var(--mn-accent)] group-hover:w-3.5 transition-all duration-300 shrink-0 mt-1.5 rounded-full" />
                   <span className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors">
@@ -958,24 +920,18 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
 
             <DetailSectionHeader id="major-related-jobs" icon={UserCheck} className="mb-4" title={isDoctorate
-                    ? '15. أهم الوظائف المرتبطة'
+                    ? publicT('public_15_key_related_jobs')
                     : isMaster
-                      ? '7. أهم الوظائف المرتبطة بالدرجة'
-                      : '6. أهم الوظائف المرتبطة'} />
+                      ? publicT('public_7_key_jobs_related_to_the_degree')
+                      : publicT('public_6_key_related_jobs')} />
 
             <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-[var(--mn-border)] shadow-2xs bg-[var(--mn-surface)] ">
-              <table className="w-full text-right border-collapse min-w-[480px]">
+              <table className="w-full text-start border-collapse min-w-[480px]">
                 <thead>
                   <tr className="bg-[var(--mn-surface-muted)] border-b border-[var(--mn-border)]">
-                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[30%] whitespace-nowrap">
-                      الوظيفة
-                    </th>
-                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[25%] whitespace-nowrap">
-                      مدى مناسبة الدرجة
-                    </th>
-                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[45%]">
-                      الملاحظة
-                    </th>
+                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[30%] whitespace-nowrap">{publicT('public_job')}</th>
+                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[25%] whitespace-nowrap">{publicT('public_degree_suitability')}</th>
+                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[45%]">{publicT('public_note')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--mn-border)]">
@@ -1010,15 +966,15 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               id="major-postgraduate"
               icon={GraduationCap}
               className="mb-4"
-              title={isDoctorate ? '16. ما بعد الدكتوراه والمسارات اللاحقة' : isMaster ? '8. فرص ما بعد الماجستير والمسارات المستقبلية' : '7. فرص الدراسات العليا'}
+              title={isDoctorate ? publicT('public_16_postdoctoral_and_subsequent_paths') : isMaster ? publicT('public_8_opportunities_after_a_masters_and_future_paths') : publicT('public_7_postgraduate_opportunities')}
             />
 
-            <div className="space-y-3 text-right">
+            <div className="space-y-3 text-start">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {postgradList.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-right "
+                    className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
                   >
                     <div className="w-1.5 h-1.5 bg-[var(--mn-primary)]/80 dark:bg-[var(--mn-accent)]/80 rounded-sm shrink-0 group-hover:scale-110 group-hover:bg-[var(--mn-primary)] dark:group-hover:bg-[var(--mn-accent)] transition-all rotate-45 mt-1.5" />
                     <span className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors">
@@ -1040,22 +996,22 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               className="mb-4"
               title={
                 isDoctorate
-                  ? '17. الدكتوراه المشابهة والفروق'
+                  ? publicT('public_17_similar_doctorates_and_differences')
                   : isMaster
-                    ? '9. التخصصات المشابهة والفرق بينها'
-                    : '8. التخصصات المشابهة'
+                    ? publicT('public_9_similar_majors_and_their_differences')
+                    : publicT('public_8_similar_majors')
               }
             />
 
             <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-[var(--mn-border)] shadow-2xs bg-[var(--mn-surface)] ">
-              <table className="w-full text-right border-collapse min-w-[500px]">
+              <table className="w-full text-start border-collapse min-w-[500px]">
                 <thead>
                   <tr className="bg-[var(--mn-surface-muted)] border-b border-[var(--mn-border)]">
                     <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[35%] whitespace-nowrap">
-                      {isDoctorate ? 'التخصص أو الدرجة المشابهة' : 'التخصص'}
+                      {isDoctorate ? publicT('public_similar_major_or_degree') : publicT('public_major_2')}
                     </th>
                     <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[65%]">
-                      {isDoctorate ? 'الفرق المختصر' : 'الفرق الجوهري'}
+                      {isDoctorate ? publicT('public_brief_distinction') : publicT('public_key_difference')}
                     </th>
                   </tr>
                 </thead>
@@ -1096,20 +1052,17 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               className="mb-3.5"
               title={
                 isDoctorate
-                  ? '18. التنبيه الأكاديمي والمهني'
+                  ? publicT('public_18_academic_and_professional_notice')
                   : isMaster
-                    ? '10. التنبيه الأكاديمي والمهني الحاسم'
-                    : '9. التنبيه الأكاديمي والمهني'
+                    ? publicT('public_10_essential_academic_and_professional_notice')
+                    : publicT('public_9_academic_and_professional_notice')
               }
             />
 
-            <div className="space-y-2 text-right">
+            <div className="space-y-2 text-start">
               {isDoctorate ? (
-                <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-right relative overflow-hidden">
-                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] leading-[1.9]">
-                    الدكتوراه بحثية ولا تمنح حق ممارسة الطب أو التشخيص أو العلاج. يجب تقييم دقة اسم
-                    البرنامج ومجال الأطروحة وجودة الإشراف والموارد.
-                  </p>
+                <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start relative overflow-hidden">
+                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] leading-[1.9]">{publicT('public_a_doctorate_is_a_research_degree_and_does')}</p>
                 </div>
               ) : (
                 alertPoints.map((point, pIdx) => (
@@ -1150,19 +1103,19 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               className="mb-4"
               title={
                 isDoctorate
-                  ? '19. استكشف فرص هذا التخصص'
+                  ? publicT('public_19_explore_opportunities_for_this_major')
                   : isMaster
-                    ? '11. استكشف فرص هذا التخصص'
-                    : '10. استكشف فرص هذا التخصص'
+                    ? publicT('public_11_explore_opportunities_for_this_major')
+                    : publicT('public_10_explore_opportunities_for_this_major')
               }
-              subtitle="علاقات منشورة تربط التخصص بالجامعات والمنح والدورات والامتداد الأكاديمي ذات الصلة."
+              subtitle={publicT('public_published_relationships_connecting_this_major_to_relevant_universities')}
             />
 
             {relationshipGraphStatus === 'loading' && (
-              <div className="mb-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-text-muted)]">جاري تحميل العلاقات المنشورة…</div>
+              <div className="mb-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-text-muted)]">{publicT('public_loading_published_relationships')}</div>
             )}
             {relationshipGraphStatus === 'unavailable' && (
-              <div className="mb-3 rounded-xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-danger-text)]">تعذر تحميل شبكة العلاقات الحية. لم يتم عرض علاقات تجريبية بديلة.</div>
+              <div className="mb-3 rounded-xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-danger-text)]">{publicT('public_could_not_load_the_live_relationship_graph_no')}</div>
             )}
             <div className="grid grid-cols-1 gap-3">
               {/* Universities Section */}
@@ -1172,13 +1125,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                     <div className="w-8 h-8 rounded-full border-2 border-[var(--mn-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--mn-primary)]">
                       <img
                         src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=150&auto=format&fit=crop&q=80"
-                        alt="جامعات"
+                        alt={publicT('public_universities')}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div>
-                      <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">جامعات وبرامج تدرس هذا التخصص</h3>
-                      <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">برامج جامعية منشورة مرتبطة</p>
+                      <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_universities_and_programs_offering_this_major')}</h3>
+                      <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">{publicT('public_related_published_university_programs')}</p>
                     </div>
                   </div>
                 </div>
@@ -1188,7 +1141,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                       key={item.id}
                       type="button"
                       onClick={() => onOpenUniversity?.(item.id)}
-                      className="group w-full text-right rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
+                      className="group w-full text-start rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div className="w-7 h-7 rounded-full border border-[var(--mn-accent)]/50 overflow-hidden shrink-0 bg-[var(--mn-primary)]/10 shadow-2xs">
@@ -1222,13 +1175,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                   <div className="w-8 h-8 rounded-full border-2 border-[var(--mn-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--mn-accent)]/10">
                     <img
                       src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=150&auto=format&fit=crop&q=80"
-                      alt="منح"
+                      alt={publicT('public_scholarships_4')}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div>
-                    <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">منح متاحة لهذا التخصص</h3>
-                    <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">تفتح صفحة المنحة مباشرة</p>
+                    <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_scholarships_available_for_this_major')}</h3>
+                    <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">{publicT('public_opens_the_scholarship_page_directly')}</p>
                   </div>
                 </div>
                 <div className="mn-detail-small-grid">
@@ -1237,7 +1190,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                       key={item.id}
                       type="button"
                       onClick={() => onOpenScholarship?.(item.id)}
-                      className="group w-full text-right rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
+                      className="group w-full text-start rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div className="w-7 h-7 rounded-full border border-[var(--mn-accent)]/50 overflow-hidden shrink-0 bg-[var(--mn-accent)]/10 shadow-2xs">
@@ -1271,13 +1224,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                   <div className="w-8 h-8 rounded-full border-2 border-[var(--mn-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--mn-primary)]/10">
                     <img
                       src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&auto=format&fit=crop&q=80"
-                      alt="دورات"
+                      alt={publicT('public_courses_2')}
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <div>
-                    <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">دورات مرتبطة بهذا التخصص</h3>
-                    <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">الدورة تفتح تفاصيلها، والمزيد يفتح فلتر المجال</p>
+                    <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_courses_related_to_this_major')}</h3>
+                    <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">{publicT('public_the_course_opens_its_details_more_opens_the')}</p>
                   </div>
                 </div>
                 <div className="mn-detail-small-grid">
@@ -1286,7 +1239,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                       key={item.id}
                       type="button"
                       onClick={() => onOpenCourse?.(item.id)}
-                      className="group w-full text-right rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
+                      className="group w-full text-start rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div className="w-7 h-7 rounded-full border border-[var(--mn-accent)]/50 overflow-hidden shrink-0 bg-[var(--mn-primary)]/10 shadow-2xs">
@@ -1321,13 +1274,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                     <div className="w-8 h-8 rounded-full border-2 border-[var(--mn-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--mn-primary)]/10">
                       <img
                         src="https://images.unsplash.com/photo-1532012197267-da84d127e765?w=150&auto=format&fit=crop&q=80"
-                        alt="الامتداد الأكاديمي"
+                        alt={publicT('public_academic_progression')}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div>
-                      <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">الامتداد الأكاديمي للتخصص</h3>
-                      <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">مسارات أعلى أو تخصصية مرتبطة بالمجال</p>
+                      <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_academic_progression_for_this_major')}</h3>
+                      <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">{publicT('public_related_advanced_or_specialist_paths')}</p>
                     </div>
                   </div>
                   <div className="mn-detail-small-grid">
@@ -1336,7 +1289,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                         key={item.id}
                         type="button"
                         onClick={() => onOpenMajor?.(item.id)}
-                        className="group text-right rounded-xl border border-[var(--mn-border-brand)] bg-gradient-to-b from-[var(--mn-primary)]/5 to-[var(--mn-surface)] p-3 hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex flex-col justify-between"
+                        className="group text-start rounded-xl border border-[var(--mn-border-brand)] bg-gradient-to-b from-[var(--mn-primary)]/5 to-[var(--mn-surface)] p-3 hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex flex-col justify-between"
                       >
                         <div>
                           <div className="inline-flex rounded-full bg-[var(--mn-accent)]/12 px-2 py-0.5 text-[8.5px] font-bold text-[var(--mn-heading)] border border-[var(--mn-accent)]/25">

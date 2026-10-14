@@ -8,7 +8,7 @@ const source = (relativePath: string) => readFileSync(`${repoRoot}${relativePath
 describe('TR-WP11 public localized entity pages source contract', () => {
   it('passes the presentation locale to canonical university, major, test, and CMS APIs', () => {
     const liveData = source('apps/web/src/features/public-template/publicLiveDataSource.ts');
-    expect(liveData).toContain('ApiClient.getUniversities({ locale');
+    expect(liveData).toMatch(/ApiClient\.getUniversities\(\{\s*locale/);
     expect(liveData).toContain('ApiClient.getMajors({ locale');
     expect(liveData).toMatch(/ApiClient\.getInternationalTests\(\{\s*locale/);
     expect(liveData).toContain('ApiClient.getCmsContent({ locale');
@@ -16,7 +16,7 @@ describe('TR-WP11 public localized entity pages source contract', () => {
 
   it('uses the selected presentation language for live data and document semantics', () => {
     const app = source('apps/web/src/features/public-template/PublicTemplateApp.tsx');
-    expect(app).toContain('const { language } = useTranslation()');
+    expect(app).toMatch(/const \{[^}]*language[^}]*\} = useTranslation\(\)/);
     expect(app).toContain('usePublicLiveData(import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE, language)');
     expect(app).toContain("document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'");
     expect(app).toContain('document.documentElement.lang = language');

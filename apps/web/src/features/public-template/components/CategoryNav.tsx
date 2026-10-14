@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { CategoryType } from '../types';
 
@@ -7,11 +8,13 @@ interface CategoryNavProps {
 }
 
 export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSelectCategory }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const categories = [
     {
       id: 'scholarships' as CategoryType,
-      label: 'المنح',
-      sublabel: 'والفرص',
+      label: publicT('public_scholarships'),
+      sublabel: publicT('public_and_opportunities'),
       icon: (cls: string) => (
         <svg
           className={cls}
@@ -29,8 +32,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
     },
     {
       id: 'universities' as CategoryType,
-      label: 'الجامعات',
-      sublabel: 'العالمية',
+      label: publicT('public_universities_2'),
+      sublabel: publicT('public_worldwide'),
       icon: (cls: string) => (
         <svg
           className={cls}
@@ -53,8 +56,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
     },
     {
       id: 'countries' as CategoryType,
-      label: 'الدول',
-      sublabel: 'والوجهات',
+      label: publicT('public_countries'),
+      sublabel: publicT('public_and_destinations'),
       icon: (cls: string) => (
         <svg
           className={cls}
@@ -73,8 +76,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
     },
     {
       id: 'majors' as CategoryType,
-      label: 'التخصصات',
-      sublabel: 'المطلوبة',
+      label: publicT('public_majors'),
+      sublabel: publicT('public_in_demand'),
       icon: (cls: string) => (
         <svg
           className={cls}
@@ -94,8 +97,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
     },
     {
       id: 'courses' as CategoryType,
-      label: 'الدورات',
-      sublabel: 'التأهيلية',
+      label: publicT('public_courses'),
+      sublabel: publicT('public_preparation'),
       icon: (cls: string) => (
         <svg
           className={cls}
@@ -115,8 +118,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
     },
     {
       id: 'articles' as CategoryType,
-      label: 'المقالات',
-      sublabel: 'والمعرفة',
+      label: publicT('public_articles'),
+      sublabel: publicT('public_and_knowledge'),
       icon: (cls: string) => (
         <svg
           className={cls}
@@ -134,8 +137,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
     },
     {
       id: 'services' as CategoryType,
-      label: 'الخدمات',
-      sublabel: 'المتخصصة',
+      label: publicT('public_services_2'),
+      sublabel: publicT('public_specialized'),
       icon: (cls: string) => (
         <svg
           className={cls}
@@ -153,8 +156,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
     },
     {
       id: 'exams' as CategoryType,
-      label: 'الاختبارات',
-      sublabel: 'الدولية',
+      label: publicT('public_exams'),
+      sublabel: publicT('public_international'),
       icon: (cls: string) => (
         <svg
           className={cls}
@@ -175,8 +178,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
     },
     {
       id: 'jobs' as CategoryType,
-      label: 'الوظائف',
-      sublabel: 'والتدريب',
+      label: publicT('public_jobs'),
+      sublabel: publicT('public_and_internships'),
       icon: (cls: string) => (
         <svg
           className={cls}
@@ -194,8 +197,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
     },
     {
       id: 'tools' as CategoryType,
-      label: 'الأدوات',
-      sublabel: 'الطلابية',
+      label: publicT('public_tools_2'),
+      sublabel: publicT('public_for_students'),
       icon: (cls: string) => (
         <svg
           className={cls}
@@ -218,15 +221,13 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
       {/* Section Title */}
       <div className="flex items-center justify-between mb-3 px-1">
         <h3 className="text-sm font-bold text-[var(--mn-heading)] flex items-center gap-1.5">
-          <span>تصفح حسب الفئة</span>
+          <span>{publicT('public_browse_by_category')}</span>
         </h3>
         {selectedCategory !== 'all' && (
           <button
             onClick={() => onSelectCategory('all')}
             className="text-[11px] text-[var(--mn-heading)] font-bold hover:underline cursor-pointer"
-          >
-            عرض الكل
-          </button>
+          >{publicT('public_view_all')}</button>
         )}
       </div>
 

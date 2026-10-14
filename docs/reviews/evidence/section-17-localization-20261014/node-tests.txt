@@ -1,0 +1,76 @@
+TAP version 13
+# Subtest: Arabic semantic gate decodes literals and ignores translation variables
+ok 1 - Arabic semantic gate decodes literals and ignores translation variables
+  ---
+  duration_ms: 17.800921
+  type: 'test'
+  ...
+# Subtest: Arabic semantic gate still rejects English prose next to valid variables
+ok 2 - Arabic semantic gate still rejects English prose next to valid variables
+  ---
+  duration_ms: 4.334391
+  type: 'test'
+  ...
+# Subtest: dictionary keys are independent of quote style, indentation and same-line formatting
+ok 3 - dictionary keys are independent of quote style, indentation and same-line formatting
+  ---
+  duration_ms: 19.436873
+  type: 'test'
+  ...
+# Subtest: blank values remain detectable; computed, dynamic and duplicate entries fail closed
+ok 4 - blank values remain detectable; computed, dynamic and duplicate entries fail closed
+  ---
+  duration_ms: 6.429343
+  type: 'test'
+  ...
+# Subtest: UI translation checks resolve provider aliases, inherited callback scopes and local dictionaries
+ok 5 - UI translation checks resolve provider aliases, inherited callback scopes and local dictionaries
+  ---
+  duration_ms: 10.148152
+  type: 'test'
+  ...
+# Subtest: real missing shared dictionary keys remain checked when another namespace uses t
+ok 6 - real missing shared dictionary keys remain checked when another namespace uses t
+  ---
+  duration_ms: 3.163406
+  type: 'test'
+  ...
+# Subtest: a deep untranslated interactive control fails copy inspection with file and line
+ok 7 - a deep untranslated interactive control fails copy inspection with file and line
+  ---
+  duration_ms: 19.33421
+  type: 'test'
+  ...
+# Subtest: dictionary copy and non-rendered proper nouns do not fabricate missing UI text
+ok 8 - dictionary copy and non-rendered proper nouns do not fabricate missing UI text
+  ---
+  duration_ms: 2.566521
+  type: 'test'
+  ...
+# Subtest: rendered expressions, fallback prose and template accessible names are inspected
+ok 9 - rendered expressions, fallback prose and template accessible names are inspected
+  ---
+  duration_ms: 3.568737
+  type: 'test'
+  ...
+# Subtest: machine comparisons and event arguments do not count as rendered copy
+ok 10 - machine comparisons and event arguments do not count as rendered copy
+  ---
+  duration_ms: 3.439266
+  type: 'test'
+  ...
+# Subtest: aliased translators with named parameters retain missing-key coverage
+ok 11 - aliased translators with named parameters retain missing-key coverage
+  ---
+  duration_ms: 4.699446
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2739.599253

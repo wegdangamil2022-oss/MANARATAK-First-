@@ -1,3 +1,4 @@
+import { PUBLIC_TEMPLATE_LOCALES } from '@manaratak/shared';
 import { CmsSitemapEntryDto } from '@manaratak/domain';
 
 const CMS_CANONICAL_PATH =
@@ -56,26 +57,26 @@ export function buildCmsSitemapXml(
     locales[entry.locale] = `${base}${entry.canonicalPath}`;
     groups.set(entry.contentId, locales);
   }
-  const rows = entries.map((entry) => {
-    const languages = groups.get(entry.contentId)!;
-    const alternates = (['ar', 'en'] as const)
-      .filter((locale) => languages[locale])
-      .map(
+  const rows = entries
+    .filter((entry) => PUBLIC_TEMPLATE_LOCALES.includes(entry.locale))
+    .map((entry) => {
+      const languages = groups.get(entry.contentId)!;
+      const alternates = PUBLIC_TEMPLATE_LOCALES.filter((locale) => languages[locale]).map(
         (locale) =>
           `    <xhtml:link rel="alternate" hreflang="${locale}" href="${xml(languages[locale]!)}" />`,
       );
-    if (languages.ar) {
-      alternates.push(
-        `    <xhtml:link rel="alternate" hreflang="x-default" href="${xml(languages.ar)}" />`,
-      );
-    }
-    return [
-      '  <url>',
-      `    <loc>${xml(`${base}${entry.canonicalPath}`)}</loc>`,
-      ...alternates,
-      '  </url>',
-    ].join('\n');
-  });
+      if (languages.ar) {
+        alternates.push(
+          `    <xhtml:link rel="alternate" hreflang="x-default" href="${xml(languages.ar)}" />`,
+        );
+      }
+      return [
+        '  <url>',
+        `    <loc>${xml(`${base}${entry.canonicalPath}`)}</loc>`,
+        ...alternates,
+        '  </url>',
+      ].join('\n');
+    });
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',

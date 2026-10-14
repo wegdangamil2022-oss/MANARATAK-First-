@@ -195,14 +195,18 @@ async function main() {
   const staticOnly = process.argv.includes('--static-only');
   if (!apiBase && !staticOnly) throw new Error('PUBLIC_PRERENDER_API_URL/VITE_API_URL is required for canonical detail prerendering; use --static-only only for local source verification.');
 
+  const releasePolicy=await readFile(new URL('../packages/shared/src/localization/readiness.ts',import.meta.url),'utf8');
+  const flag=releasePolicy.match(/PUBLIC_ENGLISH_COPY_READY\s*=\s*(true|false)\s*;/);
+  if(!flag)throw new Error('PUBLIC_COPY_RELEASE_POLICY_UNAVAILABLE');
+  const releaseLocales=flag[1]==='true'?['ar','en']:['ar'];
   const template = await readFile(resolve(distDir, 'index.html'), 'utf8');
   const manifest = [];
-  for (const locale of ['ar', 'en']) {
+  for (const locale of releaseLocales) {
     for (const [route, title, description, schemaType] of STATIC_ROUTES) {
       const path = localizedPath(route, locale);
       const canonical = `${publicBase}${path}`;
       const ar = `${publicBase}${localizedPath(route, 'ar')}`;
-      const en = `${publicBase}${localizedPath(route, 'en')}`;
+      const en = releaseLocales.includes('en') ? `${publicBase}${localizedPath(route, 'en')}` : undefined;
       const jsonLd = { '@context': 'https://schema.org', '@type': schemaType, name: title, description, url: canonical, inLanguage: locale };
       await writeRoute(distDir, path, inject(template, { title, description, canonical, ar, en, locale, jsonLd }));
       manifest.push({ path, canonical, kind: 'static' });
@@ -211,7 +215,7 @@ async function main() {
 
   if (apiBase) {
     for (const catalog of DYNAMIC_CATALOGS) {
-      for (const locale of ['ar', 'en']) {
+      for (const locale of releaseLocales) {
         const items = await fetchAll(apiBase, catalog, locale);
         for (const item of items) {
           const slug = item.slug || item.publicSlug;
@@ -220,7 +224,7 @@ async function main() {
           const path = localizedPath(bare, locale);
           const canonical = `${publicBase}${path}`;
           const ar = `${publicBase}${localizedPath(bare, 'ar')}`;
-          const en = `${publicBase}${localizedPath(bare, 'en')}`;
+          const en = releaseLocales.includes('en') && item.localization?.fullyLocalized===true ? `${publicBase}${localizedPath(bare, 'en')}` : undefined;
           const title = titleOf(item, locale);
           const description = descriptionOf(item, locale, title);
           const jsonLd = { '@context': 'https://schema.org', '@type': catalog.type, name: title, description, url: canonical, identifier: item.publicId || item.id || slug, inLanguage: locale };
@@ -232,7 +236,7 @@ async function main() {
   }
 
   if (apiBase) {
-    for (const locale of ['ar', 'en']) {
+    for (const locale of releaseLocales) {
       const items = await fetchCmsPublished(apiBase, locale);
       for (const item of items) {
         if (!item || item.siteIdentifier !== 'manaratak' || item.locale !== locale ||
@@ -248,6 +252,7 @@ async function main() {
         }
         const localized = Array.isArray(item.availableLocales) ? item.availableLocales : [];
         const alternateFor = (language) => {
+          if(!releaseLocales.includes(language))return undefined;
           const target = localized.find((entry) => entry.locale === language);
           return target && typeof target.slug === 'string' &&
             /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(target.slug)

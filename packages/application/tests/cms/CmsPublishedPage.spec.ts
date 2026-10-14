@@ -37,7 +37,7 @@ describe('Live CMS publication HTML', () => {
     expect(html).toContain('<html lang="ar" dir="rtl">');
     expect(html).toContain('<p>Current approved text</p>');
     expect(html).toContain('href="https://manaratak.example/ar/news/arabic-news"');
-    expect(html).toContain('hreflang="en" href="https://manaratak.example/en/news/english-news"');
+    expect(html).not.toContain('hreflang="en"');
     expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
     expect(html).not.toContain('<img');
     expect(html).not.toContain('<script>unsafe');

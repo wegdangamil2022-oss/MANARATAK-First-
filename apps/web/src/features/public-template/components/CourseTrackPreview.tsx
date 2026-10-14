@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState, useMemo } from 'react';
 import {
   Search,
@@ -39,6 +40,8 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
   onToggleFavorite,
   onRestrictedCourse,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   const isNative = track === 'native';
   const rawCourses = courses;
   const pageTitle = isNative ? 'دورات منارتك' : 'الدورات المدفوعة';
@@ -113,7 +116,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
   return (
     <div
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel"
-      dir="rtl"
+      dir={publicDir}
     >
       {/* ========================================================================= */}
       {/* HERO CURVED BANNER */}
@@ -124,8 +127,8 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
           <button
             onClick={onBack}
             className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-8 h-8 bg-black/25 hover:bg-black/40 border border-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all z-30 cursor-pointer text-white shadow-xs active:scale-95"
-            title="العودة"
-            aria-label="العودة"
+            title={publicT('public_back')}
+            aria-label={publicT('public_back')}
           >
             <ChevronLeft className="w-4 h-4 rotate-180 text-white" />
           </button>
@@ -169,7 +172,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
           {/* Headline with Gold Curve */}
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight">
-              <span>ابحث في </span>
+              <span>{publicT('public_search_in')}{' '}</span>
               <span className="relative inline-block text-white">
                 {pageTitle}
                 {/* Gold brush accent line underneath */}
@@ -202,7 +205,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث باسم الدورة، المدرب، المهارة..."
+                placeholder={publicT('public_search_by_course_instructor_or_skill')}
                 className="w-full py-2 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[11px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[11px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel"
                 data-mn-design="8bba664dec"
               />
@@ -228,7 +231,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
               className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-danger-text)] bg-[var(--mn-danger-soft)] px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif]"
             >
               <RotateCcw className="w-3 h-3" />
-              <span>إعادة ضبط الفلاتر ({activeFiltersCount})</span>
+              <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>
             </button>
           </div>
         )}
@@ -245,7 +248,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
               <div className="flex items-center gap-1 text-[var(--mn-heading)] font-bold text-[10px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight">
                 <Layers className="w-3 h-3 text-[var(--mn-accent-text)]" />
                 <span className="truncate">
-                  {selectedCategory === 'الكل' ? 'جميع المجالات' : selectedCategory}
+                  {selectedCategory === 'الكل' ? publicT('public_all_domains_2') : selectedCategory}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-1" />
@@ -253,11 +256,11 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                title="اختر المجال"
+                title={publicT('public_choose_domain')}
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
-                    {cat === 'الكل' ? 'جميع المجالات' : cat}
+                    {cat === 'الكل' ? publicT('public_all_domains_2') : cat}
                   </option>
                 ))}
               </select>
@@ -268,7 +271,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
               <div className="flex items-center gap-1 text-[var(--mn-heading)] font-bold text-[10px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight">
                 <GraduationCap className="w-3 h-3 text-[var(--mn-accent-text)]" />
                 <span className="truncate">
-                  {selectedLevel === 'الكل' ? 'جميع المستويات' : selectedLevel}
+                  {selectedLevel === 'الكل' ? publicT('public_all_levels_2') : selectedLevel}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-1" />
@@ -276,11 +279,11 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(e.target.value)}
                 className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                title="اختر المستوى"
+                title={publicT('public_choose_level')}
               >
                 {levels.map((lvl) => (
                   <option key={lvl} value={lvl}>
-                    {lvl === 'الكل' ? 'جميع المستويات' : lvl}
+                    {lvl === 'الكل' ? publicT('public_all_levels_2') : lvl}
                   </option>
                 ))}
               </select>
@@ -295,7 +298,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
       <div className="max-w-xl mx-auto px-4 mt-4 flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--mn-heading)]">
           <BookOpen className="w-4 h-4 text-[#142B5F] dark:text-[#E5B54F]" />
-          <span>الدورات المتاحة ({filteredCourses.length})</span>
+          <span>{publicT('public_available_courses')}{filteredCourses.length})</span>
         </div>
       </div>
 
@@ -317,7 +320,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                 }
               }}
               onClick={() => handleCardClick(course)}
-              className="bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] dark:hover:border-[#D6A43B] shadow-xs hover:shadow-md transition-all relative overflow-hidden group mn-panel text-right cursor-pointer select-none w-full block active:scale-[0.99]"
+              className="bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] dark:hover:border-[#D6A43B] shadow-xs hover:shadow-md transition-all relative overflow-hidden group mn-panel text-start cursor-pointer select-none w-full block active:scale-[0.99]"
             >
               {/* Golden Top Line */}
               <div className="h-1 w-full bg-gradient-to-r from-[#D6A43B] via-[#F3CE74] to-[#D6A43B] shadow-2xs" />
@@ -335,16 +338,14 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     {!course.isFree && (
-                      <span className="absolute bottom-0.5 right-0.5 px-1 py-0.2 rounded bg-amber-600/90 text-white font-bold text-[7.5px] sm:text-[8px]">
-                        مدفوعة
-                      </span>
+                      <span className="absolute bottom-0.5 right-0.5 px-1 py-0.2 rounded bg-amber-600/90 text-white font-bold text-[7.5px] sm:text-[8px]">{publicT('public_paid')}</span>
                     )}
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
                       <span className="px-1.5 py-0.5 rounded-md bg-[var(--mn-page)] dark:bg-white/10 text-[var(--mn-text-muted)] font-bold text-[8.5px] sm:text-[9.5px]">
-                        {course.category || 'تأهيل أكاديمي'}
+                        {course.category || publicT('public_academic_preparation')}
                       </span>
 
                       <div className="flex items-center gap-1.5 sm:gap-2">
@@ -371,8 +372,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                       {course.title}
                     </h3>
 
-                    <p className="text-[9.5px] sm:text-[10px] text-[var(--mn-text-muted)] font-semibold mt-0.5 truncate">
-                      تقديم: {course.instructor || course.provider}
+                    <p className="text-[9.5px] sm:text-[10px] text-[var(--mn-text-muted)] font-semibold mt-0.5 truncate">{publicT('public_presented_by')}{' '}{course.instructor || course.provider}
                     </p>
                   </div>
                 </div>
@@ -382,12 +382,12 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                   <div className="flex items-center gap-2 sm:gap-2.5 text-[var(--mn-text-muted)] font-semibold flex-wrap">
                     <span className="flex items-center gap-1">
                       <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#142B5F] dark:text-[#E5B54F]" />
-                      <span>{course.duration || '25 ساعة'}</span>
+                      <span>{course.duration || publicT('public_25_hours')}</span>
                     </span>
                     {course.lessonsCount && (
                       <span className="flex items-center gap-1">
                         <BookOpen className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#142B5F] dark:text-[#E5B54F]" />
-                        <span>{course.lessonsCount} محاضرات</span>
+                        <span>{course.lessonsCount}{' '}{publicT('public_lectures')}</span>
                       </span>
                     )}
                   </div>
@@ -402,7 +402,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                     data-mn-design="26ecd1db9e"
                   >
                     <PlayCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#E5B54F]" />
-                    <span>متابعة الدورة</span>
+                    <span>{publicT('public_continue_course')}</span>
                   </button>
                 </div>
               </div>
@@ -414,17 +414,15 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
         {filteredCourses.length === 0 && (
           <div className="bg-[var(--mn-surface)] rounded-3xl border border-dashed border-[var(--mn-border)] p-8 text-center space-y-3 mn-panel">
             <BookOpen className="w-10 h-10 mx-auto text-[#142B5F] dark:text-[#E5B54F]" />
-            <h3 className="text-sm font-bold text-[var(--mn-heading)]">لا توجد دورات مطابقة للبحث</h3>
-            <p className="text-[11px] text-[var(--mn-text-muted)]">
-              جرب تغيير كلمات البحث أو إعادة ضبط الفلاتر لعرض كافة الدورات التدريبية المتاحة.
-            </p>
+            <h3 className="text-sm font-bold text-[var(--mn-heading)]">{publicT('public_no_matching_courses_found')}</h3>
+            <p className="text-[11px] text-[var(--mn-text-muted)]">{publicT('public_try_changing_your_search_terms_or_resetting_the')}</p>
             <button
               type="button"
               onClick={handleResetFilters}
               className="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[var(--mn-primary)] text-white text-[11px] font-bold mn-inverse cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" />
-              <span>إعادة ضبط الفلاتر</span>
+              <span>{publicT('public_reset_filters_2')}</span>
             </button>
           </div>
         )}

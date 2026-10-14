@@ -77,13 +77,13 @@ describe('CMS prerender source contract (local mock API, no database/provider)',
     expect(result.code, result.output).toBe(0);
 
     const arHtml = await readFile(resolve(dist, 'ar/news/arabic-news/index.html'), 'utf8');
-    const enHtml = await readFile(resolve(dist, 'en/news/english-news/index.html'), 'utf8');
+    await expect(readFile(resolve(dist, 'en/news/english-news/index.html'), 'utf8')).rejects.toMatchObject({code:'ENOENT'});
     const sitemap = await readFile(resolve(dist, 'sitemap.xml'), 'utf8');
     const manifest = JSON.parse(await readFile(resolve(dist, 'prerender-manifest.json'), 'utf8'));
 
     expect(arHtml).toContain('rel="canonical" href="https://manaratak.example/ar/news/arabic-news"');
-    expect(arHtml).toContain('hreflang="en" href="https://manaratak.example/en/news/english-news"');
-    expect(enHtml).toContain('English SEO title');
+    expect(arHtml).not.toContain('hreflang="en"');
+    expect(manifest.routes.some((entry:{path:string})=>entry.path.startsWith('/en/'))).toBe(false);
     // Live CMS entries are now served by /cms-sitemap.xml; the generated
     // static sitemap must never keep a retired CMS article indexed.
     expect(sitemap).not.toContain('/ar/news/arabic-news');
@@ -95,6 +95,6 @@ describe('CMS prerender source contract (local mock API, no database/provider)',
     const monoHtml = await readFile(resolve(dist, 'ar/news/single-language/index.html'), 'utf8');
     expect(monoHtml).not.toContain('hreflang="en"');
     expect(monoHtml).not.toContain('og:locale:alternate');
-    expect(manifest.routes.filter((entry: { kind: string }) => entry.kind === 'cms')).toHaveLength(3);
+    expect(manifest.routes.filter((entry: { kind: string }) => entry.kind === 'cms')).toHaveLength(2);
   });
 });

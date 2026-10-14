@@ -236,6 +236,7 @@ export interface UniversityInternationalAdmissions {
 }
 
 export interface University {
+  localization?: PublicUniversityDto['localization'];
   publishedData?: PublicUniversityDto;
   /** Stable public route key (slug in live mode). */
   id: string;
@@ -407,6 +408,7 @@ export interface Course {
 }
 
 export interface Major {
+  localization?: import('../../api/client').PublicMajorDto['localization'];
   contentSections?: Array<{ sectionKey?: string; title?: string; content?: string; metadata?: Record<string, unknown> }>;
   /** Stable public route key (slug in live mode). */
   id: string;
@@ -637,6 +639,7 @@ export interface ExamOfficialLink {
 }
 
 export interface Exam {
+  localization?: import('@manaratak/ui').PublicExam['localization'];
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;

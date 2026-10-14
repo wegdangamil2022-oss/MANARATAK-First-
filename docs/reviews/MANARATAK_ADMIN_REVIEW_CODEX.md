@@ -11717,6 +11717,8 @@ Ownership: Course owns catalog/course/learning outcomes, curriculum, learning pa
 
 # 17 — الترجمات والتعدد اللغوي / Localization & Translation Governance
 
+> **إكمال مصدر 14 أكتوبر 2026:** أُكملت إصلاحات حوكمة النقل وقراءة المركز وlocale/SEO، وأُغلقت فجوة English gate في CMS HTML/sitemap وخلط لغة الرابط مع reader. نجحت127 اختبارات خفيفة في26 ملفًا و11 Node وTypeScript؛ [تقرير القسم17 الصحيح](SECTION_17_LOCALIZATION_COMPLETION_2026-10-14.md). **English release/translation authoring مقفلان**؛ copy1090 ملاحظة في غرفة الدراسة لا تُعلن مكتملة، وLOC-ADM-024 مؤجل لما بعد28. الأحكام القديمة أدناه تاريخية، وليس هذا إكمالًا للقسم18/AI.
+
 > **معيار الإغلاق المحدّث للقسم 17:** إصلاح الأكواد والثغرات والنواقص + اختبارات source/contract/security خفيفة مستهدفة + رفع Commit. **لا يلزم هنا E2E حي أو قاعدة بيانات/مزود تشغيل فعلي**؛ اختبارات التشغيل في الملحق الأخير بعد القسم 28، مع بقاء إطلاق الإنتاج محظورًا دون أدلته.
 > **الاختبار الأساسي المختصر:** Localization: اختيار اللغة دون خلط بيانات AR/EN، قواعد النشر والـRTL/LTR على مستوى المصدر/المكونات.
 

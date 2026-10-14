@@ -1,0 +1,70 @@
+{
+  "section": 17,
+  "domain": "LOCALIZATION_TRANSLATION",
+  "sourceBaseline": "cb65e7652fb1edde8371d11804ac4d87f729b5b8",
+  "sourceReferenceBranch": "codex/complete-sections-15-17-source-20261014",
+  "node": "22.23.3",
+  "vitest": {
+    "exitCode": 0,
+    "filesPassed": 26,
+    "testsPassed": 127,
+    "durationSeconds": 18.74,
+    "testExecutionSeconds": 1.5,
+    "config": ".section17-localization-vitest.config.ts"
+  },
+  "nodeTests": {
+    "exitCode": 0,
+    "passed": 11
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "command": "tsc -b packages/infrastructure packages/ui apps/api apps/admin apps/web --pretty false"
+  },
+  "eslint": {
+    "changedFilesChecked": 131,
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 376,
+    "finalAdditionalCheck": {
+      "errors": 0,
+      "warnings": 2,
+      "overlapsInitialCheck": true
+    }
+  },
+  "sourceQuality": {
+    "exitCode": 0,
+    "publicEnglishCopyReady": false,
+    "unresolvedRenderedCopyFindings": 1090
+  },
+  "policy": {
+    "translationContentMode": "INFRASTRUCTURE_ONLY",
+    "publicEnglishCopyReady": false,
+    "runtimeProof": "UNVERIFIED",
+    "fullEnglishContentParityClaimed": false
+  },
+  "migration": {
+    "source": "20261014010000_owner_translation_receipt",
+    "applied": 0
+  },
+  "runtime": {
+    "databaseConnected": false,
+    "workerStarted": false,
+    "providerCalls": 0,
+    "browserE2E": false,
+    "deployment": false
+  },
+  "diffCheck": {
+    "exitCode": 0
+  },
+  "logs": {
+    "final-changes-eslint.txt": "1ef633c4f1f4bdaae893569814d5c4af0ca691fdff536a1162b35b17050e5b75",
+    "client-generation.txt": "a5021b9736706f92a200b6091ebd6b30f6af425e7b53ab756f76217e3fb02a3e",
+    "vitest.txt": "8b2429907809dd1f792d2570351a134136c239fc6e1e3073448c5dac6953a0d9",
+    "typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "root-locale.txt": "1970ddbf10df93ac719f4a28f109598972f8e2dede0c034f9f57ce149313d9f3",
+    "initial-checks.txt": "cc58ba12d8f30e64661d4c7f91141f9d33672be8be702a0e9dc24e662679d54f",
+    "eslint.txt": "45067d1f096b74abef136664ea40c320c59ebaa9e0791c6ef8bc85b7cac8bea3",
+    "source-quality.txt": "270591c75d541d0277a93b3dee9f4a29ba8c1ead803a15a41adf8a614a924981",
+    "node-tests.txt": "ec56025f7de1dd68544e89c6b3c6e05da6bb5cc15f663bc82353b6e1f1c5dbe3"
+  }
+}

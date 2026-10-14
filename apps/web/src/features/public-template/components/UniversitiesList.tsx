@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { University } from '../types';
 import { Building2, Trophy, Globe, GraduationCap, ExternalLink, ChevronLeft } from 'lucide-react';
@@ -8,17 +9,17 @@ interface UniversitiesListProps {
 }
 
 export const UniversitiesList: React.FC<UniversitiesListProps> = ({ universities, onSelectUniversity }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   return (
     <div className="w-full px-4 py-3 space-y-3 pb-20">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-bold text-[var(--mn-heading)] flex items-center gap-1.5">
             <Building2 className="w-4 h-4 text-[var(--mn-heading)]" />
-            <span>أفضل الجامعات العالمية والشريكة</span>
+            <span>{publicT('public_leading_international_and_partner_universities')}</span>
           </h2>
-          <p className="text-[11px] text-[var(--mn-text-muted)]">
-            تصفح الجامعات الرائدة التي تقدم منحاً دراسية كاملة
-          </p>
+          <p className="text-[11px] text-[var(--mn-text-muted)]">{publicT('public_browse_leading_universities_offering_full_scholarships')}</p>
         </div>
       </div>
 
@@ -35,7 +36,7 @@ export const UniversitiesList: React.FC<UniversitiesListProps> = ({ universities
               }
             }}
             onClick={() => onSelectUniversity?.(uni)}
-            className="bg-[var(--mn-surface)] rounded-2xl border border-[var(--mn-border)] shadow-xs hover:shadow-md transition-all overflow-hidden p-3.5 space-y-2.5 text-right hover:border-[var(--mn-border-gold)] cursor-pointer mn-panel "
+            className="bg-[var(--mn-surface)] rounded-2xl border border-[var(--mn-border)] shadow-xs hover:shadow-md transition-all overflow-hidden p-3.5 space-y-2.5 text-start hover:border-[var(--mn-border-gold)] cursor-pointer mn-panel "
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -60,7 +61,7 @@ export const UniversitiesList: React.FC<UniversitiesListProps> = ({ universities
               {/* Global Rank Badge */}
               <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--mn-gold-surface)] text-[var(--mn-accent-text)] text-[10px] font-bold shrink-0 mn-panel ">
                 <Trophy className="w-3 h-3 text-[var(--mn-accent-text)]" />
-                <span>{uni.globalRank == null ? 'الترتيب: غير متوفر' : `المرتبة #${uni.globalRank}`}</span>
+                <span>{uni.globalRank == null ? publicT('public_ranking_unavailable_2') : publicT('public_rank_number_alt', { v0: uni.globalRank })}</span>
               </div>
             </div>
 
@@ -79,8 +80,8 @@ export const UniversitiesList: React.FC<UniversitiesListProps> = ({ universities
 
             <div className="flex items-center justify-between pt-2 border-t border-[var(--mn-border)] text-xs">
               <div className="flex items-center gap-3 text-[11px] text-[var(--mn-heading)] font-bold">
-                <span className="inline-flex items-center gap-1"><GraduationCap className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" />{uni.scholarshipCount == null ? 'المنح: غير متوفرة' : `${uni.scholarshipCount} منحة معتمدة`}</span>
-                <span>نسبة القبول: {uni.acceptanceRate ?? 'غير متوفرة'}</span>
+                <span className="inline-flex items-center gap-1"><GraduationCap className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" />{uni.scholarshipCount == null ? publicT('public_scholarships_unavailable_2') : publicT('public_approved_scholarship_count', { v0: uni.scholarshipCount })}</span>
+                <span>{publicT('public_acceptance_rate')}{' '}{uni.acceptanceRate ?? publicT('public_unavailable_3')}</span>
               </div>
 
               <a
@@ -90,7 +91,7 @@ export const UniversitiesList: React.FC<UniversitiesListProps> = ({ universities
                 onClick={(event) => event.stopPropagation()}
                 className="flex items-center gap-1 text-[11px] font-semibold text-[var(--mn-accent-text)] hover:text-[var(--mn-accent-text)] hover:underline"
               >
-                <span>موقع الجامعة</span>
+                <span>{publicT('public_university_location')}</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>

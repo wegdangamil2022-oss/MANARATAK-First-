@@ -1,0 +1,16 @@
+ FAIL  tests/translation/cms-seo-prerender.spec.ts > CMS prerender source contract (local mock API, no database/provider) > renders published CMS canonical paths, real alternate slugs and indexable sitemap only
+Error: ENOENT: no such file or directory, open '/tmp/cms-seo-source-XOsw3h/en/news/english-news/index.html'
+ FAIL  tests/translation/public-localized-entity-pages.spec.ts > TR-WP11 public localized entity pages source contract > passes the presentation locale to canonical university, major, test, and CMS APIs
+AssertionError: expected 'import { mapInternationalTestToExam }…' to contain 'ApiClient.getUniversities({ locale'
+ FAIL  tests/translation/public-localized-entity-pages.spec.ts > TR-WP11 public localized entity pages source contract > uses the selected presentation language for live data and document semantics
+AssertionError: expected 'import React, { useState, useEffect, …' to contain 'const { language } = useTranslation()'
+ FAIL  tests/translation/translation-quality-gates.spec.ts > translation quality gates > keeps locale route, canonical, hreflang and metadata language consistent
+AssertionError: expected undefined to be 'https://manaratak.example/en/universi…' // Object.is equality
+ Test Files  3 failed | 16 passed (19)
+      Tests  4 failed | 92 passed (96)
+   Duration  28.33s (transform 24.11s, setup 0ms, import 44.62s, tests 2.68s, environment 3ms)
+
+Later synthetic CMS-release fixture lacked publishedAt; corrected without changing production date validation.
+Root router fixture required a simulated window before module initialization; final two rendering tests pass.
+Initial TypeScript found a missing Exam localization type; canonical mapper/type propagation repaired.
+Initial source gate had unset source-only guard variables; final static command explicitly sets DATABASE_MUTATIONS_ALLOWED=false DATABASE_ENVIRONMENT=source.

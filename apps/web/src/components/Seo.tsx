@@ -34,16 +34,20 @@ export function Seo({
     });
     document.title = pageTitle;
     upsertMeta('description', description);
-    upsertMeta('robots', `${noIndex ? 'noindex' : 'index'},${noFollow ? 'nofollow' : 'follow'}`);
+    upsertMeta('robots', `${noIndex || !localizedLinks.indexable ? 'noindex' : 'index'},${noFollow ? 'nofollow' : 'follow'}`);
     upsertMeta('og:title', pageTitle, 'property');
     upsertMeta('og:description', description, 'property');
     upsertMeta('og:type', 'website', 'property');
     upsertMeta('og:url', canonicalUrl || localizedLinks.canonical, 'property');
     upsertMeta('og:locale', toOpenGraphLocale(language), 'property');
-    upsertMeta('og:locale:alternate', getAlternateOpenGraphLocale(language), 'property');
+    if(Object.keys(localizedLinks.alternates).length>1) upsertMeta('og:locale:alternate', getAlternateOpenGraphLocale(language), 'property');
+    else document.head.querySelector('meta[property="og:locale:alternate"]')?.remove();
     upsertLink('canonical', canonicalUrl || localizedLinks.canonical);
-    upsertAlternateLink('ar', localizedLinks.alternates.ar);
-    upsertAlternateLink('en', localizedLinks.alternates.en);
+    for (const locale of ['ar','en'] as const) {
+      const href=localizedLinks.alternates[locale];
+      if(href) upsertAlternateLink(locale,href);
+      else document.head.querySelector(`link[rel="alternate"][hreflang="${locale}"]`)?.remove();
+    }
     upsertAlternateLink('x-default', localizedLinks.xDefault);
   }, [canonicalUrl, description, language, location.pathname, noFollow, noIndex, title]);
 

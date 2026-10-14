@@ -93,7 +93,8 @@ describe('translation quality gates', () => {
 
     expect(links.canonical).toBe('https://manaratak.example/ar/universities/example-university');
     expect(links.alternates.ar).toBe('https://manaratak.example/ar/universities/example-university');
-    expect(links.alternates.en).toBe('https://manaratak.example/en/universities/example-university');
+    expect(links.alternates.en).toBeUndefined();
+    expect(links.indexable).toBe(true);
     expect(links.xDefault).toBe(links.alternates.ar);
     expect(toOpenGraphLocale('ar')).toBe('ar_AR');
     expect(toOpenGraphLocale('en')).toBe('en_US');

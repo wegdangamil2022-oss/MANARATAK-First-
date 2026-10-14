@@ -31,6 +31,7 @@ export interface ExamOfficialLink {
 }
 
 export interface PublicExam {
+  localization?: {requestedLocale?:string;resolvedLocale?:string|null;availability?:string;fullyLocalized?:boolean;indexable?:boolean};
   locale?: 'ar' | 'en';
   availabilitySummary?: string;
   /** Stable public route key (slug in live mode). */
@@ -82,6 +83,7 @@ export interface PublicExam {
 
 /** The same adapter is used for saved admin previews and published API data. */
 export interface InternationalTestPresentationInput {
+  localization?: {requestedLocale?:string;resolvedLocale?:string|null;availability?:string;fullyLocalized?:boolean;indexable?:boolean};
   locale?: 'ar' | 'en';
   locations?:{countries?:Array<{id:string;name:string;nameAr?:string;iso2Code:string}>;cities?:Array<{id:string;name:string;nameAr?:string;countryIso2Code:string}>};
   relatedUniversities?: ExamEntityRef[];
@@ -146,6 +148,7 @@ export function mapInternationalTestToExam(dto: InternationalTestPresentationInp
   }
   const nameEn = nonEmpty(dto.localizedNameEn, dto.abbreviation, dto.testCode, dto.canonicalName);
   return {
+    localization:dto.localization,
     id: dto.slug || dto.id, ownerId: dto.id, publicId: dto.publicId, slug: dto.slug,
     locale, name: en?nonEmpty(dto.displayName,dto.localizedNameEn,dto.canonicalName):nonEmpty(dto.displayName,dto.localizedNameAr,dto.canonicalName), nameEn,
     category: dto.testCategory, categoryLabel: en?dto.testCategory.replace(/_/g,' '):categoryLabels[dto.testCategory] || dto.testCategory,

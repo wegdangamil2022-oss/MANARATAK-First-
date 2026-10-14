@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState } from 'react';
 import { ApplicationMilestone, Scholarship, Course } from '../types';
 import {
@@ -35,6 +36,8 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
   courses,
   onOpenAiLetterForScholarship,
 }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string>(milestones[0]?.id || '');
   const [showAddModal, setShowAddModal] = useState(false);
   const [newScholarshipId, setNewScholarshipId] = useState(allScholarships[0]?.id || '');
@@ -109,25 +112,22 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
   };
 
   return (
-    <div id="learner-progress-tracker" className="w-full px-5 py-3 space-y-4 pb-24 text-right">
+    <div id="learner-progress-tracker" className="w-full px-5 py-3 space-y-4 pb-24 text-start">
       {/* Professional Polish Progress Card */}
       <div className="bg-[var(--mn-surface)] p-5 rounded-3xl border border-[var(--mn-border)] shadow-sm space-y-3 mn-panel ">
         <div className="flex justify-between items-center">
           <span className="text-[var(--mn-heading)] text-sm font-bold flex items-center gap-1.5">
-            <Trophy className="w-4 h-4 text-[var(--mn-accent-text)]" />
-            تقدمك التعليمي العام
-          </span>
+            <Trophy className="w-4 h-4 text-[var(--mn-accent-text)]" />{publicT('public_your_overall_learning_progress')}</span>
           <span className="text-[var(--mn-accent-text)] font-bold text-sm">
             {overallPercentage}%
           </span>
         </div>
 
         {/* Progress bar using var(--mn-accent-soft) and slate-100 */}
-        <progress className="mn-native-progress mn-native-progress-accent h-2.5 w-full" value={Math.min(100, Math.max(0, overallPercentage))} max={100} aria-label="التقدم التعليمي العام" />
+        <progress className="mn-native-progress mn-native-progress-accent h-2.5 w-full" value={Math.min(100, Math.max(0, overallPercentage))} max={100} aria-label={publicT('public_overall_learning_progress')} />
 
         <p className="text-xs text-[var(--mn-text-muted)] font-medium">
-          {completedChecklistItems} من {totalChecklistItems} مهام أكاديمية مكتملة بنجاح
-        </p>
+          {completedChecklistItems}{' '}{publicT('public_of')}{' '}{totalChecklistItems}{' '}{publicT('public_academic_tasks_completed_successfully')}</p>
       </div>
 
       {/* Push Notification / Instant Updates Alert Box */}
@@ -137,21 +137,17 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
             <BellRing className="w-4 h-4 text-[var(--mn-heading)]" />
           </div>
           <div>
-            <div className="text-xs font-bold text-[var(--mn-heading)]">نظام التنبيهات الفورية مفعّل</div>
-            <div className="text-[11px] text-[var(--mn-text-muted)]">
-              تصلك إشعارات فورية بكل منحة جديدة أو اقتراب موعد نهائي
-            </div>
+            <div className="text-xs font-bold text-[var(--mn-heading)]">{publicT('public_instant_notifications_are_enabled')}</div>
+            <div className="text-[11px] text-[var(--mn-text-muted)]">{publicT('public_get_notified_about_new_scholarships_and_approaching_deadlines')}</div>
           </div>
         </div>
-        <span className="px-2.5 py-1 rounded-full bg-[var(--mn-primary)] text-[var(--mn-accent-text)] font-bold text-[10px] shrink-0 shadow-2xs mn-inverse ">
-          مباشر
-        </span>
+        <span className="px-2.5 py-1 rounded-full bg-[var(--mn-primary)] text-[var(--mn-accent-text)] font-bold text-[10px] shrink-0 shadow-2xs mn-inverse ">{publicT('public_live')}</span>
       </div>
 
       {/* Tracked Scholarships Section Header */}
       <div className="flex items-center justify-between pt-1">
         <h3 className="text-xs font-bold text-[var(--mn-heading)] flex items-center gap-1">
-          <span>ملفات التقديم المتابعة</span>
+          <span>{publicT('public_tracked_applications')}</span>
           <span className="px-1.5 py-0.5 rounded-full bg-[var(--mn-primary)]/10 text-[var(--mn-heading)] text-[10px] font-bold">
             {milestones.length}
           </span>
@@ -162,7 +158,7 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
           className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--mn-primary)] hover:bg-[var(--mn-primary-hover)] text-[var(--mn-accent-text)] text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer mn-inverse hover:mn-inverse "
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>إضافة منحة</span>
+          <span>{publicT('public_add_scholarship')}</span>
         </button>
       </div>
 
@@ -211,12 +207,10 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
               </div>
               <div className="flex items-center gap-3 text-[11px] text-[var(--mn-text-muted)] font-semibold mt-1">
                 <span className="flex items-center gap-1 text-[var(--mn-danger-text)] font-bold">
-                  <Calendar className="w-3.5 h-3.5" />
-                  الموعد: {activeMilestone.deadline}
+                  <Calendar className="w-3.5 h-3.5" />{publicT('public_deadline_2')}{' '}{activeMilestone.deadline}
                 </span>
                 <span className="flex items-center gap-1 text-[var(--mn-heading)]">
-                  <Clock className="w-3.5 h-3.5" />
-                  المرحلة: {activeMilestone.stage}
+                  <Clock className="w-3.5 h-3.5" />{publicT('public_stage')}{' '}{activeMilestone.stage}
                 </span>
               </div>
             </div>
@@ -225,7 +219,7 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
             <button
               onClick={() => onDeleteMilestone(activeMilestone.id)}
               className="p-1.5 text-[var(--mn-text-muted)] hover:text-[var(--mn-danger-text)] hover:bg-[var(--mn-danger-soft)] rounded-lg transition-colors cursor-pointer"
-              title="إزالة من قائمة المتابعة"
+              title={publicT('public_remove_from_tracking')}
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -235,23 +229,21 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
           <div className="p-3 rounded-2xl bg-[var(--mn-accent)]/10 border border-[var(--mn-accent)]/30 flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-xs text-[var(--mn-heading)] font-bold">
               <Sparkles className="w-4 h-4 text-[var(--mn-accent-text)]" />
-              <span>مساعدة الذكاء الاصطناعي</span>
+              <span>{publicT('public_ai_assistance')}</span>
             </div>
             {onOpenAiLetterForScholarship && (
               <button
                 onClick={() => onOpenAiLetterForScholarship(activeMilestone.scholarshipTitle)}
                 className="px-3 py-1 bg-[var(--mn-primary)] text-[var(--mn-accent-text)] rounded-xl text-[10px] font-bold hover:bg-[var(--mn-primary-hover)] active:scale-95 transition-all cursor-pointer mn-inverse hover:mn-inverse "
-              >
-                توليد خطاب دافع AI
-              </button>
+              >{publicT('public_generate_an_ai_motivation_letter')}</button>
             )}
           </div>
 
           {/* Checklist of Application Requirements */}
           <div>
             <h4 className="text-xs font-bold text-[var(--mn-heading)] mb-2.5 flex items-center justify-between">
-              <span>قائمة المهام والملفات (Checklist)</span>
-              <span className="text-[10px] text-[var(--mn-text-muted)] font-normal">اضغط للتحديث</span>
+              <span>{publicT('public_tasks_and_files_checklist')}</span>
+              <span className="text-[10px] text-[var(--mn-text-muted)] font-normal">{publicT('public_click_to_update')}</span>
             </h4>
 
             <div className="space-y-2">
@@ -287,9 +279,7 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
 
                   {task.completed && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mn-primary)]/10 px-2 py-0.5 text-[9px] font-bold text-[var(--mn-heading)]">
-                      <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                      مكتمل
-                    </span>
+                      <CheckCircle2 className="h-3 w-3" aria-hidden="true" />{publicT('public_completed')}</span>
                   )}
                 </div>
               ))}
@@ -300,10 +290,10 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
           <div className="p-3 bg-[var(--mn-page)] rounded-2xl border border-[var(--mn-border)] text-xs mn-panel ">
             <div className="font-bold text-[var(--mn-text)] mb-1 flex items-center gap-1">
               <FileText className="w-3.5 h-3.5 text-[var(--mn-text-muted)]" />
-              <span>ملاحظاتك الخاصة:</span>
+              <span>{publicT('public_your_private_notes')}</span>
             </div>
             <p className="text-[var(--mn-text-muted)] text-[11px] leading-relaxed">
-              {activeMilestone.notes || 'لا توجد ملاحظات مضافة بعد.'}
+              {activeMilestone.notes || publicT('public_no_notes_added_yet')}
             </p>
           </div>
         </div>
@@ -314,9 +304,9 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-[var(--mn-heading)] flex items-center gap-1.5">
             <BookOpen className="w-4 h-4 text-[var(--mn-heading)]" />
-            <span>الدورات التأهيلية المسجلة</span>
+            <span>{publicT('public_enrolled_preparation_courses')}</span>
           </h3>
-          <span className="text-[10px] text-[var(--mn-text-muted)]">منارة التعلم</span>
+          <span className="text-[10px] text-[var(--mn-text-muted)]">{publicT('public_learning_beacon')}</span>
         </div>
 
         <div className="space-y-2.5">
@@ -346,7 +336,7 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
                 <div className="text-[11px] font-bold text-[var(--mn-heading)] mb-1">
                   {course.progressPercent || 0}%
                 </div>
-                <progress className="mn-native-progress mn-native-progress-primary h-1.5 w-14" value={Math.min(100, Math.max(0, course.progressPercent || 0))} max={100} aria-label={`تقدم ${course.title || 'الدورة'}`} />
+                <progress className="mn-native-progress mn-native-progress-primary h-1.5 w-14" value={Math.min(100, Math.max(0, course.progressPercent || 0))} max={100} aria-label={publicT('public_course_progress_title', { v0: course.title || publicT('public_course') })} />
               </div>
             </div>
           ))}
@@ -356,15 +346,13 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
       {/* Add New Milestone Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-[var(--mn-surface)] rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-[var(--mn-accent)]/30 space-y-4 animate-in fade-in zoom-in-95 duration-150 text-right mn-panel ">
+          <div className="bg-[var(--mn-surface)] rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-[var(--mn-accent)]/30 space-y-4 animate-in fade-in zoom-in-95 duration-150 text-start mn-panel ">
             <div className="flex items-center justify-between border-b border-[var(--mn-border)] pb-2">
-              <h3 className="text-sm font-semibold text-[var(--mn-heading)]">
-                إضافة منحة جديدة لنظام المتابعة
-              </h3>
+              <h3 className="text-sm font-semibold text-[var(--mn-heading)]">{publicT('public_add_a_scholarship_to_your_tracker')}</h3>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                aria-label="إغلاق"
+                aria-label={publicT('public_close')}
                 className="grid min-h-10 min-w-10 place-items-center rounded-xl text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)] hover:text-[var(--mn-text)]"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
@@ -372,9 +360,7 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[var(--mn-text)] mb-1">
-                اختر المنحة الدراسية:
-              </label>
+              <label className="block text-xs font-bold text-[var(--mn-text)] mb-1">{publicT('public_choose_a_scholarship')}</label>
               <select
                 value={newScholarshipId}
                 onChange={(e) => setNewScholarshipId(e.target.value)}
@@ -389,14 +375,12 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[var(--mn-text)] mb-1">
-                ملاحظات أو أهداف خاصة:
-              </label>
+              <label className="block text-xs font-bold text-[var(--mn-text)] mb-1">{publicT('public_private_notes_or_goals')}</label>
               <textarea
                 value={newNotes}
                 onChange={(e) => setNewNotes(e.target.value)}
                 rows={2}
-                placeholder="مثلاً: التركيز على برنامج ماجستير الذكاء الاصطناعي وتجهيز مقترح البحث..."
+                placeholder={publicT('public_for_example_focus_on_an_ai_masters_program')}
                 className="w-full py-2 px-3 bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-xl text-xs text-[var(--mn-heading)] focus:outline-hidden focus:border-[var(--mn-border-brand)] mn-panel "
               />
             </div>
@@ -405,15 +389,11 @@ export const LearnerProgressTracker: React.FC<LearnerProgressTrackerProps> = ({
               <button
                 onClick={handleAddNewTracker}
                 className="flex-1 py-2.5 bg-[var(--mn-primary)] text-[var(--mn-accent-text)] font-bold text-xs rounded-xl shadow-md hover:bg-[var(--mn-primary-hover)] active:scale-95 transition-all cursor-pointer mn-inverse hover:mn-inverse "
-              >
-                بدء المتابعة الآن
-              </button>
+              >{publicT('public_start_tracking_now')}</button>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="py-2.5 px-4 bg-[var(--mn-surface-muted)] text-[var(--mn-text-muted)] font-bold text-xs rounded-xl hover:bg-[var(--mn-surface-muted)] cursor-pointer mn-panel hover:mn-panel "
-              >
-                إلغاء
-              </button>
+              >{publicT('public_cancel')}</button>
             </div>
           </div>
         </div>

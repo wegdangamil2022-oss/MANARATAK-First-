@@ -7,6 +7,8 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
+import { readStoredLocale } from '../i18n/browserStorage';
+import { isPublicTemplateLocaleEnabled } from '@manaratak/shared';
 import { isSupportedLocale } from '@manaratak/shared';
 import { useTranslation } from '../i18n/I18nProvider';
 import { localizeLocation, resolveLegacyPublicLocale } from '../i18n/localeRouting';
@@ -37,20 +39,27 @@ const PageLoadingFallback = () => {
 const PasswordRecoveryPage = () => <StudentAuthPage onAuthenticated={() => { window.location.assign('/student'); }} />;
 
 
-const RootLayout = () => {
+export const RootLayout = () => {
   const { language, setLanguage } = useTranslation();
   const location = useLocation();
   const { locale } = useParams<{ locale?: string }>();
   const routeLocale = isSupportedLocale(locale) ? locale : null;
 
   useEffect(() => {
-    if (routeLocale && routeLocale !== language) setLanguage(routeLocale);
+    if (routeLocale && isPublicTemplateLocaleEnabled(routeLocale) && routeLocale !== language) setLanguage(routeLocale);
   }, [language, routeLocale, setLanguage]);
 
+  if (routeLocale && !isPublicTemplateLocaleEnabled(routeLocale)) {
+    return <Navigate replace to={localizeLocation(location, 'ar')} />;
+  }
   if (!routeLocale) {
-    const targetLocale = resolveLegacyPublicLocale(localStorage.getItem('manaratak_lang'));
+    const preferredLocale = resolveLegacyPublicLocale(readStoredLocale());
+    const targetLocale = isPublicTemplateLocaleEnabled(preferredLocale) ? preferredLocale : 'ar';
     return <Navigate replace to={localizeLocation(location, targetLocale)} />;
   }
+
+  // Wait for the URL-authoritative locale before mounting readers or metadata.
+  if (routeLocale !== language) return <PageLoadingFallback />;
 
   const localeRelativePath = location.pathname.replace(/^\/(?:ar|en)(?=\/|$)/, '') || '/';
   const isCanonicalAdminPath =

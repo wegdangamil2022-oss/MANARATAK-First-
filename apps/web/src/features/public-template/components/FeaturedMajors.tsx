@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { Major } from '../types';
 import { Sparkles, ChevronLeft, GraduationCap } from 'lucide-react';
@@ -16,31 +17,33 @@ interface DegreeCategory {
 }
 
 export const FeaturedMajors: React.FC<FeaturedMajorsProps> = ({ onViewAllClick }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const DEGREE_CATEGORIES: DegreeCategory[] = [
     {
       id: 'bachelors',
-      title: 'البكالوريوس',
+      title: publicT('public_bachelors_2'),
       count: 840,
       imageUrl:
         'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80',
     },
     {
       id: 'masters',
-      title: 'الماجستير',
+      title: publicT('public_masters_2'),
       count: 1114,
       imageUrl:
         'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80',
     },
     {
       id: 'phd',
-      title: 'الدكتوراه',
+      title: publicT('public_doctorate_2'),
       count: 1116,
       imageUrl:
         'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80',
     },
     {
       id: 'fellowships',
-      title: 'الزمالات',
+      title: publicT('public_fellowships'),
       count: 360,
       imageUrl:
         'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&q=80',
@@ -66,13 +69,11 @@ export const FeaturedMajors: React.FC<FeaturedMajorsProps> = ({ onViewAllClick }
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
                   <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" />
                 </span>
-                <span>ابحث عن تخصصك</span>
+                <span>{publicT('public_find_your_major')}</span>
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">
-              اختر الدرجة العلمية التي تطمح للوصول إليها وتعرف على التخصصات المتاحة لها.
-            </p>
+            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_choose_the_degree_you_aspire_to_and_explore')}</p>
           </div>
 
           {/* 2x2 Grid for Degree Categories with Images */}
@@ -109,8 +110,7 @@ export const FeaturedMajors: React.FC<FeaturedMajorsProps> = ({ onViewAllClick }
                       {category.title}
                     </h4>
                     <p className="text-[8.5px] sm:text-[9.5px] font-bold text-[var(--mn-accent-text)] line-clamp-1 font-['Cairo',sans-serif]">
-                      {category.count} تخصص
-                    </p>
+                      {category.count}{' '}{publicT('public_major')}</p>
                   </div>
                 </div>
               </div>
@@ -124,7 +124,7 @@ export const FeaturedMajors: React.FC<FeaturedMajorsProps> = ({ onViewAllClick }
               onClick={onViewAllClick}
               className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
             >
-              <span className="text-[12px] sm:text-sm font-bold">تصفح جميع التخصصات</span>
+              <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_all_majors')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
             </button>
           </div>

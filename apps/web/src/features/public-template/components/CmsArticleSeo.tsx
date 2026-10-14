@@ -1,3 +1,4 @@
+import { PUBLIC_TEMPLATE_LOCALES } from '@manaratak/shared';
 import { useEffect } from 'react';
 import type { PublicArticle } from '../types';
 
@@ -24,16 +25,18 @@ export function cmsArticleSeoProjection(article: PublicArticle, baseUrl: string)
   };
   const canonical = path(seo.locale, article.slug);
   if (canonical !== article.canonicalUrl) return null;
-  const alternates = seo.availableLocales.map((entry) => ({
-    locale: entry.locale,
-    href: origin.origin + path(entry.locale, entry.slug),
-  }));
+  const alternates = seo.availableLocales
+    .filter((entry) => PUBLIC_TEMPLATE_LOCALES.some((locale) => locale === entry.locale))
+    .map((entry) => ({
+      locale: entry.locale,
+      href: origin.origin + path(entry.locale, entry.slug),
+    }));
   if (new Set(alternates.map((entry) => entry.locale)).size !== alternates.length) return null;
   return {
     title: `${seo.title} | MANARATAK`,
     description: seo.description,
     canonical: origin.origin + canonical,
-    robots: `${seo.noIndex ? 'noindex' : 'index'},${seo.noFollow ? 'nofollow' : 'follow'}`,
+    robots: `${seo.noIndex || !PUBLIC_TEMPLATE_LOCALES.some((locale) => locale === seo.locale) ? 'noindex' : 'index'},${seo.noFollow ? 'nofollow' : 'follow'}`,
     locale: seo.locale,
     alternates,
     updatedAt: article.updatedAt,

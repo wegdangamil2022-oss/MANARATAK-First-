@@ -1,3 +1,4 @@
+import { PUBLIC_TEMPLATE_LOCALES } from '@manaratak/shared';
 import { NextFunction, Request, Response, Router } from 'express';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
@@ -199,6 +200,12 @@ export class CmsPublicRouter {
           .strict()
           .parse(req.query);
         const [, locale, , slug] = path.split('/');
+        if (!PUBLIC_TEMPLATE_LOCALES.some(enabled => enabled === locale)) {
+          res.set({'X-Robots-Tag':'noindex, nofollow','Cache-Control':'private, no-store, must-revalidate'});
+          res.status(404).end();
+          return;
+        }
+
         const redirect = await publicCmsUseCases.resolveRedirect('manaratak', locale, path);
         if (redirect) {
           if (
@@ -239,6 +246,12 @@ export class CmsPublicRouter {
           .strict()
           .parse(req.query);
         const locale = path.split('/')[1];
+        if (!PUBLIC_TEMPLATE_LOCALES.some(enabled => enabled === locale)) {
+          res.set({'X-Robots-Tag':'noindex, nofollow','Cache-Control':'private, no-store, must-revalidate'});
+          res.status(404).end();
+          return;
+        }
+
         const result = await publicCmsUseCases.resolveRedirect('manaratak', locale, path);
         if (!result) {
           res.status(404).end();

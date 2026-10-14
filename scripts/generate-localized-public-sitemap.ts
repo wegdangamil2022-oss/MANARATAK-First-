@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import {
-  SUPPORTED_LOCALES,
+  PUBLIC_TEMPLATE_LOCALES,
   type SupportedLocale,
 } from '@manaratak/shared';
 import { localizePathname } from '../apps/web/src/i18n/localeRouting';
@@ -23,7 +23,7 @@ export function generateLocalizedPublicSitemap(baseUrlInput: string): string {
   const baseUrl = normalizePublicBaseUrl(baseUrlInput);
 
   const urls = STATIC_INDEXABLE_PUBLIC_PATHS.flatMap((pathname) =>
-    SUPPORTED_LOCALES.map((locale) =>
+    PUBLIC_TEMPLATE_LOCALES.map((locale) =>
       buildUrlEntry(baseUrl, pathname, locale),
     ),
   );
@@ -51,7 +51,7 @@ function buildUrlEntry(
     '  <url>',
     `    <loc>${escapeXml(current)}</loc>`,
     `    <xhtml:link rel="alternate" hreflang="ar" href="${escapeXml(ar)}" />`,
-    `    <xhtml:link rel="alternate" hreflang="en" href="${escapeXml(en)}" />`,
+    ...(PUBLIC_TEMPLATE_LOCALES.includes('en') ? [`    <xhtml:link rel="alternate" hreflang="en" href="${escapeXml(en)}" />`] : []),
     `    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(ar)}" />`,
     '  </url>',
   ].join('\n');

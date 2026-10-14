@@ -1,3 +1,4 @@
+import { PUBLIC_TEMPLATE_LOCALES } from '@manaratak/shared';
 import { CmsPublishingPolicy, PublicCmsContentDto, PublicCmsBlockDto } from '@manaratak/domain';
 import { cmsPublicOrigin } from './CmsSeoSitemap';
 
@@ -19,6 +20,8 @@ export function renderCmsPublishedPage(
   if (content.siteIdentifier !== 'manaratak' || !['ar', 'en'].includes(content.locale)) {
     throw new Error('CMS_PAGE_SCOPE_INVALID');
   }
+  if (!PUBLIC_TEMPLATE_LOCALES.some((locale) => locale === content.locale))
+    throw new Error('CMS_PUBLIC_LOCALE_NOT_RELEASED');
   const canonical = CmsPublishingPolicy.canonicalPath(
     content.locale,
     content.contentType,
@@ -39,6 +42,8 @@ export function renderCmsPublishedPage(
       origin + CmsPublishingPolicy.canonicalPath(entry.locale, content.contentType, entry.slug),
     );
   }
+  for (const locale of languages.keys())
+    if (!PUBLIC_TEMPLATE_LOCALES.some((enabled) => enabled === locale)) languages.delete(locale);
   const alternates = [...languages]
     .map(([locale, url]) => `<link rel="alternate" hreflang="${locale}" href="${escape(url)}">`)
     .join('\n');

@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   HeartHandshake,
@@ -799,6 +800,8 @@ const GOVERNORATES_2026_DATA: GovernorateSeats[] = [
 ];
 
 function GovernoratesSeatsAccordion() {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [openIds, setOpenIds] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   // Sort modes: "desc_seats" (الأكثر مقاعداً), "official" (الترتيب الرسمي 1-22), "asc_seats" (الأقل مقاعداً)
@@ -880,7 +883,7 @@ function GovernoratesSeatsAccordion() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ابحث عن محافظة (مثال: عدن، تعز)..."
+            placeholder={publicT('public_course_search_for_a_governorate_e_g_aden_taiz_140')}
             className="w-full pr-8 pl-3 py-1.5 text-[12px] font-bold font-['Cairo',sans-serif] rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-text)] placeholder:text-[var(--mn-text-muted)] focus:outline-none focus:border-[#142B5F] dark:focus:border-[#F2CD78] transition-colors"
           />
           <Search className="w-4 h-4 text-[var(--mn-text-muted)] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -898,10 +901,10 @@ function GovernoratesSeatsAccordion() {
                   ? "bg-[#142B5F] text-white dark:bg-[#F2CD78] dark:text-[#142B5F]"
                   : "text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)]"
               }`}
-              title="ترتيب تنازلي من الأكثر مقاعداً إلى الأقل"
+              title={publicT('public_course_sort_by_number_of_places_highest_first_141')}
             >
               <ArrowDownNarrowWide className="w-3.5 h-3.5" />
-              <span>الأكثر عدداً</span>
+              <span>{publicT('public_course_most_places_142')}</span>
             </button>
             <button
               type="button"
@@ -911,9 +914,9 @@ function GovernoratesSeatsAccordion() {
                   ? "bg-[#142B5F] text-white dark:bg-[#F2CD78] dark:text-[#142B5F]"
                   : "text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)]"
               }`}
-              title="الترتيب حسب كشف الوزارة الرسمي"
+              title={publicT('public_course_sort_by_the_ministrys_official_list_143')}
             >
-              <span>الترتيب الرسمي</span>
+              <span>{publicT('public_course_official_order_144')}</span>
             </button>
           </div>
 
@@ -923,16 +926,12 @@ function GovernoratesSeatsAccordion() {
               type="button"
               onClick={expandAll}
               className="px-2.5 py-1 rounded-md border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] text-[12px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)] transition-colors cursor-pointer"
-            >
-              فتح الكل
-            </button>
+            >{publicT('public_course_expand_all_145')}{' '}</button>
             <button
               type="button"
               onClick={collapseAll}
               className="px-2.5 py-1 rounded-md border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] text-[12px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)] transition-colors cursor-pointer"
-            >
-              طي الكل
-            </button>
+            >{publicT('public_course_collapse_all_146')}{' '}</button>
           </div>
         </div>
       </div>
@@ -940,9 +939,7 @@ function GovernoratesSeatsAccordion() {
       {/* Governorates List */}
       <div className="divide-y divide-[var(--mn-border)]">
         {filtered.length === 0 ? (
-          <div className="p-6 text-center text-[12px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text-muted)]">
-            لا توجد محافظة تطابق بحثك.
-          </div>
+          <div className="p-6 text-center text-[12px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text-muted)]">{publicT('public_course_no_governorate_matches_your_search_147')}{' '}</div>
         ) : (
           filtered.map((gov, index) => {
             const isOpen = openIds.includes(gov.id);
@@ -973,9 +970,7 @@ function GovernoratesSeatsAccordion() {
                         {gov.name}
                       </span>
                       {gov.isSpecialCategory && (
-                        <span className="px-1.5 py-0.2 rounded text-[10px] font-bold font-[Cairo,sans-serif] bg-white/20 text-white dark:bg-[#F2CD78]/20 dark:text-[#F2CD78]">
-                          خارج
-                        </span>
+                        <span className="px-1.5 py-0.2 rounded text-[10px] font-bold font-[Cairo,sans-serif] bg-white/20 text-white dark:bg-[#F2CD78]/20 dark:text-[#F2CD78]">{publicT('public_course_abroad_148')}{' '}</span>
                       )}
                     </div>
 
@@ -983,24 +978,20 @@ function GovernoratesSeatsAccordion() {
                     <div className="flex items-center flex-wrap gap-1.5 text-[11.5px] font-bold font-[Cairo,sans-serif]">
                       {/* Total badge */}
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-bold font-[Cairo,sans-serif] bg-[#142B5F]/10 text-[#142B5F] dark:bg-[#F2CD78]/15 dark:text-[#F2CD78] border border-[#142B5F]/20 dark:border-[var(--mn-border)]">
-                        <span className="font-mono ml-1">{totalAll}</span> إجمالي
-                      </span>
+                        <span className="font-mono ml-1">{totalAll}</span>{' '}{publicT('public_course_total_149')}{' '}</span>
 
                       {/* Bachelor badge */}
                       <span className="inline-flex items-center px-2 py-0.5 rounded-md font-bold font-[Cairo,sans-serif] bg-[var(--mn-surface)] text-[var(--mn-text)] border border-[var(--mn-border)]">
-                        <span className="font-mono ml-1">{gov.bachelorTotal}</span> بكالوريوس
-                      </span>
+                        <span className="font-mono ml-1">{gov.bachelorTotal}</span>{' '}{publicT('public_course_bachelors_150')}{' '}</span>
 
                       {/* Master badge */}
                       <span className="inline-flex items-center px-2 py-0.5 rounded-md font-bold font-[Cairo,sans-serif] bg-[var(--mn-surface)] text-[var(--mn-text)] border border-[var(--mn-border)]">
-                        <span className="font-mono ml-1">{gov.masterTotal}</span> ماجستير
-                      </span>
+                        <span className="font-mono ml-1">{gov.masterTotal}</span>{' '}{publicT('public_course_masters_151')}{' '}</span>
 
                       {/* Medicine badge */}
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold font-[Cairo,sans-serif] bg-[var(--mn-surface)] text-[#142B5F] dark:text-[#F2CD78] border border-[var(--mn-border)]">
                         <Stethoscope className="w-3 h-3 text-[#D6A43B]" />
-                        <span className="font-mono ml-0.5">{gov.medicineTotal}</span> طب
-                      </span>
+                        <span className="font-mono ml-0.5">{gov.medicineTotal}</span>{' '}{publicT('public_course_medicine_152')}{' '}</span>
                     </div>
                   </div>
 
@@ -1084,9 +1075,7 @@ function GovernoratesSeatsAccordion() {
                             ))}
                           </div>
                         ) : (
-                          <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text-muted)] italic">
-                            لا توجد مقاعد ماجستير مخصصة في هذه الدورة
-                          </p>
+                          <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text-muted)] italic">{publicT('public_course_no_masters_places_allocated_in_this_round_159')}{' '}</p>
                         )}
                       </div>
 
@@ -1109,9 +1098,7 @@ function GovernoratesSeatsAccordion() {
                             ))}
                           </div>
                         ) : (
-                          <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text-muted)] italic">
-                            لا توجد مقاعد طب بشري مخصصة في هذه الدورة
-                          </p>
+                          <p className="text-[11.5px] font-bold font-['Cairo',sans-serif] text-[var(--mn-text-muted)] italic">{publicT('public_course_no_medical_places_allocated_in_this_round_161')}{' '}</p>
                         )}
                       </div>
                     </div>
@@ -1135,6 +1122,8 @@ export function CourseStudyRoomView({
   onBack: () => void;
   onRestrictedAction?: (msg?: string) => void;
 }) {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [openLectureId, setOpenLectureId] = useState<number>(1);
   const [activeItemId, setActiveItemId] = useState<string>('');
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string>('');
@@ -1359,17 +1348,16 @@ export function CourseStudyRoomView({
               data-mn-design="346df39503"
             >
               <ArrowRight className="w-3.5 h-3.5 shrink-0" />
-              <span className="leading-none">العودة لقائمة المحاضرات</span>
+              <span className="leading-none">{publicT('public_course_back_to_lecture_list_162')}</span>
             </button>
             
             <div className="text-center hidden sm:block">
-              <span className="text-[10px] text-white/60 block font-bold">المحاضرة {activeLecture.id}: {activeLecture.title}</span>
+              <span className="text-[10px] text-white/60 block font-bold">{publicT('public_course_lecture_163')}{' '}{activeLecture.id}: {activeLecture.title}</span>
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--mn-learning-success-400)] animate-pulse" />
-              <span className="text-[8.5px] font-bold text-[var(--mn-learning-success-400)] bg-[var(--mn-learning-success-500)]/10 px-1.5 py-0.5 rounded border border-[var(--mn-learning-success-500)]/20 font-['Cairo',sans-serif]">
-                مكتمل: {completedLessonsInLecture}/{totalLessonsInLecture}
+              <span className="text-[8.5px] font-bold text-[var(--mn-learning-success-400)] bg-[var(--mn-learning-success-500)]/10 px-1.5 py-0.5 rounded border border-[var(--mn-learning-success-500)]/20 font-['Cairo',sans-serif]">{publicT('public_course_completed_164')}{' '}{completedLessonsInLecture}/{totalLessonsInLecture}
               </span>
             </div>
           </div>
@@ -1423,7 +1411,7 @@ export function CourseStudyRoomView({
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#142B5F]/85 backdrop-blur-md border border-[#D6A43B]/50 text-[#F2CD78] text-[9.5px] sm:text-[10.5px] font-bold shadow-xs">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <span>محاضرة مسجلة • 1080p FHD</span>
+                  <span>{publicT('public_course_recorded_lecture_1080p_fhd_165')}</span>
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -1437,9 +1425,7 @@ export function CourseStudyRoomView({
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center z-10">
               {/* Lecture Title & Platform Watermark */}
               <div className="max-w-md mx-auto mb-2.5 sm:mb-3.5 px-2">
-                <span className="text-[10px] sm:text-[11px] font-bold text-[#D6A43B] tracking-wider block mb-1">
-                  منصة منارتك التعليمية • مساق المنح والقبولات
-                </span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-[#D6A43B] tracking-wider block mb-1">{publicT('public_course_manaratak_learning_platform_scholarships_and_admission_course_166')}{' '}</span>
                 <h3 className="text-white text-xs sm:text-base font-bold font-['Cairo',sans-serif] leading-snug drop-shadow-md">
                   {activeItem.title}
                 </h3>
@@ -1455,7 +1441,7 @@ export function CourseStudyRoomView({
 
               <div className="mt-2.5 sm:mt-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/55 backdrop-blur-md border border-white/15 text-white/90 text-[10px] font-bold">
                 <Play className="w-3 h-3 text-[#D6A43B] fill-[#D6A43B] rotate-180" />
-                <span>انقر لتشغيل المحاضرة</span>
+                <span>{publicT('public_course_click_to_play_the_lecture_167')}</span>
               </div>
             </div>
 
@@ -1486,12 +1472,8 @@ export function CourseStudyRoomView({
                 <div className="w-12 h-12 rounded-full bg-red-500/20 border-2 border-red-500/60 flex items-center justify-center mb-2.5 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.5)]">
                   <Lock className="w-6 h-6" />
                 </div>
-                <h4 className="text-white font-bold text-sm sm:text-base font-['Cairo',sans-serif]">
-                  ليس لديك صلاحية لتشغيل هذا الفيديو
-                </h4>
-                <p className="text-white/70 text-xs mt-1.5 font-['Cairo',sans-serif] max-w-xs leading-relaxed">
-                  هذا المحتوى مقفل ومتاح فقط للطلاب المشتركين في الدورة التدريبية.
-                </p>
+                <h4 className="text-white font-bold text-sm sm:text-base font-['Cairo',sans-serif]">{publicT('public_course_you_do_not_have_permission_to_play_this_168')}{' '}</h4>
+                <p className="text-white/70 text-xs mt-1.5 font-['Cairo',sans-serif] max-w-xs leading-relaxed">{publicT('public_course_this_content_is_locked_and_available_only_to_169')}{' '}</p>
               </div>
             )}
           </div>
@@ -1517,8 +1499,7 @@ export function CourseStudyRoomView({
               <h2 className="text-[13px] sm:text-sm font-bold text-[var(--mn-heading)] leading-snug font-['Cairo',sans-serif]">
                 {activeItem.title}
               </h2>
-              <p className="text-[11px] sm:text-xs font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-relaxed break-words">
-                المحاضرة {activeLecture.id}: {activeLecture.title}
+              <p className="text-[11px] sm:text-xs font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-relaxed break-words">{publicT('public_course_lecture_163')}{' '}{activeLecture.id}: {activeLecture.title}
               </p>
             </div>
           </div>
@@ -9189,9 +9170,7 @@ export function CourseStudyRoomView({
               type="button"
               onClick={() => setActiveItemId('')}
               className="w-full sm:w-auto px-3.5 py-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)] text-[11.5px] font-bold text-[var(--mn-heading)] transition-all cursor-pointer text-center font-['Cairo',sans-serif] shadow-2xs"
-            >
-              العودة لمنهج المحاضرات
-            </button>
+            >{publicT('public_course_back_to_course_syllabus_1123')}{' '}</button>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
@@ -9202,7 +9181,7 @@ export function CourseStudyRoomView({
                 className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer border flex items-center justify-center gap-1.5 font-['Cairo',sans-serif] shadow-2xs bg-[var(--mn-learning-success-600)] hover:bg-[var(--mn-learning-success-700)] text-white border-[var(--mn-learning-success-600)]"
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>تحديد كمكتمل</span>
+                <span>{publicT('public_course_mark_as_completed_1124')}</span>
               </button>
 
               {nextLesson && (
@@ -9218,7 +9197,7 @@ export function CourseStudyRoomView({
                   }}
                   className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#142B5F] to-[#1E3B7D] hover:from-[#1E3B7D] hover:to-[#2A4E9E] text-[#F2CD78] text-[11px] font-bold border border-[#D6A43B]/30 shadow-2xs transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 font-['Cairo',sans-serif]"
                 >
-                  <span>الذهاب للدرس التالي</span>
+                  <span>{publicT('public_course_go_to_next_lesson_1125')}</span>
                   <ArrowLeft className="w-3.5 h-3.5 rotate-180 text-[#D6A43B]" />
                 </button>
               )}
@@ -9257,8 +9236,8 @@ export function CourseStudyRoomView({
           type="button"
           onClick={onBack}
           className="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 bg-black/25 hover:bg-black/40 border border-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all z-30 cursor-pointer text-white shadow-xs active:scale-95"
-          title="العودة"
-          aria-label="العودة"
+          title={publicT('public_course_back_20')}
+          aria-label={publicT('public_course_back_20')}
         >
           <ArrowRight className="w-4 h-4 text-white" />
         </button>
@@ -9267,12 +9246,8 @@ export function CourseStudyRoomView({
         <div className="max-w-xl mx-auto text-center relative z-10 space-y-2.5 pt-4 sm:pt-6 pb-1">
           {/* Main Title */}
           <div>
-            <span className="text-[15px] font-bold text-[var(--mn-accent-soft)] font-['Cairo',sans-serif] tracking-normal block mb-1">
-              منصة منارتك التعليمية
-            </span>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold text-white font-['Cairo',sans-serif] leading-snug">
-              الدورة التدريبية للمنح الدراسية والقبولات الجامعية
-            </h1>
+            <span className="text-[15px] font-bold text-[var(--mn-accent-soft)] font-['Cairo',sans-serif] tracking-normal block mb-1">{publicT('public_course_manaratak_learning_platform_1126')}{' '}</span>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold text-white font-['Cairo',sans-serif] leading-snug">{publicT('public_course_scholarship_and_university_admission_training_course_1127')}{' '}</h1>
           </div>
 
           {/* Golden Line Underneath */}
@@ -9286,12 +9261,10 @@ export function CourseStudyRoomView({
           <div className="bg-white/10 dark:bg-black/30 border border-white/15 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 space-y-2.5 mt-2">
             <div className="flex items-center justify-between gap-2 text-xs font-bold text-white font-['Cairo',sans-serif]">
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] text-white/90">نسبة التقدم:</span>
-                <span className="text-[var(--mn-accent-soft)] mn-font-title text-xs">0% مكتمل</span>
+                <span className="text-[11px] text-white/90">{publicT('public_course_progress_1128')}</span>
+                <span className="text-[var(--mn-accent-soft)] mn-font-title text-xs">{publicT('public_course_0_completed_1129')}</span>
               </div>
-              <span className="text-[10.5px] font-bold text-[var(--mn-learning-success-300)] bg-[var(--mn-learning-success-900)]/60 border border-[var(--mn-learning-success-400)]/30 px-2.5 py-0.5 rounded-full">
-                المحاضرة 1 من 7
-              </span>
+              <span className="text-[10.5px] font-bold text-[var(--mn-learning-success-300)] bg-[var(--mn-learning-success-900)]/60 border border-[var(--mn-learning-success-400)]/30 px-2.5 py-0.5 rounded-full">{publicT('public_course_lecture_1_of_7_1130')}{' '}</span>
             </div>
 
             {/* Progress Bar */}
@@ -9313,7 +9286,7 @@ export function CourseStudyRoomView({
                 className="w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#D6A43B] to-[#F3CE74] hover:brightness-110 text-[#142B5F] text-[13px] font-bold font-['Cairo',sans-serif] shadow-2xs transition-transform active:scale-95 cursor-pointer"
               >
                 <Play className="w-3.5 h-3.5 text-[#142B5F] fill-[#142B5F]" />
-                <span>متابعة الدرس</span>
+                <span>{publicT('public_course_continue_lesson_1131')}</span>
               </button>
             </div>
           </div>
@@ -9329,16 +9302,12 @@ export function CourseStudyRoomView({
                 <BookOpen className="w-4 h-4 text-[#D6A43B] fill-[#D6A43B]" />
               </div>
               <div className="flex flex-col">
-                <h2 className="text-sm sm:text-base mn-font-emphasis text-[var(--mn-heading)] leading-none">
-                  قائمة المحاضرات والدروس
-                </h2>
+                <h2 className="text-sm sm:text-base mn-font-emphasis text-[var(--mn-heading)] leading-none">{publicT('public_course_lecture_and_lesson_list_1132')}{' '}</h2>
                 <div className="w-12 h-0.5 bg-[#D6A43B] rounded-full mt-1.5" />
               </div>
             </div>
 
-            <span className="text-[10px] font-bold text-[var(--mn-primary)] dark:text-[var(--mn-accent-soft)] bg-[var(--mn-page)] px-2.5 py-1 rounded-lg border border-[var(--mn-border)]">
-              7 محاضرات
-            </span>
+            <span className="text-[10px] font-bold text-[var(--mn-primary)] dark:text-[var(--mn-accent-soft)] bg-[var(--mn-page)] px-2.5 py-1 rounded-lg border border-[var(--mn-border)]">{publicT('public_course_7_lectures_1133')}{' '}</span>
           </div>
 
           {/* 7 Lectures List */}
@@ -9379,19 +9348,16 @@ export function CourseStudyRoomView({
                             {lecture.title}
                           </h3>
                           {isCurrentLecture ? (
-                            <span className="text-[9px] font-bold text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-300)] bg-[var(--mn-learning-success-50)] dark:bg-[var(--mn-learning-success-950)]/60 px-1.5 py-0.2 rounded-md border border-[var(--mn-learning-success-300)]/40 shrink-0">
-                              متاحة للقراءة
-                            </span>
+                            <span className="text-[9px] font-bold text-[var(--mn-learning-success-700)] dark:text-[var(--mn-learning-success-300)] bg-[var(--mn-learning-success-50)] dark:bg-[var(--mn-learning-success-950)]/60 px-1.5 py-0.2 rounded-md border border-[var(--mn-learning-success-300)]/40 shrink-0">{publicT('public_course_available_to_read_1134')}{' '}</span>
                           ) : (
                             <span className="text-[9px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-300/40 shrink-0 flex items-center gap-1">
                               <Lock className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
-                              <span>مغلقة</span>
+                              <span>{publicT('public_course_locked_1135')}</span>
                             </span>
                           )}
                         </div>
                         <span className="text-[10px] text-[var(--mn-text-muted)] block mt-0.5">
-                          {lecture.items.length} دروس وعناصر تعليمية
-                        </span>
+                          {lecture.items.length}{' '}{publicT('public_course_lessons_and_learning_items_1136')}{' '}</span>
                       </div>
                     </div>
 
@@ -9460,7 +9426,7 @@ export function CourseStudyRoomView({
                                 {isLocked && (
                                   <span className="text-[9px] font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-300/40 shrink-0 flex items-center gap-1">
                                     <Lock className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
-                                    <span>مغلق</span>
+                                    <span>{publicT('public_course_locked_1137')}</span>
                                   </span>
                                 )}
                               </div>

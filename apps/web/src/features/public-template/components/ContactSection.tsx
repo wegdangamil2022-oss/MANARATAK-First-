@@ -1,7 +1,10 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { ChevronLeft, Globe2 } from 'lucide-react';
 
 export const ContactSection: React.FC<{onOpen: () => void}> = ({onOpen}) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   return (
     <section id="contact-section" className="px-0 py-3 w-full font-['Cairo',sans-serif]">
       {/* Standard Framed Container matching FeaturedJobs section */}
@@ -16,15 +19,13 @@ export const ContactSection: React.FC<{onOpen: () => void}> = ({onOpen}) => {
               <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
                 <Globe2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" />
               </span>
-              <span>نحن دائماً بالقرب منك</span>
+              <span>{publicT('public_we_are_always_close_by')}</span>
             </h3>
             <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
           </div>
 
           {/* Description Text */}
-          <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-xl mx-auto leading-relaxed mt-1 mb-4 sm:mb-5">
-            شبكة واسعة من الفروع والوكلاء المعتمدين حول العالم لخدمتك، وتقديم الدعم الفني والاستشارات الأكاديمية أينما كنت.
-          </p>
+          <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-xl mx-auto leading-relaxed mt-1 mb-4 sm:mb-5">{publicT('public_a_wide_network_of_branches_and_authorized_agents')}</p>
 
           {/* Action Button */}
           <button
@@ -32,7 +33,7 @@ export const ContactSection: React.FC<{onOpen: () => void}> = ({onOpen}) => {
             onClick={onOpen}
             className="group inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs cursor-pointer"
           >
-            <span className="text-xs sm:text-sm font-bold">عرض تفاصيل الاتصال والوكلاء</span>
+            <span className="text-xs sm:text-sm font-bold">{publicT('public_view_contact_and_agent_details')}</span>
             <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
           </button>
         </div>

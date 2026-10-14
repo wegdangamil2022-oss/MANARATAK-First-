@@ -147,9 +147,7 @@ describe('CmsPublicRouter', () => {
       expect(response.status).toBe(200);
       expect(response.headers['content-type']).toMatch(/application\/xml/);
       expect(response.text).toContain('<loc>https://manaratak.example/ar/news/arabic-news</loc>');
-      expect(response.text).toContain(
-        'hreflang="en" href="https://manaratak.example/en/news/english-news"',
-      );
+      expect(response.text).not.toContain('hreflang="en"');
       expect(response.headers['cache-control']).toContain('must-revalidate');
       const notModified = await request(server)
         .get('/cms/sitemap.xml')
@@ -266,4 +264,16 @@ describe('CmsPublicRouter', () => {
     expect(second.status).toBe(304);
     expect(second.text).toBe('');
   });
+  it('rejects gated English HTML and redirects before canonical owner reads',async()=>{
+    const cms=createUseCases();const server=createApp(cms);
+    for(const endpoint of ['pages/http-resolve','redirects/http-resolve']){
+      const response=await request(server).get('/cms/'+endpoint+'?path=/en/news/english-news');
+      expect(response.status).toBe(404);
+      expect(response.headers['x-robots-tag']).toBe('noindex, nofollow');
+      expect(response.headers['cache-control']).toContain('no-store');
+    }
+    expect(cms.getBySlug).not.toHaveBeenCalled();
+    expect(cms.resolveRedirect).not.toHaveBeenCalled();
+  });
+
 });

@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { BookOpenText, ChevronLeft } from 'lucide-react';
 import { RelatedArticleRef } from '../types';
@@ -9,6 +10,8 @@ interface RelatedArticlesStripProps {
 }
 
 export const RelatedArticlesStrip: React.FC<RelatedArticlesStripProps> = ({ articles, onOpenArticle, compact = false }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   if (!articles || articles.length === 0) return null;
   return (
     <section className={`rounded-2xl border border-[var(--mn-border-brand)]/25 bg-[var(--mn-surface)] shadow-sm  mn-panel ${compact ? 'p-3' : 'p-3.5'}`}>
@@ -17,8 +20,8 @@ export const RelatedArticlesStrip: React.FC<RelatedArticlesStripProps> = ({ arti
           <BookOpenText className="h-4 w-4" />
         </div>
         <div>
-          <h3 className="text-[11px] font-bold text-[var(--mn-heading)]">مقالات وأدلة مرتبطة</h3>
-          <p className="text-[8.5px] font-semibold text-[var(--mn-text-muted)]">محتوى تحريري يساعدك على فهم المتطلبات والسياق</p>
+          <h3 className="text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_related_articles_and_guides')}</h3>
+          <p className="text-[8.5px] font-semibold text-[var(--mn-text-muted)]">{publicT('public_editorial_content_to_help_you_understand_requirements_and')}</p>
         </div>
       </div>
       <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -28,10 +31,10 @@ export const RelatedArticlesStrip: React.FC<RelatedArticlesStripProps> = ({ arti
             type="button"
             onClick={() => onOpenArticle?.(article.id)}
             disabled={!onOpenArticle}
-            className="min-w-[220px] max-w-[260px] rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-right transition enabled:hover:border-[var(--mn-accent)] enabled:active:scale-[0.99] mn-panel "
+            className="min-w-[220px] max-w-[260px] rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-start transition enabled:hover:border-[var(--mn-accent)] enabled:active:scale-[0.99] mn-panel "
           >
             <div className="flex items-center gap-1.5 text-[8px] font-bold text-[var(--mn-accent-text)]">
-              <span>{article.typeLabel || 'مقال'}</span>
+              <span>{article.typeLabel || publicT('public_article')}</span>
               {article.category && <span className="text-[var(--mn-text-muted)]">• {article.category}</span>}
             </div>
             <p className="mt-1 text-[10px] font-bold leading-5 text-[var(--mn-heading)] line-clamp-2">{article.title}</p>

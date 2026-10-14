@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import { searchPublishedMajors } from '../publicLiveDataSource';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
@@ -34,6 +35,8 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
   favoriteIds = [],
   onToggleFavorite,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFaculty, setSelectedFaculty] = useState('الكل');
@@ -88,7 +91,7 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
   return (
     <div
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
-      dir="rtl"
+      dir={publicDir}
     >
       {/* ========================================================================= */}
       {/* HERO EMERALD CURVED BANNER */}
@@ -99,8 +102,8 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
           <button
             onClick={onBack}
             className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-8 h-8 bg-black/25 hover:bg-black/40 border border-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all z-30 cursor-pointer text-white shadow-xs active:scale-95"
-            title="العودة"
-            aria-label="العودة"
+            title={publicT('public_back')}
+            aria-label={publicT('public_back')}
           >
             <ChevronLeft className="w-4 h-4 rotate-180 text-white" />
           </button>
@@ -144,10 +147,8 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
           {/* Headline with Gold Curve */}
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight">
-              <span>ابحث عن </span>
-              <span className="relative inline-block text-white">
-                تخصصك الأكاديمي
-                {/* Gold brush accent line underneath */}
+              <span>{publicT('public_find')}{' '}</span>
+              <span className="relative inline-block text-white">{publicT('public_your_academic_major')}{/* Gold brush accent line underneath */}
                 <svg
                   className="absolute -bottom-1.5 inset-x-0 w-full h-2 text-[var(--mn-accent-text)]"
                   viewBox="0 0 100 12"
@@ -165,9 +166,7 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
             </h1>
 
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] mt-1.5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">
-              تصفح التخصصات المتاحة وتعرف على الكليات والدرجات العلمية المناسبة لطموحك
-            </p>
+            <p className="text-[11px] sm:text-xs text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] mt-1.5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">{publicT('public_browse_available_majors_and_discover_faculties_and_degrees')}</p>
           </div>
 
           {/* Integrated Search Bar in Hero */}
@@ -177,7 +176,7 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث باسم التخصص، الكلية، الوظيفة..."
+                placeholder={publicT('public_search_by_major_faculty_or_job')}
                 className="w-full py-2 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[11px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[11px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
                 data-mn-design="8bba664dec"
               />
@@ -201,7 +200,7 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
               className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-danger-soft)] hover:bg-[var(--mn-danger-soft)] px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif]"
             >
               <RotateCcw className="w-3 h-3" />
-              <span>إعادة ضبط الفلاتر ({activeFiltersCount})</span>
+              <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>
             </button>
           </div>
         )}
@@ -219,11 +218,11 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
               <div className="flex items-center gap-1 text-[var(--mn-heading)] font-bold text-[10px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight">
                 <Layers className="w-3 h-3 text-[var(--mn-accent-text)]" />
                 <span className="truncate">
-                  {selectedFaculty === 'الكل' ? 'اختر الكلية' : selectedFaculty}
+                  {selectedFaculty === 'الكل' ? publicT('public_choose_faculty') : selectedFaculty}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-1" />
-              <input aria-label="الكلية أو المجال الأكاديمي" list="major-field-suggestions" value={selectedFaculty==='الكل'?'':selectedFaculty} onChange={event=>setSelectedFaculty(event.target.value||'الكل')} className="mt-2 w-full rounded border p-1 text-xs" placeholder="اكتب الكلية أو المجال" />
+              <input aria-label={publicT('public_faculty_or_academic_domain')} list="major-field-suggestions" value={selectedFaculty==='الكل'?'':selectedFaculty} onChange={event=>setSelectedFaculty(event.target.value||'الكل')} className="mt-2 w-full rounded border p-1 text-xs" placeholder={publicT('public_enter_a_faculty_or_domain')} />
               <datalist id="major-field-suggestions">{faculties.filter(value=>value!=='الكل').map(value=><option key={value} value={value}/>)}</datalist>
             </div>
 
@@ -232,7 +231,7 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
               <div className="flex items-center gap-1 text-[var(--mn-heading)] font-bold text-[10px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight">
                 <GraduationCap className="w-3 h-3 text-[var(--mn-accent-text)]" />
                 <span className="truncate">
-                  {selectedDegree === 'الكل' ? 'الدرجة العلمية' : selectedDegree}
+                  {selectedDegree === 'الكل' ? publicT('public_degree_2') : selectedDegree}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-1" />
@@ -240,11 +239,11 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
                 value={selectedDegree}
                 onChange={(e) => setSelectedDegree(e.target.value)}
                 className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-                title="اختر الدرجة العلمية"
+                title={publicT('public_choose_degree')}
               >
                 {degreeLevels.map((lvl) => (
                   <option key={lvl} value={lvl}>
-                    {lvl === 'الكل' ? 'جميع الدرجات' : lvl}
+                    {lvl === 'الكل' ? publicT('public_all_degrees') : lvl}
                   </option>
                 ))}
               </select>
@@ -259,36 +258,27 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
       <div ref={resultsRef} className="w-full max-w-4xl mx-auto mn-inline-gutter pt-3 space-y-2.5">
         {/* Section Header: التخصصات المتاحة */}
         <div className="flex items-center justify-between px-1">
-          <span className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">
-            التخصصات المتاحة ({error?'غير معروف':loading?'…':total})
+          <span className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_available_majors')}{error?publicT('public_unknown'):loading?'…':total})
           </span>
-          <span className="text-[10px] sm:text-[11px] text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">
-            محدثة باستمرار
-          </span>
+          <span className="text-[10px] sm:text-[11px] text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">{publicT('public_updated_regularly')}</span>
         </div>
 
         {/* Cards Stack */}
         <div className="flex flex-col gap-2.5 sm:gap-3 w-full">
-          {loading&&<p role="status">جارٍ تحميل التخصصات…</p>}
-          {error&&<div><p role="alert">{error}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>{locale==='ar'?'إعادة المحاولة':'Retry'}</button></div>}
-          {nextCursor&&<button type="button" disabled={loading} onClick={()=>setCursor(nextCursor)}>عرض المزيد</button>}
+          {loading&&<p role="status">{publicT('public_loading_majors')}</p>}
+          {error&&<div><p role="alert">{error}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>{locale==='ar'?publicT('public_try_again'):'Retry'}</button></div>}
+          {nextCursor&&<button type="button" disabled={loading} onClick={()=>setCursor(nextCursor)}>{publicT('public_show_more')}</button>}
           {filteredMajors.length === 0 && (loading || error) ? null : filteredMajors.length === 0 ? (
             <div className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel ">
               <div className="w-12 h-12 rounded-full bg-[var(--mn-surface-muted)] flex items-center justify-center text-[var(--mn-text-muted)] mn-panel ">
                 <Search className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">
-                لا توجد تخصصات مطابقة للبحث
-              </h3>
-              <p className="text-xs text-[var(--mn-text-muted)] max-w-xs font-['Cairo',sans-serif]">
-                جرب تغيير خيارات التصفية أو البحث باسم تخصص آخر.
-              </p>
+              <h3 className="text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_no_matching_majors_found')}</h3>
+              <p className="text-xs text-[var(--mn-text-muted)] max-w-xs font-['Cairo',sans-serif]">{publicT('public_try_changing_the_filters_or_searching_for_another_2')}</p>
               <button
                 onClick={handleResetFilters}
                 className="mt-2 px-4 py-1.5 bg-[var(--mn-primary)] text-white rounded-xl text-xs font-bold cursor-pointer font-['Cairo',sans-serif] mn-inverse "
-              >
-                إلغاء التصفية وعرض الكل
-              </button>
+              >{publicT('public_clear_filters_and_view_all')}</button>
             </div>
           ) : (
             filteredMajors.map((major) => (

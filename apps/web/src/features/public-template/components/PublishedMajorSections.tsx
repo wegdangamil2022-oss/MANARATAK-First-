@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -7,7 +8,9 @@ import { DetailSectionHeader } from './DetailUi';
 
 /** Keep the source hierarchy and every block of the selected published version. */
 export function PublishedMajorSections({ sections, level }: { sections: NonNullable<Major['contentSections']>; level?: string }) {
-  if (!sections.length) return <p dir="rtl" className="p-4 text-center text-sm text-[var(--mn-text-muted)]">المحتوى التفصيلي غير متاح لهذا الإصدار حالياً.</p>;
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
+  if (!sections.length) return <p dir={publicDir} className="p-4 text-center text-sm text-[var(--mn-text-muted)]">{publicT('public_detailed_content_is_currently_unavailable_in_this_release')}</p>;
   const groups: Array<{ title: string; blocks: typeof sections }> = [];
   const norm = (text: string) => text.replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/[\u064B-\u065F]/g, '').trim();
   const isDoctorate = level?.toUpperCase() === 'DOCTORATE';
@@ -36,7 +39,7 @@ export function PublishedMajorSections({ sections, level }: { sections: NonNulla
     if (!groups.length || isMain || (parent && norm(groups[groups.length - 1].title) !== norm(parent))) groups.push({ title, blocks: [] });
     groups[groups.length - 1].blocks.push(section);
   }
-  return <div dir="rtl" className="px-0 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3">
+  return <div dir={publicDir} className="px-0 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3">
     {groups.map((group, index) => <section key={`${index}-${group.title}`} className="relative w-full bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden">
       <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
       <DetailSectionHeader id={`major-source-${index}`} icon={BookOpen} className="px-3.5 pt-3.5 pb-2.5" title={`${index + 1}. ${group.title.replace(/^\s*[0-9٠-٩]+[.)،-]\s*/, '')}`} />
@@ -44,7 +47,7 @@ export function PublishedMajorSections({ sections, level }: { sections: NonNulla
         {group.blocks.map((block, blockIndex) => <div key={block.sectionKey || blockIndex}>
           {(blockIndex > 0 || norm(block.title || '') !== norm(group.title)) && block.title && <h3 className="mb-2 text-[var(--mn-primary)]">{block.title}</h3>}
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
-            table: ({ children }) => <div className="overflow-x-auto rounded-xl border border-[var(--mn-border)]"><table className="w-full text-right">{children}</table></div>,
+            table: ({ children }) => <div className="overflow-x-auto rounded-xl border border-[var(--mn-border)]"><table className="w-full text-start">{children}</table></div>,
             th: ({ children }) => <th className="p-2 bg-[var(--mn-surface-muted)] border-b border-[var(--mn-border)]">{children}</th>,
             td: ({ children }) => <td className="p-2 border-b border-[var(--mn-border)] align-top">{children}</td>,
             ul: ({ children }) => <ul className="list-disc pr-5 space-y-1.5 my-2">{children}</ul>,

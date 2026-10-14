@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import { useTranslation } from '../../../i18n/I18nProvider';
 import { serviceCopy } from '../serviceCopy';
 import React, { useRef, useState } from 'react';
@@ -63,6 +64,8 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
   searchAnchor,
   searchTerm,
 }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const { language, dir } = useTranslation();
   useDetailSearchTarget(searchAnchor, searchTerm);
   const [showRequestNotice, setShowRequestNotice] = useState(false);
@@ -339,7 +342,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
                       }))
                     }
                     className="mt-1 w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-2 text-[10px] text-[var(--mn-text)] outline-none focus:ring-2 focus:ring-[var(--mn-focus)]"
-                    placeholder={`أدخل ${field}`}
+                    placeholder={publicT('public_enter_field', { v0: field })}
                   />
                 </label>
               ))}
@@ -416,7 +419,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
             if (missing) {
               setRequestError(
                 language === 'ar'
-                  ? `أكمل الحقل المطلوب: ${missing}`
+                  ? publicT('public_complete_required_field', { v0: missing })
                   : `Complete the required field: ${missing}`,
               );
               return;

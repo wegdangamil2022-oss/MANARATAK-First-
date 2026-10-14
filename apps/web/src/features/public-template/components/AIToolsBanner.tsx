@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { ArrowUpLeft, Award, Calculator, ChevronLeft, Database, FileText, Sparkles, Target } from 'lucide-react';
 
@@ -10,22 +11,22 @@ const TOOL_PAIRS = [
   [
     {
       id: 'university-comparison',
-      title: 'مقارنة الجامعات',
-      subtitle: 'قارن بيانات الجامعات قبل اتخاذ القرار',
+      title: "public_compare_universities",
+      subtitle: "public_compare_university_information_before_deciding",
       imageUrl: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=300&q=80',
       fallbackIcon: <Database className="w-4 h-4 text-[#D6A43B]" />,
     },
     {
       id: 'motivation-letter-generator',
-      title: 'مولّد خطاب الدافع',
-      subtitle: 'أنشئ مسودة منظمة قابلة للمراجعة',
+      title: "public_motivation_letter_generator",
+      subtitle: "public_create_an_organized_draft_for_review",
       imageUrl: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=300&q=80',
       fallbackIcon: <Sparkles className="w-4 h-4 text-[#D6A43B]" />,
     },
     {
       id: 'gpa-calculator',
-      title: 'حاسبة المعدل التراكمي',
-      subtitle: 'احسب وحوّل معدلك الأكاديمي بدقة',
+      title: "public_gpa_calculator",
+      subtitle: "public_calculate_and_convert_your_academic_gpa",
       imageUrl: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=300&q=80',
       fallbackIcon: <Calculator className="w-4 h-4 text-[#D6A43B]" />,
     },
@@ -34,22 +35,22 @@ const TOOL_PAIRS = [
   [
     {
       id: 'scholarship-eligibility-checker',
-      title: 'مُحلل الأهلية للمنح',
-      subtitle: 'قيّم توافق مؤهلاتك مع الشروط المطلوبة',
+      title: "public_scholarship_eligibility_analyzer",
+      subtitle: "public_assess_how_your_qualifications_match_the_requirements",
       imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=300&q=80',
       fallbackIcon: <Target className="w-4 h-4 text-[#D6A43B]" />,
     },
     {
       id: 'cv-builder',
-      title: 'صانع السيرة الأكاديمية',
-      subtitle: 'صمّم سيرة ذاتية قياسية متوافقة',
+      title: "public_academic_cv_builder",
+      subtitle: "public_build_a_standard_academic_cv",
       imageUrl: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=300&q=80',
       fallbackIcon: <FileText className="w-4 h-4 text-[#D6A43B]" />,
     },
     {
       id: 'recommendation-assistant',
-      title: 'مساعد خطابات التوصية',
-      subtitle: 'جهّز نماذج ومحاور التوصية لمشرفيك',
+      title: "public_recommendation_letter_assistant",
+      subtitle: "public_prepare_recommendation_templates_and_talking_points_for_your",
       imageUrl: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=300&q=80',
       fallbackIcon: <Award className="w-4 h-4 text-[#D6A43B]" />,
     },
@@ -57,6 +58,8 @@ const TOOL_PAIRS = [
 ];
 
 export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   return (
     <section id="ai-tools-section" className="px-0 py-3 w-full">
       <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-sm overflow-hidden mn-panel ">
@@ -70,30 +73,28 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools }) =
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
                   <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" />
                 </span>
-                <span>أدوات منارتك</span>
+                <span>{publicT('public_manaratak_tools')}</span>
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">
-              أدوات ذكية وحاسبات للمقارنة والتخطيط والتقديم واتخاذ القرار.
-            </p>
+            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_smart_tools_and_calculators_for_comparison_planning_applications')}</p>
           </div>
 
           {/* Horizontal Scrollable Container with 2-by-2 Stacked Tools */}
           <div className="relative w-full">
-            <div className="flex overflow-x-auto gap-2 sm:gap-2.5 pb-2 pt-1 no-scrollbar snap-x snap-mandatory scroll-smooth" dir="rtl">
+            <div className="flex overflow-x-auto gap-2 sm:gap-2.5 pb-2 pt-1 no-scrollbar snap-x snap-mandatory scroll-smooth" dir={publicDir}>
               {TOOL_PAIRS.map((pair, colIdx) => (
                 <div key={colIdx} className="flex-none w-[230px] sm:w-[260px] space-y-2 snap-start">
                   {pair.map((tool) => (
                     <button
                       key={tool.id}
                       onClick={() => onOpenAiTools(tool.id)}
-                      className="w-full text-right rounded-2xl border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/60 bg-[var(--mn-surface)] p-2.5 shadow-2xs hover:shadow-sm transition-all active:scale-[0.98] cursor-pointer min-w-0 mn-panel group flex items-start gap-2.5"
+                      className="w-full text-start rounded-2xl border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/60 bg-[var(--mn-surface)] p-2.5 shadow-2xs hover:shadow-sm transition-all active:scale-[0.98] cursor-pointer min-w-0 mn-panel group flex items-start gap-2.5"
                     >
                       <div className="w-8 h-8 rounded-full overflow-hidden p-[1px] bg-[#142B5F] dark:bg-[var(--mn-accent)] border border-[#D6A43B]/60 shrink-0 shadow-2xs flex items-center justify-center">
                         <img
                           src={tool.imageUrl}
-                          alt={tool.title}
+                          alt={publicT(tool.title)}
                           className="w-full h-full rounded-full object-cover"
                           referrerPolicy="no-referrer"
                           onError={(e) => {
@@ -104,10 +105,10 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools }) =
                       </div>
                       <div className="min-w-0 flex-1">
                         <h4 className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug font-['Cairo',sans-serif] group-hover:text-[var(--mn-accent-text)] transition-colors">
-                          {tool.title}
+                          {publicT(tool.title)}
                         </h4>
                         <p className="mt-0.5 text-[9px] sm:text-[10px] text-[var(--mn-text-muted)] leading-4 font-medium font-['Cairo',sans-serif] line-clamp-1">
-                          {tool.subtitle}
+                          {publicT(tool.subtitle)}
                         </p>
                       </div>
                       {/* Navigation Arrow Badge */}
@@ -127,7 +128,7 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools }) =
               onClick={() => onOpenAiTools()}
               className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
             >
-              <span className="text-[12px] sm:text-sm font-bold">تصفح أدوات منارتك</span>
+              <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_manaratak_tools')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
             </button>
           </div>

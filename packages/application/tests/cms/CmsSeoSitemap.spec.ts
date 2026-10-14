@@ -11,8 +11,8 @@ describe('live CMS sitemap authority', () => {
   it('emits per-content multilingual links using each published locale own slug', () => {
     const xml = buildCmsSitemapXml(paths, 'https://manaratak.example');
     expect(xml).toContain('<loc>https://manaratak.example/ar/news/arabic-news</loc>');
-    expect(xml).toContain('<loc>https://manaratak.example/en/news/english-news</loc>');
-    expect(xml).toContain('hreflang="en" href="https://manaratak.example/en/news/english-news"');
+    expect(xml).not.toContain('<loc>https://manaratak.example/en/news/english-news</loc>');
+    expect(xml).not.toContain('hreflang="en"');
     const single = xml.split('<loc>https://manaratak.example/ar/study-guides/guide-only</loc>')[1].split('</url>')[0];
     expect(single).not.toContain('hreflang="en"');
     expect(single).toContain('hreflang="x-default"');

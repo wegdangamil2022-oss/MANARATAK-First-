@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { useOverlayDialog } from '../useOverlayDialog';
 import {
@@ -42,82 +43,84 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
   isDarkMode = false,
   onToggleDarkMode,
 }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   useOverlayDialog(isOpen, onClose, 'mn-navigation-dialog');
   if (!isOpen) return null;
 
   const menuItems = [
     {
       id: 'account',
-      label: 'حسابي ومساحة الطالب',
+      label: publicT('public_my_account_and_student_workspace'),
       icon: <User className="w-4 h-4 text-[var(--mn-accent-text)]" />,
     },
     {
       id: 'home',
-      label: 'الرئيسية',
+      label: publicT('public_home'),
       icon: (
         <GraduationCap className="w-4 h-4 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)]" />
       ),
     },
     {
       id: 'tracker',
-      label: 'نظام متابعة تقدم المتعلمين',
+      label: publicT('public_learner_progress_tracker'),
       icon: <ListChecks className="w-4 h-4 text-[var(--mn-accent-text)]" />,
     },
     {
       id: 'reports',
-      label: 'التقارير الأكاديمية والتدقيق',
+      label: publicT('public_academic_reports_and_audits'),
       icon: <Layers className="w-4 h-4 text-[var(--mn-accent-text)]" />,
     },
     {
       id: 'ai-tools',
-      label: 'أدوات منارتك',
+      label: publicT('public_manaratak_tools'),
       icon: <Sparkles className="w-4 h-4 text-[var(--mn-accent-text)]" />,
     },
     {
       id: 'favorites',
-      label: 'المفضلة والمحفوظات',
+      label: publicT('public_favorites_and_saved_items'),
       icon: <Heart className="w-4 h-4 text-[var(--mn-accent-text)]" />,
     },
     {
       id: 'countries',
-      label: 'الدول والوجهات الدراسية',
+      label: publicT('public_countries_and_study_destinations'),
       icon: <Globe className="w-4 h-4 text-[var(--mn-accent-text)]" />,
     },
     {
       id: 'universities',
-      label: 'دليل الجامعات العالمية',
+      label: publicT('public_international_university_directory'),
       icon: (
         <Building2 className="w-4 h-4 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)]" />
       ),
     },
     {
       id: 'courses',
-      label: 'الدورات التدريبية',
+      label: publicT('public_training_courses'),
       icon: (
         <BookOpen className="w-4 h-4 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)]" />
       ),
     },
     {
       id: 'majors',
-      label: 'دليل التخصصات',
+      label: publicT('public_majors_directory'),
       icon: (
         <Layers className="w-4 h-4 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)]" />
       ),
     },
-    {id: 'scholarships', label: 'المنح الدراسية', icon: <GraduationCap className="w-4 h-4" />},
-    {id: 'exams', label: 'الاختبارات الدولية', icon: <ListChecks className="w-4 h-4" />},
-    {id: 'articles', label: 'المقالات والأدلة', icon: <BookOpen className="w-4 h-4" />},
-    {id: 'services', label: 'الخدمات الطلابية والعامة', icon: <User className="w-4 h-4" />},
-    {id: 'jobs', label: 'الوظائف والتدريب', icon: <Building2 className="w-4 h-4" />},
+    {id: 'scholarships', label: publicT('public_scholarships_3'), icon: <GraduationCap className="w-4 h-4" />},
+    {id: 'exams', label: publicT('public_international_exams'), icon: <ListChecks className="w-4 h-4" />},
+    {id: 'articles', label: publicT('public_articles_and_guides'), icon: <BookOpen className="w-4 h-4" />},
+    {id: 'services', label: publicT('public_student_and_general_services'), icon: <User className="w-4 h-4" />},
+    {id: 'jobs', label: publicT('public_jobs_and_internships'), icon: <Building2 className="w-4 h-4" />},
   ];
 
   return (
     <div role="presentation" tabIndex={-1} onKeyDown={function (event) { if (event.key === 'Escape') onClose(); }} onClick={event => {if (event.target === event.currentTarget) onClose();}} className="fixed inset-0 bg-black/70 backdrop-blur-xs z-[80] flex justify-end">
-      <div id="mn-navigation-dialog" role="dialog" aria-modal="true" aria-label="القائمة الرئيسية" tabIndex={-1} className="bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] max-w-xs w-full h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 text-right border-l border-[var(--mn-border)] dark:border-[var(--mn-border)] mn-panel dark:mn-panel ">
+      <div id="mn-navigation-dialog" role="dialog" aria-modal="true" aria-label={publicT('public_main_menu')} tabIndex={-1} className="bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] max-w-xs w-full h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 text-start border-l border-[var(--mn-border)] dark:border-[var(--mn-border)] mn-panel dark:mn-panel ">
         {/* Drawer Header */}
         <div className="bg-[var(--mn-primary)] dark:bg-[var(--mn-surface)] p-5 text-white border-b border-[var(--mn-accent)]/30 relative mn-inverse dark:mn-panel ">
           <button
-            aria-label="إغلاق القائمة"
+            aria-label={publicT('public_close_menu')}
             onClick={onClose}
             className="absolute top-3 left-3 h-10 w-10 rounded-xl bg-[var(--mn-primary)] dark:bg-[var(--mn-surface-elevated)] hover:bg-black/30 text-[var(--mn-text-muted)] hover:text-white flex items-center justify-center transition-colors cursor-pointer mn-inverse dark:mn-panel "
           >
@@ -136,21 +139,19 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                   {userProfile.email}
                 </p>
                 <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-surface-elevated)] text-[10px] text-[var(--mn-on-dark-muted)] border border-[var(--mn-accent)]/40 mn-inverse dark:mn-panel ">
-                  <span>المعدل: {userProfile.gpa}</span>
+                  <span>{publicT('public_gpa')}{' '}{userProfile.gpa}</span>
                 </div>
               </div>
             ) : (
               <div>
-                <h3 className="text-sm font-bold text-white mb-1">زائر جديد</h3>
+                <h3 className="text-sm font-bold text-white mb-1">{publicT('public_new_visitor')}</h3>
                 <button
                   onClick={() => {
                     onNavigate('auth');
                     onClose();
                   }}
                   className="min-h-10 px-3 py-2 bg-[var(--mn-accent)] hover:bg-[var(--mn-accent)] text-[var(--mn-on-accent)] text-[11px] font-bold rounded-lg transition-colors cursor-pointer mn-gold hover:mn-gold "
-                >
-                  تسجيل الدخول / حساب جديد
-                </button>
+                >{publicT('public_sign_in_create_account')}</button>
               </div>
             )}
           </div>
@@ -165,7 +166,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 onNavigate(item.id);
                 onClose();
               }}
-              className="w-full text-right p-3 rounded-2xl text-xs font-bold text-[var(--mn-text)] dark:text-[var(--mn-text)] hover:bg-[var(--mn-primary)]/10 dark:hover:bg-[var(--mn-surface-muted)] hover:text-[var(--mn-heading)] dark:hover:text-[var(--mn-accent-text)] flex items-center justify-between transition-colors active:scale-98 cursor-pointer dark:hover:mn-panel "
+              className="w-full text-start p-3 rounded-2xl text-xs font-bold text-[var(--mn-text)] dark:text-[var(--mn-text)] hover:bg-[var(--mn-primary)]/10 dark:hover:bg-[var(--mn-surface-muted)] hover:text-[var(--mn-heading)] dark:hover:text-[var(--mn-accent-text)] flex items-center justify-between transition-colors active:scale-98 cursor-pointer dark:hover:mn-panel "
             >
               <div className="flex items-center gap-2.5">
                 {item.icon}
@@ -186,14 +187,14 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 ) : (
                   <Moon className="w-4 h-4 text-[var(--mn-heading)]" />
                 )}
-                <span>المظهر / Theme</span>
+                <span>{publicT('public_appearance_theme')}</span>
               </div>
               <button
                 onClick={onToggleDarkMode}
-                aria-label={isDarkMode ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'}
+                aria-label={isDarkMode ? publicT('public_switch_to_light_mode') : publicT('public_switch_to_dark_mode')}
                 className="min-h-10 px-3 py-2 bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-[var(--mn-border)] rounded-xl text-xs font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] cursor-pointer flex items-center gap-1 mn-panel dark:mn-panel "
               >
-                {isDarkMode ? 'ليلي' : 'نهاري'}
+                {isDarkMode ? publicT('public_dark') : publicT('public_light')}
               </button>
             </div>
           )}
@@ -202,22 +203,20 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
           <div className="p-3 rounded-2xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] dark:border-[var(--mn-border)] text-xs flex items-center justify-between mt-2 mn-panel dark:mn-panel ">
             <div className="flex items-center gap-2 text-[var(--mn-text)] dark:text-[var(--mn-text)] font-bold">
               <Globe className="w-4 h-4 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)]" />
-              <span>اللغة / Language</span>
+              <span>{publicT('public_language_2')}</span>
             </div>
             <button
               onClick={onToggleLanguage}
-              aria-label="تبديل لغة الواجهة"
+              aria-label={publicT('public_change_interface_language')}
               className="min-h-10 px-3 py-2 bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-[var(--mn-border)] rounded-xl text-xs font-bold text-[var(--mn-heading)] dark:text-[var(--mn-text)] cursor-pointer mn-panel dark:mn-panel "
             >
-              {language === 'ar' ? 'العربية' : 'English'}
+              {language === 'ar' ? publicT('public_arabic') : 'English'}
             </button>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-3 bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border-t border-[var(--mn-border)] dark:border-[var(--mn-border)] text-center text-[10px] text-[var(--mn-text-muted)] dark:text-[var(--mn-text-muted)] mn-panel dark:mn-panel ">
-          منصة منارتك للفرص التعليمية • تصميم الهاتف المحمول
-        </div>
+        <div className="p-3 bg-[var(--mn-page)] dark:bg-[var(--mn-surface)] border-t border-[var(--mn-border)] dark:border-[var(--mn-border)] text-center text-[10px] text-[var(--mn-text-muted)] dark:text-[var(--mn-text-muted)] mn-panel dark:mn-panel ">{publicT('public_manaratak_educational_opportunities_platform_mobile_design')}</div>
       </div>
     </div>
   );
