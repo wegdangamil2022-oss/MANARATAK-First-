@@ -3,7 +3,12 @@ import { z } from 'zod';
 import { AIExecutionOrchestrator } from '@manaratak/application';
 
 const capabilityRequestSchema = z.object({
-  capabilityKey: z.string().trim().min(1).max(160).regex(/^[a-zA-Z0-9_.:-]+$/),
+  capabilityKey: z
+    .string()
+    .trim()
+    .min(1)
+    .max(160)
+    .regex(/^[a-zA-Z0-9_.:-]+$/),
   input: z.string().min(1).max(100_000),
   locale: z.enum(['ar', 'en']).optional().nullable(),
   dataClassification: z
@@ -85,7 +90,8 @@ export class AIGatewayRouter {
         if (!req.params.publicId.startsWith('aij_'))
           return res.status(404).json({ error: 'AI_ASYNC_RESULT_NOT_FOUND' });
         const result = await aiExecutionUseCases.findAsyncResultForRequester(
-          req.params.publicId, requester,
+          req.params.publicId,
+          requester,
         );
         if (!result) return res.status(404).json({ error: 'AI_ASYNC_RESULT_NOT_FOUND' });
         return res.json(result);
@@ -107,15 +113,24 @@ export class AIGatewayRouter {
     router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
       if (err instanceof z.ZodError)
         return res.status(400).json({ error: 'AI_INPUT_INVALID', details: err.issues });
-      const code = err instanceof Error ? err.message : 'AI_EXECUTION_FAILED';
-      const status = code.includes('AUTHENTICATED')
-        ? 401
-        : code === 'AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED' ||
-            code === 'AI_EXECUTION_STATE_CONFLICT'
-          ? 409
-          : code.includes('NOT_CONFIGURED')
-            ? 503
-            : 400;
+      // HTTP errors carry bounded operational codes, never raw provider/DB text.
+      const candidate = err instanceof Error ? err.message.slice(0, 128).split(':', 1)[0] : '';
+      const code = /^AI_[A-Z0-9_]{1,100}$/.test(candidate) ? candidate : 'AI_EXECUTION_FAILED';
+      const status =
+        code === 'AI_EXECUTION_FAILED'
+          ? 500
+          : code === 'AI_ASYNC_RESULT_NOT_AVAILABLE'
+            ? 404
+            : code === 'AI_ASYNC_RESULT_NOT_READY'
+              ? 409
+              : code.includes('AUTHENTICATED')
+                ? 401
+                : code === 'AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED' ||
+                    code === 'AI_EXECUTION_STATE_CONFLICT'
+                  ? 409
+                  : code.includes('NOT_CONFIGURED')
+                    ? 503
+                    : 400;
       return res.status(status).json({ error: code });
     });
 

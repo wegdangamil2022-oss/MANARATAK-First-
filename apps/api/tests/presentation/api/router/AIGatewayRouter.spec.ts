@@ -134,4 +134,21 @@ describe('AIGatewayRouter capability boundary', () => {
     expect(result.body.error).toBe('AI_EXECUTION_IN_FLIGHT_CANCELLATION_UNSUPPORTED');
   });
 
+  it('does not return raw provider or persistence error text over HTTP',async()=>{
+    const useCases=createUseCases();
+    useCases.executeCapability.mockRejectedValue(new Error('Upstream rejected secret-token and private student content'));
+    const response=await request(createApp(useCases)).post('/ai/execute').send({capabilityKey:'ai.summarize',input:'text'});
+    expect(response.status).toBe(500);expect(response.body).toEqual({error:'AI_EXECUTION_FAILED'});
+    expect(response.text).not.toContain('secret-token');
+    useCases.executeCapability.mockRejectedValue(new Error('AI_CAPABILITY_NOT_ALLOWED:private student content'));
+    const bounded=await request(createApp(useCases)).post('/ai/execute').send({capabilityKey:'ai.summarize',input:'text'});
+    expect(bounded.status).toBe(400);expect(bounded.body).toEqual({error:'AI_CAPABILITY_NOT_ALLOWED'});
+  });
+  it('returns no-store unavailability for a retained but ineligible async result',async()=>{
+    const useCases=createUseCases();useCases.findAsyncResultForRequester.mockRejectedValue(new Error('AI_ASYNC_RESULT_NOT_AVAILABLE'));
+    const response=await request(createApp(useCases)).get('/ai/executions/aij_blocked/result');
+    expect(response.status).toBe(404);expect(response.headers['cache-control']).toContain('no-store');
+    expect(response.body).toEqual({error:'AI_ASYNC_RESULT_NOT_AVAILABLE'});
+  });
+
 });

@@ -54,7 +54,7 @@ type ResourceKey =
   | 'knowledgeSources'
   | 'incidents'
   | 'platformSettings';
-type SectionKey = 'overview' | 'executions' | 'playground' | ResourceKey;
+type SectionKey = 'overview' | 'executions' | 'playground' | 'async-queue' | ResourceKey;
 interface RegistryRecord {
   id?: string;
   key: string;
@@ -119,6 +119,7 @@ interface AsyncJob {
 const sectionNamesEn: Record<SectionKey, string> = {
   overview: 'Overview',
   executions: 'Executions and trace',
+  'async-queue': 'Asynchronous execution queue',
   providers: 'Providers',
   models: 'Models and pricing',
   modelPrices: 'Price history',
@@ -148,6 +149,7 @@ const groupNamesEn: Record<string, string> = {
 const sections: Array<{ key: SectionKey; label: string; group: string; icon: ReactNode }> = [
   { key: 'overview', label: 'نظرة عامة', group: 'المراقبة', icon: <Gauge /> },
   { key: 'executions', label: 'التنفيذ والتتبّع', group: 'المراقبة', icon: <Activity /> },
+  { key: 'async-queue', label: 'طابور التنفيذ غير المتزامن', group: 'التشغيل', icon: <Workflow /> },
   { key: 'providers', label: 'المزوّدون', group: 'السجلات', icon: <Boxes /> },
   { key: 'models', label: 'النماذج والأسعار', group: 'السجلات', icon: <Bot /> },
   { key: 'modelPrices', label: 'تاريخ الأسعار', group: 'السجلات', icon: <CircleDollarSign /> },
@@ -293,8 +295,13 @@ export function AIGovernancePage() {
                 <ExecutionsPanel />
               ) : active === 'playground' ? (
                 <PlaygroundPanel />
+              ) : active === 'async-queue' ? (
+                <AsyncQueuePanel />
               ) : active === 'workflows' ? (
-                <WorkflowsPanel />
+                <div className="space-y-6">
+                  <RegistryPanel resource="workflows" title={copy('سير العمل')} />
+                  <GovernedRunPanel kind="workflows" />
+                </div>
               ) : active === 'evaluations' ? (
                 <div className="space-y-6">
                   <RegistryPanel resource="evaluations" title={copy('تعريفات التقييم')} />
@@ -665,15 +672,15 @@ function ExecutionsPanel() {
   const copy = useAICopy();
   const [urlParams, setUrlParams] = useSearchParams();
   const [page, setPage] = useState(1);
-  const [status, setStatus] = useState(urlParams.get('status') ?? '');
-  const [search, setSearch] = useState(urlParams.get('search') ?? '');
-  const [query, setQuery] = useState(urlParams.get('search') ?? '');
-  const [consumerKey, setConsumerKey] = useState(urlParams.get('consumerKey') ?? '');
-  const [providerKey, setProviderKey] = useState(urlParams.get('providerKey') ?? '');
-  const [purpose, setPurpose] = useState(urlParams.get('purpose') ?? '');
-  const [selected, setSelected] = useState(urlParams.get('execution') ?? '');
+  // The URL owns facets and the selected execution, including navigation/back.
+  const status = urlParams.get('status') ?? '';
+  const query = urlParams.get('search') ?? '';
+  const consumerKey = urlParams.get('consumerKey') ?? '';
+  const providerKey = urlParams.get('providerKey') ?? '';
+  const purpose = urlParams.get('purpose') ?? '';
+  const selected = urlParams.get('execution') ?? '';
+  const [search, setSearch] = useState(query);
   const chooseExecution = (publicId: string) => {
-    setSelected(publicId);
     setUrlParams(
       (current) => {
         const next = new URLSearchParams(current);
@@ -684,33 +691,37 @@ function ExecutionsPanel() {
       { replace: true },
     );
   };
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setQuery(search.trim());
+  const setFilter = useCallback(
+    (key: string, value: string) => {
       setPage(1);
-      setSelected('');
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [search]);
-  useEffect(() => {
-    setUrlParams(
-      (current) => {
-        const next = new URLSearchParams(current);
-        for (const [key, value] of Object.entries({
-          status,
-          search: query,
-          consumerKey,
-          providerKey,
-          purpose,
-        })) {
+      setUrlParams(
+        (current) => {
+          const next = new URLSearchParams(current);
           if (value) next.set(key, value);
           else next.delete(key);
-        }
-        return next.toString() === current.toString() ? current : next;
-      },
-      { replace: true },
-    );
-  }, [status, query, consumerKey, providerKey, purpose, setUrlParams]);
+          next.delete('execution');
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setUrlParams],
+  );
+  const setStatus = (value: string) => setFilter('status', value);
+  const setConsumerKey = (value: string) => setFilter('consumerKey', value);
+  const setProviderKey = (value: string) => setFilter('providerKey', value);
+  const setPurpose = (value: string) => setFilter('purpose', value);
+  useEffect(() => {
+    setSearch(query);
+  }, [query]);
+  useEffect(() => {
+    if (search.trim() === query) return;
+    const timer = window.setTimeout(() => setFilter('search', search.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [search, query, setFilter]);
+  useEffect(() => {
+    setPage(1);
+  }, [status, query, consumerKey, providerKey, purpose]);
   const params = new URLSearchParams({
     page: String(page),
     pageSize: '25',
@@ -748,7 +759,6 @@ function ExecutionsPanel() {
             onChange={(e) => {
               setStatus(e.target.value);
               setPage(1);
-              setSelected('');
             }}
           >
             <option value="">{copy('كل الحالات')}</option>
@@ -791,14 +801,24 @@ function ExecutionsPanel() {
             type="button"
             className="action-secondary"
             onClick={() => {
-              setStatus('');
               setSearch('');
-              setQuery('');
-              setConsumerKey('');
-              setProviderKey('');
-              setPurpose('');
               setPage(1);
-              chooseExecution('');
+              setUrlParams(
+                (current) => {
+                  const next = new URLSearchParams(current);
+                  for (const key of [
+                    'status',
+                    'search',
+                    'consumerKey',
+                    'providerKey',
+                    'purpose',
+                    'execution',
+                  ])
+                    next.delete(key);
+                  return next;
+                },
+                { replace: true },
+              );
             }}
           >
             {copy('مسح الفلاتر')}
@@ -899,7 +919,7 @@ function ExecutionDetails({ publicId, onClose }: { publicId: string; onClose: ()
     </Panel>
   );
 }
-function WorkflowsPanel() {
+function AsyncQueuePanel() {
   const copy = useAICopy();
   const { hasPermission } = useAdminAuthorization();
   const [page, setPage] = useState(1);

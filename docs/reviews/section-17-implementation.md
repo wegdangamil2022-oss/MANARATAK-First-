@@ -1,3 +1,5 @@
+> **Current section 18 source follow-up (14 October 2026):** [AI completion](SECTION_18_AI_COMPLETION_2026-10-14.md) records the current read/privacy/UI repairs and 178 passing lightweight tests on main. Prior source SHAs and checks below remain historical; AI-ADM-030/runtime remain deferred.
+
 # Section 17 — Enterprise AI Platform (P17)
 
 **Status: CODE_CLOSED — RUNTIME_DEFERRED.**

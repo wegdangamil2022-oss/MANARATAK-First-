@@ -364,6 +364,13 @@ describe('P17 canonical knowledge source contracts', () => {
     });
     expect(JSON.stringify(batch)).not.toContain(source.content);
   });
+  it.each([{sourceType:'UNIVERSITY'},{sourceReferenceId:'other'},{locale:'en'}])('refuses an owner identity change after embedding latency without replacing the prior projection',async(patch)=>{
+    const f=knowledgeFixture();f.owners.resolve.mockResolvedValueOnce(source).mockResolvedValueOnce({...source,...patch});
+    await expect(f.knowledge.index(input)).rejects.toThrow('AI_KNOWLEDGE_OWNER_REVISION_CHANGED');
+    expect(f.adapter.embed).toHaveBeenCalledOnce();
+    expect(f.repository.recordUsage).toHaveBeenCalledOnce();
+    expect(f.repository.replaceEmbeddings).not.toHaveBeenCalled();
+  });
   it('refuses manual content and unknown owners before embedding', async () => {
     const f = knowledgeFixture();
     await expect(f.knowledge.index({ ...input, content: 'Untrusted' })).rejects.toThrow(

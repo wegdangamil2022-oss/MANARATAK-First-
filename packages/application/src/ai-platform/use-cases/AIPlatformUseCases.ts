@@ -1455,6 +1455,8 @@ export class AIExecutionOrchestrator {
     if (!job.executionPublicId) throw new Error('AI_ASYNC_RESULT_NOT_AVAILABLE');
     const execution = await this.repository.findExecution(job.executionPublicId);
     if (!execution || execution.requesterReferenceId !== requesterReferenceId) return null;
+    if (execution.status !== AIExecutionStatus.COMPLETED)
+      throw new Error('AI_ASYNC_RESULT_NOT_AVAILABLE');
     const artifact = execution.metadata?.asyncResult as Record<string, unknown> | undefined;
     if (
       !artifact ||
@@ -2226,6 +2228,8 @@ export class AIKnowledgeUseCases {
   ) {
     if (!this.owners || this.payloads?.status() !== 'READY')
       throw new Error('AI_KNOWLEDGE_OWNER_VERIFICATION_REQUIRED');
+    const index = await this.repository.find<AIKnowledgeIndex>('knowledgeIndexes', indexKey);
+    if (!index || index.status !== 'ACTIVE' || !index.sourceDomains.includes(sourceType)) return [];
     const source = await this.owners.resolve({
       sourceType,
       sourceReferenceId,
@@ -2235,9 +2239,19 @@ export class AIKnowledgeUseCases {
     if (
       !source ||
       !source.transferAllowed ||
+      source.sourceType !== sourceType ||
+      source.sourceReferenceId !== sourceReferenceId ||
+      (locale != null && source.locale !== locale) ||
+      (source.readerScope === 'PUBLIC' && source.dataClassification !== 'PUBLIC') ||
       (source.readerScope !== 'PUBLIC' && source.readerScope !== requesterReferenceId)
     ) {
-      if (sourceType === 'CMS' && (!source || source.readerScope === 'PUBLIC'))
+      const withdrawnPublicCms = sourceType === 'CMS' && (!source || (
+        source.sourceType === sourceType &&
+        source.sourceReferenceId === sourceReferenceId &&
+        (locale == null || source.locale === locale) &&
+        !source.transferAllowed && source.readerScope === 'PUBLIC'
+      ));
+      if (withdrawnPublicCms)
         await this.repository.removeKnowledgeSource(
           indexKey,
           sourceType,
@@ -2246,6 +2260,9 @@ export class AIKnowledgeUseCases {
         );
       return [];
     }
+    if (Buffer.byteLength(source.content, 'utf8') > 256_000)
+      throw new Error('AI_KNOWLEDGE_SOURCE_BYTES_EXCEEDED');
+    const checksum = sha256(source.content);
     const rows = await this.repository.listKnowledgeChunks(
       indexKey,
       sourceType,
@@ -2260,6 +2277,8 @@ export class AIKnowledgeUseCases {
         Date.parse(String(row.metadata.expiresAt)) <= Date.now()
       )
         continue;
+      if (row.metadata.sourceChecksum !== checksum)
+        throw new Error('AI_KNOWLEDGE_OWNER_REVISION_CHANGED');
       const protectedChunk = row.metadata.protectedChunk as
         Parameters<IAIAsyncPayloadProtector['unprotect']>[0] | undefined;
       if (!protectedChunk) continue;
@@ -2282,6 +2301,8 @@ export class AIKnowledgeUseCases {
         value.expiresAt !== row.metadata.expiresAt
       )
         throw new Error('AI_KNOWLEDGE_CHUNK_INTEGRITY_FAILED');
+      // An envelope can expire while protection/owner checks are in progress.
+      if (Date.parse(String(value.expiresAt)) <= Date.now()) continue;
       result.push({ text: value.text });
     }
     return result;
@@ -2329,6 +2350,8 @@ export class AIKnowledgeUseCases {
       !verified.transferAllowed ||
       verified.sourceType !== input.sourceType ||
       verified.sourceReferenceId !== input.sourceReferenceId ||
+      (input.locale != null && verified.locale !== input.locale) ||
+      (verified.readerScope === 'PUBLIC' && verified.dataClassification !== 'PUBLIC') ||
       (verified.readerScope !== 'PUBLIC' && verified.readerScope !== input.actorReferenceId)
     )
       throw new Error('AI_KNOWLEDGE_OWNER_SOURCE_NOT_AUTHORIZED');
@@ -2552,6 +2575,9 @@ export class AIKnowledgeUseCases {
       if (
         !latestOwner ||
         !latestOwner.transferAllowed ||
+        latestOwner.sourceType !== verified.sourceType ||
+        latestOwner.sourceReferenceId !== verified.sourceReferenceId ||
+        latestOwner.locale !== verified.locale ||
         latestOwner.sourceVersion !== verified.sourceVersion ||
         latestOwner.publishedAt !== verified.publishedAt ||
         latestOwner.readerScope !== verified.readerScope ||

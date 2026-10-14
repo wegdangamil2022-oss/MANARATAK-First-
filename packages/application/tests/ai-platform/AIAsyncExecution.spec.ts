@@ -186,6 +186,7 @@ describe('Phase 17 durable async execution', () => {
     });
     (repo as any).findExecution = vi.fn().mockResolvedValue({
       publicId: 'ai_done',
+      status:AIExecutionStatus.COMPLETED,
       requesterReferenceId: 'student-1',
       metadata: {
         asyncResult: {
@@ -240,6 +241,7 @@ describe('Phase 17 durable async execution', () => {
     });
     (repo as any).findExecution = vi.fn().mockResolvedValue({
       publicId: 'ai_old',
+      status:AIExecutionStatus.COMPLETED,
       requesterReferenceId: 'student-1',
       metadata: {
         asyncResult: {

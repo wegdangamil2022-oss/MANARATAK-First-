@@ -11925,6 +11925,8 @@ Ownership: Course owns catalog/course/learning outcomes, curriculum, learning pa
 
 # 18 — الذكاء الاصطناعي / Enterprise AI Platform (P17)
 
+> **إكمال مصدر 14 أكتوبر 2026:** أُكملت نواقص index/owner/result read eligibility وخصوصية أخطاء HTTP وربط workflow/queue والتحقيق والفلاتر. نجحت178 اختبارات خفيفة في13 ملفًا وTypeScript؛ [تقرير القسم18](SECTION_18_AI_COMPLETION_2026-10-14.md). **CODE_CLOSED — RUNTIME_DEFERRED**؛ AI-ADM-030 مؤجل لما بعد28، دون provider/paid inference أو تفعيل runtime. الأحكام القديمة أدناه تاريخية وليست حكم المصدر الحالي.
+
 > **معيار الإغلاق المحدّث للقسم 18:** إصلاح الأكواد والثغرات والنواقص + اختبارات source/contract/security خفيفة مستهدفة + رفع Commit. **لا يلزم هنا E2E حي أو قاعدة بيانات/مزود تشغيل فعلي**؛ اختبارات التشغيل في الملحق الأخير بعد القسم 28، مع بقاء إطلاق الإنتاج محظورًا دون أدلته.
 > **الاختبار الأساسي المختصر:** AI: صلاحيات استدعاء النموذج، تنقية البيانات، حدود الاستخدام وتجاهل مدخلات غير موثوقة عبر mocks.
 
