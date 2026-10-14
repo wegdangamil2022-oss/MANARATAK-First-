@@ -128,6 +128,7 @@ export function mapPublicUniversityDto(dto: PublicUniversityDto): University {
     }));
   return {
     publishedData: dto,
+    localization:dto.localization,
     id: dto.slug,
     ownerId: dto.publicId,
     publicId: dto.publicId,
@@ -176,6 +177,7 @@ export function mapPublicMajorDto(dto: PublicMajorDto): Major {
   const sectionText = (dto.contentSections ?? []).map((section) => section.content).filter(Boolean).join('\n');
   const description = dto.description ?? dto.studentFriendlySummary ?? sectionText;
   return {
+    localization:dto.localization,
     id: `${dto.slug}/${(dto.degreeLevel || '').toLowerCase()}`,
     ownerId: dto.publicId,
     publicId: dto.publicId,

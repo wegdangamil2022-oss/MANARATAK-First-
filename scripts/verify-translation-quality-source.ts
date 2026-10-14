@@ -1,3 +1,4 @@
+import {untranslatedPublicCopy} from './translation/public-copy-gate.mjs';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { extname, join, relative, resolve } from 'node:path';
 import { readDictionaryEntries, literalUiTranslationKeys } from './translation/dictionary-source.mjs';
@@ -132,6 +133,15 @@ function checkLocaleContracts(): void {
   requireIncludes(api, '.default(APPLICATION_DEFAULT_LOCALE)', 'API locale default uses application default contract');
 }
 
+function checkPublicEnglishRelease(): void {
+  const policy=read('packages/shared/src/localization/readiness.ts');
+  const ready=/PUBLIC_ENGLISH_COPY_READY\s*=\s*true\s*;/.test(policy);
+  const findings=walkSourceFiles('apps/web/src/features/public-template').filter(file=>file.endsWith('.tsx')).flatMap(file=>untranslatedPublicCopy(readFileSync(file,'utf8'),relative(ROOT,file)));
+  requireCondition(!ready || findings.length===0,`English shell activation requires public copy parity; unresolved rendered literals=${findings.length}`);
+  requireIncludes(read('apps/web/src/router/index.tsx'),'isPublicTemplateLocaleEnabled','public English routes enforce the governed copy gate');
+  requireIncludes(read('packages/infrastructure/src/translation-import/PrismaTranslationImportGateway.ts'),'assertTranslationContentAuthoringEnabled','translation transfer persistence enforces the frozen mode');
+}
+
 function checkTranslationBehaviorContracts(): void {
   const projection = read('packages/application/src/localization/ApplicationLocaleProjectionService.ts');
   for (const method of ['projectUniversity', 'projectMajor', 'projectInternationalTest']) {
@@ -177,6 +187,7 @@ checkI18nProvider('apps/web/src/i18n/I18nProvider.tsx', 'Web UI');
 checkI18nProvider('apps/admin/src/i18n/I18nProvider.tsx', 'Admin UI');
 checkLocaleContracts();
 checkTranslationBehaviorContracts();
+checkPublicEnglishRelease();
 
 if (failures.length > 0) {
   process.stderr.write([

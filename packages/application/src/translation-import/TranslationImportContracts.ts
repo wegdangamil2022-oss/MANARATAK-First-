@@ -30,6 +30,9 @@ export interface TranslationTargetSnapshot {
   currentValue: string | null;
   currentReviewStatus?: string | null;
   storageRecordId?: string | null;
+  ownerRevision?: string;
+  sourceDigest?: string | null;
+  proposedFields?: Readonly<Record<string,string>>;
 }
 
 export interface TranslationImportEvidence {
@@ -55,6 +58,9 @@ export interface TranslationTransferApproval {
   decision: 'APPLY' | 'REJECT';
   reviewedBy: string;
   reviewedAt?: Date;
+  approvalId?: string;
+  /** Authenticated mutation context supplied by the composition root, never request body. */
+  actorId?: string;
 }
 
 export interface TranslationTransferResult {
@@ -65,9 +71,13 @@ export interface TranslationTransferResult {
   fieldKey: string;
   previousValue: string | null;
   currentValue: string;
+  approved?: boolean;
+  published?: boolean;
+  publicEligible?: boolean;
 }
 
 export interface ITranslationImportGateway {
+  publishApproved?(target: TranslationTargetSnapshot, approval: TranslationTransferApproval): Promise<TranslationTransferResult>;
   resolveExact(locator: TranslationTargetLocator): Promise<TranslationTargetSnapshot | null>;
   applyApproved(
     candidate: TranslationStagedCandidate,

@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState } from 'react';
 import { Mail, Lock, User, LogIn, Chrome } from 'lucide-react';
 
@@ -7,6 +8,8 @@ interface AuthPageProps {
 }
 
 export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestrictedAction }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [isLogin, setIsLogin] = useState(true);
   const [notice, setNotice] = useState('');
   const explainPreview = () => {
@@ -29,21 +32,19 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestric
               <LogIn className="w-7 h-7 text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)]" />
             </div>
             <h2 className="text-xl font-bold text-white mb-1">
-              {isLogin ? 'مرحباً بعودتك!' : 'إنشاء حساب جديد'}
+              {isLogin ? publicT('public_welcome_back') : publicT('public_create_a_new_account')}
             </h2>
             <p className="text-[var(--mn-accent-text)] text-xs font-bold">
               {isLogin
-                ? 'سجل دخولك لمتابعة رحلتك التعليمية'
-                : 'انضم إلى منارتك وابدأ رحلتك التعليمية'}
+                ? publicT('public_sign_in_to_continue_your_learning_journey')
+                : publicT('public_join_manaratak_and_start_your_learning_journey')}
             </p>
           </div>
         </div>
 
         {/* Form Section */}
         <div className="p-6">
-          <div className="mb-4 rounded-xl border border-[var(--mn-accent)]/25 bg-[var(--mn-accent)]/5 p-2.5 text-center text-[10px] leading-5 text-[var(--mn-text-muted)] font-bold">
-            واجهة تسجيل تجريبية فقط — المصادقة الحقيقية وربط الحساب سيتم عبر Identity Platform لاحقًا.
-          </div>
+          <div className="mb-4 rounded-xl border border-[var(--mn-accent)]/25 bg-[var(--mn-accent)]/5 p-2.5 text-center text-[10px] leading-5 text-[var(--mn-text-muted)] font-bold">{publicT('public_registration_preview_only_real_authentication_and_account_linking')}</div>
           <div className="mb-6">
             <button
               type="button"
@@ -51,7 +52,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestric
               className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-[var(--mn-surface)] dark:bg-[var(--mn-surface-elevated)] border-2 border-[var(--mn-border)] dark:border-[var(--mn-border)] hover:bg-[var(--mn-page)] dark:hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)] dark:text-[var(--mn-text)] font-bold rounded-xl shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.98] cursor-pointer mn-panel dark:mn-panel hover:mn-panel dark:hover:mn-panel "
             >
               <Chrome className="w-5 h-5 text-[var(--mn-danger-text)]" />
-              <span>المتابعة باستخدام Google</span>
+              <span>{publicT('public_continue_with_google')}</span>
             </button>
           </div>
 
@@ -61,9 +62,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestric
                 <div className="w-full border-t border-[var(--mn-border)] dark:border-[var(--mn-border)]"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] text-[var(--mn-text-muted)] text-xs font-bold mn-panel dark:mn-panel ">
-                  أو عبر البريد الإلكتروني
-                </span>
+                <span className="px-2 bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] text-[var(--mn-text-muted)] text-xs font-bold mn-panel dark:mn-panel ">{publicT('public_or_use_email')}</span>
               </div>
             </div>
           </div>
@@ -72,9 +71,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestric
           <form className="space-y-4" onSubmit={(e) => {e.preventDefault(); explainPreview();}}>
             {!isLogin && (
               <div>
-                <label className="block text-xs font-bold text-[var(--mn-text)] dark:text-[var(--mn-text)] mb-1.5">
-                  الاسم الكامل
-                </label>
+                <label className="block text-xs font-bold text-[var(--mn-text)] dark:text-[var(--mn-text)] mb-1.5">{publicT('public_full_name')}</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                     <User className="h-4 w-4 text-[var(--mn-text-muted)]" />
@@ -82,16 +79,14 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestric
                   <input
                     type="text"
                     className="block w-full pl-3 pr-9 py-2.5 text-sm border border-[var(--mn-border)] dark:border-[var(--mn-border)] rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] text-[var(--mn-heading)] dark:text-white placeholder-[var(--mn-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--mn-primary)] dark:focus:ring-[var(--mn-focus)] focus:border-transparent transition-all mn-panel dark:mn-panel "
-                    placeholder="أدخل اسمك الكامل"
+                    placeholder={publicT('public_enter_your_full_name')}
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-[var(--mn-text)] dark:text-[var(--mn-text)] mb-1.5">
-                البريد الإلكتروني
-              </label>
+              <label className="block text-xs font-bold text-[var(--mn-text)] dark:text-[var(--mn-text)] mb-1.5">{publicT('public_email')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                   <Mail className="h-4 w-4 text-[var(--mn-text-muted)]" />
@@ -105,9 +100,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestric
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[var(--mn-text)] dark:text-[var(--mn-text)] mb-1.5">
-                كلمة المرور
-              </label>
+              <label className="block text-xs font-bold text-[var(--mn-text)] dark:text-[var(--mn-text)] mb-1.5">{publicT('public_password')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                   <Lock className="h-4 w-4 text-[var(--mn-text-muted)]" />
@@ -125,9 +118,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestric
                 <button
                   type="button" onClick={explainPreview}
                   className="text-xs font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] hover:underline"
-                >
-                  نسيت كلمة المرور؟
-                </button>
+                >{publicT('public_forgot_password')}</button>
               </div>
             )}
 
@@ -136,18 +127,18 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestric
               onClick={explainPreview}
               className="w-full py-3 px-4 bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] hover:bg-[var(--mn-primary-hover)] dark:hover:bg-[var(--mn-accent-soft)] text-white dark:text-[var(--mn-on-accent)] text-sm font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 active:scale-[0.98] mn-inverse dark:mn-gold hover:mn-inverse dark:hover:mn-gold "
             >
-              {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب جديد'}
+              {isLogin ? publicT('public_sign_in') : publicT('public_create_a_new_account')}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-xs text-[var(--mn-text-muted)] dark:text-[var(--mn-text-muted)] font-bold">
-              {isLogin ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟'}{' '}
+              {isLogin ? publicT('public_do_not_have_an_account') : publicT('public_already_have_an_account')}{' '}
               <button
                 onClick={() => setIsLogin(!isLogin)}
                 className="font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] hover:underline cursor-pointer"
               >
-                {isLogin ? 'إنشاء حساب' : 'تسجيل الدخول'}
+                {isLogin ? publicT('public_create_account') : publicT('public_sign_in')}
               </button>
             </p>
             {onBackToWorkspace && (
@@ -155,9 +146,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToWorkspace, onRestric
                 type="button"
                 onClick={onBackToWorkspace}
                 className="mt-3 text-[10px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] hover:underline"
-              >
-                العودة إلى معاينة مساحة الطالب
-              </button>
+              >{publicT('public_back_to_the_student_workspace_preview')}</button>
             )}
           </div>
         </div>

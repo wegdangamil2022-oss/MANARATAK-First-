@@ -541,6 +541,7 @@ export interface PublicScholarshipDto {
 }
 
 export interface PublicUniversityDto {
+  localization?: {requestedLocale?:string;resolvedLocale?:string|null;availability?:string;fullyLocalized?:boolean;indexable?:boolean};
   institutionalOwnership?: string | null;
   organizationUnits?: Record<string, unknown>[];
   tuitionProfiles?: Record<string, unknown>[];
@@ -589,6 +590,7 @@ export interface PublicUniversityDto {
 }
 
 export interface PublicMajorDto {
+  localization?: {requestedLocale?:string;resolvedLocale?:string|null;availability?:string;fullyLocalized?:boolean;indexable?:boolean};
   publicId: string;
   slug: string;
   displayName: string;

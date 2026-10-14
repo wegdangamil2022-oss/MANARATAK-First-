@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useMemo, useState } from 'react';
 import {
   ArrowRight,
@@ -23,41 +24,41 @@ const TYPE_STYLE: Record<ArticleType, { icon: React.ReactNode; label: string; cl
   {
     STUDY_GUIDE: {
       icon: <BookOpenText className="h-4 w-4" />,
-      label: 'دليل دراسي',
+      label: "public_study_guide",
       className:
         'bg-[var(--mn-surface-muted)] text-[var(--mn-link)] border-[var(--mn-border-brand)] mn-panel ',
     },
     ARTICLE: {
       icon: <Newspaper className="h-4 w-4" />,
-      label: 'مقال',
+      label: "public_article",
       className: 'bg-[var(--mn-page)] text-[var(--mn-text)] border-[var(--mn-border)] mn-panel ',
     },
     NEWS: {
       icon: <Clock3 className="h-4 w-4" />,
-      label: 'خبر',
+      label: "public_news",
       className:
         'bg-[var(--mn-gold-surface)] text-[var(--mn-accent-text)] border-[var(--mn-border-gold)] mn-panel ',
     },
     CHECKLIST: {
       icon: <FileCheck2 className="h-4 w-4" />,
-      label: 'قائمة تحقق',
+      label: "public_checklist",
       className:
         'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]',
     },
     FAQ: {
       icon: <FileText className="h-4 w-4" />,
-      label: 'أسئلة شائعة',
+      label: "public_frequently_asked_questions",
       className: 'bg-[var(--mn-page)] text-[var(--mn-text)] border-[var(--mn-border)] mn-panel',
     },
     LANDING_PAGE: {
       icon: <FileText className="h-4 w-4" />,
-      label: 'صفحة هبوط',
+      label: "public_landing_page",
       className:
         'bg-[var(--mn-surface-muted)] text-[var(--mn-text)] border-[var(--mn-border)] mn-panel',
     },
     STATIC_PAGE: {
       icon: <FileText className="h-4 w-4" />,
-      label: 'صفحة ثابتة',
+      label: "public_static_page",
       className:
         'bg-[var(--mn-surface-muted)] text-[var(--mn-text)] border-[var(--mn-border)] mn-panel',
     },
@@ -78,6 +79,8 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
   favoriteIds = [],
   onToggleFavorite,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<'ALL' | ArticleType>('ALL');
 
@@ -95,7 +98,7 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
 
   return (
     <main
-      dir="rtl"
+      dir={publicDir}
       className="min-h-screen bg-[var(--mn-page)] pb-16 font-['Cairo',sans-serif] mn-panel "
     >
       <section className="relative overflow-hidden bg-gradient-to-b from-[var(--mn-primary)] via-[var(--mn-primary)] to-[var(--mn-primary)] px-4 pb-12 pt-5 text-white shadow-sm mn-inverse ">
@@ -108,25 +111,18 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
               type="button"
               onClick={onBack}
               className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-[var(--mn-on-dark-muted)] backdrop-blur-sm transition hover:bg-white/10"
-              aria-label="العودة"
-              title="العودة"
+              aria-label={publicT('public_back')}
+              title={publicT('public_back')}
             >
               <ArrowRight className="h-4 w-4" />
             </button>
-            <span className="rounded-full border border-[var(--mn-border-gold)] bg-[var(--mn-accent)]/10 px-3 py-1 text-[10px] font-bold text-[var(--mn-accent-text)]">
-              منصة المعرفة
-            </span>
+            <span className="rounded-full border border-[var(--mn-border-gold)] bg-[var(--mn-accent)]/10 px-3 py-1 text-[10px] font-bold text-[var(--mn-accent-text)]">{publicT('public_knowledge_platform')}</span>
           </div>
 
           <div className="text-center">
             <Sparkles className="mb-1 h-4 w-4 text-[var(--mn-accent-text)]" aria-hidden="true" />
-            <h1 className="text-[22px] font-bold leading-9 sm:text-[26px]">
-              المقالات والأدلة الدراسية
-            </h1>
-            <p className="mx-auto mt-1.5 max-w-sm text-[11px] font-medium leading-6 text-[var(--mn-on-dark-muted)] sm:text-xs">
-              أدلة عملية ومقالات تحريرية تساعدك على فهم المنح والقبول والدراسة والاختبارات واتخاذ
-              قرار أوضح.
-            </p>
+            <h1 className="text-[22px] font-bold leading-9 sm:text-[26px]">{publicT('public_articles_and_study_guides')}</h1>
+            <p className="mx-auto mt-1.5 max-w-sm text-[11px] font-medium leading-6 text-[var(--mn-on-dark-muted)] sm:text-xs">{publicT('public_practical_guides_and_editorial_articles_to_help_you')}</p>
           </div>
 
           <div className="mx-auto mt-4 max-w-md">
@@ -135,7 +131,7 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
               <input
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="ابحث بعنوان المقال أو الموضوع..."
+                placeholder={publicT('public_search_by_article_title_or_topic')}
                 className="w-full rounded-full border border-[var(--mn-border-gold)] bg-[var(--mn-primary)]/80 py-2.5 pl-10 pr-10 text-center text-xs font-bold text-white outline-none placeholder:text-[var(--mn-on-dark-muted)] focus:border-[var(--mn-border-gold)] focus:bg-[var(--mn-primary)] mn-inverse focus:mn-inverse "
               />
               {searchQuery && (
@@ -174,7 +170,7 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
                       : 'border border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)] mn-panel hover:mn-panel '
                   }`}
                 >
-                  {item.label}
+                  {publicT(item.label)}
                 </button>
               );
             })}
@@ -182,8 +178,8 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
         </div>
 
         <div className="flex items-center justify-between px-1 pt-1 text-[10px] font-bold text-[var(--mn-text-muted)] sm:text-[11px]">
-          <span>{filtered.length} مواد معرفية</span>
-          <span>الأحدث أولًا</span>
+          <span>{filtered.length}{' '}{publicT('public_knowledge_resources')}</span>
+          <span>{publicT('public_newest_first')}</span>
         </div>
 
         <section className="space-y-3">
@@ -216,9 +212,7 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
                         <span className="block text-[9px] font-bold text-[var(--mn-accent-text)]">
                           MANARATAK
                         </span>
-                        <span className="mt-0.5 block text-[9px] font-bold leading-4 text-[var(--mn-on-dark-muted)]">
-                          المعرفة والإرشاد
-                        </span>
+                        <span className="mt-0.5 block text-[9px] font-bold leading-4 text-[var(--mn-on-dark-muted)]">{publicT('public_knowledge_and_guidance')}</span>
                       </div>
                     </div>
                   </div>
@@ -236,9 +230,7 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
                         {article.categoryAr}
                       </span>
                       {index === 0 && (
-                        <span className="rounded-full bg-[var(--mn-primary)]/7 px-2 py-1 text-[9px] font-bold text-[var(--mn-heading)]">
-                          مميز
-                        </span>
+                        <span className="rounded-full bg-[var(--mn-primary)]/7 px-2 py-1 text-[9px] font-bold text-[var(--mn-heading)]">{publicT('public_featured')}</span>
                       )}
                     </div>
 
@@ -286,9 +278,7 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
                         type="button"
                         onClick={() => onSelectArticle?.(article)}
                         className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-xl bg-[var(--mn-primary)] px-3 text-[10px] font-bold text-white shadow-sm transition hover:bg-[var(--mn-primary-hover)] active:scale-[0.99] mn-inverse hover:mn-inverse"
-                      >
-                        اقرأ المقال
-                        <ChevronLeft className="h-3.5 w-3.5" />
+                      >{publicT('public_read_article')}<ChevronLeft className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>

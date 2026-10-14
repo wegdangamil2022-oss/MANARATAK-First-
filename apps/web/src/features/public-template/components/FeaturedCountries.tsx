@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { Globe, ChevronLeft } from 'lucide-react';
 
@@ -85,6 +86,8 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
   onSelectCountry,
   onViewAllClick,
 }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   return (
     <section
       id="featured-countries-section"
@@ -104,13 +107,11 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
                   <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" />
                 </span>
-                <span>أشهر وجهات الدراسة والابتعاث</span>
+                <span>{publicT('public_popular_study_abroad_destinations')}</span>
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">
-              اكتشف أفضل الدول للدراسة في الخارج وتعرف على ثقافاتها والفرص التعليمية المتاحة بها.
-            </p>
+            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_discover_leading_countries_for_studying_abroad_their_cultures')}</p>
           </div>
 
           {/* Fixed 4x2 Grid with Larger Bubbles & High Contrast Typography */}
@@ -157,8 +158,7 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
 
                 {/* Opportunity Count Badge (Clear & Visible) */}
                 <span className="text-[9px] sm:text-[10px] text-[var(--mn-heading)] font-bold bg-[var(--mn-primary)]/10 px-2 py-0.5 rounded-full whitespace-nowrap">
-                  {item.scholarshipsCount} فرصة
-                </span>
+                  {item.scholarshipsCount}{' '}{publicT('public_opportunity')}</span>
               </div>
             ))}
           </div>
@@ -170,7 +170,7 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
               onClick={onViewAllClick}
               className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
             >
-              <span className="text-[12px] sm:text-sm font-bold">تصفح جميع الوجهات والدول</span>
+              <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_all_destinations_and_countries')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
             </button>
           </div>

@@ -83,6 +83,8 @@ export class AdminUniversityUseCases {
       throw new Error(`UNSUPPORTED_TRANSLATION_LOCALE:${input.locale}`);
     }
 
+    if(input.reviewStatus && input.reviewStatus!=='NEEDS_REVIEW')throw new Error('TRANSLATION_OWNER_REVIEW_WORKFLOW_REQUIRED');
+
     return this.mutate('UNIVERSITY_TRANSLATION_UPSERTED', id, context, async (repository) => {
       if (!repository.upsertTranslation) {
         throw new Error('UNIVERSITY_TRANSLATION_PERSISTENCE_NOT_AVAILABLE');

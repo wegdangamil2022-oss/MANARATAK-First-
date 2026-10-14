@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { Home, Search, Heart, Sparkles, Bell } from 'lucide-react';
 
@@ -18,10 +19,12 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
   unreadNotificationsCount,
   isNotificationsOpen = false,
 }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const tabs = [
     {
       id: 'home' as TabType,
-      label: 'الرئيسية',
+      label: publicT('public_home'),
       icon: (isActive: boolean) => (
         <Home
           className={`w-5 h-5 transition-transform duration-200 ${
@@ -34,7 +37,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
     },
     {
       id: 'search' as TabType,
-      label: 'بحث',
+      label: publicT('public_search'),
       icon: (isActive: boolean) => (
         <Search
           className={`w-5 h-5 transition-transform duration-200 ${
@@ -47,7 +50,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
     },
     {
       id: 'favorites' as TabType,
-      label: 'المفضلة',
+      label: publicT('public_favorites'),
       icon: (isActive: boolean) => (
         <div className="relative">
           <Heart
@@ -67,7 +70,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
     },
     {
       id: 'ai-tools' as TabType,
-      label: 'أدوات',
+      label: publicT('public_tools'),
       icon: (isActive: boolean) => (
         <div className="relative flex items-center justify-center">
           <Sparkles
@@ -87,7 +90,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
     },
     {
       id: 'notifications' as TabType,
-      label: 'الإشعارات',
+      label: publicT('public_notifications'),
       icon: (isActive: boolean) => (
         <div className="relative">
           <Bell

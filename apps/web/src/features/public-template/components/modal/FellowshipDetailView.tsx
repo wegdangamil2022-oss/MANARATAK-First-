@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../../i18n/I18nProvider';
 import React from 'react';
 import {
   BookOpen,
@@ -99,35 +100,31 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
   major,
   onOpenMajor,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   const relationshipDemo =
     FELLOWSHIP_RELATIONSHIP_DEMOS[major.id] || DEFAULT_FELLOWSHIP_RELATIONSHIPS;
 
   return (
-    <div className="px-0 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3" dir="rtl">
+    <div className="px-0 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3" dir={publicDir}>
       {/* 1. BASIC FELLOWSHIP INFORMATION CARD */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
 
         {/* Section Header */}
-        <DetailSectionHeader icon={BookOpen} title="1. معلومات الزمالة الأساسية" />
+        <DetailSectionHeader icon={BookOpen} title={publicT('public_1_basic_fellowship_information')} />
 
         {/* Table Header Row */}
         <div className="grid grid-cols-12 bg-[var(--mn-surface-muted)] border-y border-[var(--mn-border)] py-2.5 px-3.5 sm:px-4 items-center">
-          <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] text-right">
-            الحقل
-          </div>
-          <div className="col-span-8 text-[12px] font-bold text-[var(--mn-heading)] text-right">
-            التفاصيل
-          </div>
+          <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] text-start">{publicT('public_field')}</div>
+          <div className="col-span-8 text-[12px] font-bold text-[var(--mn-heading)] text-start">{publicT('public_details_2')}</div>
         </div>
 
         {/* Table Body Rows */}
         <div className="divide-y divide-[var(--mn-border)] bg-[var(--mn-surface)] ">
           {/* Reference Code */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-              الرمز المرجعي
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_reference_code')}</div>
             <div className="col-span-8 text-[11px] font-bold text-[var(--mn-text)] font-mono tracking-wider">
               {major.code || 'FEL-0001'}
             </div>
@@ -135,17 +132,13 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
 
           {/* Arabic Name */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-              الاسم بالعربية
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_arabic_name')}</div>
             <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)]">{major.name}</div>
           </div>
 
           {/* Name in English */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-              الاسم بالإنجليزية
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_english_name')}</div>
             <div className="col-span-8 text-[11px] font-bold text-[var(--mn-accent-text)] font-['Cairo',sans-serif] tracking-wide">
               {major.nameEn}
             </div>
@@ -153,47 +146,39 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
 
           {/* Fellowship Type */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-              نوع الزمالة
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_fellowship_type')}</div>
             <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)]">
-              {major.fellowshipType || 'زمالة تدريبية سريرية — Clinical Training Fellowship'}
+              {major.fellowshipType || publicT('public_clinical_training_fellowship')}
             </div>
           </div>
 
           {/* Field */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-              المجال المهني أو البحثي
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_professional_or_research_domain')}</div>
             <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)]">
-              {major.professionalOrResearchField || major.academicField || 'القلب والأوعية'}
+              {major.professionalOrResearchField || major.academicField || publicT('public_cardiovascular_medicine')}
             </div>
           </div>
 
           {/* Associated Majors */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-              التخصصات المرتبطة
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_related_majors_2')}</div>
             <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
               {major.associatedMajor ||
-                'الطب الباطني، طب القلب، وظائف الأعضاء القلبية، التصوير القلبي، والعناية القلبية'}
+                publicT('public_internal_medicine_cardiology_cardiac_physiology_cardiac_imaging_and')}
             </div>
           </div>
 
           {/* Canonical linked majors — navigation demo for future API relationships */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start bg-[var(--mn-page)] border-y border-[var(--mn-border)]">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-1">
-              روابط التخصص
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-1">{publicT('public_major_links')}</div>
             <div className="col-span-8 grid gap-1.5">
               {relationshipDemo.associatedMajors.map((item) => (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => onOpenMajor?.(item.id)}
-                  className="group flex w-full items-center justify-between gap-2 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2.5 py-2 text-right transition-all hover:border-[var(--mn-accent)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs "
+                  className="group flex w-full items-center justify-between gap-2 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2.5 py-2 text-start transition-all hover:border-[var(--mn-accent)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs "
                 >
                   <span className="min-w-0">
                     <span className="block text-[10.5px] font-bold text-[var(--mn-heading)]">
@@ -211,51 +196,39 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
 
           {/* Target Audience Summary */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-              الفئة المستهدفة
-            </div>
-            <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
-              أطباء أكملوا تدريبًا تخصصيًا أساسيًا مناسبًا في الطب الباطني أو ما يعادله
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_target_applicants_2')}</div>
+            <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">{publicT('public_physicians_who_have_completed_suitable_basic_specialist_training')}</div>
           </div>
 
           {/* Duration */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-              المدة الشائعة
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_typical_duration')}</div>
             <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
               {major.duration ||
-                'غالبًا نحو 3 سنوات بعد التدريب الأساسي، مع اختلاف واضح حسب النظام'}
+                publicT('public_typically_around_3_years_after_basic_training_with')}
             </div>
           </div>
 
           {/* Training Nature */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-              طبيعة التدريب
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_training_type')}</div>
             <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
               {major.natureOfStudy ||
-                'سريري عملي، دورانات، عيادات، مناوبات، مناقشات حالات، وبحث أو تحسين جودة'}
+                publicT('public_practical_clinical_training_rotations_clinics_on_call_duties')}
             </div>
           </div>
 
           {/* Licensing Requirement */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">
-              متطلب الترخيص العام
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_general_licensing_requirement')}</div>
             <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)]">
-              {major.licensingRequirement || 'مطلوب للممارسة السريرية'}
+              {major.licensingRequirement || publicT('public_required_for_clinical_practice')}
             </div>
           </div>
 
           {/* Short Description */}
           <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
-              الوصف المختصر
-            </div>
+            <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_brief_description')}</div>
             <div className="col-span-8 text-[11px] font-bold text-[var(--mn-text)] leading-relaxed">
               {major.description}
             </div>
@@ -266,19 +239,12 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 2. NATURE & OBJECTIVE OF FELLOWSHIP */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={FileText} title="2. طبيعة الزمالة وهدفها" />
+        <DetailSectionHeader icon={FileText} title={publicT('public_2_fellowship_nature_and_purpose')} />
 
         <div className="space-y-2.5">
-          <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-right space-y-2 ">
-            <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">
-              تؤسس الزمالة كفاءة واسعة في أمراض القلب لدى البالغين قبل الانتقال إلى تخصصات أدق مثل
-              التداخلات أو اضطرابات النظم أو قصور القلب. وتشمل تقييم الأعراض القلبية، وفهم الفحوص،
-              وإدارة الحالات المزمنة والحادة، والتنسيق مع الطوارئ والعناية والجراحة.
-            </p>
-            <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify pt-1.5 border-t border-[var(--mn-border)]">
-              لا تمنح الزمالة وحدها صلاحية عالمية؛ إذ ترتبط الصلاحيات بالترخيص والاعتماد والامتيازات
-              السريرية المحلية.
-            </p>
+          <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start space-y-2 ">
+            <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">{publicT('public_the_fellowship_establishes_broad_competence_in_adult_cardiology')}</p>
+            <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify pt-1.5 border-t border-[var(--mn-border)]">{publicT('public_the_fellowship_alone_does_not_grant_universal_authority')}</p>
           </div>
         </div>
       </div>
@@ -286,9 +252,9 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 3. TYPE OF FELLOWSHIP */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={Layers} title="3. نوع الزمالة" />
+        <DetailSectionHeader icon={Layers} title={publicT('public_3_fellowship_type')} />
 
-        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 text-right">
+        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 text-start">
           {(
             major.fellowshipTypeDetails || [
               'النوع الأساسي: زمالة تدريبية سريرية.',
@@ -300,7 +266,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           ).map((item, idx) => (
             <div
               key={idx}
-              className="flex flex-row items-start gap-2 p-2 sm:p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-300 group text-right h-full "
+              className="flex flex-row items-start gap-2 p-2 sm:p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-300 group text-start h-full "
             >
               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] group-hover:bg-[var(--mn-accent)] dark:group-hover:bg-[var(--mn-primary)] shrink-0 mt-1.5 shadow-sm transition-colors" />
               <span className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed group-hover:text-[var(--mn-heading)] transition-colors flex-1">
@@ -314,9 +280,9 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 4. TARGET AUDIENCE */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={Users} title="4. الفئة المستهدفة" />
+        <DetailSectionHeader icon={Users} title={publicT('public_4_target_applicants')} />
 
-        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 text-right">
+        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 text-start">
           {(
             major.targetAudience || [
               'أطباء أنهوا إقامة أو تدريبًا أساسيًا في الطب الباطني أو مسارًا معادلًا.',
@@ -327,7 +293,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           ).map((item, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-2 p-2 sm:p-2.5 rounded-full bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[var(--mn-border-brand)] hover:bg-[var(--mn-surface)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group text-right h-full "
+              className="flex items-center gap-2 p-2 sm:p-2.5 rounded-full bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[var(--mn-border-brand)] hover:bg-[var(--mn-surface)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group text-start h-full "
             >
               <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[var(--mn-primary)]/10 flex items-center justify-center shrink-0 group-hover:bg-[var(--mn-primary)] dark:group-hover:bg-[var(--mn-accent)] transition-colors ">
                 <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[var(--mn-heading)] group-hover:text-white transition-colors" />
@@ -343,9 +309,9 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 5. GENERAL PREVIOUS QUALIFICATIONS */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={CheckCircle} title="5. المؤهلات السابقة العامة" />
+        <DetailSectionHeader icon={CheckCircle} title={publicT('public_5_general_prior_qualifications')} />
 
-        <div className="space-y-3 text-right">
+        <div className="space-y-3 text-start">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {(
               major.previousQualifications || [
@@ -358,7 +324,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
             ).map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-page)]/40 hover:shadow-2xs transition-all duration-200 group text-right "
+                className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-page)]/40 hover:shadow-2xs transition-all duration-200 group text-start "
               >
                 <CheckCircle2 className="w-4 h-4 text-[var(--mn-heading)] shrink-0 mt-0.5" />
                 <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
@@ -371,9 +337,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           <div className="rounded-xl border border-[var(--mn-border-brand)]/50 bg-gradient-to-l from-[var(--mn-primary)]/[0.035] to-[var(--mn-surface)] p-2.5 sm:p-3 ">
             <div className="mb-2 flex items-center gap-1.5">
               <GraduationCap className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" />
-              <h3 className="text-[10.5px] font-bold text-[var(--mn-heading)]">
-                تخصصات وخلفيات مرتبطة
-              </h3>
+              <h3 className="text-[10.5px] font-bold text-[var(--mn-heading)]">{publicT('public_related_majors_and_backgrounds')}</h3>
             </div>
             <div className="grid gap-1.5 sm:grid-cols-2">
               {relationshipDemo.associatedMajors.map((item) => (
@@ -381,7 +345,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
                   key={`background-${item.id}`}
                   type="button"
                   onClick={() => onOpenMajor?.(item.id)}
-                  className="group flex items-center justify-between gap-2 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2.5 py-2 text-right transition-all hover:border-[var(--mn-accent)] hover:bg-[var(--mn-gold-surface)]/30 "
+                  className="group flex items-center justify-between gap-2 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2.5 py-2 text-start transition-all hover:border-[var(--mn-accent)] hover:bg-[var(--mn-gold-surface)]/30 "
                 >
                   <span className="text-[10px] font-semibold text-[var(--mn-heading)]">{item.name}</span>
                   <ArrowLeft className="h-3 w-3 shrink-0 text-[var(--mn-accent-text)] transition-transform group-hover:-translate-x-0.5" />
@@ -396,10 +360,10 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
             <div className="w-5 h-5 rounded-full bg-[var(--mn-accent)]/10 border border-[var(--mn-accent)] flex items-center justify-center shrink-0 mt-0.5">
               <Info className="w-3 h-3 text-[var(--mn-accent-text)]" />
             </div>
-            <div className="flex-1 min-w-0 pr-1 text-right">
+            <div className="flex-1 min-w-0 pr-1 text-start">
               <p className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-text)] leading-relaxed">
                 {major.previousQualificationsNote ||
-                  'تختلف شروط القبول الدقيقة حسب الدولة والهيئة والبرنامج، ولا تحفظ شروط مؤسسة بعينها داخل Phase 10.'}
+                  publicT('public_exact_admission_requirements_vary_by_country_authority_and')}
               </p>
             </div>
           </div>
@@ -409,9 +373,9 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 6. DURATION AND TRAINING PATTERN */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={Clock} title="6. المدة ونمط التدريب" />
+        <DetailSectionHeader icon={Clock} title={publicT('public_6_duration_and_training_arrangement')} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-right">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-start">
           {(
             major.durationAndPattern || [
               'دوام كامل غالبًا.',
@@ -423,7 +387,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           ).map((item, idx) => (
             <div
               key={idx}
-              className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl bg-[var(--mn-page)]/80 border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-surface)] hover:shadow-2xs transition-all text-right "
+              className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl bg-[var(--mn-page)]/80 border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-surface)] hover:shadow-2xs transition-all text-start "
             >
               <div className="w-1.5 h-3.5 bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] rounded-full shrink-0 mt-0.5 " />
               <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
@@ -437,16 +401,14 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 7. TRAINING COMPONENTS */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={Stethoscope} title="7. مكونات التدريب" />
+        <DetailSectionHeader icon={Stethoscope} title={publicT('public_7_training_components')} />
 
-        <div className="space-y-4 text-right">
+        <div className="space-y-4 text-start">
           {/* Sub-block 1: الدورانات والخبرة السريرية */}
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
               <HeartPulse className="w-4 h-4 text-[var(--mn-heading)]" />
-              <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">
-                الدورانات والخبرة السريرية:
-              </h3>
+              <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_rotations_and_clinical_experience')}</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {(
@@ -476,9 +438,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           <div className="space-y-2 pt-2 border-t border-[var(--mn-border)]">
             <div className="flex items-center gap-1.5">
               <Activity className="w-4 h-4 text-[var(--mn-accent-text)]" />
-              <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">
-                الإجراءات أو التقنيات تحت الإشراف:
-              </h3>
+              <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_procedures_or_techniques_under_supervision')}</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {(
@@ -507,9 +467,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           <div className="space-y-2 pt-2 border-t border-[var(--mn-border)]">
             <div className="flex items-center gap-1.5">
               <FlaskConical className="w-4 h-4 text-[var(--mn-heading)]" />
-              <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">
-                البحث وتحسين الجودة:
-              </h3>
+              <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_research_and_quality_improvement')}</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {(
@@ -538,9 +496,9 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 8. TARGET COMPETENCIES */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={Award} title="8. الكفاءات المستهدفة" />
+        <DetailSectionHeader icon={Award} title={publicT('public_8_target_competencies')} />
 
-        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 pt-0.5 text-right">
+        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 pt-0.5 text-start">
           {(
             major.targetCompetencies || [
               'التقييم المتكامل للمريض القلبي.',
@@ -554,7 +512,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           ).map((comp, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-2 p-2 sm:p-2.5 rounded-t-lg bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)] border-b-2 border-b-[var(--mn-border-gold)] hover:border-b-[var(--mn-primary)] dark:hover:border-b-[var(--mn-accent)] hover:bg-[var(--mn-page)] transition-all duration-300 group text-right h-full "
+              className="flex items-center gap-2 p-2 sm:p-2.5 rounded-t-lg bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)] border-b-2 border-b-[var(--mn-border-gold)] hover:border-b-[var(--mn-primary)] dark:hover:border-b-[var(--mn-accent)] hover:bg-[var(--mn-page)] transition-all duration-300 group text-start h-full "
             >
               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] group-hover:bg-[var(--mn-accent)] dark:group-hover:bg-[var(--mn-primary)] transition-colors shrink-0" />
               <span className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors flex-1">
@@ -568,9 +526,9 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 9. SUB-SPECIALTIES & PATHWAYS */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={Compass} title="9. المسارات والتخصصات الدقيقة" />
+        <DetailSectionHeader icon={Compass} title={publicT('public_9_subspecialty_paths')} />
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-0.5 text-right">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-0.5 text-start">
           {(
             major.subSpecialties || [
               'مرض الشرايين التاجية',
@@ -584,7 +542,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           ).map((track, idx) => (
             <div
               key={idx}
-              className="flex items-center p-2.5 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)]/60 hover:shadow-2xs transition-all duration-200 group text-right overflow-hidden relative min-h-[44px] "
+              className="flex items-center p-2.5 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)]/60 hover:shadow-2xs transition-all duration-200 group text-start overflow-hidden relative min-h-[44px] "
             >
               <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-[var(--mn-primary)]/80 dark:bg-[var(--mn-accent)]/80 group-hover:bg-[var(--mn-primary)] dark:group-hover:bg-[var(--mn-accent)] transition-colors" />
               <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors pr-2">
@@ -598,9 +556,9 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 10. SUPERVISION & TRAINING ENVIRONMENT */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={ShieldCheck} title="10. الإشراف وبيئة التدريب" />
+        <DetailSectionHeader icon={ShieldCheck} title={publicT('public_10_supervision_and_training_environment')} />
 
-        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 text-right">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 text-start">
           {(
             major.supervisionAndEnvironment || [
               'مشرفون معتمدون في طب القلب.',
@@ -612,7 +570,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           ).map((item, idx) => (
             <div
               key={idx}
-              className="flex flex-row items-start gap-2 p-2 sm:p-2.5 rounded-lg bg-[var(--mn-surface)] border border-[var(--mn-border)] shadow-[2px_2px_0px_var(--mn-accent-soft)] hover:shadow-[3px_3px_0px_var(--mn-primary)] dark:hover:shadow-[3px_3px_0px_var(--mn-accent)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all duration-300 text-right group h-full "
+              className="flex flex-row items-start gap-2 p-2 sm:p-2.5 rounded-lg bg-[var(--mn-surface)] border border-[var(--mn-border)] shadow-[2px_2px_0px_var(--mn-accent-soft)] hover:shadow-[3px_3px_0px_var(--mn-primary)] dark:hover:shadow-[3px_3px_0px_var(--mn-accent)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all duration-300 text-start group h-full "
             >
               <div className="w-4 h-4 sm:w-5 sm:h-5 rounded bg-[var(--mn-surface-muted)] text-[var(--mn-text-muted)] flex items-center justify-center shrink-0 font-bold text-[9px] sm:text-[10px] group-hover:bg-[var(--mn-primary)] group-hover:text-white dark:group-hover:bg-[var(--mn-accent)] dark:group-hover:text-[var(--mn-primary)] transition-colors ">
                 {idx + 1}
@@ -628,9 +586,9 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 11. ASSESSMENT & COMPLETION REQUIREMENTS */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={ListChecks} title="11. التقييم ومتطلبات الإكمال" />
+        <DetailSectionHeader icon={ListChecks} title={publicT('public_11_assessment_and_completion_requirements')} />
 
-        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 pt-0.5 text-right">
+        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 pt-0.5 text-start">
           {(
             major.assessmentAndCompletionRequirements || [
               'تقييم مستمر للمعرفة والقرار السريري.',
@@ -643,7 +601,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           ).map((req, idx) => (
             <div
               key={idx}
-              className="flex items-start gap-2 p-2 sm:p-2.5 rounded-lg bg-[var(--mn-accent)]/5 border-2 border-dotted border-[var(--mn-accent)]/50 hover:border-[var(--mn-border-brand)] hover:bg-[var(--mn-surface-muted)]/60 hover:shadow-sm transition-all text-right group h-full"
+              className="flex items-start gap-2 p-2 sm:p-2.5 rounded-lg bg-[var(--mn-accent)]/5 border-2 border-dotted border-[var(--mn-accent)]/50 hover:border-[var(--mn-border-brand)] hover:bg-[var(--mn-surface-muted)]/60 hover:shadow-sm transition-all text-start group h-full"
             >
               <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-sm bg-[var(--mn-accent)]/20 text-[var(--mn-heading)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[9px] group-hover:bg-[var(--mn-primary)] group-hover:text-white dark:group-hover:bg-[var(--mn-accent)] dark:group-hover:text-[var(--mn-primary)] transition-colors rotate-45 ">
                 <Star className="h-2.5 w-2.5 -rotate-45 fill-current" aria-hidden="true" />
@@ -659,9 +617,9 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 12. RESULTING CERTIFICATE OR TITLE */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={Award} title="12. الشهادة أو الصفة الناتجة" />
+        <DetailSectionHeader icon={Award} title={publicT('public_12_resulting_certificate_or_status')} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-right">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-start">
           {(
             major.resultingCertificate || [
               'شهادة إكمال زمالة طب القلب للبالغين.',
@@ -672,7 +630,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           ).map((cert, idx) => (
             <div
               key={idx}
-              className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl bg-[var(--mn-page)]/80 border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-surface)] hover:shadow-2xs transition-all text-right group "
+              className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl bg-[var(--mn-page)]/80 border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-surface)] hover:shadow-2xs transition-all text-start group "
             >
               <div className="w-5 h-5 rounded-lg bg-[var(--mn-accent)]/10 text-[var(--mn-accent-text)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px] group-hover:bg-[var(--mn-accent)] group-hover:text-white transition-colors ">
                 <Star className="h-3 w-3 fill-current" aria-hidden="true" />
@@ -688,12 +646,12 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 13. SCOPE OF PRACTICE & LICENSING */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={Scale} title="13. نطاق الممارسة والترخيص" />
+        <DetailSectionHeader icon={Scale} title={publicT('public_13_scope_of_practice_and_licensing')} />
 
-        <div className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-br from-[var(--mn-page)]/90 to-[var(--mn-gold-surface)]/20 border border-[var(--mn-border-gold)] text-right ">
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-br from-[var(--mn-page)]/90 to-[var(--mn-gold-surface)]/20 border border-[var(--mn-border-gold)] text-start ">
           <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">
             {major.practiceScopeAndLicensing ||
-              'تدعم الزمالة ممارسة طب القلب للبالغين ضمن الترخيص والاعتماد والامتيازات الممنوحة. لا تسمح تلقائيًا بإجراء تدخلات متقدمة أو إجراءات كهربائية أو جراحية دون تدريب دقيق واعتماد منفصل.'}
+              publicT('public_the_fellowship_supports_adult_cardiology_practice_within_the')}
           </p>
         </div>
       </div>
@@ -701,9 +659,9 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 14. WORK FIELDS AFTER FELLOWSHIP */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={Briefcase} title="14. مجالات العمل بعد الزمالة" />
+        <DetailSectionHeader icon={Briefcase} title={publicT('public_14_careers_after_the_fellowship')} />
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-right pt-0.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-start pt-0.5">
           {(
             major.workFields || [
               'أقسام وعيادات القلب',
@@ -716,7 +674,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
           ).map((field, index) => (
             <div
               key={index}
-              className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-page)]/40 hover:shadow-2xs transition-all duration-200 group text-right "
+              className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)] hover:bg-[var(--mn-page)]/40 hover:shadow-2xs transition-all duration-200 group text-start "
             >
               <div className="w-2 h-[2.5px] bg-[var(--mn-primary)]/80 dark:bg-[var(--mn-accent)]/80 group-hover:bg-[var(--mn-primary)] dark:group-hover:bg-[var(--mn-accent)] group-hover:w-3.5 transition-all duration-300 shrink-0 mt-1.5 rounded-full" />
               <span className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors">
@@ -730,19 +688,15 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 15. RELATION TO RESIDENCY, BOARD & PHD */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={UserCheck} title="15. العلاقة بالإقامة والبورد والدكتوراه" />
+        <DetailSectionHeader icon={UserCheck} title={publicT('public_15_relationship_to_residency_boards_and_doctorates')} />
 
         {/* Table 15 */}
         <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-[var(--mn-border-gold)] shadow-2xs bg-[var(--mn-surface)] ">
-          <table className="w-full text-right border-collapse min-w-[500px]">
+          <table className="w-full text-start border-collapse min-w-[500px]">
             <thead>
               <tr className="bg-gradient-to-l from-[var(--mn-primary)]/5 to-[var(--mn-surface)] border-b border-[var(--mn-border-gold)]">
-                <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[35%] whitespace-nowrap">
-                  المسار
-                </th>
-                <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[65%]">
-                  العلاقة بالزمالة
-                </th>
+                <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[35%] whitespace-nowrap">{publicT('public_path')}</th>
+                <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[65%]">{publicT('public_relationship_to_the_fellowship')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--mn-border)]">
@@ -799,19 +753,15 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 16. SIMILAR FELLOWSHIPS & DIFFERENCES */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={GitCompare} title="16. الزمالات المشابهة والفروق" />
+        <DetailSectionHeader icon={GitCompare} title={publicT('public_16_similar_fellowships_and_differences')} />
 
         {/* Table 16 */}
         <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-[var(--mn-border-gold)] shadow-2xs bg-[var(--mn-surface)] ">
-          <table className="w-full text-right border-collapse min-w-[500px]">
+          <table className="w-full text-start border-collapse min-w-[500px]">
             <thead>
               <tr className="bg-gradient-to-l from-[var(--mn-primary)]/5 to-[var(--mn-surface)] border-b border-[var(--mn-border-gold)]">
-                <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[40%] whitespace-nowrap">
-                  الزمالة أو المسار المشابه
-                </th>
-                <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[60%]">
-                  الفرق المختصر
-                </th>
+                <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[40%] whitespace-nowrap">{publicT('public_similar_fellowship_or_path')}</th>
+                <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[60%]">{publicT('public_brief_distinction')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--mn-border)]">
@@ -843,7 +793,7 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
                         <button
                           type="button"
                           onClick={() => onOpenMajor?.(targetFellowshipId)}
-                          className="inline-flex items-center gap-1.5 text-right font-bold text-[var(--mn-heading)] transition-colors hover:text-[var(--mn-accent-text)]"
+                          className="inline-flex items-center gap-1.5 text-start font-bold text-[var(--mn-heading)] transition-colors hover:text-[var(--mn-accent-text)]"
                         >
                           <span>{row.name}</span>
                           <ArrowLeft className="h-3 w-3 shrink-0 text-[var(--mn-accent-text)]" />
@@ -866,14 +816,14 @@ export const FellowshipDetailView: React.FC<FellowshipDetailViewProps> = ({
       {/* 17. PROFESSIONAL & REGULATORY ALERT */}
       <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
         <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
-        <DetailSectionHeader icon={ShieldAlert} title="17. التنبيه المهني والتنظيمي" />
+        <DetailSectionHeader icon={ShieldAlert} title={publicT('public_17_professional_and_regulatory_notice')} />
 
-        <div className="space-y-2 text-right">
-          <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-gold-surface)]/30 border border-[var(--mn-accent)]/40 text-right relative overflow-hidden">
+        <div className="space-y-2 text-start">
+          <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-gold-surface)]/30 border border-[var(--mn-accent)]/40 text-start relative overflow-hidden">
             <div className="absolute top-0 right-0 w-1.5 h-full bg-[var(--mn-accent)] " />
             <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] leading-[1.9]">
               {major.professionalRegulatoryAlert ||
-                'الزمالة لا تمنح حق ممارسة طب القلب خارج الترخيص والاعتماد المحلي، ولا تسمح بإجراءات تخصصية دقيقة دون تدريب وامتيازات منفصلة. القرارات العاجلة والإجرائية يجب أن تتم داخل بيئة معتمدة وتحت حوكمة سريرية.'}
+                publicT('public_the_fellowship_does_not_authorize_cardiology_practice_outside')}
             </p>
           </div>
         </div>

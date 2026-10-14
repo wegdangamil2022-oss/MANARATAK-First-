@@ -1,3 +1,5 @@
+import type {AtomicMutationRequestContext} from '../event-foundation/use-cases/AtomicDomainMutationCoordinator';
+import { assertTranslationContentAuthoringEnabled } from '@manaratak/shared';
 import {
   ITranslationImportGateway,
   TranslationStagedCandidate,
@@ -11,6 +13,7 @@ export class TranslationImportTransferService {
   async transfer(
     candidate: TranslationStagedCandidate,
     approval: TranslationTransferApproval,
+    context?: AtomicMutationRequestContext,
   ): Promise<TranslationTransferResult> {
     if (approval.decision !== 'APPLY') {
       throw new Error('TRANSLATION_TRANSFER_NOT_APPROVED');
@@ -25,6 +28,10 @@ export class TranslationImportTransferService {
       throw new Error('TRANSLATION_DRY_RUN_TRANSFER_BLOCKED');
     }
 
-    return this.gateway.applyApproved(candidate, approval);
+    assertTranslationContentAuthoringEnabled(candidate.target.locator.entityKind);
+    if (!approval.approvalId || !context?.actorId || context.actorId === approval.reviewedBy) {
+      throw new Error('TRANSLATION_TRUSTED_INDEPENDENT_APPROVAL_REQUIRED');
+    }
+    return this.gateway.applyApproved(candidate, {...approval,actorId:context.actorId});
   }
 }

@@ -57,7 +57,7 @@ export function literalUiTranslationKeys(source, filename = 'component.tsx') {
   });
   const keys = [];
   visit(ast, node => {
-    if (!ts.isCallExpression(node) || !ts.isIdentifier(node.expression) || node.arguments.length !== 1 || !ts.isStringLiteralLike(node.arguments[0])) return;
+    if (!ts.isCallExpression(node) || !ts.isIdentifier(node.expression) || node.arguments.length < 1 || !ts.isStringLiteralLike(node.arguments[0])) return;
     for (let scope = scopeOf(node); scope; scope = scope === ast ? null : scopeOf(scope)) {
       const bindings = scopes.get(scope);
       if (bindings?.has(node.expression.text)) {

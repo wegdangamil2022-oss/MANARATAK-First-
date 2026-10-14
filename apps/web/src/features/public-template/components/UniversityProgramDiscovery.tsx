@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import { useEffect, useRef, useState } from 'react';
 import { ApiClient } from '../../../api/client';
 interface Program {
@@ -22,6 +23,8 @@ interface Program {
   }>;
 }
 export function UniversityProgramDiscovery({ universityPublicId }: { universityPublicId: string }) {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [items, setItems] = useState<Program[]>([]);
   const [language, setLanguage] = useState('');
   const [mode, setMode] = useState('');
@@ -90,11 +93,9 @@ export function UniversityProgramDiscovery({ universityPublicId }: { universityP
   }, [universityPublicId, language, mode]);
   return (
     <section className="space-y-3 rounded-xl border p-4">
-      <h3 className="font-bold">البرامج ولغة الدراسة ومواعيد القبول</h3>
-      <label>
-        لغة البرنامج
-        <select disabled={busy} value={language} onChange={(e) => setLanguage(e.target.value)}>
-          <option value="">الكل</option>
+      <h3 className="font-bold">{publicT('public_programs_study_language_and_admission_deadlines')}</h3>
+      <label>{publicT('public_program_language')}<select disabled={busy} value={language} onChange={(e) => setLanguage(e.target.value)}>
+          <option value="">{publicT('public_all')}</option>
           {choices.map((value) => (
             <option key={value.id} value={value.id}>
               {value.name}
@@ -102,87 +103,76 @@ export function UniversityProgramDiscovery({ universityPublicId }: { universityP
           ))}
         </select>
       </label>
-      <label>
-        نمط الدراسة
-        <select disabled={busy} value={mode} onChange={(e) => setMode(e.target.value)}>
-          <option value="">الكل</option>
-          <option value="FULL_TIME">دوام كامل</option>
-          <option value="PART_TIME">دوام جزئي</option>
-          <option value="UNKNOWN">غير موضح</option>
+      <label>{publicT('public_study_arrangement')}<select disabled={busy} value={mode} onChange={(e) => setMode(e.target.value)}>
+          <option value="">{publicT('public_all')}</option>
+          <option value="FULL_TIME">{publicT('public_full_time')}</option>
+          <option value="PART_TIME">{publicT('public_part_time')}</option>
+          <option value="UNKNOWN">{publicT('public_not_specified')}</option>
         </select>
       </label>
       {error && <p role="status">{error}</p>}
-      {busy && <p role="status">جارٍ التحميل</p>}
-      {!busy && !error && !items.length && <p>لا برامج منشورة موثقة مطابقة في النتائج المحملة.</p>}
+      {busy && <p role="status">{publicT('public_loading')}</p>}
+      {!busy && !error && !items.length && <p>{publicT('public_no_matching_verified_published_programs_in_the_loaded')}</p>}
       {items.map((item) => (
         <article key={item.id} className="rounded border p-3">
           <h4>{item.sourceProgramName}</h4>
           {item.study ? (
             <>
-              <p>
-                لغة الدراسة:{' '}
+              <p>{publicT('public_study_language_2')}{' '}
                 {item.study.languages.map((value) => value.nameAr ?? value.name).join('، ') ||
-                  'غير موضحة'}
+                  publicT('public_not_specified_4')}
               </p>
-              <p>
-                نمط الدراسة:{' '}
+              <p>{publicT('public_study_arrangement_2')}{' '}
                 {item.study.studyMode === 'FULL_TIME'
-                  ? 'دوام كامل'
+                  ? publicT('public_full_time')
                   : item.study.studyMode === 'PART_TIME'
-                    ? 'دوام جزئي'
-                    : 'غير موضح'}{' '}
-                · طريقة التدريس:{' '}
+                    ? publicT('public_part_time')
+                    : publicT('public_not_specified')}{' '}{publicT('public_teaching_method')}{' '}
                 {item.study.teachingDelivery === 'ONLINE'
-                  ? 'عن بعد'
+                  ? publicT('public_remote')
                   : item.study.teachingDelivery === 'ON_CAMPUS'
-                    ? 'في الحرم'
+                    ? publicT('public_on_campus')
                     : item.study.teachingDelivery === 'HYBRID'
-                      ? 'هجين'
-                      : 'غير موضحة'}
+                      ? publicT('public_hybrid')
+                      : publicT('public_not_specified_4')}
               </p>
               {item.study.durationValue && (
-                <p>
-                  المدة: {item.study.durationValue}{' '}
-                  {item.study.durationUnit === 'MONTHS' ? 'شهرًا' : 'سنة'}
+                <p>{publicT('public_duration_2')}{' '}{item.study.durationValue}{' '}
+                  {item.study.durationUnit === 'MONTHS' ? publicT('public_months') : publicT('public_year')}
                 </p>
               )}
               {item.study.entryEligibility && (
-                <p>متطلبات البرنامج: {item.study.entryEligibility}</p>
+                <p>{publicT('public_program_requirements')}{' '}{item.study.entryEligibility}</p>
               )}
             </>
           ) : (
-            <p>لغة ومتطلبات الدراسة غير موثقة بعد؛ لا تستنتج الأهلية من وصف الجامعة العام.</p>
+            <p>{publicT('public_study_language_and_requirements_have_not_been_verified')}</p>
           )}
           <ul>
             {item.intakes.map((intake) => (
               <li key={intake.id}>
                 {intake.applicantSegment} ·{' '}
                 {intake.window === 'OPEN'
-                  ? 'التقديم مفتوح'
+                  ? publicT('public_applications_open')
                   : intake.window === 'CLOSED'
-                    ? 'التقديم مغلق'
+                    ? publicT('public_applications_closed')
                     : intake.window === 'UPCOMING'
-                      ? 'التقديم لم يفتح بعد'
-                      : 'الحالة غير مؤكدة'}{' '}
-                · الإغلاق:{' '}
+                      ? publicT('public_applications_have_not_opened_yet')
+                      : publicT('public_status_unconfirmed')}{' '}{publicT('public_closing')}{' '}
                 <time dateTime={intake.applicationClose}>
                   {new Date(intake.applicationClose).toLocaleString('ar', {
                     timeZone: intake.timezone,
                   })}
                 </time>{' '}
                 ({intake.timezone}) ·{' '}
-                <a href={intake.officialSourceUrl} target="_blank" rel="noopener noreferrer">
-                  المصدر الرسمي
-                </a>
+                <a href={intake.officialSourceUrl} target="_blank" rel="noopener noreferrer">{publicT('public_official_source')}</a>
               </li>
             ))}
           </ul>
         </article>
       ))}
       {cursor && (
-        <button type="button" disabled={busy} onClick={() => void load(true)}>
-          تحميل البرامج التالية
-        </button>
+        <button type="button" disabled={busy} onClick={() => void load(true)}>{publicT('public_load_more_programs')}</button>
       )}
     </section>
   );

@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: a deep untranslated interactive control fails copy inspection with file and line
+ok 1 - a deep untranslated interactive control fails copy inspection with file and line
+  ---
+  duration_ms: 8.068342
+  type: 'test'
+  ...
+# Subtest: dictionary copy and non-rendered proper nouns do not fabricate missing UI text
+ok 2 - dictionary copy and non-rendered proper nouns do not fabricate missing UI text
+  ---
+  duration_ms: 2.161936
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 485.694498

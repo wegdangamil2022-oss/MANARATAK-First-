@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { Search, X } from 'lucide-react';
 
@@ -18,7 +19,9 @@ interface SmartSearchBarProps {
 export const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
   searchQuery,
   onSearchChange,
-}) => (
+}) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+  return (
   <div className="w-full relative z-20">
     <div className="mn-search-control flex items-center border border-[var(--mn-border)] focus-within:border-[var(--mn-accent)]/70 focus-within:ring-2 focus-within:ring-[var(--mn-primary)]/10 shadow-2xs overflow-hidden transition-all mn-panel ">
       <div className="p-3 text-[var(--mn-text-muted)] flex items-center justify-center">
@@ -29,15 +32,16 @@ export const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
         type="text"
         value={searchQuery}
         onChange={(event) => onSearchChange(event.target.value)}
-        placeholder="ابحث داخل هذا القسم..."
-        className="min-w-0 w-full px-1 text-xs sm:text-sm text-[var(--mn-text)] placeholder-[var(--mn-text-muted)] bg-transparent focus:outline-hidden font-medium text-right font-['Cairo',sans-serif]"
-        dir="rtl"
+        placeholder={publicT('public_search_within_this_section')}
+        className="min-w-0 w-full px-1 text-xs sm:text-sm text-[var(--mn-text)] placeholder-[var(--mn-text-muted)] bg-transparent focus:outline-hidden font-medium text-start font-['Cairo',sans-serif]"
+        dir={publicDir}
       />
       {searchQuery && (
-        <button onClick={() => onSearchChange('')} className="p-2 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] cursor-pointer" aria-label="مسح البحث">
+        <button onClick={() => onSearchChange('')} className="p-2 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] cursor-pointer" aria-label={publicT('public_clear_search')}>
           <X className="w-4 h-4" />
         </button>
       )}
     </div>
   </div>
 );
+};

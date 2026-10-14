@@ -5,7 +5,7 @@ import {
 } from '../../scripts/generate-localized-public-sitemap';
 
 describe('localized public sitemap', () => {
-  it('contains both supported locales for every static indexable path', () => {
+  it('contains only released locales for every static indexable path', () => {
     const sitemap = generateLocalizedPublicSitemap(
       'https://manaratak.example',
     );
@@ -16,19 +16,19 @@ describe('localized public sitemap', () => {
       expect(sitemap).toContain(
         `https://manaratak.example/ar${suffix}`,
       );
-      expect(sitemap).toContain(
+      expect(sitemap).not.toContain(
         `https://manaratak.example/en${suffix}`,
       );
     }
   });
 
-  it('emits hreflang ar, en and x-default alternates', () => {
+  it('emits only released hreflang alternates', () => {
     const sitemap = generateLocalizedPublicSitemap(
       'https://manaratak.example',
     );
 
     expect(sitemap).toContain('hreflang="ar"');
-    expect(sitemap).toContain('hreflang="en"');
+    expect(sitemap).not.toContain('hreflang="en"');
     expect(sitemap).toContain('hreflang="x-default"');
   });
 

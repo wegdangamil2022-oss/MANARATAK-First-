@@ -17,6 +17,6 @@ export function publicMajorProjection(major:MajorDto,sections:readonly MajorCont
     currentPublishedVersionId:major.currentPublishedVersionId,profiles,
     description:text(optional.description),studentFriendlySummary:text(optional.studentFriendlySummary),
     acquiredSkills:strings(optional.acquiredSkills),careerOutcomes:strings(optional.careerOutcomes),typicalCourses:strings(optional.typicalCourses),
-    contentSections:sections.filter(section=>['APPROVED','PUBLISHED'].includes(section.reviewStatus ?? '')).map(section=>({sectionKey:section.sectionKey,title:section.title,content:section.content,reviewStatus:section.reviewStatus})),
+    contentSections:sections.filter(section=>section.locale ? section.reviewStatus==='PUBLISHED' : ['APPROVED','PUBLISHED'].includes(section.reviewStatus ?? '')).map(section=>({sectionKey:section.sectionKey,title:section.title,content:section.content,reviewStatus:section.reviewStatus})),
   } as PublicMajorDto;
 }

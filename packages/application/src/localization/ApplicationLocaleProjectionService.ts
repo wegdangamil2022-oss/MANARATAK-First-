@@ -21,6 +21,8 @@ import {
   DEFAULT_LOCALE,
   isSupportedLocale,
   resolveLocalizedLocale,
+  resolveSourceLocaleEvidence,
+  assessLocalizedPage,
   type LocalizedLocaleResolution,
   type SupportedLocale,
 } from '@manaratak/shared';
@@ -145,12 +147,13 @@ export class ApplicationLocaleProjectionService {
         PUBLIC_UNIVERSITY_TRANSLATION_STATUSES.has(text.reviewStatus ?? ''),
     );
 
-    const displayName = this.resolveValue<string>({
+    const resolvedName = this.resolveValue<string>({
       requestedLocale: locale,
       sourceLocale,
       sourceValue: university.displayName,
       localizedValues: this.collectUniversityTranslationValues(translations, 'displayName'),
-    }).value ?? university.displayName;
+    });
+    const displayName = resolvedName.value ?? university.displayName;
 
     const description = this.resolveValue<string>({
       requestedLocale: locale,
@@ -182,7 +185,8 @@ export class ApplicationLocaleProjectionService {
       rankings: this.projectUniversityChildren(university.rankings, 'RANKING', localizedTexts, locale, sourceLocale),
       translations,
     } as UniversityDto;
-    return projectPublicUniversity(projected);
+    const pageTranslation=translations.find(item=>item.locale===locale);
+    return {...projectPublicUniversity(projected), localization: {...resolvedName.resolution, resolvedLocale: resolvedName.resolution.locale, sourceStatus: resolveSourceLocaleEvidence(university.sourceRecords ?? []).status, ...assessLocalizedPage(locale,[{value:pageTranslation?.displayName,reviewStatus:pageTranslation?.reviewStatus,resolvedLocale:pageTranslation?.locale as SupportedLocale},{value:pageTranslation?.description,reviewStatus:pageTranslation?.reviewStatus,resolvedLocale:pageTranslation?.locale as SupportedLocale}])}};
   }
 
   public projectMajor(
@@ -191,7 +195,7 @@ export class ApplicationLocaleProjectionService {
     locale: SupportedLocale,
   ): PublicMajorDto {
     const sourceLocale = this.extractMajorSourceLocale(major);
-    const displayName = this.resolveValue<string>({
+    const resolvedName = this.resolveValue<string>({
       requestedLocale: locale,
       sourceLocale,
       sourceValue: major.displayName,
@@ -199,11 +203,17 @@ export class ApplicationLocaleProjectionService {
         ar: this.nonEmptyText(major.localizedNameAr),
         en: this.nonEmptyText(major.localizedNameEn),
       },
-    }).value ?? major.displayName;
+    });
+    const displayName=resolvedName.value ?? major.displayName;
 
     const projectedSections = this.selectMajorSections(contentSections, locale, sourceLocale);
     const exposed=publicMajorProjection(major,projectedSections);
-    return {...exposed,displayName,localizedNameAr:major.localizedNameAr,localizedNameEn:major.localizedNameEn};
+    const optional=major.optionalFields as Record<string,unknown>|undefined;
+    const names=optional?.translationNameCandidates as Record<string,{value?:string;reviewStatus?:string}>|undefined;
+    const keys=[...new Set(contentSections.map(section=>section.sectionKey))];
+    if(!keys.length)keys.push('overview');
+    const readiness=assessLocalizedPage(locale,[{value:names?.[locale]?.value,reviewStatus:names?.[locale]?.reviewStatus,resolvedLocale:locale},...keys.map(key=>{const section=contentSections.find(item=>item.sectionKey===key&&item.locale===locale&&item.reviewStatus==='PUBLISHED');return {value:section?.content,reviewStatus:section?.reviewStatus,resolvedLocale:section?locale:null};})]);
+    return {...exposed,displayName,localizedNameAr:major.localizedNameAr,localizedNameEn:major.localizedNameEn,localization:{...resolvedName.resolution,resolvedLocale:resolvedName.resolution.locale,...readiness,fieldProfile:'OWNER_NAME_AND_PUBLISHED_SECTIONS',sourceStatus:resolveSourceLocaleEvidence(major.sources ?? []).status}};
   }
 
   public projectInternationalTest(
@@ -236,7 +246,7 @@ export class ApplicationLocaleProjectionService {
       localizedNameAr: test.localizedNameAr,
       localizedNameEn: test.localizedNameEn,
       locale,
-      localization:resolvedName.resolution,
+      localization:{...resolvedName.resolution,resolvedLocale:resolvedName.resolution.locale,fullyLocalized:false,indexable:locale==='ar'},
       family: test.family ? this.projectNamedCarrier(test.family, locale) : test.family,
       provider: test.provider ? this.projectNamedCarrier(test.provider, locale) : test.provider,
       versions: test.versions?.map((version) => this.projectInternationalTestVersion(version, locale)),
@@ -323,7 +333,7 @@ export class ApplicationLocaleProjectionService {
   ): MajorContentSectionDto[] {
     const eligible = sections.filter(
       (section) =>
-        section.reviewStatus === undefined || PUBLIC_MAJOR_SECTION_STATUSES.has(section.reviewStatus),
+        section.locale ? section.reviewStatus === 'PUBLISHED' : PUBLIC_MAJOR_SECTION_STATUSES.has(section.reviewStatus ?? ''),
     );
     const groups = this.groupBy(eligible, (section) => section.sectionKey);
     const projected: MajorContentSectionDto[] = [];
@@ -419,19 +429,11 @@ export class ApplicationLocaleProjectionService {
   }
 
   private extractSourceLocale(records: unknown[] | undefined): SupportedLocale | null {
-    if (!Array.isArray(records)) return null;
-    for (const record of records) {
-      if (!this.isRecord(record)) continue;
-      if (isSupportedLocale(record.sourceLocale)) return record.sourceLocale;
-    }
-    return null;
+    return resolveSourceLocaleEvidence(records ?? []).locale;
   }
 
   private extractMajorSourceLocale(major: MajorDto): SupportedLocale | null {
-    for (const source of major.sources ?? []) {
-      if (isSupportedLocale(source.sourceLocale)) return source.sourceLocale;
-    }
-    return null;
+    return resolveSourceLocaleEvidence(major.sources ?? []).locale;
   }
 
   private extractInternationalTestSourceLocale(test: InternationalTestDto): SupportedLocale | null {

@@ -83,7 +83,7 @@ export class TranslationImportPreparationService
   private classifyEntity(publicId: string): TranslationCanonicalEntityKind {
     if (MAJOR_PUBLIC_ID.test(publicId)) return 'MAJOR';
     if (UNIVERSITY_PUBLIC_ID.test(publicId)) return 'UNIVERSITY';
-    throw new Error(`TRANSLATION_CANONICAL_ID_UNSUPPORTED:${publicId}`);
+    throw new Error(`UNSUPPORTED_TARGET_OWNER:${publicId}`);
   }
 
   private buildLocator(

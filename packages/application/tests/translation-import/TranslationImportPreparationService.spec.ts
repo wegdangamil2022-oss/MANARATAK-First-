@@ -109,7 +109,7 @@ describe('TranslationImportPreparationService', () => {
       fieldKey: 'displayName',
       translatedValue: 'University of Florence',
       reviewStatus: 'APPROVED',
-    }))).rejects.toThrow('TRANSLATION_CANONICAL_ID_UNSUPPORTED');
+    }))).rejects.toThrow('UNSUPPORTED_TARGET_OWNER');
     expect(persistence.resolveExact).not.toHaveBeenCalled();
   });
 

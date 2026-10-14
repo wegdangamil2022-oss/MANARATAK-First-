@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Award,
@@ -37,12 +38,14 @@ interface CoursesSearchPageProps {
 type FreeCourseMode = 'all' | 'free-with-certificate' | 'free-only';
 
 const FREE_COURSE_OPTIONS: Array<{ value: FreeCourseMode; label: string }> = [
-  { value: 'all', label: 'كل الدورات المجانية' },
-  { value: 'free-with-certificate', label: 'مجانية + شهادة مجانية' },
-  { value: 'free-only', label: 'دورة مجانية فقط' },
+  { value: 'all', label: "public_all_free_courses" },
+  { value: 'free-with-certificate', label: "public_free_course_free_certificate" },
+  { value: 'free-only', label: "public_free_course_only" },
 ];
 
 export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, onSelectCourse, importedCourses = [], initialQuery = '', initialField = '', favoriteIds = [], onToggleFavorite }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const normalizedInitialField = initialField.trim() ? `field:${initialField.trim()}` : 'all';
   const distinct = (values: string[]) => [...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar'));
@@ -94,7 +97,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
   };
 
   const selectedFreeCourseLabel =
-    FREE_COURSE_OPTIONS.find((option) => option.value === freeCourseMode)?.label ?? 'نوع الدورة';
+    FREE_COURSE_OPTIONS.find((option) => option.value === freeCourseMode)?.label ?? 'public_course_type';
 
   const visibleImportedCourses = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -136,7 +139,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
   return (
     <div
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
-      dir="rtl"
+      dir={publicDir}
     >
       {/* HERO — same visual language as Scholarships / Universities / Majors */}
       <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-12 sm:pb-14 overflow-hidden shadow-xs border-b border-[var(--mn-accent)]/20 mn-inverse ">
@@ -168,8 +171,8 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
           <button
             onClick={onBack}
             className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-8 h-8 bg-black/25 hover:bg-black/40 border border-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all z-30 cursor-pointer text-white shadow-xs active:scale-95"
-            title="العودة"
-            aria-label="العودة"
+            title={publicT('public_back')}
+            aria-label={publicT('public_back')}
           >
             <ChevronLeft className="w-4 h-4 rotate-180 text-white" />
           </button>
@@ -178,8 +181,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
         <div className="max-w-md sm:max-w-xl mx-auto text-center relative z-10 space-y-2.5 pt-5">
           <div className="relative inline-block mb-1">
             <div className="absolute -inset-x-6 -inset-y-3 bg-[var(--mn-accent)]/10 blur-xl rounded-full" />
-            <h1 className="relative text-2xl sm:text-3xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
-              الدورات <span className="text-[var(--mn-accent-soft)]">العالمية</span>
+            <h1 className="relative text-2xl sm:text-3xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">{publicT('public_courses')}{' '}<span className="text-[var(--mn-accent-soft)]">{publicT('public_worldwide')}</span>
             </h1>
           </div>
 
@@ -189,9 +191,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
             <div className="w-12 h-px bg-gradient-to-l from-transparent to-[var(--mn-accent-soft)]/50" />
           </div>
 
-          <p className="text-[12px] sm:text-sm text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] leading-relaxed max-w-[92%] mx-auto drop-shadow-md">
-            ابحث في الدورات المجانية المتاحة من كبرى المنصات والجامعات العالمية، واختر ما يناسب مجالك ومستواك.
-          </p>
+          <p className="text-[12px] sm:text-sm text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] leading-relaxed max-w-[92%] mx-auto drop-shadow-md">{publicT('public_search_free_courses_from_leading_global_platforms_and')}</p>
 
           {/* Search stays inside the upper section, matching Scholarships. */}
           <div className="pt-1 max-w-sm sm:max-w-md mx-auto px-1">
@@ -200,7 +200,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                 type="text"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="اكتب اسم الدورة، المجال، أو المنصة..."
+                placeholder={publicT('public_enter_a_course_name_domain_or_platform')}
                 className="w-full py-2.5 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-xs font-semibold placeholder:text-[var(--mn-text-muted)] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
               />
               <Search className="w-4 h-4 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
@@ -208,7 +208,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                 <button
                   onClick={() => setSearchQuery('')}
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] cursor-pointer"
-                  title="مسح البحث"
+                  title={publicT('public_clear_search')}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -224,7 +224,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
               className="text-[10px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-surface-elevated)]/95 px-2.5 py-0.5 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-panel "
             >
               <RotateCcw className="w-3 h-3" />
-              <span>إعادة ضبط الفلاتر ({activeFiltersCount})</span>
+              <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>
             </button>
           </div>
         )}
@@ -236,7 +236,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
           {/* نوع الدورة */}
           <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[62px] sm:h-[66px] cursor-pointer mn-panel ">
             <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] font-semibold text-[10.5px] sm:text-xs font-['Cairo',sans-serif] w-full">
-              <span className="truncate">{freeCourseMode === 'all' ? 'نوع الدورة' : selectedFreeCourseLabel}</span>
+              <span className="truncate">{freeCourseMode === 'all' ? publicT('public_course_type') : selectedFreeCourseLabel}</span>
               <Award className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
@@ -244,10 +244,10 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
               value={freeCourseMode}
               onChange={(event) => setFreeCourseMode(event.target.value as FreeCourseMode)}
               className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-              title="اختر نوع الدورة"
+              title={publicT('public_choose_course_type')}
             >
               {FREE_COURSE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
+                <option key={option.value} value={option.value}>{publicT(option.label)}</option>
               ))}
             </select>
           </div>
@@ -255,7 +255,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
           {/* المنصة */}
           <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[62px] sm:h-[66px] cursor-pointer mn-panel ">
             <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] font-semibold text-[10.5px] sm:text-xs font-['Cairo',sans-serif] w-full">
-              <span className="truncate">{selectedPlatform === 'all' ? 'المنصة' : selectedPlatform}</span>
+              <span className="truncate">{selectedPlatform === 'all' ? publicT('public_platform') : selectedPlatform}</span>
               <Globe2 className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
@@ -263,9 +263,9 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
               value={selectedPlatform}
               onChange={(event) => setSelectedPlatform(event.target.value)}
               className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-              title="اختر المنصة"
+              title={publicT('public_choose_platform')}
             >
-              <option value="all">كل المنصات</option>
+              <option value="all">{publicT('public_all_platforms')}</option>
               {IMPORTED_PLATFORM_OPTIONS.map((platform) => (
                 <option key={platform} value={platform}>{platform}</option>
               ))}
@@ -283,12 +283,10 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
             }`}
           >
             <div className="flex items-center justify-center gap-1 font-semibold text-[10.5px] sm:text-xs font-['Cairo',sans-serif] w-full">
-              <span>{advancedFiltersCount > 0 ? `تصفية (${advancedFiltersCount})` : 'تصفية'}</span>
+              <span>{advancedFiltersCount > 0 ? publicT('public_filter_count', { v0: advancedFiltersCount }) : publicT('public_filter')}</span>
               <SlidersHorizontal className={`w-3.5 h-3.5 shrink-0 ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-accent-soft)]' : 'text-[#142B5F] dark:text-[#D6A43B]'}`} />
             </div>
-            <span className={`mt-0.5 max-w-full truncate text-[8px] sm:text-[9px] font-bold ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-on-dark-muted)]' : 'text-[var(--mn-text-muted)]'}`}>
-              المجال • اللغة • المستوى • الشهادة
-            </span>
+            <span className={`mt-0.5 max-w-full truncate text-[8px] sm:text-[9px] font-bold ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-on-dark-muted)]' : 'text-[var(--mn-text-muted)]'}`}>{publicT('public_domain_language_level_certificate')}</span>
           </button>
         </div>
 
@@ -298,36 +296,36 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
             <div className="grid grid-cols-2 gap-2">
               <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 pr-8 mn-panel ">
                 <BookOpen className="absolute right-2.5 w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedField === 'all' ? 'المجال أو التخصص' : COURSE_FIELD_OPTIONS.find(option => option.value === selectedField)?.label || initialField}</span>
+                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedField === 'all' ? publicT('public_domain_or_specialization') : COURSE_FIELD_OPTIONS.find(option => option.value === selectedField)?.label || initialField}</span>
                 <select value={selectedField} onChange={(event) => setSelectedField(event.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
-                  <option value="all">كل المجالات والتخصصات</option>
+                  <option value="all">{publicT('public_all_domains_and_specializations')}</option>
                   {COURSE_FIELD_OPTIONS.map((field) => <option key={field.value} value={field.value}>{field.label}</option>)}
                 </select>
               </label>
 
               <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 pr-8 mn-panel ">
                 <Languages className="absolute right-2.5 w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedLanguage === 'all' ? 'اللغة' : selectedLanguage}</span>
+                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedLanguage === 'all' ? publicT('public_language') : selectedLanguage}</span>
                 <select value={selectedLanguage} onChange={(event) => setSelectedLanguage(event.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
-                  <option value="all">كل اللغات</option>
+                  <option value="all">{publicT('public_all_languages')}</option>
                   {LANGUAGE_OPTIONS.map((language) => <option key={language} value={language}>{language}</option>)}
                 </select>
               </label>
 
               <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 pr-8 mn-panel ">
                 <GraduationCap className="absolute right-2.5 w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedLevel === 'all' ? 'المستوى' : selectedLevel}</span>
+                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedLevel === 'all' ? publicT('public_level') : selectedLevel}</span>
                 <select value={selectedLevel} onChange={(event) => setSelectedLevel(event.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
-                  <option value="all">كل المستويات</option>
+                  <option value="all">{publicT('public_all_levels')}</option>
                   {LEVEL_OPTIONS.map((level) => <option key={level} value={level}>{level}</option>)}
                 </select>
               </label>
 
               <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 pr-8 mn-panel ">
                 <Award className="absolute right-2.5 w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedCertificate === 'all' ? 'نوع الشهادة' : selectedCertificate}</span>
+                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedCertificate === 'all' ? publicT('public_certificate_type') : selectedCertificate}</span>
                 <select value={selectedCertificate} onChange={(event) => setSelectedCertificate(event.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
-                  <option value="all">كل أنواع الشهادات</option>
+                  <option value="all">{publicT('public_all_certificate_types')}</option>
                   {CERTIFICATE_OPTIONS.map((certificate) => <option key={certificate} value={certificate}>{certificate}</option>)}
                 </select>
               </label>
@@ -363,7 +361,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                     <div className="mb-1 flex items-center gap-1.5">
                       <span className="truncate text-[10px] font-semibold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{course.provider}</span>
                       <span className="h-1 w-1 shrink-0 rounded-full bg-[var(--mn-accent)] mn-gold " />
-                      <span className="shrink-0 rounded-full bg-[var(--mn-gold-surface)] px-2 py-0.5 text-[9px] font-bold text-[var(--mn-accent-text)] border border-[var(--mn-border-gold)] font-['Cairo',sans-serif] mn-panel ">مستوردة</span>
+                      <span className="shrink-0 rounded-full bg-[var(--mn-gold-surface)] px-2 py-0.5 text-[9px] font-bold text-[var(--mn-accent-text)] border border-[var(--mn-border-gold)] font-['Cairo',sans-serif] mn-panel ">{publicT('public_imported')}</span>
                     </div>
 
                     <h2 className="line-clamp-2 text-[14px] font-bold leading-6 text-[var(--mn-heading)] font-['Cairo',sans-serif]">
@@ -379,7 +377,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                   <div className="flex min-h-[42px] items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/80 px-2.5 mn-panel ">
                     <Globe2 className="h-3.5 w-3.5 shrink-0 text-[var(--mn-heading)]" />
                     <div className="min-w-0">
-                      <div className="text-[8px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">اللغة</div>
+                      <div className="text-[8px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">{publicT('public_language')}</div>
                       <div className="truncate text-[10px] font-semibold text-[var(--mn-text)] font-['Cairo',sans-serif]">{course.language}</div>
                     </div>
                   </div>
@@ -387,7 +385,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                   <div className="flex min-h-[42px] items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/80 px-2.5 mn-panel ">
                     <GraduationCap className="h-3.5 w-3.5 shrink-0 text-[var(--mn-heading)]" />
                     <div className="min-w-0">
-                      <div className="text-[8px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">المستوى</div>
+                      <div className="text-[8px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">{publicT('public_level')}</div>
                       <div className="truncate text-[10px] font-semibold text-[var(--mn-text)] font-['Cairo',sans-serif]">{course.level}</div>
                     </div>
                   </div>
@@ -396,7 +394,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                 <div className="mt-2.5 flex flex-wrap gap-1.5">
                   <span className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] px-2.5 py-1 text-[9px] font-bold text-[var(--mn-success-text)] font-['Cairo',sans-serif]">
                     <CheckCircle2 className="h-3 w-3" />
-                    {course.freeCertificate ? 'شهادة إتمام معتمدة' : 'محتوى معتمد'}
+                    {course.freeCertificate ? publicT('public_accredited_completion_certificate') : publicT('public_accredited_content')}
                   </span>
                   {course.freeCertificate && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] px-2.5 py-1 text-[9px] font-bold text-[var(--mn-accent-text)] font-['Cairo',sans-serif] mn-panel ">
@@ -412,7 +410,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                     onClick={() => onSelectCourse?.(course)}
                     className="flex w-full items-center justify-between rounded-xl bg-[var(--mn-primary)] px-3.5 py-2.5 text-white shadow-sm transition-transform active:scale-[0.99] mn-inverse "
                   >
-                    <span className="text-[11px] font-bold font-['Cairo',sans-serif]">عرض التفاصيل</span>
+                    <span className="text-[11px] font-bold font-['Cairo',sans-serif]">{publicT('public_view_details')}</span>
                     <ArrowLeft className="h-4 w-4 text-[var(--mn-accent-soft)]" />
                   </button>
                 </div>
@@ -422,9 +420,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
         </section>
       ) : (
         <div className="max-w-lg mx-auto mn-inline-gutter pt-2 pb-5">
-          <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 text-center text-[11px] font-bold text-[var(--mn-text-muted)] shadow-sm mn-panel ">
-            لا توجد دورات مطابقة للفلاتر الحالية.
-          </div>
+          <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 text-center text-[11px] font-bold text-[var(--mn-text-muted)] shadow-sm mn-panel ">{publicT('public_no_courses_match_the_current_filters')}</div>
         </div>
       )}
 

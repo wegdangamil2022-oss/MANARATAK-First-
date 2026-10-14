@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState } from 'react';
 import {
   ArrowRight,
@@ -28,6 +29,8 @@ interface AcademicReportsPageProps {
 type ReportTab = 'overview' | 'linkage' | 'unresolved' | 'simulator' | 'explorer';
 
 export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: AcademicReportsPageProps) {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [activeSubTab, setActiveSubTab] = useState<ReportTab>('overview');
   const [simulatedQuery, setSimulatedQuery] = useState('');
   const [simulationResult, setSimulationResult] = useState<any>(null);
@@ -310,17 +313,17 @@ export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: Academ
   };
 
   const iscedBroadFields = [
-    { code: '00', title: 'برامج ومؤهلات عامة', count: 1169, matched: 471, gap: 698, desc: 'البرامج التحضيرية والتأسيسية العامة.' },
-    { code: '01', title: 'التربية والتعليم', count: 146, matched: 140, gap: 6, desc: 'الدبلومات التربوية وإعداد المعلمين.' },
-    { code: '02', title: 'الفنون والعلوم الإنسانية', count: 184, matched: 162, gap: 22, desc: 'التاريخ، اللغات، الدراسات الإسلامية.' },
-    { code: '03', title: 'العلوم الاجتماعية والصحافة', count: 181, matched: 100, gap: 81, desc: 'علم النفس، وعلم الاجتماع، والإعلام.' },
-    { code: '04', title: 'الأعمال والإدارة والقانون', count: 440, matched: 440, gap: 0, desc: 'المحاسبة والتمويل والقوانين (مكتمل 100%).' },
-    { code: '05', title: 'العلوم الطبيعية والرياضيات', count: 455, matched: 455, gap: 0, desc: 'الفيزياء، الكيمياء، الرياضيات (مكتمل 100%).' },
-    { code: '06', title: 'تكنولوجيا الاتصالات والمعلومات', count: 101, matched: 58, gap: 43, desc: 'علوم الحاسب، والشبكات، ومسارات الذكاء الاصطناعي.' },
-    { code: '07', title: 'الهندسة والتصنيع والبناء', count: 225, matched: 212, gap: 13, desc: 'الهندسة المدنية والميكانيكية والمعمارية.' },
-    { code: '08', title: 'الزراعة والحراجة ومصايد الأسماك', count: 88, matched: 64, gap: 24, desc: 'الإنتاج الحيواني والنباتي والبيطرة الإقليمية.' },
-    { code: '09', title: 'الصحة والرفاه', count: 365, matched: 296, gap: 69, desc: 'الطب، التمريض، الصيدلة، والتأهيل الطبي.' },
-    { code: '10', title: 'الخدمات العامة والشخصية', count: 48, matched: 31, gap: 17, desc: 'إدارة الفنادق، السلامة المهنية، والرياضة.' },
+    { code: '00', title: publicT('public_general_programs_and_qualifications'), count: 1169, matched: 471, gap: 698, desc: 'البرامج التحضيرية والتأسيسية العامة.' },
+    { code: '01', title: publicT('public_education'), count: 146, matched: 140, gap: 6, desc: 'الدبلومات التربوية وإعداد المعلمين.' },
+    { code: '02', title: publicT('public_arts_and_humanities'), count: 184, matched: 162, gap: 22, desc: 'التاريخ، اللغات، الدراسات الإسلامية.' },
+    { code: '03', title: publicT('public_social_sciences_and_journalism'), count: 181, matched: 100, gap: 81, desc: 'علم النفس، وعلم الاجتماع، والإعلام.' },
+    { code: '04', title: publicT('public_business_administration_and_law'), count: 440, matched: 440, gap: 0, desc: 'المحاسبة والتمويل والقوانين (مكتمل 100%).' },
+    { code: '05', title: publicT('public_natural_sciences_and_mathematics'), count: 455, matched: 455, gap: 0, desc: 'الفيزياء، الكيمياء، الرياضيات (مكتمل 100%).' },
+    { code: '06', title: publicT('public_information_and_communication_technology'), count: 101, matched: 58, gap: 43, desc: 'علوم الحاسب، والشبكات، ومسارات الذكاء الاصطناعي.' },
+    { code: '07', title: publicT('public_engineering_manufacturing_and_construction'), count: 225, matched: 212, gap: 13, desc: 'الهندسة المدنية والميكانيكية والمعمارية.' },
+    { code: '08', title: publicT('public_agriculture_forestry_and_fisheries'), count: 88, matched: 64, gap: 24, desc: 'الإنتاج الحيواني والنباتي والبيطرة الإقليمية.' },
+    { code: '09', title: publicT('public_health_and_welfare'), count: 365, matched: 296, gap: 69, desc: 'الطب، التمريض، الصيدلة، والتأهيل الطبي.' },
+    { code: '10', title: publicT('public_public_and_personal_services'), count: 48, matched: 31, gap: 17, desc: 'إدارة الفنادق، السلامة المهنية، والرياضة.' },
   ];
 
   const currentBroadField = iscedBroadFields.find((f) => f.code === selectedBroadField);
@@ -501,7 +504,7 @@ export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: Academ
             </p>
 
             <div className="overflow-x-auto rounded-xl border border-[var(--mn-border)]">
-              <table className="w-full text-xs text-[var(--mn-text)] text-right">
+              <table className="w-full text-xs text-[var(--mn-text)] text-start">
                 <thead className="bg-[var(--mn-surface-muted)] text-[var(--mn-heading)] font-bold">
                   <tr className="border-b border-[var(--mn-border)]">
                     <th className="p-2.5 text-center w-12">#</th>
@@ -613,7 +616,7 @@ export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: Academ
 
       {/* 2. ISCED-F LINKAGE REPORT */}
       {activeSubTab === 'linkage' && (
-        <div className="mn-card p-5 sm:p-6 rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] space-y-4 animate-in fade-in duration-150 text-right">
+        <div className="mn-card p-5 sm:p-6 rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] space-y-4 animate-in fade-in duration-150 text-start">
           <div className="flex items-center justify-between border-b border-[var(--mn-border)] pb-3">
             <h2 className="text-base font-bold text-[var(--mn-heading)]">
               {t('تقرير التحقق من توسيع فئة ISCED-F ووثيقة التدقيق المالي والأكاديمي', 'UNESCO ISCED-F 2013 Expansion & Linkage Audit Document')}
@@ -665,7 +668,7 @@ export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: Academ
 
       {/* 3. UNRESOLVED GAPS REPORT */}
       {activeSubTab === 'unresolved' && (
-        <div className="mn-card p-5 sm:p-6 rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] space-y-4 animate-in fade-in duration-150 text-right">
+        <div className="mn-card p-5 sm:p-6 rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] space-y-4 animate-in fade-in duration-150 text-start">
           <div className="flex items-center justify-between border-b border-[var(--mn-border)] pb-3">
             <h2 className="text-base font-bold text-[var(--mn-heading)]">
               {t('تقرير تحليل الحالات المعلقة والفجوات الحقيقية للتصنيف (Step 8.7-D)', 'Final Unresolved Major Classification & Gaps Analysis (Step 8.7-D)')}
@@ -705,20 +708,20 @@ export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: Academ
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-2">
               <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]">
-                <span className="font-bold text-[var(--mn-heading)] block">المعلوماتية الصحية (Health Informatics)</span>
-                <span className="text-[10px] text-[var(--mn-text-muted)]">تتقاطع بين الصحة (09) وتكنولوجيا المعلومات (06)</span>
+                <span className="font-bold text-[var(--mn-heading)] block">{publicT('public_health_informatics')}</span>
+                <span className="text-[10px] text-[var(--mn-text-muted)]">{publicT('public_combines_health_09_and_information_technology_06')}</span>
               </div>
               <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]">
-                <span className="font-bold text-[var(--mn-heading)] block">الهندسة الطبية الحيوية (Biomedical Engineering)</span>
-                <span className="text-[10px] text-[var(--mn-text-muted)]">تتقاطع بين الصحة (09) والهندسة (07)</span>
+                <span className="font-bold text-[var(--mn-heading)] block">{publicT('public_biomedical_engineering')}</span>
+                <span className="text-[10px] text-[var(--mn-text-muted)]">{publicT('public_combines_health_09_and_engineering_07')}</span>
               </div>
               <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]">
-                <span className="font-bold text-[var(--mn-heading)] block">علوم البيانات (Data Science)</span>
-                <span className="text-[10px] text-[var(--mn-text-muted)]">تتقاطع بين تكنولوجيا المعلومات (06) والرياضيات والإحصاء (05)</span>
+                <span className="font-bold text-[var(--mn-heading)] block">{publicT('public_data_science')}</span>
+                <span className="text-[10px] text-[var(--mn-text-muted)]">{publicT('public_combines_information_technology_06_and_mathematics_and_statistics')}</span>
               </div>
               <div className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)]">
-                <span className="font-bold text-[var(--mn-heading)] block">الأمن السيبراني (Cybersecurity)</span>
-                <span className="text-[10px] text-[var(--mn-text-muted)]">تتقاطع بين تكنولوجيا المعلومات (06) والخدمات الأمنية (10)</span>
+                <span className="font-bold text-[var(--mn-heading)] block">{publicT('public_cybersecurity')}</span>
+                <span className="text-[10px] text-[var(--mn-text-muted)]">{publicT('public_combines_information_technology_06_and_security_services_10')}</span>
               </div>
             </div>
 
@@ -732,10 +735,10 @@ export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: Academ
               )}
             </p>
             <ul className="list-disc list-inside space-y-1 pr-4 text-amber-700 dark:text-amber-400">
-              <li><b>إعادة التأهيل الرياضي (Sports Rehabilitation)</b> - تفتقر الصحة الرياضية لرمز تخصصي مستقل.</li>
-              <li><b>تحليل السلوك التطبيقي (Applied Behavior Analysis)</b> - ممارسة سلوكية نفسية إقليمية هامة.</li>
-              <li><b>الديموغرافيا وعلم السكان (Demography)</b> - دراسة التغيرات السكانية والإحصاء الحيوي البشري.</li>
-              <li><b>التنمية الاجتماعية (Social Development)</b> - دراسة التطور المستدام وحوكمة شؤون المجتمع.</li>
+              <li><b>{publicT('public_sports_rehabilitation')}</b>{' '}{publicT('public_sports_health_lacks_a_separate_specialization_code')}</li>
+              <li><b>{publicT('public_applied_behavior_analysis')}</b>{' '}{publicT('public_an_important_regional_practice_in_behavioral_psychology')}</li>
+              <li><b>{publicT('public_demography')}</b>{' '}{publicT('public_the_study_of_population_changes_and_human_biostatistics')}</li>
+              <li><b>{publicT('public_social_development')}</b>{' '}{publicT('public_the_study_of_sustainable_development_and_community_governance')}</li>
             </ul>
           </div>
         </div>
@@ -743,7 +746,7 @@ export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: Academ
 
       {/* 4. SMART RESOLVER SIMULATOR */}
       {activeSubTab === 'simulator' && (
-        <div className="space-y-5 animate-in fade-in duration-150 text-right">
+        <div className="space-y-5 animate-in fade-in duration-150 text-start">
           <div className="mn-card p-5 rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] space-y-4">
             <h2 className="text-base font-bold text-[var(--mn-heading)] flex items-center gap-1.5">
               <Zap className="h-5 w-5 text-amber-500" />
@@ -849,7 +852,7 @@ export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: Academ
 
       {/* 5. ISCED GUIDE EXPLORER */}
       {activeSubTab === 'explorer' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-in fade-in duration-150 text-right">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-in fade-in duration-150 text-start">
           {/* Broad Fields Menu Column */}
           <div className="md:col-span-1 space-y-2 max-h-[500px] overflow-y-auto pr-1">
             <h3 className="text-xs font-bold text-[var(--mn-text-muted)] px-2 mb-2">
@@ -860,7 +863,7 @@ export function AcademicReportsPage({ locale, onBack, dataMode = 'api' }: Academ
                 key={field.code}
                 type="button"
                 onClick={() => setSelectedBroadField(field.code)}
-                className={`w-full text-right p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer border ${
+                className={`w-full text-start p-3 rounded-2xl text-xs font-bold flex items-center justify-between transition-colors cursor-pointer border ${
                   selectedBroadField === field.code
                     ? 'border-[var(--mn-accent)] bg-[var(--mn-primary)]/10 text-[var(--mn-secondary)]'
                     : 'border-transparent hover:bg-[var(--mn-surface-muted)] text-[var(--mn-text)]'

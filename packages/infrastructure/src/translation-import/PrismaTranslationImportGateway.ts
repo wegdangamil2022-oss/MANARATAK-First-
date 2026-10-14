@@ -1,3 +1,7 @@
+import { createHash, randomUUID } from 'node:crypto';
+import { assertTranslationContentAuthoringEnabled } from '@manaratak/shared';
+import type { AtomicPersistenceContext, AuthorizationEvaluatorService } from '@manaratak/domain';
+import { PrismaGovernanceApprovalGateway } from '../authorization/PrismaGovernanceApprovalGateway';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   ITranslationImportGateway,
@@ -11,7 +15,10 @@ import {
 type TranslationPrismaClient = PrismaClient | Prisma.TransactionClient;
 
 export class PrismaTranslationImportGateway implements ITranslationImportGateway {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly authorization?: AuthorizationEvaluatorService,
+  ) {}
 
   async resolveExact(locator: TranslationTargetLocator): Promise<TranslationTargetSnapshot | null> {
     return this.resolveWithClient(this.prisma, locator);
@@ -21,8 +28,92 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
     candidate: TranslationStagedCandidate,
     approval: TranslationTransferApproval,
   ): Promise<TranslationTransferResult> {
+    assertTranslationContentAuthoringEnabled(candidate.target.locator.entityKind);
+    if (
+      !this.authorization ||
+      !approval.actorId ||
+      !approval.approvalId ||
+      approval.actorId === approval.reviewedBy ||
+      candidate.evidence.execution.dryRun ||
+      approval.decision !== 'APPLY' ||
+      candidate.reviewStatus !== 'APPROVED'
+    )
+      throw new Error('TRANSLATION_TRUSTED_INDEPENDENT_APPROVAL_REQUIRED');
+    const permission =
+      candidate.target.locator.entityKind === 'UNIVERSITY'
+        ? 'admin:universities:manage'
+        : 'admin:majors:manage';
+    for (const actor of [approval.actorId, approval.reviewedBy]) {
+      if (
+        !(
+          await this.authorization.evaluatePermission(actor, permission, {
+            requestTime: new Date(),
+          })
+        ).isGranted
+      )
+        throw new Error('TRANSLATION_OWNER_PERMISSION_DENIED');
+    }
     return this.prisma.$transaction(
       async (tx) => {
+        assertTranslationContentAuthoringEnabled(candidate.target.locator.entityKind);
+        const receiptId =
+          'translation-receipt:' +
+          createHash('sha256')
+            .update(JSON.stringify([candidate.target.locator, candidate.evidence.handoffId]))
+            .digest('hex');
+        const digest = createHash('sha256')
+          .update(
+            JSON.stringify([
+              candidate.target,
+              candidate.translatedValue,
+              candidate.evidence.handoffId,
+              approval.approvalId,
+            ]),
+          )
+          .digest('hex');
+        const previous = await tx.ownerTranslationTransferReceipt.findUnique({
+          where: { id: receiptId },
+        });
+        if (previous) {
+          if (
+            previous.digest !== digest ||
+            previous.actorId !== approval.actorId ||
+            previous.reviewerId !== approval.reviewedBy ||
+            previous.approvalId !== approval.approvalId
+          )
+            throw new Error('TRANSLATION_RECEIPT_REPLAY_CONFLICT');
+          return {
+            ...this.result(
+              previous.outcome as 'APPLIED' | 'NO_CHANGE',
+              candidate.target,
+              candidate.translatedValue,
+            ),
+            approved: true,
+            published: false,
+            publicEligible: false,
+          };
+        }
+        // Lock the canonical owner; every effect, approval consumption and receipt
+        // commits with the owner audit/outbox, including no-op transfers.
+        const table =
+          candidate.target.locator.entityKind === 'UNIVERSITY'
+            ? Prisma.raw('"University"')
+            : Prisma.raw('"Major"');
+        await tx.$queryRaw(
+          Prisma.sql`SELECT id FROM ${table} WHERE id=${candidate.target.internalEntityId} FOR UPDATE`,
+        );
+        await new PrismaGovernanceApprovalGateway(this.prisma).consume(
+          approval.approvalId!,
+          'TRANSLATION_TRANSFER',
+          {
+            target: candidate.target,
+            translatedValue: candidate.translatedValue,
+            handoffId: candidate.evidence.handoffId,
+          },
+          approval.actorId!,
+          approval.reviewedBy,
+          { boundaryId: receiptId, transactionClient: tx } as AtomicPersistenceContext & {transactionClient: Prisma.TransactionClient},
+        );
         const latest = await this.resolveWithClient(tx, candidate.target.locator);
         if (!latest) {
           throw new Error(`TRANSLATION_CANONICAL_TARGET_NOT_FOUND:${candidate.target.publicId}`);
@@ -35,8 +126,22 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           throw new Error('TRANSLATION_EXACT_IDENTITY_RESOLUTION_VIOLATION');
         }
 
+        if (
+          latest.ownerRevision !== candidate.target.ownerRevision ||
+          latest.currentReviewStatus !== candidate.target.currentReviewStatus ||
+          latest.sourceDigest !== candidate.target.sourceDigest
+        )
+          throw new Error('TRANSLATION_STALE_DIFF_REVIEW_REQUIRED');
         if (latest.currentValue === candidate.translatedValue) {
-          return this.result('NO_CHANGE', latest, candidate.translatedValue);
+          return this.finishTransfer(
+            tx,
+            receiptId,
+            digest,
+            latest,
+            candidate,
+            approval,
+            'NO_CHANGE',
+          );
         }
         if (latest.currentValue !== candidate.expectedCurrentValue) {
           throw new Error('TRANSLATION_STALE_DIFF_REVIEW_REQUIRED');
@@ -45,14 +150,14 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         if (latest.locator.entityKind === 'UNIVERSITY') {
           await this.applyUniversityTranslation(tx, latest, candidate, approval);
         } else if (latest.locator.fieldKind === 'DISPLAY_NAME') {
-          await this.applyMajorName(tx, latest, candidate.translatedValue);
+          await this.applyMajorName(tx, latest, candidate, approval);
         } else if (latest.locator.fieldKind === 'CONTENT_SECTION') {
           await this.applyMajorContentSection(tx, latest, candidate, approval);
         } else {
           throw new Error(`TRANSLATION_FIELD_UNSUPPORTED:MAJOR:${latest.locator.fieldKey}`);
         }
 
-        return this.result('APPLIED', latest, candidate.translatedValue);
+        return this.finishTransfer(tx, receiptId, digest, latest, candidate, approval, 'APPLIED');
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
@@ -81,14 +186,17 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           displayName: true,
           description: true,
           reviewStatus: true,
+          updatedAt: true,
+          metadata: true,
         },
       });
 
-      const currentValue = locator.fieldKind === 'DISPLAY_NAME'
-        ? translation?.displayName ?? null
-        : locator.fieldKind === 'DESCRIPTION'
-          ? translation?.description ?? null
-          : null;
+      const currentValue =
+        locator.fieldKind === 'DISPLAY_NAME'
+          ? (translation?.displayName ?? null)
+          : locator.fieldKind === 'DESCRIPTION'
+            ? (translation?.description ?? null)
+            : null;
 
       if (locator.fieldKind === 'CONTENT_SECTION') {
         throw new Error(`TRANSLATION_FIELD_UNSUPPORTED:UNIVERSITY:${locator.fieldKey}`);
@@ -102,6 +210,9 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         currentValue,
         currentReviewStatus: translation?.reviewStatus ?? null,
         storageRecordId: translation?.id ?? null,
+        ownerRevision: translation?.updatedAt.toISOString() ?? 'ABSENT',
+        sourceDigest: this.digest(translation?.metadata),
+        proposedFields: this.pendingValues(translation?.metadata, 'pendingTranslationFields'),
       };
     }
 
@@ -113,6 +224,8 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         status: true,
         localizedNameAr: true,
         localizedNameEn: true,
+        updatedAt: true,
+        optionalFields: true,
       },
     });
     if (!major) return null;
@@ -126,6 +239,9 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         currentValue: locator.locale === 'ar' ? major.localizedNameAr : major.localizedNameEn,
         currentReviewStatus: null,
         storageRecordId: null,
+        ownerRevision: major.updatedAt.toISOString(),
+        sourceDigest: this.digest(major.optionalFields),
+        proposedFields: this.pendingValues(major.optionalFields, 'translationNameCandidates'),
       };
     }
 
@@ -141,7 +257,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         ...(locator.sectionOwner.profileId ? { profileId: locator.sectionOwner.profileId } : {}),
         ...(locator.sectionOwner.versionId ? { versionId: locator.sectionOwner.versionId } : {}),
       },
-      select: { id: true, content: true, reviewStatus: true },
+      select: { id: true, content: true, reviewStatus: true, updatedAt: true, metadata: true },
       orderBy: { createdAt: 'desc' },
       take: 2,
     });
@@ -157,6 +273,14 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
       currentValue: section?.content ?? null,
       currentReviewStatus: section?.reviewStatus ?? null,
       storageRecordId: section?.id ?? null,
+      ownerRevision: section?.updatedAt.toISOString() ?? 'ABSENT',
+      sourceDigest: this.digest(section?.metadata),
+      proposedFields: this.pendingValues(
+        {
+          content: (section?.metadata as Prisma.JsonObject | undefined)?.pendingTranslationContent,
+        },
+        null,
+      ),
     };
   }
 
@@ -215,10 +339,28 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
       select: { metadata: true },
     });
     const metadata = this.withEvidence(existing?.metadata, candidate, approval);
-    const fieldData = latest.locator.fieldKind === 'DISPLAY_NAME'
-      ? { displayName: candidate.translatedValue }
-      : { description: candidate.translatedValue };
-
+    // Keep the last published owner value live while an approved import awaits
+    // its independent publication decision. Staging evidence belongs to the owner.
+    const pending =
+      metadata.pendingTranslationFields && typeof metadata.pendingTranslationFields === 'object'
+        ? (metadata.pendingTranslationFields as Prisma.JsonObject)
+        : {};
+    const stagedMetadata = {
+      ...metadata,
+      translationFieldEvidence: {
+        ...(metadata.translationFieldEvidence && typeof metadata.translationFieldEvidence==='object' ? metadata.translationFieldEvidence as Prisma.JsonObject : {}),
+        [latest.locator.fieldKey]: this.withEvidence(null,candidate,approval).translationImport!,
+      },
+      pendingTranslationFields: {
+        ...pending,
+        [latest.locator.fieldKind === 'DISPLAY_NAME' ? 'displayName' : 'description']: {
+          value: candidate.translatedValue,
+          reviewStatus: 'APPROVED',
+          actorId: approval.actorId,
+          approvalId: approval.approvalId,
+        },
+      },
+    };
     await tx.universityTranslation.upsert({
       where: {
         universityId_locale: {
@@ -229,28 +371,47 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
       create: {
         universityId: latest.internalEntityId,
         locale: latest.locator.locale,
-        ...fieldData,
         reviewStatus: 'APPROVED',
-        metadata,
+        metadata: stagedMetadata as Prisma.InputJsonObject,
       },
-      update: {
-        ...fieldData,
-        reviewStatus: 'APPROVED',
-        metadata,
-      },
+      update: { metadata: stagedMetadata as Prisma.InputJsonObject },
     });
   }
 
   private async applyMajorName(
     tx: Prisma.TransactionClient,
     latest: TranslationTargetSnapshot,
-    translatedValue: string,
+    candidate: TranslationStagedCandidate,
+    approval: TranslationTransferApproval,
   ): Promise<void> {
+    const existing = await tx.major.findUniqueOrThrow({
+      where: { id: latest.internalEntityId },
+      select: { optionalFields: true },
+    });
+    const optional =
+      existing.optionalFields &&
+      typeof existing.optionalFields === 'object' &&
+      !Array.isArray(existing.optionalFields)
+        ? (existing.optionalFields as Prisma.JsonObject)
+        : {};
     await tx.major.update({
       where: { id: latest.internalEntityId },
-      data: latest.locator.locale === 'ar'
-        ? { localizedNameAr: translatedValue }
-        : { localizedNameEn: translatedValue },
+      data: {
+        optionalFields: {
+          ...optional,
+          translationNameCandidates: {
+            ...(optional.translationNameCandidates &&
+            typeof optional.translationNameCandidates === 'object'
+              ? (optional.translationNameCandidates as Prisma.JsonObject)
+              : {}),
+            [latest.locator.locale]: {
+              value: candidate.translatedValue,
+              reviewStatus: 'APPROVED',
+              evidence: this.withEvidence(null, candidate, approval),
+            },
+          },
+        },
+      },
     });
   }
 
@@ -272,9 +433,15 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
       await tx.majorContentSection.update({
         where: { id: existing.id },
         data: {
-          content: candidate.translatedValue,
-          reviewStatus: 'APPROVED',
-          metadata,
+          metadata: {
+            ...metadata,
+            pendingTranslationContent: {
+              value: candidate.translatedValue,
+              reviewStatus: 'APPROVED',
+              actorId: approval.actorId,
+              approvalId: approval.approvalId,
+            },
+          },
         },
       });
       return;
@@ -290,9 +457,17 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         versionId: owner.versionId,
         sectionKey: latest.locator.sectionKey,
         locale: latest.locator.locale,
-        content: candidate.translatedValue,
-        reviewStatus: 'APPROVED',
-        metadata,
+        content: '',
+        reviewStatus: 'NEEDS_REVIEW',
+        metadata: {
+          ...metadata,
+          pendingTranslationContent: {
+            value: candidate.translatedValue,
+            reviewStatus: 'APPROVED',
+            actorId: approval.actorId,
+            approvalId: approval.approvalId,
+          },
+        },
       },
     });
   }
@@ -302,9 +477,10 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
     candidate: TranslationStagedCandidate,
     approval: TranslationTransferApproval,
   ): Prisma.InputJsonObject {
-    const current = existing && typeof existing === 'object' && !Array.isArray(existing)
-      ? existing as Prisma.JsonObject
-      : {};
+    const current =
+      existing && typeof existing === 'object' && !Array.isArray(existing)
+        ? (existing as Prisma.JsonObject)
+        : {};
     const evidence = candidate.evidence;
     return {
       ...current,
@@ -319,6 +495,9 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         sourceId: evidence.artifact.sourceId,
         rawArtifactReference: evidence.artifact.rawArtifactReference,
         idempotencyKey: evidence.execution.idempotencyKey,
+        actorId: approval.actorId,
+        approvalId: approval.approvalId,
+        reviewStatus: 'APPROVED',
         reviewedBy: approval.reviewedBy,
         reviewedAt: (approval.reviewedAt ?? new Date()).toISOString(),
         ...(evidence.provenance.sourceRowNumber !== undefined
@@ -329,6 +508,314 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           : {}),
       },
     } as Prisma.InputJsonObject;
+  }
+
+  /** Separate owner publication decision; transfer approval never publishes content. */
+  async publishApproved(
+    target: TranslationTargetSnapshot,
+    approval: TranslationTransferApproval,
+  ): Promise<TranslationTransferResult> {
+    assertTranslationContentAuthoringEnabled(target.locator.entityKind);
+    if (
+      !this.authorization ||
+      !approval.actorId ||
+      !approval.approvalId ||
+      approval.actorId === approval.reviewedBy ||
+      approval.decision !== 'APPLY'
+    )
+      throw new Error('TRANSLATION_TRUSTED_INDEPENDENT_APPROVAL_REQUIRED');
+    const grant =
+      target.locator.entityKind === 'UNIVERSITY'
+        ? 'admin:universities:manage'
+        : 'admin:majors:manage';
+    for (const actor of [approval.actorId, approval.reviewedBy])
+      if (
+        !(await this.authorization.evaluatePermission(actor, grant, { requestTime: new Date() }))
+          .isGranted
+      )
+        throw new Error('TRANSLATION_OWNER_PERMISSION_DENIED');
+    return this.prisma.$transaction(
+      async (tx) => {
+        assertTranslationContentAuthoringEnabled(target.locator.entityKind);
+        const table = Prisma.raw(
+          target.locator.entityKind === 'UNIVERSITY' ? '"University"' : '"Major"',
+        );
+        await tx.$queryRaw(
+          Prisma.sql`SELECT id FROM ${table} WHERE id=${target.internalEntityId} FOR UPDATE`,
+        );
+        const latest = await this.resolveWithClient(tx, target.locator);
+        if (
+          !latest ||
+          latest.ownerRevision !== target.ownerRevision ||
+          latest.currentReviewStatus !== target.currentReviewStatus ||
+          latest.sourceDigest !== target.sourceDigest ||
+          latest.currentValue !== target.currentValue
+        )
+          throw new Error('TRANSLATION_STALE_DIFF_REVIEW_REQUIRED');
+        await new PrismaGovernanceApprovalGateway(this.prisma).consume(
+          approval.approvalId!,
+          'TRANSLATION_PUBLICATION',
+          { target },
+          approval.actorId!,
+          approval.reviewedBy,
+          {
+            boundaryId: 'translation-publication:' + approval.approvalId,
+            transactionClient: tx,
+          } as AtomicPersistenceContext & {transactionClient: Prisma.TransactionClient},
+        );
+        let value = latest.currentValue ?? '';
+        if (target.locator.entityKind === 'UNIVERSITY') {
+          const row = await tx.universityTranslation.findUniqueOrThrow({
+            where: {
+              universityId_locale: {
+                universityId: latest.internalEntityId,
+                locale: latest.locator.locale,
+              },
+            },
+          });
+          const metadata = (row.metadata ?? {}) as Prisma.JsonObject;
+          const pending = (metadata.pendingTranslationFields ?? {}) as Prisma.JsonObject;
+          const field = target.locator.fieldKind === 'DISPLAY_NAME' ? 'displayName' : 'description';
+          const staged = pending[field] as Prisma.JsonObject | undefined;
+          if (
+            staged?.reviewStatus !== 'APPROVED' ||
+            typeof staged.value !== 'string' ||
+            !staged.value.trim() ||
+            staged.actorId === approval.reviewedBy
+          )
+            throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
+          value = staged.value;
+          const pendingName = pending.displayName as Prisma.JsonObject | undefined;
+          const pendingDescription = pending.description as Prisma.JsonObject | undefined;
+          for (const entry of [pendingName, pendingDescription])
+            if (
+              entry &&
+              (entry.reviewStatus !== 'APPROVED' || entry.actorId === approval.reviewedBy)
+            )
+              throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
+          const nextName =
+            typeof pendingName?.value === 'string' ? pendingName.value : row.displayName;
+          const nextDescription =
+            typeof pendingDescription?.value === 'string'
+              ? pendingDescription.value
+              : row.description;
+          if (!nextName?.trim() || !nextDescription?.trim())
+            throw new Error('TRANSLATION_OWNER_REQUIRED_FIELDS_MISSING');
+          const remaining = { ...pending };
+          delete remaining.displayName;
+          delete remaining.description;
+          const changed = await tx.universityTranslation.updateMany({
+            where: { id: row.id, updatedAt: row.updatedAt },
+            data: {
+              displayName: nextName,
+              description: nextDescription,
+              reviewStatus: 'PUBLISHED',
+              metadata: {
+                ...metadata,
+                pendingTranslationFields: remaining,
+                publishedTranslationApprovalId: approval.approvalId!,
+              },
+            },
+          });
+          if (changed.count !== 1) throw new Error('TRANSLATION_STALE_DIFF_REVIEW_REQUIRED');
+        } else if (target.locator.fieldKind === 'DISPLAY_NAME') {
+          const row = await tx.major.findUniqueOrThrow({ where: { id: latest.internalEntityId } });
+          const optional = (row.optionalFields ?? {}) as Prisma.JsonObject;
+          const names = (optional.translationNameCandidates ?? {}) as Prisma.JsonObject;
+          const candidate = names[target.locator.locale] as Prisma.JsonObject | undefined;
+          const evidence = (candidate?.evidence as Prisma.JsonObject | undefined)
+            ?.translationImport as Prisma.JsonObject | undefined;
+          if (
+            candidate?.reviewStatus !== 'APPROVED' ||
+            typeof candidate.value !== 'string' ||
+            !candidate.value.trim() ||
+            evidence?.actorId === approval.reviewedBy
+          )
+            throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
+          value = candidate.value;
+          await tx.major.update({
+            where: { id: row.id },
+            data: {
+              ...(target.locator.locale === 'ar'
+                ? { localizedNameAr: value }
+                : { localizedNameEn: value }),
+              optionalFields: {
+                ...optional,
+                translationNameCandidates: {
+                  ...names,
+                  [target.locator.locale]: {
+                    ...candidate,
+                    reviewStatus: 'PUBLISHED',
+                    publishedBy: approval.actorId,
+                    publishedAt: new Date().toISOString(),
+                  },
+                },
+              },
+            },
+          });
+        } else {
+          if (!latest.storageRecordId) throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
+          const row = await tx.majorContentSection.findUniqueOrThrow({
+            where: { id: latest.storageRecordId },
+          });
+          const metadata = (row.metadata ?? {}) as Prisma.JsonObject;
+          const staged = metadata.pendingTranslationContent as Prisma.JsonObject | undefined;
+          if (
+            staged?.reviewStatus !== 'APPROVED' ||
+            typeof staged.value !== 'string' ||
+            !staged.value.trim() ||
+            staged.actorId === approval.reviewedBy
+          )
+            throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
+          value = staged.value;
+          const { pendingTranslationContent: _pending, ...publishedMetadata } = metadata;
+          await tx.majorContentSection.update({
+            where: { id: row.id },
+            data: {
+              content: value,
+              reviewStatus: 'PUBLISHED',
+              metadata: {
+                ...publishedMetadata,
+                publishedTranslationApprovalId: approval.approvalId!,
+              },
+            },
+          });
+        }
+        const id = randomUUID();
+        const facts = {
+          approvalId: approval.approvalId,
+          locale: target.locator.locale,
+          fieldKey: target.locator.fieldKey,
+          valueHash: this.digest(value),
+        };
+        await tx.auditRecord.create({
+          data: {
+            id,
+            reference: 'translation-publish:' + id,
+            action: 'OWNER_TRANSLATION_PUBLISHED',
+            category: target.locator.entityKind,
+            severity: 'INFO',
+            actorId: approval.actorId!,
+            actorType: 'USER',
+            targetId: target.internalEntityId,
+            targetType: target.locator.entityKind,
+            source: 'OWNER_TRANSLATION_PUBLICATION',
+            timestamp: new Date(),
+            contextMetadata: facts,
+          },
+        });
+        await tx.transactionalOutboxRecord.create({
+          data: {
+            id: randomUUID(),
+            eventType: 'OwnerTranslationPublished',
+            domain: target.locator.entityKind === 'UNIVERSITY' ? 'UNIVERSITIES' : 'MAJORS',
+            aggregateType: target.locator.entityKind,
+            aggregateId: target.internalEntityId,
+            payload: facts,
+            metadata: { schemaVersion: 1 },
+          },
+        });
+        return {
+          ...this.result('APPLIED', latest, value),
+          approved: true,
+          published: true,
+          publicEligible: latest.entityStatus === 'PUBLISHED',
+        };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+  }
+
+  private pendingValues(value: unknown, key: string | null): Record<string, string> {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    const record = value as Record<string, unknown>;
+    const fields = key ? record[key] : record;
+    if (!fields || typeof fields !== 'object' || Array.isArray(fields)) return {};
+    return Object.fromEntries(
+      Object.entries(fields).flatMap(([name, entry]) =>
+        entry &&
+        typeof entry === 'object' &&
+        typeof (entry as Record<string, unknown>).value === 'string'
+          ? [[name, (entry as { value: string }).value]]
+          : [],
+      ),
+    );
+  }
+
+  private digest(value: unknown): string {
+    return createHash('sha256')
+      .update(JSON.stringify(value ?? null))
+      .digest('hex');
+  }
+
+  private async finishTransfer(
+    tx: Prisma.TransactionClient,
+    receiptId: string,
+    digest: string,
+    latest: TranslationTargetSnapshot,
+    candidate: TranslationStagedCandidate,
+    approval: TranslationTransferApproval,
+    state: 'APPLIED' | 'NO_CHANGE',
+  ): Promise<TranslationTransferResult> {
+    const result = {
+      ...this.result(state, latest, candidate.translatedValue),
+      approved: true,
+      published: false,
+      publicEligible: false,
+    };
+    const evidence = {
+      handoffId: candidate.evidence.handoffId,
+      approvalId: approval.approvalId,
+      fieldKey: latest.locator.fieldKey,
+      locale: latest.locator.locale,
+      previousHash: this.digest(latest.currentValue),
+      nextHash: this.digest(candidate.translatedValue),
+      correlationId: candidate.evidence.correlationId,
+      outcome: state,
+    };
+    const id = randomUUID();
+    await tx.auditRecord.create({
+      data: {
+        id,
+        reference: 'translation-owner:' + id,
+        action: 'TRANSLATION_TRANSFER_RECORDED',
+        category: latest.locator.entityKind,
+        severity: 'INFO',
+        actorId: approval.actorId!,
+        actorType: 'USER',
+        targetId: latest.internalEntityId,
+        targetType: latest.locator.entityKind,
+        source: 'OWNER_TRANSLATION_TRANSFER',
+        timestamp: new Date(),
+        contextMetadata: evidence as Prisma.InputJsonObject,
+      },
+    });
+    await tx.transactionalOutboxRecord.create({
+      data: {
+        id: randomUUID(),
+        eventType: 'OwnerTranslationApproved',
+        domain: latest.locator.entityKind === 'UNIVERSITY' ? 'UNIVERSITIES' : 'MAJORS',
+        aggregateType: latest.locator.entityKind,
+        aggregateId: latest.internalEntityId,
+        payload: evidence as Prisma.InputJsonObject,
+        metadata: { source: 'OWNER_TRANSLATION_TRANSFER', schemaVersion: 1 },
+      },
+    });
+    await tx.ownerTranslationTransferReceipt.create({
+      data: {
+        id: receiptId,
+        ownerDomain: latest.locator.entityKind,
+        targetId:
+          latest.internalEntityId + ':' + latest.locator.locale + ':' + latest.locator.fieldKey,
+        handoffId: candidate.evidence.handoffId,
+        approvalId: approval.approvalId!,
+        actorId: approval.actorId!,
+        reviewerId: approval.reviewedBy,
+        digest,
+        outcome: state,
+      },
+    });
+    return result;
   }
 
   private result(

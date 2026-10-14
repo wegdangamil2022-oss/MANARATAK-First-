@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import { ApiClient } from '../../../api/client';
 import { mapExam } from '../publicLiveDataSource';
 import React, { useState, useMemo, useEffect } from 'react';
@@ -44,6 +45,8 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
   favoriteIds = [],
   onToggleFavorite,
 }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState('الكل');
 
@@ -169,8 +172,8 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
           <button
             onClick={onBack}
             className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-8 h-8 bg-black/25 hover:bg-black/40 border border-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all z-30 cursor-pointer text-white shadow-xs active:scale-95"
-            title="العودة"
-            aria-label="العودة"
+            title={publicT('public_back')}
+            aria-label={publicT('public_back')}
           >
             <ChevronLeft className="w-4 h-4 rotate-180 text-white" />
           </button>
@@ -181,11 +184,8 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
           {/* Main Title Container */}
           <div className="relative inline-block mb-2">
             <div className="absolute -inset-x-6 -inset-y-3 bg-[var(--mn-accent)]/10 blur-xl rounded-full" />
-            <h1 className="relative text-2xl sm:text-3xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
-              دليل الاختبارات{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--mn-accent-soft)] to-[var(--mn-accent-soft)] mn-gold ">
-                الدولية
-              </span>
+            <h1 className="relative text-2xl sm:text-3xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">{publicT('public_exam_directory')}{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--mn-accent-soft)] to-[var(--mn-accent-soft)] mn-gold ">{publicT('public_international')}</span>
             </h1>
           </div>
 
@@ -197,10 +197,7 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
           </div>
 
           {/* Subtitle / Beautiful Copywriting */}
-          <p className="text-[13px] sm:text-sm text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] leading-relaxed max-w-[90%] mx-auto drop-shadow-md">
-            بوابتك الموثوقة للقبول العالمي. استعد لاختبارات اللغة والقدرات العالمية، واكتشف المعايير
-            التي تفتح لك أبواب أرقى الجامعات في العالم.
-          </p>
+          <p className="text-[13px] sm:text-sm text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] leading-relaxed max-w-[90%] mx-auto drop-shadow-md">{publicT('public_your_trusted_gateway_to_international_admission_prepare_for')}</p>
         </div>
       </div>
 
@@ -217,7 +214,7 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
             </div>
             <input
               type="text"
-              placeholder="ابحث عن اختبار (مثال: IELTS, TOEFL, SAT)..."
+              placeholder={publicT('public_search_for_an_exam_e_g_ielts_toefl')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 bg-transparent py-2.5 sm:py-3 text-[13px] sm:text-sm text-[var(--mn-heading)] outline-none placeholder:text-[var(--mn-text-muted)] font-medium w-full"
@@ -257,7 +254,7 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
             <article
               key={exam.id}
               onClick={() => onSelectExam?.(exam)}
-              className="min-h-[168px] bg-[var(--mn-surface)] border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-2xl p-4 text-right shadow-sm hover:shadow-md active:scale-[0.99] transition-all cursor-pointer relative overflow-hidden mn-panel "
+              className="min-h-[168px] bg-[var(--mn-surface)] border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-2xl p-4 text-start shadow-sm hover:shadow-md active:scale-[0.99] transition-all cursor-pointer relative overflow-hidden mn-panel "
             >
               {onToggleFavorite && (
                 <FavoriteButton
@@ -292,15 +289,15 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
                 <div className="relative grid grid-cols-2 gap-1.5 mt-3">
                   <div className="rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-1.5 flex items-center gap-1.5 mn-panel ">
                     <Award className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
-                    <span className="text-[8.5px] font-bold text-[var(--mn-text)] truncate">{exam.scoreRange || 'الدرجة حسب الاختبار'}</span>
+                    <span className="text-[8.5px] font-bold text-[var(--mn-text)] truncate">{exam.scoreRange || publicT('public_score_depends_on_the_exam')}</span>
                   </div>
                   <div className="rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-1.5 flex items-center gap-1.5 mn-panel ">
                     <Clock className="w-3 h-3 text-[var(--mn-heading)] shrink-0" />
-                    <span className="text-[8.5px] font-bold text-[var(--mn-text)] truncate">{exam.duration || 'مدة متغيرة'}</span>
+                    <span className="text-[8.5px] font-bold text-[var(--mn-text)] truncate">{exam.duration || publicT('public_variable_duration')}</span>
                   </div>
                   <div className="rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-1.5 flex items-center gap-1.5 mn-panel ">
                     <ShieldCheck className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
-                    <span className="text-[8.5px] font-bold text-[var(--mn-text)] truncate">{exam.validity || 'حسب الجهة'}</span>
+                    <span className="text-[8.5px] font-bold text-[var(--mn-text)] truncate">{exam.validity || publicT('public_depends_on_the_organization')}</span>
                   </div>
                   <div className="rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-1.5 flex items-center gap-1.5 mn-panel ">
                     <Languages className="w-3 h-3 text-[var(--mn-heading)] shrink-0" />
@@ -311,8 +308,7 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
 
               <p className="relative text-[10px] font-semibold text-[var(--mn-text-muted)] leading-5 mt-2.5 line-clamp-2">{exam.description}</p>
               {exam.feeSummary && (
-                <div className="relative mt-2 rounded-lg border border-[var(--mn-accent)]/15 bg-[var(--mn-accent)]/5 px-2 py-1.5 text-[8.5px] font-bold text-[var(--mn-text-muted)]">
-                  الرسوم: {exam.feeSummary}
+                <div className="relative mt-2 rounded-lg border border-[var(--mn-accent)]/15 bg-[var(--mn-accent)]/5 px-2 py-1.5 text-[8.5px] font-bold text-[var(--mn-text-muted)]">{publicT('public_fees')}{' '}{exam.feeSummary}
                 </div>
               )}
               <div className="relative flex items-center justify-between gap-2 mt-2.5">
@@ -323,19 +319,15 @@ export const ExamsSearchPage: React.FC<ExamsSearchPageProps> = ({
                     </span>
                   ))}
                 </div>
-                <span className="text-[9px] font-bold text-[var(--mn-heading)] whitespace-nowrap flex items-center gap-0.5">
-                  عرض التفاصيل
-                  <ChevronLeft className="w-3 h-3" />
+                <span className="text-[9px] font-bold text-[var(--mn-heading)] whitespace-nowrap flex items-center gap-0.5">{publicT('public_view_details')}<ChevronLeft className="w-3 h-3" />
                 </span>
               </div>
             </article>
           ))}
         </div>
-        {dataMode==='api'&&<div><p role="status">{loading?(locale==='en'?'Loading…':'جارٍ التحميل…'):total}</p>{error&&<p role="alert">{error}</p>}<button type="button" disabled={loading||page<=1} onClick={()=>setPage(p=>p-1)}>{locale==='en'?'Previous':'السابق'}</button><span>{page}</span><button type="button" disabled={loading||page*50>=total} onClick={()=>setPage(p=>p+1)}>{locale==='en'?'Next':'التالي'}</button></div>}
+        {dataMode==='api'&&<div><p role="status">{loading?(locale==='en'?'Loading…':publicT('public_loading_2')):total}</p>{error&&<p role="alert">{error}</p>}<button type="button" disabled={loading||page<=1} onClick={()=>setPage(p=>p-1)}>{locale==='en'?'Previous':publicT('public_previous')}</button><span>{page}</span><button type="button" disabled={loading||page*50>=total} onClick={()=>setPage(p=>p+1)}>{locale==='en'?'Next':publicT('public_next')}</button></div>}
         {filteredExams.length === 0 && (
-          <div className="bg-[var(--mn-surface)] border border-dashed border-[var(--mn-border)] rounded-2xl p-6 text-center text-xs font-bold text-[var(--mn-text-muted)] mn-panel ">
-            لا توجد اختبارات مطابقة لهذا البحث.
-          </div>
+          <div className="bg-[var(--mn-surface)] border border-dashed border-[var(--mn-border)] rounded-2xl p-6 text-center text-xs font-bold text-[var(--mn-text-muted)] mn-panel ">{publicT('public_no_exams_match_this_search')}</div>
         )}
       </div>
     </div>

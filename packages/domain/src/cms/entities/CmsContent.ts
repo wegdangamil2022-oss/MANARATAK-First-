@@ -333,6 +333,8 @@ export interface CmsContentBlockDto {
 }
 
 export interface CmsAnnouncementDto {
+  /** Admin read projection only; a draft may retain an approved public snapshot. */
+  hasPublicSnapshot?: boolean;
   id: string;
   publicId: string;
   siteIdentifier: string;

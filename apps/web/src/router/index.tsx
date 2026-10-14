@@ -7,6 +7,8 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
+import { readStoredLocale } from '../i18n/browserStorage';
+import { isPublicTemplateLocaleEnabled } from '@manaratak/shared';
 import { isSupportedLocale } from '@manaratak/shared';
 import { useTranslation } from '../i18n/I18nProvider';
 import { localizeLocation, resolveLegacyPublicLocale } from '../i18n/localeRouting';
@@ -47,8 +49,12 @@ const RootLayout = () => {
     if (routeLocale && routeLocale !== language) setLanguage(routeLocale);
   }, [language, routeLocale, setLanguage]);
 
+  if (routeLocale && !isPublicTemplateLocaleEnabled(routeLocale)) {
+    return <Navigate replace to={localizeLocation(location, 'ar')} />;
+  }
   if (!routeLocale) {
-    const targetLocale = resolveLegacyPublicLocale(localStorage.getItem('manaratak_lang'));
+    const preferredLocale = resolveLegacyPublicLocale(readStoredLocale());
+    const targetLocale = isPublicTemplateLocaleEnabled(preferredLocale) ? preferredLocale : 'ar';
     return <Navigate replace to={localizeLocation(location, targetLocale)} />;
   }
 

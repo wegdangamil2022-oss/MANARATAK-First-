@@ -836,7 +836,7 @@ export const en = {
   "translation_loaded_records": "Loaded records",
   "translation_missing_ar": "Missing Arabic",
   "translation_missing_en": "Missing English",
-  "translation_complete_bilingual": "Bilingual complete",
+  "translation_complete_bilingual": "Name present in both languages",
   "translation_filter_all": "All translation states",
   "translation_search": "Search",
   "translation_search_placeholder": "Search by name, code, slug, or identifier…",

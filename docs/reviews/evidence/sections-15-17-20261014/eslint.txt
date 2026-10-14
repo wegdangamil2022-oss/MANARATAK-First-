@@ -1,0 +1,6 @@
+
+/workspace/manaratak-first/apps/admin/src/pages/AdminTranslationWorkspacePage.tsx
+  405:24  warning  The ref value 'listGeneration.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'listGeneration.current' to a variable inside the effect, and use that variable in the cleanup function      react-hooks/exhaustive-deps
+  406:26  warning  The ref value 'detailGeneration.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'detailGeneration.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+✖ 2 problems (0 errors, 2 warnings)

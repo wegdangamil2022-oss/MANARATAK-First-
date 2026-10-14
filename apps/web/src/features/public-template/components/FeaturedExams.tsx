@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { Exam } from '../types';
 import { FileSignature, ChevronLeft } from 'lucide-react';
@@ -175,6 +176,8 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
   onSelectExam,
   onViewAllClick,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   const handleExamClick = (examItem: { name: string; code: string }) => {
     if (exams && exams.length > 0 && onSelectExam) {
       const matched = exams.find(
@@ -211,19 +214,17 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
                   <FileSignature className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" />
                 </span>
-                <span>دليل الاختبارات الدولية</span>
+                <span>{publicT('public_international_exam_directory')}</span>
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">
-              تعرف على متطلبات القبول اللغوية والأكاديمية والمهنية
-            </p>
+            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_explore_language_academic_and_professional_admission_requirements')}</p>
           </div>
 
           {/* Marquee Scrolling Badges Area */}
           <div
             className="relative w-full overflow-hidden flex items-center py-2.5 mb-3 mask-edges"
-            dir="rtl"
+            dir={publicDir}
           >
             <div className="animate-scroll-rtl gap-2.5 sm:gap-3 cursor-default">
               {/* First Set of Badges */}
@@ -291,7 +292,7 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
               onClick={onViewAllClick}
               className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs"
             >
-              <span className="text-[12px] sm:text-sm font-bold">تصفح جميع الاختبارات الدولية</span>
+              <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_all_international_exams')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
             </button>
           </div>

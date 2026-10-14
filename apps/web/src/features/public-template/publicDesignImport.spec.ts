@@ -1,11 +1,16 @@
-import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { createElement, type ReactElement } from 'react';
+import { renderToStaticMarkup as renderStatic } from 'react-dom/server';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { FeaturedCourses } from './components/FeaturedCourses';
 import { FeaturedServices } from './components/FeaturedServices';
 import { loadPublicPrototypeSnapshot } from './publicPrototypeDataSource';
+import { I18nProvider } from '../../i18n/I18nProvider';
+
+function renderToStaticMarkup(element: ReactElement): string {
+  return renderStatic(createElement(I18nProvider, { children: element }));
+}
 
 describe('public design import boundaries', () => {
   it('retains the supplied course and service datasets for explicit prototype mode', () => {

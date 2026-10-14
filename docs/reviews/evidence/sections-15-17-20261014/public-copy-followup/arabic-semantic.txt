@@ -1,0 +1,3 @@
+PASS arabic-values-no-accidental-english-prose
+PASS representative-arabic-copy
+ARABIC_SEMANTIC_COPY=PASS findings=0
