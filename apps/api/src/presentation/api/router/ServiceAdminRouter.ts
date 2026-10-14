@@ -56,6 +56,8 @@ export class ServiceAdminRouter {
     };
 
     const listQuerySchema = z.object({
+      supportedCountryReferenceId: z.string().trim().min(1).max(160).optional(),
+      supportedLanguageReferenceId: z.string().trim().min(1).max(160).optional(),
       search: z.string().trim().max(120).optional(),
       status: z.preprocess(
         (value) => (value === '' || value === 'all' ? undefined : value),

@@ -5,7 +5,7 @@ import { ServiceAdminRouter } from '../../../../src/presentation/api/router/Serv
 function fixture(permissions:string[],error?:Error){
  const fulfillment:any={getRequest:vi.fn().mockResolvedValue({id:'req',assignedStaffId:'actor'}),listRequests:vi.fn().mockResolvedValue({data:[]}),createFinanceInvoice:vi.fn().mockResolvedValue({id:'invoice'})};
  const catalog:any={listServices:error?vi.fn().mockRejectedValue(error):vi.fn().mockResolvedValue({data:[]})};
- const app=express();app.use(express.json());app.use((req:any,_res,next)=>{req.authUserId='actor';next();});app.use('/services',ServiceAdminRouter.create({adminServiceCatalogUseCases:catalog,adminServiceFulfillmentUseCases:fulfillment,serviceOperationsUseCases:{} as any,authEvaluatorService:{evaluatePermission:vi.fn(async(_actor,p)=>({isGranted:permissions.includes(p)}))} as any}));return {app,fulfillment};
+ const app=express();app.use(express.json());app.use((req:any,_res,next)=>{req.authUserId='actor';next();});app.use('/services',ServiceAdminRouter.create({adminServiceCatalogUseCases:catalog,adminServiceFulfillmentUseCases:fulfillment,serviceOperationsUseCases:{} as any,authEvaluatorService:{evaluatePermission:vi.fn(async(_actor,p)=>({isGranted:permissions.includes(p)}))} as any}));return {app,fulfillment,catalog};
 }
 describe('Section 21 backend authorization',()=>{
  it('catalog-only staff cannot read request PII',async()=>{const f=fixture(['admin:services:manage']);expect((await request(f.app).get('/services/requests')).status).toBe(403);expect(f.fulfillment.listRequests).not.toHaveBeenCalled();});
@@ -20,4 +20,16 @@ describe('Section 21 backend authorization',()=>{
    expect((await request(f.app).post('/services/operations/deliveries').send(body)).status).toBe(400);
  });
  it('redacts unexpected internal diagnostics',async()=>{const f=fixture(['admin:services:manage'],new Error('postgres private password=secret'));const res=await request(f.app).get('/services');expect(res.status).toBe(500);expect(JSON.stringify(res.body)).not.toContain('secret');expect(res.body.correlationId).toBeTruthy();});
+ it('passes bounded country/language filters together before owner paging',async()=>{
+   const f=fixture(['admin:services:manage']);
+   const response=await request(f.app).get('/services?supportedCountryReferenceId=country&supportedLanguageReferenceId=language&page=2');
+   expect(response.status).toBe(200);
+   expect(f.catalog.listServices).toHaveBeenCalledWith(expect.objectContaining({supportedCountryReferenceId:'country',supportedLanguageReferenceId:'language',page:2}));
+ });
+ it('rejects unbounded reference filters without calling the catalog',async()=>{
+   const f=fixture(['admin:services:manage']);
+   const response=await request(f.app).get('/services').query({supportedCountryReferenceId:'x'.repeat(161)});
+   expect(response.status).toBe(400);expect(f.catalog.listServices).not.toHaveBeenCalled();
+ });
+
 });

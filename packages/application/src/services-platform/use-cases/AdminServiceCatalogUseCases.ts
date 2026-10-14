@@ -90,7 +90,19 @@ export class AdminServiceCatalogUseCases {
   public async listServices(
     filters: ServiceCatalogFilters,
   ): Promise<PaginatedServiceCatalogResult<ServiceCatalogItemDto>> {
-    return this.repository.list(filters);
+    const [country, language] = await Promise.all([
+      filters.supportedCountryReferenceId
+        ? this.references.resolveCountryReference(filters.supportedCountryReferenceId)
+        : null,
+      filters.supportedLanguageReferenceId
+        ? this.references.resolveLanguageReference(filters.supportedLanguageReferenceId)
+        : null,
+    ]);
+    return this.repository.list({
+      ...filters,
+      ...(country ? { supportedCountryReferenceId: country.id } : {}),
+      ...(language ? { supportedLanguageReferenceId: language.id } : {}),
+    });
   }
   public async getService(id: string): Promise<ServiceCatalogItemDto> {
     const service = await this.repository.findById(id);

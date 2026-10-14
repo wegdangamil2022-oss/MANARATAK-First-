@@ -1,0 +1,38 @@
+{
+  "section": 21,
+  "phase": "P20",
+  "date": "2026-10-14",
+  "baseCommit": "5f291dee987829725ed5fd1f7353e82f821503e1",
+  "verdict": "CODE_CLOSED_RUNTIME_DEFERRED",
+  "nodeMajor": 22,
+  "baselineTests": 33,
+  "targetedTests": {
+    "files": 9,
+    "tests": 49,
+    "added": 16,
+    "status": "PASS",
+    "workers": 1
+  },
+  "existingClosureRegressionScript": {
+    "cases": 18,
+    "status": "PASS"
+  },
+  "typecheck": "PASS",
+  "lint": {
+    "errors": 0,
+    "warnings": 57
+  },
+  "scope": "SVC-ADM-001 through 028; SVC-FG-029 through 031",
+  "databaseMutations": false,
+  "migrationsApplied": false,
+  "workersRun": false,
+  "liveProviders": false,
+  "heavyTests": false,
+  "sha256": {
+    "baseline-vitest.txt": "a97ab71326682cfc9dfaf4d21a802ba309f4df5667e7094a43bd46fff349be42",
+    "vitest.txt": "d94183a43294aafd3b893fdef53c62c53cbed3c02d5bc04e24a35a71f23d81bd",
+    "closure-regressions.txt": "dd565bd3cdbdabe2672f5b0294b013747223e3b8edabc23e8ca0dc7a570304de",
+    "typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "eslint.txt": "b688a546360b86ded18a1e1d6a05874606cf52f78469669b98bf46bb86377133"
+  }
+}

@@ -391,16 +391,16 @@ export class PrismaServicePlatformRepository
         : undefined,
     };
     Object.keys(where).forEach((key) => where[key] === undefined && delete where[key]);
-    const [rows, total] = await Promise.all([
-      this.catalog().findMany({
+    const [rows, total] = await this.prisma.$transaction(async (tx) => Promise.all([
+      this.catalog(tx).findMany({
         where,
         include: this.catalogInclude(),
         orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
-      this.catalog().count({ where }),
-    ]);
+      this.catalog(tx).count({ where }),
+    ]), { isolationLevel: 'RepeatableRead' });
     return {
       data: rows.map((row: any) => this.mapCatalog(row)),
       total,

@@ -8,7 +8,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ServiceOperationsWorkspace } from '../components/ServiceOperationsWorkspace';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { ServiceRequestsWorkspace } from '../components/ServiceRequestsWorkspace';
-import { CanonicalMultiPicker } from '../components/CanonicalPicker';
+import { CanonicalPicker, CanonicalMultiPicker } from '../components/CanonicalPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import {
   ServiceAvailabilityStatus,
@@ -78,6 +78,8 @@ export function ServicesAdminPage() {
       : searchParams.get('tab') === 'operations'
         ? 'OPERATIONS'
         : 'CATALOG';
+  const countryFilter = searchParams.get('supportedCountryReferenceId') || '';
+  const languageFilter = searchParams.get('supportedLanguageReferenceId') || '';
   const [query, setQuery] = useState(() => reviewOwnerSearch(searchParams));
   const [search, setSearch] = useState(() => reviewOwnerSearch(searchParams));
   const [page, setPage] = useState(1);
@@ -109,8 +111,11 @@ export function ServicesAdminPage() {
     const request = ++listSequence.current;
     setLoading(true);
     setListError(null);
+    setServices(null);
     try {
       const params = new URLSearchParams({ page: String(page), pageSize: '20' });
+      if (countryFilter) params.set('supportedCountryReferenceId', countryFilter);
+      if (languageFilter) params.set('supportedLanguageReferenceId', languageFilter);
       if (statusFilter) params.set('status', statusFilter);
       if (categoryFilter) params.set('serviceCategory', categoryFilter);
       if (availabilityFilter) params.set('serviceAvailabilityStatus', availabilityFilter);
@@ -142,6 +147,8 @@ export function ServicesAdminPage() {
     page,
     fulfillmentFilter,
     completenessFilter,
+    countryFilter,
+    languageFilter,
   ]);
   useEffect(() => {
     void loadServices();
@@ -533,6 +540,34 @@ export function ServicesAdminPage() {
                 ))}
               </select>
             </label>
+            <CanonicalPicker
+              label={t('supported_countries')}
+              value={countryFilter || null}
+              load={canonicalPickerApi.countries}
+              paged optional
+              onChange={(value) => {
+                setPage(1);
+                setSearchParams((current) => {
+                  const next = new URLSearchParams(current);
+                  value ? next.set('supportedCountryReferenceId', value) : next.delete('supportedCountryReferenceId');
+                  return next;
+                });
+              }}
+            />
+            <CanonicalPicker
+              label={t('supported_languages')}
+              value={languageFilter || null}
+              load={canonicalPickerApi.languages}
+              paged optional
+              onChange={(value) => {
+                setPage(1);
+                setSearchParams((current) => {
+                  const next = new URLSearchParams(current);
+                  value ? next.set('supportedLanguageReferenceId', value) : next.delete('supportedLanguageReferenceId');
+                  return next;
+                });
+              }}
+            />
             <label className="flex-1 text-xs font-bold">
               {serviceText('بحث بالاسم أو الرمز أو المزود', language)}
               <input

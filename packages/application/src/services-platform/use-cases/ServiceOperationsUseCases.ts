@@ -369,7 +369,7 @@ export class ServiceOperationsUseCases {
     if (!Number.isInteger(input.scale) || input.scale < 0 || input.scale > 6)
       throw new Error('SERVICE_PRICING_SCALE_INVALID');
     const effectiveFrom = input.effectiveFrom ?? new Date();
-    if (input.effectiveTo && input.effectiveTo <= effectiveFrom)
+    if (!Number.isFinite(effectiveFrom.getTime()) || (input.effectiveTo && (!Number.isFinite(input.effectiveTo.getTime()) || input.effectiveTo <= effectiveFrom)))
       throw new Error('SERVICE_PRICING_EFFECTIVE_WINDOW_INVALID');
     // Immutable price identity excludes lifecycle fields (status/effectiveTo) that may change when a price is retired.
     const fingerprint = createHash('sha256')
@@ -427,7 +427,7 @@ export class ServiceOperationsUseCases {
         throw new Error('SERVICE_DISCOUNT_PERCENTAGE_INVALID');
     }
     const activeFrom = input.activeFrom ?? new Date();
-    if (input.activeTo && input.activeTo <= activeFrom)
+    if (!Number.isFinite(activeFrom.getTime()) || (input.activeTo && (!Number.isFinite(input.activeTo.getTime()) || input.activeTo <= activeFrom)))
       throw new Error('SERVICE_DISCOUNT_WINDOW_INVALID');
     if (
       input.maxRedemptions != null &&
@@ -468,7 +468,7 @@ export class ServiceOperationsUseCases {
     if (discount.packageId && discount.packageId !== (input.packageId ?? null))
       throw new Error('SERVICE_PROMOTION_DISCOUNT_SCOPE_MISMATCH');
     const activeFrom = input.activeFrom ?? new Date();
-    if (input.activeTo && input.activeTo <= activeFrom)
+    if (!Number.isFinite(activeFrom.getTime()) || (input.activeTo && (!Number.isFinite(input.activeTo.getTime()) || input.activeTo <= activeFrom)))
       throw new Error('SERVICE_PROMOTION_WINDOW_INVALID');
     return this.operations.createPromotion({
       publicId: `svc_promo_${randomUUID()}`,
@@ -590,7 +590,7 @@ export class ServiceOperationsUseCases {
     this.assertTimezone(input.timezone);
     if (input.timezone !== provider.timezone)
       throw new Error('SERVICE_SLOT_TIMEZONE_PROVIDER_MISMATCH');
-    if (input.startsAt >= input.endsAt) throw new Error('SERVICE_SLOT_WINDOW_INVALID');
+    if (!Number.isFinite(input.startsAt.getTime()) || !Number.isFinite(input.endsAt.getTime()) || input.startsAt >= input.endsAt) throw new Error('SERVICE_SLOT_WINDOW_INVALID');
     const capacity = input.capacity ?? provider.capacity;
     if (!Number.isInteger(capacity) || capacity < 1 || capacity > provider.capacity)
       throw new Error('SERVICE_SLOT_CAPACITY_INVALID');

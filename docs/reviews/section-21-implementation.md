@@ -1,3 +1,5 @@
+> Current follow-up (2026-10-14): [Section 21 completion](SECTION_21_COMPLETION_2026-10-14.md). SVC-FG-031 included; 49 Vitest tests, 18 closure cases and Node 22 compilation passed. Runtime remains deferred. Historical checkpoint below.
+
 # Section 21 / P20 — Services implementation
 
 Branch: `fix/codex-section-21-services`. Base: `main` merge `d398be07`.
