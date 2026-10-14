@@ -1,0 +1,1221 @@
+[
+  {
+    "url": "https://360.kinneret.ac.il/terms",
+    "retrievedAt": "2026-10-14T20:54:09.257917+00:00",
+    "status": 200,
+    "finalUrl": "https://360.kinneret.ac.il/terms-of-use/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "62196b9cb09bfe2aa53e5ed84924cdbe66f86b4809bfd8532e16c992cc1ccddc",
+    "bytes": 584928
+  },
+  {
+    "url": "https://abiturient.bteu.by/abiturientu/poryadok-priyoma/",
+    "retrievedAt": "2026-10-14T20:54:09.258962+00:00",
+    "status": 200,
+    "finalUrl": "https://abiturient.bteu.by/abiturientu/poryadok-priyoma/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "b46ba2da79ef5983e2c434a5eb0832657a87ad62f434635b80d7ed3504a6fdc7",
+    "bytes": 171021
+  },
+  {
+    "url": "https://admission.baiust.ac.bd/",
+    "retrievedAt": "2026-10-14T20:54:09.259454+00:00",
+    "status": 200,
+    "finalUrl": "https://admission.baiust.ac.bd/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "acfb98b17612eb972190482c513c1bc011965cd9db2a544c8defcffdcbee55df",
+    "bytes": 24206
+  },
+  {
+    "url": "https://aju.edu.ly/",
+    "retrievedAt": "2026-10-14T20:54:09.260055+00:00",
+    "status": 200,
+    "finalUrl": "https://aju.edu.ly/",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "d0d6b61292ad1234c7551531d5e6322a35c65612ff49b7900572c67d3c098772",
+    "bytes": 466931
+  },
+  {
+    "url": "https://aksp-ks.net/Contact",
+    "retrievedAt": "2026-10-14T20:54:09.260649+00:00",
+    "status": 200,
+    "finalUrl": "https://aksp-ks.net/Contact",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "d44849c55b47bd0154ff9a7f1eb3d8502a251d037a8d5c2a05a2789d4961e891",
+    "bytes": 117459
+  },
+  {
+    "url": "https://albutana.edu.sd/",
+    "retrievedAt": "2026-10-14T20:54:09.261082+00:00",
+    "status": 200,
+    "finalUrl": "https://albutana.edu.sd/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "43adfe1052838feb1495c59efc69628f691ca9158dd63b6bcccc27cc4af7ce30",
+    "bytes": 272292
+  },
+  {
+    "url": "https://alistiqlal.edu.ps/cv/720",
+    "retrievedAt": "2026-10-14T20:54:09.261623+00:00",
+    "status": 200,
+    "finalUrl": "https://alistiqlal.edu.ps/ar/cv/720",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "a5b3c766e39b11121b8b1f0ee8dd4b4e4249b84e240a6fd83c52a081fc0d6532",
+    "bytes": 74392
+  },
+  {
+    "url": "https://almakassed-college.com/contact/",
+    "retrievedAt": "2026-10-14T20:54:09.262061+00:00",
+    "error": "HTTP Error 500: Internal Server Error"
+  },
+  {
+    "url": "https://alsalam.edu.sd/",
+    "retrievedAt": "2026-10-14T20:54:09.262570+00:00",
+    "status": 200,
+    "finalUrl": "https://alsalam.edu.sd/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "url": "https://archive.ph/WHn6d",
+    "retrievedAt": "2026-10-14T20:54:09.263492+00:00",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://barawauniversity.so/contact-us/",
+    "retrievedAt": "2026-10-14T20:54:09.264171+00:00",
+    "status": 200,
+    "finalUrl": "https://barawauniversity.so/contact-us/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "857ea3f2bca196be8c83871c299474daa0de0ebdb93a397c68590c77c4e9ab79",
+    "bytes": 235547
+  },
+  {
+    "url": "https://basu.edu.af/en/contact-us",
+    "retrievedAt": "2026-10-14T20:54:09.264855+00:00",
+    "status": 200,
+    "finalUrl": "https://basu.edu.af/en/contact-us",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "28cd35eeba0977c0e5f946f3cd4f038dc1fe003f0dff2b9fd14ffd6899008fdb",
+    "bytes": 36821
+  },
+  {
+    "url": "https://caxias.unigranrio.edu.br/",
+    "retrievedAt": "2026-10-14T20:54:10.275767+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://chihuahua2.tecnm.mx/",
+    "retrievedAt": "2026-10-14T20:54:10.332537+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://civilizationuniv.edu.ye/about-us/1324",
+    "retrievedAt": "2026-10-14T20:54:10.346869+00:00",
+    "status": 200,
+    "finalUrl": "https://civilizationuniv.edu.ye/about-us/1324",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "70747cfffdb0ce65367c6b15bba2a2e9232828c40ab34e234950f1167b2a1b39",
+    "bytes": 311356
+  },
+  {
+    "url": "https://clifforduni.edu.ng/contact/",
+    "retrievedAt": "2026-10-14T20:54:10.405908+00:00",
+    "status": 200,
+    "finalUrl": "https://clifforduni.edu.ng/contact/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "b319e02722ba356da5c8bace72269eddbe7239e3641687e2f8f3ac2290dbcec1",
+    "bytes": 167858
+  },
+  {
+    "url": "https://cones.gov.py/universidad-santa-clara-de-asis/",
+    "retrievedAt": "2026-10-14T20:54:10.423154+00:00",
+    "status": 200,
+    "finalUrl": "https://cones.gov.py/universidad-santa-clara-de-asis/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "5ac79bf7b3b0cfd5b67637cb8a0005597cbd2e360f20f19dfcb8e42621e69e39",
+    "bytes": 158174
+  },
+  {
+    "url": "https://coou.edu.ng/contactus",
+    "retrievedAt": "2026-10-14T20:54:10.747649+00:00",
+    "status": 200,
+    "finalUrl": "https://coou.edu.ng/contactus",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "ba6fd64710b538f75f1e7864a3649dbe4518c92ced505acc3263b119541230ee",
+    "bytes": 67144
+  },
+  {
+    "url": "https://cumandalay.edu.mm/contact-us/",
+    "retrievedAt": "2026-10-14T20:54:10.770602+00:00",
+    "status": 200,
+    "finalUrl": "https://cumandalay.edu.mm/contact-us/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "70d1dda54a8117752238e082d3d3f13a99070e2e96a6330eb24a7f1b687475f2",
+    "bytes": 90580
+  },
+  {
+    "url": "https://cyber-univ.ac.id/sambutan-rektor",
+    "retrievedAt": "2026-10-14T20:54:12.341412+00:00",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://dental.srmist.edu.in/pg/",
+    "retrievedAt": "2026-10-14T20:54:12.460182+00:00",
+    "status": 200,
+    "finalUrl": "https://dental.srmist.edu.in/pg/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "99ef922e61be7d3baef168e967c6d9b63b0c44ddaa7413d288a34b5d6283a249",
+    "bytes": 381092
+  },
+  {
+    "url": "https://dicts.busitema.ac.ug/support/other/where-busitema-campuses-are-located",
+    "retrievedAt": "2026-10-14T20:54:13.158859+00:00",
+    "status": 200,
+    "finalUrl": "https://dicts.busitema.ac.ug/support/other/where-busitema-campuses-are-located",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "7df36f872a338a070c4e2d83c519eb73ba088af2dc21dcc11c5f656aef6e08b4",
+    "bytes": 25775
+  },
+  {
+    "url": "https://ebaub.ac.bd/contact.html",
+    "retrievedAt": "2026-10-14T20:54:13.249601+00:00",
+    "status": 200,
+    "finalUrl": "https://ebaub.ac.bd/contact.html",
+    "contentType": "text/html",
+    "sha256": "154db7985762c18f324853b98f7fba2adf2ac783a34f75f7bd720ed396a9c314",
+    "bytes": 21434
+  },
+  {
+    "url": "https://en.fd.si/varstvo-osebnih-podatkov",
+    "retrievedAt": "2026-10-14T20:54:13.267640+00:00",
+    "status": 200,
+    "finalUrl": "https://en.fd.si/varstvo-osebnih-podatkov",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "b6cb470a2c45e42f963bac1c99a544c855103b5be0609c5390a9c825cbf2d1f3",
+    "bytes": 146342
+  },
+  {
+    "url": "https://en.uit.no/om/kontakt",
+    "retrievedAt": "2026-10-14T20:54:13.548846+00:00",
+    "status": 200,
+    "finalUrl": "https://en.uit.no/om/kontakt",
+    "contentType": "text/html;charset=utf-8",
+    "sha256": "118cb9f06187dc5010aed7709518d858da57bf1c75f6a477c5863d52c71f3d5e",
+    "bytes": 142744
+  },
+  {
+    "url": "https://english.hi.is/about-ui/university-system/about-university-system",
+    "retrievedAt": "2026-10-14T20:54:14.638727+00:00",
+    "status": 200,
+    "finalUrl": "https://english.hi.is/about-ui/university-system/about-university-system",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "022165e3905a515d01d468eb2a3f229c2b13668674f2d7dbd3ea8ca90b2eb1d1",
+    "bytes": 309203
+  },
+  {
+    "url": "https://epu.edu.et/ethiopian-police-university-management-board-reviews-2018-e-c-performance-approves-2019-e-c-plan/",
+    "retrievedAt": "2026-10-14T20:54:14.768720+00:00",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://fatima.edu.ph/our-lady-of-fatima-university-valenzuela/",
+    "retrievedAt": "2026-10-14T20:54:15.288312+00:00",
+    "status": 200,
+    "finalUrl": "https://fatima.edu.ph/our-lady-of-fatima-university-valenzuela/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "0385c90de69edb494a0b354f41d9adb38e881cf13f9fe7f41b7ca948cf65e0f5",
+    "bytes": 467844
+  },
+  {
+    "url": "https://funai.edu.ng/contact-us/",
+    "retrievedAt": "2026-10-14T20:54:15.807088+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://gamli.holar.is/is/skolinn/um-haskolann-a-holum/um-haskolann",
+    "retrievedAt": "2026-10-14T20:54:15.846527+00:00",
+    "status": 200,
+    "finalUrl": "https://gamli.holar.is/is/skolinn/um-haskolann-a-holum/um-haskolann",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "4ad0c81be14fe6372bb03d48fe24507af688f45c47b392f05e2e3735f5872bb9",
+    "bytes": 62865
+  },
+  {
+    "url": "https://gcwus.edu.pk/admission-contact/",
+    "retrievedAt": "2026-10-14T20:54:16.002268+00:00",
+    "status": 200,
+    "finalUrl": "https://gcwus.edu.pk/admission-contact/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "7caeb9a7972e6d8e1e52502bb3f74c8b5bd4221744a86b98b81f94818a40418f",
+    "bytes": 73941
+  },
+  {
+    "url": "https://giu.gm/service/al-hikma-university/",
+    "retrievedAt": "2026-10-14T20:54:16.004272+00:00",
+    "status": 200,
+    "finalUrl": "https://giu.gm/service/al-hikma-university/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "db770074ce3c5143e65d14904f30d94c126094d9a4fd9b190a92ccb42d1e4ffb",
+    "bytes": 115956
+  },
+  {
+    "url": "https://hadara.edu.iq/",
+    "retrievedAt": "2026-10-14T20:54:16.066967+00:00",
+    "status": 200,
+    "finalUrl": "https://hadara.edu.iq/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "8edca78a518332c8d442723c670f81ce52fed20571cde653f39b57967cc95388",
+    "bytes": 688297
+  },
+  {
+    "url": "https://hallmarkuniversity.edu.ng/contact-us/",
+    "retrievedAt": "2026-10-14T20:54:16.073475+00:00",
+    "status": 200,
+    "finalUrl": "https://hallmarkuniversity.edu.ng/contact-us/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "3e22dfa12541d2b7f7cb1e7f284602e969a5c42bcbd265cf447f16eb0a518220",
+    "bytes": 174442
+  },
+  {
+    "url": "https://hbtu.edu.mm/contact_us",
+    "retrievedAt": "2026-10-14T20:54:16.290007+00:00",
+    "status": 200,
+    "finalUrl": "https://hbtu.edu.mm/contact_us",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "ccb4d0c35a04ee5b98cd8fb041bf6080bf2b37b145ce39f40dd90945a24b3641",
+    "bytes": 18021
+  },
+  {
+    "url": "https://inifenay.gob.mx/blog-galeria.php?ID_GALERIA=33",
+    "retrievedAt": "2026-10-14T20:54:16.741806+00:00",
+    "status": 200,
+    "finalUrl": "https://inifenay.gob.mx/blog-galeria.php?ID_GALERIA=33",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "a96bb92110daf1d554bd5d5e21810274d3b6b738af4571cf011b611c0c1bde05",
+    "bytes": 15237
+  },
+  {
+    "url": "https://ispozls.com/blog.html",
+    "retrievedAt": "2026-10-14T20:54:17.351223+00:00",
+    "status": 200,
+    "finalUrl": "https://ispozls.com/blog.html",
+    "contentType": "text/html",
+    "sha256": "6a0d4aaeb5539c10c4fde48cef9568780450ccf644ef42a04123cf53856b41a9",
+    "bytes": 24215
+  },
+  {
+    "url": "https://join.ucas.edu.ps/about-us",
+    "retrievedAt": "2026-10-14T20:54:17.521097+00:00",
+    "status": 200,
+    "finalUrl": "https://join.ucas.edu.ps/about-us",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "596283058eabc71e6bc12ce0577d35eebf006e941ca3ab5afbb7da32f663a005",
+    "bytes": 57094
+  },
+  {
+    "url": "https://kilaw.edu.kw/annualConference/en/third-party-funding-in-international-arbitration-and-its-impact-on-the-procedure/",
+    "retrievedAt": "2026-10-14T20:54:17.670273+00:00",
+    "status": 200,
+    "finalUrl": "https://kilaw.edu.kw/annualConference/en/third-party-funding-in-international-arbitration-and-its-impact-on-the-procedure/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "8cd9156adff0729fa43c7da85ffab73bc4ddadd4bca13f2d3eb319d70b3d464c",
+    "bytes": 85006
+  },
+  {
+    "url": "https://ksiu.edu.eg/alumni/alumni-affairs/",
+    "retrievedAt": "2026-10-14T20:54:17.847485+00:00",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://loeu.opsu.gob.ve/detalle-localidad/1836/",
+    "retrievedAt": "2026-10-14T20:54:18.018034+00:00",
+    "status": 200,
+    "finalUrl": "https://loeu.opsu.gob.ve/detalle-localidad/1836/",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "57b75fc02619e5400b0ab8e71cd86d89793b155fb3fe9fc5d43bcf7f402a05b8",
+    "bytes": 19162
+  },
+  {
+    "url": "https://lp3mlk.unidayan.ac.id/",
+    "retrievedAt": "2026-10-14T20:54:18.075561+00:00",
+    "status": 200,
+    "finalUrl": "https://lp3mlk.unidayan.ac.id/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "2a830a95f8ed246e63812339f8f5aef2078e0bbfbeaecfaa5051935fd4224dbb",
+    "bytes": 163491
+  },
+  {
+    "url": "https://mts.university/",
+    "retrievedAt": "2026-10-14T20:54:18.165911+00:00",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "url": "https://muc.edu.gh/contact/",
+    "retrievedAt": "2026-10-14T20:54:18.202529+00:00",
+    "status": 200,
+    "finalUrl": "https://muc.edu.gh/contact/",
+    "contentType": "text/html",
+    "sha256": "be03278c9bc32f17fb6da25076fef86a22829c8f65d3bc65f5cfefe39e2a670b",
+    "bytes": 61854
+  },
+  {
+    "url": "https://oaustech.edu.ng/?route=information%2Fcontact",
+    "retrievedAt": "2026-10-14T20:54:18.328890+00:00",
+    "status": 200,
+    "finalUrl": "https://oaustech.edu.ng/?route=information%2Fcontact",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "123f8ec4c1228532ab372a7e8eee407a2219f7c64553601720e0cf090ffb2b15",
+    "bytes": 129978
+  },
+  {
+    "url": "https://omsiid.mspu.by/en/index.php?view=HOW_TO_APPLY",
+    "retrievedAt": "2026-10-14T20:54:18.526448+00:00",
+    "status": 200,
+    "finalUrl": "https://omsiid.mspu.by/en/index.php?view=HOW_TO_APPLY",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "f4493135aba703f1dff93b6d0de43f1fb3193fabf895aad14bf572d1a8823c1c",
+    "bytes": 19826
+  },
+  {
+    "url": "https://open.ac.mu/contact-us/",
+    "retrievedAt": "2026-10-14T20:54:18.571917+00:00",
+    "status": 200,
+    "finalUrl": "https://open.ac.mu/contact-us/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "74eeae059afc319507f983005bd6f29461f6b67a56f3c8b5ea4fd855076525ef",
+    "bytes": 107239
+  },
+  {
+    "url": "https://pmb.unipdu.ac.id/contact-us/",
+    "retrievedAt": "2026-10-14T20:54:18.854199+00:00",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://pmb.unsuri.ac.id/",
+    "retrievedAt": "2026-10-14T20:54:19.273768+00:00",
+    "status": 200,
+    "finalUrl": "https://pmb.unsuri.ac.id/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "f99d048e7d4016980ad0cd8133115d56d8daa6f13b2337ba4a3a57f8f1505d05",
+    "bytes": 87128
+  },
+  {
+    "url": "https://pmb.unusu.ac.id/",
+    "retrievedAt": "2026-10-14T20:54:19.502853+00:00",
+    "status": 200,
+    "finalUrl": "https://pmb.unusu.ac.id/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "b130c5b3a2f99079f96f0cb20c90a763c9fe5c41093395c02a1d91f4e92e1b9c",
+    "bytes": 32407
+  },
+  {
+    "url": "https://pmb.upp.ac.id/",
+    "retrievedAt": "2026-10-14T20:54:20.054709+00:00",
+    "status": 200,
+    "finalUrl": "https://pmb.upp.ac.id/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "b89a32f93a40d91198f646333cdba280445f09f63683bdfce8515c24b324bb5c",
+    "bytes": 18866
+  },
+  {
+    "url": "https://prepa.udem.edu.mx/es/contactanos",
+    "retrievedAt": "2026-10-14T20:54:20.144817+00:00",
+    "status": 200,
+    "finalUrl": "https://prepa.udem.edu.mx/es/contactanos",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "cecae5880362ea7c85892f448f1d8a14a1087e794fe2eb25029e07239701318b",
+    "bytes": 45092
+  },
+  {
+    "url": "https://ptuk.edu.ps/ar/",
+    "retrievedAt": "2026-10-14T20:54:20.476400+00:00",
+    "status": 200,
+    "finalUrl": "https://ptuk.edu.ps/ar/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "72cece830ff7eabb255e4652dbe76490d16aefe4d670423b4daf35bf45720a34",
+    "bytes": 56338
+  },
+  {
+    "url": "https://publikasi.unkrit.ac.id/index.php/Akademia/about/submissions",
+    "retrievedAt": "2026-10-14T20:54:20.574110+00:00",
+    "status": 200,
+    "finalUrl": "https://publikasi.unkrit.ac.id/index.php/Akademia/about/submissions",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "3715cefb24589bee22f9fd1fe1f8c06eaf766b0a59f422ffe3ba65f6100e1e25",
+    "bytes": 17043
+  },
+  {
+    "url": "https://quanef-gb.com/institutes/show/78",
+    "retrievedAt": "2026-10-14T20:54:20.665165+00:00",
+    "status": 200,
+    "finalUrl": "https://quanef-gb.com/institutes/show/78",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "28a7667beb5cb43310835a3bb254ca5a013cb371ebd0805281bc935b2728d204",
+    "bytes": 54712
+  },
+  {
+    "url": "https://rawda.edu.ps/news/details/20045",
+    "retrievedAt": "2026-10-14T20:54:20.940184+00:00",
+    "error": "The read operation timed out"
+  },
+  {
+    "url": "https://reestri.eqe.ge/en/inner/72",
+    "retrievedAt": "2026-10-14T20:54:21.197519+00:00",
+    "status": 200,
+    "finalUrl": "https://reestri.eqe.ge/en/inner/72",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "fdeb342b1925da5ae420814b49bbff5d2739fb10ec56f370ba4d80d587ae31d7",
+    "bytes": 54292
+  },
+  {
+    "url": "https://referensi.data.kemdikbud.go.id/pendidikan/npsn/021018",
+    "retrievedAt": "2026-10-14T20:54:21.259655+00:00",
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+  },
+  {
+    "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/011013",
+    "retrievedAt": "2026-10-14T20:54:21.558465+00:00",
+    "status": 200,
+    "finalUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/011013",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "29aea4bb3b26cf990e42714a321b0103527ab185ce3ba9eb06bceb6a9846c0bf",
+    "bytes": 15762
+  },
+  {
+    "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/091006",
+    "retrievedAt": "2026-10-14T20:54:21.560095+00:00",
+    "status": 200,
+    "finalUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/091006",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "7fd177692aae46479c3f6a0e273dcf7f4da405e0126554ecb144e2896d93ceb0",
+    "bytes": 15895
+  },
+  {
+    "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/161005",
+    "retrievedAt": "2026-10-14T20:54:21.572869+00:00",
+    "status": 200,
+    "finalUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/161005",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "e83b9bf227c09bd9aeb3327f75de161a4feffedf1a61734dbd0e788b848ff141",
+    "bytes": 15888
+  },
+  {
+    "url": "https://referensi.data.kemendikdasmen.go.id/tabs.php?npsn=031078",
+    "retrievedAt": "2026-10-14T20:54:21.642448+00:00",
+    "status": 200,
+    "finalUrl": "https://referensi.data.kemendikdasmen.go.id/tabs.php?npsn=031078",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "4a611f482dd85757e3759f2f89eedda9bbd5a959a59c4d2a23373d3faaca6615",
+    "bytes": 15761
+  },
+  {
+    "url": "https://rpl.unsoed.ac.id/",
+    "retrievedAt": "2026-10-14T20:54:21.761959+00:00",
+    "status": 200,
+    "finalUrl": "https://rpl.unsoed.ac.id/",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "7cef6306d4d9fd859b24b39384f749c398cf0211ba46f6c93c0e00ff6d736d43",
+    "bytes": 36915
+  },
+  {
+    "url": "https://samas.no/en/basic-page/contact-information",
+    "retrievedAt": "2026-10-14T20:54:21.845928+00:00",
+    "status": 200,
+    "finalUrl": "https://samas.no/en/basic-page/contact-information",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "22c1d93057fd6138528abf8da1dee8e7bce8803d0b3663b8aa8dd4ff5bf67f6f",
+    "bytes": 28550
+  },
+  {
+    "url": "https://sawauniversity.edu.iq/En/index.php",
+    "retrievedAt": "2026-10-14T20:54:22.312773+00:00",
+    "status": 200,
+    "finalUrl": "https://sawauniversity.edu.iq/En/index.php",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "7d5f38873b05bd8aa7212cafb0266d72dc0563bb19b62113791ae245f007031a",
+    "bytes": 70076
+  },
+  {
+    "url": "https://sdu.edu.kz/en/contact-us-4/",
+    "retrievedAt": "2026-10-14T20:54:22.698189+00:00",
+    "status": 200,
+    "finalUrl": "https://sdu.edu.kz/en/contact-us-4/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "f0ab7d0e24c1b0e032d1dd5b189c8b81f27db45b2c25e7ee21aa1e28c30b2cfb",
+    "bytes": 337732
+  },
+  {
+    "url": "https://services.nmu.edu.ng/faculties/01d0a61a-0a74-4418-8e61-f0dc984edf9d",
+    "retrievedAt": "2026-10-14T20:54:22.898954+00:00",
+    "status": 200,
+    "finalUrl": "https://services.nmu.edu.ng/faculties/01d0a61a-0a74-4418-8e61-f0dc984edf9d",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "1f4dbf8116ad53839b022e79c4e45f0b07a3c41e5d06f45f08cbbbba6fe67fd7",
+    "bytes": 36098
+  },
+  {
+    "url": "https://shabait.com/2016/06/08/a-future-abundant-of-intellectuals-eritrean-institutions-of-higher-education/",
+    "retrievedAt": "2026-10-14T20:54:22.904672+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://shmu.ac.ir/en/contactus",
+    "retrievedAt": "2026-10-14T20:54:23.471179+00:00",
+    "status": 200,
+    "finalUrl": "https://shmu.ac.ir/en/contactus",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "112de47f44fae9b8c1918f5e10b46e908d5925c1cb805b041424ed4dc0bff96b",
+    "bytes": 40640
+  },
+  {
+    "url": "https://sic.cultura.gob.mx/ficha.php?table=universidad&table_id=773",
+    "retrievedAt": "2026-10-14T20:54:23.638049+00:00",
+    "status": 200,
+    "finalUrl": "https://sic.cultura.gob.mx/ficha.php?table=universidad&table_id=773",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "c7003b605a0c2ab563f2c7789c4f5f1f395ec8f9ce5c5b2070d3302fb2e5dd3f",
+    "bytes": 37938
+  },
+  {
+    "url": "https://sites.google.com/bpsu.edu.ph/bpsucart/contact",
+    "retrievedAt": "2026-10-14T20:54:23.674296+00:00",
+    "status": 200,
+    "finalUrl": "https://sites.google.com/bpsu.edu.ph/bpsucart/contact",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "0a596b33c623101a27f4d3abc2425f401623acc9403a50ab1039d82e773b14a5",
+    "bytes": 167220
+  },
+  {
+    "url": "https://sjsm.org/contact-us/",
+    "retrievedAt": "2026-10-14T20:54:23.879609+00:00",
+    "status": 200,
+    "finalUrl": "https://sjsm.org/contact-us/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "561d42d77d4ba2acfe45314c3d5b38bd9c1ac80e4fcc6425d5f8fd37d829ffba",
+    "bytes": 35794
+  },
+  {
+    "url": "https://slp.tecnm.mx/",
+    "retrievedAt": "2026-10-14T20:54:23.888712+00:00",
+    "status": 200,
+    "finalUrl": "https://slp.tecnm.mx/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "a9835d8f2690493125ed37dc43baf7b0ac1aa004ab3af4efc21b9aeabeb20d11",
+    "bytes": 184053
+  },
+  {
+    "url": "https://slt.lk/index.php/en/news/slt-mobitel-nebula-institute-technology-achieves-international-recognition-pearson-btec-higher",
+    "retrievedAt": "2026-10-14T20:54:24.238363+00:00",
+    "status": 200,
+    "finalUrl": "https://slt.lk/index.php/en/news/slt-mobitel-nebula-institute-technology-achieves-international-recognition-pearson-btec-higher",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "0ffe06bb1ee4473c05e040933f85a2eeabbc2ca080bac24de93bd0dad7a544d8",
+    "bytes": 95556
+  },
+  {
+    "url": "https://southwesternuniversity.edu.ng/about-us/",
+    "retrievedAt": "2026-10-14T20:54:24.312492+00:00",
+    "status": 200,
+    "finalUrl": "https://southwesternuniversity.edu.ng/about-us/",
+    "contentType": "text/html",
+    "sha256": "3bb40456027c77d05b991e4686f10e51739a6ebdca3e33ec5edcd1e2c28b34cf",
+    "bytes": 1686
+  },
+  {
+    "url": "https://toluca.tecnm.mx/contacto-instituto-tecnologico-de-toluca",
+    "retrievedAt": "2026-10-14T20:54:24.639702+00:00",
+    "status": 200,
+    "finalUrl": "https://toluca.tecnm.mx/contacto-instituto-tecnologico-de-toluca",
+    "contentType": "text/html",
+    "sha256": "c04c4befa9bb4c227f58e8cdd293542422509de8f08e5bffcfa03fefc104802a",
+    "bytes": 10646
+  },
+  {
+    "url": "https://tuplon.edu.mm/contact/",
+    "retrievedAt": "2026-10-14T20:54:24.640073+00:00",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://ufes.edu.mm/location/",
+    "retrievedAt": "2026-10-14T20:54:24.682086+00:00",
+    "status": 200,
+    "finalUrl": "https://ufes.edu.mm/location/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "6a37e46c583aac55e90f893c3d6fd55ebfd0e515b34ed27580386ece092848f5",
+    "bytes": 107199
+  },
+  {
+    "url": "https://umam.edu.my/contact",
+    "retrievedAt": "2026-10-14T20:54:24.978967+00:00",
+    "status": 200,
+    "finalUrl": "https://umam.edu.my/contact",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "21d96215179dcbf56596d16f3f8b87e5ae6e348904ebce72e3b38e3fa31c80d1",
+    "bytes": 82337
+  },
+  {
+    "url": "https://umib.net/kontakt/",
+    "retrievedAt": "2026-10-14T20:54:25.284314+00:00",
+    "status": 200,
+    "finalUrl": "https://umib.net/kontakt/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "586abd78abc8178ce82afaf0aaf494732832a891248b3d15946170942d91756e",
+    "bytes": 158168
+  },
+  {
+    "url": "https://ump.ac.id/profil-3-Lokasi.Kampus.html",
+    "retrievedAt": "2026-10-14T20:54:25.330407+00:00",
+    "status": 200,
+    "finalUrl": "https://ump.ac.id/profil-3-Lokasi.Kampus.html",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "be509e223805c4a915e5f4f7a1d85b7fa47fa970c58be8f9381be635963ffde3",
+    "bytes": 72029
+  },
+  {
+    "url": "https://unhz.eu/en/contacts/",
+    "retrievedAt": "2026-10-14T20:54:25.536447+00:00",
+    "status": 200,
+    "finalUrl": "https://unhz.eu/en/contacts/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "6af86cd1b5555a95bdde9cfb3294ac04e500bd744e5fefe0693910c6e23b02cb",
+    "bytes": 169760
+  },
+  {
+    "url": "https://uni-gjilan.net/kontakti/",
+    "retrievedAt": "2026-10-14T20:54:25.995794+00:00",
+    "status": 200,
+    "finalUrl": "https://uni-gjilan.net/kontakti/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "faa6a991b5978358b24f7c43c7defc0b816e79ced7d5b00884b9cb4ee0e4826b",
+    "bytes": 64265
+  },
+  {
+    "url": "https://uni-gjk.org/",
+    "retrievedAt": "2026-10-14T20:54:26.033590+00:00",
+    "status": 200,
+    "finalUrl": "https://uni-gjk.org/al",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "ce50e270c0ab880c332d6e9343c7da7663b07d14ef50278c0c84bdbaec6dbc43",
+    "bytes": 132825
+  },
+  {
+    "url": "https://uni-pr.edu/desk/inc/media/B1CE0A58-7361-4251-BE8A-21C7640C0C5E.pdf",
+    "retrievedAt": "2026-10-14T20:54:26.231303+00:00",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "url": "https://uni-prizren.com/",
+    "retrievedAt": "2026-10-14T20:54:26.579056+00:00",
+    "status": 200,
+    "finalUrl": "https://uni-prizren.com/",
+    "contentType": "text/html",
+    "sha256": "f36bf6cd74f4805e00036dbb1342d29346e07c1b7a5ad9b5adcbf440e0527d5a",
+    "bytes": 490553
+  },
+  {
+    "url": "https://uni50lwiro.ac.cd/a-propos-de-uni-50-lwiro/",
+    "retrievedAt": "2026-10-14T20:54:26.769841+00:00",
+    "error": "The read operation timed out"
+  },
+  {
+    "url": "https://unibolguarani.edu.bo/ubicacion",
+    "retrievedAt": "2026-10-14T20:54:26.902850+00:00",
+    "status": 200,
+    "finalUrl": "https://unibolguarani.edu.bo/ubicacion",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "b7bb3257b1372ec071b81dc80ecce2926ae85d00a968acd5ab67f4a6b54f3c9d",
+    "bytes": 39238
+  },
+  {
+    "url": "https://unik.ac.ug/faqs/",
+    "retrievedAt": "2026-10-14T20:54:26.907568+00:00",
+    "status": 200,
+    "finalUrl": "https://unik.ac.ug/faqs/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "9f470314bd91e99a526f43cd06add66e70b3404540c41ce7f21338949ca9be79",
+    "bytes": 78478
+  },
+  {
+    "url": "https://univalb.ac.id/contact/",
+    "retrievedAt": "2026-10-14T20:54:27.229836+00:00",
+    "status": 200,
+    "finalUrl": "https://univalb.ac.id/contact/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "ff33441fc8081bc4da7fd64c87e8464476be4b23f7e3ff520a2c5a5a751ae5aa",
+    "bytes": 106661
+  },
+  {
+    "url": "https://univetbantara.ac.id/kontak/",
+    "retrievedAt": "2026-10-14T20:54:27.586382+00:00",
+    "status": 200,
+    "finalUrl": "https://univetbantara.ac.id/kontak/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "a96c1ddd5f0a16715a0e789f50f61c94da2edd883597e6ce27a1da298e10bf20",
+    "bytes": 164885
+  },
+  {
+    "url": "https://unsxx.bo/",
+    "retrievedAt": "2026-10-14T20:54:27.716664+00:00",
+    "status": 200,
+    "finalUrl": "https://unsxx.bo/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "d3740c4fb58d9c76fb24bdde1c590437ab40af87d73a3652d6d7cb5dfaa5040d",
+    "bytes": 81598
+  },
+  {
+    "url": "https://unupurwokerto.ac.id/profil/sekilas-unu-purwokerto/",
+    "retrievedAt": "2026-10-14T20:54:28.000273+00:00",
+    "status": 200,
+    "finalUrl": "https://unupurwokerto.ac.id/profil/sekilas-unu-purwokerto/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "01da70509af961ffc764cbba763361d851b1961ff7998632858fe37914fb1892",
+    "bytes": 224735
+  },
+  {
+    "url": "https://uofdalanj.edu.sd/eng/index.php/contact-us",
+    "retrievedAt": "2026-10-14T20:54:28.015358+00:00",
+    "status": 200,
+    "finalUrl": "https://uofdalanj.edu.sd/eng/index.php/contact-us",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "560407a7e5c9d5e40079c8051725f8d3bb2a52111f9ea5c125c7de65e1088e7a",
+    "bytes": 24343
+  },
+  {
+    "url": "https://ushaf.net/kontakti/",
+    "retrievedAt": "2026-10-14T20:54:28.023287+00:00",
+    "status": 200,
+    "finalUrl": "https://ushaf.net/kontakti/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "c55026f83f4bbbf01a110d9417a348d4690927329e6d9d74f0cbad74fe465765",
+    "bytes": 79617
+  },
+  {
+    "url": "https://utu.ac.id/about-us/",
+    "retrievedAt": "2026-10-14T20:54:28.252415+00:00",
+    "status": 200,
+    "finalUrl": "https://utu.ac.id/about-us/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "7e8dc3e53dbe8feba7058d6aa9bccc7723042f98323397c3a221c1cd9126a103",
+    "bytes": 110971
+  },
+  {
+    "url": "https://vttu.edu.vn/",
+    "retrievedAt": "2026-10-14T20:54:28.712147+00:00",
+    "status": 200,
+    "finalUrl": "https://vttu.edu.vn/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "b4a0890a7ec60ae6cf37cc7afc4f703a1988f55ee63acfde7da268b1426de990",
+    "bytes": 275705
+  },
+  {
+    "url": "https://wascal-mali.edu.ml/contact/",
+    "retrievedAt": "2026-10-14T20:54:28.883534+00:00",
+    "status": 200,
+    "finalUrl": "https://wascal-mali.edu.ml/contact/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "706a33e26e22c36649e7008b29eaeb3b5fc3f5f3eb79f5bae1b9562918123067",
+    "bytes": 477992
+  },
+  {
+    "url": "https://www.agu.edu.vn/en",
+    "retrievedAt": "2026-10-14T20:54:28.948897+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://www.akademijakm.edu.rs/en/kontakt.php",
+    "retrievedAt": "2026-10-14T20:54:29.435970+00:00",
+    "status": 200,
+    "finalUrl": "https://www.akademijakm.edu.rs/en/kontakt.php",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "37c0293b90a73a8b6d4f797e2358b299e5b37b21234ae8d9c61ac7fa7a03091b",
+    "bytes": 9421
+  },
+  {
+    "url": "https://www.auamed.org/contact/",
+    "retrievedAt": "2026-10-14T20:54:29.581097+00:00",
+    "status": 200,
+    "finalUrl": "https://www.auamed.org/contact/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "96bbe75448b50b78f63988915419f526b9422e7a8027f5fc4dd117544b1a37cb",
+    "bytes": 270535
+  },
+  {
+    "url": "https://www.bahia.tecnm.mx/inicio/",
+    "retrievedAt": "2026-10-14T20:54:29.948217+00:00",
+    "status": 200,
+    "finalUrl": "https://www.bahia.tecnm.mx/inicio/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "06dbbc4c7f219251a5a3123a09f05485882aec659fc379c6d0b05cfb9e353148",
+    "bytes": 92541
+  },
+  {
+    "url": "https://www.ccgp.gov.cn/cggg/dfgg/gzgg/202609/t20260917_27343131.htm",
+    "retrievedAt": "2026-10-14T20:54:30.241868+00:00",
+    "status": 200,
+    "finalUrl": "https://www.ccgp.gov.cn/cggg/dfgg/gzgg/202609/t20260917_27343131.htm",
+    "contentType": "text/html",
+    "sha256": "e025a844587342e1a01aa4c7fb151e504a105d9d7974b9353485368069bce1f9",
+    "bytes": 15715
+  },
+  {
+    "url": "https://www.cdcuauhtemoc.tecnm.mx/2026/05/",
+    "retrievedAt": "2026-10-14T20:54:30.408445+00:00",
+    "status": 200,
+    "finalUrl": "https://www.cdcuauhtemoc.tecnm.mx/2026/05/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "6a02b16b6e3563252d8f7dca9aa73cc0577785fd8e4809a6d0d443a8ed1207e3",
+    "bytes": 219335
+  },
+  {
+    "url": "https://www.city.dazaifu.lg.jp/soshiki/27/2031.html",
+    "retrievedAt": "2026-10-14T20:54:30.845162+00:00",
+    "status": 200,
+    "finalUrl": "https://www.city.dazaifu.lg.jp/soshiki/27/2031.html",
+    "contentType": "text/html",
+    "sha256": "ab599ba8089b6be9b1826a12f54b1da153ae22fa7eec506cb0eef66a9b66e896",
+    "bytes": 39634
+  },
+  {
+    "url": "https://www.city.sanyo-onoda.lg.jp/soshiki/6/rikadai-syugakusien.html",
+    "retrievedAt": "2026-10-14T20:54:30.961298+00:00",
+    "status": 200,
+    "finalUrl": "https://www.city.sanyo-onoda.lg.jp/soshiki/6/rikadai-syugakusien.html",
+    "contentType": "text/html",
+    "sha256": "79f5f85c4d4fb4b1bca3b7686fe64067d84996f38ecfe2581da15f65d3fadc77",
+    "bytes": 30982
+  },
+  {
+    "url": "https://www.dagonuniversity.edu.mm/",
+    "retrievedAt": "2026-10-14T20:54:31.300510+00:00",
+    "status": 200,
+    "finalUrl": "https://www.dagonuniversity.edu.mm/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "22bd60ad257fc052e51b9ea753298a2682ce71dbd833baec643cc96502fe351c",
+    "bytes": 107060
+  },
+  {
+    "url": "https://www.dawa-college.net/",
+    "retrievedAt": "2026-10-14T20:54:31.433670+00:00",
+    "status": 200,
+    "finalUrl": "https://www.dawa-college.net/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "e453620a11e0a5a54b54de34c86078209504e26d78f30257c8f4819f57a7038a",
+    "bytes": 55916
+  },
+  {
+    "url": "https://www.du.edu.et/campuses/main-campus/",
+    "retrievedAt": "2026-10-14T20:54:31.603959+00:00",
+    "status": 200,
+    "finalUrl": "https://www.du.edu.et/campuses/main-campus/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "6dda3329d4f5286c624f7d386dc33863b62c808539567d97ff3b83a52a651fc6",
+    "bytes": 250196
+  },
+  {
+    "url": "https://www.europaprima.com/isu/kontakt-isu/",
+    "retrievedAt": "2026-10-14T20:54:31.790078+00:00",
+    "status": 200,
+    "finalUrl": "https://www.europaprima.com/isu/kontakt-isu/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "e7db9d54443c1035e03bff1017430d79cac25d899a12f5a1bb5fc6d5b63e1af4",
+    "bytes": 72428
+  },
+  {
+    "url": "https://www.g77.org/costis/documents/COSTIS_Final_Print.pdf",
+    "retrievedAt": "2026-10-14T20:54:31.941405+00:00",
+    "status": 200,
+    "finalUrl": "https://www.g77.org/costis/documents/COSTIS_Final_Print.pdf",
+    "contentType": "application/pdf",
+    "sha256": "89a595e8fdca776e3cf3c6af596344d558d8110a593504750d141569adb3fd9d",
+    "bytes": 4362909
+  },
+  {
+    "url": "https://www.gcsh.edu.ps/ar/faqs",
+    "retrievedAt": "2026-10-14T20:54:32.343710+00:00",
+    "status": 200,
+    "finalUrl": "https://www.gcsh.edu.ps/ar/faqs",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "09bfde35c8ba679ed320d843aff13f0f5d9b213b7f72b5617473c0b77cd6a3b4",
+    "bytes": 24535
+  },
+  {
+    "url": "https://www.gsu.by/en",
+    "retrievedAt": "2026-10-14T20:54:32.453149+00:00",
+    "status": 200,
+    "finalUrl": "https://www.gsu.by/en",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "b21908321c3b5987f098c5d46bb379985c58d162a1866defb172789014e6c1b4",
+    "bytes": 226791
+  },
+  {
+    "url": "https://www.gsu.edu.ph/career/chief-administrative-officer-administrative-officer-v-gscb-cadof-1-2023/",
+    "retrievedAt": "2026-10-14T20:54:32.642622+00:00",
+    "status": 200,
+    "finalUrl": "https://www.gsu.edu.ph/career/chief-administrative-officer-administrative-officer-v-gscb-cadof-1-2023/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "8f0e80c281f7befc17b702314b75bf18917f6f41af219cecf2b41c94997f4f54",
+    "bytes": 46152
+  },
+  {
+    "url": "https://www.ibu.edu.mk/",
+    "retrievedAt": "2026-10-14T20:54:33.131741+00:00",
+    "error": "The read operation timed out"
+  },
+  {
+    "url": "https://www.ingenieria.uaq.mx/index.php/investigacion/comiteetica",
+    "retrievedAt": "2026-10-14T20:54:33.227508+00:00",
+    "status": 200,
+    "finalUrl": "https://www.ingenieria.uaq.mx/index.php/investigacion/comiteetica",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "6c429308bb60a8e006e54b6cac8bf8a207f8c016901361e4c004aecfce68e60f",
+    "bytes": 120967
+  },
+  {
+    "url": "https://www.ipr-ifra.edu.ml/IMG/pdf/mpv.pdf",
+    "retrievedAt": "2026-10-14T20:54:33.552536+00:00",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://www.itatitalaquia.edu.mx/historia.html",
+    "retrievedAt": "2026-10-14T20:54:33.988193+00:00",
+    "status": 200,
+    "finalUrl": "https://www.itatitalaquia.edu.mx/historia.html",
+    "contentType": "text/html",
+    "sha256": "49481bdd8401f81970eb6858904fcdaf3a45af7b4676218e5fd3ef00e2829062",
+    "bytes": 5788
+  },
+  {
+    "url": "https://www.iuk.edu.kw/about",
+    "retrievedAt": "2026-10-14T20:54:34.267689+00:00",
+    "status": 200,
+    "finalUrl": "https://www.iuk.edu.kw/about",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "4f6d4d7b1b18cc2932bcd9bad554b27397108a4b618b754b0d46b4e0fac7143c",
+    "bytes": 78362
+  },
+  {
+    "url": "https://www.mbu.ac.th/uncategorized/post-3095/",
+    "retrievedAt": "2026-10-14T20:54:34.390072+00:00",
+    "status": 200,
+    "finalUrl": "https://www.mbu.ac.th/uncategorized/post-3095/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "94ae15e233e074a22fbc2d5ec6b7918f8e066779f651ed9ccbff2b5f576eb695",
+    "bytes": 251901
+  },
+  {
+    "url": "https://www.mext.go.jp/a_menu/koutou/ninka/05022501.htm",
+    "retrievedAt": "2026-10-14T20:54:34.717743+00:00",
+    "status": 200,
+    "finalUrl": "https://www.mext.go.jp/a_menu/koutou/ninka/05022501.htm",
+    "contentType": "text/html",
+    "sha256": "c0b7b112531e704a259ee1dd9727e171091b78e2a380130fe5b250932eb262dc",
+    "bytes": 17065
+  },
+  {
+    "url": "https://www.minedu.gob.bo/index.php?Itemid=104&limitstart=44&option=com_content&view=featured",
+    "retrievedAt": "2026-10-14T20:54:34.867083+00:00",
+    "status": 200,
+    "finalUrl": "https://www.minedu.gob.bo/index.php?Itemid=104&limitstart=44&option=com_content&view=featured",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "fefc1c3dfb57d55cec05c8f1ae32c1ec13165ef9bb023fd335273413af1ebe96",
+    "bytes": 61674
+  },
+  {
+    "url": "https://www.mit.edu.mk/contact",
+    "retrievedAt": "2026-10-14T20:54:35.488920+00:00",
+    "status": 200,
+    "finalUrl": "https://www.mit.edu.mk/contact",
+    "contentType": "text/html; charset=utf-8",
+    "sha256": "3ca46583d30ad61ae4ca9b46c15768accb9eda83395b802eb0673527432d625f",
+    "bytes": 2180
+  },
+  {
+    "url": "https://www.mlqu.edu.ph/contact-us/",
+    "retrievedAt": "2026-10-14T20:54:36.319565+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://www.moe.edu.ps/uploads/Guidance26-7-2025.pdf",
+    "retrievedAt": "2026-10-14T20:54:36.334411+00:00",
+    "status": 200,
+    "finalUrl": "https://www.moe.edu.ps/uploads/Guidance26-7-2025.pdf",
+    "contentType": "application/pdf",
+    "sha256": "ed7eda173b724041869c872172e938b747702926c95952bab65bf9bc7d2bc042",
+    "bytes": 6291456
+  },
+  {
+    "url": "https://www.moe.edu.ps/uploads/Guidance26-7-2026.pdf",
+    "retrievedAt": "2026-10-14T20:54:36.367794+00:00",
+    "status": 200,
+    "finalUrl": "https://www.moe.edu.ps/uploads/Guidance26-7-2026.pdf",
+    "contentType": "application/pdf",
+    "sha256": "9f07bfa479306fc456764330b03f05d8813377b03607e01abb8436c714942f74",
+    "bytes": 6291456
+  },
+  {
+    "url": "https://www.mohe.pna.ps/Portals/0/MOHEResources/Student-Brochure/nashra2024_1.pdf",
+    "retrievedAt": "2026-10-14T20:54:37.169428+00:00",
+    "status": 200,
+    "finalUrl": "https://www.mohe.pna.ps/Portals/0/MOHEResources/Student-Brochure/nashra2024_1.pdf",
+    "contentType": "application/pdf",
+    "sha256": "d892bd658ee8670d15642659699c879eba2dedd0d88849fcbc56f5f80c549054",
+    "bytes": 5782361
+  },
+  {
+    "url": "https://www.moheye.net/private-universities/",
+    "retrievedAt": "2026-10-14T20:54:37.501531+00:00",
+    "status": 200,
+    "finalUrl": "https://www.moheye.net/private-universities/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "08b2e02fc2c712b612f96236d651837081b67e736adc2c9fc3d9681c331f041f",
+    "bytes": 538280
+  },
+  {
+    "url": "https://www.naec.ge/uploads/postData/20-24/%E1%83%90%E1%83%AE%E1%83%90%E1%83%9A%E1%83%98%20%E1%83%AA%E1%83%9C%E1%83%9D%E1%83%91%E1%83%90%E1%83%A0%E1%83%98/%E1%83%AA%E1%83%9C%E1%83%9D%E1%83%91%E1%83%90%E1%83%A0%E1%83%98%20%E1%83%90%E1%83%91%E1%83%98%E1%83%A2%E1%83%A3%E1%83%A0%E1%83%98%E1%83%94%E1%83%9C%E1%83%A2%E1%83%94%E1%83%91%E1%83%98%E1%83%A1%E1%83%90%E1%83%97%E1%83%95%E1%83%98%E1%83%A1%202024%20%288%29.pdf",
+    "retrievedAt": "2026-10-14T20:54:37.667683+00:00",
+    "status": 200,
+    "finalUrl": "https://www.naec.ge/uploads/postData/20-24/%E1%83%90%E1%83%AE%E1%83%90%E1%83%9A%E1%83%98%20%E1%83%AA%E1%83%9C%E1%83%9D%E1%83%91%E1%83%90%E1%83%A0%E1%83%98/%E1%83%AA%E1%83%9C%E1%83%9D%E1%83%91%E1%83%90%E1%83%A0%E1%83%98%20%E1%83%90%E1%83%91%E1%83%98%E1%83%A2%E1%83%A3%E1%83%A0%E1%83%98%E1%83%94%E1%83%9C%E1%83%A2%E1%83%94%E1%83%91%E1%83%98%E1%83%A1%E1%83%90%E1%83%97%E1%83%95%E1%83%98%E1%83%A1%202024%20%288%29.pdf",
+    "contentType": "application/pdf",
+    "sha256": "c8dc8a0a0d8dab50a8a1614941a2072b33ca4726c767fdab6c41733fe8d92880",
+    "bytes": 6291456
+  },
+  {
+    "url": "https://www.pur.ac.rw/pages/announcement.php?key=1195",
+    "retrievedAt": "2026-10-14T20:54:38.480612+00:00",
+    "status": 200,
+    "finalUrl": "https://www.pur.ac.rw/pages/announcement.php?key=1195",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "f6aa649aeb222837ef8d99dbda7cfd48dc6ed6298ad4e49de038330704f7dbda",
+    "bytes": 9522
+  },
+  {
+    "url": "https://www.re.minesursi.gouv.cd/etablissement.php?id=1639",
+    "retrievedAt": "2026-10-14T20:54:38.549665+00:00",
+    "status": 200,
+    "finalUrl": "https://www.re.minesursi.gouv.cd/etablissement.php?id=1639",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "dacebbb7708ff0ea4159037a31cff91d02199fb2081eeaae7bbba3986b375fa4",
+    "bytes": 26645
+  },
+  {
+    "url": "https://www.tj.gov.cn/zwgk/ggqsydwxxgk/jy/ptbkgx/202409/t20240923_6736190.html",
+    "retrievedAt": "2026-10-14T20:54:38.612030+00:00",
+    "status": 200,
+    "finalUrl": "https://www.tj.gov.cn/zwgk/ggqsydwxxgk/jy/ptbkgx/202409/t20240923_6736190.html",
+    "contentType": "text/html",
+    "sha256": "e5d69143e89d531b171c428929b3bc9aefd14b7ab1fd716efdf180ad4b30aca9",
+    "bytes": 144349
+  },
+  {
+    "url": "https://www.u-bordeaux-montaigne.fr/fr/contact/plan-d-acces.html",
+    "retrievedAt": "2026-10-14T20:54:39.415976+00:00",
+    "status": 200,
+    "finalUrl": "https://www.u-bordeaux-montaigne.fr/fr/contact/plan-d-acces.html",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "7e275ca4b67bfe68718c601f6e6b96bffa425abd780bf9ba015ab4de749ec68c",
+    "bytes": 100828
+  },
+  {
+    "url": "https://www.ufpcanarias.es/Home/About",
+    "retrievedAt": "2026-10-14T20:54:39.566421+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://www.ugc-universities.gov.bd/university-detail/78",
+    "retrievedAt": "2026-10-14T20:54:39.793759+00:00",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://www.unc.nc/nous-contacter/plan-et-acces/",
+    "retrievedAt": "2026-10-14T20:54:40.373294+00:00",
+    "status": 200,
+    "finalUrl": "https://www.unc.nc/nous-contacter/plan-et-acces/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "a38aa0194a56d57c45017930b56dc7226a6a4f7b374a10cb5923bc804022f6a4",
+    "bytes": 296757
+  },
+  {
+    "url": "https://www.univ-guyane.fr/universite/mentions-legales/",
+    "retrievedAt": "2026-10-14T20:54:40.531277+00:00",
+    "status": 200,
+    "finalUrl": "https://www.univ-guyane.fr/universite/mentions-legales/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "328b809870652a026d4c8e9bb6dfb1babd0f3c167196f9172a2d0e5e19f84157",
+    "bytes": 510728
+  },
+  {
+    "url": "https://www.univ.edu.dj/?page_id=6249",
+    "retrievedAt": "2026-10-14T20:54:41.852390+00:00",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://www.unre.ac.pg/pages/campus-map.html",
+    "retrievedAt": "2026-10-14T20:54:41.856200+00:00",
+    "status": 200,
+    "finalUrl": "https://www.unre.ac.pg/pages/campus-map.html",
+    "contentType": "text/html",
+    "sha256": "baf81875b2cb7e5ca980a8622522ac61b4acb292a0d501e7a170254e1a964329",
+    "bytes": 22898
+  },
+  {
+    "url": "https://www.upf.pf/fr",
+    "retrievedAt": "2026-10-14T20:54:41.973753+00:00",
+    "status": 200,
+    "finalUrl": "https://www.upf.pf/fr",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "d74398ca4b68fe703a7a64dfd3bf33956af2b52bf419634b86a4513844ee255c",
+    "bytes": 88383
+  },
+  {
+    "url": "https://www.upslp.edu.mx/upslp/?page_id=868",
+    "retrievedAt": "2026-10-14T20:54:42.386386+00:00",
+    "error": "HTTP Error 503: Service Unavailable"
+  },
+  {
+    "url": "https://www.uptaltoapure.edu.ve/",
+    "retrievedAt": "2026-10-14T20:54:42.791706+00:00",
+    "status": 200,
+    "finalUrl": "https://www.uptaltoapure.edu.ve/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "7ee3058c467b1887fea0fe93bbee4f8e23208bcc484dc766f2ddf9a30b536670",
+    "bytes": 134956
+  },
+  {
+    "url": "https://www.wru.edu.et/wru_glance",
+    "retrievedAt": "2026-10-14T20:54:43.599551+00:00",
+    "status": 200,
+    "finalUrl": "https://www.wru.edu.et/wru_glance",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "49ccd79dbe0ce276f63c5f9af84839e510e71128f32d12bcc71178373ad48b71",
+    "bytes": 28093
+  },
+  {
+    "url": "https://hadara.edu.iq/نبذه-عن-الكلية/",
+    "retrievedAt": "2026-10-14T20:58:16.171361+00:00",
+    "status": 200,
+    "finalUrl": "https://hadara.edu.iq/%D9%86%D8%A8%D8%B0%D9%87-%D8%B9%D9%86-%D8%A7%D9%84%D9%83%D9%84%D9%8A%D8%A9/",
+    "contentType": "text/html; charset=UTF-8",
+    "sha256": "f1edab8a9ac1583a3566160c021251d2c4fb4bf96625c64d804844d2573891b4",
+    "bytes": 228968
+  },
+  {
+    "url": "https://irantahsil.org/wp-content/uploads/2025/09/دفترچه-پیوست-ها-1.pdf",
+    "retrievedAt": "2026-10-14T20:58:16.172213+00:00",
+    "status": 200,
+    "finalUrl": "https://irantahsil.org/wp-content/uploads/2025/09/%D8%AF%D9%81%D8%AA%D8%B1%DA%86%D9%87-%D9%BE%DB%8C%D9%88%D8%B3%D8%AA-%D9%87%D8%A7-1.pdf",
+    "contentType": "application/pdf",
+    "sha256": "4e54cb61f7e41300a3d61413966b7ae95a3cf4c8f08cc29f3ccbe0a33e6b1296",
+    "bytes": 5210221
+  },
+  {
+    "url": "https://orot.ac.il/דרכי-הגעה",
+    "retrievedAt": "2026-10-14T20:58:16.172841+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://www.buqaen.ac.ir/تماس-با-ما",
+    "retrievedAt": "2026-10-14T20:58:16.173346+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  }
+]

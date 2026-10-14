@@ -1,0 +1,17 @@
+{
+  "baselineCommit": "a84d8fe3033715074f87a4d8342e36b5f7dde45c",
+  "uploadedRows": 274,
+  "appliedSourceBindings": 104,
+  "retainedReviewRows": 170,
+  "addedCities": 66,
+  "modifiedExistingCities": 21,
+  "correctedExistingCityParents": 2,
+  "sourceMatchedUniversities": 10553,
+  "universities": 10723,
+  "cities": 10676,
+  "regions": 5003,
+  "countries": 194,
+  "databaseWrites": 0,
+  "runtime": "RUNTIME_UNTESTED",
+  "factualGeographyVerification": "INCOMPLETE; user-supplied research, administrative address and campus scope retained; no automatic owner approval"
+}

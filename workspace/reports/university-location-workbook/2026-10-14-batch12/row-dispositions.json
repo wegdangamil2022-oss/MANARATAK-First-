@@ -1,0 +1,2742 @@
+[
+  {
+    "referenceId": "INS-EGY-0026",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Marsa Matrouh",
+    "uploadedRegion": "Matrouh",
+    "notes": "المصدر الرسمي يثبت أصل الجامعة في مرسى مطروح لكنه لا يقدم عنوان مبنى الرئاسة الحالي؛ لا تعامل عنوان الفرع التاريخي تلقائيًا كعنوان المقر الحالي.",
+    "sourceUrl": "https://www.mau.edu.eg/aboutmau"
+  },
+  {
+    "referenceId": "INS-EGY-0062",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": null,
+    "notes": "أثبت الموقع الرسمي علامة كيلومتر على طريق القاهرة–بلبيس؛ هذا لا يثبت أن المبنى داخل الحدود البلدية لمدينة العبور. تُترك المدينة والمنطقة دون اعتماد.",
+    "sourceUrl": "https://oust.edu.eg/en"
+  },
+  {
+    "referenceId": "INS-EGY-0065",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": null,
+    "notes": "العنوان الرسمي لا يقول العاصمة الإدارية الجديدة، بخلاف المدينة القديمة؛ لا يمكن استنتاج البلدية/المحافظة الدقيقة من علامة الكيلومتر والمدينة القريبة.",
+    "sourceUrl": "https://uec.edu.eg/contact-us"
+  },
+  {
+    "referenceId": "INS-EGY-0068",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "El Tur",
+    "regionCode": "EG-JS",
+    "existingCityId": "city_eg_at_tur",
+    "scope": "Source locality only; مقر رئيسي. الجامعة تصرح بأن وحدة شؤون الخريجين مقرها في main El Tur campus؛ وتحدد campus 3 ومدنها. | اعتماد الطور كمقر رئيسي، وفصل فروع شرم الشيخ ورأس سدر No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://ksiu.edu.eg/alumni/alumni-affairs/"
+  },
+  {
+    "referenceId": "INS-EGY-0077",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Menoufia",
+    "notes": "توجد قرينة رسمية لمحافظة المنوفية، لكنها لا تثبت مدينة السادات القديمة؛ الموقع الرسمي يذكر علامة كيلومتر فقط، وبيانات المركز/البلدة تحتاج تدقيق.",
+    "sourceUrl": "https://menoufia.edu.eg/"
+  },
+  {
+    "referenceId": "INS-EGY-0099",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Sadat City",
+    "uploadedRegion": "Menoufia",
+    "notes": "صفحة المجلس الرسمي وردت في الفهرس ولم يُفتح نصها بالكامل؛ يوجد نص حكومي متضارب/خطأ تحرير يذكر الزقازيق في صفحة السادات. لا يتوفر عنوان مبنى دقيق. ليست جامعة مدينة السادات الحكومية.",
+    "sourceUrl": "https://cnu.mohesr.gov.eg/index.php/sadat-city"
+  },
+  {
+    "referenceId": "INS-EGY-0100",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "New Administrative Capital",
+    "uploadedRegion": "Cairo Capital Governorate / العاصمة الإدارية الجديدة",
+    "notes": "الوضع المؤسسي: مؤسسة قيد التأسيس. درجة المصدر: مرسوم رئاسي. مرسوم تأسيس في العاصمة الإدارية الجديدة؛ لا يُثبت بدء التشغيل أو موقع المبنى.",
+    "sourceUrl": "https://sis.gov.eg/en/presidency/internal-affairs/presidential-decrees/president-approves-setting-up-technological-national-university-in-new-capital/"
+  },
+  {
+    "referenceId": "INS-EGY-0115",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Borg El Arab",
+    "uploadedRegion": "Alexandria Governorate",
+    "notes": "الجامعة تؤكد برج العرب/الإسكندرية لكنها لا تصرح في صفحة التواصل بحدود «برج العرب الجديدة» ولا رقم المبنى.",
+    "sourceUrl": "https://batechu.com/"
+  },
+  {
+    "referenceId": "INS-LBY-0004",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Al-Zahra",
+    "regionCode": "LY-JI",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. الاسم القديم العزيزية يشير إلى كليات أخرى؛ الصفحة الرسمية تحدد الزهراء مقرًا للجامعة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://aju.edu.ly/"
+  },
+  {
+    "referenceId": "INS-SDN-0005",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Al-Fula",
+    "regionCode": "SD-GK",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. مجمعات إضافية بالمجلد وبابنوسة ولقاوة؛ لا تنسب إليها جميع الكليات. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://alsalam.edu.sd/"
+  },
+  {
+    "referenceId": "INS-SDN-0006",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Dilling",
+    "regionCode": "SD-KS",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. ورد Dilling وDalanj تسميتين للمدينة نفسها؛ بيانات الاتصال بالموقع تحمل أرقامًا افتراضية؛ الموقع الجغرافي مذكور صراحة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://uofdalanj.edu.sd/eng/index.php/contact-us"
+  },
+  {
+    "referenceId": "INS-SDN-0029",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Rufaa",
+    "regionCode": "SD-GZ",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. ص. ب. 200 بريد وليس موقع مبنى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://albutana.edu.sd/"
+  },
+  {
+    "referenceId": "INS-SDN-0035",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "El Geneina",
+    "uploadedRegion": "West Darfur",
+    "notes": "دليل القبول الحكومي يثبت عدة كليات في المدينة، لا يحدد مقر رئاسة الجامعة أو الحالة الحالية للمجمعات.",
+    "sourceUrl": "https://daleel.admission.gov.sd/gov_org.htm"
+  },
+  {
+    "referenceId": "INS-SDN-0051",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Al-Nuhud",
+    "uploadedRegion": "West Kordofan",
+    "notes": "الموقع يذكر مقرًا مؤقتًا بأم درمان سنة 2026، وعنوان التواصل النهود؛ لا يُعدّ عنوان أم درمان حرمًا جامعيًا أصليًا.",
+    "sourceUrl": "https://wku.edu.sd/ar/"
+  },
+  {
+    "referenceId": "INS-CIV-0088",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Abidjan",
+    "uploadedRegion": "District autonome d'Abidjan",
+    "notes": "السجل الحكومي يثبت أبوبو داخل أبيدجان؛ لا يحدد شارع مبنى الحرم. Abobo حي/بلدية وليس مدينة مستقلة عن أبيدجان.",
+    "sourceUrl": "https://bac.mesrs-ci.net/offres/ets-prives"
+  },
+  {
+    "referenceId": "INS-GMB-0008",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "CURRENT_KANIFING_REGION_NOT_IN_REGISTRY",
+    "uploadedCity": "Tallinding Kunjang",
+    "uploadedRegion": "Kanifing Municipality",
+    "notes": "موقع الجهة المؤسسة Gambia Islamic Union يحدد العنوان؛ Tallinding حي/بلدة داخل Kanifing وليس مدينة Banjul.",
+    "sourceUrl": "https://giu.gm/service/al-hikma-university/"
+  },
+  {
+    "referenceId": "INS-GHA-0035",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Sowutuom",
+    "regionCode": "GH-AA",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Sowutuom ضاحية/حي داخل منطقة أكرا الكبرى، ولا ينبغي مساواتها تلقائيًا بمدينة Accra North القديمة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://muc.edu.gh/contact/"
+  },
+  {
+    "referenceId": "INS-GNB-0004",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "REGISTERED_ADDRESS_INSTITUTION_ACTIVITY_UNVERIFIED",
+    "uploadedCity": "Bôr (Setor Prabis)",
+    "uploadedRegion": "Biombo",
+    "notes": "الوضع المؤسسي: غير متحقق من حالة النشاط الراهنة. درجة المصدر: السجل الوطني للمؤهلات. Estrada de Bôr, Bôr nº5; Setor Prabis.",
+    "sourceUrl": "https://quanef-gb.com/institutes/show/78"
+  },
+  {
+    "referenceId": "INS-GNB-0008",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Safim",
+    "uploadedRegion": "Biombo",
+    "notes": "الوضع المؤسسي: غير متحقق من حالة النشاط الراهنة. درجة المصدر: السجل الوطني للمؤهلات. السجل الوطني يحدد Setor Safim، لا عنوان مبنى دقيق.",
+    "sourceUrl": "https://quanef-gb.com/institutes/show/82"
+  },
+  {
+    "referenceId": "INS-MLI-0004",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Katibougou",
+    "regionCode": "ML-2",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. الموقع التابع لبرنامج دكتوراه داخل المعهد يحدد مبنى Katibougou، وKoulikoro مرجع المنطقة/العنوان البريدي؛ ليس Bamako. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://wascal-mali.edu.ml/contact/"
+  },
+  {
+    "referenceId": "INS-NGA-0014",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Ndufu-Alike",
+    "regionCode": "NG-EB",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Ndufu-Alike هي بلدة مقر الحرم ضمن Ikwo LGA في Ebonyi. ذكر Abakaliki في بعض عناوين البريد أو التعريف لا يجعلها مدينة الحرم. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://funai.edu.ng/contact-us/"
+  },
+  {
+    "referenceId": "INS-NGA-0041",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Okerenkoko",
+    "regionCode": "NG-DE",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يحدد Okerenkoko مقر المؤسسة؛ لا تُنقل إلى مدينة Warri لمجرد اسم المنطقة المحلية Warri South West. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://services.nmu.edu.ng/faculties/01d0a61a-0a74-4418-8e61-f0dc984edf9d"
+  },
+  {
+    "referenceId": "INS-NGA-0051",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Ibusa",
+    "uploadedRegion": "Delta State",
+    "notes": "السجل الرسمي لهيئة الجامعات النيجيرية NUC يثبت هوية الجامعة وبلدة التسجيل والولاية، لكنه لا يثبت العنوان الفيزيائي الدقيق أو المقر الإداري. ",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0055",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Bassam-Bari",
+    "uploadedRegion": "Bayelsa State",
+    "notes": "السجل الرسمي لهيئة الجامعات النيجيرية NUC يثبت هوية الجامعة وبلدة التسجيل والولاية، لكنه لا يثبت العنوان الفيزيائي الدقيق أو المقر الإداري. الاسم الجغرافي بالسجل Bassam-Bari مقابل Bassam-Biri في البيانات؛ يلزم إثبات الهوية المحلية قبل الربط.",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0056",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Kwale",
+    "uploadedRegion": "Delta State",
+    "notes": "السجل الرسمي لهيئة الجامعات النيجيرية NUC يثبت هوية الجامعة وبلدة التسجيل والولاية، لكنه لا يثبت العنوان الفيزيائي الدقيق أو المقر الإداري. ",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0068",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Tai Town",
+    "uploadedRegion": "Rivers",
+    "notes": "NUC يذكر Tai Town, Ogoniland, Rivers State؛ الجامعة نفسها تتحدث عن مواقع متباينة. لا تجزم بمقر الحرم.",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0071",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Iragbiji",
+    "uploadedRegion": "Osun State",
+    "notes": "السجل الرسمي لهيئة الجامعات النيجيرية NUC يثبت هوية الجامعة وبلدة التسجيل والولاية، لكنه لا يثبت العنوان الفيزيائي الدقيق أو المقر الإداري. ",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0089",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Akungba-Akoko",
+    "uploadedRegion": "Ondo",
+    "notes": "الرئيس يثبت بلدة الجامعة وولاية Ondo لكن لا يحدد شارع مقر الإدارة؛ PMB صندوق بريد.",
+    "sourceUrl": "https://aaua.edu.ng/vice-chancellor/vcs-welcome-message"
+  },
+  {
+    "referenceId": "INS-NGA-0091",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Igbariam",
+    "regionCode": "NG-AN",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. المدينة القديمة Uli تخص حرمًا فرعيًا؛ مقر الإدارة/الحرم الرئيسي المذكور حاليًا Igbariam، مع الاحتفاظ بUli كحرم آخر. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://coou.edu.ng/contactus"
+  },
+  {
+    "referenceId": "INS-NGA-0106",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Okitipupa",
+    "regionCode": "NG-ON",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. المكان الفعلي على طريق Okitipupa–Igbokoda، وصندوق البريد P.M.B. 353 مستقل عنه. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://oaustech.edu.ng/?route=information%2Fcontact"
+  },
+  {
+    "referenceId": "INS-NGA-0125",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Osara",
+    "uploadedRegion": "Kogi",
+    "notes": "مقتطف من نطاق الجامعة الرسمي؛ لم تفتح صفحة العنوان مباشرة. Osara بلدة ضمن Kogi وOkehi LGA؛ مدينة Okene ليست بالضرورة موقع الحرم.",
+    "sourceUrl": "https://custech.edu.ng/"
+  },
+  {
+    "referenceId": "INS-NGA-0141",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Akampa",
+    "uploadedRegion": "Cross River State",
+    "notes": "السجل الرسمي لهيئة الجامعات النيجيرية NUC يثبت هوية الجامعة وبلدة التسجيل والولاية، لكنه لا يثبت العنوان الفيزيائي الدقيق أو المقر الإداري. ",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0143",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Ezza",
+    "uploadedRegion": "Ebonyi State",
+    "notes": "السجل الرسمي لهيئة الجامعات النيجيرية NUC يثبت هوية الجامعة وبلدة التسجيل والولاية، لكنه لا يثبت العنوان الفيزيائي الدقيق أو المقر الإداري. اسم NUC يختلف عن الاسم الأصلي؛ درجة تطابق/إعادة التسمية تستلزم مستندًا إضافيًا.",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0144",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Omuma",
+    "uploadedRegion": "Imo",
+    "notes": "NUC يدرج الجامعة في Omuma بولاية Imo، لا عبارة Science and Technology في خانة المدينة القديمة. موقع الحرم لم يُحدد.",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0194",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Ajebo",
+    "uploadedRegion": "Ogun State",
+    "notes": "السجل الرسمي لهيئة الجامعات النيجيرية NUC يثبت هوية الجامعة وبلدة التسجيل والولاية، لكنه لا يثبت العنوان الفيزيائي الدقيق أو المقر الإداري. Seriki Sotayo تحديد أدق يظهر مع Ajebo، وليس بالضرورة البلدة نفسها.",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0195",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Okun-Owa",
+    "regionCode": "NG-OG",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Lagos Liaison Office إداري منفصل ولا يدل على موقع الحرم؛ 'Oku-Owa' في القديم اختلاف تهجئة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://southwesternuniversity.edu.ng/about-us/"
+  },
+  {
+    "referenceId": "INS-NGA-0199",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Ijebu-Itele",
+    "regionCode": "NG-OG",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. ثبت موقع المدينة والعنوان من مصدر المؤسسة، لكن City Source ID لم يُفحص مباشرة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://hallmarkuniversity.edu.ng/contact-us/"
+  },
+  {
+    "referenceId": "INS-NGA-0203",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Ibafo",
+    "uploadedRegion": "Ogun State",
+    "notes": "الجامعة تسوق مقرها باسم Prayer City، بينما صفحة التعليم المفتوح الرسمية تسجل Ibafo؛ ينبغي عدم اعتماد Makogi Oba القديمة بلا إثبات مستقل.",
+    "sourceUrl": "https://odl.mtu.edu.ng/contact"
+  },
+  {
+    "referenceId": "INS-NGA-0211",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Akpabuyo",
+    "uploadedRegion": "Cross River State",
+    "notes": "السجل الرسمي لهيئة الجامعات النيجيرية NUC يثبت هوية الجامعة وبلدة التسجيل والولاية، لكنه لا يثبت العنوان الفيزيائي الدقيق أو المقر الإداري. مدونة الجامعة توضح Akpabuyo لكن لم يثبت الموقع الدقيق للمقر من نطاقه الرئيسي.",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0212",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Eiyenkorin",
+    "uploadedRegion": "Kwara",
+    "notes": "السجل التنظيمي الرسمي يؤكد موقع تسجيل المؤسسة في Eiyenkorin؛ لم يتحقق عنوان المبنى المفتوح.",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0214",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Ihie",
+    "regionCode": "NG-AB",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Owerrinta اسم أوسع/مجاور مستخدم في وصف الجامعة، والموقع الرسمي يسمّي Ihie موضع الحرم؛ لا تُنشأ مدينة جديدة إذا كانت Ihie جزءًا من نفس المدينة في ملف المدن. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://clifforduni.edu.ng/contact/"
+  },
+  {
+    "referenceId": "INS-NGA-0215",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Nneato-Isuochi",
+    "uploadedRegion": "Abia State",
+    "notes": "الموقع الرسمي يصرح بأن اسم Nneochi تركيب من بلدتي Nneato وIsuochi، فلا تختار واحدة منهما بمفردها.",
+    "sourceUrl": "https://spiritanuniversity.edu.ng/location"
+  },
+  {
+    "referenceId": "INS-NGA-0219",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Otto-Ijanikin",
+    "uploadedRegion": "Lagos State",
+    "notes": "الموقع المسترجع من نطاق فرعي backup؛ Otto-Ijanikin موضع الحرم، وOjo اسم المنطقة في عنوان البريد/الاتصال، ومطابقة حدود البلدة تتطلب تحققًا.",
+    "sourceUrl": "https://backup.ekounimed.edu.ng/vc-welcome-speech/"
+  },
+  {
+    "referenceId": "INS-NGA-0250",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Asa",
+    "uploadedRegion": "Abia",
+    "notes": "صفحة اتصال حديثة بالموقع الرسمي تذكر Rivers State في فقرة وAbia State في تذييلها، في حين تشير النسخة القديمة إلى Abia؛ المدينة Asa مدعومة لكن التعارض الإداري باقٍ.",
+    "sourceUrl": "https://old.nbu.edu.ng/"
+  },
+  {
+    "referenceId": "INS-NGA-0251",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Anambra",
+    "notes": "المؤسسة تصف الحرم باسم مركب Achina/Onneh دون تحديد البلدة الواقعة فيها مباني الحرم تحديدًا؛ Aguata عنوان صندوق بريد. لا تختار أحد الاسمين بالتخمين.",
+    "sourceUrl": "https://puni.edu.ng/contactus"
+  },
+  {
+    "referenceId": "INS-NGA-0307",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Okirika-Nweke",
+    "uploadedRegion": "Imo State",
+    "notes": "السجل الرسمي لهيئة الجامعات النيجيرية NUC يثبت هوية الجامعة وبلدة التسجيل والولاية، لكنه لا يثبت العنوان الفيزيائي الدقيق أو المقر الإداري. Mbaise نطاق جغرافي أوسع وليس البلدة الدقيقة؛ البلدة المعلنة Okirika-Nweke.",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-NGA-0324",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Ikere-Ekiti",
+    "uploadedRegion": "Ekiti",
+    "notes": "هيئة NUC النيجيرية تحدد الجامعة المسجلة في Ikere-Ekiti وليس Gwada؛ لا يظهر عنوان حرم مبني/عامل.",
+    "sourceUrl": "https://enuc.nuc.edu.ng/nus"
+  },
+  {
+    "referenceId": "INS-AGO-0050",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Sequele",
+    "uploadedRegion": "Icolo e Bengo",
+    "notes": "وثيقة منسوبة للمعهد تحدد Sequele، وصفحة المؤسسة تذكر Sequele؛ نص العنوان التفصيلي لم يؤخذ من صفحة اتصال جامعية مباشرة. المستودع يحوي تقسيم أنغولا قديمًا ولا يحوي رمز Icolo e Bengo مثبتًا. وثيقة مساندة https://pt.scribd.com/document/985546729/Medicina-1",
+    "sourceUrl": "https://www.facebook.com/iska.oficial/"
+  },
+  {
+    "referenceId": "INS-AGO-0053",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "CURRENT_ANGOLA_BOUNDARIES_REVIEW_REQUIRED",
+    "uploadedCity": "Viana",
+    "uploadedRegion": "Luanda",
+    "notes": "الموقع الرسمي يفصل الحرم الأساسي في Viana عن فرع Zango 2؛ لا ينبغي اعتماد Icolo e Bengo تلقائيًا.",
+    "sourceUrl": "https://ispozls.com/blog.html"
+  },
+  {
+    "referenceId": "INS-AGO-0063",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Calulo",
+    "uploadedRegion": "Cuanza Sul",
+    "notes": "عنوان مدرج على صفحة منظمي نشاط بالمعهد وليس موقعًا مؤسسيًا جامعيًا مستقلًا؛ المصدر المساند https://sites.google.com/view/isptlo-plb/portugu%C3%AAs",
+    "sourceUrl": null
+  },
+  {
+    "referenceId": "INS-COG-0002",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Kintélé",
+    "uploadedRegion": null,
+    "notes": "Brazzaville قد تشير إلى الحاضرة الحضرية وليس الدائرة الإدارية الأولى التي تقع فيها Kintélé؛ لا يُنسخ رمز منطقة بالتخمين.",
+    "sourceUrl": "https://www.udsn.cg/valider-inscription/"
+  },
+  {
+    "referenceId": "INS-COG-0003",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Liambou-Nene",
+    "uploadedRegion": null,
+    "notes": "Pointe-Noire مرجع قرب جغرافي، لا يُعتمد كمدينة للمقر. تحديد المحافظة/الدائرة أولى يحتاج مصدر إداري.",
+    "sourceUrl": "https://uccbz.net/contact/"
+  },
+  {
+    "referenceId": "INS-COD-0009",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Kinshasa",
+    "regionCode": "CD-KN",
+    "existingCityId": "city_cd_kinshasa",
+    "scope": "Source locality only; رئيسي. Kasa-Vubu بلدية ضمن Kinshasa وليس اسم مدينة منفصلة؛ عنوان شارع Saïo أكدته قاعدة WHED. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.re.minesursi.gouv.cd/etablissement.php?id=1639"
+  },
+  {
+    "referenceId": "INS-COD-0038",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Lwiro",
+    "regionCode": "CD-SK",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Kabare إقليم إداري أوسع؛ البلدة الفعلية Lwiro. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://uni50lwiro.ac.cd/a-propos-de-uni-50-lwiro/"
+  },
+  {
+    "referenceId": "INS-COD-0045",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Luozi",
+    "uploadedRegion": "Kongo Central",
+    "notes": "صفحة مؤسسة قديمة لم تتأكد حداثتها، وتذكر مكتب تمثيل في Kinshasa؛ لا تستبدل الحرم بمكتب التمثيل.",
+    "sourceUrl": "https://www.congovision.com/ull/contact.html"
+  },
+  {
+    "referenceId": "INS-COD-0050",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Tshumbe",
+    "uploadedRegion": "Sankuru",
+    "notes": "اتحاد الجامعات الفرنكوفونية يحدد Tshumbe؛ السجل الحكومي يذكر Lubefu بوصفه Territoire/Ville دون عنوان الحرم.",
+    "sourceUrl": "https://www.auf.org/membre/universite-notre-dame-de-tshumbe-2/"
+  },
+  {
+    "referenceId": "INS-COD-0060",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Kimpese",
+    "uploadedRegion": "Kongo Central",
+    "notes": "الحكومة تؤكد المؤسسة في إقليم Songololo؛ بلدة Kimpese مأخوذة من اسم المؤسسة وليس عنوان شارع. يلزم إثبات أن المقر داخل البلدة لا مجرد الإقليم.",
+    "sourceUrl": "https://minesursi.gouv.cd/?categorie=&etablissements=&etat=&page=97&province=&search=&statut=&territoire="
+  },
+  {
+    "referenceId": "INS-COD-0064",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Mulo (Lubero Territory)",
+    "uploadedRegion": "Nord-Kivu",
+    "notes": "الوضع المؤسسي: مذكورة في السجل الرسمي. درجة المصدر: وزارة التعليم العالي الكونغولية. المؤسسة مدرجة في Nord-Kivu؛ Lubero إقليم إداري وMulo موضع الجامعة المسمى.",
+    "sourceUrl": "https://www.minesu.gouv.cd/images/3_NORD-KIVU.pdf"
+  },
+  {
+    "referenceId": "INS-BDI-0017",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Rugombo",
+    "uploadedRegion": "Cibitoke",
+    "notes": "الحرم في Rugombo مؤكد من منشور المؤسسة، لكنها تشير كذلك إلى Bujumbura، ولم يثبت أن Rugombo هو المقر الرئيسي. يجب مراجعة تقسيم المقاطعات البوروندية الحالي.",
+    "sourceUrl": "https://www.facebook.com/easuburundi/"
+  },
+  {
+    "referenceId": "INS-DJI-0001",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Djibouti",
+    "regionCode": "DJ-DJ",
+    "existingCityId": "city_dj_djibouti",
+    "scope": "Source locality only; رئيسي. Balbala حي/قسم في مدينة جيبوتي؛ B.P.1904 صندوق بريد وليس موقع المقر. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.univ.edu.dj/?page_id=6249"
+  },
+  {
+    "referenceId": "INS-DJI-0002",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Djibouti City",
+    "uploadedRegion": "Djibouti",
+    "notes": "الوضع المؤسسي: مؤسسة موجودة؛ مقرها التفصيلي غير مثبت. درجة المصدر: موقع المؤسسة. موقع المؤسسة متاح، لكن عنوان PK 23 Route d'Arta لم يُثبت بصورة حاسمة من المصدر الأصلي.",
+    "sourceUrl": "https://www.isss.dj/"
+  },
+  {
+    "referenceId": "INS-ERI-0001",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "NEARBY_LOCALITY_NOT_EXACT_SETTLEMENT",
+    "uploadedCity": "Mai Nefhi / Abardae vicinity",
+    "uploadedRegion": "Maekel / Central Region",
+    "notes": "الوضع المؤسسي: نشطة وفق مصادر رسمية. درجة المصدر: وكالة الأنباء الحكومية الإريترية. وزارة الإعلام الإريترية تثبت منطقة Mai Nefhi، وتذكر COSTIS بلدة Abardae قرب الموقع.",
+    "sourceUrl": "https://shabait.com/2016/06/08/a-future-abundant-of-intellectuals-eritrean-institutions-of-higher-education/"
+  },
+  {
+    "referenceId": "INS-ETH-0007",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Arba Minch",
+    "uploadedRegion": "South Ethiopia Region",
+    "notes": "الحرم الرئيسي شمال حدود البلدة تقريبًا بخمسة كيلومترات؛ Arba Minch أقرب اسم حضري ثابت، لكن البلدية الميدانية الدقيقة تحتاج تدقيق.",
+    "sourceUrl": "https://amu.edu.et/en/campus-guide"
+  },
+  {
+    "referenceId": "INS-ETH-0016",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Debre Markos",
+    "uploadedRegion": null,
+    "notes": "المدينة ثابتة، لكن المنطقة الإدارية الأولى لم تُثبت من عنوان الاتصال الرسمي في هذه الجولة.",
+    "sourceUrl": "https://www.dmu.edu.et/?page_id=116"
+  },
+  {
+    "referenceId": "INS-ETH-0019",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "CURRENT_SOUTH_ETHIOPIA_REGION_NOT_IN_REGISTRY",
+    "uploadedCity": "Dilla",
+    "uploadedRegion": "South Ethiopia Region",
+    "notes": "مقر رئيسي مؤكد؛ للمؤسسة عدة مقرات داخل دِلّا.",
+    "sourceUrl": "https://www.du.edu.et/campuses/main-campus/"
+  },
+  {
+    "referenceId": "INS-ETH-0022",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Sendafa",
+    "regionCode": "ET-OR",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. موقع الجامعة يذكر أيضًا Awash 7 campus؛ Sendafa هو المقر الرئيسي المحدد. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://epu.edu.et/ethiopian-police-university-management-board-reviews-2018-e-c-performance-approves-2019-e-c-plan/"
+  },
+  {
+    "referenceId": "INS-ETH-0029",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Jinka",
+    "uploadedRegion": "South Ethiopia Regional State / South Omo Zone",
+    "notes": "الوضع المؤسسي: موجودة. درجة المصدر: موقع الجامعة + دليل ثانوي. مدينة Jinka معروفة؛ لم يُسترجع عنوان الحرم التفصيلي من الجامعة، والتقسيم الإقليمي تغير.",
+    "sourceUrl": "https://www.jku.edu.et/"
+  },
+  {
+    "referenceId": "INS-ETH-0045",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Hosanna",
+    "uploadedRegion": "Central Ethiopia Region",
+    "notes": "موقع الجامعة يذكر Hosaena؛ أخبارها الحالية تشير إلى إقليم إثيوبيا الوسطى، خلافًا لإشارات SNNPR التاريخية. يلزم فحص المعرّف الإداري الجديد.",
+    "sourceUrl": "https://www.wcu.edu.et/cmse.aspx"
+  },
+  {
+    "referenceId": "INS-ETH-0046",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "CURRENT_CENTRAL_ETHIOPIA_REGION_NOT_IN_REGISTRY",
+    "uploadedCity": "Werabe",
+    "uploadedRegion": "Central Ethiopia Regional State",
+    "notes": "المنطقة الحالية Central Ethiopia لا تقابل مباشرة SNNPR القديم في سجل regions؛ رمز المنطقة يُترك فارغًا.",
+    "sourceUrl": "https://www.wru.edu.et/wru_glance"
+  },
+  {
+    "referenceId": "INS-ETH-0047",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Wolaita Sodo",
+    "uploadedRegion": null,
+    "notes": "ذُكرت المدينة صراحة؛ لم يحدد مقتطف الاتصال الإقليم الإداري المتغير لعام 2026.",
+    "sourceUrl": "https://www.wsu.edu.et/"
+  },
+  {
+    "referenceId": "INS-ETH-0049",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Wolkite",
+    "uploadedRegion": null,
+    "notes": "اسم المدينة في تذييل النظام الجامعي؛ تقسيمات Central Ethiopia الحديثة لا تطابق آليًا مناطق مستودع قديمة؛ يلزم إثبات موضع الحرم.",
+    "sourceUrl": "https://dormitory.wku.edu.et/auth/login"
+  },
+  {
+    "referenceId": "INS-KEN-0076",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Konza Technopolis",
+    "uploadedRegion": null,
+    "notes": "المصدر مؤسسة التنمية الحكومية يربط الجامعة بمنطقة كونزا، ولا يحدد موقع مبنى أو وحدة إدارية لمقر الجامعة التشغيلي.",
+    "sourceUrl": "https://konza.go.ke/investment/"
+  },
+  {
+    "referenceId": "INS-MWI-0007",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Nguludi",
+    "uploadedRegion": "Southern Region",
+    "notes": "Limbe عنوان صندوق بريد فقط، أما موقع الحرم الفعلي فهو Nguludi في منطقة Chiradzulu. مصدر الجامعة القديم يدعم المكان.",
+    "sourceUrl": "https://www.cunima.ac.mw/index.php?id=e94a04a53d35f1a6b75dda8ceffa8ee0"
+  },
+  {
+    "referenceId": "INS-MUS-0006",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Réduit",
+    "regionCode": "MU-MO",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. هذا عنوان المقر؛ توجد للجامعة أيضًا منشأة منفصلة في Curepipe. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://open.ac.mu/contact-us/"
+  },
+  {
+    "referenceId": "INS-MUS-0008",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Ebene / Reduit",
+    "uploadedRegion": null,
+    "notes": "المصدر يذكر Ebene وReduit معًا، لذلك يتطلب تحديد الحد البلدي الدقيق قبل تثبيت مدينة واحدة.",
+    "sourceUrl": "https://www.adi.ac.mu/contact-us.html"
+  },
+  {
+    "referenceId": "INS-RWA-0010",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "HUYE_DISTRICT_NOT_PROOF_OF_HUYE_SETTLEMENT",
+    "uploadedCity": "Huye",
+    "uploadedRegion": "Southern Province",
+    "notes": "الجامعة لديها فرع Karongi مستقل؛ المصدر يصف حرم Huye بأنه الرئيسي.",
+    "sourceUrl": "https://www.pur.ac.rw/pages/announcement.php?key=1195"
+  },
+  {
+    "referenceId": "INS-SOM-0006",
+    "uploadedStatus": "غير محسوم",
+    "disposition": "HOLD",
+    "reason": "NO_CURRENT_PRIMARY_INSTITUTION_LOCATION_EVIDENCE",
+    "uploadedCity": null,
+    "uploadedRegion": null,
+    "notes": "الموقع مرجح من دليل غير حكومي، ولم يتوفر مصدر رسمي معاصر يدل على حرم الجامعة. لا تُعتمد المدينة آليًا.",
+    "sourceUrl": "https://www.unirank.org/so/uni/jaamacada-gedo/"
+  },
+  {
+    "referenceId": "INS-SOM-0021",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Merca",
+    "regionCode": "SO-SH",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. مكاتب/فروع أخرى في مقديشو وبراوة؛ اسم Barawa ليس موقع الرئاسة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://barawauniversity.so/contact-us/"
+  },
+  {
+    "referenceId": "INS-SSD-0001",
+    "uploadedStatus": "غير محسوم",
+    "disposition": "HOLD",
+    "reason": "NO_CURRENT_PRIMARY_INSTITUTION_LOCATION_EVIDENCE",
+    "uploadedCity": null,
+    "uploadedRegion": null,
+    "notes": "الموضع جغرافيًا مرجح عند Akobo؛ الهوية والنشاط الحالي لم يُثبتا بسجل حكومي.",
+    "sourceUrl": "https://www.unirank.org/ss/uni/akobo-heritage-and-memorial-university/"
+  },
+  {
+    "referenceId": "INS-SSD-0010",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Juba",
+    "uploadedRegion": "Central Equatoria",
+    "notes": "موقع رسمي يورد أربعة أحرم: Juba وMalakal وRenk وMelut؛ عنوان الاتصال لا يثبت مقر الجامعة الأصلي أو جميع الكليات.",
+    "sourceUrl": "https://unu.edu.ss/"
+  },
+  {
+    "referenceId": "INS-UGA-0009",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Busitema",
+    "regionCode": "UG-202",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. مقر الجامعة في بلدة/قرية Busitema وليس مدينة Tororo التي يستعمل مكتب البريد عنوانًا لها؛ الجامعة متعددة الحرم. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://dicts.busitema.ac.ug/support/other/where-busitema-campuses-are-located"
+  },
+  {
+    "referenceId": "INS-UGA-0040",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Kisubi",
+    "regionCode": "UG-113",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. P.O. Box Entebbe عنوان مراسلات، وليس المدينة الفعلية للحرم؛ الموقع يصرح بأنه لا توجد فروع. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://unik.ac.ug/faqs/"
+  },
+  {
+    "referenceId": "INS-BWA-0001",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Gaborone",
+    "uploadedRegion": "Gaborone",
+    "notes": "ورد العنوان ضمن موقع رسمي لمشروع الجامعة ومُعرض بالفهرس، ولم يُفتح ذلك الرابط منفصلًا في هذه الجولة؛ للجامعة فروع أخرى.",
+    "sourceUrl": "https://botswana.baisago.ac.bw/official-upscale-project-launch/"
+  },
+  {
+    "referenceId": "INS-ZMB-0033",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Chikankata",
+    "uploadedRegion": "Southern Province",
+    "notes": "الموقع الجامعي يثبت بلدة Chikankata لكنه لا يضع رقم شارع أو إحداثية قابلة لإعادة التحقق.",
+    "sourceUrl": "https://www.southvalleyuniversity.com/"
+  },
+  {
+    "referenceId": "INS-ZMB-0044",
+    "uploadedStatus": "غير نشطة / تاريخية",
+    "disposition": "HOLD",
+    "reason": "INACTIVE_OR_HISTORICAL_INSTITUTION_NO_ACTIVE_LOCATION",
+    "uploadedCity": "Chikankata",
+    "uploadedRegion": "Southern Province",
+    "notes": "HEA ألغت تسجيل الجامعة اعتبارًا من 3 أبريل 2024؛ تقرير الهيئة يحدد Chikankata موقعًا سابقًا. | منع الربط كجامعة نشطة؛ حفظ الموقع التاريخي فقط",
+    "sourceUrl": "https://www.linkedin.com/posts/heazambia_heazambia-highereducationzambia-activity-7181991474366996481-1M90"
+  },
+  {
+    "referenceId": "INS-YEM-0005",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Seiyun",
+    "uploadedRegion": "حضرموت",
+    "notes": "قائمة حكومية تحدد المدينة والمحافظة، دون عنوان شارع أو مقر مبنى؛ تُترك تفاصيل العنوان ناقصة.",
+    "sourceUrl": "https://www.moheye.net/private-universities/"
+  },
+  {
+    "referenceId": "INS-YEM-0012",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Mukalla",
+    "uploadedRegion": "Hadramawt",
+    "notes": "عنوان مدينة المكلا منشور في تذييل الموقع الرسمي الحالي، لكنه لا يحدد الشارع أو يصرّح بحصرية المقر الرئيسي. City Source ID غير متحقق.",
+    "sourceUrl": "https://alarabuni.edu.ye/"
+  },
+  {
+    "referenceId": "INS-YEM-0031",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Sana'a",
+    "uploadedRegion": "أمانة العاصمة",
+    "notes": "مجلس الاعتماد يميز «الجامعة العربية للعلوم و التقنية» عن «جامعة الأكاديميين العرب». صفحات منسوبة للجامعة وأدلة أعمال تورد صنعاء لكن عناوين الشوارع متعارضة؛ لا تعيّن حرمًا محددًا. | معيار الدليل: سجل مجلس الاعتماد + صفحة منسوبة للجامعة (الشارع غير محسوم)",
+    "sourceUrl": "https://www.caqa-yemen.org/ar"
+  },
+  {
+    "referenceId": "INS-YEM-0033",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Sana'a (reported)",
+    "uploadedRegion": "Amanat Al Asimah",
+    "notes": "الوضع المؤسسي: مدرجة لدى جهة الاعتماد. درجة المصدر: جهة الاعتماد + دليل ثانوي. المصادر الثانوية ترجح شارع الرباط خلف بنك اليمن والكويت؛ لم تثبت بالجامعة رسميًا.",
+    "sourceUrl": "https://caqa-yemen.org/"
+  },
+  {
+    "referenceId": "INS-YEM-0052",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "PRIMARY_AUTHORITY_TAIZ_ADEN_CONFLICT",
+    "uploadedCity": "Taiz",
+    "uploadedRegion": "تعز",
+    "notes": "الجدول الوزاري يسرد تعز، وموقع الجامعة المنشور 2024 يعطي شارع الثورة؛ البطاقة الوصفية الوزارية تتعارض وتقول عدن. | اعتماد تعز جغرافيًا؛ إبقاء تعارض بطاقة الوزارة موثقًا",
+    "sourceUrl": "https://www.moheye.net/private-universities/"
+  },
+  {
+    "referenceId": "INS-YEM-0055",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Al-Habilayn",
+    "uploadedRegion": "لحج",
+    "notes": "مصدر صادر عن قناة الكلية نفسها، وتؤيد وزارة التعليم العالي نسبة الكلية لمحافظة لحج؛ لم يُجلب موقع إلكتروني مستقل للكلية.",
+    "sourceUrl": "https://t.me/s/RadfanCollage"
+  },
+  {
+    "referenceId": "INS-YEM-0056",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Saada",
+    "uploadedRegion": "Saada",
+    "notes": "الموقع مؤسسي فعّال لكن أخبار 'صعدة' لا تحدد مقر الرئاسة داخل المدينة تحديدًا.",
+    "sourceUrl": "https://saada-uni.edu.ye/"
+  },
+  {
+    "referenceId": "INS-YEM-0061",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Hadibu",
+    "uploadedRegion": "Socotra",
+    "notes": "مقتطف مفهرس من صفحة اتصال الجامعة فقط، وفشل جلب الصفحة المباشر. أثبت التحديد المبدئي للمدينة والمحافظة، ولم يثبت الشارع أو المقر الإداري.",
+    "sourceUrl": "https://sa-university.com/contact-us/"
+  },
+  {
+    "referenceId": "INS-YEM-0064",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Al-Qaidah / Al-Qa'idah (reported)",
+    "uploadedRegion": "Ibb Governorate",
+    "notes": "الوضع المؤسسي: مدرجة لدى جهة الاعتماد. درجة المصدر: هيئة الاعتماد + منشور مؤسسي. دليل تابع للمؤسسة يذكر القاعدة محافظة إب على الطريق العام، لا صنعاء؛ عنوان المقر الأصلي يحتاج تأكيدًا.",
+    "sourceUrl": "https://www.caqa.gov.ye/alshrkaaa/topic/32"
+  },
+  {
+    "referenceId": "INS-YEM-0066",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Aden",
+    "regionCode": "YE-AD",
+    "existingCityId": "city_ye_aden",
+    "scope": "Source locality only; رئيسي. تصحيح جوهري: الموقع الرسمي يصرّح بأن عدن المركز الرئيسي للجامعة وأن صنعاء فرع. يجب تغيير ربط المدينة القديم صنعاء، دون تعديل البيانات في GitHub الآن. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://civilizationuniv.edu.ye/about-us/1324"
+  },
+  {
+    "referenceId": "INS-YEM-0072",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Sana'a",
+    "uploadedRegion": null,
+    "notes": "الدليل الرسمي لوزارة التعليم العالي يذكر صنعاء دون تحديد عنوان المبنى أو الاختصاص: أمانة العاصمة YE-SA أو محافظة صنعاء YE-SN. لم أضع رمز منطقة تخمينيًا.",
+    "sourceUrl": "https://www.moheye.net/private-universities/"
+  },
+  {
+    "referenceId": "INS-YEM-0073",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Sana'a",
+    "uploadedRegion": "أمانة العاصمة",
+    "notes": "مصدر وسيط ينقل إعلان المؤسسة ويذكر صراحة العنوان بمذبح وفرعها في الحديدة: https://yemenacademic.net/archives/53354 ؛ والمحتوى منشور أيضًا في قناة خاصة بتداول الإعلانات https://t.me/s/YemenandGolf ؛ لم يفتح الموقع الرسمي للمؤسسة للتحقق المباشر.",
+    "sourceUrl": null
+  },
+  {
+    "referenceId": "INS-SAU-0049",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Al Hawiyah",
+    "uploadedRegion": "منطقة مكة المكرمة / Makkah",
+    "notes": "الموقع الجامعي ظاهر بفهرس البحث لكن محاولة فتح الصفحة المباشرة انتهت بمهلة؛ الحوية منطقة حضرية ضمن محافظة الطائف، وليست محافظة مستقلة.",
+    "sourceUrl": "https://elearning.tu.edu.sa/"
+  },
+  {
+    "referenceId": "INS-ARE-0045",
+    "uploadedStatus": "غير نشطة / تاريخية",
+    "disposition": "HOLD",
+    "reason": "INACTIVE_OR_HISTORICAL_INSTITUTION_NO_ACTIVE_LOCATION",
+    "uploadedCity": null,
+    "uploadedRegion": null,
+    "notes": "السجل الرسمي الإماراتي CAA: Ocean University — Status Inactive؛ لا يثبت عنوان حرم نشط. | تعطيل أي ربط نشط؛ احتفظ بالمؤسسة كسجل غير نشط لا جامعة لها حرم مؤكد",
+    "sourceUrl": "https://caa.ae/Pages/Institutes/Details.aspx?GUID=155"
+  },
+  {
+    "referenceId": "INS-OMN-0023",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Barka",
+    "uploadedRegion": "South Al Batinah",
+    "notes": "اسم مدينة موقع الحرم مثبت في صفحة الكلية، لكن العنوان البريدي Halban لا يساوي العنوان الفعلي؛ التفاصيل المكانية الدقيقة غير مذكورة.",
+    "sourceUrl": "https://www.ocmt.edu.om/smart-test"
+  },
+  {
+    "referenceId": "INS-QAT-0002",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Ash-Shahaniyah",
+    "uploadedRegion": "Ash Shīḩānīyah",
+    "notes": "صفحة فعالية بالموقع الرسمي تسجل موقع الكلية في الشحانية؛ صفحة التواصل تورد صندوق بريد الدوحة فقط. مطلوب التحقق من موقع الحرم نفسه.",
+    "sourceUrl": "https://www.abmmc.edu.qa/wp/event/the-beginning-of-spring-semester/?lang=en"
+  },
+  {
+    "referenceId": "INS-QAT-0011",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Al Rayyan",
+    "uploadedRegion": "Al Rayyan",
+    "notes": "صفحة فعالية رسمية تذكر عنوان الحرم لكن ليست صفحة الاتصال المؤسسي الأحدث؛ يلزم تأكيد عنوان مقر الجامعة المركزي.",
+    "sourceUrl": "https://research-day.hbku.edu.qa/rd-23/"
+  },
+  {
+    "referenceId": "INS-KWT-0008",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Ardiya",
+    "regionCode": "KW-FA",
+    "existingCityId": "city_kw_official_ardiyah",
+    "scope": "Source locality only; رئيسي. Ardiya منطقة عمرانية/ضاحية؛ لم يُثبت وجود sourceCityId مطابق في مستودع المدن. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.iuk.edu.kw/about"
+  },
+  {
+    "referenceId": "INS-KWT-0009",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Doha",
+    "uploadedRegion": null,
+    "notes": "مؤسسة الكويت للتقدم العلمي تُدرج العنوان بالدوحة الكويتية، لا الدوحة القطرية؛ لكن عنوان Postal address لا يكفي لتحديد المبنى الفعلي أو المحافظة، ويُترك الرمز فارغًا.",
+    "sourceUrl": "https://research.kfas.org.kw/en/organisations/kuwait-college-of-science-and-technology/"
+  },
+  {
+    "referenceId": "INS-KWT-0010",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Doha",
+    "regionCode": "KW-KU",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. الدوحة هنا منطقة بالكويت وليست الدوحة القطرية؛ الجامعة لها عنوان منشور أيضًا في دليل طلاب رسمي. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://kilaw.edu.kw/annualConference/en/third-party-funding-in-international-arbitration-and-its-impact-on-the-procedure/"
+  },
+  {
+    "referenceId": "INS-IRQ-0013",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Tikrit",
+    "regionCode": "IQ-SD",
+    "existingCityId": "city_iq_tikrit",
+    "scope": "Source locality only; مقر رئيسي. الوضع المؤسسي: موجودة متعددة المواقع. درجة المصدر: الموقع الرسمي للكلية. المقر الرئيسي تكريت مقابل جامعة تكريت؛ فروع أخرى في بلد والشرقاط. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://hadara.edu.iq/نبذه-عن-الكلية/"
+  },
+  {
+    "referenceId": "INS-IRQ-0080",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Samawah",
+    "regionCode": "IQ-MU",
+    "existingCityId": "city_iq_as_samawah",
+    "scope": "Source locality only; رئيسي. موقع الجامعة يحدد مكان الحرم مباشرة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://sawauniversity.edu.iq/En/index.php"
+  },
+  {
+    "referenceId": "INS-IRQ-0084",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Dhi Qar",
+    "notes": "هذا عنوان صندوق بريد، لا يكفي لإثبات موقع حرم جامعة سومر داخل مدينة الرفاعي؛ أُثبتت المحافظة فقط. ",
+    "sourceUrl": "https://uos.edu.iq/"
+  },
+  {
+    "referenceId": "INS-PSE-0003",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Deir al-Balah",
+    "regionCode": "PS-DEB",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. فرع ثانٍ في بيت لاهيا؛ توجد صفحة اتصل بنا عنوانها غزة الرمال لا تمثل بالضرورة المقر الرئيسي. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.dawa-college.net/"
+  },
+  {
+    "referenceId": "INS-PSE-0004",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Al-Dhahiriya",
+    "uploadedRegion": "محافظة الخليل",
+    "notes": "الموقع الرسمي يثبت المدينة؛ لم يحدد رقم مبنى أو شارع. اسمها الحالي على الموقع كلية العلوم الإسلامية؛ وثيقة وزارة التعليم العالي تربطها بالخليل-الظاهرية.",
+    "sourceUrl": "https://dcsis.edu.ps/"
+  },
+  {
+    "referenceId": "INS-PSE-0006",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Jericho",
+    "regionCode": "PS-JRH",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. العنوان يظهر في تذييل صفحات الجامعة، وليس صندوقًا بريديًا (ص.ب. 10 مفصول). No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://alistiqlal.edu.ps/cv/720"
+  },
+  {
+    "referenceId": "INS-PSE-0007",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Jerusalem",
+    "regionCode": "PS-JEM",
+    "existingCityId": "city_ps_official_a85c4b336f5aaab3",
+    "scope": "Source locality only; رئيسي. حي الطور داخل القدس وليس بلدة بديلة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://almakassed-college.com/contact/"
+  },
+  {
+    "referenceId": "INS-PSE-0010",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Nablus",
+    "regionCode": "PS-NBS",
+    "existingCityId": "city_ps_geonames_282615",
+    "scope": "Source locality only; رئيسي. الصفحة إعلان رسمي للاستقبال المباشر في مبنى الكلية. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://rawda.edu.ps/news/details/20045"
+  },
+  {
+    "referenceId": "INS-PSE-0024",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Rawabi",
+    "regionCode": "PS-RBH",
+    "existingCityId": null,
+    "scope": "Source locality only; مقر رئيسي/حرم معلن. تطابق الاسم العربي وشهادة التأسيس 2024 وموقع gcsh.edu.ps في الدليل الحكومي يثبت أنه نفس المؤسسة. تنص نشرة 2025 على مقر رئيسي بمحافظة رام الله والبيرة؛ يحدد موقع الكلية روابي. لا يجوز إبقاء غزة. | معيار الدليل: نشرة وزارة التعليم العالي الفلسطينية 2025 ص 87 + الموقع الرسمي No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.moe.edu.ps/uploads/Guidance26-7-2025.pdf"
+  },
+  {
+    "referenceId": "INS-PSE-0030",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Khan Younis – Al-Fukhari",
+    "uploadedRegion": "Khan Yunis",
+    "notes": "عنوان 2013 الحكومي بخان يونس–الفخاري؛ إعلان الكلية 2026 يشير إلى مقر مؤقت في مجمع ناصر. لا اعتماد مقر تاريخي باعتباره الحالي.",
+    "sourceUrl": "https://www.pcn.edu.ps/news.php?id=127"
+  },
+  {
+    "referenceId": "INS-PSE-0032",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Deir Al-Balah",
+    "uploadedRegion": "Deir El Balah",
+    "notes": "صفحة الاتصال بدورية تابعة للكلية تثبت المدينة؛ لم يُثبت المبنى الرئيسي تحديدًا، وقد تكون خدمات متفرقة.",
+    "sourceUrl": "https://journals.ptcdb.edu.ps/index.php/PTCJRS/en/about/contact"
+  },
+  {
+    "referenceId": "INS-PSE-0033",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Tulkarm",
+    "regionCode": "PS-TKM",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. مقر رئيسي حسب صفحة عن الجامعة، ولها فروع أخرى في رام الله والعروب. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://ptuk.edu.ps/ar/"
+  },
+  {
+    "referenceId": "INS-PSE-0034",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Qalqilya",
+    "uploadedRegion": "محافظة قلقيلية",
+    "notes": "المصدر حكومي، يثبت اسم المؤسسة والمدينة فقط لا موقع مبناها؛ موقع المؤسسة المباشر تعذر فتحه.",
+    "sourceUrl": "https://www.mohe.pna.ps/Portals/0/MOHEResources/Docs/Statistics/2023-2024.pdf"
+  },
+  {
+    "referenceId": "INS-PSE-0036",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Gaza City",
+    "regionCode": "PS-GZA",
+    "existingCityId": "city_ps_geonames_281133",
+    "scope": "Source locality only; رئيسي. صفحة القبول تذكر غزة مقرًا رئيسيًا، وخانيونس والنصيرات مواقع أخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://join.ucas.edu.ps/about-us"
+  },
+  {
+    "referenceId": "INS-PSE-0040",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Jerusalem",
+    "regionCode": "PS-JEM",
+    "existingCityId": "city_ps_official_a85c4b336f5aaab3",
+    "scope": "Source locality only; مقر مسجل. الوضع المؤسسي: مذكورة في الأدلة الحكومية. درجة المصدر: دليل وزارة التربية والتعليم العالي. الدليل الحكومي يثبت القدس؛ مصدر ثانوي يرجّح جبل الزيتون. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.moe.edu.ps/uploads/Guidance26-7-2026.pdf"
+  },
+  {
+    "referenceId": "INS-LBN-0025",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Jwaya",
+    "uploadedRegion": "South Lebanon",
+    "notes": "مقتطف صفحة وزارة التربية يحدد البلدة؛ تعذر فتح الصفحة مباشرة بسبب مهلة الطلب. لا يثبت وجود/عدم وجود المدينة في ملف المدن الضخم. يحتاج فحص جميع سجلات المدن قبل اقتراح الإضافة.",
+    "sourceUrl": "https://www.mehe.gov.lb/ar/Pages/Structure/Higher%20EDU/PrivUniv/UnivInst/jwaya.aspx"
+  },
+  {
+    "referenceId": "INS-LBN-0027",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Aintoura",
+    "uploadedRegion": "Mount Lebanon",
+    "notes": "الجامعة متعددة الأحرام؛ عينطورة حرم مثبت بالإضافة إلى الحدث، ولا يوجد نص صريح بأنه المقر الرئيسي. Zouk Mikael عنوان صندوق بريد.",
+    "sourceUrl": "https://www.lcu.edu.lb/"
+  },
+  {
+    "referenceId": "INS-LBN-0034",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Haret Hreik / Ghobeiry",
+    "uploadedRegion": "Mount Lebanon",
+    "notes": "وزارة التعليم العالي تحدد Haret Hreik / Ghobeiry رغم أن الاسم القديم 'Metn' يوحي بالقضاء؛ تعذر فتح الصفحة بعد ظهور مقتطفها، فيبقى تحديد البلدية الدقيقة جزئيًا.",
+    "sourceUrl": "https://www.mehe.gov.lb/ar/Pages/Structure/Higher%20EDU/PrivUniv/UnivInst/matn.aspx"
+  },
+  {
+    "referenceId": "INS-LBN-0036",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Damour",
+    "uploadedRegion": "Mount Lebanon",
+    "notes": "عنوان P.O. Box بيروت لا يُستخدم كمدينة موقع الجامعة؛ صفحة الاتصال من موقع وحدة جامعية، ولا تثبت أن جميع الأحرام في الدامور.",
+    "sourceUrl": "https://www.pay.mubs.edu.lb/csc/contactus.aspx"
+  },
+  {
+    "referenceId": "INS-LBN-0038",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "South Lebanon",
+    "notes": "Zahrani اسم قضاء/منطقة وليس دليلًا على بلدة المقر؛ المطلوب التحقق من البلدة الدقيقة على طريق صيدا–صور.",
+    "sourceUrl": "https://www.pu.edu.lb/"
+  },
+  {
+    "referenceId": "INS-LBN-0044",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Kelhat",
+    "uploadedRegion": "North Governorate (El Koura District)",
+    "notes": "كلمة El-Koura في السجل القديم قضاء إداري لا بلدة؛ عنوان المبنى الإداري يؤكد Kelhat، وللجامعة عدة فروع.",
+    "sourceUrl": "https://www.balamand.edu.lb/AboutUOB/Advancement/Pages/Contactus.aspx"
+  },
+  {
+    "referenceId": "INS-SYR-0012",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Ghabagheb (proposed; unverified)",
+    "uploadedRegion": "Daraa Governorate (proposed)",
+    "notes": "الوضع المؤسسي: احتمال تغيير الاسم؛ لم يؤكد رسميًا. درجة المصدر: موقع الجامعة غير متاح + دليل ثانوي. دليل غير حكومي ذكر غباغب في درعا واسم British University in Damascus؛ يلزم إثبات رسمي لكليهما.",
+    "sourceUrl": "https://ru.edu.sy/"
+  },
+  {
+    "referenceId": "INS-SYR-0025",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Maarat Saidnaya",
+    "uploadedRegion": "Rif Dimashq",
+    "notes": "المصدر دليل تعليمي غير حكومي، لا الموقع الجامعي المباشر؛ يلزم corroboration من asu.edu.sy.",
+    "sourceUrl": "https://www.uni.sy/Syria/University/asu.edu.sy"
+  },
+  {
+    "referenceId": "INS-SYR-0047",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Deir Atiyah",
+    "uploadedRegion": "Rif Dimashq",
+    "notes": "صفحة دليل تعليمي مفصلة؛ يلزم تأكيد العنوان المباشر من الجامعة.",
+    "sourceUrl": "https://uni.sy/Syria/University/uok.edu.sy"
+  },
+  {
+    "referenceId": "INS-SYR-0052",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Jabab",
+    "uploadedRegion": "Daraa",
+    "notes": "تعارض جوهري مع 'Damascus Countryside' القديمة؛ لا يثبت من موقع الجامعة الأصلي، لذلك تأكيد جزئي فقط.",
+    "sourceUrl": "https://www.uni.sy/Syria/University/qpu.edu.sy"
+  },
+  {
+    "referenceId": "INS-ISR-0004",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Yenon (postal address)",
+    "uploadedRegion": "Southern District",
+    "notes": "الموقع الرسمي يصف Yenon بعنوان المراسلات، لا يثبت أن حرم Achva يقع داخل بلدة Yenon. لا تعتمدها كمدينة حرم.",
+    "sourceUrl": "https://www.achva.ac.il/en/about-achva/"
+  },
+  {
+    "referenceId": "INS-ISR-0021",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Givat Washington",
+    "uploadedRegion": "Central District",
+    "notes": "الاسم يشير لمجمع Givat Washington وليس لمدينة Yavne؛ عنوان بريد D.N. Avtach؛ لم يُثبت من صفحة الاتصال الرسمية اسم البلدة البلدية.",
+    "sourceUrl": "https://studyisrael.org.il/study-in-israel/"
+  },
+  {
+    "referenceId": "INS-ISR-0026",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Alon Shvut",
+    "uploadedRegion": null,
+    "notes": "المصدر خاص بمركز أبحاث/حرم Alon Shvut؛ لدى الكلية فروع في Jerusalem وMigdal Oz؛ لا دليل على انفراد هذا الموقع بالمقر الإداري.",
+    "sourceUrl": "https://kitveyet.herzog.ac.il/contact-2/"
+  },
+  {
+    "referenceId": "INS-ISR-0034",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Tzemach",
+    "regionCode": "IL-Z",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. نص جامعي يثبت موقع الحرم في צמח، و'עמק הירדן' عنوان مجلس إقليمي/بريد لا مدينة أخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://360.kinneret.ac.il/terms"
+  },
+  {
+    "referenceId": "INS-ISR-0037",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": null,
+    "notes": "هذا عنوان بريد إداري D.N. وليس بلدة؛ لا يمكن تحويل Yezreel Valley القديمة تلقائيًا لمدينة.",
+    "sourceUrl": "https://www.yvc.ac.il/en/about/contact-us/"
+  },
+  {
+    "referenceId": "INS-ISR-0040",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Katzrin",
+    "uploadedRegion": "Northern District",
+    "notes": "دليل مجلس التعليم العالي يذكر Katzrin، لكن الوضع الحالي للكلية/الاندماج المحتمل وعنوان الإدارة لم يُحسما.",
+    "sourceUrl": "https://studyisrael.org.il/study-in-israel/"
+  },
+  {
+    "referenceId": "INS-ISR-0044",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "MULTICAMPUS_AND_TERRITORY_SCOPE_REVIEW_REQUIRED",
+    "uploadedCity": "Elkana",
+    "uploadedRegion": null,
+    "notes": "المؤسسة ذات حرمين Elkana وRehovot؛ لا يصح تعميم Elkana مقرًا لكل البرامج أو عدم ذكر الحرم الآخر.",
+    "sourceUrl": "https://orot.ac.il/דרכי-הגעה"
+  },
+  {
+    "referenceId": "INS-ISR-0047",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": null,
+    "notes": "Emek Hefer مجلس إقليمي وليس بالضرورة مدينة؛ حرم Michmoret مستقل؛ لا يجوز تسجيل Emek Hefer كبلدة.",
+    "sourceUrl": "https://www.ruppin.ac.il/en/about-ruppin/contact-us/"
+  },
+  {
+    "referenceId": "INS-ISR-0056",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": null,
+    "notes": "توثيق تغيير هوية الجامعة لا يثبت أن جميع مباني الحرم داخل بلدية Kiryat Shmona؛ تُراجع مواقع الأحرم قبل اعتماد مدينة رئيسية.",
+    "sourceUrl": "https://www.telhai.ac.il/en/news/5417"
+  },
+  {
+    "referenceId": "INS-IRN-0023",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Qaen",
+    "regionCode": "IR-29",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي.  No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.buqaen.ac.ir/تماس-با-ما"
+  },
+  {
+    "referenceId": "INS-IRN-0117",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Asadabad",
+    "uploadedRegion": "Hamadan",
+    "notes": "صفحة تعريف مؤسسية ومراجع جامعية تسند المدينة؛ لا عنوان شارع رسمي مباشر، ولا يمكن اعتبار Plus Code من دليل مستقل إثباتًا كاملًا.",
+    "sourceUrl": "https://www.linkedin.com/company/sjauacir"
+  },
+  {
+    "referenceId": "INS-IRN-0133",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Shahroud",
+    "regionCode": "IR-20",
+    "existingCityId": "city_ir_shahrud",
+    "scope": "Source locality only; عنوان إداري. عنوان الجامعة الإداري، لا يمثل مواقع كلياتها ومستشفياتها كافة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://shmu.ac.ir/en/contactus"
+  },
+  {
+    "referenceId": "INS-IRN-0174",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "ARCHIVED_OR_SECONDARY_ADDRESS_NOT_CURRENT_PRIMARY",
+    "uploadedCity": "Torbat-e Heydarieh",
+    "uploadedRegion": "Razavi Khorasan",
+    "notes": "الوضع المؤسسي: جامعة قائمة. درجة المصدر: نسخة محفوظة من الموقع الجامعي ودليل. العنوان المنشور: کیلومتر ۷ جاده تربت حیدریه – مشهد، خراسان رضوی.",
+    "sourceUrl": "https://archive.ph/WHn6d"
+  },
+  {
+    "referenceId": "INS-AFG-0005",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Kohistan Hesa Awal",
+    "uploadedRegion": "Kapisa",
+    "notes": "المصدر يثبت المديرية (ولسوالي) وليس قرية أو مدينة محددة؛ لا تساوِ 'Kapisa' بمدينة.",
+    "sourceUrl": "https://www.au.edu.af/dr/تماس-با-ما"
+  },
+  {
+    "referenceId": "INS-AFG-0010",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Chakran Village",
+    "regionCode": "AF-BDG",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. بلدة/قرية Chakran ترد صراحة بموقع الجامعة؛ لم يُفحص وجودها في سجل المدن بالكامل. يحتاج فحص جميع سجلات المدن قبل اقتراح الإضافة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://basu.edu.af/en/contact-us"
+  },
+  {
+    "referenceId": "INS-PAK-0036",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Sialkot",
+    "regionCode": "PK-PB",
+    "existingCityId": "city_pk_sialkot_city",
+    "scope": "Source locality only; رئيسي. ثبت موقع المدينة والعنوان من مصدر المؤسسة، لكن City Source ID لم يُفحص مباشرة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://gcwus.edu.pk/admission-contact/"
+  },
+  {
+    "referenceId": "INS-IND-0106",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Kattankulathur",
+    "regionCode": "IN-TN",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. المصدر من الكلية التابعة لحرم Kattankulathur؛ المدينة القديمة Chennai هي مدينة مجاورة كبرى وليست بلدة الحرم الرئيسية. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://dental.srmist.edu.in/pg/"
+  },
+  {
+    "referenceId": "INS-BGD-0006",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Syedpur",
+    "regionCode": "BD-08",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Syedpur محل الحرم في مديرية Cumilla وليس Saidpur بولاية Nilphamari. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://admission.baiust.ac.bd/"
+  },
+  {
+    "referenceId": "INS-BGD-0029",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Chapainawabganj",
+    "regionCode": "BD-45",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. مصدر الجامعة ومصدر هيئة الاعتماد البنغلاديشية متفقان. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://ebaub.ac.bd/contact.html"
+  },
+  {
+    "referenceId": "INS-LKA-0022",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Welisara",
+    "regionCode": "LK-1",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. الشركة المالكة تؤكد المقر الرئيسي Welisara لا Padukka المسجلة؛ هذه مؤسسة تدريب وليست بالضرورة جامعة مستقلة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://slt.lk/index.php/en/news/slt-mobitel-nebula-institute-technology-achieves-international-recognition-pearson-btec-higher"
+  },
+  {
+    "referenceId": "INS-KAZ-0050",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Kaskelen",
+    "regionCode": "KZ-19",
+    "existingCityId": "city_kz_qaskeleng",
+    "scope": "Source locality only; رئيسي. ترك رمز المنطقة فارغًا؛ KZ-75 في ملف المناطق مسمى Almaty وقد لا يطابق الإقليم (مقابل مدينة ألماتي). No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://sdu.edu.kz/en/contact-us-4/"
+  },
+  {
+    "referenceId": "INS-CHN-0076",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Tianjin",
+    "regionCode": "CN-TJ",
+    "existingCityId": "city_cn_tianjin",
+    "scope": "Source locality only; رئيسي. موقع حكومي بلدية تيانجين؛ هناك حَرمان في Hedong لا مدينتان. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.tj.gov.cn/zwgk/ggqsydwxxgk/jy/ptbkgx/202409/t20240923_6736190.html"
+  },
+  {
+    "referenceId": "INS-CHN-0151",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Shuanghe",
+    "regionCode": "CN-NM",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. السجل القديم يضع Bayannur (مدينة/منطقة على مستوى prefecture)؛ الجامعة تقع في Shuanghe Town داخل Linhe District. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.ccgp.gov.cn/cggg/dfgg/gzgg/202609/t20260917_27343131.htm"
+  },
+  {
+    "referenceId": "INS-PRK-0008",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Huichon",
+    "uploadedRegion": "Chagang",
+    "notes": "بوابة وزارة التوحيد الكورية الجنوبية تثبت Huichon، وموسوعة أكاديمية تذكر حي 전신동. الاسم 희천체신대학 سابق ثم 희천공업대학 منذ 1969؛ قد يكون السجل باسم تاريخي لا مؤسسة مستقلة حاليًا. | معيار الدليل: بوابة حكومية كورية جنوبية + موسوعة أكاديمية مع توثيق تاريخي",
+    "sourceUrl": "https://nkinfo.unikorea.go.kr/nkp/search/search.do?query=%ED%9D%AC%EC%B2%9C%EA%B3%B5%EC%97%85%EB%8C%80%ED%95%99"
+  },
+  {
+    "referenceId": "INS-KOR-0079",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": null,
+    "notes": "3 مقرات رسمية في مدن/بلدات مختلفة؛ المصدر لا يسمي أحدها مقر الجامعة الرئيسي. ليس آمنًا اختيار مدينة واحدة لربط المؤسسة.",
+    "sourceUrl": "https://www.kduniv.ac.kr/eng/Main.do"
+  },
+  {
+    "referenceId": "INS-JPN-0041",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Dazaifu",
+    "regionCode": "JP-40",
+    "existingCityId": "city_jp_geonames_7422816",
+    "scope": "Source locality only; رئيسي. الاسم الوارد في السجل تاريخي؛ الجامعة الحالية Japan University of Economics. بلدية دايزافو تؤكد عنوان حرم فوكوكا، مع وجود مقرات/فروع أخرى. City Source ID غير مثبت بعد. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.city.dazaifu.lg.jp/soshiki/27/2031.html"
+  },
+  {
+    "referenceId": "INS-JPN-0050",
+    "uploadedStatus": "غير نشطة / تاريخية",
+    "disposition": "HOLD",
+    "reason": "INACTIVE_OR_HISTORICAL_INSTITUTION_NO_ACTIVE_LOCATION",
+    "uploadedCity": "Amagasaki",
+    "uploadedRegion": "Hyogo",
+    "notes": "مادة حكومية يابانية تذكر أن موقع جامعة سانت توماس السابقة أُلغي في 2015 ونُقلت منشآته للبلدية؛ Eichi اسمها التاريخي. | منع ربط كسجل جامعي نشط؛ الاحتفاظ بمدينتها التاريخية فقط",
+    "sourceUrl": "https://www.mext.go.jp/content/000251029.pdf"
+  },
+  {
+    "referenceId": "INS-JPN-0237",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "PRIMARY_SOURCE_IS_2005_HISTORICAL_INSTITUTION_RECORD",
+    "uploadedCity": "Matsusaka",
+    "uploadedRegion": "Mie",
+    "notes": "عنوان رسمي تاريخي؛ الجامعة تغير اسمها إلى Mie Chukyo University ثم أُغلقت في 2013. لا تُربط كجامعة حالية.",
+    "sourceUrl": "https://www.mext.go.jp/a_menu/koutou/ninka/05022501.htm"
+  },
+  {
+    "referenceId": "INS-JPN-0368",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Sanyo-Onoda",
+    "regionCode": "JP-35",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. جامعة العلوم بطوكيو في ياماغوتشي اسم سابق؛ أصبحت جامعة بلدية سانيو أونودا سنة 2016. عنوان المؤسسة وعنوان المكتب المؤسسي متطابقان في كشف البلدية 2026، ولا يتعلق بمقر طوكيو. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.city.sanyo-onoda.lg.jp/soshiki/6/rikadai-syugakusien.html"
+  },
+  {
+    "referenceId": "INS-JPN-0479",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Koshigaya",
+    "uploadedRegion": "Saitama",
+    "notes": "الموقع الرسمي يثبت حرم كوشيغايا وليس بالضرورة المقر القانوني الوحيد؛ للجامعة فروع في محافظات أخرى. لا يُسقط مقر الفرع على الجامعة كاملة.",
+    "sourceUrl": "https://www.bunkyo.ac.jp/stf/kkokusai/English/about/traffic.html"
+  },
+  {
+    "referenceId": "INS-MMR-0003",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "East Dagon Township",
+    "regionCode": "MM-06",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. تعارض مهم: السجل القديم North Dagon، والموقع الرسمي الحالي يقول East Dagon؛ لا تُطابق المدينتين بالاسم. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.dagonuniversity.edu.mm/"
+  },
+  {
+    "referenceId": "INS-MMR-0015",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Mandalay Region",
+    "notes": "مقتطف ملف PDF رسمي ظهر في البحث، وتعذر جلب PDF كاملًا عند إعادة الفتح؛ لم يُثبت اسم بلدة دون Township.",
+    "sourceUrl": "https://www.mtu.edu.mm/wp-content/uploads/2020/06/MTU-Directory.pdf"
+  },
+  {
+    "referenceId": "INS-MMR-0016",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Mandalay",
+    "uploadedRegion": "Mandalay Region",
+    "notes": "Maha Aungmye تقسيم township داخل Mandalay وليست مدينة مستقلة. تفصيل الشارع من دليل غير رسمي: https://www.edge.com.mm/listing/mandalay-university-u00251939.html",
+    "sourceUrl": "https://www.mu.edu.mm/"
+  },
+  {
+    "referenceId": "INS-MMR-0027",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Ohn Chaw (Patheingyi)",
+    "uploadedRegion": "Mandalay Region",
+    "notes": "عنوان تفصيلي بمصادر تعليمية ثانوية وليس صفحة مؤسسة أصلية مفتوحة: https://www.edge.com.mm/listing/national-university-of-arts-and-culture-mandalay-u00251947.html؛ القرية Ohn Chaw داخل Patheingyi.",
+    "sourceUrl": null
+  },
+  {
+    "referenceId": "INS-MMR-0029",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Naypyidaw Union Territory",
+    "notes": "تغيرت هوية الجامعة وموقعها في 2024؛ مصدر المؤسسة الجديدة لم يُفتح مباشرة (502) لكن ظهر مقتطف؛ لا تفترض أن موقع NTU القديم ما زال قائمًا.",
+    "sourceUrl": "https://www.nspu.edu.mm/?page_id=102"
+  },
+  {
+    "referenceId": "INS-MMR-0045",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Hmawbi",
+    "regionCode": "MM-06",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. المصدر جامعي يثبت بلدة Hmawbi وليس مدينة Yangon المركزية. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://hbtu.edu.mm/contact_us"
+  },
+  {
+    "referenceId": "INS-MMR-0052",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Mandalay",
+    "uploadedRegion": "Mandalay Region",
+    "notes": "الموقع الرسمي يثبت هوية المؤسسة الحالية، لكن لم تُستخرج منه بلدة/شارع محددان. ليست Mandalay Technological University الموجودة في Patheingyi.",
+    "sourceUrl": "https://www.tum.edu.mm/"
+  },
+  {
+    "referenceId": "INS-MMR-0059",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Loilem",
+    "regionCode": "MM-17",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يحدد طريق Nansang في Loilem؛ لا يُختزل اسم Panglong في اسم مدينة أخرى من دون دليل. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://tuplon.edu.mm/contact/"
+  },
+  {
+    "referenceId": "INS-MMR-0067",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "NEAR_TAOH_NOT_PROOF_OF_INSIDE_SETTLEMENT",
+    "uploadedCity": "Taoh Village, Sintgaing Township",
+    "uploadedRegion": "Mandalay Region",
+    "notes": "موقع الجامعة الرسمي يحدد Sintgaing قرب Taoh، مخالفًا للموقع الترويجي ucsmsc.org الذي يشير إلى Patheingyi. لا تخلط المصدرين.",
+    "sourceUrl": "https://cumandalay.edu.mm/contact-us/"
+  },
+  {
+    "referenceId": "INS-MMR-0071",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Yezin",
+    "regionCode": "MM-18",
+    "existingCityId": "city_mm_geonames_1284953",
+    "scope": "Source locality only; رئيسي. Yezin بلدة/منطقة حرم، Zayarthiri هي Township، وNaypyidaw إقليم إداري. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://ufes.edu.mm/location/"
+  },
+  {
+    "referenceId": "INS-MMR-0072",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Mandalay Region",
+    "notes": "الدليل الحكومي يثبت Township Patheingyi؛ لا يثبت اسم قرية/بلدة محددة ضمن الـTownship، لذلك حقل المدينة يبقى فارغًا.",
+    "sourceUrl": "https://myanmar.gov.mm/en/government-directory?_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_Vb1CbZSzALPv_cur=20&_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_Vb1CbZSzALPv_delta=5&p_p_id=com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_Vb1CbZSzALPv&p_p_lifecycle=0&p_p_mode=view&p_p_state=normal&p_r_p_resetCur=false"
+  },
+  {
+    "referenceId": "INS-THA-0041",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Salaya",
+    "regionCode": "TH-73",
+    "existingCityId": "city_th_geonames_6865927",
+    "scope": "Source locality only; رئيسي. ليس في Bangkok؛ العنوان الرسمي للحرم المركزي في Salaya، Nakhon Pathom، ويوجد عدد من الفروع الأخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.mbu.ac.th/uncategorized/post-3095/"
+  },
+  {
+    "referenceId": "INS-VNM-0042",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "POST_2025_ADMINISTRATIVE_BOUNDARY_REVIEW_REQUIRED",
+    "uploadedCity": "Long Xuyen",
+    "uploadedRegion": "An Giang Province",
+    "notes": "تغيّرت التقسيمات الإدارية بفيتنام سنة 2025؛ المصدر يصف Long Xuyen بأنها phường (حي/وحدة إدارية)، لا مدينة مستقلة حاليًا؛ رمز VN-44 يحتاج مراجعة سريان.",
+    "sourceUrl": "https://www.agu.edu.vn/en"
+  },
+  {
+    "referenceId": "INS-VNM-0076",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "POST_2025_ADMINISTRATIVE_BOUNDARY_REVIEW_REQUIRED",
+    "uploadedCity": "Thanh Xuan",
+    "uploadedRegion": "Can Tho",
+    "notes": "عنوان الموقع الرسمي يذكر Cần Thơ حاليًا؛ بيانات قديمة قد تشير إلى Hậu Giang قبل تغييرات الإدارة 2025، وتحتاج مطابقة أحدث رمز إقليم.",
+    "sourceUrl": "https://vttu.edu.vn/"
+  },
+  {
+    "referenceId": "INS-MYS-0044",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Padang Besar",
+    "regionCode": "MY-09",
+    "existingCityId": "city_my_geonames_1753004",
+    "scope": "Source locality only; عنوان إداري. عنوان اتصال الجامعة؛ تعيينه عنوانًا إداريًا وليس حصرًا لجميع الأحرم. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://umam.edu.my/contact"
+  },
+  {
+    "referenceId": "INS-IDN-0037",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Bakaran Batu",
+    "regionCode": "ID-SU",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Labuhanbatu محافظة (Kabupaten)، وBakaran Batu موقع البلدة/الحارة؛ Rantau Selatan هي Kecamatan. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://univalb.ac.id/contact/"
+  },
+  {
+    "referenceId": "INS-IDN-0081",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Maluku Utara",
+    "notes": "العنوان الحر يذكر Sofifi/Oba Utara لكن الحقول الحكومية تحدد Marekofo/Tidore Selatan؛ لا يمكن مساواة الاثنين.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/121017"
+  },
+  {
+    "referenceId": "INS-IDN-0095",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "South Jakarta",
+    "uploadedRegion": "DKI Jakarta",
+    "notes": "هذا موقع القبول الرسمي الخاص بالجامعة، لكن فتحه المباشر تعذر؛ المدينة هي Jakarta Selatan والوحدة المحلية الأصغر Ulujami؛ يلزم اختبار الرابط قبل التطبيق.",
+    "sourceUrl": "https://pendaftaran.darunnajah.ac.id/home"
+  },
+  {
+    "referenceId": "INS-IDN-0099",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Baubau",
+    "regionCode": "ID-SG",
+    "existingCityId": "city_id_official_baubau",
+    "scope": "Source locality only; رئيسي. العنوان الجامعي 124 يختلف عن عنوان سجل الحكومة Yos Sudarso 43؛ اتفاق المصدرين على Baubau وBetoambari، ويستلزم تدقيق رقم المبنى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://lp3mlk.unidayan.ac.id/"
+  },
+  {
+    "referenceId": "INS-IDN-0105",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "West Jakarta",
+    "uploadedRegion": "Jakarta (DKI)",
+    "notes": "الموقع الرسمي يذكر حرمين في غرب جاكرتا وحرمًا آخر في بيكاسي؛ تثبت المدينة لهذا الفرع فقط، ولم يثبت مقر الشركة/الجامعة الإداري الوحيد. Jakarta Barat مدينة إدارية تابعة لإقليم جاكرتا.",
+    "sourceUrl": "https://reguler.undira.ac.id/info_beasiswa"
+  },
+  {
+    "referenceId": "INS-IDN-0114",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Kotamobagu",
+    "regionCode": "ID-SA",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. تحديد المدينة على مستوى Kota مؤكد من السجل الحكومي؛ لا تُعامل Kecamatan Kotamobagu Barat مدينة مستقلة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/161005"
+  },
+  {
+    "referenceId": "INS-IDN-0117",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Pematang Raya",
+    "uploadedRegion": "Sumatera Utara",
+    "notes": "Kampus II في مدينة Pematang Siantar، ولا يجوز دمج موقعَي الحرمين. المصدر مفهرس رسميًا لكن فتحه مباشرة أعاد 403.",
+    "sourceUrl": "https://www.univefarina.ac.id/"
+  },
+  {
+    "referenceId": "INS-IDN-0132",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Aceh",
+    "notes": "تعارض موقع Kotacane ضمن العنوان مع القرية الإدارية Bambel؛ لا تُختار مدينة تعسفًا؛ الاسم الحكومي Universitas Gunung Leuser يختلف عن الأصلي.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/131009"
+  },
+  {
+    "referenceId": "INS-IDN-0176",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Sumatera Utara",
+    "notes": "العنوان يذكر Rantauprapat/Padang Bulan، بينما الحقول البنيوية تضع Bilah Hulu / Tujuh Aek Nabara.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/011028"
+  },
+  {
+    "referenceId": "INS-IDN-0218",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Purwokerto",
+    "regionCode": "ID-JT",
+    "existingCityId": "city_id_purwokerto",
+    "scope": "Source locality only; عنوان إداري. العنوان الرسمي للمبنى الإداري المركزي؛ Banyumas هو Kabupaten/المديرية، بينما المدينة المستخدمة Purwokerto. لا تعميم على كل الكليات. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://rpl.unsoed.ac.id/"
+  },
+  {
+    "referenceId": "INS-IDN-0226",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Ketaren",
+    "regionCode": "ID-SU",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Ketaren قرية/حيّ داخل Kabanjahe وليست رمز مدينة موجودًا بالضرورة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/011013"
+  },
+  {
+    "referenceId": "INS-IDN-0241",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Tambakrejo",
+    "uploadedRegion": "Jawa Timur",
+    "notes": "عنوان الجامعة يؤكد Tambakberas/Tambakrejo محلة وقرية داخل Kecamatan Jombang؛ رقم المدينة يجب أن يُربط ببلدة مناسبة لا بالمحافظة.",
+    "sourceUrl": "https://alumni.unwaha.ac.id/"
+  },
+  {
+    "referenceId": "INS-IDN-0243",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Airmadidi",
+    "uploadedRegion": "Sulawesi Utara",
+    "notes": "Airmadidi بلدة فعلية؛ Minahasa Utara مديرية لا المدينة نفسها. لا توثيق لتطابق sourceCityId. نتيجة البحث تعرض عنوان الموقع الرسمي لكن فتح الصفحة فشل (403)، لذلك لا يُعد تحققًا مباشرًا من الصفحة.",
+    "sourceUrl": "https://www.unklab.ac.id/"
+  },
+  {
+    "referenceId": "INS-IDN-0261",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Tentena",
+    "regionCode": "ID-ST",
+    "existingCityId": "city_id_tentena",
+    "scope": "Source locality only; رئيسي. عنوان الجامعة مذكور بموقع دوريتها الرسمي، لكن مطابقة رمز المنطقة من المستودع لم تُتحقق في هذه الجولة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://publikasi.unkrit.ac.id/index.php/Akademia/about/submissions"
+  },
+  {
+    "referenceId": "INS-IDN-0262",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Waingapu",
+    "uploadedRegion": "Nusa Tenggara Timur",
+    "notes": "العنوان الرسمي مفهرس، لكن فتح الموقع المباشر كان محظورًا في محاولة التحقق؛ يجب إبقاء النتيجة مؤكدة جزئيًا.",
+    "sourceUrl": "https://unkriswina.ac.id/kontak/"
+  },
+  {
+    "referenceId": "INS-IDN-0307",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Jawa Tengah",
+    "notes": "السجل الحكومي يضع العنوان في Wanasari Brebes بينما الحقول الإدارية BANJARAN / KEC. SALEM.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/061036"
+  },
+  {
+    "referenceId": "INS-IDN-0317",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "South Tangerang",
+    "uploadedRegion": "Banten",
+    "notes": "يتأكد الحرم ببلدية Tangerang Selatan وإقليم Banten، مع وجود مواقع للجامعة في وسط جاكرتا؛ تحديد المقر الرئيسي القانوني يتطلب مصدرًا إضافيًا.",
+    "sourceUrl": "https://siakad.umj.ac.id/cbtfront/"
+  },
+  {
+    "referenceId": "INS-IDN-0326",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Sulawesi Tengah",
+    "notes": "السجل الحكومي يعطي قرية Jaya Kencana؛ Luwuk في اسم الجامعة وليس دليلًا أن الحرم داخل Luwuk؛ حُفظت القرية دون تحويلها إلى مدينة كبيرة.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/161008"
+  },
+  {
+    "referenceId": "INS-IDN-0341",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Dukuhwaluh",
+    "regionCode": "ID-JT",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Dukuhwaluh قرية، Kembaran ناحية، Banyumas منطقة kabupaten، وPurwokerto عنوان بريدي؛ يلزم تعريف مستوى city في بيانات المستودع قبل الربط. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://ump.ac.id/profil-3-Lokasi.Kampus.html"
+  },
+  {
+    "referenceId": "INS-IDN-0372",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Taman Asri",
+    "uploadedRegion": "Lampung",
+    "notes": "اسم البلدة/القرية الحكومية Taman Asri، وليس Lampung Timur (اسم Kabupaten). المصدر فهرس حكومي قابل للفتح بحسب نتيجة البحث؛ يجب فحص حدود الـdesa على الخريطة.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/021026"
+  },
+  {
+    "referenceId": "INS-IDN-0374",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Karangklesem",
+    "regionCode": "ID-JT",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Karangklesem قرية ضمن ناحية Purwokerto Selatan؛ Banyumas مديرية وليس مدينة. للجامعة حرم Winduaji أيضًا حسب صفحة القبول؛ لا يثبت citySourceId. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://unupurwokerto.ac.id/profil/sekilas-unu-purwokerto/"
+  },
+  {
+    "referenceId": "INS-IDN-0378",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Medan",
+    "regionCode": "ID-SU",
+    "existingCityId": "city_id_medan",
+    "scope": "Source locality only; رئيسي. تعارض مع المدينة القديمة Deli Serdang؛ مصادر أقدم تشير إلى حرم في Tanjung Selamat، Deli Serdang، بينما موقع القبول الرسمي يسمي الحرم الرئيسي في Medan. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://pmb.unusu.ac.id/"
+  },
+  {
+    "referenceId": "INS-IDN-0405",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Nusa Tenggara Timur",
+    "notes": "العنوان الحر Mokdale/Ba a بينما القرية الإدارية Kolobolon / Lobalain؛ ينبغي تحقق الخرائط الرسمية.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/151007"
+  },
+  {
+    "referenceId": "INS-IDN-0428",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Maluku Utara",
+    "notes": "موقع غير محسوم كبلدة/مدينة؛ موقع غير حكومي يدعي Daruba / Lemonade دون تطابق واضح مع قرية MOMOJIU في سجل الوزارة.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/121018"
+  },
+  {
+    "referenceId": "INS-IDN-0429",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Rambah",
+    "regionCode": "ID-RI",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Rokan Hulu اسم Kabupaten لا اسم البلدة الفعلية؛ الموقع يذكر قرية Rambah في ناحية Rambah Hilir. لا تُحوّل الإدراج إلى مدينة Pasir Pengaraian آليًا. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://pmb.upp.ac.id/"
+  },
+  {
+    "referenceId": "INS-IDN-0433",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Jawa Timur",
+    "notes": "الموقع الرسمي يذكر Kabupaten Kediri فقط؛ لا يثبت Kecamatan/Desa أو إذا كان داخل Kota Kediri، لذلك لم أملأ المدينة.",
+    "sourceUrl": "https://pmb.updkediri.ac.id/home"
+  },
+  {
+    "referenceId": "INS-IDN-0449",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Paguyangan",
+    "uploadedRegion": "Jawa Tengah",
+    "notes": "Paguyangan هنا Kecamatan؛ الموقع لا يحدد kelurahan بالتأكيد؛ يجب التحقق من نوع المكان قبل ربطه بكيان city في النظام. رابط الجامعة تعذر فتحه مباشرة.",
+    "sourceUrl": "https://pmb.peradaban.ac.id/"
+  },
+  {
+    "referenceId": "INS-IDN-0454",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Rejoso",
+    "regionCode": "ID-JI",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Rejoso قرية/موضع داخل Peterongan؛ Jombang في العنوان اسم Kabupaten لا يثبت المدينة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://pmb.unipdu.ac.id/contact-us/"
+  },
+  {
+    "referenceId": "INS-IDN-0480",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Senali",
+    "regionCode": "ID-BE",
+    "existingCityId": null,
+    "scope": "Source locality only; عنوان إداري. المصدر الحكومي يحدد الوحدة المحلية Senali ضمن Kecamatan Arga Makmur؛ المحافظة Bengkulu Utara، الإقليم الأول Bengkulu. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://referensi.data.kemdikbud.go.id/pendidikan/npsn/021018"
+  },
+  {
+    "referenceId": "INS-IDN-0508",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Jawa Tengah",
+    "notes": "السجل الحكومي: Tambakrejo، Kecamatan Patebon، Kab. Kendal؛ موقع الجامعة يذكر Jambearum.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/061043"
+  },
+  {
+    "referenceId": "INS-IDN-0515",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "South Jakarta",
+    "regionCode": "ID-JK",
+    "existingCityId": "city_id_official_085e87d4382bbf23",
+    "scope": "Source locality only; رئيسي. المدينة القديمة Jakarta Pusat غير مطابقة؛ عنوان الجامعة الحالي في جنوب جاكرتا. ليس Universitas Siber Asia (مؤسسة مستقلة). No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://cyber-univ.ac.id/sambutan-rektor"
+  },
+  {
+    "referenceId": "INS-IDN-0520",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": null,
+    "uploadedRegion": "Sumatera Utara",
+    "notes": "اختلاف الحقل الحر Silangit عن قرية Siaro في السجل الحكومي؛ يلزم الموقع الرسمي للجامعة أو الخرائط الحكومية للحسم.",
+    "sourceUrl": "https://referensi.data.kemendikdasmen.go.id/tabs.php?npsn=011018"
+  },
+  {
+    "referenceId": "INS-IDN-0534",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Kedungrejo",
+    "regionCode": "ID-JI",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. اسم الجامعة يذكر Surabaya، لكن المقر الفعلي في Kedungrejo بمنطقة Waru التابعة لكابوباتن Sidoarjo. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://pmb.unsuri.ac.id/"
+  },
+  {
+    "referenceId": "INS-IDN-0563",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Ujong Tanoh Darat",
+    "regionCode": "ID-AC",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Ujong Tanoh Darat قرية، Meureubo ناحية، Aceh Barat مديرية؛ لا تخطئ فتنقل الجامعة إلى Aceh Barat كمدينة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://utu.ac.id/about-us/"
+  },
+  {
+    "referenceId": "INS-IDN-0586",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Gadingan",
+    "regionCode": "ID-JT",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Gadingan/Jombor موضع محلي داخل Bendosari؛ Sukoharjo مديرية. لم يُتحقق من مطابقته بسجل المدن. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://univetbantara.ac.id/kontak/"
+  },
+  {
+    "referenceId": "INS-IDN-0592",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Sanggrahan",
+    "uploadedRegion": "Jawa Tengah",
+    "notes": "سجل حكومي إندونيسي ظاهر بالفهرس ولم ينجح فتح الصفحة مباشرة؛ اعتماد العنوان يحتاج تأكيدًا مباشرًا في الجولة التالية.",
+    "sourceUrl": "https://referensi.data.kemdikbud.go.id/pendidikan/npsn/061018"
+  },
+  {
+    "referenceId": "INS-PHL-0018",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Balanga City",
+    "regionCode": "PH-BAN",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. مصدر وحدة الجامعة المعنية بمكافحة الروتين على نطاق bpsu.edu.ph ويحدد main campus؛ لها فروع أخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://sites.google.com/bpsu.edu.ph/bpsucart/contact"
+  },
+  {
+    "referenceId": "INS-PHL-0053",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Buenavista",
+    "regionCode": "PH-GUI",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. صفحة توظيف رسمية لعام 2025 توضح main campus؛ Mclain نطاق فرعي من Buenavista. يوجد فرعان في Jordan وSan Lorenzo. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.gsu.edu.ph/career/chief-administrative-officer-administrative-officer-v-gscb-cadof-1-2023/"
+  },
+  {
+    "referenceId": "INS-PHL-0063",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Santa Cruz",
+    "uploadedRegion": "Laguna",
+    "notes": "موقع الجامعة يؤكد تعدد الأحرم، وصف Santa Cruz كمقر رئيسي يحتاج صفحة تواصل/قرار رسمي أكثر تحديدًا؛ العنوان التفصيلي غير مثبت هنا.",
+    "sourceUrl": "https://lspu.edu.ph/"
+  },
+  {
+    "referenceId": "INS-PHL-0069",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Quezon City",
+    "regionCode": "PH-00",
+    "existingCityId": "city_ph_quezon_city",
+    "scope": "Source locality only; رئيسي. Quiapo التي تظهر بالسجل موقع سابق في Manila؛ العنوان الجامعي الحالي صريح بمدينة Quezon City. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.mlqu.edu.ph/contact-us/"
+  },
+  {
+    "referenceId": "INS-PHL-0088",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Valenzuela City",
+    "regionCode": "PH-00",
+    "existingCityId": "city_ph_valenzuela",
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يصرح بأن Valenzuela الحرم الرئيسي، مع وجود أفرع أخرى. الرابط في عمود المصدر المساند هو موقع الجامعة نفسه وليس مرجعًا حكوميًا لتقسيم المنطقة؛ لم يثبت City Source ID. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://fatima.edu.ph/our-lady-of-fatima-university-valenzuela/"
+  },
+  {
+    "referenceId": "INS-FRA-0006",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Pessac",
+    "regionCode": "FR-NAQ",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يوضح أن الحرم الجامعي الكبير يمتد إلى Pessac/Talence/Gradignan وأن للمؤسسة مواقع أخرى؛ هذه بيانات الحرم الرئيسي. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.u-bordeaux-montaigne.fr/fr/contact/plan-d-acces.html"
+  },
+  {
+    "referenceId": "INS-FRA-0069",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Cayenne",
+    "regionCode": "FR-973",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. 97337 هو رمز بريد Cedex لا اسم بلدة؛ French Guiana منطقة وراء البحار، وليس مدينة في فرنسا الأوروبية. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.univ-guyane.fr/universite/mentions-legales/"
+  },
+  {
+    "referenceId": "INS-FRA-0071",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Punaauia",
+    "regionCode": "FR-PF",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Punaauia هي مكان الحرم؛ Faa’a يظهر فقط ضمن عنوان الصندوق البريدي، ولا يجب اعتباره مدينة المقر. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.upf.pf/fr"
+  },
+  {
+    "referenceId": "INS-FRA-0070",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Noumea",
+    "regionCode": "FR-NC",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. حرم Nouville في Nouméa؛ الرمز البريدي Cedex لا يشير إلى مقر مختلف. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.unc.nc/nous-contacter/plan-et-acces/"
+  },
+  {
+    "referenceId": "INS-FRA-0072",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Pointe-a-Pitre",
+    "uploadedRegion": "Guadeloupe",
+    "notes": "الجامعة ثنائية القطب: غوادلوب ومارتينيك؛ عنوان الناشر/الإدارة لا يمثل كافة كليات/فروع الجامعة.",
+    "sourceUrl": "https://www.univ-antilles.fr/mentions-legales"
+  },
+  {
+    "referenceId": "INS-ISL-0003",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Hólar",
+    "regionCode": "IS-5",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. من 1 يوليو 2026 أصبحت University of Iceland at Hólar مؤسسة مرتبطة بمنظومة جامعة آيسلندا؛ Sauðárkrókur عنوان بريدي وموقع إضافي لا يحل محل Hólar. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://gamli.holar.is/is/skolinn/um-haskolann-a-holum/um-haskolann"
+  },
+  {
+    "referenceId": "INS-MKD-0003",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "SKOPJE_MUNICIPALITY_SOURCE_SCOPE_REVIEW_REQUIRED",
+    "uploadedCity": "Skopje",
+    "uploadedRegion": "Skopje",
+    "notes": "الموقع الرسمي يؤكد مدينة Skopje وعنوان الشارع؛ رمز الإقليم لم يُثبت.",
+    "sourceUrl": "https://www.europaprima.com/isu/kontakt-isu/"
+  },
+  {
+    "referenceId": "INS-MKD-0002",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Skopje",
+    "uploadedRegion": "City of Skopje",
+    "notes": "الموقع الرسمي محظور الفتح المباشر (403)، والعنوان التفصيلي متاح في كتيب رسمي سابق؛ مدينة سكوبيه مؤكدة، لكن يلزم تأكيد حديث لرقم المبنى.",
+    "sourceUrl": "https://www.eurm.edu.mk/"
+  },
+  {
+    "referenceId": "INS-MKD-0005",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "CAIR_ADDRESS_CONFLICTS_WITH_KARPOS_CITY_PARENT",
+    "uploadedCity": "Skopje",
+    "uploadedRegion": "Skopje",
+    "notes": "Čair بلدية/حي ضمن Skopje، وليس مدينة جامعية منفصلة.",
+    "sourceUrl": "https://www.ibu.edu.mk/"
+  },
+  {
+    "referenceId": "INS-MKD-0009",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "SKOPJE_CAMPUSES_MUNICIPALITY_NOT_ESTABLISHED",
+    "uploadedCity": "Skopje",
+    "uploadedRegion": "City of Skopje (municipality needs confirmation)",
+    "notes": "الجامعة لها حَرَمان مختلفان في سكوبيه؛ لا يُستخدم رمز بلدية حي من ملف المناطق دون تحديدها.",
+    "sourceUrl": "https://www.mit.edu.mk/contact"
+  },
+  {
+    "referenceId": "INS-MKD-0017",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Skopje",
+    "uploadedRegion": null,
+    "notes": "المدينة ثابتة، لكن الرمز الإداري المحلي Skopje لا يستنبط من البلدية الفرعية دون تحديد رسمي.",
+    "sourceUrl": "https://utms.edu.mk/en/utms-profile"
+  },
+  {
+    "referenceId": "INS-NOR-0032",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "POST_2024_FINNMARK_REGION_NOT_IN_REGISTRY",
+    "uploadedCity": "Kautokeino",
+    "uploadedRegion": "Finnmark",
+    "notes": "الاسم المحلي السامي Guovdageaidnu، وKautokeino الاسم النرويجي.",
+    "sourceUrl": "https://samas.no/en/basic-page/contact-information"
+  },
+  {
+    "referenceId": "INS-NOR-0005",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "POST_2024_TROMS_REGION_NOT_IN_REGISTRY",
+    "uploadedCity": "Tromsø",
+    "uploadedRegion": "Troms",
+    "notes": "جامعة متعددة الفروع؛ العنوان للحرم/المقر في Tromsø.",
+    "sourceUrl": "https://en.uit.no/om/kontakt"
+  },
+  {
+    "referenceId": "INS-SRB-0029",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "COUNTRY_TERRITORY_SCOPE_REVIEW_REQUIRED",
+    "uploadedCity": "Leposavić",
+    "uploadedRegion": "Kosovo (administrative classification disputed)",
+    "notes": "المعرّف الأصلي SRB يحفظ كما هو، الموقع داخل كوسوفو المتنازع على وضعها؛ لا تغيير البلد تلقائيًا إلى XKX.",
+    "sourceUrl": "https://www.akademijakm.edu.rs/en/kontakt.php"
+  },
+  {
+    "referenceId": "INS-SRB-0006",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Kosovska Mitrovica",
+    "uploadedRegion": null,
+    "notes": "الجامعة تقدم عنوانًا رسميًا لرئاستها في Mitrovica بكوسوفو؛ سجل ISO الأصلي SRB واسم الموقع الصربي يعكسان نزاعًا سياسيًا/إداريًا؛ لا تستبدل الرمز بـ XKX أو تصنفها ضمن صربيا جغرافيًا بالتخمين.",
+    "sourceUrl": "https://en.pr.ac.rs/university/rectorate/"
+  },
+  {
+    "referenceId": "INS-SVN-0015",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Trzin",
+    "regionCode": "SI-186",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يثبت مقراً في Trzin؛ توجد مواقع تعليمية إضافية في Ljubljana وDob. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://en.fd.si/varstvo-osebnih-podatkov"
+  },
+  {
+    "referenceId": "INS-ESP-0065",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Santa María de Guía",
+    "regionCode": "ES-CN",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. يوجد Campus de Guía وموقع إضافي INNOVEGUETA في Las Palmas de Gran Canaria؛ لا تخلط المقرين. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.ufpcanarias.es/Home/About"
+  },
+  {
+    "referenceId": "INS-GBR-0117",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Guildford (former campus)",
+    "uploadedRegion": "Surrey",
+    "notes": "الموقع الرسمي يؤكد وجود حرم تاريخي في Guildford ولا يثبت استمرار تشغيله؛ معلومات ثانوية تشير لإغلاقه في 2024. لا يُستخدم كعنوان المقر الحالي.",
+    "sourceUrl": "https://www.law.ac.uk/set-for-success/our-alumni/helen-goatley/"
+  },
+  {
+    "referenceId": "INS-BLR-0021",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Gomel",
+    "regionCode": "BY-HO",
+    "existingCityId": "city_by_homyel",
+    "scope": "Source locality only; رئيسي. أثبت موقع القبول الجامعي الرسمي مقر الجامعة؛ لا يستلزم فصل تهجئتي Gomel وHomyel إلى مدينتين. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://abiturient.bteu.by/abiturientu/poryadok-priyoma/"
+  },
+  {
+    "referenceId": "INS-BLR-0025",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Gomel",
+    "regionCode": "BY-HO",
+    "existingCityId": "city_by_homyel",
+    "scope": "Source locality only; رئيسي.  No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.gsu.by/en"
+  },
+  {
+    "referenceId": "INS-BLR-0036",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Mozyr",
+    "regionCode": "BY-HO",
+    "existingCityId": "city_by_mazyr",
+    "scope": "Source locality only; رئيسي. المصدر صفحة جامعية للمقبولين نشرها قسم الجامعة؛ يستحسن تجديد تأكيد عنوان المقر عند أي تطبيق آلي. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://omsiid.mspu.by/en/index.php?view=HOW_TO_APPLY"
+  },
+  {
+    "referenceId": "INS-GEO-0034",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Gremi",
+    "regionCode": "GE-KA",
+    "existingCityId": null,
+    "scope": "Source locality only; مقر جامعي. الوضع المؤسسي: معتمدة رسميًا. درجة المصدر: سجلات الاعتماد والقبول الحكومية. دليل NAEC الرسمي: قرية Gremi بلدية Kvareli الرمز 4806؛ سجل EQE يثبت الترخيص. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://reestri.eqe.ge/en/inner/72"
+  },
+  {
+    "referenceId": "INS-XKX-0001",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "COUNTRY_XKX_NOT_IN_CANONICAL_REGISTRY",
+    "uploadedCity": "Gjakova",
+    "uploadedRegion": "District of Gjakova",
+    "notes": "عنوان رئاسة الجامعة منشور مباشرة في موقع الجامعة | المدينة مؤكدة جغرافيًا؛ يمنع الربط بـCity Source ID حتى إضافة دولة XKX رسميًا",
+    "sourceUrl": "https://uni-gjk.org/"
+  },
+  {
+    "referenceId": "INS-XKX-0002",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "COUNTRY_XKX_NOT_IN_CANONICAL_REGISTRY",
+    "uploadedCity": "Mitrovica",
+    "uploadedRegion": "District of Mitrovica",
+    "notes": "موقع الجامعة يعرض رئاسة الجامعة ومدينة Mitrovica مباشرة | المدينة مؤكدة جغرافيًا؛ يمنع الربط بـCity Source ID حتى إضافة دولة XKX رسميًا",
+    "sourceUrl": "https://umib.net/kontakt/"
+  },
+  {
+    "referenceId": "INS-XKX-0003",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "COUNTRY_XKX_NOT_IN_CANONICAL_REGISTRY",
+    "uploadedCity": "Gjilan",
+    "uploadedRegion": "District of Gjilan",
+    "notes": "صفحة الجامعة الحالية تنشر عنوانها الكامل | المدينة مؤكدة جغرافيًا؛ يمنع الربط بـCity Source ID حتى إضافة دولة XKX رسميًا",
+    "sourceUrl": "https://uni-gjilan.net/kontakti/"
+  },
+  {
+    "referenceId": "INS-XKX-0004",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "COUNTRY_XKX_NOT_IN_CANONICAL_REGISTRY",
+    "uploadedCity": "Vushtrri",
+    "uploadedRegion": "District of Mitrovica",
+    "notes": "صفحة الاتصال الرسمية بالأكاديمية تثبت مقرها Vushtrri | المدينة مؤكدة جغرافيًا؛ يمنع الربط بـCity Source ID حتى إضافة دولة XKX رسميًا",
+    "sourceUrl": "https://aksp-ks.net/Contact"
+  },
+  {
+    "referenceId": "INS-XKX-0005",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "COUNTRY_XKX_NOT_IN_CANONICAL_REGISTRY",
+    "uploadedCity": "Ferizaj",
+    "uploadedRegion": "District of Ferizaj",
+    "notes": "الموقع الرسمي يثبت المدينة، ويحتوي على عنواني شارع مختلفين داخل المدينة نفسها | المدينة مؤكدة جغرافيًا؛ يمنع الربط بـCity Source ID حتى إضافة دولة XKX رسميًا",
+    "sourceUrl": "https://ushaf.net/kontakti/"
+  },
+  {
+    "referenceId": "INS-XKX-0006",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "COUNTRY_XKX_NOT_IN_CANONICAL_REGISTRY",
+    "uploadedCity": "Peja",
+    "uploadedRegion": "District of Peja",
+    "notes": "عنوان منشور مباشرة في صفحة اتصال الجامعة | المدينة مؤكدة جغرافيًا؛ يمنع الربط بـCity Source ID حتى إضافة دولة XKX رسميًا",
+    "sourceUrl": "https://unhz.eu/en/contacts/"
+  },
+  {
+    "referenceId": "INS-XKX-0007",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "COUNTRY_XKX_NOT_IN_CANONICAL_REGISTRY",
+    "uploadedCity": "Pristina",
+    "uploadedRegion": "District of Pristina",
+    "notes": "المستند الرسمي للجامعة يحدد عنوان رئاسة الجامعة في بريشتينا | المدينة مؤكدة جغرافيًا؛ يمنع الربط بـCity Source ID حتى إضافة دولة XKX رسميًا",
+    "sourceUrl": "https://uni-pr.edu/desk/inc/media/B1CE0A58-7361-4251-BE8A-21C7640C0C5E.pdf"
+  },
+  {
+    "referenceId": "INS-XKX-0008",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "COUNTRY_XKX_NOT_IN_CANONICAL_REGISTRY",
+    "uploadedCity": "Prizren",
+    "uploadedRegion": "District of Prizren",
+    "notes": "موقع الجامعة الحالي يصرح بأن مقر الجامعة بمدينة Prizren؛ العنوان التفصيلي في الموقع المؤرشف | المدينة مؤكدة جغرافيًا؛ يمنع الربط بـCity Source ID حتى إضافة دولة XKX رسميًا",
+    "sourceUrl": "https://uni-prizren.com/"
+  },
+  {
+    "referenceId": "INS-RUS-0222",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Moscow",
+    "uploadedRegion": "Moscow (federal city)",
+    "notes": "المقر القانوني في موسكو بينما توجد كليات وحرم فعلي في Mytishchi بمقاطعة موسكو. ينبغي تحديد أي حرم يتبع السجل قبل اختيار City Source ID.",
+    "sourceUrl": "https://eduprosvet.ru/vse-kontakty/kak-dobratsya-do-korpusa-5/"
+  },
+  {
+    "referenceId": "INS-MEX-0013",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Atitalaquia",
+    "regionCode": "MX-HID",
+    "existingCityId": "city_mx_geonames_3532627",
+    "scope": "Source locality only; رئيسي. الجامعة تنسب عنوانها بنفسها إلى بلدية Atitalaquia وولاية Hidalgo. لم يُثبت City Source ID من ملف المدن الكبير. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.itatitalaquia.edu.mx/historia.html"
+  },
+  {
+    "referenceId": "INS-MEX-0014",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "La Cruz de Huanacaxtle",
+    "regionCode": "MX-NAY",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Bahía de Banderas هي البلدية، أمّا La Cruz de Huanacaxtle فهي البلدة الفعلية. يحتاج معرف المدينة الموجود إلى مطابقة أو إنشاء لاحق بعد تأكيد عدم وجوده. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.bahia.tecnm.mx/inicio/"
+  },
+  {
+    "referenceId": "INS-MEX-0021",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Chihuahua",
+    "regionCode": "MX-CHH",
+    "existingCityId": "city_mx_chihuahua",
+    "scope": "Source locality only; رئيسي. يختلف عن Instituto Tecnológico de Chihuahua II (Av. de las Industrias 11101). No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://sic.cultura.gob.mx/ficha.php?table=universidad&table_id=773"
+  },
+  {
+    "referenceId": "INS-MEX-0022",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Chihuahua",
+    "regionCode": "MX-CHH",
+    "existingCityId": "city_mx_chihuahua",
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يؤكد عنوان المعهد التقني Chihuahua II. ضرورة عدم الخلط مع Instituto Tecnológico de Chihuahua (المعهد I). No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://chihuahua2.tecnm.mx/"
+  },
+  {
+    "referenceId": "INS-MEX-0024",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Ciudad Cuauhtemoc",
+    "regionCode": "MX-CHH",
+    "existingCityId": "city_mx_cuauhtemoc",
+    "scope": "Source locality only; رئيسي.  No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.cdcuauhtemoc.tecnm.mx/2026/05/"
+  },
+  {
+    "referenceId": "INS-MEX-0054",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Soledad de Graciano Sanchez",
+    "regionCode": "MX-SLP",
+    "existingCityId": "city_mx_soledad_de_graciano_sanchez",
+    "scope": "Source locality only; رئيسي. المدينة الحالية San Luis Potosí تختلف عن البلدية الفعلية Soledad de Graciano Sánchez؛ المطابقة مع سجل المدن لم تثبت. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://slp.tecnm.mx/"
+  },
+  {
+    "referenceId": "INS-MEX-0057",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Metepec",
+    "regionCode": "MX-MEX",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. اسم المؤسسة Toluca لا يعني أنها تقع في بلدية Toluca؛ الموقع الفعلي في Metepec. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://toluca.tecnm.mx/contacto-instituto-tecnologico-de-toluca"
+  },
+  {
+    "referenceId": "INS-MEX-0058",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Torreón",
+    "uploadedRegion": "Coahuila de Zaragoza",
+    "notes": "عنوان في ملف PDF من الشبكة الوطنية ومعطيات حكومية ظهرا كمقتطفات فقط ولم يُفتح المصدر. يوجد اختلاف في الرمز البريدي (27170 مقابل 27018) ويحتاج حسمًا.",
+    "sourceUrl": "https://www.tecnm.mx/dir_calidad/gestion_calidad/TecNM-CA-MC-001-A12.pdf"
+  },
+  {
+    "referenceId": "INS-MEX-0082",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Culiacan",
+    "uploadedRegion": "Sinaloa",
+    "notes": "المؤسسة متعددة الوحدات؛ صفحة موقع Culiacán تثبت الحرم المحلي ولا تثبت أنه المقر الإداري المركزي.",
+    "sourceUrl": "https://uadeo.mx/culiacan/"
+  },
+  {
+    "referenceId": "INS-MEX-0083",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Santiago de Queretaro",
+    "regionCode": "MX-QUE",
+    "existingCityId": "city_mx_queretaro",
+    "scope": "Source locality only; رئيسي. عنوان مركز الجامعة وارد في موقع رسمي لإحدى الكليات؛ توجد وحدات جامعية أخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.ingenieria.uaq.mx/index.php/investigacion/comiteetica"
+  },
+  {
+    "referenceId": "INS-MEX-0101",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "San Pedro Garza Garcia",
+    "regionCode": "MX-NLE",
+    "existingCityId": "city_mx_san_pedro_garza_garcia",
+    "scope": "Source locality only; رئيسي. عنوان Campus UDEM مذكور داخل صفحة القبول التابعة للجامعة، وليس عنوان المدرسة الثانوية وحدها. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://prepa.udem.edu.mx/es/contactanos"
+  },
+  {
+    "referenceId": "INS-MEX-0107",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Puerto Angel",
+    "uploadedRegion": "Oaxaca",
+    "notes": "الجامعة متعددة المقرات (Puerto Escondido, Puerto Ángel, Huatulco, Oaxaca). موضع Puerto Ángel هو حرم مثبت وليس مقر رئيسي مؤكد.",
+    "sourceUrl": "https://www.umar.mx/web/assets/contacto/contacto.html"
+  },
+  {
+    "referenceId": "INS-MEX-0133",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "San Luis Potosi",
+    "regionCode": "MX-SLP",
+    "existingCityId": "city_mx_san_luis_potosi",
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يحدد مكان الجامعة وعنوان الشارع؛ رمز المنطقة من الملف الأصلي؛ تعذرت مطابقة sourceCityId. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.upslp.edu.mx/upslp/?page_id=868"
+  },
+  {
+    "referenceId": "INS-ATG-0001",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "COOLIDGE_PARISH_NOT_PROVEN_BY_SUPPLIED_ADDRESS",
+    "uploadedCity": "Coolidge",
+    "uploadedRegion": null,
+    "notes": "مكتب نيويورك إداري منفصل؛ المقر الأكاديمي الفعلي في Coolidge.",
+    "sourceUrl": "https://www.auamed.org/contact/"
+  },
+  {
+    "referenceId": "INS-ATG-0002",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Piccadilly",
+    "uploadedRegion": null,
+    "notes": "العناوين الأمريكية في الصفحة عنوان بريد/إدارة، وليست بديلًا لمقر Antigua؛ فتح الموقع مباشرة تعذر فتم اعتماد مقتطف مفهرس.",
+    "sourceUrl": "https://www.uhsa.ag/contacts/"
+  },
+  {
+    "referenceId": "INS-VCT-0001",
+    "uploadedStatus": "مؤكد",
+    "disposition": "HOLD",
+    "reason": "ARNOS_VALE_PARISH_NOT_PROVEN_BY_SUPPLIED_ADDRESS",
+    "uploadedCity": "Arnos Vale",
+    "uploadedRegion": null,
+    "notes": "Illinois Office مكتب إدارة أمريكي منفصل؛ حرم St Vincent ثابت.",
+    "sourceUrl": "https://sjsm.org/contact-us/"
+  },
+  {
+    "referenceId": "INS-TTO-0001",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Cantaro Village",
+    "uploadedRegion": null,
+    "notes": "Upper Santa Cruz منطقة أوسع وليست البلدة الدقيقة؛ الصفحة رسمية (نظام سجلات الكلية)، تعتمد مقتطف الفهرس.",
+    "sourceUrl": "https://records.cnc.nazarene.org/"
+  },
+  {
+    "referenceId": "INS-TTO-0005",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Maracas Valley",
+    "uploadedRegion": null,
+    "notes": "St. Joseph جزء العنوان البريدي/المركز الحضري الأكبر؛ الموقع يحدد Main Campus في Maracas Valley. لا تمثل الأفرع الستة.",
+    "sourceUrl": "https://usc.edu.tt/about-us/faq/"
+  },
+  {
+    "referenceId": "INS-PNG-0004",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Vudal",
+    "regionCode": "PG-EBR",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. فحص ملف workspace/reference-data/cities/oceania/22_cities_oceania.csv لم يجد Vudal؛ وجد Kokopo فقط، وهي مدينة قرب الجامعة وعنوان صندوق بريد. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.unre.ac.pg/pages/campus-map.html"
+  },
+  {
+    "referenceId": "INS-ARG-0012",
+    "uploadedStatus": "مؤكد جزئيًا",
+    "disposition": "HOLD",
+    "reason": "PARTIAL_EVIDENCE_REQUIRES_REVIEW",
+    "uploadedCity": "Villa de Merlo",
+    "uploadedRegion": "San Luis",
+    "notes": "الموقع الرسمي يثبت البلدة والمقاطعة دون ذكر شارع وعنوان المقر التفصيلي.",
+    "sourceUrl": "https://unlc.edu.ar/"
+  },
+  {
+    "referenceId": "INS-BOL-0008",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Llallagua",
+    "regionCode": "BO-P",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. لها مكتب/مقر إداري ثانوي في لاباز؛ المقر المركزي Llallagua. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://unsxx.bo/"
+  },
+  {
+    "referenceId": "INS-BOL-0011",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Warisata",
+    "regionCode": "BO-L",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. وزارة التعليم تؤكد المقر الرئيسي في Warisata ولها وحدات فرعية Cuyahuani وTaypiplaya وLa Asunta. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.minedu.gob.bo/index.php?Itemid=104&limitstart=44&option=com_content&view=featured"
+  },
+  {
+    "referenceId": "INS-BOL-0013",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Ivo",
+    "regionCode": "BO-H",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. Camiri نقطة وصول بالحافلات وليست بلدة الحرم؛ Kuruyuki الواردة في الملف القديم ليست مقر الجامعة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://unibolguarani.edu.bo/ubicacion"
+  },
+  {
+    "referenceId": "INS-BRA-0133",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Duque de Caxias",
+    "regionCode": "BR-RJ",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. مقر رئيسي، وتوجد حُرُم أخرى في Nova Iguaçu وBarra da Tijuca. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://caxias.unigranrio.edu.br/"
+  },
+  {
+    "referenceId": "INS-PRY-0056",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Caaguazú",
+    "regionCode": "PY-5",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي. بلدة Caaguazú تتطابق اسميًا مع اسم الإدارة الأولى (departamento) لكنهما مستويان مختلفان. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://cones.gov.py/universidad-santa-clara-de-asis/"
+  },
+  {
+    "referenceId": "INS-VEN-0032",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Mantecal",
+    "regionCode": "VE-C",
+    "existingCityId": null,
+    "scope": "Source locality only; رئيسي.  No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://www.uptaltoapure.edu.ve/"
+  },
+  {
+    "referenceId": "INS-VEN-0043",
+    "uploadedStatus": "مؤكد",
+    "disposition": "APPLY_SOURCE_BINDING",
+    "place": "Barquisimeto",
+    "regionCode": "VE-K",
+    "existingCityId": "city_ve_barquisimeto",
+    "scope": "Source locality only; رئيسي. دليل التعليم العالي الرسمي يثبت المقر الرئيسي ببركيسيميتو، ويذكر أحرمًا فرعية في ولايات أخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "sourceUrl": "https://loeu.opsu.gob.ve/detalle-localidad/1836/"
+  }
+]

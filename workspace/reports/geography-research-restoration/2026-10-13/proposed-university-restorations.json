@@ -34071,5 +34071,3702 @@
       "hashMeaning": "UTF-8 reviewed address excerpt returned by search; not live-page bytes"
     },
     "addressExcerpt": "الطريق الساحلي – بن جواد"
+  },
+  {
+    "referenceId": "INS-EGY-0068",
+    "countryIso3": "EGY",
+    "name": "El Tur",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; مقر رئيسي. الجامعة تصرح بأن وحدة شؤون الخريجين مقرها في main El Tur campus؛ وتحدد campus 3 ومدنها. | اعتماد الطور كمقر رئيسي، وفصل فروع شرم الشيخ ورأس سدر No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "الطور",
+      "ascii": "El Tur",
+      "regionCode": "EG-JS",
+      "existingCityId": "city_eg_at_tur"
+    },
+    "source": {
+      "url": "https://ksiu.edu.eg/alumni/alumni-affairs/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 5,
+      "sha256": "4c55367d2e8d9948534ed5ea657800e2d4f9fb2efd31c7915fb84c587251e576",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://ksiu.edu.eg/alumni/alumni-affairs/",
+        "retrievedAt": "2026-10-14T20:54:17.847485+00:00",
+        "error": "HTTP Error 503: Service Unavailable"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "مقر رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-LBY-0004",
+    "countryIso3": "LBY",
+    "name": "Al-Zahra",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الاسم القديم العزيزية يشير إلى كليات أخرى؛ الصفحة الرسمية تحدد الزهراء مقرًا للجامعة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "الزهراء",
+      "ascii": "Al-Zahra",
+      "regionCode": "LY-JI"
+    },
+    "source": {
+      "url": "https://aju.edu.ly/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 10,
+      "sha256": "55767fd21901ff465ba400d27047f3ec3b5045d08d319bd8655dd986f9a59186",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://aju.edu.ly/",
+        "retrievedAt": "2026-10-14T20:54:09.260055+00:00",
+        "status": 200,
+        "finalUrl": "https://aju.edu.ly/",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "d0d6b61292ad1234c7551531d5e6322a35c65612ff49b7900572c67d3c098772",
+        "bytes": 466931,
+        "cacheKey": "19da91eedf060473c5c8c2a915e6cfa3bebb651348ad3e37299fe7844f8273e6"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-SDN-0005",
+    "countryIso3": "SDN",
+    "name": "Al-Fula",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. مجمعات إضافية بالمجلد وبابنوسة ولقاوة؛ لا تنسب إليها جميع الكليات. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "الفولة",
+      "ascii": "Al-Fula",
+      "regionCode": "SD-GK"
+    },
+    "source": {
+      "url": "https://alsalam.edu.sd/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 11,
+      "sha256": "d300cc3e721c1ec61544b7b51e8951d662c5f72b7bcb91643f4a1a9f40be2c3e",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://alsalam.edu.sd/",
+        "retrievedAt": "2026-10-14T20:54:09.262570+00:00",
+        "status": 200,
+        "finalUrl": "https://alsalam.edu.sd/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "cacheKey": "3f681168fc72a7f356137a895809f7b098f6dbc637d90dfc02a646de625b8cf6"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-SDN-0006",
+    "countryIso3": "SDN",
+    "name": "Dilling",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. ورد Dilling وDalanj تسميتين للمدينة نفسها؛ بيانات الاتصال بالموقع تحمل أرقامًا افتراضية؛ الموقع الجغرافي مذكور صراحة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "الدلنج",
+      "ascii": "Dilling",
+      "regionCode": "SD-KS"
+    },
+    "source": {
+      "url": "https://uofdalanj.edu.sd/eng/index.php/contact-us",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 12,
+      "sha256": "a710e2a23290afed2f1d0a7e155822332dab3d6706a85dc0f9f61e7c93b99ccd",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://uofdalanj.edu.sd/eng/index.php/contact-us",
+        "retrievedAt": "2026-10-14T20:54:28.015358+00:00",
+        "status": 200,
+        "finalUrl": "https://uofdalanj.edu.sd/eng/index.php/contact-us",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "560407a7e5c9d5e40079c8051725f8d3bb2a52111f9ea5c125c7de65e1088e7a",
+        "bytes": 24343,
+        "cacheKey": "9afb85f2513224dd8b9e11e2cbf25cacac6edd48c43baf9329cc076237f40a6f"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-SDN-0029",
+    "countryIso3": "SDN",
+    "name": "Rufaa",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. ص. ب. 200 بريد وليس موقع مبنى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "رفاعة",
+      "ascii": "Rufaa",
+      "regionCode": "SD-GZ"
+    },
+    "source": {
+      "url": "https://albutana.edu.sd/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 13,
+      "sha256": "51265d4bc231687a2f2951bf50f76254b13eddd5dcee9619218b679d30f3eb77",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://albutana.edu.sd/",
+        "retrievedAt": "2026-10-14T20:54:09.261082+00:00",
+        "status": 200,
+        "finalUrl": "https://albutana.edu.sd/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "43adfe1052838feb1495c59efc69628f691ca9158dd63b6bcccc27cc4af7ce30",
+        "bytes": 272292,
+        "cacheKey": "e78035693b98759791f0951bed2cdce8780bc9110b29977f1e49441a4dd78497"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-GHA-0035",
+    "countryIso3": "GHA",
+    "name": "Sowutuom",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Sowutuom ضاحية/حي داخل منطقة أكرا الكبرى، ولا ينبغي مساواتها تلقائيًا بمدينة Accra North القديمة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Sowutuom",
+      "ascii": "Sowutuom",
+      "regionCode": "GH-AA"
+    },
+    "source": {
+      "url": "https://muc.edu.gh/contact/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 18,
+      "sha256": "7720d6e25d7542e838a26cc8f98c64e9cca5fdcf19bc25af0ee1ff3737495e43",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://muc.edu.gh/contact/",
+        "retrievedAt": "2026-10-14T20:54:18.202529+00:00",
+        "status": 200,
+        "finalUrl": "https://muc.edu.gh/contact/",
+        "contentType": "text/html",
+        "sha256": "be03278c9bc32f17fb6da25076fef86a22829c8f65d3bc65f5cfefe39e2a670b",
+        "bytes": 61854,
+        "cacheKey": "1af167aebe1e11f681ee9f3184bd74945331b52981b9eff9ba4bfb8d58428fe8"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MLI-0004",
+    "countryIso3": "MLI",
+    "name": "Katibougou",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الموقع التابع لبرنامج دكتوراه داخل المعهد يحدد مبنى Katibougou، وKoulikoro مرجع المنطقة/العنوان البريدي؛ ليس Bamako. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Katibougou",
+      "ascii": "Katibougou",
+      "regionCode": "ML-2"
+    },
+    "source": {
+      "url": "https://wascal-mali.edu.ml/contact/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 21,
+      "sha256": "8df29441b46df605091bfdc6362920b726069c0267e24b60097e8c02ec97a55e",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://wascal-mali.edu.ml/contact/",
+        "retrievedAt": "2026-10-14T20:54:28.883534+00:00",
+        "status": 200,
+        "finalUrl": "https://wascal-mali.edu.ml/contact/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "706a33e26e22c36649e7008b29eaeb3b5fc3f5f3eb79f5bae1b9562918123067",
+        "bytes": 477992,
+        "cacheKey": "5bf05131d8d326cf20c14e45e8e50be1f41ede6f59fea4c1ca7a4a85a4cacc0d"
+      },
+      "supportingUrl": "https://www.ipr-ifra.edu.ml/IMG/pdf/mpv.pdf"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-NGA-0014",
+    "countryIso3": "NGA",
+    "name": "Ndufu-Alike",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Ndufu-Alike هي بلدة مقر الحرم ضمن Ikwo LGA في Ebonyi. ذكر Abakaliki في بعض عناوين البريد أو التعريف لا يجعلها مدينة الحرم. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Ndufu-Alike",
+      "ascii": "Ndufu-Alike",
+      "regionCode": "NG-EB"
+    },
+    "source": {
+      "url": "https://funai.edu.ng/contact-us/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 22,
+      "sha256": "d79e349f03151c358b9ea9bdd434d29f09e2c7dd0390ea193d8d021f04a6f45e",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://funai.edu.ng/contact-us/",
+        "retrievedAt": "2026-10-14T20:54:15.807088+00:00",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-NGA-0041",
+    "countryIso3": "NGA",
+    "name": "Okerenkoko",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يحدد Okerenkoko مقر المؤسسة؛ لا تُنقل إلى مدينة Warri لمجرد اسم المنطقة المحلية Warri South West. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Okerenkoko",
+      "ascii": "Okerenkoko",
+      "regionCode": "NG-DE"
+    },
+    "source": {
+      "url": "https://services.nmu.edu.ng/faculties/01d0a61a-0a74-4418-8e61-f0dc984edf9d",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 23,
+      "sha256": "116c630febe7de9c699819fee8327c01d26c50581221558f515f2d5445eb3d55",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://services.nmu.edu.ng/faculties/01d0a61a-0a74-4418-8e61-f0dc984edf9d",
+        "retrievedAt": "2026-10-14T20:54:22.898954+00:00",
+        "status": 200,
+        "finalUrl": "https://services.nmu.edu.ng/faculties/01d0a61a-0a74-4418-8e61-f0dc984edf9d",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "1f4dbf8116ad53839b022e79c4e45f0b07a3c41e5d06f45f08cbbbba6fe67fd7",
+        "bytes": 36098,
+        "cacheKey": "dd8392b01eec678985b9a7fb847e5165169618c32c50244fe2a269ed507d1d6d"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-NGA-0091",
+    "countryIso3": "NGA",
+    "name": "Igbariam",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. المدينة القديمة Uli تخص حرمًا فرعيًا؛ مقر الإدارة/الحرم الرئيسي المذكور حاليًا Igbariam، مع الاحتفاظ بUli كحرم آخر. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Igbariam",
+      "ascii": "Igbariam",
+      "regionCode": "NG-AN"
+    },
+    "source": {
+      "url": "https://coou.edu.ng/contactus",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 30,
+      "sha256": "e8807ec443f84c7f6638afc30f6407b0057171fcd303cd6c30580f829b466b60",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://coou.edu.ng/contactus",
+        "retrievedAt": "2026-10-14T20:54:10.747649+00:00",
+        "status": 200,
+        "finalUrl": "https://coou.edu.ng/contactus",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "ba6fd64710b538f75f1e7864a3649dbe4518c92ced505acc3263b119541230ee",
+        "bytes": 67144,
+        "cacheKey": "7243a5f27c2d44815d4a0ac334676d4b7aafd9275e2c6d0066eb628fed64faad"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-NGA-0106",
+    "countryIso3": "NGA",
+    "name": "Okitipupa",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. المكان الفعلي على طريق Okitipupa–Igbokoda، وصندوق البريد P.M.B. 353 مستقل عنه. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Okitipupa",
+      "ascii": "Okitipupa",
+      "regionCode": "NG-ON"
+    },
+    "source": {
+      "url": "https://oaustech.edu.ng/?route=information%2Fcontact",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 31,
+      "sha256": "fa46396347201fb3abb180a0ef2281611648d8e8afd5e304bd660f8d01895943",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://oaustech.edu.ng/?route=information%2Fcontact",
+        "retrievedAt": "2026-10-14T20:54:18.328890+00:00",
+        "status": 200,
+        "finalUrl": "https://oaustech.edu.ng/?route=information%2Fcontact",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "123f8ec4c1228532ab372a7e8eee407a2219f7c64553601720e0cf090ffb2b15",
+        "bytes": 129978,
+        "cacheKey": "bda4403a8ba0a4a201b533f3c85e138cbb5527a9d687937ba4569215463eafba"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-NGA-0195",
+    "countryIso3": "NGA",
+    "name": "Okun-Owa",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Lagos Liaison Office إداري منفصل ولا يدل على موقع الحرم؛ 'Oku-Owa' في القديم اختلاف تهجئة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Okun-Owa",
+      "ascii": "Okun-Owa",
+      "regionCode": "NG-OG"
+    },
+    "source": {
+      "url": "https://southwesternuniversity.edu.ng/about-us/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 37,
+      "sha256": "179b8d7c424bde0844a8ceef9d7ef350ce348c807ef86c3bdd2f864db7021598",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://southwesternuniversity.edu.ng/about-us/",
+        "retrievedAt": "2026-10-14T20:54:24.312492+00:00",
+        "status": 200,
+        "finalUrl": "https://southwesternuniversity.edu.ng/about-us/",
+        "contentType": "text/html",
+        "sha256": "3bb40456027c77d05b991e4686f10e51739a6ebdca3e33ec5edcd1e2c28b34cf",
+        "bytes": 1686,
+        "cacheKey": "4bdd8c4baeda2758aac38af001535e45b588089bdad8e8027b26d7fd8cd499b0"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-NGA-0199",
+    "countryIso3": "NGA",
+    "name": "Ijebu-Itele",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. ثبت موقع المدينة والعنوان من مصدر المؤسسة، لكن City Source ID لم يُفحص مباشرة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Ijebu-Itele",
+      "ascii": "Ijebu-Itele",
+      "regionCode": "NG-OG"
+    },
+    "source": {
+      "url": "https://hallmarkuniversity.edu.ng/contact-us/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 38,
+      "sha256": "e9fb2c32c19d9b1832e8f0ff9268aea1ac1d9e05317eaf4132a886a05711c742",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://hallmarkuniversity.edu.ng/contact-us/",
+        "retrievedAt": "2026-10-14T20:54:16.073475+00:00",
+        "status": 200,
+        "finalUrl": "https://hallmarkuniversity.edu.ng/contact-us/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "3e22dfa12541d2b7f7cb1e7f284602e969a5c42bcbd265cf447f16eb0a518220",
+        "bytes": 174442,
+        "cacheKey": "dd271a12a33d8dbf2d2987f8b9fdaf9b598d9f89656c2e2b0d35dce8118ffce1"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-NGA-0214",
+    "countryIso3": "NGA",
+    "name": "Ihie",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Owerrinta اسم أوسع/مجاور مستخدم في وصف الجامعة، والموقع الرسمي يسمّي Ihie موضع الحرم؛ لا تُنشأ مدينة جديدة إذا كانت Ihie جزءًا من نفس المدينة في ملف المدن. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Ihie",
+      "ascii": "Ihie",
+      "regionCode": "NG-AB"
+    },
+    "source": {
+      "url": "https://clifforduni.edu.ng/contact/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 42,
+      "sha256": "b8433ea2fca1f95714338f9a54c445364f1c852f094c422c2a09785cf5f031e8",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://clifforduni.edu.ng/contact/",
+        "retrievedAt": "2026-10-14T20:54:10.405908+00:00",
+        "status": 200,
+        "finalUrl": "https://clifforduni.edu.ng/contact/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "b319e02722ba356da5c8bace72269eddbe7239e3641687e2f8f3ac2290dbcec1",
+        "bytes": 167858,
+        "cacheKey": "c9952e03503851954712242c9277c3a52305fbdb380dc2854ee522090ca663c8"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-COD-0009",
+    "countryIso3": "COD",
+    "name": "Kinshasa",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Kasa-Vubu بلدية ضمن Kinshasa وليس اسم مدينة منفصلة؛ عنوان شارع Saïo أكدته قاعدة WHED. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Kinshasa",
+      "ascii": "Kinshasa",
+      "regionCode": "CD-KN",
+      "existingCityId": "city_cd_kinshasa"
+    },
+    "source": {
+      "url": "https://www.re.minesursi.gouv.cd/etablissement.php?id=1639",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 54,
+      "sha256": "eea45bd13772366d068b90da1e0b6138e8734adb175eeb489f634a4d7235f920",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.re.minesursi.gouv.cd/etablissement.php?id=1639",
+        "retrievedAt": "2026-10-14T20:54:38.549665+00:00",
+        "status": 200,
+        "finalUrl": "https://www.re.minesursi.gouv.cd/etablissement.php?id=1639",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "dacebbb7708ff0ea4159037a31cff91d02199fb2081eeaae7bbba3986b375fa4",
+        "bytes": 26645,
+        "cacheKey": "1a1a22b9c8f9c2196277b64c91f82a304b2fa6bd28e70c4a53c09dd7bc3e87e3"
+      },
+      "supportingUrl": "https://www.re.minesursi.gouv.cd/etablissement.php?id=1639"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-COD-0038",
+    "countryIso3": "COD",
+    "name": "Lwiro",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Kabare إقليم إداري أوسع؛ البلدة الفعلية Lwiro. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Lwiro",
+      "ascii": "Lwiro",
+      "regionCode": "CD-SK"
+    },
+    "source": {
+      "url": "https://uni50lwiro.ac.cd/a-propos-de-uni-50-lwiro/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 55,
+      "sha256": "d58054ea88f9c29e184a6523e4dbf224283f097b75128223216678403bd2787b",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://uni50lwiro.ac.cd/a-propos-de-uni-50-lwiro/",
+        "retrievedAt": "2026-10-14T20:54:26.769841+00:00",
+        "error": "The read operation timed out"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-DJI-0001",
+    "countryIso3": "DJI",
+    "name": "Djibouti",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Balbala حي/قسم في مدينة جيبوتي؛ B.P.1904 صندوق بريد وليس موقع المقر. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Djibouti",
+      "ascii": "Djibouti",
+      "regionCode": "DJ-DJ",
+      "existingCityId": "city_dj_djibouti"
+    },
+    "source": {
+      "url": "https://www.univ.edu.dj/?page_id=6249",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 61,
+      "sha256": "f9fd48199e9a7d5a8a8694bf50e35fac30458667d03667b54ba4cb70e6547b0f",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.univ.edu.dj/?page_id=6249",
+        "retrievedAt": "2026-10-14T20:54:41.852390+00:00",
+        "error": "HTTP Error 503: Service Unavailable"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-ETH-0022",
+    "countryIso3": "ETH",
+    "name": "Sendafa",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. موقع الجامعة يذكر أيضًا Awash 7 campus؛ Sendafa هو المقر الرئيسي المحدد. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Sendafa",
+      "ascii": "Sendafa",
+      "regionCode": "ET-OR"
+    },
+    "source": {
+      "url": "https://epu.edu.et/ethiopian-police-university-management-board-reviews-2018-e-c-performance-approves-2019-e-c-plan/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 67,
+      "sha256": "8b80f7a8967c26d7467fb3c8deadb4a363516984bb2a65881ad9667fa3dcc744",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://epu.edu.et/ethiopian-police-university-management-board-reviews-2018-e-c-performance-approves-2019-e-c-plan/",
+        "retrievedAt": "2026-10-14T20:54:14.768720+00:00",
+        "error": "HTTP Error 503: Service Unavailable"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MUS-0006",
+    "countryIso3": "MUS",
+    "name": "Réduit",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. هذا عنوان المقر؛ توجد للجامعة أيضًا منشأة منفصلة في Curepipe. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Réduit",
+      "ascii": "Réduit",
+      "regionCode": "MU-MO"
+    },
+    "source": {
+      "url": "https://open.ac.mu/contact-us/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 75,
+      "sha256": "699bd95e64e1bf8767c99ff769540fcf9aba394b1bb83267d75b3f6c2c4a6c75",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://open.ac.mu/contact-us/",
+        "retrievedAt": "2026-10-14T20:54:18.571917+00:00",
+        "status": 200,
+        "finalUrl": "https://open.ac.mu/contact-us/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "74eeae059afc319507f983005bd6f29461f6b67a56f3c8b5ea4fd855076525ef",
+        "bytes": 107239,
+        "cacheKey": "6c3bdb025de19fd04a067033dc4a03bc4db4363df54f443740b85ae47448eab8"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-SOM-0021",
+    "countryIso3": "SOM",
+    "name": "Merca",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. مكاتب/فروع أخرى في مقديشو وبراوة؛ اسم Barawa ليس موقع الرئاسة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Marka",
+      "ascii": "Merca",
+      "regionCode": "SO-SH"
+    },
+    "source": {
+      "url": "https://barawauniversity.so/contact-us/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 79,
+      "sha256": "96443c65d346076e26fd8c57800de656aab97cedfc138de745d613202a4783f4",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://barawauniversity.so/contact-us/",
+        "retrievedAt": "2026-10-14T20:54:09.264171+00:00",
+        "status": 200,
+        "finalUrl": "https://barawauniversity.so/contact-us/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "857ea3f2bca196be8c83871c299474daa0de0ebdb93a397c68590c77c4e9ab79",
+        "bytes": 235547,
+        "cacheKey": "e91183064475848cf17fd4266dec0989d69be790917d7b25b28eeacc29278afb"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-UGA-0009",
+    "countryIso3": "UGA",
+    "name": "Busitema",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. مقر الجامعة في بلدة/قرية Busitema وليس مدينة Tororo التي يستعمل مكتب البريد عنوانًا لها؛ الجامعة متعددة الحرم. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Busitema",
+      "ascii": "Busitema",
+      "regionCode": "UG-202"
+    },
+    "source": {
+      "url": "https://dicts.busitema.ac.ug/support/other/where-busitema-campuses-are-located",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 82,
+      "sha256": "f61763c95a825eeac7ad431e806bc981c4540c7e193b2debc0813f636d35e6c5",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://dicts.busitema.ac.ug/support/other/where-busitema-campuses-are-located",
+        "retrievedAt": "2026-10-14T20:54:13.158859+00:00",
+        "status": 200,
+        "finalUrl": "https://dicts.busitema.ac.ug/support/other/where-busitema-campuses-are-located",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "7df36f872a338a070c4e2d83c519eb73ba088af2dc21dcc11c5f656aef6e08b4",
+        "bytes": 25775,
+        "cacheKey": "dc26a4e3e64c38ea818784f9676b4951d361d0042aeb9d95b024ef6ccb0b2486"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-UGA-0040",
+    "countryIso3": "UGA",
+    "name": "Kisubi",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. P.O. Box Entebbe عنوان مراسلات، وليس المدينة الفعلية للحرم؛ الموقع يصرح بأنه لا توجد فروع. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Kisubi",
+      "ascii": "Kisubi",
+      "regionCode": "UG-113"
+    },
+    "source": {
+      "url": "https://unik.ac.ug/faqs/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 83,
+      "sha256": "4925a811b336e69a428fc6b5c950848e6e5c42ecc31c33ceeb0a6bbf6653f4f6",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://unik.ac.ug/faqs/",
+        "retrievedAt": "2026-10-14T20:54:26.907568+00:00",
+        "status": 200,
+        "finalUrl": "https://unik.ac.ug/faqs/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "9f470314bd91e99a526f43cd06add66e70b3404540c41ce7f21338949ca9be79",
+        "bytes": 78478,
+        "cacheKey": "105d63cedb27157b2fcb6f66ccfa3bdd4a7fa207640e3e69531e080292b43a2d"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-YEM-0066",
+    "countryIso3": "YEM",
+    "name": "Aden",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. تصحيح جوهري: الموقع الرسمي يصرّح بأن عدن المركز الرئيسي للجامعة وأن صنعاء فرع. يجب تغيير ربط المدينة القديم صنعاء، دون تعديل البيانات في GitHub الآن. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "عدن",
+      "ascii": "Aden",
+      "regionCode": "YE-AD",
+      "existingCityId": "city_ye_aden"
+    },
+    "source": {
+      "url": "https://civilizationuniv.edu.ye/about-us/1324",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 96,
+      "sha256": "4cbd6cc715f6daaea22822ead6002d5f995306220a4cc41dc13bf4c8e00b93e3",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://civilizationuniv.edu.ye/about-us/1324",
+        "retrievedAt": "2026-10-14T20:54:10.346869+00:00",
+        "status": 200,
+        "finalUrl": "https://civilizationuniv.edu.ye/about-us/1324",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "70747cfffdb0ce65367c6b15bba2a2e9232828c40ab34e234950f1167b2a1b39",
+        "bytes": 311356,
+        "cacheKey": "084aea31de2a2078c02bd6967e8dd0ae9d68534ea2ce9421f65c1d6d6244ee0d"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-KWT-0008",
+    "countryIso3": "KWT",
+    "name": "Ardiya",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Ardiya منطقة عمرانية/ضاحية؛ لم يُثبت وجود sourceCityId مطابق في مستودع المدن. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "العارضية",
+      "ascii": "Ardiya",
+      "regionCode": "KW-FA",
+      "existingCityId": "city_kw_official_ardiyah"
+    },
+    "source": {
+      "url": "https://www.iuk.edu.kw/about",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 104,
+      "sha256": "dc935f876cb7b4bd2a322d75a2d1caf5a24d5d6aaa7973e5a3abdccc80af8713",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.iuk.edu.kw/about",
+        "retrievedAt": "2026-10-14T20:54:34.267689+00:00",
+        "status": 200,
+        "finalUrl": "https://www.iuk.edu.kw/about",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "4f6d4d7b1b18cc2932bcd9bad554b27397108a4b618b754b0d46b4e0fac7143c",
+        "bytes": 78362,
+        "cacheKey": "9cdc8150bd9b9cb6fd66eece0eb0d0750bea8fd1faa1a71363b8161495d52b1e"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-KWT-0010",
+    "countryIso3": "KWT",
+    "name": "Doha",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الدوحة هنا منطقة بالكويت وليست الدوحة القطرية؛ الجامعة لها عنوان منشور أيضًا في دليل طلاب رسمي. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "الدوحة",
+      "ascii": "Doha",
+      "regionCode": "KW-KU"
+    },
+    "source": {
+      "url": "https://kilaw.edu.kw/annualConference/en/third-party-funding-in-international-arbitration-and-its-impact-on-the-procedure/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 106,
+      "sha256": "cbc172251a56e6d0241088ebb39940f9d061e3b9b0a5d9eec87d1e25bbf62fab",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://kilaw.edu.kw/annualConference/en/third-party-funding-in-international-arbitration-and-its-impact-on-the-procedure/",
+        "retrievedAt": "2026-10-14T20:54:17.670273+00:00",
+        "status": 200,
+        "finalUrl": "https://kilaw.edu.kw/annualConference/en/third-party-funding-in-international-arbitration-and-its-impact-on-the-procedure/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "8cd9156adff0729fa43c7da85ffab73bc4ddadd4bca13f2d3eb319d70b3d464c",
+        "bytes": 85006,
+        "cacheKey": "12b47eb3480001a3f5d15ad25162b7ecdad6c7c2084bc5ea4b33583a426f4f80"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IRQ-0013",
+    "countryIso3": "IRQ",
+    "name": "Tikrit",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; مقر رئيسي. الوضع المؤسسي: موجودة متعددة المواقع. درجة المصدر: الموقع الرسمي للكلية. المقر الرئيسي تكريت مقابل جامعة تكريت؛ فروع أخرى في بلد والشرقاط. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Tikrit",
+      "ascii": "Tikrit",
+      "regionCode": "IQ-SD",
+      "existingCityId": "city_iq_tikrit"
+    },
+    "source": {
+      "url": "https://hadara.edu.iq/نبذه-عن-الكلية/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 107,
+      "sha256": "37a23ea6471816343de8e3e1731eb581fa9eae2cfd5307cd51531560d522f373",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://hadara.edu.iq/نبذه-عن-الكلية/",
+        "retrievedAt": "2026-10-14T20:58:16.171361+00:00",
+        "status": 200,
+        "finalUrl": "https://hadara.edu.iq/%D9%86%D8%A8%D8%B0%D9%87-%D8%B9%D9%86-%D8%A7%D9%84%D9%83%D9%84%D9%8A%D8%A9/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "f1edab8a9ac1583a3566160c021251d2c4fb4bf96625c64d804844d2573891b4",
+        "bytes": 228968,
+        "cacheKey": "4f7933b099f5d4991adf8058178940215b728ea97f11a48e76a033ba8b4d56f0"
+      },
+      "supportingUrl": "https://hadara.edu.iq/"
+    },
+    "addressExcerpt": "مقر رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IRQ-0080",
+    "countryIso3": "IRQ",
+    "name": "Samawah",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. موقع الجامعة يحدد مكان الحرم مباشرة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "السماوة",
+      "ascii": "Samawah",
+      "regionCode": "IQ-MU",
+      "existingCityId": "city_iq_as_samawah"
+    },
+    "source": {
+      "url": "https://sawauniversity.edu.iq/En/index.php",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 108,
+      "sha256": "c72797aaba019f2fbbff1afa2a5731046506043588f232194e01b2225213daa8",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://sawauniversity.edu.iq/En/index.php",
+        "retrievedAt": "2026-10-14T20:54:22.312773+00:00",
+        "status": 200,
+        "finalUrl": "https://sawauniversity.edu.iq/En/index.php",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "7d5f38873b05bd8aa7212cafb0266d72dc0563bb19b62113791ae245f007031a",
+        "bytes": 70076,
+        "cacheKey": "42ef9fdd06aac53a88beaef3732e39ea62f937156b717e47392ffe3cd30bde93"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PSE-0003",
+    "countryIso3": "PSE",
+    "name": "Deir al-Balah",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. فرع ثانٍ في بيت لاهيا؛ توجد صفحة اتصل بنا عنوانها غزة الرمال لا تمثل بالضرورة المقر الرئيسي. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "دير البلح",
+      "ascii": "Deir al-Balah",
+      "regionCode": "PS-DEB"
+    },
+    "source": {
+      "url": "https://www.dawa-college.net/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 110,
+      "sha256": "cf93ff4ea0ed097c4fab55e59832f795e9e5ba2f637a6cac68357cb1b51a98c9",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.dawa-college.net/",
+        "retrievedAt": "2026-10-14T20:54:31.433670+00:00",
+        "status": 200,
+        "finalUrl": "https://www.dawa-college.net/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "e453620a11e0a5a54b54de34c86078209504e26d78f30257c8f4819f57a7038a",
+        "bytes": 55916,
+        "cacheKey": "264f0940950e2e60a12c70f58175b057d9a59bb3ba4362a1d2407946e2994ab5"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PSE-0006",
+    "countryIso3": "PSE",
+    "name": "Jericho",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. العنوان يظهر في تذييل صفحات الجامعة، وليس صندوقًا بريديًا (ص.ب. 10 مفصول). No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "أريحا",
+      "ascii": "Jericho",
+      "regionCode": "PS-JRH"
+    },
+    "source": {
+      "url": "https://alistiqlal.edu.ps/cv/720",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 112,
+      "sha256": "d13e590d51427c34c1082790dac87e93c4b7a74e3810d7f1173560702534ad1e",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://alistiqlal.edu.ps/cv/720",
+        "retrievedAt": "2026-10-14T20:54:09.261623+00:00",
+        "status": 200,
+        "finalUrl": "https://alistiqlal.edu.ps/ar/cv/720",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "a5b3c766e39b11121b8b1f0ee8dd4b4e4249b84e240a6fd83c52a081fc0d6532",
+        "bytes": 74392,
+        "cacheKey": "d49f5376e1fb90a73ef13cae9577b33dccf87c6a11cf60b3cf7638b4499995d3"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PSE-0007",
+    "countryIso3": "PSE",
+    "name": "Jerusalem",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. حي الطور داخل القدس وليس بلدة بديلة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "القدس",
+      "ascii": "Jerusalem",
+      "regionCode": "PS-JEM",
+      "existingCityId": "city_ps_official_a85c4b336f5aaab3"
+    },
+    "source": {
+      "url": "https://almakassed-college.com/contact/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 113,
+      "sha256": "160ac9c813a38e20c1ba76900080e162f0512aa0c1168c8b49d6fa3b671325d9",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://almakassed-college.com/contact/",
+        "retrievedAt": "2026-10-14T20:54:09.262061+00:00",
+        "error": "HTTP Error 500: Internal Server Error"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PSE-0010",
+    "countryIso3": "PSE",
+    "name": "Nablus",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الصفحة إعلان رسمي للاستقبال المباشر في مبنى الكلية. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "نابلس",
+      "ascii": "Nablus",
+      "regionCode": "PS-NBS",
+      "existingCityId": "city_ps_geonames_282615"
+    },
+    "source": {
+      "url": "https://rawda.edu.ps/news/details/20045",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 114,
+      "sha256": "851ce99bd57b1c215e7bc15a9e40911183f9bf2aa2357f7b05ed2b1abe9cfae5",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://rawda.edu.ps/news/details/20045",
+        "retrievedAt": "2026-10-14T20:54:20.940184+00:00",
+        "error": "The read operation timed out"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PSE-0024",
+    "countryIso3": "PSE",
+    "name": "Rawabi",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; مقر رئيسي/حرم معلن. تطابق الاسم العربي وشهادة التأسيس 2024 وموقع gcsh.edu.ps في الدليل الحكومي يثبت أنه نفس المؤسسة. تنص نشرة 2025 على مقر رئيسي بمحافظة رام الله والبيرة؛ يحدد موقع الكلية روابي. لا يجوز إبقاء غزة. | معيار الدليل: نشرة وزارة التعليم العالي الفلسطينية 2025 ص 87 + الموقع الرسمي No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "روابي",
+      "ascii": "Rawabi",
+      "regionCode": "PS-RBH"
+    },
+    "source": {
+      "url": "https://www.moe.edu.ps/uploads/Guidance26-7-2025.pdf",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 115,
+      "sha256": "775f786c700262d5634163d93250f1cd7f7bbac018d35d92689b083f608c4675",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.moe.edu.ps/uploads/Guidance26-7-2025.pdf",
+        "retrievedAt": "2026-10-14T20:54:36.334411+00:00",
+        "status": 200,
+        "finalUrl": "https://www.moe.edu.ps/uploads/Guidance26-7-2025.pdf",
+        "contentType": "application/pdf",
+        "sha256": "ed7eda173b724041869c872172e938b747702926c95952bab65bf9bc7d2bc042",
+        "bytes": 6291456,
+        "cacheKey": "07060c06ee8e41d127be48cd66f269d086512ddf7c853f8a0ec12f552d2363fc"
+      },
+      "supportingUrl": "https://www.gcsh.edu.ps/ar/faqs"
+    },
+    "addressExcerpt": "مقر رئيسي/حرم معلن",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PSE-0033",
+    "countryIso3": "PSE",
+    "name": "Tulkarm",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. مقر رئيسي حسب صفحة عن الجامعة، ولها فروع أخرى في رام الله والعروب. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "طولكرم",
+      "ascii": "Tulkarm",
+      "regionCode": "PS-TKM"
+    },
+    "source": {
+      "url": "https://ptuk.edu.ps/ar/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 118,
+      "sha256": "decc15754cc9e83e5041b6213a75c93b1fd5432921ee87331dd688ea3f2627cd",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://ptuk.edu.ps/ar/",
+        "retrievedAt": "2026-10-14T20:54:20.476400+00:00",
+        "status": 200,
+        "finalUrl": "https://ptuk.edu.ps/ar/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "72cece830ff7eabb255e4652dbe76490d16aefe4d670423b4daf35bf45720a34",
+        "bytes": 56338,
+        "cacheKey": "ad4f0b970d831dcafd9b3b1f09c5959ae57cfa6052d9ca0c78880ed8998fc4e6"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PSE-0036",
+    "countryIso3": "PSE",
+    "name": "Gaza City",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. صفحة القبول تذكر غزة مقرًا رئيسيًا، وخانيونس والنصيرات مواقع أخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "غزة",
+      "ascii": "Gaza City",
+      "regionCode": "PS-GZA",
+      "existingCityId": "city_ps_geonames_281133"
+    },
+    "source": {
+      "url": "https://join.ucas.edu.ps/about-us",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 120,
+      "sha256": "5227f9acd140237abeab56eecfd7174b56bb9683cd4f4764eadc953409da3259",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://join.ucas.edu.ps/about-us",
+        "retrievedAt": "2026-10-14T20:54:17.521097+00:00",
+        "status": 200,
+        "finalUrl": "https://join.ucas.edu.ps/about-us",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "596283058eabc71e6bc12ce0577d35eebf006e941ca3ab5afbb7da32f663a005",
+        "bytes": 57094,
+        "cacheKey": "6ac066a89bcd3da63eea2d0a1e59e8a3424ac36820254c6bb6572a48a70d8e41"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PSE-0040",
+    "countryIso3": "PSE",
+    "name": "Jerusalem",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; مقر مسجل. الوضع المؤسسي: مذكورة في الأدلة الحكومية. درجة المصدر: دليل وزارة التربية والتعليم العالي. الدليل الحكومي يثبت القدس؛ مصدر ثانوي يرجّح جبل الزيتون. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "القدس",
+      "ascii": "Jerusalem",
+      "regionCode": "PS-JEM",
+      "existingCityId": "city_ps_official_a85c4b336f5aaab3"
+    },
+    "source": {
+      "url": "https://www.moe.edu.ps/uploads/Guidance26-7-2026.pdf",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 121,
+      "sha256": "6301e11bd46f4a16ae75bdf37b62b078fa1e5752322acdbad8dd28aeb4769951",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.moe.edu.ps/uploads/Guidance26-7-2026.pdf",
+        "retrievedAt": "2026-10-14T20:54:36.367794+00:00",
+        "status": 200,
+        "finalUrl": "https://www.moe.edu.ps/uploads/Guidance26-7-2026.pdf",
+        "contentType": "application/pdf",
+        "sha256": "9f07bfa479306fc456764330b03f05d8813377b03607e01abb8436c714942f74",
+        "bytes": 6291456,
+        "cacheKey": "89a0207a6a2da088411670fbb36ee1889e3571a1d3390ab3cdca996f83eb8c23"
+      },
+      "supportingUrl": "https://www.mohe.pna.ps/Portals/0/MOHEResources/Student-Brochure/nashra2024_1.pdf"
+    },
+    "addressExcerpt": "مقر مسجل",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-ISR-0034",
+    "countryIso3": "ISR",
+    "name": "Tzemach",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. نص جامعي يثبت موقع الحرم في צמח، و'עמק הירדן' عنوان مجلس إقليمي/بريد لا مدينة أخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "צמח",
+      "ascii": "Tzemach",
+      "regionCode": "IL-Z"
+    },
+    "source": {
+      "url": "https://360.kinneret.ac.il/terms",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 135,
+      "sha256": "d85a043db9f285972b9cab9db01c98eee4034e7530334cf14a5c4a17ec0ca307",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://360.kinneret.ac.il/terms",
+        "retrievedAt": "2026-10-14T20:54:09.257917+00:00",
+        "status": 200,
+        "finalUrl": "https://360.kinneret.ac.il/terms-of-use/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "62196b9cb09bfe2aa53e5ed84924cdbe66f86b4809bfd8532e16c992cc1ccddc",
+        "bytes": 584928,
+        "cacheKey": "11b0d678992507a76fab0674d73efebe15140fc58543df3284e35e4b773c69e5"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IRN-0023",
+    "countryIso3": "IRN",
+    "name": "Qaen",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي.  No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "قائن",
+      "ascii": "Qaen",
+      "regionCode": "IR-29"
+    },
+    "source": {
+      "url": "https://www.buqaen.ac.ir/تماس-با-ما",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 141,
+      "sha256": "0b3c55e65037f0ca1650e0de4c3425e72c505fb21385d54a11174b396d463fa2",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.buqaen.ac.ir/تماس-با-ما",
+        "retrievedAt": "2026-10-14T20:58:16.173346+00:00",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IRN-0133",
+    "countryIso3": "IRN",
+    "name": "Shahroud",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; عنوان إداري. عنوان الجامعة الإداري، لا يمثل مواقع كلياتها ومستشفياتها كافة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "شاهرود",
+      "ascii": "Shahroud",
+      "regionCode": "IR-20",
+      "existingCityId": "city_ir_shahrud"
+    },
+    "source": {
+      "url": "https://shmu.ac.ir/en/contactus",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 143,
+      "sha256": "c03e702fd713d85bb96a014b7dd2d4a73c0eb932fd0260c666e8e684b0aa2a27",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://shmu.ac.ir/en/contactus",
+        "retrievedAt": "2026-10-14T20:54:23.471179+00:00",
+        "status": 200,
+        "finalUrl": "https://shmu.ac.ir/en/contactus",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "112de47f44fae9b8c1918f5e10b46e908d5925c1cb805b041424ed4dc0bff96b",
+        "bytes": 40640,
+        "cacheKey": "8d8cb914774e99d6c6f7214ee81ed9676c6d85e067c86029e66fc4914f0ac0bd"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "عنوان إداري",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-AFG-0010",
+    "countryIso3": "AFG",
+    "name": "Chakran Village",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. بلدة/قرية Chakran ترد صراحة بموقع الجامعة؛ لم يُفحص وجودها في سجل المدن بالكامل. يحتاج فحص جميع سجلات المدن قبل اقتراح الإضافة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "قریه چاکر ها",
+      "ascii": "Chakran Village",
+      "regionCode": "AF-BDG"
+    },
+    "source": {
+      "url": "https://basu.edu.af/en/contact-us",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 146,
+      "sha256": "f7ab45f103d6fcc825f8a564121d8acf47447ef6af70fb87b135bd8db575a809",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://basu.edu.af/en/contact-us",
+        "retrievedAt": "2026-10-14T20:54:09.264855+00:00",
+        "status": 200,
+        "finalUrl": "https://basu.edu.af/en/contact-us",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "28cd35eeba0977c0e5f946f3cd4f038dc1fe003f0dff2b9fd14ffd6899008fdb",
+        "bytes": 36821,
+        "cacheKey": "2dcc75744311dd2cc43a96e00be8c12fd110d993667ce96530b971d6e593e55d"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PAK-0036",
+    "countryIso3": "PAK",
+    "name": "Sialkot",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. ثبت موقع المدينة والعنوان من مصدر المؤسسة، لكن City Source ID لم يُفحص مباشرة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "سیالکوٹ",
+      "ascii": "Sialkot",
+      "regionCode": "PK-PB",
+      "existingCityId": "city_pk_sialkot_city"
+    },
+    "source": {
+      "url": "https://gcwus.edu.pk/admission-contact/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 147,
+      "sha256": "16e4b7a2bd030a3f488b00929670302a62207e16c8065d1a0aae957a725c6b72",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://gcwus.edu.pk/admission-contact/",
+        "retrievedAt": "2026-10-14T20:54:16.002268+00:00",
+        "status": 200,
+        "finalUrl": "https://gcwus.edu.pk/admission-contact/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "7caeb9a7972e6d8e1e52502bb3f74c8b5bd4221744a86b98b81f94818a40418f",
+        "bytes": 73941,
+        "cacheKey": "c67282d95f821c4bacd55441f0a2c9e1e90a4742d083b4630759161c5d5090e9"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IND-0106",
+    "countryIso3": "IND",
+    "name": "Kattankulathur",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. المصدر من الكلية التابعة لحرم Kattankulathur؛ المدينة القديمة Chennai هي مدينة مجاورة كبرى وليست بلدة الحرم الرئيسية. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Kattankulathur",
+      "ascii": "Kattankulathur",
+      "regionCode": "IN-TN"
+    },
+    "source": {
+      "url": "https://dental.srmist.edu.in/pg/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 148,
+      "sha256": "17c0607855d2614574e65e3ce5cd46d3cc886b05d5d267dc7a7eaa99abe45572",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://dental.srmist.edu.in/pg/",
+        "retrievedAt": "2026-10-14T20:54:12.460182+00:00",
+        "status": 200,
+        "finalUrl": "https://dental.srmist.edu.in/pg/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "99ef922e61be7d3baef168e967c6d9b63b0c44ddaa7413d288a34b5d6283a249",
+        "bytes": 381092,
+        "cacheKey": "8b28272895df162a3b7317af1072671db05d231b6a5851caeb63d9d0778cae62"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-BGD-0006",
+    "countryIso3": "BGD",
+    "name": "Syedpur",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Syedpur محل الحرم في مديرية Cumilla وليس Saidpur بولاية Nilphamari. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Syedpur",
+      "ascii": "Syedpur",
+      "regionCode": "BD-08"
+    },
+    "source": {
+      "url": "https://admission.baiust.ac.bd/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 149,
+      "sha256": "a807429b8f6deed1ad867fd24dc746bbf392aea3d556dd4cdf1fbf57350f21ce",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://admission.baiust.ac.bd/",
+        "retrievedAt": "2026-10-14T20:54:09.259454+00:00",
+        "status": 200,
+        "finalUrl": "https://admission.baiust.ac.bd/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "acfb98b17612eb972190482c513c1bc011965cd9db2a544c8defcffdcbee55df",
+        "bytes": 24206,
+        "cacheKey": "1694b0de31cb4e0d236732f227e56beeb780a0bab725160d8b1d393ed535447a"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-BGD-0029",
+    "countryIso3": "BGD",
+    "name": "Chapainawabganj",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. مصدر الجامعة ومصدر هيئة الاعتماد البنغلاديشية متفقان. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "চাঁপাইনবাবগঞ্জ",
+      "ascii": "Chapainawabganj",
+      "regionCode": "BD-45"
+    },
+    "source": {
+      "url": "https://ebaub.ac.bd/contact.html",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 150,
+      "sha256": "c09fa542eeda80c76bfee1eea50ee5fde3e8da3a4de6d92b0ee68ed9df638978",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://ebaub.ac.bd/contact.html",
+        "retrievedAt": "2026-10-14T20:54:13.249601+00:00",
+        "status": 200,
+        "finalUrl": "https://ebaub.ac.bd/contact.html",
+        "contentType": "text/html",
+        "sha256": "154db7985762c18f324853b98f7fba2adf2ac783a34f75f7bd720ed396a9c314",
+        "bytes": 21434,
+        "cacheKey": "211c416eec0bbce47fdf0564f1e227cbc24dbf5eddca0bf94088d4b281f80a5a"
+      },
+      "supportingUrl": "https://www.ugc-universities.gov.bd/university-detail/78"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-LKA-0022",
+    "countryIso3": "LKA",
+    "name": "Welisara",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الشركة المالكة تؤكد المقر الرئيسي Welisara لا Padukka المسجلة؛ هذه مؤسسة تدريب وليست بالضرورة جامعة مستقلة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "වැලිසර",
+      "ascii": "Welisara",
+      "regionCode": "LK-1"
+    },
+    "source": {
+      "url": "https://slt.lk/index.php/en/news/slt-mobitel-nebula-institute-technology-achieves-international-recognition-pearson-btec-higher",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 151,
+      "sha256": "9e1648f153316737a6c35f42a8e5399a0a02fb0b4b689247d4446341f7003510",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://slt.lk/index.php/en/news/slt-mobitel-nebula-institute-technology-achieves-international-recognition-pearson-btec-higher",
+        "retrievedAt": "2026-10-14T20:54:24.238363+00:00",
+        "status": 200,
+        "finalUrl": "https://slt.lk/index.php/en/news/slt-mobitel-nebula-institute-technology-achieves-international-recognition-pearson-btec-higher",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "0ffe06bb1ee4473c05e040933f85a2eeabbc2ca080bac24de93bd0dad7a544d8",
+        "bytes": 95556,
+        "cacheKey": "fb0275ce197a56d7c65ab341cb878e06268ba093ed29cde53c2b7f597b798d20"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-KAZ-0050",
+    "countryIso3": "KAZ",
+    "name": "Kaskelen",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. ترك رمز المنطقة فارغًا؛ KZ-75 في ملف المناطق مسمى Almaty وقد لا يطابق الإقليم (مقابل مدينة ألماتي). No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Қаскелең",
+      "ascii": "Kaskelen",
+      "regionCode": "KZ-19",
+      "existingCityId": "city_kz_qaskeleng"
+    },
+    "source": {
+      "url": "https://sdu.edu.kz/en/contact-us-4/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 152,
+      "sha256": "e43c2aa3d0965519fc10daa3756e4e742e794b68688333746f57852a09204336",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://sdu.edu.kz/en/contact-us-4/",
+        "retrievedAt": "2026-10-14T20:54:22.698189+00:00",
+        "status": 200,
+        "finalUrl": "https://sdu.edu.kz/en/contact-us-4/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "f0ab7d0e24c1b0e032d1dd5b189c8b81f27db45b2c25e7ee21aa1e28c30b2cfb",
+        "bytes": 337732,
+        "cacheKey": "15ed10be43f46373487161df5cac4ad2742727c1d5449d1fbaebee3926dc3a5f"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-CHN-0076",
+    "countryIso3": "CHN",
+    "name": "Tianjin",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. موقع حكومي بلدية تيانجين؛ هناك حَرمان في Hedong لا مدينتان. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "天津市",
+      "ascii": "Tianjin",
+      "regionCode": "CN-TJ",
+      "existingCityId": "city_cn_tianjin"
+    },
+    "source": {
+      "url": "https://www.tj.gov.cn/zwgk/ggqsydwxxgk/jy/ptbkgx/202409/t20240923_6736190.html",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 153,
+      "sha256": "85595cad75b528c40bd9447da88221e3ec4f6fca4468c6cf1af5fe9cc859ac57",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.tj.gov.cn/zwgk/ggqsydwxxgk/jy/ptbkgx/202409/t20240923_6736190.html",
+        "retrievedAt": "2026-10-14T20:54:38.612030+00:00",
+        "status": 200,
+        "finalUrl": "https://www.tj.gov.cn/zwgk/ggqsydwxxgk/jy/ptbkgx/202409/t20240923_6736190.html",
+        "contentType": "text/html",
+        "sha256": "e5d69143e89d531b171c428929b3bc9aefd14b7ab1fd716efdf180ad4b30aca9",
+        "bytes": 144349,
+        "cacheKey": "e67b54b3cc07bd9d0d68bbcb85a5ed4cd4c9a82790e99aff3335019ec90f6945"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-CHN-0151",
+    "countryIso3": "CHN",
+    "name": "Shuanghe",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. السجل القديم يضع Bayannur (مدينة/منطقة على مستوى prefecture)؛ الجامعة تقع في Shuanghe Town داخل Linhe District. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "双河镇",
+      "ascii": "Shuanghe",
+      "regionCode": "CN-NM"
+    },
+    "source": {
+      "url": "https://www.ccgp.gov.cn/cggg/dfgg/gzgg/202609/t20260917_27343131.htm",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 154,
+      "sha256": "49c5d2ef1c2dee2f8092c91cf8f097d37370c732ce18be9cc29b051603e4ce94",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.ccgp.gov.cn/cggg/dfgg/gzgg/202609/t20260917_27343131.htm",
+        "retrievedAt": "2026-10-14T20:54:30.241868+00:00",
+        "status": 200,
+        "finalUrl": "https://www.ccgp.gov.cn/cggg/dfgg/gzgg/202609/t20260917_27343131.htm",
+        "contentType": "text/html",
+        "sha256": "e025a844587342e1a01aa4c7fb151e504a105d9d7974b9353485368069bce1f9",
+        "bytes": 15715,
+        "cacheKey": "f3daf387896bfd999a9b04679306f544404582eb3ce03155cbe023be98ab3241"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-JPN-0041",
+    "countryIso3": "JPN",
+    "name": "Dazaifu",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الاسم الوارد في السجل تاريخي؛ الجامعة الحالية Japan University of Economics. بلدية دايزافو تؤكد عنوان حرم فوكوكا، مع وجود مقرات/فروع أخرى. City Source ID غير مثبت بعد. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "太宰府市",
+      "ascii": "Dazaifu",
+      "regionCode": "JP-40",
+      "existingCityId": "city_jp_geonames_7422816"
+    },
+    "source": {
+      "url": "https://www.city.dazaifu.lg.jp/soshiki/27/2031.html",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 157,
+      "sha256": "84b3b2105025b9d343f9636b03466a577735f76084fe1261e540e8d38ea5148b",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.city.dazaifu.lg.jp/soshiki/27/2031.html",
+        "retrievedAt": "2026-10-14T20:54:30.845162+00:00",
+        "status": 200,
+        "finalUrl": "https://www.city.dazaifu.lg.jp/soshiki/27/2031.html",
+        "contentType": "text/html",
+        "sha256": "ab599ba8089b6be9b1826a12f54b1da153ae22fa7eec506cb0eef66a9b66e896",
+        "bytes": 39634,
+        "cacheKey": "648d1c0390d20976f81e459352a0b260f0c99791e94117668212149697ae8e80"
+      },
+      "supportingUrl": "https://www.city.dazaifu.lg.jp/soshiki/27/2031.html"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-JPN-0368",
+    "countryIso3": "JPN",
+    "name": "Sanyo-Onoda",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. جامعة العلوم بطوكيو في ياماغوتشي اسم سابق؛ أصبحت جامعة بلدية سانيو أونودا سنة 2016. عنوان المؤسسة وعنوان المكتب المؤسسي متطابقان في كشف البلدية 2026، ولا يتعلق بمقر طوكيو. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "山陽小野田市",
+      "ascii": "Sanyo-Onoda",
+      "regionCode": "JP-35"
+    },
+    "source": {
+      "url": "https://www.city.sanyo-onoda.lg.jp/soshiki/6/rikadai-syugakusien.html",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 160,
+      "sha256": "9fe67ec152dd3fa70534a190e447c5bbc8fdd5b0c5660d9c8e466ad47908a081",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.city.sanyo-onoda.lg.jp/soshiki/6/rikadai-syugakusien.html",
+        "retrievedAt": "2026-10-14T20:54:30.961298+00:00",
+        "status": 200,
+        "finalUrl": "https://www.city.sanyo-onoda.lg.jp/soshiki/6/rikadai-syugakusien.html",
+        "contentType": "text/html",
+        "sha256": "79f5f85c4d4fb4b1bca3b7686fe64067d84996f38ecfe2581da15f65d3fadc77",
+        "bytes": 30982,
+        "cacheKey": "ba869bd871edd3a649c685fceb5067f991ad69f584577a1bb11465a0963356ad"
+      },
+      "supportingUrl": "https://www.city.sanyo-onoda.lg.jp/soshiki/6/rikadai-syugakusien.html"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MMR-0003",
+    "countryIso3": "MMR",
+    "name": "East Dagon Township",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. تعارض مهم: السجل القديم North Dagon، والموقع الرسمي الحالي يقول East Dagon؛ لا تُطابق المدينتين بالاسم. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "ဒဂုံမြို့သစ် (အရှေ့ပိုင်း)",
+      "ascii": "East Dagon Township",
+      "regionCode": "MM-06"
+    },
+    "source": {
+      "url": "https://www.dagonuniversity.edu.mm/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 162,
+      "sha256": "24373cfb0da8e841b29ea73386104f8f1907a8620be61dc9d13c94127e79dd51",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.dagonuniversity.edu.mm/",
+        "retrievedAt": "2026-10-14T20:54:31.300510+00:00",
+        "status": 200,
+        "finalUrl": "https://www.dagonuniversity.edu.mm/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "22bd60ad257fc052e51b9ea753298a2682ce71dbd833baec643cc96502fe351c",
+        "bytes": 107060,
+        "cacheKey": "dbdce395c4021dc5e5f0783977a0a5b70b8cbdc69eed11dfee4ac854d486bb5d"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MMR-0045",
+    "countryIso3": "MMR",
+    "name": "Hmawbi",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. المصدر جامعي يثبت بلدة Hmawbi وليس مدينة Yangon المركزية. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "မှော်ဘီ",
+      "ascii": "Hmawbi",
+      "regionCode": "MM-06"
+    },
+    "source": {
+      "url": "https://hbtu.edu.mm/contact_us",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 167,
+      "sha256": "edb181c274fbdecbdea2d709dee349a8eb491b1db649131a0282c3959bede434",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://hbtu.edu.mm/contact_us",
+        "retrievedAt": "2026-10-14T20:54:16.290007+00:00",
+        "status": 200,
+        "finalUrl": "https://hbtu.edu.mm/contact_us",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "ccb4d0c35a04ee5b98cd8fb041bf6080bf2b37b145ce39f40dd90945a24b3641",
+        "bytes": 18021,
+        "cacheKey": "564b71f8d03662e07b4788c507ca07f5dddf18d6616bb7affc747dbbdf890449"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MMR-0059",
+    "countryIso3": "MMR",
+    "name": "Loilem",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يحدد طريق Nansang في Loilem؛ لا يُختزل اسم Panglong في اسم مدينة أخرى من دون دليل. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "လွိုင်လင်",
+      "ascii": "Loilem",
+      "regionCode": "MM-17"
+    },
+    "source": {
+      "url": "https://tuplon.edu.mm/contact/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 169,
+      "sha256": "81e8159e972b6a39ce8d50a3705ea2703081dbc048a17ea895756b4ffc088b8d",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://tuplon.edu.mm/contact/",
+        "retrievedAt": "2026-10-14T20:54:24.640073+00:00",
+        "error": "HTTP Error 503: Service Unavailable"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MMR-0071",
+    "countryIso3": "MMR",
+    "name": "Yezin",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Yezin بلدة/منطقة حرم، Zayarthiri هي Township، وNaypyidaw إقليم إداري. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "ရေဆင်း",
+      "ascii": "Yezin",
+      "regionCode": "MM-18",
+      "existingCityId": "city_mm_geonames_1284953"
+    },
+    "source": {
+      "url": "https://ufes.edu.mm/location/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 171,
+      "sha256": "b0a835eff2c19a0756062d84ef0a1118b8381cc702d1cb1d4845b17e50561594",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://ufes.edu.mm/location/",
+        "retrievedAt": "2026-10-14T20:54:24.682086+00:00",
+        "status": 200,
+        "finalUrl": "https://ufes.edu.mm/location/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "6a37e46c583aac55e90f893c3d6fd55ebfd0e515b34ed27580386ece092848f5",
+        "bytes": 107199,
+        "cacheKey": "9984c7e0670397c0ad3567363b87d45b64c347b1be90e5fb7b9dfbebefac0a75"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-THA-0041",
+    "countryIso3": "THA",
+    "name": "Salaya",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. ليس في Bangkok؛ العنوان الرسمي للحرم المركزي في Salaya، Nakhon Pathom، ويوجد عدد من الفروع الأخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "ศาลายา",
+      "ascii": "Salaya",
+      "regionCode": "TH-73",
+      "existingCityId": "city_th_geonames_6865927"
+    },
+    "source": {
+      "url": "https://www.mbu.ac.th/uncategorized/post-3095/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 173,
+      "sha256": "0cc3e924f7e0dca22fa922fdb77b3378b7bdfe4fe79931a5f09917b55d693667",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.mbu.ac.th/uncategorized/post-3095/",
+        "retrievedAt": "2026-10-14T20:54:34.390072+00:00",
+        "status": 200,
+        "finalUrl": "https://www.mbu.ac.th/uncategorized/post-3095/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "94ae15e233e074a22fbc2d5ec6b7918f8e066779f651ed9ccbff2b5f576eb695",
+        "bytes": 251901,
+        "cacheKey": "ce0108a472c1821fe54f3615b254b75a5a0a167ac6bf03fa2347f8f20a7bcfd1"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MYS-0044",
+    "countryIso3": "MYS",
+    "name": "Padang Besar",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; عنوان إداري. عنوان اتصال الجامعة؛ تعيينه عنوانًا إداريًا وليس حصرًا لجميع الأحرم. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Padang Besar",
+      "ascii": "Padang Besar",
+      "regionCode": "MY-09",
+      "existingCityId": "city_my_geonames_1753004"
+    },
+    "source": {
+      "url": "https://umam.edu.my/contact",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 176,
+      "sha256": "88d875cb23bce7817d8c057c4ba919b176227a1c90e8cf9f60725678b52f977d",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://umam.edu.my/contact",
+        "retrievedAt": "2026-10-14T20:54:24.978967+00:00",
+        "status": 200,
+        "finalUrl": "https://umam.edu.my/contact",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "21d96215179dcbf56596d16f3f8b87e5ae6e348904ebce72e3b38e3fa31c80d1",
+        "bytes": 82337,
+        "cacheKey": "655190d7a5ba36b0e87f6f3caf17db99ec266527ae5ddcdbffaebece19a92b15"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "عنوان إداري",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0037",
+    "countryIso3": "IDN",
+    "name": "Bakaran Batu",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Labuhanbatu محافظة (Kabupaten)، وBakaran Batu موقع البلدة/الحارة؛ Rantau Selatan هي Kecamatan. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Bakaran Batu",
+      "ascii": "Bakaran Batu",
+      "regionCode": "ID-SU"
+    },
+    "source": {
+      "url": "https://univalb.ac.id/contact/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 177,
+      "sha256": "cb80097fb6256a6619199ea11a70fb9f90e047b2a540f367dcde018c01adf14b",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://univalb.ac.id/contact/",
+        "retrievedAt": "2026-10-14T20:54:27.229836+00:00",
+        "status": 200,
+        "finalUrl": "https://univalb.ac.id/contact/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "ff33441fc8081bc4da7fd64c87e8464476be4b23f7e3ff520a2c5a5a751ae5aa",
+        "bytes": 106661,
+        "cacheKey": "fdfaef607ffdfb26322fc4fffa4daf947aa09f0b737df1df002e0b1d5e0e1d58"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0099",
+    "countryIso3": "IDN",
+    "name": "Baubau",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. العنوان الجامعي 124 يختلف عن عنوان سجل الحكومة Yos Sudarso 43؛ اتفاق المصدرين على Baubau وBetoambari، ويستلزم تدقيق رقم المبنى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Baubau",
+      "ascii": "Baubau",
+      "regionCode": "ID-SG",
+      "existingCityId": "city_id_official_baubau"
+    },
+    "source": {
+      "url": "https://lp3mlk.unidayan.ac.id/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 180,
+      "sha256": "f65921c1e29d05c791e34f0c3e21d0c30e1ec2ac13565dc0c6f5ed9c8f0c4491",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://lp3mlk.unidayan.ac.id/",
+        "retrievedAt": "2026-10-14T20:54:18.075561+00:00",
+        "status": 200,
+        "finalUrl": "https://lp3mlk.unidayan.ac.id/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "2a830a95f8ed246e63812339f8f5aef2078e0bbfbeaecfaa5051935fd4224dbb",
+        "bytes": 163491,
+        "cacheKey": "ba3345ddba14d7a1f59c174c24dcbf0e23bd3d6b130a8930807a85b9fa5d1d2f"
+      },
+      "supportingUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/091006"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0114",
+    "countryIso3": "IDN",
+    "name": "Kotamobagu",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. تحديد المدينة على مستوى Kota مؤكد من السجل الحكومي؛ لا تُعامل Kecamatan Kotamobagu Barat مدينة مستقلة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Kotamobagu",
+      "ascii": "Kotamobagu",
+      "regionCode": "ID-SA"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/161005",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 182,
+      "sha256": "6ed7dcac10a41f52300074ec78b61b07f7ea1eb489525a1a684ca6fc54972be1",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/161005",
+        "retrievedAt": "2026-10-14T20:54:21.572869+00:00",
+        "status": 200,
+        "finalUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/161005",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "e83b9bf227c09bd9aeb3327f75de161a4feffedf1a61734dbd0e788b848ff141",
+        "bytes": 15888,
+        "cacheKey": "7ee55c14eaaa9a9bd70720b811b888cf086e0aa4d3e9b92325b279aa6157fd72"
+      },
+      "supportingUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/161005"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0218",
+    "countryIso3": "IDN",
+    "name": "Purwokerto",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; عنوان إداري. العنوان الرسمي للمبنى الإداري المركزي؛ Banyumas هو Kabupaten/المديرية، بينما المدينة المستخدمة Purwokerto. لا تعميم على كل الكليات. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Purwokerto",
+      "ascii": "Purwokerto",
+      "regionCode": "ID-JT",
+      "existingCityId": "city_id_purwokerto"
+    },
+    "source": {
+      "url": "https://rpl.unsoed.ac.id/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 186,
+      "sha256": "fae849b144c4e7282df0a9acaef2dd1a92fa2841195ffb5e2db8ff778e0a8979",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://rpl.unsoed.ac.id/",
+        "retrievedAt": "2026-10-14T20:54:21.761959+00:00",
+        "status": 200,
+        "finalUrl": "https://rpl.unsoed.ac.id/",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "7cef6306d4d9fd859b24b39384f749c398cf0211ba46f6c93c0e00ff6d736d43",
+        "bytes": 36915,
+        "cacheKey": "4667c4dc4608fbeb2d6983800013cadecd76a2ee6a311a5f461cc873ba59c57e"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "عنوان إداري",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0226",
+    "countryIso3": "IDN",
+    "name": "Ketaren",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Ketaren قرية/حيّ داخل Kabanjahe وليست رمز مدينة موجودًا بالضرورة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Ketaren",
+      "ascii": "Ketaren",
+      "regionCode": "ID-SU"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/011013",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 187,
+      "sha256": "399e8e2824558fa21623a08be761d6dddc4b5a75caeaa5fbba66c8c3265fecb2",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/011013",
+        "retrievedAt": "2026-10-14T20:54:21.558465+00:00",
+        "status": 200,
+        "finalUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/011013",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "29aea4bb3b26cf990e42714a321b0103527ab185ce3ba9eb06bceb6a9846c0bf",
+        "bytes": 15762,
+        "cacheKey": "b213b7f3af21cda2cac4e213a64956823a0b34bb5e0ded41fa554df2921eebc2"
+      },
+      "supportingUrl": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/011013"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0261",
+    "countryIso3": "IDN",
+    "name": "Tentena",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. عنوان الجامعة مذكور بموقع دوريتها الرسمي، لكن مطابقة رمز المنطقة من المستودع لم تُتحقق في هذه الجولة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Tentena",
+      "ascii": "Tentena",
+      "regionCode": "ID-ST",
+      "existingCityId": "city_id_tentena"
+    },
+    "source": {
+      "url": "https://publikasi.unkrit.ac.id/index.php/Akademia/about/submissions",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 190,
+      "sha256": "ce806ba24b83837e4a80140b9905f0a7df2e5582b6459d650228aa96f87a9ab6",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://publikasi.unkrit.ac.id/index.php/Akademia/about/submissions",
+        "retrievedAt": "2026-10-14T20:54:20.574110+00:00",
+        "status": 200,
+        "finalUrl": "https://publikasi.unkrit.ac.id/index.php/Akademia/about/submissions",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "3715cefb24589bee22f9fd1fe1f8c06eaf766b0a59f422ffe3ba65f6100e1e25",
+        "bytes": 17043,
+        "cacheKey": "d54269fc43a7e6ccfc373d141ac0cede80107e36800264d70b050e636cca4619"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0341",
+    "countryIso3": "IDN",
+    "name": "Dukuhwaluh",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Dukuhwaluh قرية، Kembaran ناحية، Banyumas منطقة kabupaten، وPurwokerto عنوان بريدي؛ يلزم تعريف مستوى city في بيانات المستودع قبل الربط. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Dukuhwaluh",
+      "ascii": "Dukuhwaluh",
+      "regionCode": "ID-JT"
+    },
+    "source": {
+      "url": "https://ump.ac.id/profil-3-Lokasi.Kampus.html",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 195,
+      "sha256": "c621778879965b654baaf72685b222e54059af2875e2ad3223207725a4742dee",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://ump.ac.id/profil-3-Lokasi.Kampus.html",
+        "retrievedAt": "2026-10-14T20:54:25.330407+00:00",
+        "status": 200,
+        "finalUrl": "https://ump.ac.id/profil-3-Lokasi.Kampus.html",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "be509e223805c4a915e5f4f7a1d85b7fa47fa970c58be8f9381be635963ffde3",
+        "bytes": 72029,
+        "cacheKey": "8c5dc0cd55b22e1028bacd0c14d86144845a342e62c5ffb6c6b294d9ba6049d3"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0374",
+    "countryIso3": "IDN",
+    "name": "Karangklesem",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Karangklesem قرية ضمن ناحية Purwokerto Selatan؛ Banyumas مديرية وليس مدينة. للجامعة حرم Winduaji أيضًا حسب صفحة القبول؛ لا يثبت citySourceId. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Karangklesem",
+      "ascii": "Karangklesem",
+      "regionCode": "ID-JT"
+    },
+    "source": {
+      "url": "https://unupurwokerto.ac.id/profil/sekilas-unu-purwokerto/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 197,
+      "sha256": "277d52e63106689fde7e2bee597cd3d787f79f473c1c1f19b30e881948ed5e9e",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://unupurwokerto.ac.id/profil/sekilas-unu-purwokerto/",
+        "retrievedAt": "2026-10-14T20:54:28.000273+00:00",
+        "status": 200,
+        "finalUrl": "https://unupurwokerto.ac.id/profil/sekilas-unu-purwokerto/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "01da70509af961ffc764cbba763361d851b1961ff7998632858fe37914fb1892",
+        "bytes": 224735,
+        "cacheKey": "022c1ef4a36554b2f6f80e4aab413b8e091917fa304a7f0ff960a9a9b71fe7f5"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0378",
+    "countryIso3": "IDN",
+    "name": "Medan",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. تعارض مع المدينة القديمة Deli Serdang؛ مصادر أقدم تشير إلى حرم في Tanjung Selamat، Deli Serdang، بينما موقع القبول الرسمي يسمي الحرم الرئيسي في Medan. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Medan",
+      "ascii": "Medan",
+      "regionCode": "ID-SU",
+      "existingCityId": "city_id_medan"
+    },
+    "source": {
+      "url": "https://pmb.unusu.ac.id/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 198,
+      "sha256": "1127f55edc6926439e91c644fb879a4ac1e574d3e4546c785a1bfa7fc5aea784",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://pmb.unusu.ac.id/",
+        "retrievedAt": "2026-10-14T20:54:19.502853+00:00",
+        "status": 200,
+        "finalUrl": "https://pmb.unusu.ac.id/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "b130c5b3a2f99079f96f0cb20c90a763c9fe5c41093395c02a1d91f4e92e1b9c",
+        "bytes": 32407,
+        "cacheKey": "61982e31d09bc4d514d5770ed54746e4294075c86b6d68398b66fe380458cddd"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0429",
+    "countryIso3": "IDN",
+    "name": "Rambah",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Rokan Hulu اسم Kabupaten لا اسم البلدة الفعلية؛ الموقع يذكر قرية Rambah في ناحية Rambah Hilir. لا تُحوّل الإدراج إلى مدينة Pasir Pengaraian آليًا. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Rambah",
+      "ascii": "Rambah",
+      "regionCode": "ID-RI"
+    },
+    "source": {
+      "url": "https://pmb.upp.ac.id/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 201,
+      "sha256": "a380fa35ad52bed9c755eb79eb214af2b3bd1562999341b8a891d8617e327687",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://pmb.upp.ac.id/",
+        "retrievedAt": "2026-10-14T20:54:20.054709+00:00",
+        "status": 200,
+        "finalUrl": "https://pmb.upp.ac.id/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "b89a32f93a40d91198f646333cdba280445f09f63683bdfce8515c24b324bb5c",
+        "bytes": 18866,
+        "cacheKey": "0251d0da1d4b87d066053a2791c6b80cc1a46d4bf627d7cee72380a59a808b7d"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0454",
+    "countryIso3": "IDN",
+    "name": "Rejoso",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Rejoso قرية/موضع داخل Peterongan؛ Jombang في العنوان اسم Kabupaten لا يثبت المدينة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Rejoso",
+      "ascii": "Rejoso",
+      "regionCode": "ID-JI"
+    },
+    "source": {
+      "url": "https://pmb.unipdu.ac.id/contact-us/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 204,
+      "sha256": "7272e466c46c5a87be9f0bfd5ab5529e733bc2490336eed764475e1737796e56",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://pmb.unipdu.ac.id/contact-us/",
+        "retrievedAt": "2026-10-14T20:54:18.854199+00:00",
+        "error": "HTTP Error 404: Not Found"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0480",
+    "countryIso3": "IDN",
+    "name": "Senali",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; عنوان إداري. المصدر الحكومي يحدد الوحدة المحلية Senali ضمن Kecamatan Arga Makmur؛ المحافظة Bengkulu Utara، الإقليم الأول Bengkulu. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Senali",
+      "ascii": "Senali",
+      "regionCode": "ID-BE"
+    },
+    "source": {
+      "url": "https://referensi.data.kemdikbud.go.id/pendidikan/npsn/021018",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 205,
+      "sha256": "d0dc46b9f17dee6baea8bab868c11846d2997eb95117e2e5cb76991b8c62e7ac",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://referensi.data.kemdikbud.go.id/pendidikan/npsn/021018",
+        "retrievedAt": "2026-10-14T20:54:21.259655+00:00",
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "supportingUrl": "https://referensi.data.kemdikbud.go.id/pendidikan/npsn/021018"
+    },
+    "addressExcerpt": "عنوان إداري",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0515",
+    "countryIso3": "IDN",
+    "name": "South Jakarta",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. المدينة القديمة Jakarta Pusat غير مطابقة؛ عنوان الجامعة الحالي في جنوب جاكرتا. ليس Universitas Siber Asia (مؤسسة مستقلة). No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Jakarta Selatan",
+      "ascii": "South Jakarta",
+      "regionCode": "ID-JK",
+      "existingCityId": "city_id_official_085e87d4382bbf23"
+    },
+    "source": {
+      "url": "https://cyber-univ.ac.id/sambutan-rektor",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 207,
+      "sha256": "5b703b9f30244b50d3d64ffab2e29d6289ee0503461ba6ebd98c78eb24195de1",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://cyber-univ.ac.id/sambutan-rektor",
+        "retrievedAt": "2026-10-14T20:54:12.341412+00:00",
+        "error": "HTTP Error 503: Service Unavailable"
+      },
+      "supportingUrl": "https://referensi.data.kemendikdasmen.go.id/tabs.php?npsn=031078"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0534",
+    "countryIso3": "IDN",
+    "name": "Kedungrejo",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. اسم الجامعة يذكر Surabaya، لكن المقر الفعلي في Kedungrejo بمنطقة Waru التابعة لكابوباتن Sidoarjo. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Kedungrejo",
+      "ascii": "Kedungrejo",
+      "regionCode": "ID-JI"
+    },
+    "source": {
+      "url": "https://pmb.unsuri.ac.id/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 209,
+      "sha256": "3b504b7b82b0f2e577b726fe42a49686e8d1f31e1f4070dfc5154be010b9d2a0",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://pmb.unsuri.ac.id/",
+        "retrievedAt": "2026-10-14T20:54:19.273768+00:00",
+        "status": 200,
+        "finalUrl": "https://pmb.unsuri.ac.id/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "f99d048e7d4016980ad0cd8133115d56d8daa6f13b2337ba4a3a57f8f1505d05",
+        "bytes": 87128,
+        "cacheKey": "1114370cef6b037a4fe40758a41a196e9cc998e9f867f6adff180ce4c6a7f1b1"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0563",
+    "countryIso3": "IDN",
+    "name": "Ujong Tanoh Darat",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Ujong Tanoh Darat قرية، Meureubo ناحية، Aceh Barat مديرية؛ لا تخطئ فتنقل الجامعة إلى Aceh Barat كمدينة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Ujong Tanoh Darat",
+      "ascii": "Ujong Tanoh Darat",
+      "regionCode": "ID-AC"
+    },
+    "source": {
+      "url": "https://utu.ac.id/about-us/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 210,
+      "sha256": "6811162a16927284e3fae8046e63d5040126614965c0e1c032b98ab8c94a00b3",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://utu.ac.id/about-us/",
+        "retrievedAt": "2026-10-14T20:54:28.252415+00:00",
+        "status": 200,
+        "finalUrl": "https://utu.ac.id/about-us/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "7e8dc3e53dbe8feba7058d6aa9bccc7723042f98323397c3a221c1cd9126a103",
+        "bytes": 110971,
+        "cacheKey": "5060770edb51406f9db1fa509c21c7d9cab06ba62ddde4778979c9233ac531db"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-IDN-0586",
+    "countryIso3": "IDN",
+    "name": "Gadingan",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Gadingan/Jombor موضع محلي داخل Bendosari؛ Sukoharjo مديرية. لم يُتحقق من مطابقته بسجل المدن. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Gadingan",
+      "ascii": "Gadingan",
+      "regionCode": "ID-JT"
+    },
+    "source": {
+      "url": "https://univetbantara.ac.id/kontak/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 211,
+      "sha256": "8855013b697bf1a2840ec23e2ada2da634ca157ad2e57cab66ded88d9d7f2fe3",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://univetbantara.ac.id/kontak/",
+        "retrievedAt": "2026-10-14T20:54:27.586382+00:00",
+        "status": 200,
+        "finalUrl": "https://univetbantara.ac.id/kontak/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "a96c1ddd5f0a16715a0e789f50f61c94da2edd883597e6ce27a1da298e10bf20",
+        "bytes": 164885,
+        "cacheKey": "192747c1309ca4cbfa07a269ddbdf2afd8e61254f34120d28a01b2326ebbf12c"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PHL-0018",
+    "countryIso3": "PHL",
+    "name": "Balanga City",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. مصدر وحدة الجامعة المعنية بمكافحة الروتين على نطاق bpsu.edu.ph ويحدد main campus؛ لها فروع أخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Balanga",
+      "ascii": "Balanga City",
+      "regionCode": "PH-BAN"
+    },
+    "source": {
+      "url": "https://sites.google.com/bpsu.edu.ph/bpsucart/contact",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 213,
+      "sha256": "44569c9094f7e4fda3b9d2b6fe861506fefc119eb7c733fb890f2347044cbb45",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://sites.google.com/bpsu.edu.ph/bpsucart/contact",
+        "retrievedAt": "2026-10-14T20:54:23.674296+00:00",
+        "status": 200,
+        "finalUrl": "https://sites.google.com/bpsu.edu.ph/bpsucart/contact",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "0a596b33c623101a27f4d3abc2425f401623acc9403a50ab1039d82e773b14a5",
+        "bytes": 167220,
+        "cacheKey": "8d88571f624ea4974ee9d98e6fcbf21c973ef552e5e3fb507e76a4bf2bcd8697"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PHL-0053",
+    "countryIso3": "PHL",
+    "name": "Buenavista",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. صفحة توظيف رسمية لعام 2025 توضح main campus؛ Mclain نطاق فرعي من Buenavista. يوجد فرعان في Jordan وSan Lorenzo. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Buenavista",
+      "ascii": "Buenavista",
+      "regionCode": "PH-GUI"
+    },
+    "source": {
+      "url": "https://www.gsu.edu.ph/career/chief-administrative-officer-administrative-officer-v-gscb-cadof-1-2023/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 214,
+      "sha256": "ae316bad801db2f361449d2659ffdec9007f3fbbd63d008753f6481b9e341285",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.gsu.edu.ph/career/chief-administrative-officer-administrative-officer-v-gscb-cadof-1-2023/",
+        "retrievedAt": "2026-10-14T20:54:32.642622+00:00",
+        "status": 200,
+        "finalUrl": "https://www.gsu.edu.ph/career/chief-administrative-officer-administrative-officer-v-gscb-cadof-1-2023/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "8f0e80c281f7befc17b702314b75bf18917f6f41af219cecf2b41c94997f4f54",
+        "bytes": 46152,
+        "cacheKey": "04a7f3aab7a68e660686589f20bf706ff06acaa9aad8ca6f7cfa88d0ac9eee69"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PHL-0069",
+    "countryIso3": "PHL",
+    "name": "Quezon City",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Quiapo التي تظهر بالسجل موقع سابق في Manila؛ العنوان الجامعي الحالي صريح بمدينة Quezon City. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Quezon City",
+      "ascii": "Quezon City",
+      "regionCode": "PH-00",
+      "existingCityId": "city_ph_quezon_city"
+    },
+    "source": {
+      "url": "https://www.mlqu.edu.ph/contact-us/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 216,
+      "sha256": "a297280b91f7650268d1bd6b4bc8425cc3a36f8b3b1f7af1e2c35604ff73e7b9",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.mlqu.edu.ph/contact-us/",
+        "retrievedAt": "2026-10-14T20:54:36.319565+00:00",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PHL-0088",
+    "countryIso3": "PHL",
+    "name": "Valenzuela City",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يصرح بأن Valenzuela الحرم الرئيسي، مع وجود أفرع أخرى. الرابط في عمود المصدر المساند هو موقع الجامعة نفسه وليس مرجعًا حكوميًا لتقسيم المنطقة؛ لم يثبت City Source ID. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Valenzuela City",
+      "ascii": "Valenzuela City",
+      "regionCode": "PH-00",
+      "existingCityId": "city_ph_valenzuela"
+    },
+    "source": {
+      "url": "https://fatima.edu.ph/our-lady-of-fatima-university-valenzuela/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 217,
+      "sha256": "a9a43b6bbf59520b9e212c23a48d61169ca68a81765af58b0ee84e1f5dc5518d",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://fatima.edu.ph/our-lady-of-fatima-university-valenzuela/",
+        "retrievedAt": "2026-10-14T20:54:15.288312+00:00",
+        "status": 200,
+        "finalUrl": "https://fatima.edu.ph/our-lady-of-fatima-university-valenzuela/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "0385c90de69edb494a0b354f41d9adb38e881cf13f9fe7f41b7ca948cf65e0f5",
+        "bytes": 467844,
+        "cacheKey": "4be7b9aee9e2c156c5d9ea5c313011d83f2e1524f78f1e9cb5bb1ca9872cefba"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-FRA-0006",
+    "countryIso3": "FRA",
+    "name": "Pessac",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يوضح أن الحرم الجامعي الكبير يمتد إلى Pessac/Talence/Gradignan وأن للمؤسسة مواقع أخرى؛ هذه بيانات الحرم الرئيسي. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Pessac",
+      "ascii": "Pessac",
+      "regionCode": "FR-NAQ"
+    },
+    "source": {
+      "url": "https://www.u-bordeaux-montaigne.fr/fr/contact/plan-d-acces.html",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 218,
+      "sha256": "deef568b7329f9febdca1fbefa5eb10210f1ea611dd4f9f38913865ae856026c",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.u-bordeaux-montaigne.fr/fr/contact/plan-d-acces.html",
+        "retrievedAt": "2026-10-14T20:54:39.415976+00:00",
+        "status": 200,
+        "finalUrl": "https://www.u-bordeaux-montaigne.fr/fr/contact/plan-d-acces.html",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "7e275ca4b67bfe68718c601f6e6b96bffa425abd780bf9ba015ab4de749ec68c",
+        "bytes": 100828,
+        "cacheKey": "bc7152ef6d013823eadedaee6b735c47dcdf4b50f81ee5df4ca07590c4bfae40"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-FRA-0069",
+    "countryIso3": "FRA",
+    "name": "Cayenne",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. 97337 هو رمز بريد Cedex لا اسم بلدة؛ French Guiana منطقة وراء البحار، وليس مدينة في فرنسا الأوروبية. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Cayenne",
+      "ascii": "Cayenne",
+      "regionCode": "FR-973"
+    },
+    "source": {
+      "url": "https://www.univ-guyane.fr/universite/mentions-legales/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 219,
+      "sha256": "ce8d2baa0fc4c4141e96c469e7f3821659fa5f834a6776cec346376a49c7f7c8",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.univ-guyane.fr/universite/mentions-legales/",
+        "retrievedAt": "2026-10-14T20:54:40.531277+00:00",
+        "status": 200,
+        "finalUrl": "https://www.univ-guyane.fr/universite/mentions-legales/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "328b809870652a026d4c8e9bb6dfb1babd0f3c167196f9172a2d0e5e19f84157",
+        "bytes": 510728,
+        "cacheKey": "e07f01e476aae055d78a57c71b44ee60572b21f146c302d119b382630338c276"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-FRA-0071",
+    "countryIso3": "FRA",
+    "name": "Punaauia",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Punaauia هي مكان الحرم؛ Faa’a يظهر فقط ضمن عنوان الصندوق البريدي، ولا يجب اعتباره مدينة المقر. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Punaauia",
+      "ascii": "Punaauia",
+      "regionCode": "FR-PF"
+    },
+    "source": {
+      "url": "https://www.upf.pf/fr",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 220,
+      "sha256": "6a18884fc1c40097479b0fcde93d91f8796bdaf8f2dcefc2b04938287e09d546",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.upf.pf/fr",
+        "retrievedAt": "2026-10-14T20:54:41.973753+00:00",
+        "status": 200,
+        "finalUrl": "https://www.upf.pf/fr",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "d74398ca4b68fe703a7a64dfd3bf33956af2b52bf419634b86a4513844ee255c",
+        "bytes": 88383,
+        "cacheKey": "ec400a8eeaaaa04a9dab306f239682e695f67b8f20baadca345467e86776d5b5"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-FRA-0070",
+    "countryIso3": "FRA",
+    "name": "Noumea",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. حرم Nouville في Nouméa؛ الرمز البريدي Cedex لا يشير إلى مقر مختلف. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Nouméa",
+      "ascii": "Noumea",
+      "regionCode": "FR-NC"
+    },
+    "source": {
+      "url": "https://www.unc.nc/nous-contacter/plan-et-acces/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 221,
+      "sha256": "42934f7039f8dc85cc929a3490d63c79b85797e33c7de2062d9975b12cfe3c36",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.unc.nc/nous-contacter/plan-et-acces/",
+        "retrievedAt": "2026-10-14T20:54:40.373294+00:00",
+        "status": 200,
+        "finalUrl": "https://www.unc.nc/nous-contacter/plan-et-acces/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "a38aa0194a56d57c45017930b56dc7226a6a4f7b374a10cb5923bc804022f6a4",
+        "bytes": 296757,
+        "cacheKey": "b57c64acf26e170bafa8254232fb9f58a3ff7565c31f37515cb1533eb5622be0"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-ISL-0003",
+    "countryIso3": "ISL",
+    "name": "Hólar",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. من 1 يوليو 2026 أصبحت University of Iceland at Hólar مؤسسة مرتبطة بمنظومة جامعة آيسلندا؛ Sauðárkrókur عنوان بريدي وموقع إضافي لا يحل محل Hólar. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Hólar í Hjaltadal",
+      "ascii": "Hólar",
+      "regionCode": "IS-5"
+    },
+    "source": {
+      "url": "https://gamli.holar.is/is/skolinn/um-haskolann-a-holum/um-haskolann",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 223,
+      "sha256": "3a8ab1683fa8980c41d86b6e53bd2f63ffca8ff8837c1d7a82909d12facd4050",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://gamli.holar.is/is/skolinn/um-haskolann-a-holum/um-haskolann",
+        "retrievedAt": "2026-10-14T20:54:15.846527+00:00",
+        "status": 200,
+        "finalUrl": "https://gamli.holar.is/is/skolinn/um-haskolann-a-holum/um-haskolann",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "4ad0c81be14fe6372bb03d48fe24507af688f45c47b392f05e2e3735f5872bb9",
+        "bytes": 62865,
+        "cacheKey": "3607c6bc34f8cad04e14d9b71f2518434d06cc3dd28d54c8e618f03629ecb330"
+      },
+      "supportingUrl": "https://english.hi.is/about-ui/university-system/about-university-system"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-SVN-0015",
+    "countryIso3": "SVN",
+    "name": "Trzin",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يثبت مقراً في Trzin؛ توجد مواقع تعليمية إضافية في Ljubljana وDob. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Trzin",
+      "ascii": "Trzin",
+      "regionCode": "SI-186"
+    },
+    "source": {
+      "url": "https://en.fd.si/varstvo-osebnih-podatkov",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 233,
+      "sha256": "72f9007818c3ca92dce42b8ba3f03109d6cfaf913002ecefb1ee29fc2d28fa65",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://en.fd.si/varstvo-osebnih-podatkov",
+        "retrievedAt": "2026-10-14T20:54:13.267640+00:00",
+        "status": 200,
+        "finalUrl": "https://en.fd.si/varstvo-osebnih-podatkov",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "b6cb470a2c45e42f963bac1c99a544c855103b5be0609c5390a9c825cbf2d1f3",
+        "bytes": 146342,
+        "cacheKey": "ed90b4612118cfa5900dccb2e5a18112cf918d7a24eaa27c4637643bd418b087"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-ESP-0065",
+    "countryIso3": "ESP",
+    "name": "Santa María de Guía",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. يوجد Campus de Guía وموقع إضافي INNOVEGUETA في Las Palmas de Gran Canaria؛ لا تخلط المقرين. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Santa María de Guía de Gran Canaria",
+      "ascii": "Santa María de Guía",
+      "regionCode": "ES-CN"
+    },
+    "source": {
+      "url": "https://www.ufpcanarias.es/Home/About",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 234,
+      "sha256": "1a25ed6a27111db5644759b9ef28c4eccd947feed73576e6de321603f587e560",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.ufpcanarias.es/Home/About",
+        "retrievedAt": "2026-10-14T20:54:39.566421+00:00",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-BLR-0021",
+    "countryIso3": "BLR",
+    "name": "Gomel",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. أثبت موقع القبول الجامعي الرسمي مقر الجامعة؛ لا يستلزم فصل تهجئتي Gomel وHomyel إلى مدينتين. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Гомель",
+      "ascii": "Gomel",
+      "regionCode": "BY-HO",
+      "existingCityId": "city_by_homyel"
+    },
+    "source": {
+      "url": "https://abiturient.bteu.by/abiturientu/poryadok-priyoma/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 236,
+      "sha256": "3d8563706291590202ef81f3296986d8d5b7ba634a0fc3d0fc54fd58b2b666c7",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://abiturient.bteu.by/abiturientu/poryadok-priyoma/",
+        "retrievedAt": "2026-10-14T20:54:09.258962+00:00",
+        "status": 200,
+        "finalUrl": "https://abiturient.bteu.by/abiturientu/poryadok-priyoma/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "b46ba2da79ef5983e2c434a5eb0832657a87ad62f434635b80d7ed3504a6fdc7",
+        "bytes": 171021,
+        "cacheKey": "dc444936878df44f188e38a1e0bd9bf71e22af0c99408000be685bfd02b7c247"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-BLR-0025",
+    "countryIso3": "BLR",
+    "name": "Gomel",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي.  No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Гомель",
+      "ascii": "Gomel",
+      "regionCode": "BY-HO",
+      "existingCityId": "city_by_homyel"
+    },
+    "source": {
+      "url": "https://www.gsu.by/en",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 237,
+      "sha256": "51f28461175e70e36d2b9bf3c09b84d8fe9e23ab26110f0e1cf1bb9c49e275fd",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.gsu.by/en",
+        "retrievedAt": "2026-10-14T20:54:32.453149+00:00",
+        "status": 200,
+        "finalUrl": "https://www.gsu.by/en",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "b21908321c3b5987f098c5d46bb379985c58d162a1866defb172789014e6c1b4",
+        "bytes": 226791,
+        "cacheKey": "c7b61ae11c655657ec60e1937c19d6c81a59c8ecd952bfe6516fe181173aa3d1"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-BLR-0036",
+    "countryIso3": "BLR",
+    "name": "Mozyr",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. المصدر صفحة جامعية للمقبولين نشرها قسم الجامعة؛ يستحسن تجديد تأكيد عنوان المقر عند أي تطبيق آلي. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Мозырь",
+      "ascii": "Mozyr",
+      "regionCode": "BY-HO",
+      "existingCityId": "city_by_mazyr"
+    },
+    "source": {
+      "url": "https://omsiid.mspu.by/en/index.php?view=HOW_TO_APPLY",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 238,
+      "sha256": "c2ad2891c75f631849438f7113fa922fa88d044b0db5eb69c197cc23a0b451f6",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://omsiid.mspu.by/en/index.php?view=HOW_TO_APPLY",
+        "retrievedAt": "2026-10-14T20:54:18.526448+00:00",
+        "status": 200,
+        "finalUrl": "https://omsiid.mspu.by/en/index.php?view=HOW_TO_APPLY",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "f4493135aba703f1dff93b6d0de43f1fb3193fabf895aad14bf572d1a8823c1c",
+        "bytes": 19826,
+        "cacheKey": "a1f38fc0977fb2d1e3d8a210eb5791b7e00c058320bbddbd7fe396182e224a1a"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-GEO-0034",
+    "countryIso3": "GEO",
+    "name": "Gremi",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; مقر جامعي. الوضع المؤسسي: معتمدة رسميًا. درجة المصدر: سجلات الاعتماد والقبول الحكومية. دليل NAEC الرسمي: قرية Gremi بلدية Kvareli الرمز 4806؛ سجل EQE يثبت الترخيص. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Gremi",
+      "ascii": "Gremi",
+      "regionCode": "GE-KA"
+    },
+    "source": {
+      "url": "https://reestri.eqe.ge/en/inner/72",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 239,
+      "sha256": "ac6a08cfbb1e5531bbb0f542ecf3eaf0c90bec12d98a4220ea076c1121e58923",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://reestri.eqe.ge/en/inner/72",
+        "retrievedAt": "2026-10-14T20:54:21.197519+00:00",
+        "status": 200,
+        "finalUrl": "https://reestri.eqe.ge/en/inner/72",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "fdeb342b1925da5ae420814b49bbff5d2739fb10ec56f370ba4d80d587ae31d7",
+        "bytes": 54292,
+        "cacheKey": "45c7d4579afd0a2417f7e7f1c3eb9881256cacbbc06aa8c66ef1dd95f2ed1391"
+      },
+      "supportingUrl": "https://www.naec.ge/uploads/postData/20-24/%E1%83%90%E1%83%AE%E1%83%90%E1%83%9A%E1%83%98%20%E1%83%AA%E1%83%9C%E1%83%9D%E1%83%91%E1%83%90%E1%83%A0%E1%83%98/%E1%83%AA%E1%83%9C%E1%83%9D%E1%83%91%E1%83%90%E1%83%A0%E1%83%98%20%E1%83%90%E1%83%91%E1%83%98%E1%83%A2%E1%83%A3%E1%83%A0%E1%83%98%E1%83%94%E1%83%9C%E1%83%A2%E1%83%94%E1%83%91%E1%83%98%E1%83%A1%E1%83%90%E1%83%97%E1%83%95%E1%83%98%E1%83%A1%202024%20%288%29.pdf"
+    },
+    "addressExcerpt": "مقر جامعي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MEX-0013",
+    "countryIso3": "MEX",
+    "name": "Atitalaquia",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الجامعة تنسب عنوانها بنفسها إلى بلدية Atitalaquia وولاية Hidalgo. لم يُثبت City Source ID من ملف المدن الكبير. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Atitalaquia",
+      "ascii": "Atitalaquia",
+      "regionCode": "MX-HID",
+      "existingCityId": "city_mx_geonames_3532627"
+    },
+    "source": {
+      "url": "https://www.itatitalaquia.edu.mx/historia.html",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 249,
+      "sha256": "b5d3274aa58b889744d93f26cb6e6bef6eabe0bcdf85b92be8ab30274f8d3b6a",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.itatitalaquia.edu.mx/historia.html",
+        "retrievedAt": "2026-10-14T20:54:33.988193+00:00",
+        "status": 200,
+        "finalUrl": "https://www.itatitalaquia.edu.mx/historia.html",
+        "contentType": "text/html",
+        "sha256": "49481bdd8401f81970eb6858904fcdaf3a45af7b4676218e5fd3ef00e2829062",
+        "bytes": 5788,
+        "cacheKey": "02fc918ddea585f3629d9451470914408474f2240b6e200094030ab6ccc789d8"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MEX-0014",
+    "countryIso3": "MEX",
+    "name": "La Cruz de Huanacaxtle",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Bahía de Banderas هي البلدية، أمّا La Cruz de Huanacaxtle فهي البلدة الفعلية. يحتاج معرف المدينة الموجود إلى مطابقة أو إنشاء لاحق بعد تأكيد عدم وجوده. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "La Cruz de Huanacaxtle",
+      "ascii": "La Cruz de Huanacaxtle",
+      "regionCode": "MX-NAY"
+    },
+    "source": {
+      "url": "https://www.bahia.tecnm.mx/inicio/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 250,
+      "sha256": "49c94d795f1ffdf0503ec5e63f2b6ddd417d3aa75819162d6f8ac4d621ba56e4",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.bahia.tecnm.mx/inicio/",
+        "retrievedAt": "2026-10-14T20:54:29.948217+00:00",
+        "status": 200,
+        "finalUrl": "https://www.bahia.tecnm.mx/inicio/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "06dbbc4c7f219251a5a3123a09f05485882aec659fc379c6d0b05cfb9e353148",
+        "bytes": 92541,
+        "cacheKey": "5253ed024c9b7f7b2ac7fce8092ead31305ab6f2d100853e9fce4fdc61ed38ab"
+      },
+      "supportingUrl": "https://inifenay.gob.mx/blog-galeria.php?ID_GALERIA=33"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MEX-0021",
+    "countryIso3": "MEX",
+    "name": "Chihuahua",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. يختلف عن Instituto Tecnológico de Chihuahua II (Av. de las Industrias 11101). No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Chihuahua",
+      "ascii": "Chihuahua",
+      "regionCode": "MX-CHH",
+      "existingCityId": "city_mx_chihuahua"
+    },
+    "source": {
+      "url": "https://sic.cultura.gob.mx/ficha.php?table=universidad&table_id=773",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 251,
+      "sha256": "6e7892714eea1a11886c2b28baf1db13ea36b52c9b8bbb87d862e7a26a0c1f06",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://sic.cultura.gob.mx/ficha.php?table=universidad&table_id=773",
+        "retrievedAt": "2026-10-14T20:54:23.638049+00:00",
+        "status": 200,
+        "finalUrl": "https://sic.cultura.gob.mx/ficha.php?table=universidad&table_id=773",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "c7003b605a0c2ab563f2c7789c4f5f1f395ec8f9ce5c5b2070d3302fb2e5dd3f",
+        "bytes": 37938,
+        "cacheKey": "b8b347612b183c2d0bc5670e7b85770764d7707139135a44c45cf738cbf23bcc"
+      },
+      "supportingUrl": "https://sic.cultura.gob.mx/ficha.php?table=universidad&table_id=773"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MEX-0022",
+    "countryIso3": "MEX",
+    "name": "Chihuahua",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يؤكد عنوان المعهد التقني Chihuahua II. ضرورة عدم الخلط مع Instituto Tecnológico de Chihuahua (المعهد I). No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Chihuahua",
+      "ascii": "Chihuahua",
+      "regionCode": "MX-CHH",
+      "existingCityId": "city_mx_chihuahua"
+    },
+    "source": {
+      "url": "https://chihuahua2.tecnm.mx/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 252,
+      "sha256": "55372b659571f8ebb1e0d4bea5db998ead82e214467a061a05512e791c691522",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://chihuahua2.tecnm.mx/",
+        "retrievedAt": "2026-10-14T20:54:10.332537+00:00",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MEX-0024",
+    "countryIso3": "MEX",
+    "name": "Ciudad Cuauhtemoc",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي.  No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Ciudad Cuauhtémoc",
+      "ascii": "Ciudad Cuauhtemoc",
+      "regionCode": "MX-CHH",
+      "existingCityId": "city_mx_cuauhtemoc"
+    },
+    "source": {
+      "url": "https://www.cdcuauhtemoc.tecnm.mx/2026/05/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 253,
+      "sha256": "ebd142af34cbb5f104b4533c550ac689509fa2538e28db277044a48dc2d82d5a",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.cdcuauhtemoc.tecnm.mx/2026/05/",
+        "retrievedAt": "2026-10-14T20:54:30.408445+00:00",
+        "status": 200,
+        "finalUrl": "https://www.cdcuauhtemoc.tecnm.mx/2026/05/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "6a02b16b6e3563252d8f7dca9aa73cc0577785fd8e4809a6d0d443a8ed1207e3",
+        "bytes": 219335,
+        "cacheKey": "94a28e3d9aaef6acd462ed85dba08c811f7828da3bd388b1b68c3c5a8cfc5f1c"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MEX-0054",
+    "countryIso3": "MEX",
+    "name": "Soledad de Graciano Sanchez",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. المدينة الحالية San Luis Potosí تختلف عن البلدية الفعلية Soledad de Graciano Sánchez؛ المطابقة مع سجل المدن لم تثبت. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Soledad de Graciano Sánchez",
+      "ascii": "Soledad de Graciano Sanchez",
+      "regionCode": "MX-SLP",
+      "existingCityId": "city_mx_soledad_de_graciano_sanchez"
+    },
+    "source": {
+      "url": "https://slp.tecnm.mx/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 254,
+      "sha256": "e0143c7e584d03d12a56f07e4bf7cdf3e5649607e88b2a1feb1f91a567af54ce",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://slp.tecnm.mx/",
+        "retrievedAt": "2026-10-14T20:54:23.888712+00:00",
+        "status": 200,
+        "finalUrl": "https://slp.tecnm.mx/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "a9835d8f2690493125ed37dc43baf7b0ac1aa004ab3af4efc21b9aeabeb20d11",
+        "bytes": 184053,
+        "cacheKey": "ac7823cf30f68c73106cbcf21730fa76a3ab46cc1b32b464efc5315bedc0af74"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MEX-0057",
+    "countryIso3": "MEX",
+    "name": "Metepec",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. اسم المؤسسة Toluca لا يعني أنها تقع في بلدية Toluca؛ الموقع الفعلي في Metepec. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Metepec",
+      "ascii": "Metepec",
+      "regionCode": "MX-MEX"
+    },
+    "source": {
+      "url": "https://toluca.tecnm.mx/contacto-instituto-tecnologico-de-toluca",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 255,
+      "sha256": "2738a3d881d93449bdd0d004fda157e36ea8bb2a470b2c901326ba32fd805309",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://toluca.tecnm.mx/contacto-instituto-tecnologico-de-toluca",
+        "retrievedAt": "2026-10-14T20:54:24.639702+00:00",
+        "status": 200,
+        "finalUrl": "https://toluca.tecnm.mx/contacto-instituto-tecnologico-de-toluca",
+        "contentType": "text/html",
+        "sha256": "c04c4befa9bb4c227f58e8cdd293542422509de8f08e5bffcfa03fefc104802a",
+        "bytes": 10646,
+        "cacheKey": "67816acb912dd2378f29f679305896469029d8cb61e79f273eb9bba1c3616656"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MEX-0083",
+    "countryIso3": "MEX",
+    "name": "Santiago de Queretaro",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. عنوان مركز الجامعة وارد في موقع رسمي لإحدى الكليات؛ توجد وحدات جامعية أخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Santiago de Querétaro",
+      "ascii": "Santiago de Queretaro",
+      "regionCode": "MX-QUE",
+      "existingCityId": "city_mx_queretaro"
+    },
+    "source": {
+      "url": "https://www.ingenieria.uaq.mx/index.php/investigacion/comiteetica",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 258,
+      "sha256": "0144000ce89516dc1b2620426a110128d973c9f2b8ae6251683b25330db06775",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.ingenieria.uaq.mx/index.php/investigacion/comiteetica",
+        "retrievedAt": "2026-10-14T20:54:33.227508+00:00",
+        "status": 200,
+        "finalUrl": "https://www.ingenieria.uaq.mx/index.php/investigacion/comiteetica",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "6c429308bb60a8e006e54b6cac8bf8a207f8c016901361e4c004aecfce68e60f",
+        "bytes": 120967,
+        "cacheKey": "21098f14dad4e9fd5036c817056e00eec7b1c05d8774ac40a582ced8381dcc05"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MEX-0101",
+    "countryIso3": "MEX",
+    "name": "San Pedro Garza Garcia",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. عنوان Campus UDEM مذكور داخل صفحة القبول التابعة للجامعة، وليس عنوان المدرسة الثانوية وحدها. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "San Pedro Garza García",
+      "ascii": "San Pedro Garza Garcia",
+      "regionCode": "MX-NLE",
+      "existingCityId": "city_mx_san_pedro_garza_garcia"
+    },
+    "source": {
+      "url": "https://prepa.udem.edu.mx/es/contactanos",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 259,
+      "sha256": "6fd96c03ff4db1408cf6589d2db7d243a0df38cabb20247b4d7352799b080f85",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://prepa.udem.edu.mx/es/contactanos",
+        "retrievedAt": "2026-10-14T20:54:20.144817+00:00",
+        "status": 200,
+        "finalUrl": "https://prepa.udem.edu.mx/es/contactanos",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "cecae5880362ea7c85892f448f1d8a14a1087e794fe2eb25029e07239701318b",
+        "bytes": 45092,
+        "cacheKey": "75cb7606cb42f90ac29b487a1e93da334e2d7b7057bd2168992132db8686e588"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-MEX-0133",
+    "countryIso3": "MEX",
+    "name": "San Luis Potosi",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. الموقع الرسمي يحدد مكان الجامعة وعنوان الشارع؛ رمز المنطقة من الملف الأصلي؛ تعذرت مطابقة sourceCityId. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "San Luis Potosí",
+      "ascii": "San Luis Potosi",
+      "regionCode": "MX-SLP",
+      "existingCityId": "city_mx_san_luis_potosi"
+    },
+    "source": {
+      "url": "https://www.upslp.edu.mx/upslp/?page_id=868",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 261,
+      "sha256": "48fa7d2ae90f67f9914665caf8b6533f01ced4181bc6a8fbbb42b52b580b5aae",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.upslp.edu.mx/upslp/?page_id=868",
+        "retrievedAt": "2026-10-14T20:54:42.386386+00:00",
+        "error": "HTTP Error 503: Service Unavailable"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PNG-0004",
+    "countryIso3": "PNG",
+    "name": "Vudal",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. فحص ملف workspace/reference-data/cities/oceania/22_cities_oceania.csv لم يجد Vudal؛ وجد Kokopo فقط، وهي مدينة قرب الجامعة وعنوان صندوق بريد. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Vudal",
+      "ascii": "Vudal",
+      "regionCode": "PG-EBR"
+    },
+    "source": {
+      "url": "https://www.unre.ac.pg/pages/campus-map.html",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 267,
+      "sha256": "98e296491d7066590d6bc355dea74129147163110bb56f8a8561b243fce59f86",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.unre.ac.pg/pages/campus-map.html",
+        "retrievedAt": "2026-10-14T20:54:41.856200+00:00",
+        "status": 200,
+        "finalUrl": "https://www.unre.ac.pg/pages/campus-map.html",
+        "contentType": "text/html",
+        "sha256": "baf81875b2cb7e5ca980a8622522ac61b4acb292a0d501e7a170254e1a964329",
+        "bytes": 22898,
+        "cacheKey": "d12423c5f7a2e6fa6dc468f6cb126e58932b42d332b097bb56ca5121dc593757"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-BOL-0008",
+    "countryIso3": "BOL",
+    "name": "Llallagua",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. لها مكتب/مقر إداري ثانوي في لاباز؛ المقر المركزي Llallagua. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Llallagua",
+      "ascii": "Llallagua",
+      "regionCode": "BO-P"
+    },
+    "source": {
+      "url": "https://unsxx.bo/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 269,
+      "sha256": "0a1bc0bb5b6418a1eb878d5e147b90bf257017269e072bb542199e9d044f9eb7",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://unsxx.bo/",
+        "retrievedAt": "2026-10-14T20:54:27.716664+00:00",
+        "status": 200,
+        "finalUrl": "https://unsxx.bo/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "d3740c4fb58d9c76fb24bdde1c590437ab40af87d73a3652d6d7cb5dfaa5040d",
+        "bytes": 81598,
+        "cacheKey": "2757ca997ebaa9789ad1acbc5a6b2dfab5847cf563a34075aca013f33223612e"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-BOL-0011",
+    "countryIso3": "BOL",
+    "name": "Warisata",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. وزارة التعليم تؤكد المقر الرئيسي في Warisata ولها وحدات فرعية Cuyahuani وTaypiplaya وLa Asunta. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Warisata",
+      "ascii": "Warisata",
+      "regionCode": "BO-L"
+    },
+    "source": {
+      "url": "https://www.minedu.gob.bo/index.php?Itemid=104&limitstart=44&option=com_content&view=featured",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 270,
+      "sha256": "5f59417639cde15765e07a64a98885dc3a77512d9a2c4a6d741d483dadbd775a",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.minedu.gob.bo/index.php?Itemid=104&limitstart=44&option=com_content&view=featured",
+        "retrievedAt": "2026-10-14T20:54:34.867083+00:00",
+        "status": 200,
+        "finalUrl": "https://www.minedu.gob.bo/index.php?Itemid=104&limitstart=44&option=com_content&view=featured",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "fefc1c3dfb57d55cec05c8f1ae32c1ec13165ef9bb023fd335273413af1ebe96",
+        "bytes": 61674,
+        "cacheKey": "00473a36c0be553315f317b74942b66b5271580ef2cbf5b1f03aa58998d526c8"
+      },
+      "supportingUrl": "https://www.minedu.gob.bo/index.php?Itemid=104&limitstart=44&option=com_content&view=featured"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-BOL-0013",
+    "countryIso3": "BOL",
+    "name": "Ivo",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. Camiri نقطة وصول بالحافلات وليست بلدة الحرم؛ Kuruyuki الواردة في الملف القديم ليست مقر الجامعة. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Ivo",
+      "ascii": "Ivo",
+      "regionCode": "BO-H"
+    },
+    "source": {
+      "url": "https://unibolguarani.edu.bo/ubicacion",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 271,
+      "sha256": "f549726503d9fdb50fb6ebfbfaaef9f2f418a3fbd5870983c5cf93164a6b6480",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://unibolguarani.edu.bo/ubicacion",
+        "retrievedAt": "2026-10-14T20:54:26.902850+00:00",
+        "status": 200,
+        "finalUrl": "https://unibolguarani.edu.bo/ubicacion",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "b7bb3257b1372ec071b81dc80ecce2926ae85d00a968acd5ab67f4a6b54f3c9d",
+        "bytes": 39238,
+        "cacheKey": "dbf74715b79856d61450ea827ea98a1bde8e4230ea56d7cd8a54e6d5b847dd16"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-BRA-0133",
+    "countryIso3": "BRA",
+    "name": "Duque de Caxias",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. مقر رئيسي، وتوجد حُرُم أخرى في Nova Iguaçu وBarra da Tijuca. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Duque de Caxias",
+      "ascii": "Duque de Caxias",
+      "regionCode": "BR-RJ"
+    },
+    "source": {
+      "url": "https://caxias.unigranrio.edu.br/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 272,
+      "sha256": "a061698c826a98d723d3b20e9067d660213fb4c3c07598df881f9513ef28ef77",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://caxias.unigranrio.edu.br/",
+        "retrievedAt": "2026-10-14T20:54:10.275767+00:00",
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-PRY-0056",
+    "countryIso3": "PRY",
+    "name": "Caaguazú",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. بلدة Caaguazú تتطابق اسميًا مع اسم الإدارة الأولى (departamento) لكنهما مستويان مختلفان. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Caaguazú",
+      "ascii": "Caaguazú",
+      "regionCode": "PY-5"
+    },
+    "source": {
+      "url": "https://cones.gov.py/universidad-santa-clara-de-asis/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 273,
+      "sha256": "bb471ad9d9fd91fc42e6728cb8dfeee4a099429cbe9c2c2a657a960ac9c0bb31",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://cones.gov.py/universidad-santa-clara-de-asis/",
+        "retrievedAt": "2026-10-14T20:54:10.423154+00:00",
+        "status": 200,
+        "finalUrl": "https://cones.gov.py/universidad-santa-clara-de-asis/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "5ac79bf7b3b0cfd5b67637cb8a0005597cbd2e360f20f19dfcb8e42621e69e39",
+        "bytes": 158174,
+        "cacheKey": "a6f2ba876478fbec7f5fe1d534def62d4e9c72dfd9b7e8b3e017e464ca6bd772"
+      },
+      "supportingUrl": "https://cones.gov.py/universidad-santa-clara-de-asis/"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-VEN-0032",
+    "countryIso3": "VEN",
+    "name": "Mantecal",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي.  No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Mantecal",
+      "ascii": "Mantecal",
+      "regionCode": "VE-C"
+    },
+    "source": {
+      "url": "https://www.uptaltoapure.edu.ve/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 274,
+      "sha256": "1c1002764b783ed7703a7d7bd6afe1341eafb4ceea08c14026eb5a2e1f67212e",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://www.uptaltoapure.edu.ve/",
+        "retrievedAt": "2026-10-14T20:54:42.791706+00:00",
+        "status": 200,
+        "finalUrl": "https://www.uptaltoapure.edu.ve/",
+        "contentType": "text/html; charset=UTF-8",
+        "sha256": "7ee3058c467b1887fea0fe93bbee4f8e23208bcc484dc766f2ddf9a30b536670",
+        "bytes": 134956,
+        "cacheKey": "50fceef58b1d3e52959fd07206f701ccb35cc0708bb0a7d17c8665dec63296b2"
+      },
+      "supportingUrl": null
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
+  },
+  {
+    "referenceId": "INS-VEN-0043",
+    "countryIso3": "VEN",
+    "name": "Barquisimeto",
+    "method": "USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Source locality only; رئيسي. دليل التعليم العالي الرسمي يثبت المقر الرئيسي ببركيسيميتو، ويذكر أحرمًا فرعية في ولايات أخرى. No claim of all campuses, institution active status, publication or canonical database foreign keys.",
+    "place": {
+      "name": "Barquisimeto",
+      "ascii": "Barquisimeto",
+      "regionCode": "VE-K",
+      "existingCityId": "city_ve_barquisimeto"
+    },
+    "source": {
+      "url": "https://loeu.opsu.gob.ve/detalle-localidad/1836/",
+      "evidenceKind": "USER_SUPPLIED_PRIMARY_ADDRESS_RESEARCH",
+      "workbookPath": "workspace/reports/university-location-workbook/2026-10-14-batch12/user-location-review-batch12.xlsx",
+      "workbookSha256": "0b8f61f9b958adcab62f4485b406d783abd55a9d79eb9576072dee7225482922",
+      "worksheet": "الجامعات 274",
+      "worksheetRow": 275,
+      "sha256": "0eac2f22c91733a2b1cd87829020433bcb722bc450bbf1b99437ae3d3b1da785",
+      "hashMeaning": "UTF-8 JSON of supplied worksheet row, sorted keys; not live-page bytes",
+      "retrievedAt": "2026-10-14",
+      "httpRecheck": {
+        "url": "https://loeu.opsu.gob.ve/detalle-localidad/1836/",
+        "retrievedAt": "2026-10-14T20:54:18.018034+00:00",
+        "status": 200,
+        "finalUrl": "https://loeu.opsu.gob.ve/detalle-localidad/1836/",
+        "contentType": "text/html; charset=utf-8",
+        "sha256": "57b75fc02619e5400b0ab8e71cd86d89793b155fb3fe9fc5d43bcf7f402a05b8",
+        "bytes": 19162,
+        "cacheKey": "b923c29e26ff0edf9bb1ed8e4d0df35115068b6afcd32fda30a186f3cd200f9d"
+      },
+      "supportingUrl": "https://loeu.opsu.gob.ve/detalle-localidad/1836/"
+    },
+    "addressExcerpt": "رئيسي",
+    "sourceDataset": "User-supplied university location review Batch 12, 2026-10-14; frozen workbook and row evidence in university-location-workbook/2026-10-14-batch12"
   }
 ]

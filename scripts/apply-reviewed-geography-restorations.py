@@ -75,7 +75,7 @@ def apply(additional_decisions=None):
                      'cityType': 'UNIVERSITY_LOCALITY', 'isCountryCapital': 'false', 'isAdministrativeCapital': 'false', 'isMajorCity': 'false',
                      'isStudyCityCandidate': 'true', 'isUniversityCityCandidate': 'true', 'isTestCenterCityCandidate': 'NEEDS_REVIEW',
                      'latitude': place.get('latitude', ''), 'longitude': place.get('longitude', ''), 'timezone': place.get('timezone', ''), 'population': place.get('population', ''),
-                     'sourceType': 'MANUAL_FILE_SOURCE', 'sourceUrl': decision['source']['url'], 'sourceDataset': 'Reviewed locality source decisions, 2026-10-13; GeoNames or primary-address evidence',
+                     'sourceType': 'MANUAL_FILE_SOURCE', 'sourceUrl': decision['source']['url'], 'sourceDataset': decision.get('sourceDataset', 'Reviewed locality source decisions, 2026-10-13; GeoNames or primary-address evidence'),
                      'verificationStatus': 'NEEDS_MANUAL_REVIEW', 'translationStatus': 'NEEDS_AR_TRANSLATION', 'notes': 'Source locality: ' + decision['scope'] + '. No canonical FK or publication approval. See geography-research-restoration/2026-10-13 university receipts.'})
         city_files[filename].append(city)
         cities[identity] = city
@@ -119,6 +119,7 @@ def apply(additional_decisions=None):
                 review_reason = {
                     'USER_CITY_AND_ROR_REGISTRY_CORROBORATED': 'REGISTRY_CITY_CORROBORATED_MAIN_CAMPUS_NOT_LIVE_VERIFIED',
                     'SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED': 'PRIMARY_ADDRESS_SEARCH_INDEX_NOT_LIVE_VERIFIED',
+                    'USER_RESEARCH_PRIMARY_ADDRESS_REVIEWED': 'USER_RESEARCH_ADDRESS_REQUIRES_OWNER_VERIFICATION',
                 }.get(decision['method'])
                 row.update({'City': city['cityNameEn'], 'City Source ID': city['cityId'], 'City Region Code': city['regionCode'], 'Geography Status': 'SOURCE_MATCHED',
                             'Geography Review Reason': review_reason})

@@ -3,20 +3,20 @@
     "result": "PASS",
     "countries": 194,
     "regions": 5003,
-    "cities": 10610,
+    "cities": 10676,
     "universities": 10723,
-    "sourceMatchedUniversities": 10449,
-    "reviewUniversities": 274,
+    "sourceMatchedUniversities": 10553,
+    "reviewUniversities": 170,
     "universityCityMismatches": 0,
     "scopedCityCollisions": 0,
     "countryCityCoverageGaps": 0
   },
   "targetedVitest": {
     "result": "PASS",
-    "files": 4,
-    "tests": 35,
-    "nodeVersion": "24.19.0",
-    "note": "Passed after building local shared/domain/application packages."
+    "files": 5,
+    "tests": 38,
+    "nodeVersion": "22.23.3",
+    "note": "Initial run: 37 pass, one assertion used old queue counts. Updated expected source counters and reran both preparation tests: 2/2 PASS; remaining 36 targeted tests passed in the initial run."
   },
   "pythonIntegrityNegativeTests": {
     "result": "PASS",
@@ -29,5 +29,7 @@
   "factualCityRegionVerification": "INCOMPLETE; source joins pass; independent verification of all settlements and current administrative boundaries remains open",
   "node22Verification": "NOT_RUN",
   "databaseWrites": 0,
-  "runtime": "RUNTIME_UNTESTED"
+  "runtime": "RUNTIME_UNTESTED",
+  "latestBatchReport": "workspace/reports/university-location-workbook/2026-10-14-batch12",
+  "factualGeographyVerification": "INCOMPLETE; source joins and receipts pass; owner review of supplied primary-address research, current boundaries and campus scope remains required"
 }

@@ -1,3 +1,5 @@
+> Latest continuation: `workspace/reports/university-location-workbook/2026-10-14-batch12/README.md`: 104 additional source bindings, 170 held; current source counts 10,553 / 10,723 universities and 10,676 cities. Earlier counts below describe historical batches.
+
 > Historical snapshot. Latest continuation: `workspace/reports/university-location-verification/2026-10-14/NEXT_CHAT_HANDOFF.md` (68 additional bindings; 274 remaining).
 
 # Geography corrections and university restoration — 2026-10-13
