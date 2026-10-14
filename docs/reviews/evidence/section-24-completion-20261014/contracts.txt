@@ -1,0 +1,196 @@
+TAP version 13
+# Subtest: 301 rows: one bounded page, accurate partial scope and critical row on seventh continuation
+ok 1 - 301 rows: one bounded page, accurate partial scope and critical row on seventh continuation
+  ---
+  duration_ms: 7.528747
+  type: 'test'
+  ...
+# Subtest: 0, 1 and 1000 owner fixtures: valid empty versus bounded retention
+ok 2 - 0, 1 and 1000 owner fixtures: valid empty versus bounded retention
+  ---
+  duration_ms: 7.618944
+  type: 'test'
+  ...
+# Subtest: role matrix: platform, owner, audit and import grants are independent; private coverage unsupported
+ok 3 - role matrix: platform, owner, audit and import grants are independent; private coverage unsupported
+  ---
+  duration_ms: 0.717157
+  type: 'test'
+  ...
+# Subtest: denied source never issues a request; 403 erases previous data and is not zero
+ok 4 - denied source never issues a request; 403 erases previous data and is not zero
+  ---
+  duration_ms: 0.794272
+  type: 'test'
+  ...
+# Subtest: 404/500 failures retain stale evidence and never expose raw errors
+ok 5 - 404/500 failures retain stale evidence and never expose raw errors
+  ---
+  duration_ms: 1.06316
+  type: 'test'
+  ...
+# Subtest: malformed/empty intermediate page cannot silently reach completion
+ok 6 - malformed/empty intermediate page cannot silently reach completion
+  ---
+  duration_ms: 0.524496
+  type: 'test'
+  ...
+# Subtest: live total transition is stale and cross-page duplicates are retained once
+ok 7 - live total transition is stale and cross-page duplicates are retained once
+  ---
+  duration_ms: 0.76915
+  type: 'test'
+  ...
+# Subtest: bounded concurrency: one unavailable source does not suppress other owners
+ok 8 - bounded concurrency: one unavailable source does not suppress other owners
+  ---
+  duration_ms: 22.24743
+  type: 'test'
+  ...
+# Subtest: obsolete reads abort and never commit late results
+ok 9 - obsolete reads abort and never commit late results
+  ---
+  duration_ms: 0.989047
+  type: 'test'
+  ...
+# Subtest: source time clocks, unknown SLA and priority provenance cannot be inferred from modification
+ok 10 - source time clocks, unknown SLA and priority provenance cannot be inferred from modification
+  ---
+  duration_ms: 0.776638
+  type: 'test'
+  ...
+# Subtest: multiple reasons preserve each source and entry time rather than resetting SLA
+ok 11 - multiple reasons preserve each source and entry time rather than resetting SLA
+  ---
+  duration_ms: 0.538108
+  type: 'test'
+  ...
+# Subtest: import owner reason codes retain independent provenance and batch/row identity
+ok 12 - import owner reason codes retain independent provenance and batch/row identity
+  ---
+  duration_ms: 0.335599
+  type: 'test'
+  ...
+# Subtest: imported today ignores an old import modified today; missing import clock is unknown
+ok 13 - imported today ignores an old import modified today; missing import clock is unknown
+  ---
+  duration_ms: 0.583183
+  type: 'test'
+  ...
+# Subtest: typed owner targets block collision and permission-free audit queries
+ok 14 - typed owner targets block collision and permission-free audit queries
+  ---
+  duration_ms: 1.11572
+  type: 'test'
+  ...
+# Subtest: diff is supported only for scholarship import identity, distinct from unsupported/NA
+ok 15 - diff is supported only for scholarship import identity, distinct from unsupported/NA
+  ---
+  duration_ms: 0.334521
+  type: 'test'
+  ...
+# Subtest: unsafe URLs blocked, external HTTP kept explicitly recognizable and imported origin is authoritative
+ok 16 - unsafe URLs blocked, external HTTP kept explicitly recognizable and imported origin is authoritative
+  ---
+  duration_ms: 0.422521
+  type: 'test'
+  ...
+# Subtest: URL enums round-trip and tampering/IDs/PII never enter a shareable query
+ok 17 - URL enums round-trip and tampering/IDs/PII never enter a shareable query
+  ---
+  duration_ms: 0.501382
+  type: 'test'
+  ...
+# Subtest: actual owner scholarships source schema accepts every registered filter and rejects invalid workflow state
+ok 18 - actual owner scholarships source schema accepts every registered filter and rejects invalid workflow state
+  ---
+  duration_ms: 279.297427
+  type: 'test'
+  ...
+# Subtest: actual owner universities source schema accepts every registered filter and rejects invalid workflow state
+ok 19 - actual owner universities source schema accepts every registered filter and rejects invalid workflow state
+  ---
+  duration_ms: 110.617443
+  type: 'test'
+  ...
+# Subtest: actual owner majors source schema accepts every registered filter and rejects invalid workflow state
+ok 20 - actual owner majors source schema accepts every registered filter and rejects invalid workflow state
+  ---
+  duration_ms: 75.631657
+  type: 'test'
+  ...
+# Subtest: actual owner courses source schema accepts every registered filter and rejects invalid workflow state
+ok 21 - actual owner courses source schema accepts every registered filter and rejects invalid workflow state
+  ---
+  duration_ms: 26.521887
+  type: 'test'
+  ...
+# Subtest: actual owner tests source schema accepts every registered filter and rejects invalid workflow state
+ok 22 - actual owner tests source schema accepts every registered filter and rejects invalid workflow state
+  ---
+  duration_ms: 92.71352
+  type: 'test'
+  ...
+# Subtest: actual owner services source schema accepts every registered filter and rejects invalid workflow state
+ok 23 - actual owner services source schema accepts every registered filter and rejects invalid workflow state
+  ---
+  duration_ms: 23.653106
+  type: 'test'
+  ...
+# Subtest: actual owner cms source schema accepts every registered filter and rejects invalid workflow state
+ok 24 - actual owner cms source schema accepts every registered filter and rejects invalid workflow state
+  ---
+  duration_ms: 63.610157
+  type: 'test'
+  ...
+# Subtest: bounded REAL import owner page reads 25/25/10, filters TEST/DEMO and strips raw content
+ok 25 - bounded REAL import owner page reads 25/25/10, filters TEST/DEMO and strips raw content
+  ---
+  duration_ms: 1.615003
+  type: 'test'
+  ...
+# Subtest: imported course owner states TRUE/FALSE/absent remain VERIFIED/NEEDS_VERIFICATION/UNKNOWN
+ok 26 - imported course owner states TRUE/FALSE/absent remain VERIFIED/NEEDS_VERIFICATION/UNKNOWN
+  ---
+  duration_ms: 0.375281
+  type: 'test'
+  ...
+# Subtest: source integration boundaries: owner guards remain, review has no mutation and health contract untouched
+ok 27 - source integration boundaries: owner guards remain, review has no mutation and health contract untouched
+  ---
+  duration_ms: 0.901971
+  type: 'test'
+  ...
+# Subtest: session expiry clears retained source evidence and disables continuation
+ok 28 - session expiry clears retained source evidence and disables continuation
+  ---
+  duration_ms: 0.773505
+  type: 'test'
+  ...
+# Subtest: changed owner totals remain stale until a fresh first-page scan
+ok 29 - changed owner totals remain stale until a fresh first-page scan
+  ---
+  duration_ms: 1.228083
+  type: 'test'
+  ...
+# Subtest: malformed review clocks never imply an owner SLA or an old age
+ok 30 - malformed review clocks never imply an owner SLA or an old age
+  ---
+  duration_ms: 0.19046
+  type: 'test'
+  ...
+# Subtest: owner-total drift is not forgotten after a temporary continuation failure
+ok 31 - owner-total drift is not forgotten after a temporary continuation failure
+  ---
+  duration_ms: 1.269218
+  type: 'test'
+  ...
+1..31
+# tests 31
+# suites 0
+# pass 31
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3835.743325

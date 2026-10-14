@@ -13,6 +13,7 @@ export type ReviewPageState = {
   consistency: 'LIVE_OFFSET_RECHECK_REQUIRED';
   errorCode: string | null;
   windowLimited: boolean;
+  ownerChanged: boolean;
 };
 export type ReviewRequest = (
   url: string,
@@ -31,6 +32,7 @@ export function initialSourceState(source: ReviewSource, allowed: boolean): Revi
     consistency: 'LIVE_OFFSET_RECHECK_REQUIRED',
     errorCode: allowed ? null : 'ACCESS_DENIED',
     windowLimited: false,
+    ownerChanged: false,
   };
 }
 export function reviewErrorCode(cause: unknown): string {
@@ -104,7 +106,7 @@ export async function readNextReviewPage(
       .filter((row): row is ReviewItem => row !== null);
     const all = [...new Map([...state.rows, ...incoming].map((row) => [row.key, row])).values()];
     const windowLimited = state.windowLimited || all.length > 500;
-    const totalChanged = state.total !== null && state.total !== rawTotal;
+    const totalChanged = (state.total !== null && state.total !== rawTotal) || state.ownerChanged;
     const pageLimit = hasMore && page >= (state.source.maxPage ?? 10000);
     return {
       ...state,
@@ -119,6 +121,7 @@ export async function readNextReviewPage(
       capturedAt,
       availability: totalChanged ? 'stale' : hasMore || windowLimited ? 'partial' : 'ready',
       windowLimited,
+      ownerChanged: totalChanged,
       errorCode: pageLimit ? 'OWNER_PAGE_LIMIT' : totalChanged ? 'SOURCE_CHANGED_RECHECK' : null,
     };
   } catch (cause) {
@@ -127,7 +130,7 @@ export async function readNextReviewPage(
     return {
       ...state,
       availability:
-        errorCode === 'ACCESS_DENIED'
+        errorCode === 'ACCESS_DENIED' || errorCode === 'SESSION_REQUIRED'
           ? 'access_denied'
           : state.rows.length
             ? 'stale'

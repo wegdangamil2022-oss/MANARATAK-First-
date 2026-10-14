@@ -87,7 +87,7 @@ export function safeSourceUrl(value: unknown): string | null {
   }
 }
 export function ageBucket(value: string | null, now = Date.now()): string {
-  if (!value || Date.parse(value) > now) return 'unknown';
+  if (!value || !Number.isFinite(Date.parse(value)) || Date.parse(value) > now) return 'unknown';
   const age = now - Date.parse(value);
   return age <= 86400000 ? 'today' : age <= 604800000 ? 'week' : 'older';
 }
@@ -99,6 +99,8 @@ export function signalSla(
     !signal.reviewEnteredAt ||
     !signal.dueAt ||
     !signal.policy ||
+    !Number.isFinite(Date.parse(signal.reviewEnteredAt)) ||
+    !Number.isFinite(Date.parse(signal.dueAt)) ||
     Date.parse(signal.reviewEnteredAt) > now ||
     Date.parse(signal.dueAt) < Date.parse(signal.reviewEnteredAt)
   )

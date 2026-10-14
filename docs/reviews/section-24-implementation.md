@@ -1,3 +1,5 @@
+> Current follow-up (2026-10-14): [Section 24 completion](SECTION_24_COMPLETION_2026-10-14.md), 31 contract tests, two UI tests and Node 22 compilation passed. Explicit owner coverage limits remain. Historical checkpoint below.
+
 # Section 24 — Enterprise Review Queue
 
 Branch: `fix/codex-section-24-review-queue`. Base: section 25 `423e699c`.

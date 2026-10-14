@@ -287,7 +287,7 @@ export function AdminReviewQueuePage() {
       } catch (cause) {
         if (!signal.aborted)
           setAudit((previous) =>
-            reviewErrorCode(cause) === 'ACCESS_DENIED'
+            ['ACCESS_DENIED', 'SESSION_REQUIRED'].includes(reviewErrorCode(cause))
               ? { status: 'forbidden', items: [], cursor: null, hasMore: false }
               : { ...previous, status: 'failed' },
           );
@@ -326,7 +326,7 @@ export function AdminReviewQueuePage() {
         .catch((cause) => {
           if (!abort.signal.aborted)
             setDiff({
-              status: reviewErrorCode(cause) === 'ACCESS_DENIED' ? 'forbidden' : 'failed',
+              status: ['ACCESS_DENIED', 'SESSION_REQUIRED'].includes(reviewErrorCode(cause)) ? 'forbidden' : 'failed',
               fields: [],
             });
         });

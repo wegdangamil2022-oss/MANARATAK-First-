@@ -563,3 +563,46 @@ test('source integration boundaries: owner guards remain, review has no mutation
       app.includes(`'/admin/${path}', requireAdminPermission('admin:${permission}:manage')`),
     );
 });
+
+
+test('session expiry clears retained source evidence and disables continuation', async () => {
+  const initial = initialSourceState(source, true);
+  const good = await readNextReviewPage(initial, fixture, signal);
+  assert.ok(good.rows.length > 0);
+  const denied = await readNextReviewPage(good, async () => { throw new Error('[401] session expired'); }, signal);
+  assert.equal(denied.availability, 'access_denied');
+  assert.equal(denied.errorCode, 'SESSION_REQUIRED');
+  assert.deepEqual(denied.rows, []);
+  assert.equal(denied.total, null);
+  assert.equal(denied.nextPage, null);
+});
+test('changed owner totals remain stale until a fresh first-page scan', async () => {
+  const first = await readNextReviewPage(initialSourceState(source, true), fixture, signal);
+  const changed: ReviewRequest = async (url, options) => ({ ...(await fixture(url, options) as object), total: 302 });
+  const second = await readNextReviewPage(first, changed, signal);
+  assert.equal(second.availability, 'stale');
+  const third = await readNextReviewPage(second, changed, signal);
+  assert.equal(third.availability, 'stale');
+  assert.equal(third.errorCode, 'SOURCE_CHANGED_RECHECK');
+  const refreshed = await readNextReviewPage(initialSourceState(source, true), changed, signal);
+  assert.equal(refreshed.availability, 'partial');
+  assert.equal(refreshed.errorCode, null);
+});
+test('malformed review clocks never imply an owner SLA or an old age', () => {
+  const item = projectReviewItem(source, row(), capturedAt)!;
+  const base = { ...item.signals[0], policy: 'owner-policy', reviewEnteredAt: capturedAt, dueAt: '2026-10-13T00:00:00Z' };
+  assert.equal(signalSla({ ...base, reviewEnteredAt: 'invalid' }), 'unknown');
+  assert.equal(signalSla({ ...base, dueAt: 'invalid' }), 'unknown');
+  assert.equal(ageBucket('invalid'), 'unknown');
+});
+
+test('owner-total drift is not forgotten after a temporary continuation failure', async () => {
+  const first = await readNextReviewPage(initialSourceState(source, true), fixture, signal);
+  const changed: ReviewRequest = async (url, options) => ({ ...(await fixture(url, options) as object), total: 302 });
+  const second = await readNextReviewPage(first, changed, signal);
+  const failed = await readNextReviewPage(second, async () => { throw new Error('offline'); }, signal);
+  const resumed = await readNextReviewPage(failed, changed, signal);
+  assert.equal(resumed.availability, 'stale');
+  assert.equal(resumed.ownerChanged, true);
+  assert.equal(resumed.errorCode, 'SOURCE_CHANGED_RECHECK');
+});
