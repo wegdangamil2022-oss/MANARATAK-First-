@@ -1,0 +1,3377 @@
+[
+  {
+    "referenceId": "INS-EGY-0093",
+    "countryIso3": "EGY",
+    "name": "New Administrative Capital",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "New Administrative Capital",
+      "regionCode": "EG-C",
+      "existingCityId": "city_eg_official_5d0ba4f9865a893f"
+    },
+    "source": {
+      "url": "https://www.nasu.edu.eg/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "a7db042aa0cdfb522bd6c2f187a278a9d40c886a7da590d878c0afdb0cdde68e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "العاصمة الإدارية الجديدة، وادي التعلم والابتكار"
+  },
+  {
+    "referenceId": "INS-EGY-0124",
+    "countryIso3": "EGY",
+    "name": "Badr City",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Badr City",
+      "regionCode": "EG-C",
+      "existingCityId": "city_eg_geonames_415561"
+    },
+    "source": {
+      "url": "https://seu.edu.eg/2024/11/20/ministerial-decree-initiates-education-at-saxony-egypt-university/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "6483438a5d4f571b8705f9d4a333086cd61681b06aefc7e67458e162980202d5",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Badr City Entrance, Gate 1 Cairo Governorate"
+  },
+  {
+    "referenceId": "INS-MAR-0018",
+    "countryIso3": "MAR",
+    "name": "Fes",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Fes",
+      "regionCode": "MA-03",
+      "existingCityId": "city_ma_fes"
+    },
+    "source": {
+      "url": "https://ueuromed.org/en",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "1e3208a4fb74415621e6039a106a45d1cebe23861b855ecf70e0205eb0944939",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Route Nationale Fès-Meknès, Fès"
+  },
+  {
+    "referenceId": "INS-GHA-0012",
+    "countryIso3": "GHA",
+    "name": "Accra",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Accra",
+      "regionCode": "GH-AA",
+      "existingCityId": "city_gh_accra"
+    },
+    "source": {
+      "url": "https://cibt.edu.gh/about-admissions/how-to-apply/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "9c96f7fc7ce28dbba41277344621337546edd5a9a114f11a1b03f21fa8b7158e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Administration Block now located at former Catholic Social Advance Institute building, behind Ministry of Information and Adjacent to the GNAT Hall, Adabraka"
+  },
+  {
+    "referenceId": "INS-GHA-0016",
+    "countryIso3": "GHA",
+    "name": "Kumasi",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Kumasi",
+      "regionCode": "GH-AH",
+      "existingCityId": "city_gh_kumasi"
+    },
+    "source": {
+      "url": "https://www.csuc.edu.gh/new_about/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "93bc97b567797b28369f469b22951acb66fda8d8407fa90b337ceab1b96cc213",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Christian Service University is located in Kumasi"
+  },
+  {
+    "referenceId": "INS-GHA-0022",
+    "countryIso3": "GHA",
+    "name": "Kumasi",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Kumasi",
+      "regionCode": "GH-AH",
+      "existingCityId": "city_gh_kumasi"
+    },
+    "source": {
+      "url": "https://www.gbuc.edu.gh/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0b13145a8c2838542b4aa23676735264c5b4316b928430a43e494bb67bda592a",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Location Opposite Anglican SHS Asem-Kumasi"
+  },
+  {
+    "referenceId": "INS-GHA-0047",
+    "countryIso3": "GHA",
+    "name": "Ejisu",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ejisu",
+      "regionCode": "GH-AH"
+    },
+    "source": {
+      "url": "https://suc.edu.gh/about/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "6df2816e188b2f410bf344ccc223fcfe677fb228ef294909757f6cde20374608",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Spiritan University College, Ejisu Ashanti, Ghana"
+  },
+  {
+    "referenceId": "INS-GIN-0023",
+    "countryIso3": "GIN",
+    "name": "Dalaba",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Dalaba",
+      "regionCode": "GN-DL"
+    },
+    "source": {
+      "url": "https://issmv.com/presentation/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "d218d772c6c4510a326a6da6069c7242688093f424dfd96cb40adc49e10e0d8e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Quartier Tangama - Commune urbaine de Dalaba"
+  },
+  {
+    "referenceId": "INS-GIN-0025",
+    "countryIso3": "GIN",
+    "name": "Dubreka",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Dubreka",
+      "regionCode": "GN-DU"
+    },
+    "source": {
+      "url": "https://isamk.edu.gn/historique/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "6413567a12ae2064fc5a77108cae95ece22b1d87a33f9ef285259e06ac7af67f",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "ISAMK, Dubreka, Guinée"
+  },
+  {
+    "referenceId": "INS-LBR-0001",
+    "countryIso3": "LBR",
+    "name": "Schiefflin",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Schiefflin",
+      "regionCode": "LR-MG"
+    },
+    "source": {
+      "url": "https://www.auwa.edu.lr",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "8ac7c740844bd90781e934e398e418f613bb3a19ec761aadfca9d4bac5aada72",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Advent Hill, Robertsfield Highway, Schiefflin Township, Margibi County, Liberia"
+  },
+  {
+    "referenceId": "INS-LBR-0003",
+    "countryIso3": "LBR",
+    "name": "Suakoko",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official undergraduate/main campus locality; Kakata and Monrovia branches remain separate.",
+    "place": {
+      "name": "Suakoko",
+      "regionCode": "LR-BG"
+    },
+    "source": {
+      "url": "https://www.cu.edu.lr/history",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "3b614c8415038abf8df2255e64d2e65b8400e76f86e4fc24310b287d8e585c7c",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Cuttington Undergraduate, Suakoko, Bong County"
+  },
+  {
+    "referenceId": "INS-NGA-0084",
+    "countryIso3": "NGA",
+    "name": "Ojo",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ojo",
+      "regionCode": "NG-LA"
+    },
+    "source": {
+      "url": "https://lasu.edu.ng/home/contact/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "8b5205b89f35d63f96efc170822c9d6f91f8036a59d49bfc8f7a3e6778f406b7",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Lagos State University, Ojo (Main campus), Lagos State, Nigeria"
+  },
+  {
+    "referenceId": "INS-NGA-0111",
+    "countryIso3": "NGA",
+    "name": "Rumuolumeni",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Rumuolumeni",
+      "regionCode": "NG-RI"
+    },
+    "source": {
+      "url": "https://iaue.edu.ng/about/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "67404dfaec8dd2f89bc5785818090890bacc3b71b79622e9c6b52163fc413d4d",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Rumuolumeni (the main campus and seat of administration)"
+  },
+  {
+    "referenceId": "INS-NGA-0112",
+    "countryIso3": "NGA",
+    "name": "Gadau",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Gadau",
+      "regionCode": "NG-BA"
+    },
+    "source": {
+      "url": "https://sazu.edu.ng/about-2",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "236e02dc510a637b9e6513f4efe082dabaad4720bbb45d0c84b7702c3a9ccaaa",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Misau, Bauchi (Yuli) and Gadau (main campus)"
+  },
+  {
+    "referenceId": "INS-NGA-0117",
+    "countryIso3": "NGA",
+    "name": "Iyamho",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Iyamho",
+      "regionCode": "NG-ED"
+    },
+    "source": {
+      "url": "https://edouniversity.edu.ng/campusnews",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "a6255c1f0fe7ebda5c2d534268447d923adff0a57bec75fc6e05dcc982f0a219",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Km7, Auchi-Abuja Road, Iyamho-Uzairue Edo State, Nigeria"
+  },
+  {
+    "referenceId": "INS-NGA-0146",
+    "countryIso3": "NGA",
+    "name": "Majia",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Majia",
+      "regionCode": "NG-JI"
+    },
+    "source": {
+      "url": "https://jsumahs.edu.ng/contact",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "5edb157fd818bfc5d8ad2fdba024c65d14a8b22e7c6d4f043a7cafe667897a29",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Hadejia Road, Majia Town, Taura Local Government, Jigawa State, Nigeria"
+  },
+  {
+    "referenceId": "INS-NGA-0226",
+    "countryIso3": "NGA",
+    "name": "Oko-Irese",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Oko-Irese",
+      "regionCode": "NG-KW"
+    },
+    "source": {
+      "url": "https://www.tau.edu.ng/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "2e582b3824587bf4534b2a7b058c36918874110213866f95ef3917301d4aa1fe",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "University Drive, Off Idofin Road, Oko-Irese, Kwara State"
+  },
+  {
+    "referenceId": "INS-NGA-0247",
+    "countryIso3": "NGA",
+    "name": "Idumuje-Ugboko",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Idumuje-Ugboko",
+      "regionCode": "NG-DE"
+    },
+    "source": {
+      "url": "https://www.sportsuniversity.edu.ng/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "7930619804ac551edb512ce6fefca02825ef7f78e38030441919f0ab9929a57c",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Located in the serene environment of Idumuje Ugboko, Delta State"
+  },
+  {
+    "referenceId": "INS-NGA-0274",
+    "countryIso3": "NGA",
+    "name": "Okemesi",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Okemesi",
+      "regionCode": "NG-EK"
+    },
+    "source": {
+      "url": "https://hust.edu.ng/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0e504b66ea8425e6b16b14f777775e926637dabd27f8bfe21e4aa7113f6ba5c1",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "situated in the serene town of Okemesi, Ekiti State"
+  },
+  {
+    "referenceId": "INS-NGA-0276",
+    "countryIso3": "NGA",
+    "name": "Yargaya",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Yargaya",
+      "regionCode": "NG-KN"
+    },
+    "source": {
+      "url": "https://elrazi.edu.ng/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "4643042c15a646e948d4a0c2991a8cbf3b0a1a2df4b2cfb76400520dcdd0659b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Km 10 Maiduguri Road, Aminu Babakusa Street, Yargaya District, Kano State, Nigeria"
+  },
+  {
+    "referenceId": "INS-NGA-0277",
+    "countryIso3": "NGA",
+    "name": "Iloro-Ekiti",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Iloro-Ekiti",
+      "regionCode": "NG-EK"
+    },
+    "source": {
+      "url": "https://veniteuniversity.edu.ng/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "4a9cc3244f992effe34afac1e14f4329db3b3a663b07669eeeca792e3f2b841a",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "KM 2, Ayetoro Road. Iloro Ekiti, Ekiti State"
+  },
+  {
+    "referenceId": "INS-NGA-0297",
+    "countryIso3": "NGA",
+    "name": "Ganmo",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ganmo",
+      "regionCode": "NG-KW"
+    },
+    "source": {
+      "url": "https://aatu.edu.ng/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "01babb3549fcc68295f4940da8f807a845b6b6e1de9fbb06107a8c3c2793d95c",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Oke Ogba Ganmo, Ilorin, Kwara State"
+  },
+  {
+    "referenceId": "INS-ETH-0037",
+    "countryIso3": "ETH",
+    "name": "Chiro",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Chiro",
+      "regionCode": "ET-OR"
+    },
+    "source": {
+      "url": "https://obu.edu.et/?o=prod-267071958",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "58f85e65c426d8b3c9f79bf46920213ef516a689070d6191c75386e7ac91ddd1",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "located 326 kilometres east of Addis Ababa, in Chiro, eastern Oromia, Ethiopia"
+  },
+  {
+    "referenceId": "INS-ETH-0048",
+    "countryIso3": "ETH",
+    "name": "Woldia",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Woldia",
+      "regionCode": "ET-AM",
+      "existingCityId": "city_et_weldiya"
+    },
+    "source": {
+      "url": "https://wldu.edu.et/about-us-2/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "a066447ff843a4920ebfec94108f8b8c1d99325c41ea7508d6b466c65a1406e4",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "found in Amhara region, North Wollo, Woldia Town"
+  },
+  {
+    "referenceId": "INS-KEN-0015",
+    "countryIso3": "KEN",
+    "name": "Kisaju",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Kisaju",
+      "regionCode": "KE-10"
+    },
+    "source": {
+      "url": "https://www.iuk.ac.ke/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "4a4ca7bf54d66dbf98c13bbac65a71f4c4651b79461b495e263f9ff14d0dad45",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Kisaju, Kajiado"
+  },
+  {
+    "referenceId": "INS-KEN-0073",
+    "countryIso3": "KEN",
+    "name": "Konza Technopolis",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Konza Technopolis",
+      "regionCode": "KE-22"
+    },
+    "source": {
+      "url": "https://ouk.ac.ke/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "b4981ec8c4c5fab069cf4a9fb462c1f7d63a1cefacb32a23c270f1d3126d1489",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Konza Technopolis, Machakos County"
+  },
+  {
+    "referenceId": "INS-YEM-0059",
+    "countryIso3": "YEM",
+    "name": "Say'un",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Say'un",
+      "regionCode": "YE-HD",
+      "existingCityId": "city_ye_sayun"
+    },
+    "source": {
+      "url": "https://www.seiyunu.edu.ye/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "595836297b5c6a1a2bece25239aad4cf858ef5c4a2d201a2a9e39607bca806aa",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "سيئون - وادي حضرموت - الجمهورية اليمنية"
+  },
+  {
+    "referenceId": "INS-CIV-0042",
+    "countryIso3": "CIV",
+    "name": "Songon",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Songon",
+      "regionCode": "CI-AB"
+    },
+    "source": {
+      "url": "https://uts-edu.net/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "3c11f2412b3e026754ba02204637b07ee185bcf246daf36add01dfc04f682582",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "SONGON CARREFOUR JACQUEVILLE"
+  },
+  {
+    "referenceId": "INS-GMB-0007",
+    "countryIso3": "GMB",
+    "name": "Banjulinding",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Banjulinding",
+      "regionCode": "GM-W"
+    },
+    "source": {
+      "url": "https://alihsanuniversity.org/en/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "9473440492bdbfaf40c2b16a9cc6dc899f6ada84b94b0851888f7005ffba4692",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Main campus: Banjulunding, North Kombo"
+  },
+  {
+    "referenceId": "INS-GHA-0039",
+    "countryIso3": "GHA",
+    "name": "Manya Jorpanya",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Manya Jorpanya",
+      "regionCode": "GH-AA"
+    },
+    "source": {
+      "url": "https://palm.edu.gh/about-us/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "b7b0a6b82a0d9b42ac91cf8e9bd7a3cf2240b483553587dc9318df28a19801ed",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "1 University Avenue Annex Manya Jorpanya, Shai Hills Akosombo Road"
+  },
+  {
+    "referenceId": "INS-NGA-0075",
+    "countryIso3": "NGA",
+    "name": "Obio-Akpa",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Obio-Akpa",
+      "regionCode": "NG-AK"
+    },
+    "source": {
+      "url": "https://www.nuc.edu.ng/nigerian-univerisities/federal-univeristies/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "c885a58fc79300c72a5591a251cbab95b0679ec098af79e1567505cbbbe2d67a",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Federal University of Agriculture and Technology Obio-Akpa Akwa Ibom State"
+  },
+  {
+    "referenceId": "INS-NGA-0080",
+    "countryIso3": "NGA",
+    "name": "Uturu",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Uturu",
+      "regionCode": "NG-AB",
+      "existingCityId": "city_ng_official_645f36d4826b4e4d"
+    },
+    "source": {
+      "url": "https://www.nuc.edu.ng/nigerian-univerisities/state-univerisity/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "4d9708d5707a48af462e9747634a6b821fee28eb4b9652d15b9385b170e35445",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Abia State University, Uturu"
+  },
+  {
+    "referenceId": "INS-NGA-0311",
+    "countryIso3": "NGA",
+    "name": "Ojo",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ojo",
+      "regionCode": "NG-LA"
+    },
+    "source": {
+      "url": "https://www.nuc.edu.ng/nigerian-univerisities/private-univeristies/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0570f43dcc0fa64595ddddecae51697fc4dfe3173a271198ee6fea45ab690f8b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Unique Open University, Ojo, Lagos State"
+  },
+  {
+    "referenceId": "INS-NGA-0313",
+    "countryIso3": "NGA",
+    "name": "Ikare-Akoko",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ikare-Akoko",
+      "regionCode": "NG-ON",
+      "existingCityId": "city_ng_ikare"
+    },
+    "source": {
+      "url": "https://www.nuc.edu.ng/nigerian-univerisities/private-univeristies/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0570f43dcc0fa64595ddddecae51697fc4dfe3173a271198ee6fea45ab690f8b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Millenium Crest University, Ikare Akoko, Ondo State"
+  },
+  {
+    "referenceId": "INS-NGA-0322",
+    "countryIso3": "NGA",
+    "name": "Umuchukwu",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Umuchukwu",
+      "regionCode": "NG-AN"
+    },
+    "source": {
+      "url": "https://www.nuc.edu.ng/nigerian-univerisities/private-univeristies/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0570f43dcc0fa64595ddddecae51697fc4dfe3173a271198ee6fea45ab690f8b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Transatlantic University of Medine and Health Sciences, Umuchukwu, Anambra State"
+  },
+  {
+    "referenceId": "INS-NGA-0294",
+    "countryIso3": "NGA",
+    "name": "Igbotako",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Igbotako",
+      "regionCode": "NG-ON"
+    },
+    "source": {
+      "url": "https://www.nuc.edu.ng/nigerian-univerisities/private-univeristies/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0570f43dcc0fa64595ddddecae51697fc4dfe3173a271198ee6fea45ab690f8b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "University of Fortune, Igbotako, Ondo State"
+  },
+  {
+    "referenceId": "INS-NGA-0303",
+    "countryIso3": "NGA",
+    "name": "Mgbowo",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Mgbowo",
+      "regionCode": "NG-EN"
+    },
+    "source": {
+      "url": "https://www.nuc.edu.ng/nigerian-univerisities/private-univeristies/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0570f43dcc0fa64595ddddecae51697fc4dfe3173a271198ee6fea45ab690f8b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Kevin Eze University, Mgbowo, Enugu State"
+  },
+  {
+    "referenceId": "INS-SYR-0028",
+    "countryIso3": "SYR",
+    "name": "Ghabagheb",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ghabagheb",
+      "regionCode": "SY-DR",
+      "existingCityId": "city_sy_geonames_170325"
+    },
+    "source": {
+      "url": "https://www.aiu.edu.sy/en",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "3264ad32af18ae8137e0ed9bbd950b310116bb66161882924c535f6963b814aa",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Campus Address Daraa Highway - Ghabagheb - Syria"
+  },
+  {
+    "referenceId": "INS-SYR-0049",
+    "countryIso3": "SYR",
+    "name": "Hazano",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Hazano",
+      "regionCode": "SY-ID"
+    },
+    "source": {
+      "url": "https://mari.edu.sy/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "bcec75467c908fbea83efb7e5b3ee9b219bb2ef3767b79a0ac1158b1ea128d22",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "إدلب – حزانو، سوريا"
+  },
+  {
+    "referenceId": "INS-AFG-0069",
+    "countryIso3": "AFG",
+    "name": "Dasht-e-Top",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Dasht-e-Top",
+      "regionCode": "AF-WAR"
+    },
+    "source": {
+      "url": "https://wu.edu.af/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "1d14e95d656fff4d28aea0e31894990b9e25a081590c8b782570aa254979f811",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Address : Dasht-e-Top, Sayed Abad, Wardak, Afghanistan"
+  },
+  {
+    "referenceId": "INS-BGD-0023",
+    "countryIso3": "BGD",
+    "name": "Kotbari",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Kotbari",
+      "regionCode": "BD-08"
+    },
+    "source": {
+      "url": "https://www.cou.ac.bd/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "483c247f859b49d091ca516d483aee5cb60ba1c72ac215b19860e2c72d6bf0d0",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "located at Kotbari, Cumilla, Bangladesh"
+  },
+  {
+    "referenceId": "INS-BGD-0026",
+    "countryIso3": "BGD",
+    "name": "Gazipur",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Gazipur",
+      "regionCode": "BD-18",
+      "existingCityId": "city_bd_geonames_1200109"
+    },
+    "source": {
+      "url": "https://www.duet.ac.bd/about/history",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "562c3f9ca9a9b59c893ca2abc417d3c2a5022effccddde337cd4789a467fb5ff",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "permanent campus in the heart of Gazipur city"
+  },
+  {
+    "referenceId": "INS-BGD-0061",
+    "countryIso3": "BGD",
+    "name": "Shahjadpur",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Shahjadpur",
+      "regionCode": "BD-59"
+    },
+    "source": {
+      "url": "https://www.rub.ac.bd/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "a1b1d58b7bceb8706204c7784193f6283ec0503423b753ccb0b2405eefcf68f8",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Administration Building, 2nd Floor Shahjadpur, Sirajganj 6770"
+  },
+  {
+    "referenceId": "INS-NPL-0001",
+    "countryIso3": "NPL",
+    "name": "Rampur",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Rampur",
+      "regionCode": "NP-P3"
+    },
+    "source": {
+      "url": "https://www.afu.edu.np/contact",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "1d652e1d97e14ff92a1403efdce30e5cf34e8dd40798942c3271147ce5f5c8ed",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Rampur, Chitwan, Nepal"
+  },
+  {
+    "referenceId": "INS-NPL-0005",
+    "countryIso3": "NPL",
+    "name": "Chitlang",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Chitlang",
+      "regionCode": "NP-P3"
+    },
+    "source": {
+      "url": "https://mbust.edu.np/about/genesis",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "6d08c0ad08424cbdd3053777e1ccd27c11a6c7a5ae62ec26e13d3cada11d5ada",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Chitlang, Thaha Municipality, Makwanpur District, Bagmati Province"
+  },
+  {
+    "referenceId": "INS-NPL-0008",
+    "countryIso3": "NPL",
+    "name": "Beljhundi",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Beljhundi",
+      "regionCode": "NP-P5"
+    },
+    "source": {
+      "url": "https://nsu.edu.np/phd",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "80d3abefb7e104f71537d2c7e8611dbafb46818856392d5d80a791aa31e6974f",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Contact Office: Beljhundi, Dang, Nepal"
+  },
+  {
+    "referenceId": "INS-NPL-0013",
+    "countryIso3": "NPL",
+    "name": "Khandbari",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Khandbari",
+      "regionCode": "NP-P1"
+    },
+    "source": {
+      "url": "https://yogmayaau.edu.np/contact-us",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "892e72c519d90fb9d758f5b349efd7ade43873bb38da547061e580c131eb66ed",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Khandbari, Sankhuwasabha, Koshi Province"
+  },
+  {
+    "referenceId": "INS-LKA-0034",
+    "countryIso3": "LKA",
+    "name": "Nugegoda",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Nugegoda",
+      "regionCode": "LK-1",
+      "existingCityId": "city_lk_geonames_1232807"
+    },
+    "source": {
+      "url": "https://www.sjp.ac.lk/contact-us/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "1105826d72d65ca765da39add34f4f884dfadf0ad995cad42f5937fe1ed5ce6e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Gangodawila, Nugegoda, Sri Lanka"
+  },
+  {
+    "referenceId": "INS-LKA-0037",
+    "countryIso3": "LKA",
+    "name": "Ratmalana",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ratmalana",
+      "regionCode": "LK-1"
+    },
+    "source": {
+      "url": "https://uovt.ac.lk/en/contact",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "95b21da7997041658fd85e6a4830c852dae48e3faee812bd101e36de9351644e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "No.100, Kandawala, Ratmalana"
+  },
+  {
+    "referenceId": "INS-CHN-0063",
+    "countryIso3": "CHN",
+    "name": "Tianjin",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tianjin",
+      "regionCode": "CN-TJ",
+      "existingCityId": "city_cn_tianjin"
+    },
+    "source": {
+      "url": "https://en.tust.edu.cn/history.html",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "ec2d68227f023906ae028eafbad97d8b69583002bc326a3108cbdbd9d911ce81",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "1038 Dagu Nanlu, Hexi District, Tianjin, P.R.china"
+  },
+  {
+    "referenceId": "INS-CHN-0150",
+    "countryIso3": "CHN",
+    "name": "Ulanqab",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ulanqab",
+      "regionCode": "CN-NM"
+    },
+    "source": {
+      "url": "https://www.jnnu.edu.cn/info/1048/13385.htm",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "5849a8336a31ff8d6c78793cd8db1c0c61c6d65c569efcfdfbdf8a7ebe762d4e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "学校地址：内蒙古乌兰察布市工农大街59号"
+  },
+  {
+    "referenceId": "INS-CHN-0162",
+    "countryIso3": "CHN",
+    "name": "Fuxin",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Fuxin",
+      "regionCode": "CN-LN"
+    },
+    "source": {
+      "url": "https://www.lntu.edu.cn/info/1049/8328.htm",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "bcd0e16bab1f59d87de0fb34c801d855aed336a32019e19b56be0967f6b53f01",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "阜新校区：辽宁省阜新市中华路47号"
+  },
+  {
+    "referenceId": "INS-CHN-0259",
+    "countryIso3": "CHN",
+    "name": "Shanghai",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Shanghai",
+      "regionCode": "CN-SH",
+      "existingCityId": "city_cn_shanghai"
+    },
+    "source": {
+      "url": "https://english.shutcm.edu.cn/98/list.htm",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "d7a18ef2262a44b54e231743b463a492333c0af4be51fd7ad39db70e2a3710d5",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "1200 Cailun Road, Pudong New Area, Shanghai 201203"
+  },
+  {
+    "referenceId": "INS-CHN-0566",
+    "countryIso3": "CHN",
+    "name": "Yueyang",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Yueyang",
+      "regionCode": "CN-HN"
+    },
+    "source": {
+      "url": "https://www.hnist.edu.cn/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "2b2d196eb13e698998f42c12ddf52946565c5536269f88836010bfbcff9ec659",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "地址：湖南省岳阳市湘北大道"
+  },
+  {
+    "referenceId": "INS-CHN-0739",
+    "countryIso3": "CHN",
+    "name": "Pu'er",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Pu'er",
+      "regionCode": "CN-YN"
+    },
+    "source": {
+      "url": "https://www.peu.edu.cn/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "77177c1d6328b9367dc3d568421a065f481b897a565dee51407cb1deba71a6fc",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "地址：云南省普洱市思茅区学苑路6号"
+  },
+  {
+    "referenceId": "INS-JPN-0019",
+    "countryIso3": "JPN",
+    "name": "Mizuho",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Mizuho",
+      "regionCode": "JP-21"
+    },
+    "source": {
+      "url": "https://www.asahi-u.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "2c47d0c4c6290191a02de8b9406f5230e5c8e709bdcedd2e2ae6d3a5e7d1f1b0",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒501-0296 岐阜県瑞穂市穂積1851"
+  },
+  {
+    "referenceId": "INS-JPN-0069",
+    "countryIso3": "JPN",
+    "name": "Ogaki",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ogaki",
+      "regionCode": "JP-21"
+    },
+    "source": {
+      "url": "https://www.gku.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "79e540d581459e4df0e1cce79bd30a5335cb1d178f699bb9bf25f436c9cd6075",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒503-8550 大垣市北方町5-50"
+  },
+  {
+    "referenceId": "INS-JPN-0119",
+    "countryIso3": "JPN",
+    "name": "Kato",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Kato",
+      "regionCode": "JP-28"
+    },
+    "source": {
+      "url": "https://www.hyogo-u.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "f42740e4221929c192b7ac2dd25bc0fcd01cf9c1062622e957fdae62cc23e3ac",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒673-1494兵庫県加東市下久米942-1"
+  },
+  {
+    "referenceId": "INS-JPN-0241",
+    "countryIso3": "JPN",
+    "name": "Nantan",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Nantan",
+      "regionCode": "JP-26"
+    },
+    "source": {
+      "url": "https://www.meiji-u.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "55aec4551f41cb4732d604c87e7409c05c3ad66e25f44129e1352136441cb697",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒629-0392 京都府南丹市日吉町"
+  },
+  {
+    "referenceId": "INS-JPN-0272",
+    "countryIso3": "JPN",
+    "name": "Nisshin",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Nisshin undergraduate campus; Nagoya/Tokyo graduate branches are not substituted for this campus.",
+    "place": {
+      "name": "Nisshin",
+      "regionCode": "JP-23",
+      "existingCityId": "city_jp_geonames_6822209"
+    },
+    "source": {
+      "url": "https://www.nucba.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "33ea605563137c633ace5066a30e8732f3223da35b4c4b2d386fa1e00d2f8722",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒470-0193 愛知県日進市米野木町三ケ峯"
+  },
+  {
+    "referenceId": "INS-JPN-0273",
+    "countryIso3": "JPN",
+    "name": "Nisshin",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Nisshin",
+      "regionCode": "JP-23",
+      "existingCityId": "city_jp_geonames_6822209"
+    },
+    "source": {
+      "url": "https://www.nufs.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "8535a3a4b5d96d5512b25cd028c172b7b2061c4cfa0b1563c92cbe1aca30102c",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒470-0197 愛知県日進市岩崎町竹ノ山57"
+  },
+  {
+    "referenceId": "INS-JPN-0286",
+    "countryIso3": "JPN",
+    "name": "Mihama",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Mihama",
+      "regionCode": "JP-23"
+    },
+    "source": {
+      "url": "https://www.n-fukushi.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "661f380201476f6a47bd41eb0e9efe740dd74df172850c865f998576f7d99b6b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒470-3295 愛知県知多郡美浜町奥田"
+  },
+  {
+    "referenceId": "INS-JPN-0294",
+    "countryIso3": "JPN",
+    "name": "Miyashiro",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Miyashiro",
+      "regionCode": "JP-11"
+    },
+    "source": {
+      "url": "https://www.nit.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "11e80cfcdee072a9fed88dddad960ca5caed391d03bc015679164dfb1fa8a733",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒345-8501 埼玉県南埼玉郡宮代町学園台4-1"
+  },
+  {
+    "referenceId": "INS-JPN-0300",
+    "countryIso3": "JPN",
+    "name": "Tokyo",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tokyo",
+      "regionCode": "JP-13",
+      "existingCityId": "city_jp_tokyo"
+    },
+    "source": {
+      "url": "https://www.nishogakusha-u.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "45aac7fbc352edc12816a4029f5660a051dd56812fe349221853693809f2058d",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒102-8336 東京都千代田区三番町6-16"
+  },
+  {
+    "referenceId": "INS-JPN-0334",
+    "countryIso3": "JPN",
+    "name": "Kumatori",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Kumatori",
+      "regionCode": "JP-27"
+    },
+    "source": {
+      "url": "https://www.ouhs.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "d1fb9bb922fce623f1c179c4e92744c5e13153fabf2873eaf0b2124c4c446cfc",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒590-0496 大阪府泉南郡熊取町朝代台1番1号"
+  },
+  {
+    "referenceId": "INS-JPN-0438",
+    "countryIso3": "JPN",
+    "name": "Shunan",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Shunan",
+      "regionCode": "JP-35"
+    },
+    "source": {
+      "url": "https://www.shunan-u.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "1c058f468ff24ce71ea32f90ec003df0a00c92382f9a5b08dd5dcd1e8bcf7901",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒745-8566 山口県周南市学園台843-4-2"
+  },
+  {
+    "referenceId": "INS-JPN-0466",
+    "countryIso3": "JPN",
+    "name": "Imizu",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Administration/engineering campus in Imizu; separate Toyama nursing campus retained as a separate campus scope.",
+    "place": {
+      "name": "Imizu",
+      "regionCode": "JP-16"
+    },
+    "source": {
+      "url": "https://www.pu-toyama.ac.jp/english/about.html",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0cf356e43acb8f5367ac1b1a83c8c17916d7f6c2ac0517e312c97641296055a6",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "5180 Kurokawa , Imizu-shi , Toyama 939-0398 , Japan"
+  },
+  {
+    "referenceId": "INS-JPN-0470",
+    "countryIso3": "JPN",
+    "name": "Tokyo",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tokyo",
+      "regionCode": "JP-13",
+      "existingCityId": "city_jp_tokyo"
+    },
+    "source": {
+      "url": "https://www.tyg.jp/e/contactus/index.html",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "00c6e89ba90db13e28f3d2ecf09ff2db3b1ef29a452388b496e8b791436ca53e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "1-26-3, Hongo,Bunkyo-ku, Tokyo 113-0033, Japan"
+  },
+  {
+    "referenceId": "INS-JPN-0475",
+    "countryIso3": "JPN",
+    "name": "Tsuru",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tsuru",
+      "regionCode": "JP-19"
+    },
+    "source": {
+      "url": "https://www.tsuru.ac.jp/global/international-exchange-2/exchange-program-t-sap/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "8984185ca72c801b35599297a36013e4c17a78dcefa3e7ed2efe4f9940547f45",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒402-8555 山梨県都留市田原3-8-1"
+  },
+  {
+    "referenceId": "INS-IDN-0020",
+    "countryIso3": "IDN",
+    "name": "Lampoh Keudee",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Lampoh Keudee",
+      "regionCode": "ID-AC"
+    },
+    "source": {
+      "url": "https://unaya.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "4b77fed10130d4897fa13505e47c84b43d844246dcdb050ab51a0520f26ce33b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jln. Blang Bintang Lama KM.8.5 Lampoh Keudee, Kec. Kuta Baro, Aceh Besar, Aceh"
+  },
+  {
+    "referenceId": "INS-IDN-0039",
+    "countryIso3": "IDN",
+    "name": "Kenangan Baru",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Kenangan Baru",
+      "regionCode": "ID-SU"
+    },
+    "source": {
+      "url": "https://unhamzah.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "dcd447d14214e7b458de7dba55e3c579f4669b7a92b39cabac802d11b353874f",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Medan Estate, Kenangan Baru, Percut Sei Tuan, Kab. Deli Serdang, Sumatera Utara"
+  },
+  {
+    "referenceId": "INS-IDN-0042",
+    "countryIso3": "IDN",
+    "name": "Pangkalan Bun",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Pangkalan Bun",
+      "regionCode": "ID-KT"
+    },
+    "source": {
+      "url": "https://digitek.untama.ac.id/index.php/dgtk/about/contact",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0caf098b4ad73381ff0d3ea573988df32a1c1fb6cadfff5a2037d4d29895159e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jalan Iskandar 63 Kel. Madurejo Pangkalan Bun - Kalimantan Tengah"
+  },
+  {
+    "referenceId": "INS-IDN-0102",
+    "countryIso3": "IDN",
+    "name": "Koto Baru",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Koto Baru",
+      "regionCode": "ID-SB"
+    },
+    "source": {
+      "url": "https://undhari.ac.id/web/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "13b0bd0c83ec90a2acf41a3a5bc969e1b9785b41fa3a52af237aa35bd9d15af9",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jalan Lintas Sumatera km 18 Koto Baru Kabupaten Dharmasraya Sumatera Barat"
+  },
+  {
+    "referenceId": "INS-IDN-0112",
+    "countryIso3": "IDN",
+    "name": "Maospati",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Maospati",
+      "regionCode": "ID-JI"
+    },
+    "source": {
+      "url": "https://udnmagetan.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "d3b8337e31a193a9dd24765d25deaa3cb0f78b77fc5aab24e4e4db48b8508eda",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Kecamatan Maospati Kabupaten Magetan Jawa Timur 63392"
+  },
+  {
+    "referenceId": "INS-IDN-0123",
+    "countryIso3": "IDN",
+    "name": "Belang Bebangka",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Belang Bebangka",
+      "regionCode": "ID-AC"
+    },
+    "source": {
+      "url": "https://www.ugp.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "2d7a4df768072f8c606b2f7eb200f5d68eda270fac5e440d4bc76ee4bce2f790",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jln. Simpang Kelaping-Lukup Badak-Belang Bebangka. Kecamatan Pegasing,Takengon Aceh Tengah, 24560"
+  },
+  {
+    "referenceId": "INS-IDN-0192",
+    "countryIso3": "IDN",
+    "name": "Pucangan",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Pucangan",
+      "regionCode": "ID-JT"
+    },
+    "source": {
+      "url": "https://www.uinsaid.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "cd7db156408ac539b8c079dae8d6e3af166e5aadefb8e8dd84f624747fe6fc88",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl. Pandawa, Pucangan, Kartasura, Sukoharjo, Jawa Tengah, Indonesia"
+  },
+  {
+    "referenceId": "INS-IDN-0275",
+    "countryIso3": "IDN",
+    "name": "Jatisari",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Jatisari",
+      "regionCode": "ID-JT"
+    },
+    "source": {
+      "url": "https://umnu.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "7d9ef2bbd1f36b8f0c57f41cecc171b14b8bd97759e9a6b1d472a3377bf1334a",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jln. Kutoarjo Km. 05, Jatisari, Kebumen, Jawa Tengah, Indonesia"
+  },
+  {
+    "referenceId": "INS-IDN-0304",
+    "countryIso3": "IDN",
+    "name": "Bukittinggi",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Bukittinggi",
+      "regionCode": "ID-SB"
+    },
+    "source": {
+      "url": "https://journal.umnyarsi.ac.id/index.php/JPAMS/about/contact",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "24efb28762a85f9c3a83f1da726caee32b0160928fbf644afc3f933a26a5763d",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Bukittinggi - Sumatera Barat"
+  },
+  {
+    "referenceId": "INS-IDN-0312",
+    "countryIso3": "IDN",
+    "name": "Tanjung Redeb",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tanjung Redeb",
+      "regionCode": "ID-KI"
+    },
+    "source": {
+      "url": "https://manajemen.umberau.ac.id/penerimaan-mahasiswa-baru-2/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "e7b3209754f6681e9108feadfe4a323cbf3c29cdfbb9acd196e3be18b579e3a3",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl. Dr. Murjani 2, Tanjung Redeb, Berau – Kalimantan Timur"
+  },
+  {
+    "referenceId": "INS-IDN-0313",
+    "countryIso3": "IDN",
+    "name": "Baubau",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Baubau",
+      "regionCode": "ID-SG"
+    },
+    "source": {
+      "url": "https://umbuton.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "a10a57a0a4cd691ec17dff7c8815688aad71f07dfc74b3fca0fb9e43e752b35a",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl. Betoambari No. 36, Kota Baubau"
+  },
+  {
+    "referenceId": "INS-IDN-0333",
+    "countryIso3": "IDN",
+    "name": "Palangkaraya",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Palangkaraya",
+      "regionCode": "ID-KT",
+      "existingCityId": "city_id_palangkaraya"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/111009",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "c48026d785371cc011dff19f5b98bc11b1ed42eab839ccfa75c552d0b9e476ec",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jalan RTA Milono Km 1,5 Palangka RayaKalimantan Tengah"
+  },
+  {
+    "referenceId": "INS-IDN-0421",
+    "countryIso3": "IDN",
+    "name": "Tegal",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tegal",
+      "regionCode": "ID-JT"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/061013",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "c6130426c79552003c1fa98c4c1e2a26ccae619207382b3904dd491fbb828dbb",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl. Halmahera KM. 1 Kota Tegal"
+  },
+  {
+    "referenceId": "INS-IDN-0438",
+    "countryIso3": "IDN",
+    "name": "South Tangerang",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "South Tangerang",
+      "regionCode": "ID-BT",
+      "existingCityId": "city_id_geonames_8581443"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/041053",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "6d50a6532c6ae29a34ce1efd7efecdae4ae1e8dfd482bec9f378220f2cd104be",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "KOTA TANGERANG SELATAN"
+  },
+  {
+    "referenceId": "INS-IDN-0458",
+    "countryIso3": "IDN",
+    "name": "Palangkaraya",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Palangkaraya",
+      "regionCode": "ID-KT",
+      "existingCityId": "city_id_palangkaraya"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/111015",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "92eae1bad924ff0157fd110243493c3205071aedf4342ee27530dd7cf2455477",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl Hiu Putih Tjilik Riwut Km 7 Palangka Raya"
+  },
+  {
+    "referenceId": "INS-IDN-0485",
+    "countryIso3": "IDN",
+    "name": "Langkitin",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Langkitin",
+      "regionCode": "ID-RI"
+    },
+    "source": {
+      "url": "https://rokania.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "441d9873f90560d6d5ecaaeb63a2664c97527e535d9eda3344eebfbabffeedd9",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl. Raya Pasir Pengaraian, Km 15 Langkitin, Rambah Samo, Kab. Rokan Hulu, Riau"
+  },
+  {
+    "referenceId": "INS-IDN-0486",
+    "countryIso3": "IDN",
+    "name": "South Jakarta",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "South Jakarta",
+      "regionCode": "ID-JK",
+      "existingCityId": "city_id_official_085e87d4382bbf23"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/031030",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "c62c77496047850251241965153a8a533bdebb8ff2e8cbdf8c141e00901cd057",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "KOTA ADM. JAKARTA SELATAN"
+  },
+  {
+    "referenceId": "INS-IDN-0494",
+    "countryIso3": "IDN",
+    "name": "South Jakarta",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "South Jakarta",
+      "regionCode": "ID-JK",
+      "existingCityId": "city_id_official_085e87d4382bbf23"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/031056",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "03b0a3579905866ab4745a8a05b74a9e248c542aa19851c032c95049c0aa365e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "KOTA ADM. JAKARTA SELATAN"
+  },
+  {
+    "referenceId": "INS-IDN-0514",
+    "countryIso3": "IDN",
+    "name": "South Jakarta",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "South Jakarta",
+      "regionCode": "ID-JK",
+      "existingCityId": "city_id_official_085e87d4382bbf23"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/031068",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "2ba0ca43d32af224ebc79db2e4b849e4fcdc2c5e275199fd8374cc6dc0cc5d22",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Menara, Jl. Harsono RM, Ragunan – Jakarta Selatan"
+  },
+  {
+    "referenceId": "INS-IDN-0558",
+    "countryIso3": "IDN",
+    "name": "Batu Alang",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Batu Alang",
+      "regionCode": "ID-NB"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/081030",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "7f2d2bc3db49da12ccc0a4ca73ab92d787caaafff8768c42487aac92312bf3bf",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl. Raya Olat Maras, Batu Alang, Moyo Hulu, Sumbawa Besar"
+  },
+  {
+    "referenceId": "INS-IDN-0570",
+    "countryIso3": "IDN",
+    "name": "Luwuk",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Luwuk",
+      "regionCode": "ID-ST",
+      "existingCityId": "city_id_luwuk"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/161009",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "24a8d0e4a8b7045242125c33ff587d774948d56b1085e8658dac455103cdbe04",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jalan Dewi Sartika No 67 Luwuk"
+  },
+  {
+    "referenceId": "INS-IDN-0589",
+    "countryIso3": "IDN",
+    "name": "Kediri",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Kediri",
+      "regionCode": "ID-JI",
+      "existingCityId": "city_id_geonames_1640660"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/071087",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "2a1593319bd8f13597f51dda0bc0d8590d12bb18d53b04bf88ad63e5e20f30ea",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "KOTA KEDIRI"
+  },
+  {
+    "referenceId": "INS-IDN-0601",
+    "countryIso3": "IDN",
+    "name": "Bandung",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Bandung",
+      "regionCode": "ID-JB",
+      "existingCityId": "city_id_bandung"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/041022",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "ee1fef3e60108415bf26e0853fd1d54cffe12bb7416ef27161912ccdb2f7e04e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl. Pahlawan No.69 Bandung"
+  },
+  {
+    "referenceId": "INS-IDN-0610",
+    "countryIso3": "IDN",
+    "name": "Sengonagung",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Sengonagung",
+      "regionCode": "ID-JI"
+    },
+    "source": {
+      "url": "https://referensi.data.kemendikdasmen.go.id/pendidikan/npsn/071069",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "ddaaec289df7d0d93a6992bfec709edee237b77e08b98a32cfcb54e8c4540b8e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jalan Yudharta No 7 Sengonagung Kecamatan Purwosari Kabupaten Pasuruan"
+  },
+  {
+    "referenceId": "INS-PHL-0037",
+    "countryIso3": "PHL",
+    "name": "Munoz",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Munoz",
+      "regionCode": "PH-NUE"
+    },
+    "source": {
+      "url": "https://clsu.edu.ph/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "00172890c04895494638b36dbfd345aa7f758595ff7702d6c80b9cc3980ecd57",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Science City of Muñoz, 3120 Nueva Ecija, Philippines"
+  },
+  {
+    "referenceId": "INS-PHL-0072",
+    "countryIso3": "PHL",
+    "name": "Batac",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Batac",
+      "regionCode": "PH-ILN"
+    },
+    "source": {
+      "url": "https://www.mmsu.edu.ph/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "4ceb89f7c6e5ccd28bb9584bab36b1864681e98effbde3278587f5c9607c27bf",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Brgy. 16-S Quiling Sur, City of Batac Ilocos Norte, Philippines 2906"
+  },
+  {
+    "referenceId": "INS-PHL-0139",
+    "countryIso3": "PHL",
+    "name": "Santiago",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Santiago",
+      "regionCode": "PH-ISA"
+    },
+    "source": {
+      "url": "https://uls.edu.ph/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "93c2d9eef318d48bf0886d91d58c0763208bcb6ccc3fb700a45c2b4f8a35cabf",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Dubinan East, Santiago City, 3311"
+  },
+  {
+    "referenceId": "INS-PHL-0160",
+    "countryIso3": "PHL",
+    "name": "San Fernando",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "San Fernando",
+      "regionCode": "PH-PAM",
+      "existingCityId": "city_ph_san_fernando"
+    },
+    "source": {
+      "url": "https://web.ua.edu.ph/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "caf22fa5bf47202abbbbc39876c0d81db47c7e60dbaba2efff178b1373c399b6",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Unisite Subdivision, Del Pilar, City of San Fernando, Pampanga 2000"
+  },
+  {
+    "referenceId": "INS-PHL-0167",
+    "countryIso3": "PHL",
+    "name": "Urdaneta",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Urdaneta",
+      "regionCode": "PH-PAN"
+    },
+    "source": {
+      "url": "https://ucu.edu.ph/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "4d75439f47bf518971bb590b1822c9135744716c7bd5b59f9347c88b29062342",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Udaneta City, Pangasinan Philippines 2428"
+  },
+  {
+    "referenceId": "INS-HRV-0004",
+    "countryIso3": "HRV",
+    "name": "Zagreb",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Zagreb",
+      "regionCode": "HR-21",
+      "existingCityId": "city_hr_zagreb"
+    },
+    "source": {
+      "url": "https://www.libertas.hr/en/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "4c1c3a303b232567c4f62def336e75cc6a19c88a2b0c91a9c698eac8eb0d670a",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Zagreb, Trg J. F. Kennedy 6b"
+  },
+  {
+    "referenceId": "INS-MCO-0002",
+    "countryIso3": "MCO",
+    "name": "Monaco",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Monaco",
+      "regionCode": "MC-NATIONAL",
+      "existingCityId": "city_mc_monaco"
+    },
+    "source": {
+      "url": "https://pavillonbosio.com/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "430529bd26aa23c34b1aae852ee608cc16084c46351a09c438c261bf41393327",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "1 avenue des pins, 98000 Monaco"
+  },
+  {
+    "referenceId": "INS-SVN-0021",
+    "countryIso3": "SVN",
+    "name": "Rogaska Slatina",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Rogaska Slatina",
+      "regionCode": "SI-106"
+    },
+    "source": {
+      "url": "https://www.arema.si/803/Contacts.aspx",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "81de64b5f0723b56a81e802b97d9fa2f1fb3c149102f9497d3e60304f1cd65f9",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Kidričeva ulica 28 3250 Rogaška Slatina Slovenia"
+  },
+  {
+    "referenceId": "INS-ISL-0001",
+    "countryIso3": "ISL",
+    "name": "Hvanneyri",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Hvanneyri",
+      "regionCode": "IS-BOG"
+    },
+    "source": {
+      "url": "https://www.lbhi.is/en",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "7bf1bb6c155c7ed5dca9d7289543ce7000e473a723fbac98006f2dc58dde99e9",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Hvanneyri - 311 Borgarbyggð"
+  },
+  {
+    "referenceId": "INS-ISL-0002",
+    "countryIso3": "ISL",
+    "name": "Bifrost",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Bifrost",
+      "regionCode": "IS-BOG"
+    },
+    "source": {
+      "url": "https://www.bifrost.is/english",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "635421cdfbb8af730c6b49242737b9498f8b625dd6e733d681fa7c8beaa48cf3",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Bifröst, 311"
+  },
+  {
+    "referenceId": "INS-CAN-0069",
+    "countryIso3": "CAN",
+    "name": "Church Point",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Church Point",
+      "regionCode": "CA-NS"
+    },
+    "source": {
+      "url": "https://www.usainteanne.ca/en/contact/church-point-campus",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "69034d8ab9bfd10d4a61077219a1b7a2699186bde474692a9065fa50f15b6a0d",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Main Campus : 1695 Highway 1 Church Point, Nova Scotia"
+  },
+  {
+    "referenceId": "INS-DOM-0039",
+    "countryIso3": "DOM",
+    "name": "Azua de Compostela",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Azua de Compostela",
+      "regionCode": "DO-02"
+    },
+    "source": {
+      "url": "https://utesur.edu.do/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "8e95f1fd420fbcb91d3336d7d4e9b01416b775e163f299ab9aab01e2588376a1",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Av. Enriquillo No. 1, Barrio Mejoramiento Social. Azua de Compostela, República Dominicana"
+  },
+  {
+    "referenceId": "INS-BRB-0004",
+    "countryIso3": "BRB",
+    "name": "Warrens",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Warrens",
+      "regionCode": "BB-08"
+    },
+    "source": {
+      "url": "https://www.vubmed.org/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "dc0f754ca3df56d9f177efed1776ef43345f5331618a0e2d6f46117ebf2c9661",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Warrens Industrial Park, warrens St. Michael BB23027"
+  },
+  {
+    "referenceId": "INS-HTI-0003",
+    "countryIso3": "HTI",
+    "name": "Diquini",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Diquini",
+      "regionCode": "HT-OU"
+    },
+    "source": {
+      "url": "https://unah.edu.ht/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "aafd9896cda78754973b6c76eadd28de32cfe5e7ac62b2fa8a5e26cbffbac032",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Notre campus principal, situé à Diquini, Carrefour (Port-au-Prince)"
+  },
+  {
+    "referenceId": "INS-NGA-0242",
+    "countryIso3": "NGA",
+    "name": "Kwall",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Kwall",
+      "regionCode": "NG-PL"
+    },
+    "source": {
+      "url": "https://abs.ananuniversity.edu.ng/contact/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "80a3e90386c29e0bfc4fbb9dc77bbcde6288515a763c9c5069a4c71ea75ecb08",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "CAMPUS: ANAN University Kwall, Plateau State, Nigeria"
+  },
+  {
+    "referenceId": "INS-NGA-0258",
+    "countryIso3": "NGA",
+    "name": "Ago-Iwoye",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ago-Iwoye",
+      "regionCode": "NG-OG",
+      "existingCityId": "city_ng_geonames_2351802"
+    },
+    "source": {
+      "url": "https://aletheiauniversity.edu.ng/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "60f0f701c771704a6f6d2c6017a3ddd2dbe2cf9f9111098f2ba11a9ad00a4be9",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Major General Sansadeen, Awosanya way, Ago-Iwoye 120107, Ogun State"
+  },
+  {
+    "referenceId": "INS-NGA-0291",
+    "countryIso3": "NGA",
+    "name": "Evbuobanosa",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Evbuobanosa",
+      "regionCode": "NG-ED"
+    },
+    "source": {
+      "url": "https://www.lighthouseuniversity.edu.ng/about/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "c0356f8be9066716059adaa93e5aae3c7a18d6ab221b2b41b03b3f90bb6f47eb",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "KM 32, Benin-Asaba Express Way, Evbuobanosa, Near Abudu, Edo State, Nigeria"
+  },
+  {
+    "referenceId": "INS-EGY-0057",
+    "countryIso3": "EGY",
+    "name": "New Heliopolis",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "New Heliopolis",
+      "regionCode": "EG-C"
+    },
+    "source": {
+      "url": "https://cuc.edu.eg/AboutTheUniversity",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "aaa714ba3b17843c417f1754cc75c4d94933821cd30b8250bc1634d2b11ffde1",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "تحتل جامعة المدينة موقعًا استراتيجيًا في مدينة هليوبوليس الجديدة"
+  },
+  {
+    "referenceId": "INS-EGY-0114",
+    "countryIso3": "EGY",
+    "name": "New Assiut",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "New Assiut",
+      "regionCode": "EG-AST",
+      "existingCityId": "city_eg_official_new_assiut"
+    },
+    "source": {
+      "url": "https://www.natechu.com/about",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "b7dbf89f572da5c5f33f7d0d93dbbbb88581990b83672e8a70e4cb20ed7ca1bc",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "The university is located in New Assiut City, in Assiut Governorate"
+  },
+  {
+    "referenceId": "INS-GMB-0005",
+    "countryIso3": "GMB",
+    "name": "Brusubi",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Gambia headquarters address; institution also has a Bangui headquarters, not replaced with another country.",
+    "place": {
+      "name": "Brusubi",
+      "regionCode": "GM-W"
+    },
+    "source": {
+      "url": "https://m.euclid.int/contact-us-euclid-university/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "b0b88cafda94c8e9ffc9b1d9e9bb0010b6626a8e0239e9bf16653053da76128e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Brusubi Phase 2 Street Adjacent Brusubi Police Station | 50 Meters Off Road West Coast Region The Gambia"
+  },
+  {
+    "referenceId": "INS-GIN-0026",
+    "countryIso3": "GIN",
+    "name": "Kountia",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Kountia",
+      "regionCode": "GN-CO"
+    },
+    "source": {
+      "url": "https://isicguinee.edu.gn/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "6aa08100a8ef21b4e029baddf7aef1d8f7c4a758112051b624c8d91d1d3ef6b3",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Kountia, Usine Matela sur l'Autoroute Fidel Castro, Coyah, Guinea"
+  },
+  {
+    "referenceId": "INS-NGA-0169",
+    "countryIso3": "NGA",
+    "name": "Ikeji-Arakeji",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ikeji-Arakeji",
+      "regionCode": "NG-OS"
+    },
+    "source": {
+      "url": "https://hrdb.jabu.edu.ng/contact",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "a54dd3eeaed6955f4768582e9d926e5eb7666e78e2a205945d6980988932ebee",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Ikeji-Arakeji Osun State Nigeria"
+  },
+  {
+    "referenceId": "INS-NGA-0196",
+    "countryIso3": "NGA",
+    "name": "Ilara-Epe",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ilara-Epe",
+      "regionCode": "NG-LA"
+    },
+    "source": {
+      "url": "https://augustineuniversity.edu.ng/staffdetails?sid=QVVTMDA0Ng==",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "fe91df87715f7df15a5745b92e45b0bd8bf92f23af039c01ff0e1b799dbd370a",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Augustine University, Ilara Epe, Lagos State"
+  },
+  {
+    "referenceId": "INS-NGA-0202",
+    "countryIso3": "NGA",
+    "name": "Agbarha-Otor",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Agbarha-Otor",
+      "regionCode": "NG-DE"
+    },
+    "source": {
+      "url": "https://mciu.edu.ng/contact",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "ebd7b4ab8637866e4587f08d845d9db86fd48f86b34b4383c31bcdb5a22c1508",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Ibru Village, Agbarha-Otor, Ughelli North, Delta State, Nigeria"
+  },
+  {
+    "referenceId": "INS-NGA-0272",
+    "countryIso3": "NGA",
+    "name": "Agwada",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Agwada",
+      "regionCode": "NG-NA"
+    },
+    "source": {
+      "url": "https://phoenixuniversity.edu.ng/phoenix-vacancy/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "f910b85d4bfeb5b49a97aa541401f3c456a830f24d65a33165a6dd34ff56a3d9",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "located in Agwada town, Nasarawa state Nigeria"
+  },
+  {
+    "referenceId": "INS-NGA-0293",
+    "countryIso3": "NGA",
+    "name": "Ayetoro",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ayetoro",
+      "regionCode": "NG-OG"
+    },
+    "source": {
+      "url": "https://www.newcity.edu.ng/about-us",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "5c559401f6eccab764caaf1de0ff7e7948d7024b1132377eb94ebd42318323bb",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Strategically located in Ayetoro, Ogun State"
+  },
+  {
+    "referenceId": "INS-COD-0040",
+    "countryIso3": "COD",
+    "name": "Kalima",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official university locality explicitly states Maniema; the existing homonym city is in Tanganyika and cannot be reused.",
+    "place": {
+      "name": "Kalima",
+      "regionCode": "CD-MA"
+    },
+    "source": {
+      "url": "https://uml.cd/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "48b20e58567c560ffb59b84ff8555847374def11fda8cba155b616e823222520",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Kalima, Province du Maniema"
+  },
+  {
+    "referenceId": "INS-COD-0048",
+    "countryIso3": "COD",
+    "name": "Mulungwishi",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Mulungwishi",
+      "regionCode": "CD-HK"
+    },
+    "source": {
+      "url": "https://www.umkmulungwishi1951.org/a-propos",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "ee543fba3617fcb7f61f731e4327d19abea53917d92c9e18660475c4a9bc6167",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Adresse:Mulungwishi Province du Haut-Katanga R.D. Congo"
+  },
+  {
+    "referenceId": "INS-ETH-0009",
+    "countryIso3": "ETH",
+    "name": "Assosa",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Assosa",
+      "regionCode": "ET-BE",
+      "existingCityId": "city_et_asosa"
+    },
+    "source": {
+      "url": "https://asu.edu.et/brief-history-of-assosa-university/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "695b295887089d9801f1700cf722e3e9af969bcc79cc5728e3f4cbb7bd3a866a",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "The University is located in Assosa, the capital of Benishangul Gumuz Regional State"
+  },
+  {
+    "referenceId": "INS-YEM-0011",
+    "countryIso3": "YEM",
+    "name": "Sanaa",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Sanaa",
+      "regionCode": "YE-SA",
+      "existingCityId": "city_ye_sanaa"
+    },
+    "source": {
+      "url": "https://aust.uni.ye/address.php",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "30600b2e37047768aff65af9526f1414c93d8f4e405c23288c75967d2d1aa983",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "الجمهورية اليمنية - صنعاء تقاطع شارع الخمسين مع شارع تعز"
+  },
+  {
+    "referenceId": "INS-YEM-0057",
+    "countryIso3": "YEM",
+    "name": "Sanaa",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Sanaa",
+      "regionCode": "YE-SA",
+      "existingCityId": "city_ye_sanaa"
+    },
+    "source": {
+      "url": "https://saba.edu.ye/stratigyDetails/Home",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "31c56bc0aef5fb81b759ebb7ecfcc0398dfdd3a30a7c01c775c852fc1b25a503",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "صنعاء - عصر امام وزارة الخارجية - حي الانسي"
+  },
+  {
+    "referenceId": "INS-YEM-0067",
+    "countryIso3": "YEM",
+    "name": "Sanaa",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Sanaa",
+      "regionCode": "YE-SA",
+      "existingCityId": "city_ye_sanaa"
+    },
+    "source": {
+      "url": "https://kmsu.edu.ye/Announcements/Details?id=94",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "b83c0c3b2e56ae6e54a516702aac6b4e3a571d9b3dbbda97515cd8c205a41477",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "صنعاء - التحرير - جوار التوجية المعنوي"
+  },
+  {
+    "referenceId": "INS-YEM-0075",
+    "countryIso3": "YEM",
+    "name": "Sanaa",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Sanaa",
+      "regionCode": "YE-SA",
+      "existingCityId": "city_ye_sanaa"
+    },
+    "source": {
+      "url": "https://yuniv.net/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "7b39dd95e6230fa9db3cdc550c618b88c0939433d728a2550026a7ed1433fddb",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "صنعاء - مدينة حدة - شارع الخمسين تقاطع شارع صفر"
+  },
+  {
+    "referenceId": "INS-ARE-0057",
+    "countryIso3": "ARE",
+    "name": "Al Dhaid",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Al Dhaid",
+      "regionCode": "AE-SH"
+    },
+    "source": {
+      "url": "https://uodh.ac.ae/en/contact-us.html",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "91f3986df258f7465f234811d6141279a89790bcd50c74e117a6c3b6d60339bf",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Al Sidra, Al Dhaid - Sharjah"
+  },
+  {
+    "referenceId": "INS-KWT-0004",
+    "countryIso3": "KWT",
+    "name": "Egaila",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Egaila",
+      "regionCode": "KW-AH"
+    },
+    "source": {
+      "url": "https://www.aum.edu.kw/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "439d3427efe4e36586924b1905b14d989f19342faff858de385f5b1b231e4a22",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Located in Egaila on an expansive"
+  },
+  {
+    "referenceId": "INS-KWT-0005",
+    "countryIso3": "KWT",
+    "name": "Ardiyah",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ardiyah",
+      "regionCode": "KW-FA"
+    },
+    "source": {
+      "url": "https://www.aou.edu.kw/about/Pages/contact-us.aspx",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "b5e52cd60ac7f3040af9f57502c11adbc3952db99191438690fd5a55ed230648",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Arab Open University - Kuwait Ardiyah Industrial"
+  },
+  {
+    "referenceId": "INS-BHR-0003",
+    "countryIso3": "BHR",
+    "name": "East Al-Ekir",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "East Al-Ekir",
+      "regionCode": "BH-14"
+    },
+    "source": {
+      "url": "https://www.asu.edu.bh/contact/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "ca5152ce4b5260d8010c51234e962eb94e4d1368872ba5163fb7c20fc800fb11",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Building 166 – Road 23 – Block 623 – East Al-Ekir"
+  },
+  {
+    "referenceId": "INS-IRQ-0020",
+    "countryIso3": "IRQ",
+    "name": "Ramadi",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ramadi",
+      "regionCode": "IQ-AN",
+      "existingCityId": "city_iq_ar_ramadi"
+    },
+    "source": {
+      "url": "https://idrisi.edu.iq/about/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "1442b141f633c1ba324d6f9aa01701520ecfdcc7fca9af50389736e9da4711ba",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "تأسست في محافظة الانبار قضاء الرمادي"
+  },
+  {
+    "referenceId": "INS-PSE-0016",
+    "countryIso3": "PSE",
+    "name": "Al Bireh",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Al Bireh",
+      "regionCode": "PS-RBH"
+    },
+    "source": {
+      "url": "https://www.aou.edu.ps/about/Pages/contact-us.aspx",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "689a816337902bedbedc37d0dadb3c0b48f2d3eb879612542cceb8c3130b13a6",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "3 Sheikh Hassan Salama Street, Sateh Marhaba, Al-Bireh"
+  },
+  {
+    "referenceId": "INS-PSE-0026",
+    "countryIso3": "PSE",
+    "name": "Beit Jala",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Beit Jala",
+      "regionCode": "PS-BTH"
+    },
+    "source": {
+      "url": "https://www.lpj.org/en/the-patriarchate/educational-offices/seminary-of-beitjala",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0ae824d4a7412d8b66c9045876c911eb51bc60904de994aa7e8aef072048ece9",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Beit Jala - Manshiyeh Street"
+  },
+  {
+    "referenceId": "INS-PSE-0038",
+    "countryIso3": "PSE",
+    "name": "Khan Yunis",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Khan Yunis",
+      "regionCode": "PS-KYS",
+      "existingCityId": "city_ps_geonames_281124"
+    },
+    "source": {
+      "url": "https://en.cst-kh.edu.ps/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "2434b4da359d20f31dcaaac7d4a119847856ab3c9df8fc453871e48271092e76",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Khan Younis - Palestine Gizan Al-Najjar Courts Complex"
+  },
+  {
+    "referenceId": "INS-LBN-0001",
+    "countryIso3": "LBN",
+    "name": "Ain Saadeh",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ain Saadeh",
+      "regionCode": "LB-JL"
+    },
+    "source": {
+      "url": "https://aku.edu.lb/About.html",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "c26467774c486251dda15769eacc33fe227c6ef853de19db38ae471f9507852e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "located in Ain-Saadeh, Fanar Road"
+  },
+  {
+    "referenceId": "INS-SYR-0053",
+    "countryIso3": "SYR",
+    "name": "Deir Ali",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Deir Ali",
+      "regionCode": "SY-RD"
+    },
+    "source": {
+      "url": "https://spu.edu.sy/index.php?dir=html&ex=1&lang=1&page=contactus",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "3a059c290407c2c57c168a95bccae779e5ed60ee14604df2048d957470937fa1",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "ريف دمشق - اتستراد درعا الدولي - منطقة دير علي"
+  },
+  {
+    "referenceId": "INS-LKA-0008",
+    "countryIso3": "LKA",
+    "name": "Ratmalana",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ratmalana",
+      "regionCode": "LK-1"
+    },
+    "source": {
+      "url": "https://kdu.ac.lk/career-guidance-unit/contact-us/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "8666d7ef327c500cb1a179c052dfcce04c13df12a8749511eceea9d7dffce328",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Address Ratmalana, Sri Lanka"
+  },
+  {
+    "referenceId": "INS-CHN-0077",
+    "countryIso3": "CHN",
+    "name": "Tianjin",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tianjin",
+      "regionCode": "CN-TJ",
+      "existingCityId": "city_cn_tianjin"
+    },
+    "source": {
+      "url": "https://rsc.tjarts.edu.cn/info/1007/3386.htm",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "844fa8088c51019ff7a016aa93f07aa46a96d4a4667b7dce0fa707f308242ca4",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "学校地址：天津市河北区天纬路4号"
+  },
+  {
+    "referenceId": "INS-CHN-0079",
+    "countryIso3": "CHN",
+    "name": "Tianjin",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tianjin",
+      "regionCode": "CN-TJ",
+      "existingCityId": "city_cn_tianjin"
+    },
+    "source": {
+      "url": "https://kjc.tsguas.edu.cn/kyzd/xx/1.htm",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "ba0076ad09bee508f3f3e0630bb9390bb2567952b40687677487f9200c393adf",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "地址：天津海河教育园区雅深路2号"
+  },
+  {
+    "referenceId": "INS-CHN-0154",
+    "countryIso3": "CHN",
+    "name": "Ordos",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ordos",
+      "regionCode": "CN-NM"
+    },
+    "source": {
+      "url": "https://kjc.oit.edu.cn/info/1286/13738.htm",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "520ebf91008c31a40c0ac4f9ee7492919aa0213670d4b6c65c6349f11476151a",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "地址:内蒙古鄂尔多斯市康巴什鄂尔多斯大街东1号"
+  },
+  {
+    "referenceId": "INS-CHN-0191",
+    "countryIso3": "CHN",
+    "name": "Dalian",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Dalian",
+      "regionCode": "CN-LN",
+      "existingCityId": "city_cn_geonames_1814087"
+    },
+    "source": {
+      "url": "https://zsjy.lnp.edu.cn/c_1/2026/2059435662996389890.html",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "fb729c8cf1ae83b32778611f8357990002c8b56b2dd124606c378cf8d1618735",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "主校区具体地址：辽宁省大连市甘井子区营平路260号"
+  },
+  {
+    "referenceId": "INS-CHN-0755",
+    "countryIso3": "CHN",
+    "name": "Nyingchi",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Nyingchi",
+      "regionCode": "CN-XZ"
+    },
+    "source": {
+      "url": "https://www.xza.edu.cn/xxgkinfo/ldgh.htm",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "dd4ca247e833bf348df64e26f784bbffd6744e9900ef07f65027576de5eb874e",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "地址: 西藏林芝市巴宜区育才西路100号"
+  },
+  {
+    "referenceId": "INS-CHN-0815",
+    "countryIso3": "CHN",
+    "name": "Alar",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Alar",
+      "regionCode": "CN-XJ",
+      "existingCityId": "city_cn_geonames_1529641"
+    },
+    "source": {
+      "url": "https://zsc.taru.edu.cn/info/1066/2367.htm",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "dcb0847d9df2a1e7096e4159c645833bb7239278e8507b21902c39511186a47c",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "学校地址：新疆阿拉尔市"
+  },
+  {
+    "referenceId": "INS-KOR-0057",
+    "countryIso3": "KOR",
+    "name": "Yongin",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Yongin",
+      "regionCode": "KR-41"
+    },
+    "source": {
+      "url": "https://www.kangnam.ac.kr/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "0573dfad68ef3ced377664b33de25316b728d1ef8cea3da71ef42109c6eba434",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "경기도 용인시 기흥구 강남로 40"
+  },
+  {
+    "referenceId": "INS-KOR-0084",
+    "countryIso3": "KOR",
+    "name": "Gumi",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Gumi",
+      "regionCode": "KR-47",
+      "existingCityId": "city_kr_geonames_1842225"
+    },
+    "source": {
+      "url": "https://www.ikw.ac.kr/page/2506/1629.tc",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "03ad76be362f82b1bca5917bdc09256630813a78f0389599a9d57ea4ccf2caf9",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "경상북도 구미시 산동읍 인덕리 171-3"
+  },
+  {
+    "referenceId": "INS-JPN-0295",
+    "countryIso3": "JPN",
+    "name": "Tokyo",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tokyo",
+      "regionCode": "JP-13",
+      "existingCityId": "city_jp_tokyo"
+    },
+    "source": {
+      "url": "https://www.nms.ac.jp/sh/cme/access.html",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "ac7dc2276b63f278fb1ecff113e0ace1765ffe9737c2c9f4942ae9191b4269e2",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒113-8602 東京都文京区千駄木1-1-5"
+  },
+  {
+    "referenceId": "INS-JPN-0341",
+    "countryIso3": "JPN",
+    "name": "Tokyo",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tokyo",
+      "regionCode": "JP-13",
+      "existingCityId": "city_jp_tokyo"
+    },
+    "source": {
+      "url": "https://www.otsuma.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "01061c6d333f5b9ce61c966ae5a4f648a1478ecd08e27df7c0e3f5ee3852e8ab",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒102-8357 東京都千代田区三番町12番地"
+  },
+  {
+    "referenceId": "INS-JPN-0493",
+    "countryIso3": "JPN",
+    "name": "Ichikawa",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ichikawa",
+      "regionCode": "JP-12",
+      "existingCityId": "city_jp_ichikawa"
+    },
+    "source": {
+      "url": "https://www.wayo.ac.jp/access",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "471833edeae2a547828fa5d8c5704560a8417cc57c1b24cb988d10a632058998",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒272-8533 千葉県市川市国府台2-3-1"
+  },
+  {
+    "referenceId": "INS-JPN-0501",
+    "countryIso3": "JPN",
+    "name": "Yokkaichi",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Yokkaichi",
+      "regionCode": "JP-24",
+      "existingCityId": "city_jp_yokkaichi"
+    },
+    "source": {
+      "url": "https://www.yokkaichi-u.ac.jp/information/access.html",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "95586f600b8845e2e2114f0cb00f354cd30489a031fd211e9394b48b5b319764",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "〒512－8512 三重県四日市市萱生町（かようちょう）1200"
+  },
+  {
+    "referenceId": "INS-YEM-0047",
+    "countryIso3": "YEM",
+    "name": "Sanaa",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Sanaa",
+      "regionCode": "YE-SA",
+      "existingCityId": "city_ye_sanaa"
+    },
+    "source": {
+      "url": "https://iqraa.edu.ye/contact.html",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "92198c272b6ebc2f1a604c464263079a519350b74bc2ff960d6354bbcaee3d98",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "الحصبة - شارع جامعة الدول العربية جوار الغرفة التجارية (سابقاً) صنعاء"
+  },
+  {
+    "referenceId": "INS-YEM-0074",
+    "countryIso3": "YEM",
+    "name": "Sanaa",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Sanaa",
+      "regionCode": "YE-SA",
+      "existingCityId": "city_ye_sanaa"
+    },
+    "source": {
+      "url": "https://yju.edu.ye/university/%D9%86%D8%A8%D8%B0%D8%A9-%D8%B9%D9%86-%D8%A7%D9%84%D8%AC%D8%A7%D9%85%D8%B9%D8%A9/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "90d583579da3db5269f102685bbc4154c0429ca77555c6f7e914deb021709736",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "عنواننا : صنعاء -أمام فندق حدة"
+  },
+  {
+    "referenceId": "INS-JOR-0025",
+    "countryIso3": "JOR",
+    "name": "Al Is",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Al Is",
+      "regionCode": "JO-AT"
+    },
+    "source": {
+      "url": "https://jjee.ttu.edu.jo/contact/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "ae3c8b123fd3899c4dc1b26a178ba42f4ff2c9f865bdfc7c8cb77552e9b80394",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jordan Journal of Electrical Engineering, Tafila Technical University, Al Is, P.O. Box 179, Tafila 66110, Jordan"
+  },
+  {
+    "referenceId": "INS-BGD-0011",
+    "countryIso3": "BGD",
+    "name": "Gazipur",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Gazipur",
+      "regionCode": "BD-18",
+      "existingCityId": "city_bd_geonames_1200109"
+    },
+    "source": {
+      "url": "https://www.bou.ac.bd/Administration/Contacts",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "946ac36d96dc5198ef98821881688726878b9c7248179605574d0a38fb4cf452",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Board Bazar, Gazipur-1705, Bangladesh"
+  },
+  {
+    "referenceId": "INS-LKA-0013",
+    "countryIso3": "LKA",
+    "name": "Bollegala",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Bollegala",
+      "regionCode": "LK-1"
+    },
+    "source": {
+      "url": "https://fcit.niibs.lk/about-fcit/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "cbe8c3b6a36f6bf9e6353e9f5cb32fd880afd45ae3c77097a7a89a8106938e02",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Manelwatta, Bollegala, Kelaniya, Sri Lanka"
+  },
+  {
+    "referenceId": "INS-LKA-0017",
+    "countryIso3": "LKA",
+    "name": "Nawala",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Nawala",
+      "regionCode": "LK-1"
+    },
+    "source": {
+      "url": "https://ou.ac.lk/find-a-contact/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "82b3127d4da724025fef8b0e49b798dbdc11147f0e80a7896592c70e866447f7",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "The Open University of Sri Lanka, Nawala, Nugegoda"
+  },
+  {
+    "referenceId": "INS-JPN-0249",
+    "countryIso3": "JPN",
+    "name": "Taiwa",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "University-wide administrative office at Taiwa; separate Taihaku campus in Sendai is not substituted.",
+    "place": {
+      "name": "Taiwa",
+      "regionCode": "JP-04"
+    },
+    "source": {
+      "url": "https://www.myu.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "598f040c9802564105254d33673ddbcfad123f632dd0451c8b86de15efdf3c94",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "宮城県黒川郡大和町学苑1番地1"
+  },
+  {
+    "referenceId": "INS-JPN-0413",
+    "countryIso3": "JPN",
+    "name": "Tama",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Tama campus for institution named Tama Institute of Management and Information Sciences; other campuses not promoted as headquarters.",
+    "place": {
+      "name": "Tama",
+      "regionCode": "JP-13"
+    },
+    "source": {
+      "url": "https://www.tama.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "771d59d9fbe2dc138ff3cda04de07546d4af469fe74bb7c4b24a19c36b7c09b8",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "東京都多摩市聖ヶ丘4-1-1"
+  },
+  {
+    "referenceId": "INS-JPN-0480",
+    "countryIso3": "JPN",
+    "name": "Shimonoseki",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Shimonoseki",
+      "regionCode": "JP-35",
+      "existingCityId": "city_jp_geonames_1852225"
+    },
+    "source": {
+      "url": "https://www.toua-u.ac.jp/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "5c132b2ba7cea795a662267d1a35f81011e9a741272ff341609c4a82399dd804",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "山口県下関市一の宮学園町2-1"
+  },
+  {
+    "referenceId": "INS-KHM-0027",
+    "countryIso3": "KHM",
+    "name": "Thnal Keng",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Thnal Keng",
+      "regionCode": "KH-14"
+    },
+    "source": {
+      "url": "https://nuck.edu.kh/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "79d4a36e97292da667c0080044baf408ff4b52636dd947b1b0008ef64713120c",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "National Road 8, Thnal Keng Village, Smoang Cheung Commune, Kamchaymear District, Prey Veng Province, CAMBODIA"
+  },
+  {
+    "referenceId": "INS-IDN-0256",
+    "countryIso3": "IDN",
+    "name": "Palangkaraya",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Palangkaraya",
+      "regionCode": "ID-KT",
+      "existingCityId": "city_id_palangkaraya"
+    },
+    "source": {
+      "url": "https://ukpr.ac.id/kontak",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "787ec17da3aadb165bcb6ebe9f604b63e7c08343e2afebaa84354c0e0722b178",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Kampus Utama: JL. GS Rubay 01, RTA Milono KM. 8,5 Palangka Raya, Kalimantan Tengah"
+  },
+  {
+    "referenceId": "INS-IDN-0175",
+    "countryIso3": "IDN",
+    "name": "Teluk Kuantan",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Teluk Kuantan",
+      "regionCode": "ID-RI"
+    },
+    "source": {
+      "url": "https://uniks.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "da7cdd3bf4016cc22c817053721e03b3733c0fc624f04aa8dd14b60dab936b50",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl. Gatot Subroto KM 7, Kebun Nenas, Teluk Kuantan"
+  },
+  {
+    "referenceId": "INS-IDN-0272",
+    "countryIso3": "IDN",
+    "name": "Lumajang",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Lumajang",
+      "regionCode": "ID-JI"
+    },
+    "source": {
+      "url": "https://baak.unilu.ac.id/srtuktur-oraganisasi/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "442ddef2acfff6501ad80133ed50359040686ba7a517ed2ad9d231a9597fb19d",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl Musi No. 12 Lumajang"
+  },
+  {
+    "referenceId": "INS-IDN-0276",
+    "countryIso3": "IDN",
+    "name": "Tambun",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Tambun",
+      "regionCode": "ID-ST"
+    },
+    "source": {
+      "url": "https://umada.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "3ec8999e76fa2568d90c4a582900f16037aee680cf7c465f675217022f4357f6",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Jl. Kampus Madako, No. 1 Kel. Tambun, Kec. Baolan, Kab. Tolitoli, Indonesia"
+  },
+  {
+    "referenceId": "INS-IDN-0266",
+    "countryIso3": "IDN",
+    "name": "Lalosabila",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Lalosabila",
+      "regionCode": "ID-SG"
+    },
+    "source": {
+      "url": "https://unilaki.ac.id/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "52c0707fb409070e39b9f32683b99f6230f9f5d6203f7297eabdd37430787cce",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Kel. Lalosabila, Kec. Wawotobi Kab. Konawe"
+  },
+  {
+    "referenceId": "INS-PHL-0083",
+    "countryIso3": "PHL",
+    "name": "General Santos",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "General Santos",
+      "regionCode": "PH-SCO"
+    },
+    "source": {
+      "url": "https://www.nddu.edu.ph/contact-us/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "855c66b1d566e21313fa4aa529ac648153505514b6efc316f087ff8027876135",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Marist Avenue 9500 General Santos City Philippines"
+  },
+  {
+    "referenceId": "INS-CHE-0019",
+    "countryIso3": "CHE",
+    "name": "Manno",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Institution central administration contact locality; teaching sites in Lugano and Mendrisio remain distinct.",
+    "place": {
+      "name": "Manno",
+      "regionCode": "CH-TI"
+    },
+    "source": {
+      "url": "https://www.supsi.ch/en/contacts",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "d4a5e9a55ccebe20e3ee4f90cea4929e6c6c373af2258811a029ed2dad48dac7",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Le Gerre, Via Pobiette 11 CH-6928 Manno"
+  },
+  {
+    "referenceId": "INS-BLR-0026",
+    "countryIso3": "BLR",
+    "name": "Gomel",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Gomel",
+      "regionCode": "BY-HO",
+      "existingCityId": "city_by_homyel"
+    },
+    "source": {
+      "url": "https://gsmu.by/en/about_the_university/departments/inostrannykh_studentov/fakultet-po-podgotovke-spetsialistov-dlya-zarubezhnykh-stran/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "8a7186fa1c01950e3960d7f0ebf32a03792e454081a8d38f0c0ca352ae8fafdb",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Republic of Belarus, 246000, Gomel, st. Lange, 5"
+  },
+  {
+    "referenceId": "INS-BLR-0027",
+    "countryIso3": "BLR",
+    "name": "Grodno",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Grodno",
+      "regionCode": "BY-HR",
+      "existingCityId": "city_by_hrodna"
+    },
+    "source": {
+      "url": "https://inter.ggau.by/en/contact",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "d67d9a5dba4592da7df6dab6b4c352437efa0595deb9085c94903104779c62c4",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Grodno, 230008 Tereshkova Street, 28"
+  },
+  {
+    "referenceId": "INS-BLR-0028",
+    "countryIso3": "BLR",
+    "name": "Grodno",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Grodno",
+      "regionCode": "BY-HR",
+      "existingCityId": "city_by_hrodna"
+    },
+    "source": {
+      "url": "https://www.grsmu.by/en/university/about/about_history/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "70f1c23d53410fe5626b7f3c149a475547cf076be0102cf6a1ef3d9d7ead9d38",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Republic of Belarus, Grodno, 230009, Gorkogo str, 80"
+  },
+  {
+    "referenceId": "INS-BLR-0044",
+    "countryIso3": "BLR",
+    "name": "Grodno",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Grodno",
+      "regionCode": "BY-HR",
+      "existingCityId": "city_by_hrodna"
+    },
+    "source": {
+      "url": "https://en.grsu.by/en/about-us/contacts.html",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "1fd41ec4499846866d85c1878bdac19caec14693123914b7ecb69ee694fdcb11",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Belarus, Grodno, 230023, 22 Ozheshko str."
+  },
+  {
+    "referenceId": "INS-BIH-0016",
+    "countryIso3": "BIH",
+    "name": "East Sarajevo",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Rectorate/central administration locality; faculties in other towns remain separate.",
+    "place": {
+      "name": "East Sarajevo",
+      "regionCode": "BA-SRP"
+    },
+    "source": {
+      "url": "https://www.ues.rs.ba/en/university-today/contact/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "7c1ffdbc75c1315fad6605bafd08a80812d24e7447cf5c147fa36bac678c209b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Stefan Nemanja 5 71126, East Sarajevo Republic of Srpska, Bosnia and Herzegovina"
+  },
+  {
+    "referenceId": "INS-ESP-0021",
+    "countryIso3": "ESP",
+    "name": "Castello de la Plana",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Castello de la Plana",
+      "regionCode": "ES-CS"
+    },
+    "source": {
+      "url": "https://www.uji.es/institucional/contacta/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "5a899f42474a94f3b0a2709ebdb827f08c13f3933b06aeeff78ce47d7e591fd4",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "12006 Castelló de la Plana, Castelló"
+  },
+  {
+    "referenceId": "INS-MEX-0030",
+    "countryIso3": "MEX",
+    "name": "Villa de Alvarez",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Villa de Alvarez",
+      "regionCode": "MX-COL",
+      "existingCityId": "city_mx_villa_de_alvarez"
+    },
+    "source": {
+      "url": "https://www.colima.tecnm.mx/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "4a24f53d53df35a0fa56c92dd5df6dcf1397235cc92ed38c3a644ba309493417",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Av. Tecnológico No. 1, Villa De Alvarez,Col. C.P. 28976"
+  },
+  {
+    "referenceId": "INS-MEX-0153",
+    "countryIso3": "MEX",
+    "name": "Huajuapan de Leon",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Huajuapan de Leon",
+      "regionCode": "MX-OAX",
+      "existingCityId": "city_mx_geonames_3527023"
+    },
+    "source": {
+      "url": "https://www.utm.mx/web/assets/docs/Agenda_Investigacion_SUNEO2025.pdf",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "e8d47ca1e859f92f19e13550a403b6379f0f5b4a62736e08ea25f66cc0ffff75",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Acatlima Huajuapan de León, Oax., México C.P. 69000"
+  },
+  {
+    "referenceId": "INS-MEX-0154",
+    "countryIso3": "MEX",
+    "name": "Leon",
+    "method": "LIVE_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Leon",
+      "regionCode": "MX-GUA",
+      "existingCityId": "city_mx_leon_de_los_aldama"
+    },
+    "source": {
+      "url": "https://www.utleon.edu.mx/",
+      "evidenceKind": "LIVE_HTTP_PRIMARY_ADDRESS",
+      "sha256": "a07c1dd2f715ae33f81e64cdf9c1fb625a6936345882ae538c62b3c5e40d8e6c",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "CP. 37670 León, Gto. Mex."
+  },
+  {
+    "referenceId": "INS-NGA-0140",
+    "countryIso3": "NGA",
+    "name": "Oferekpe",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Oferekpe",
+      "regionCode": "NG-EB"
+    },
+    "source": {
+      "url": "https://www.uicto.edu.ng/contact",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "a33b22bddc848bee0466b5cd5ba2e8c0ca2720406f5ca211212df07851bec75c",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Oferekpe, Ebonyi LGA, Ebonyi State"
+  },
+  {
+    "referenceId": "INS-NGA-0142",
+    "countryIso3": "NGA",
+    "name": "Ihugh",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Ihugh",
+      "regionCode": "NG-BE"
+    },
+    "source": {
+      "url": "https://uast.benuestate.gov.ng/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "3538cf5e3fe734d81414e7081ec7c651bb49cb8bd7031a2d20ab9a356ebd2c3d",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Takeoff Campus, Ihugh-Korinya Road, Ihugh Vandeikya LGA, Benue State"
+  },
+  {
+    "referenceId": "INS-NGA-0186",
+    "countryIso3": "NGA",
+    "name": "Benin City",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Benin City",
+      "regionCode": "NG-ED",
+      "existingCityId": "city_ng_benin"
+    },
+    "source": {
+      "url": "https://www.wellspringuniversity.edu.ng/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "629ac2f8f1e3826ebdb554d9520652d5ca70c626767900e7034fd7171c2bfb52",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Wellspring University is a private institution in Benin City, Edo State, Nigeria"
+  },
+  {
+    "referenceId": "INS-MEX-0156",
+    "countryIso3": "MEX",
+    "name": "Heroica Matamoros",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Heroica Matamoros",
+      "regionCode": "MX-TAM",
+      "existingCityId": "city_mx_heroica_matamoros"
+    },
+    "source": {
+      "url": "https://www.utmatamoros.edu.mx/contacto/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "700a10129e062dff7074c4ad2a26c7c2dbd0f7cc8663d45a7c44e453413d0de8",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Carretera a Reynosa Km. 8.5, Col. Guadalupe, C.P. 87569, Matamoros, Tamps."
+  },
+  {
+    "referenceId": "INS-ARG-0072",
+    "countryIso3": "ARG",
+    "name": "Libertador San Martin",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Libertador San Martin",
+      "regionCode": "AR-E"
+    },
+    "source": {
+      "url": "https://uap.edu.ar/contacto/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "7bc24ea876b31d4e9fb0262622e58bfb5379fb117155fadb9ed15e8d2e98576b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "La Universidad Adventista del Plata se encuentra en Libertador San Martín, en la provincia de Entre Ríos"
+  },
+  {
+    "referenceId": "INS-PER-0032",
+    "countryIso3": "PER",
+    "name": "Quillabamba",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Quillabamba",
+      "regionCode": "PE-CUS"
+    },
+    "source": {
+      "url": "https://www.gob.pe/uniq",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "9a28d806ad8e96c55080e15aaff30496964e5b0d0488c093c43a686fd7c9fa89",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "El Arenal S/N - Quillabamba - Santa Ana - La Convención - Cusco - Perú"
+  },
+  {
+    "referenceId": "INS-PER-0093",
+    "countryIso3": "PER",
+    "name": "Luricocha",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Luricocha",
+      "regionCode": "PE-AYA"
+    },
+    "source": {
+      "url": "https://www.gob.pe/institucion/unah/contacto-y-numeros-de-emergencias",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "2a9879eb67726c39420704a9528af35dccbf9f1334d9467d2c465999f3d87422",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Ciudad universitaria Intay Av. Carlos Ch. Hiraoka s/n, Luricocha, Huanta - Luricocha - Huanta - Ayacucho - Perú"
+  },
+  {
+    "referenceId": "INS-VEN-0020",
+    "countryIso3": "VEN",
+    "name": "Santa Barbara del Zulia",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "Santa Barbara del Zulia",
+      "regionCode": "VE-V"
+    },
+    "source": {
+      "url": "https://unesur.edu.ve/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "24eb1f522fa47cc603983c1f5b1a0a52561566f126b036dd193e667aac47cf7b",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "Rectorado. Santa Bárbara, Municipio Colón Estado Zulia – Venezuela"
+  },
+  {
+    "referenceId": "INS-ZAF-0024",
+    "countryIso3": "ZAF",
+    "name": "KwaDlangezwa",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official institution address locality; source binding, not approval of every campus.",
+    "place": {
+      "name": "KwaDlangezwa",
+      "regionCode": "ZA-KZN"
+    },
+    "source": {
+      "url": "https://www.unizulu.ac.za/contact-us/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "ca81a020fc3cebf603dd7990a37dee5314bc88e7ee22e812c53c137714d92b11",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "KwaDlangezwa Main Campus"
+  }
+]

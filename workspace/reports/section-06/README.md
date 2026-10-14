@@ -2,6 +2,8 @@
 
 Date: **2026-10-10**. Repository baseline: `93b25a9c6b56e1db2a92230d59b78cf7ac64257c`. **Not a database audit.** No DB reads/writes, migrations, seeds, backfills, fuzzy merges or imports were performed.
 
+Historical report: its counts, catalog rows and university input reflect the baseline above. City sources and the active university geography queue were updated on 2026-10-13; see [the new reconciliation report](../city-region-reconciliation/2026-10-13/README.md). Do not interpret this historical report as an audit of the changed live source files.
+
 ## Coverage and exact counts
 
 The university input is `workspace/import-sources/reconciliation/m10-12-14/universities-geography.jsonl` (blob `8ff326132d2b572916e6c5de16de90a10a93b8f0`), containing **only 3,549 previously unresolved university geography rows**, not all university records. It contains **2,103 distinct valid country + normalized city keys** and **1 invalid row** (INS-VEN-0043 has an empty city). Consequently, these numbers CANNOT prove the number of absent cities in the live database or the full university universe.

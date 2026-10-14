@@ -1,0 +1,74 @@
+[
+  {
+    "referenceId": "INS-JPN-0126",
+    "countryIso3": "JPN",
+    "name": "Minamiuonuma",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official campus/administrative locality; retrieved primary search index address, not a new live-page verification.",
+    "place": {
+      "name": "Minamiuonuma",
+      "regionCode": "JP-15"
+    },
+    "source": {
+      "url": "https://www.iuj.ac.jp/inquiry/general/",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "51b13180d5043b406d3caaab17296db86a43ccf764ad1ae4414ff85c497b6e93",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "IUJ is located in Minamiuonuma City, Niigata Prefecture"
+  },
+  {
+    "referenceId": "INS-JPN-0355",
+    "countryIso3": "JPN",
+    "name": "Fukaya",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official campus/administrative locality; retrieved primary search index address, not a new live-page verification.",
+    "place": {
+      "name": "Fukaya",
+      "regionCode": "JP-11"
+    },
+    "source": {
+      "url": "https://www.sit.ac.jp/gakkahp/kikai/access.html",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "8b872ecea0e7e24d04c0d04e2b83d34f644d38ac047d7eff5f49ebce92736f0d",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "埼玉県深谷市普済寺1690"
+  },
+  {
+    "referenceId": "INS-JPN-0375",
+    "countryIso3": "JPN",
+    "name": "Shibata",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official campus/administrative locality; retrieved primary search index address, not a new live-page verification.",
+    "place": {
+      "name": "Shibata",
+      "regionCode": "JP-04"
+    },
+    "source": {
+      "url": "https://www.sendaidaigaku.jp/about.html?name=access",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "6896fb6b03487c44e12f4d96d92c3fb4ed49697b8b0a8587ec2fd241b2ee0244",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "宮城県柴田郡柴田町船岡南二丁目2番18号"
+  },
+  {
+    "referenceId": "INS-AUS-0023",
+    "countryIso3": "AUS",
+    "name": "Sippy Downs",
+    "method": "SEARCH_INDEX_PRIMARY_ADDRESS_REVIEWED",
+    "scope": "Official campus/administrative locality; retrieved primary search index address, not a new live-page verification.",
+    "place": {
+      "name": "Sippy Downs",
+      "regionCode": "AU-QLD"
+    },
+    "source": {
+      "url": "https://www.unisc.edu.au/study/open-day-2026/open-day-competition",
+      "evidenceKind": "SEARCH_INDEX_PRIMARY_ADDRESS",
+      "sha256": "3dd25c64ead1d5df75834d8bbf852da7d0abdb07c1ceeca094d28a9a0af0b8f1",
+      "retrievedAt": "2026-10-13"
+    },
+    "addressExcerpt": "90 Sippy Downs Drive, Sippy Downs QLD 4556"
+  }
+]

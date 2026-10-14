@@ -1,0 +1,639 @@
+{"key":"AD.06","name":"Sant Julià de Loria","ascii":"Sant Julia de Loria","id":"3039162"}
+{"key":"AE.06","name":"Sharjah","ascii":"Sharjah","id":"292673"}
+{"key":"AF.29","name":"Paktika","ascii":"Paktika","id":"1131256"}
+{"key":"AF.32","name":"Samangan","ascii":"Samangan","id":"1127766"}
+{"key":"AF.38","name":"Nuristan","ascii":"Nuristan","id":"1444363"}
+{"key":"AF.41","name":"Daykundi","ascii":"Daykundi","id":"6957553"}
+{"key":"AM.08","name":"Syunik","ascii":"Syunik","id":"409314"}
+{"key":"AM.11","name":"Yerevan","ascii":"Yerevan","id":"616051"}
+{"key":"AO.08","name":"Huambo","ascii":"Huambo","id":"3348310"}
+{"key":"AO.20","name":"Luanda","ascii":"Luanda","id":"2240444"}
+{"key":"AR.01","name":"Buenos Aires","ascii":"Buenos Aires","id":"3435907"}
+{"key":"AR.07","name":"Buenos Aires F.D.","ascii":"Buenos Aires F.D.","id":"3433955"}
+{"key":"AR.08","name":"Entre Rios","ascii":"Entre Rios","id":"3434137"}
+{"key":"AR.12","name":"La Rioja","ascii":"La Rioja","id":"3848949"}
+{"key":"AR.19","name":"San Luis","ascii":"San Luis","id":"3837029"}
+{"key":"AR.23","name":"Tierra del Fuego","ascii":"Tierra del Fuego","id":"3834450"}
+{"key":"AT.05","name":"Salzburg","ascii":"Salzburg","id":"2766823"}
+{"key":"AT.07","name":"Tyrol","ascii":"Tyrol","id":"2763586"}
+{"key":"AU.02","name":"New South Wales","ascii":"New South Wales","id":"2155400"}
+{"key":"BA.01","name":"Federation of B&H","ascii":"Federation of B&H","id":"3229999"}
+{"key":"BA.02","name":"Srpska","ascii":"Srpska","id":"3230000"}
+{"key":"BA.BRC","name":"Brčko","ascii":"Brcko","id":"3294903"}
+{"key":"BD.84","name":"Chittagong","ascii":"Chittagong","id":"1337200"}
+{"key":"BE.BRU","name":"Brussels Capital","ascii":"Brussels Capital","id":"2800867"}
+{"key":"BE.VLG","name":"Flanders","ascii":"Flanders","id":"3337388"}
+{"key":"BE.WAL","name":"Wallonia","ascii":"Wallonia","id":"3337387"}
+{"key":"BG.42","name":"Sofia-Capital","ascii":"Sofia-Capital","id":"731061"}
+{"key":"BH.17","name":"Southern Governorate","ascii":"Southern Governorate","id":"7090972"}
+{"key":"BH.19","name":"Northern","ascii":"Northern","id":"7090974"}
+{"key":"BN.02","name":"Brunei-Muara District","ascii":"Brunei-Muara District","id":"1820818"}
+{"key":"BO.02","name":"Cochabamba","ascii":"Cochabamba","id":"3919966"}
+{"key":"BR.05","name":"Bahia","ascii":"Bahia","id":"3471168"}
+{"key":"BR.08","name":"Espírito Santo","ascii":"Espirito Santo","id":"3463930"}
+{"key":"BR.14","name":"Mato Grosso","ascii":"Mato Grosso","id":"3457419"}
+{"key":"BR.15","name":"Minas Gerais","ascii":"Minas Gerais","id":"3457153"}
+{"key":"BR.18","name":"Paraná","ascii":"Parana","id":"3455077"}
+{"key":"BR.21","name":"Rio de Janeiro","ascii":"Rio de Janeiro","id":"3451189"}
+{"key":"BR.23","name":"Rio Grande do Sul","ascii":"Rio Grande do Sul","id":"3451133"}
+{"key":"BR.26","name":"Santa Catarina","ascii":"Santa Catarina","id":"3450387"}
+{"key":"BR.27","name":"São Paulo","ascii":"Sao Paulo","id":"3448433"}
+{"key":"BR.28","name":"Sergipe","ascii":"Sergipe","id":"3447799"}
+{"key":"BR.29","name":"Goiás","ascii":"Goias","id":"3462372"}
+{"key":"BS.23","name":"New Providence","ascii":"New Providence","id":"3571815"}
+{"key":"BS.25","name":"Freeport","ascii":"Freeport","id":"3572374"}
+{"key":"BW.01","name":"Central","ascii":"Central","id":"933851"}
+{"key":"BY.01","name":"Brest","ascii":"Brest","id":"629631"}
+{"key":"BY.06","name":"Mogilev","ascii":"Mogilev","id":"625073"}
+{"key":"BY.07","name":"Vitebsk","ascii":"Vitebsk","id":"620134"}
+{"key":"CA.01","name":"Alberta","ascii":"Alberta","id":"5883102"}
+{"key":"CA.02","name":"British Columbia","ascii":"British Columbia","id":"5909050"}
+{"key":"CA.04","name":"New Brunswick","ascii":"New Brunswick","id":"6087430"}
+{"key":"CA.07","name":"Nova Scotia","ascii":"Nova Scotia","id":"6091530"}
+{"key":"CA.08","name":"Ontario","ascii":"Ontario","id":"6093943"}
+{"key":"CA.10","name":"Quebec","ascii":"Quebec","id":"6115047"}
+{"key":"CD.15","name":"Haut-Lomami","ascii":"Haut-Lomami","id":"216141"}
+{"key":"CD.29","name":"Tanganyika","ascii":"Tanganyika","id":"205253"}
+{"key":"CF.04","name":"Mambéré-Kadéï","ascii":"Mambere-Kadei","id":"2386161"}
+{"key":"CF.15","name":"Nana-Grébizi","ascii":"Nana-Grebizi","id":"2386243"}
+{"key":"CG.04","name":"Kouilou","ascii":"Kouilou","id":"2258738"}
+{"key":"CH.AG","name":"Aargau","ascii":"Aargau","id":"2661876"}
+{"key":"CH.BE","name":"Bern","ascii":"Bern","id":"2661551"}
+{"key":"CH.TI","name":"Ticino","ascii":"Ticino","id":"2658370"}
+{"key":"CH.VD","name":"Vaud","ascii":"Vaud","id":"2658182"}
+{"key":"CH.VS","name":"Valais","ascii":"Valais","id":"2658205"}
+{"key":"CH.ZH","name":"Zurich","ascii":"Zurich","id":"2657895"}
+{"key":"CI.82","name":"Lagunes District","ascii":"Lagunes District","id":"11153057"}
+{"key":"CI.94","name":"Comoé District","ascii":"Comoe District","id":"11153053"}
+{"key":"CL.02","name":"Aysén","ascii":"Aysen","id":"3900333"}
+{"key":"CL.04","name":"Araucania","ascii":"Araucania","id":"3899463"}
+{"key":"CL.12","name":"Santiago Metropolitan","ascii":"Santiago Metropolitan","id":"3873544"}
+{"key":"CM.08","name":"West","ascii":"West","id":"2222934"}
+{"key":"CM.11","name":"Centre","ascii":"Centre","id":"2233376"}
+{"key":"CM.12","name":"Far North","ascii":"Far North","id":"2231755"}
+{"key":"CN.01","name":"Anhui","ascii":"Anhui","id":"1818058"}
+{"key":"CN.02","name":"Zhejiang","ascii":"Zhejiang","id":"1784764"}
+{"key":"CN.04","name":"Jiangsu","ascii":"Jiangsu","id":"1806260"}
+{"key":"CN.05","name":"Jilin","ascii":"Jilin","id":"2036500"}
+{"key":"CN.06","name":"Qinghai","ascii":"Qinghai","id":"1280239"}
+{"key":"CN.07","name":"Fujian","ascii":"Fujian","id":"1811017"}
+{"key":"CN.09","name":"Henan","ascii":"Henan","id":"1808520"}
+{"key":"CN.10","name":"Hebei","ascii":"Hebei","id":"1808773"}
+{"key":"CN.11","name":"Hunan","ascii":"Hunan","id":"1806691"}
+{"key":"CN.12","name":"Hubei","ascii":"Hubei","id":"1806949"}
+{"key":"CN.13","name":"Xinjiang","ascii":"Xinjiang","id":"1529047"}
+{"key":"CN.14","name":"Tibet","ascii":"Tibet","id":"1279685"}
+{"key":"CN.18","name":"Guizhou","ascii":"Guizhou","id":"1809445"}
+{"key":"CN.19","name":"Liaoning","ascii":"Liaoning","id":"2036115"}
+{"key":"CN.20","name":"Inner Mongolia","ascii":"Inner Mongolia","id":"2035607"}
+{"key":"CN.24","name":"Shanxi","ascii":"Shanxi","id":"1795912"}
+{"key":"CN.25","name":"Shandong","ascii":"Shandong","id":"1796328"}
+{"key":"CN.26","name":"Shaanxi","ascii":"Shaanxi","id":"1796480"}
+{"key":"CN.29","name":"Yunnan","ascii":"Yunnan","id":"1785694"}
+{"key":"CN.30","name":"Guangdong","ascii":"Guangdong","id":"1809935"}
+{"key":"CN.32","name":"Sichuan","ascii":"Sichuan","id":"1794299"}
+{"key":"CN.33","name":"Chongqing","ascii":"Chongqing","id":"1814905"}
+{"key":"CO.25","name":"San Andres y Providencia","ascii":"San Andres y Providencia","id":"3670205"}
+{"key":"CR.03","name":"Guanacaste Province","ascii":"Guanacaste Province","id":"3623582"}
+{"key":"CR.06","name":"Limón Province","ascii":"Limon Province","id":"3623064"}
+{"key":"CR.08","name":"San José","ascii":"San Jose","id":"3621837"}
+{"key":"CY.02","name":"Keryneia","ascii":"Keryneia","id":"146411"}
+{"key":"CY.03","name":"Larnaka","ascii":"Larnaka","id":"146398"}
+{"key":"CY.06","name":"Pafos","ascii":"Pafos","id":"146213"}
+{"key":"CZ.80","name":"Vysocina","ascii":"Vysocina","id":"3339538"}
+{"key":"DE.01","name":"Baden-Wurttemberg","ascii":"Baden-Wurttemberg","id":"2953481"}
+{"key":"DE.02","name":"Bavaria","ascii":"Bavaria","id":"2951839"}
+{"key":"DE.03","name":"Bremen","ascii":"Bremen","id":"2944387"}
+{"key":"DE.05","name":"Hesse","ascii":"Hesse","id":"2905330"}
+{"key":"DE.06","name":"Lower Saxony","ascii":"Lower Saxony","id":"2862926"}
+{"key":"DE.07","name":"North Rhine-Westphalia","ascii":"North Rhine-Westphalia","id":"2861876"}
+{"key":"DE.08","name":"Rheinland-Pfalz","ascii":"Rheinland-Pfalz","id":"2847618"}
+{"key":"DE.11","name":"Brandenburg","ascii":"Brandenburg","id":"2945356"}
+{"key":"DE.12","name":"Mecklenburg-Vorpommern","ascii":"Mecklenburg-Vorpommern","id":"2872567"}
+{"key":"DE.13","name":"Saxony","ascii":"Saxony","id":"2842566"}
+{"key":"DE.14","name":"Saxony-Anhalt","ascii":"Saxony-Anhalt","id":"2842565"}
+{"key":"DE.15","name":"Thuringia","ascii":"Thuringia","id":"2822542"}
+{"key":"DK.20","name":"Zealand","ascii":"Zealand","id":"6418541"}
+{"key":"DZ.20","name":"Blida","ascii":"Blida","id":"2503765"}
+{"key":"EC.11","name":"Imbabura","ascii":"Imbabura","id":"3655635"}
+{"key":"EC.14","name":"Manabí","ascii":"Manabi","id":"3654451"}
+{"key":"EG.02","name":"Red Sea","ascii":"Red Sea","id":"361468"}
+{"key":"EG.08","name":"Giza","ascii":"Giza","id":"360997"}
+{"key":"EG.09","name":"Monufia","ascii":"Monufia","id":"360689"}
+{"key":"EG.11","name":"Cairo","ascii":"Cairo","id":"360631"}
+{"key":"ES.07","name":"Balearic Islands","ascii":"Balearic Islands","id":"2521383"}
+{"key":"ES.29","name":"Madrid","ascii":"Madrid","id":"3117732"}
+{"key":"ES.32","name":"Navarre","ascii":"Navarre","id":"3115609"}
+{"key":"ES.51","name":"Andalusia","ascii":"Andalusia","id":"2593109"}
+{"key":"ES.52","name":"Aragon","ascii":"Aragon","id":"3336899"}
+{"key":"ES.53","name":"Canary Islands","ascii":"Canary Islands","id":"2593110"}
+{"key":"ES.54","name":"Castille-La Mancha","ascii":"Castille-La Mancha","id":"2593111"}
+{"key":"ES.56","name":"Catalonia","ascii":"Catalonia","id":"3336901"}
+{"key":"ES.58","name":"Galicia","ascii":"Galicia","id":"3336902"}
+{"key":"ES.59","name":"Basque Country","ascii":"Basque Country","id":"3336903"}
+{"key":"ET.44","name":"Addis Ababa","ascii":"Addis Ababa","id":"444178"}
+{"key":"ET.46","name":"Amhara","ascii":"Amhara","id":"444180"}
+{"key":"ET.47","name":"Bīnshangul Gumuz","ascii":"Binshangul Gumuz","id":"444181"}
+{"key":"ET.52","name":"Somali","ascii":"Somali","id":"444186"}
+{"key":"ET.53","name":"Tigray","ascii":"Tigray","id":"444187"}
+{"key":"ET.SI","name":"Sidama Region","ascii":"Sidama Region","id":"8299784"}
+{"key":"ET.SW","name":"South West Ethiopia Peoples' Region","ascii":"South West Ethiopia Peoples' Region","id":"12902784"}
+{"key":"FJ.01","name":"Central","ascii":"Central","id":"2205272"}
+{"key":"FR.11","name":"Île-de-France","ascii":"Ile-de-France","id":"3012874"}
+{"key":"FR.32","name":"Hauts-de-France","ascii":"Hauts-de-France","id":"11071624"}
+{"key":"FR.84","name":"Auvergne-Rhône-Alpes","ascii":"Auvergne-Rhone-Alpes","id":"11071625"}
+{"key":"FR.94","name":"Corsica","ascii":"Corsica","id":"3023519"}
+{"key":"GB.ENG","name":"England","ascii":"England","id":"6269131"}
+{"key":"GB.ENG.B9","name":"Buckinghamshire","ascii":"Buckinghamshire","id":"2654408"}
+{"key":"GB.ENG.C6","name":"Cornwall","ascii":"Cornwall","id":"2652355"}
+{"key":"GB.ENG.E6","name":"Gloucestershire","ascii":"Gloucestershire","id":"2648402"}
+{"key":"GB.ENG.F2","name":"Hampshire","ascii":"Hampshire","id":"2647554"}
+{"key":"GB.ENG.G5","name":"Kent","ascii":"Kent","id":"3333158"}
+{"key":"GB.ENG.G6","name":"City of Kingston upon Hull","ascii":"City of Kingston upon Hull","id":"3333159"}
+{"key":"GB.ENG.H2","name":"Lancashire","ascii":"Lancashire","id":"2644974"}
+{"key":"GB.ENG.H5","name":"Leicestershire","ascii":"Leicestershire","id":"2644667"}
+{"key":"GB.ENG.M9","name":"Staffordshire","ascii":"Staffordshire","id":"2637141"}
+{"key":"GB.ENG.N7","name":"Surrey","ascii":"Surrey","id":"2636512"}
+{"key":"GB.ENG.P6","name":"West Sussex","ascii":"West Sussex","id":"2634258"}
+{"key":"GB.ENG.WNH","name":"West Northamptonshire","ascii":"West Northamptonshire","id":"13192427"}
+{"key":"GB.ENG.Z6","name":"Central Bedfordshire","ascii":"Central Bedfordshire","id":"7290535"}
+{"key":"GB.NIR.N09000004","name":"Causeway Coast and Glens","ascii":"Causeway Coast and Glens","id":"11353070"}
+{"key":"GB.SCT.U6","name":"East Lothian","ascii":"East Lothian","id":"2650386"}
+{"key":"GB.SCT.V1","name":"Fife","ascii":"Fife","id":"2649469"}
+{"key":"GB.SCT.V3","name":"Highland","ascii":"Highland","id":"2646944"}
+{"key":"GB.SCT.W6","name":"Stirling","ascii":"Stirling","id":"2636909"}
+{"key":"GB.WLS","name":"Wales","ascii":"Wales","id":"2634895"}
+{"key":"GB.WLS.X5","name":"Cardiff","ascii":"Cardiff","id":"3333241"}
+{"key":"GB.WLS.X7","name":"Carmarthenshire","ascii":"Carmarthenshire","id":"2653753"}
+{"key":"GB.WLS.Y6","name":"Newport","ascii":"Newport","id":"3333246"}
+{"key":"GB.WLS.Y9","name":"Rhondda Cynon Taf","ascii":"Rhondda Cynon Taf","id":"3333247"}
+{"key":"GB.WLS.Z4","name":"Wrexham","ascii":"Wrexham","id":"2633484"}
+{"key":"GE.04","name":"Adjara","ascii":"Adjara","id":"615929"}
+{"key":"GE.72","name":"Samtskhe-Javakheti","ascii":"Samtskhe-Javakheti","id":"865544"}
+{"key":"GH.04","name":"Central","ascii":"Central","id":"2302353"}
+{"key":"GH.09","name":"Western","ascii":"Western","id":"2294076"}
+{"key":"GH.10","name":"Upper East","ascii":"Upper East","id":"2294291"}
+{"key":"GM.01","name":"Banjul","ascii":"Banjul","id":"2413875"}
+{"key":"GQ.04","name":"Bioko Norte","ascii":"Bioko Norte","id":"2566978"}
+{"key":"GQ.10","name":"Djibloho","ascii":"Djibloho","id":"12168385"}
+{"key":"HR.21","name":"Zagreb","ascii":"Zagreb","id":"3337532"}
+{"key":"HT.09","name":"Nord","ascii":"Nord","id":"3719543"}
+{"key":"HT.14","name":"Grand'Anse","ascii":"Grand'Anse","id":"3724613"}
+{"key":"HU.04","name":"Borsod-Abaúj-Zemplén","ascii":"Borsod-Abauj-Zemplen","id":"722064"}
+{"key":"ID.01","name":"Aceh","ascii":"Aceh","id":"1215638"}
+{"key":"ID.02","name":"Bali","ascii":"Bali","id":"1650535"}
+{"key":"ID.10","name":"Yogyakarta","ascii":"Yogyakarta","id":"1621176"}
+{"key":"ID.15","name":"Lampung","ascii":"Lampung","id":"1638535"}
+{"key":"ID.33","name":"Banten","ascii":"Banten","id":"1923045"}
+{"key":"ID.37","name":"Riau","ascii":"Riau","id":"1629652"}
+{"key":"IE.L","name":"Leinster","ascii":"Leinster","id":"7521314"}
+{"key":"IL.01","name":"Southern District","ascii":"Southern District","id":"294952"}
+{"key":"IL.02","name":"Central District","ascii":"Central District","id":"294904"}
+{"key":"IL.03","name":"Northern District","ascii":"Northern District","id":"294824"}
+{"key":"IL.04","name":"Haifa","ascii":"Haifa","id":"294800"}
+{"key":"IL.05","name":"Tel Aviv","ascii":"Tel Aviv","id":"293396"}
+{"key":"IL.06","name":"Jerusalem","ascii":"Jerusalem","id":"293198"}
+{"key":"IN.03","name":"Assam","ascii":"Assam","id":"1278253"}
+{"key":"IN.10","name":"Haryana","ascii":"Haryana","id":"1270260"}
+{"key":"IN.11","name":"Himachal Pradesh","ascii":"Himachal Pradesh","id":"1270101"}
+{"key":"IN.12","name":"Jammu and Kashmir","ascii":"Jammu and Kashmir","id":"1269320"}
+{"key":"IN.13","name":"Kerala","ascii":"Kerala","id":"1267254"}
+{"key":"IN.16","name":"Maharashtra","ascii":"Maharashtra","id":"1264418"}
+{"key":"IN.19","name":"Karnataka","ascii":"Karnataka","id":"1267701"}
+{"key":"IN.21","name":"Odisha","ascii":"Odisha","id":"1261029"}
+{"key":"IN.23","name":"Punjab","ascii":"Punjab","id":"1259223"}
+{"key":"IN.24","name":"Rajasthan","ascii":"Rajasthan","id":"1258899"}
+{"key":"IN.25","name":"Tamil Nadu","ascii":"Tamil Nadu","id":"1255053"}
+{"key":"IN.33","name":"Goa","ascii":"Goa","id":"1271157"}
+{"key":"IN.34","name":"Bihar","ascii":"Bihar","id":"1275715"}
+{"key":"IN.35","name":"Madhya Pradesh","ascii":"Madhya Pradesh","id":"1264542"}
+{"key":"IN.36","name":"Uttar Pradesh","ascii":"Uttar Pradesh","id":"1253626"}
+{"key":"IN.39","name":"Uttarakhand","ascii":"Uttarakhand","id":"1444366"}
+{"key":"IQ.06","name":"Babil","ascii":"Babil","id":"98227"}
+{"key":"IQ.13","name":"Kirkuk","ascii":"Kirkuk","id":"98410"}
+{"key":"IR.04","name":"Sistan and Baluchestan","ascii":"Sistan and Baluchestan","id":"1159456"}
+{"key":"IR.07","name":"Fars","ascii":"Fars","id":"134766"}
+{"key":"IR.10","name":"Ilam Province","ascii":"Ilam Province","id":"130801"}
+{"key":"IR.15","name":"Khuzestan","ascii":"Khuzestan","id":"127082"}
+{"key":"IR.25","name":"Semnan","ascii":"Semnan","id":"116401"}
+{"key":"IR.26","name":"Tehran","ascii":"Tehran","id":"110791"}
+{"key":"IR.29","name":"Kerman","ascii":"Kerman","id":"128231"}
+{"key":"IR.33","name":"East Azerbaijan","ascii":"East Azerbaijan","id":"142549"}
+{"key":"IR.34","name":"Markazi","ascii":"Markazi","id":"124763"}
+{"key":"IR.35","name":"Māzandarān","ascii":"Mazandaran","id":"124544"}
+{"key":"IR.42","name":"Razavi Khorasan","ascii":"Razavi Khorasan","id":"6201375"}
+{"key":"IR.43","name":"North Khorasan","ascii":"North Khorasan","id":"6201376"}
+{"key":"IT.01","name":"Abruzzo","ascii":"Abruzzo","id":"3183560"}
+{"key":"IT.03","name":"Calabria","ascii":"Calabria","id":"2525468"}
+{"key":"IT.04","name":"Campania","ascii":"Campania","id":"3181042"}
+{"key":"IT.07","name":"Lazio","ascii":"Lazio","id":"3174976"}
+{"key":"IT.09","name":"Lombardy","ascii":"Lombardy","id":"3174618"}
+{"key":"IT.12","name":"Piedmont","ascii":"Piedmont","id":"3170831"}
+{"key":"IT.13","name":"Apulia","ascii":"Apulia","id":"3169778"}
+{"key":"IT.16","name":"Tuscany","ascii":"Tuscany","id":"3165361"}
+{"key":"IT.19","name":"Aosta Valley","ascii":"Aosta Valley","id":"3164857"}
+{"key":"KE.11","name":"Bomet County","ascii":"Bomet County","id":"7667666"}
+{"key":"KE.22","name":"Kiambu County","ascii":"Kiambu County","id":"192709"}
+{"key":"KE.26","name":"Kisumu County","ascii":"Kisumu County","id":"191242"}
+{"key":"KE.29","name":"Laikipia","ascii":"Laikipia","id":"189794"}
+{"key":"KE.36","name":"Migori County","ascii":"Migori County","id":"7667678"}
+{"key":"KE.38","name":"Murang'A","ascii":"Murang'A","id":"185578"}
+{"key":"KE.39","name":"Nakuru County","ascii":"Nakuru County","id":"7668902"}
+{"key":"KE.44","name":"Nyeri County","ascii":"Nyeri County","id":"7667661"}
+{"key":"KE.47","name":"Taita Taveta","ascii":"Taita Taveta","id":"7667652"}
+{"key":"KE.49","name":"Tharaka - Nithi","ascii":"Tharaka - Nithi","id":"179380"}
+{"key":"KG.01","name":"Bishkek","ascii":"Bishkek","id":"1528334"}
+{"key":"KG.02","name":"Chuy Region","ascii":"Chuy Region","id":"1538652"}
+{"key":"KG.03","name":"Jalal-Abad Region","ascii":"Jalal-Abad Region","id":"1529778"}
+{"key":"KG.07","name":"Issyk-Kul","ascii":"Issyk-Kul","id":"1528260"}
+{"key":"KH.02","name":"Kampong Cham","ascii":"Kampong Cham","id":"1831172"}
+{"key":"KH.04","name":"Kampong Speu Province","ascii":"Kampong Speu Province","id":"1831132"}
+{"key":"KH.05","name":"Kampong Thom","ascii":"Kampong Thom","id":"1831124"}
+{"key":"KH.08","name":"Koh Kong","ascii":"Koh Kong","id":"1831037"}
+{"key":"KH.09","name":"Kratie","ascii":"Kratie","id":"1830563"}
+{"key":"KH.12","name":"Pursat","ascii":"Pursat","id":"1821301"}
+{"key":"KH.14","name":"Prey Veng","ascii":"Prey Veng","id":"1822609"}
+{"key":"KH.17","name":"Stung Treng","ascii":"Stung Treng","id":"1822028"}
+{"key":"KH.18","name":"Svay Rieng","ascii":"Svay Rieng","id":"1821992"}
+{"key":"KH.19","name":"Takeo","ascii":"Takeo","id":"1821939"}
+{"key":"KH.23","name":"Ratanakiri","ascii":"Ratanakiri","id":"1822449"}
+{"key":"KH.24","name":"Siem Reap","ascii":"Siem Reap","id":"1822213"}
+{"key":"KH.25","name":"Banteay Meanchey","ascii":"Banteay Meanchey","id":"1899273"}
+{"key":"KH.26","name":"Kep","ascii":"Kep","id":"1830937"}
+{"key":"KH.29","name":"Battambang","ascii":"Battambang","id":"1821310"}
+{"key":"KI.01","name":"Gilbert Islands","ascii":"Gilbert Islands","id":"2110215"}
+{"key":"KN.08","name":"Saint Mary Cayon","ascii":"Saint Mary Cayon","id":"3575173"}
+{"key":"KN.10","name":"Saint Paul Charlestown","ascii":"Saint Paul Charlestown","id":"3575171"}
+{"key":"KP.01","name":"Chagang","ascii":"Chagang","id":"2045265"}
+{"key":"KP.03","name":"South Hamgyong","ascii":"South Hamgyong","id":"1877450"}
+{"key":"KP.06","name":"South Hwanghae","ascii":"South Hwanghae","id":"1876884"}
+{"key":"KP.07","name":"North Hwanghae","ascii":"North Hwanghae","id":"1876888"}
+{"key":"KP.11","name":"P'yŏngan-bukto","ascii":"P'yongan-bukto","id":"1871954"}
+{"key":"KP.15","name":"South Pyongan","ascii":"South Pyongan","id":"1871952"}
+{"key":"KP.17","name":"North Hamgyong","ascii":"North Hamgyong","id":"2044245"}
+{"key":"KP.19","name":"Kaesong","ascii":"Kaesong","id":"12902703"}
+{"key":"KR.03","name":"Jeollabuk-do","ascii":"Jeollabuk-do","id":"1845789"}
+{"key":"KR.05","name":"North Chungcheong","ascii":"North Chungcheong","id":"1845106"}
+{"key":"KR.10","name":"Busan","ascii":"Busan","id":"1838519"}
+{"key":"KR.11","name":"Seoul","ascii":"Seoul","id":"1835847"}
+{"key":"KR.12","name":"Incheon","ascii":"Incheon","id":"1843561"}
+{"key":"KR.13","name":"Gyeonggi-do","ascii":"Gyeonggi-do","id":"1841610"}
+{"key":"KR.14","name":"Gyeongsangbuk-do","ascii":"Gyeongsangbuk-do","id":"1841597"}
+{"key":"KR.15","name":"Daegu","ascii":"Daegu","id":"1835327"}
+{"key":"KR.16","name":"Jeollanam-do","ascii":"Jeollanam-do","id":"1845788"}
+{"key":"KR.17","name":"Chungcheongnam-do","ascii":"Chungcheongnam-do","id":"1845105"}
+{"key":"KR.18","name":"Gwangju","ascii":"Gwangju","id":"1841808"}
+{"key":"KR.19","name":"Daejeon","ascii":"Daejeon","id":"1835224"}
+{"key":"KR.20","name":"Gyeongsangnam-do","ascii":"Gyeongsangnam-do","id":"1902028"}
+{"key":"KR.21","name":"Ulsan","ascii":"Ulsan","id":"1833742"}
+{"key":"KZ.03","name":"Aqmola","ascii":"Aqmola","id":"1518003"}
+{"key":"KZ.04","name":"Aktobe","ascii":"Aktobe","id":"610688"}
+{"key":"KZ.05","name":"Astana","ascii":"Astana","id":"1538317"}
+{"key":"KZ.07","name":"West Kazakhstan","ascii":"West Kazakhstan","id":"607847"}
+{"key":"KZ.09","name":"Mangystau","ascii":"Mangystau","id":"608879"}
+{"key":"KZ.10","name":"Turkistan","ascii":"Turkistan","id":"1524787"}
+{"key":"KZ.11","name":"Pavlodar Region","ascii":"Pavlodar Region","id":"1520239"}
+{"key":"KZ.12","name":"Karaganda","ascii":"Karaganda","id":"1523401"}
+{"key":"KZ.12510143","name":"Abai Region","ascii":"Abai Region","id":"12510143"}
+{"key":"KZ.12510144","name":"Zhetysu Region","ascii":"Zhetysu Region","id":"12510144"}
+{"key":"KZ.12510145","name":"Ulytau Region","ascii":"Ulytau Region","id":"12510145"}
+{"key":"KZ.13","name":"Kostanay","ascii":"Kostanay","id":"1521671"}
+{"key":"KZ.14","name":"Kyzylorda","ascii":"Kyzylorda","id":"1521406"}
+{"key":"KZ.15","name":"East Kazakhstan","ascii":"East Kazakhstan","id":"1517381"}
+{"key":"KZ.16","name":"North Kazakhstan","ascii":"North Kazakhstan","id":"1519367"}
+{"key":"KZ.17","name":"Zhambyl","ascii":"Zhambyl","id":"1524444"}
+{"key":"LA.16","name":"Loungnamtha","ascii":"Loungnamtha","id":"1655561"}
+{"key":"LB.04","name":"Beirut","ascii":"Beirut","id":"276780"}
+{"key":"LB.05","name":"Mount Lebanon","ascii":"Mount Lebanon","id":"273607"}
+{"key":"LB.06","name":"South Governorate","ascii":"South Governorate","id":"279894"}
+{"key":"LB.07","name":"Nabatieh","ascii":"Nabatieh","id":"444191"}
+{"key":"LC.06","name":"Gros-Islet","ascii":"Gros-Islet","id":"3576685"}
+{"key":"LK.29","name":"Central Province","ascii":"Central Province","id":"1249296"}
+{"key":"LK.30","name":"North Central Province","ascii":"North Central Province","id":"1232870"}
+{"key":"LK.32","name":"North Western Province","ascii":"North Western Province","id":"1232860"}
+{"key":"LK.33","name":"Sabaragamuwa Province","ascii":"Sabaragamuwa Province","id":"1228435"}
+{"key":"LK.34","name":"Southern Province","ascii":"Southern Province","id":"1227618"}
+{"key":"LK.35","name":"Uva Province","ascii":"Uva Province","id":"1225265"}
+{"key":"LK.36","name":"Western Province","ascii":"Western Province","id":"1223421"}
+{"key":"LK.37","name":"Eastern Province","ascii":"Eastern Province","id":"8133521"}
+{"key":"LK.38","name":"Northern Province","ascii":"Northern Province","id":"7671049"}
+{"key":"LR.17","name":"Margibi County","ascii":"Margibi County","id":"2588491"}
+{"key":"LV.06","name":"Daugavpils","ascii":"Daugavpils","id":"460414"}
+{"key":"LV.21","name":"Ogre","ascii":"Ogre","id":"457061"}
+{"key":"LV.31","name":"Valmiera","ascii":"Valmiera","id":"454564"}
+{"key":"LV.95","name":"Mārupe","ascii":"Marupe","id":"7628319"}
+{"key":"LY.72","name":"Misratah","ascii":"Misratah","id":"2214845"}
+{"key":"LY.75","name":"Sabha District","ascii":"Sabha District","id":"2212774"}
+{"key":"LY.78","name":"Wadi ash Shati'","ascii":"Wadi ash Shati'","id":"2219413"}
+{"key":"LY.80","name":"Jabal al Gharbi","ascii":"Jabal al Gharbi","id":"7602689"}
+{"key":"LY.82","name":"Al Marqab","ascii":"Al Marqab","id":"7602691"}
+{"key":"ML.06","name":"Sikasso","ascii":"Sikasso","id":"2451184"}
+{"key":"MM.01","name":"Rakhine","ascii":"Rakhine","id":"1298852"}
+{"key":"MM.02","name":"Chin State","ascii":"Chin State","id":"1327132"}
+{"key":"MM.04","name":"Kachin State","ascii":"Kachin State","id":"1321702"}
+{"key":"MM.05","name":"Kayin State","ascii":"Kayin State","id":"1320233"}
+{"key":"MM.06","name":"Kayah State","ascii":"Kayah State","id":"1319539"}
+{"key":"MM.08","name":"Mandalay Region","ascii":"Mandalay Region","id":"1311871"}
+{"key":"MM.10","name":"Sagaing Region","ascii":"Sagaing Region","id":"1298480"}
+{"key":"MM.11","name":"Shan State","ascii":"Shan State","id":"1297099"}
+{"key":"MM.13","name":"Mon","ascii":"Mon","id":"1308528"}
+{"key":"MM.17","name":"Yangon","ascii":"Yangon","id":"1298822"}
+{"key":"MT.06","name":"Bormla","ascii":"Bormla","id":"8299705"}
+{"key":"MT.30","name":"Luqa","ascii":"Luqa","id":"8299729"}
+{"key":"MT.39","name":"Paola","ascii":"Paola","id":"8299738"}
+{"key":"MT.48","name":"Saint John","ascii":"Saint John","id":"8299747"}
+{"key":"MT.52","name":"Saint Paul’s Bay","ascii":"Saint Paul's Bay","id":"8299751"}
+{"key":"MU.15","name":"Moka","ascii":"Moka","id":"934275"}
+{"key":"MU.16","name":"Pamplemousses","ascii":"Pamplemousses","id":"934212"}
+{"key":"MU.17","name":"Plaines Wilhems","ascii":"Plaines Wilhems","id":"934166"}
+{"key":"MW.N","name":"Northern Region","ascii":"Northern Region","id":"924591"}
+{"key":"MW.S","name":"Southern Region","ascii":"Southern Region","id":"923817"}
+{"key":"MX.05","name":"Chiapas","ascii":"Chiapas","id":"3531011"}
+{"key":"MX.07","name":"Coahuila","ascii":"Coahuila","id":"4013674"}
+{"key":"MX.11","name":"Guanajuato","ascii":"Guanajuato","id":"4005267"}
+{"key":"MX.13","name":"Hidalgo","ascii":"Hidalgo","id":"3527115"}
+{"key":"MX.16","name":"Michoacán","ascii":"Michoacan","id":"3995955"}
+{"key":"MX.18","name":"Nayarit","ascii":"Nayarit","id":"3995012"}
+{"key":"MX.20","name":"Oaxaca","ascii":"Oaxaca","id":"3522509"}
+{"key":"MX.21","name":"Puebla","ascii":"Puebla","id":"3521082"}
+{"key":"MX.22","name":"Querétaro","ascii":"Queretaro","id":"3520914"}
+{"key":"MX.29","name":"Tlaxcala","ascii":"Tlaxcala","id":"3515359"}
+{"key":"MX.30","name":"Veracruz","ascii":"Veracruz","id":"3514780"}
+{"key":"MX.31","name":"Yucatán","ascii":"Yucatan","id":"3514211"}
+{"key":"MY.01","name":"Johor","ascii":"Johor","id":"1733049"}
+{"key":"MY.02","name":"Kedah","ascii":"Kedah","id":"1733048"}
+{"key":"MY.03","name":"Kelantan","ascii":"Kelantan","id":"1733044"}
+{"key":"MY.04","name":"Melaka","ascii":"Melaka","id":"1733035"}
+{"key":"MY.05","name":"Negeri Sembilan","ascii":"Negeri Sembilan","id":"1733043"}
+{"key":"MY.06","name":"Pahang","ascii":"Pahang","id":"1733042"}
+{"key":"MY.07","name":"Perak","ascii":"Perak","id":"1733041"}
+{"key":"MY.08","name":"Perlis","ascii":"Perlis","id":"1733040"}
+{"key":"MY.11","name":"Sarawak","ascii":"Sarawak","id":"1733038"}
+{"key":"MY.12","name":"Selangor","ascii":"Selangor","id":"1733037"}
+{"key":"MY.14","name":"Kuala Lumpur","ascii":"Kuala Lumpur","id":"1733046"}
+{"key":"MY.15","name":"Labuan","ascii":"Labuan","id":"1734240"}
+{"key":"MY.17","name":"Putrajaya","ascii":"Putrajaya","id":"1996552"}
+{"key":"NE.09","name":"Tillabéri Region","ascii":"Tillaberi Region","id":"2595293"}
+{"key":"NG.11","name":"FCT","ascii":"FCT","id":"2352776"}
+{"key":"NG.21","name":"Akwa Ibom State","ascii":"Akwa Ibom State","id":"2350813"}
+{"key":"NG.22","name":"Cross River State","ascii":"Cross River State","id":"2345891"}
+{"key":"NG.23","name":"Kaduna State","ascii":"Kaduna State","id":"2335722"}
+{"key":"NG.24","name":"Katsina State","ascii":"Katsina State","id":"2334797"}
+{"key":"NG.25","name":"Anambra","ascii":"Anambra","id":"2349961"}
+{"key":"NG.29","name":"Kano State","ascii":"Kano State","id":"2335196"}
+{"key":"NG.30","name":"Kwara State","ascii":"Kwara State","id":"2332785"}
+{"key":"NG.31","name":"Niger State","ascii":"Niger State","id":"2328925"}
+{"key":"NG.32","name":"Oyo State","ascii":"Oyo State","id":"2325190"}
+{"key":"NG.36","name":"Delta","ascii":"Delta","id":"2565341"}
+{"key":"NG.37","name":"Edo State","ascii":"Edo State","id":"2565343"}
+{"key":"NG.39","name":"Jigawa State","ascii":"Jigawa State","id":"2565345"}
+{"key":"NG.40","name":"Kebbi","ascii":"Kebbi","id":"2597363"}
+{"key":"NG.41","name":"Kogi State","ascii":"Kogi State","id":"2597364"}
+{"key":"NG.42","name":"Osun State","ascii":"Osun State","id":"2597365"}
+{"key":"NG.48","name":"Ondo State","ascii":"Ondo State","id":"2326168"}
+{"key":"NG.49","name":"Plateau State","ascii":"Plateau State","id":"2324828"}
+{"key":"NG.50","name":"Rivers State","ascii":"Rivers State","id":"2324433"}
+{"key":"NG.52","name":"Bayelsa State","ascii":"Bayelsa State","id":"2595344"}
+{"key":"NG.53","name":"Ebonyi State","ascii":"Ebonyi State","id":"2595345"}
+{"key":"NG.54","name":"Ekiti State","ascii":"Ekiti State","id":"2595346"}
+{"key":"NG.57","name":"Zamfara State","ascii":"Zamfara State","id":"2595349"}
+{"key":"NL.03","name":"Gelderland","ascii":"Gelderland","id":"2755634"}
+{"key":"NL.09","name":"Utrecht","ascii":"Utrecht","id":"2745909"}
+{"key":"NL.16","name":"Flevoland","ascii":"Flevoland","id":"3319179"}
+{"key":"NO.21","name":"Trøndelag","ascii":"Trondelag","id":"11862827"}
+{"key":"NP.1","name":"Koshi","ascii":"Koshi","id":"12095447"}
+{"key":"NP.2","name":"Madhesh","ascii":"Madhesh","id":"12095448"}
+{"key":"NP.3","name":"Bagmati Province","ascii":"Bagmati Province","id":"12095449"}
+{"key":"NP.4","name":"Gandaki Pradesh","ascii":"Gandaki Pradesh","id":"12095450"}
+{"key":"NP.5","name":"Lumbini Province","ascii":"Lumbini Province","id":"12095451"}
+{"key":"NP.7","name":"Sudurpashchim Pradesh","ascii":"Sudurpashchim Pradesh","id":"12095453"}
+{"key":"NZ.E9","name":"Canterbury","ascii":"Canterbury","id":"2192628"}
+{"key":"NZ.F3","name":"Manawatu-Wanganui","ascii":"Manawatu-Wanganui","id":"2179671"}
+{"key":"NZ.G2","name":"Wellington Region","ascii":"Wellington Region","id":"2179538"}
+{"key":"OM.11","name":"Al Batinah North","ascii":"Al Batinah North","id":"8394434"}
+{"key":"PA.12","name":"Ngöbe-Buglé Comarca","ascii":"Ngoebe-Bugle Comarca","id":"7303688"}
+{"key":"PE.01","name":"Amazonas","ascii":"Amazonas","id":"3699699"}
+{"key":"PE.07","name":"Callao","ascii":"Callao","id":"3946080"}
+{"key":"PE.09","name":"Huancavelica","ascii":"Huancavelica","id":"3939467"}
+{"key":"PE.12","name":"Junin","ascii":"Junin","id":"3937485"}
+{"key":"PE.13","name":"La Libertad","ascii":"La Libertad","id":"3695781"}
+{"key":"PE.15","name":"Lima region","ascii":"Lima region","id":"3936452"}
+{"key":"PG.05","name":"Southern Highlands Province","ascii":"Southern Highlands Province","id":"2086331"}
+{"key":"PG.19","name":"Enga Province","ascii":"Enga Province","id":"2097655"}
+{"key":"PG.20","name":"National Capital","ascii":"National Capital","id":"2089856"}
+{"key":"PH.01","name":"Ilocos","ascii":"Ilocos","id":"7521301"}
+{"key":"PH.02","name":"Cagayan Valley","ascii":"Cagayan Valley","id":"7521297"}
+{"key":"PH.03","name":"Central Luzon","ascii":"Central Luzon","id":"7521305"}
+{"key":"PH.05","name":"Bicol Region","ascii":"Bicol Region","id":"7521310"}
+{"key":"PH.06","name":"Western Visayas","ascii":"Western Visayas","id":"7521304"}
+{"key":"PH.07","name":"Central Visayas","ascii":"Central Visayas","id":"7521306"}
+{"key":"PH.08","name":"Eastern Visayas","ascii":"Eastern Visayas","id":"7521307"}
+{"key":"PH.09","name":"Zamboanga Peninsula","ascii":"Zamboanga Peninsula","id":"7521308"}
+{"key":"PH.10","name":"Northern Mindanao","ascii":"Northern Mindanao","id":"7521295"}
+{"key":"PH.11","name":"Davao Region","ascii":"Davao Region","id":"7521309"}
+{"key":"PH.12","name":"Soccsksargen","ascii":"Soccsksargen","id":"7521298"}
+{"key":"PH.13","name":"Caraga","ascii":"Caraga","id":"7521299"}
+{"key":"PH.14","name":"Autonomous Region in Muslim Mindanao","ascii":"Autonomous Region in Muslim Mindanao","id":"7115989"}
+{"key":"PH.40","name":"Calabarzon","ascii":"Calabarzon","id":"7521303"}
+{"key":"PH.41","name":"Mimaropa","ascii":"Mimaropa","id":"7521296"}
+{"key":"PH.NCR","name":"National Capital Region","ascii":"National Capital Region","id":"7521311"}
+{"key":"PK.03","name":"Khyber Pakhtunkhwa","ascii":"Khyber Pakhtunkhwa","id":"1168873"}
+{"key":"PK.06","name":"Azad Kashmir","ascii":"Azad Kashmir","id":"1184196"}
+{"key":"PK.07","name":"Gilgit-Baltistan","ascii":"Gilgit-Baltistan","id":"1168878"}
+{"key":"PL.75","name":"Lublin","ascii":"Lublin","id":"858785"}
+{"key":"PL.77","name":"Lesser Poland","ascii":"Lesser Poland","id":"858786"}
+{"key":"PL.87","name":"West Pomerania","ascii":"West Pomerania","id":"3337499"}
+{"key":"PT.10","name":"Madeira","ascii":"Madeira","id":"2593105"}
+{"key":"PT.14","name":"Lisbon","ascii":"Lisbon","id":"2267056"}
+{"key":"PT.18","name":"Santarém","ascii":"Santarem","id":"2263478"}
+{"key":"PT.19","name":"Setúbal","ascii":"Setubal","id":"2262961"}
+{"key":"PT.23","name":"Azores","ascii":"Azores","id":"3411865"}
+{"key":"RO.36","name":"Timiș County","ascii":"Timis County","id":"665091"}
+{"key":"RO.43","name":"Ilfov","ascii":"Ilfov","id":"865518"}
+{"key":"RS.SE.10","name":"Podunavlje District","ascii":"Podunavlje District","id":"7581804"}
+{"key":"RS.SE.11","name":"Branicevo","ascii":"Branicevo","id":"7581794"}
+{"key":"RS.SE.12","name":"Šumadija","ascii":"Sumadija","id":"7581908"}
+{"key":"RS.SE.13","name":"Pomoravlje","ascii":"Pomoravlje","id":"7581805"}
+{"key":"RS.SE.14","name":"Bor","ascii":"Bor","id":"7581582"}
+{"key":"RS.SE.15","name":"Zaječar","ascii":"Zajecar","id":"7581910"}
+{"key":"RS.SE.16","name":"Zlatibor","ascii":"Zlatibor","id":"7581912"}
+{"key":"RS.SE.18","name":"Raška","ascii":"Raska","id":"7581807"}
+{"key":"RS.SE.19","name":"Rasina","ascii":"Rasina","id":"7581806"}
+{"key":"RS.SE.20","name":"Nišava","ascii":"Nisava","id":"7581801"}
+{"key":"RS.SE.21","name":"Toplica","ascii":"Toplica","id":"7581909"}
+{"key":"RS.SE.22","name":"Pirot","ascii":"Pirot","id":"7581803"}
+{"key":"RS.SE.23","name":"Jablanica","ascii":"Jablanica","id":"7581795"}
+{"key":"RS.SE.24","name":"Pčinja","ascii":"Pcinja","id":"7581802"}
+{"key":"RS.SE.8","name":"Mačva","ascii":"Macva","id":"7581799"}
+{"key":"RS.SE.9","name":"Kolubara","ascii":"Kolubara","id":"7581798"}
+{"key":"RS.VO.1","name":"North Bačka","ascii":"North Backa","id":"7581808"}
+{"key":"RS.VO.2","name":"Central Banat","ascii":"Central Banat","id":"7581906"}
+{"key":"RS.VO.3","name":"North Banat","ascii":"North Banat","id":"7581905"}
+{"key":"RS.VO.4","name":"South Banat","ascii":"South Banat","id":"7581797"}
+{"key":"RS.VO.5","name":"West Bačka","ascii":"West Backa","id":"7581911"}
+{"key":"RS.VO.6","name":"South Bačka","ascii":"South Backa","id":"7581796"}
+{"key":"RS.VO.7","name":"Srem","ascii":"Srem","id":"7581907"}
+{"key":"RU.05","name":"Amur Oblast","ascii":"Amur Oblast","id":"2027748"}
+{"key":"RU.07","name":"Astrakhan Oblast","ascii":"Astrakhan Oblast","id":"580491"}
+{"key":"RU.09","name":"Belgorod Oblast","ascii":"Belgorod Oblast","id":"578071"}
+{"key":"RU.10","name":"Bryansk Oblast","ascii":"Bryansk Oblast","id":"571473"}
+{"key":"RU.12","name":"Chechnya","ascii":"Chechnya","id":"569665"}
+{"key":"RU.13","name":"Chelyabinsk","ascii":"Chelyabinsk","id":"1508290"}
+{"key":"RU.20","name":"Irkutsk Oblast","ascii":"Irkutsk Oblast","id":"2023468"}
+{"key":"RU.21","name":"Ivanovo Oblast","ascii":"Ivanovo Oblast","id":"555235"}
+{"key":"RU.23","name":"Kaliningrad Oblast","ascii":"Kaliningrad Oblast","id":"554230"}
+{"key":"RU.28","name":"Karelia","ascii":"Karelia","id":"552548"}
+{"key":"RU.30","name":"Khabarovsk","ascii":"Khabarovsk","id":"2022888"}
+{"key":"RU.33","name":"Kirov Oblast","ascii":"Kirov Oblast","id":"548389"}
+{"key":"RU.37","name":"Kostroma Oblast","ascii":"Kostroma Oblast","id":"543871"}
+{"key":"RU.40","name":"Kurgan Oblast","ascii":"Kurgan Oblast","id":"1501312"}
+{"key":"RU.41","name":"Kursk Oblast","ascii":"Kursk Oblast","id":"538555"}
+{"key":"RU.42","name":"Leningradskaya Oblast'","ascii":"Leningradskaya Oblast'","id":"536199"}
+{"key":"RU.43","name":"Lipetsk Oblast","ascii":"Lipetsk Oblast","id":"535120"}
+{"key":"RU.44","name":"Magadan Oblast","ascii":"Magadan Oblast","id":"2123627"}
+{"key":"RU.49","name":"Murmansk","ascii":"Murmansk","id":"524304"}
+{"key":"RU.50","name":"Nenets","ascii":"Nenets","id":"522652"}
+{"key":"RU.52","name":"Novgorod Oblast","ascii":"Novgorod Oblast","id":"519324"}
+{"key":"RU.53","name":"Novosibirsk Oblast","ascii":"Novosibirsk Oblast","id":"1496745"}
+{"key":"RU.54","name":"Omsk Oblast","ascii":"Omsk Oblast","id":"1496152"}
+{"key":"RU.55","name":"Orenburg Oblast","ascii":"Orenburg Oblast","id":"515001"}
+{"key":"RU.56","name":"Oryol oblast","ascii":"Oryol oblast","id":"514801"}
+{"key":"RU.57","name":"Penza Oblast","ascii":"Penza Oblast","id":"511555"}
+{"key":"RU.60","name":"Pskov Oblast","ascii":"Pskov Oblast","id":"504338"}
+{"key":"RU.61","name":"Rostov","ascii":"Rostov","id":"501165"}
+{"key":"RU.62","name":"Ryazan Oblast","ascii":"Ryazan Oblast","id":"500059"}
+{"key":"RU.63","name":"Sakha","ascii":"Sakha","id":"2013162"}
+{"key":"RU.64","name":"Sakhalin Oblast","ascii":"Sakhalin Oblast","id":"2121529"}
+{"key":"RU.65","name":"Samara Oblast","ascii":"Samara Oblast","id":"499068"}
+{"key":"RU.67","name":"Saratov Oblast","ascii":"Saratov Oblast","id":"498671"}
+{"key":"RU.68","name":"North Ossetia–Alania","ascii":"North Ossetia-Alania","id":"519969"}
+{"key":"RU.69","name":"Smolensk Oblast","ascii":"Smolensk Oblast","id":"491684"}
+{"key":"RU.71","name":"Sverdlovsk Oblast","ascii":"Sverdlovsk Oblast","id":"1490542"}
+{"key":"RU.72","name":"Tambov Oblast","ascii":"Tambov Oblast","id":"484638"}
+{"key":"RU.75","name":"Tomsk Oblast","ascii":"Tomsk Oblast","id":"1489421"}
+{"key":"RU.76","name":"Tula Oblast","ascii":"Tula Oblast","id":"480508"}
+{"key":"RU.77","name":"Tver Oblast","ascii":"Tver Oblast","id":"480041"}
+{"key":"RU.78","name":"Tyumen Oblast","ascii":"Tyumen Oblast","id":"1488747"}
+{"key":"RU.81","name":"Ulyanovsk","ascii":"Ulyanovsk","id":"479119"}
+{"key":"RU.83","name":"Vladimir Oblast","ascii":"Vladimir Oblast","id":"826294"}
+{"key":"RU.84","name":"Volgograd Oblast","ascii":"Volgograd Oblast","id":"472755"}
+{"key":"RU.85","name":"Vologda Oblast","ascii":"Vologda Oblast","id":"472454"}
+{"key":"RU.87","name":"Yamalo-Nenets","ascii":"Yamalo-Nenets","id":"1486462"}
+{"key":"RU.88","name":"Yaroslavl Oblast","ascii":"Yaroslavl Oblast","id":"468898"}
+{"key":"RW.11","name":"Eastern Province","ascii":"Eastern Province","id":"6413337"}
+{"key":"RW.15","name":"Southern Province","ascii":"Southern Province","id":"6413341"}
+{"key":"SA.06","name":"Eastern Province","ascii":"Eastern Province","id":"108241"}
+{"key":"SA.08","name":"Al-Qassim Region","ascii":"Al-Qassim Region","id":"108933"}
+{"key":"SA.10","name":"Riyadh Region","ascii":"Riyadh Region","id":"108411"}
+{"key":"SB.14","name":"Honiara","ascii":"Honiara","id":"9259067"}
+{"key":"SC.05","name":"Anse Royale","ascii":"Anse Royale","id":"241444"}
+{"key":"SD.43","name":"Northern State","ascii":"Northern State","id":"378389"}
+{"key":"SD.53","name":"River Nile","ascii":"River Nile","id":"408664"}
+{"key":"SE.02","name":"Blekinge","ascii":"Blekinge","id":"2721357"}
+{"key":"SE.03","name":"Gävleborg","ascii":"Gaevleborg","id":"2712411"}
+{"key":"SE.05","name":"Gotland","ascii":"Gotland","id":"2711508"}
+{"key":"SE.06","name":"Halland","ascii":"Halland","id":"2708794"}
+{"key":"SE.07","name":"Jämtland","ascii":"Jaemtland","id":"2703330"}
+{"key":"SE.08","name":"Jönköping","ascii":"Joenkoeping","id":"2702976"}
+{"key":"SE.09","name":"Kalmar","ascii":"Kalmar","id":"2702259"}
+{"key":"SE.10","name":"Dalarna","ascii":"Dalarna","id":"2699767"}
+{"key":"SE.12","name":"Kronoberg","ascii":"Kronoberg","id":"2699050"}
+{"key":"SE.14","name":"Norrbotten","ascii":"Norrbotten","id":"604010"}
+{"key":"SE.15","name":"Örebro","ascii":"OErebro","id":"2686655"}
+{"key":"SE.16","name":"Östergötland","ascii":"OEstergoetland","id":"2685867"}
+{"key":"SE.18","name":"Södermanland","ascii":"Soedermanland","id":"2676207"}
+{"key":"SE.21","name":"Uppsala","ascii":"Uppsala","id":"2666218"}
+{"key":"SE.22","name":"Värmland","ascii":"Vaermland","id":"2664870"}
+{"key":"SE.23","name":"Västerbotten","ascii":"Vaesterbotten","id":"2664415"}
+{"key":"SE.24","name":"Västernorrland","ascii":"Vaesternorrland","id":"2664292"}
+{"key":"SE.25","name":"Västmanland","ascii":"Vaestmanland","id":"2664179"}
+{"key":"SE.26","name":"Stockholm","ascii":"Stockholm","id":"2673722"}
+{"key":"SE.27","name":"Skåne","ascii":"Skane","id":"3337385"}
+{"key":"SE.28","name":"Västra Götaland","ascii":"Vaestra Goetaland","id":"3337386"}
+{"key":"SK.01","name":"Banská Bystrica Region","ascii":"Banska Bystrica Region","id":"3343954"}
+{"key":"SK.02","name":"Bratislava Region","ascii":"Bratislava Region","id":"3343955"}
+{"key":"SK.03","name":"Košice Region","ascii":"Kosice Region","id":"865084"}
+{"key":"SK.04","name":"Nitra Region","ascii":"Nitra Region","id":"3343956"}
+{"key":"SK.05","name":"Prešov Region","ascii":"Presov Region","id":"865085"}
+{"key":"SK.06","name":"Trenčín Region","ascii":"Trencin Region","id":"3343957"}
+{"key":"SK.07","name":"Trnava Region","ascii":"Trnava Region","id":"3343958"}
+{"key":"SK.08","name":"Žilina Region","ascii":"Zilina Region","id":"3056506"}
+{"key":"SL.02","name":"Northern Province","ascii":"Northern Province","id":"2404798"}
+{"key":"SL.03","name":"Southern Province","ascii":"Southern Province","id":"2403745"}
+{"key":"SM.07","name":"San Marino","ascii":"San Marino","id":"3345302"}
+{"key":"SN.03","name":"Diourbel Region","ascii":"Diourbel Region","id":"2252308"}
+{"key":"SO.12","name":"Sanaag","ascii":"Sanaag","id":"52187"}
+{"key":"SO.21","name":"Awdal","ascii":"Awdal","id":"6268943"}
+{"key":"SO.22","name":"Sool","ascii":"Sool","id":"6268947"}
+{"key":"SZ.02","name":"Lubombo Region","ascii":"Lubombo Region","id":"935042"}
+{"key":"TD.20","name":"Mayo-Kebbi Ouest","ascii":"Mayo-Kebbi Ouest","id":"7603253"}
+{"key":"TD.21","name":"N’Djaména","ascii":"N'Djamena","id":"7603254"}
+{"key":"TG.23","name":"Kara","ascii":"Kara","id":"2597439"}
+{"key":"TH.37","name":"Saraburi","ascii":"Saraburi","id":"1606417"}
+{"key":"TH.79","name":"Nong Bua Lamphu","ascii":"Nong Bua Lamphu","id":"1906690"}
+{"key":"TL.ER","name":"Ermera","ascii":"Ermera","id":"1644865"}
+{"key":"TN.36","name":"Tunis Governorate","ascii":"Tunis Governorate","id":"2464464"}
+{"key":"TZ.08","name":"Mara","ascii":"Mara","id":"154775"}
+{"key":"TZ.25","name":"Zanzibar Urban/West","ascii":"Zanzibar Urban/West","id":"148724"}
+{"key":"UA.12","name":"Kyiv City","ascii":"Kyiv City","id":"703447"}
+{"key":"UA.20","name":"Sevastopol City","ascii":"Sevastopol City","id":"694422"}
+{"key":"UG.C","name":"Central Region","ascii":"Central Region","id":"234594"}
+{"key":"US.AK","name":"Alaska","ascii":"Alaska","id":"5879092"}
+{"key":"US.AL","name":"Alabama","ascii":"Alabama","id":"4829764"}
+{"key":"US.AR","name":"Arkansas","ascii":"Arkansas","id":"4099753"}
+{"key":"US.AZ","name":"Arizona","ascii":"Arizona","id":"5551752"}
+{"key":"US.CA","name":"California","ascii":"California","id":"5332921"}
+{"key":"US.CO","name":"Colorado","ascii":"Colorado","id":"5417618"}
+{"key":"US.CT","name":"Connecticut","ascii":"Connecticut","id":"4831725"}
+{"key":"US.FL","name":"Florida","ascii":"Florida","id":"4155751"}
+{"key":"US.GA","name":"Georgia","ascii":"Georgia","id":"4197000"}
+{"key":"US.HI","name":"Hawaii","ascii":"Hawaii","id":"5855797"}
+{"key":"US.IA","name":"Iowa","ascii":"Iowa","id":"4862182"}
+{"key":"US.ID","name":"Idaho","ascii":"Idaho","id":"5596512"}
+{"key":"US.IL","name":"Illinois","ascii":"Illinois","id":"4896861"}
+{"key":"US.IN","name":"Indiana","ascii":"Indiana","id":"4921868"}
+{"key":"US.KS","name":"Kansas","ascii":"Kansas","id":"4273857"}
+{"key":"US.KY","name":"Kentucky","ascii":"Kentucky","id":"6254925"}
+{"key":"US.LA","name":"Louisiana","ascii":"Louisiana","id":"4331987"}
+{"key":"US.MA","name":"Massachusetts","ascii":"Massachusetts","id":"6254926"}
+{"key":"US.MD","name":"Maryland","ascii":"Maryland","id":"4361885"}
+{"key":"US.ME","name":"Maine","ascii":"Maine","id":"4971068"}
+{"key":"US.MI","name":"Michigan","ascii":"Michigan","id":"5001836"}
+{"key":"US.MN","name":"Minnesota","ascii":"Minnesota","id":"5037779"}
+{"key":"US.MO","name":"Missouri","ascii":"Missouri","id":"4398678"}
+{"key":"US.MS","name":"Mississippi","ascii":"Mississippi","id":"4436296"}
+{"key":"US.MT","name":"Montana","ascii":"Montana","id":"5667009"}
+{"key":"US.NC","name":"North Carolina","ascii":"North Carolina","id":"4482348"}
+{"key":"US.ND","name":"North Dakota","ascii":"North Dakota","id":"5690763"}
+{"key":"US.NH","name":"New Hampshire","ascii":"New Hampshire","id":"5090174"}
+{"key":"US.NJ","name":"New Jersey","ascii":"New Jersey","id":"5101760"}
+{"key":"US.NM","name":"New Mexico","ascii":"New Mexico","id":"5481136"}
+{"key":"US.NY","name":"New York","ascii":"New York","id":"5128638"}
+{"key":"US.OH","name":"Ohio","ascii":"Ohio","id":"5165418"}
+{"key":"US.OK","name":"Oklahoma","ascii":"Oklahoma","id":"4544379"}
+{"key":"US.OR","name":"Oregon","ascii":"Oregon","id":"5744337"}
+{"key":"US.PA","name":"Pennsylvania","ascii":"Pennsylvania","id":"6254927"}
+{"key":"US.SC","name":"South Carolina","ascii":"South Carolina","id":"4597040"}
+{"key":"US.SD","name":"South Dakota","ascii":"South Dakota","id":"5769223"}
+{"key":"US.TN","name":"Tennessee","ascii":"Tennessee","id":"4662168"}
+{"key":"US.TX","name":"Texas","ascii":"Texas","id":"4736286"}
+{"key":"US.UT","name":"Utah","ascii":"Utah","id":"5549030"}
+{"key":"US.VA","name":"Virginia","ascii":"Virginia","id":"6254928"}
+{"key":"US.WA","name":"Washington","ascii":"Washington","id":"5815135"}
+{"key":"US.WI","name":"Wisconsin","ascii":"Wisconsin","id":"5279468"}
+{"key":"US.WV","name":"West Virginia","ascii":"West Virginia","id":"4826850"}
+{"key":"US.WY","name":"Wyoming","ascii":"Wyoming","id":"5843591"}
+{"key":"UZ.03","name":"Fergana","ascii":"Fergana","id":"1484845"}
+{"key":"UZ.09","name":"Karakalpakstan","ascii":"Karakalpakstan","id":"453752"}
+{"key":"VE.06","name":"Bolívar","ascii":"Bolivar","id":"3648106"}
+{"key":"VE.15","name":"Miranda","ascii":"Miranda","id":"3632191"}
+{"key":"VE.20","name":"Táchira","ascii":"Tachira","id":"3626553"}
+{"key":"ZA.05","name":"Eastern Cape","ascii":"Eastern Cape","id":"1085593"}
+{"key":"ZA.07","name":"Mpumalanga","ascii":"Mpumalanga","id":"1085595"}
+{"key":"ZA.09","name":"Limpopo","ascii":"Limpopo","id":"1085597"}
+{"key":"ZA.10","name":"North West","ascii":"North West","id":"1085598"}
+{"key":"ZM.02","name":"Central Province","ascii":"Central Province","id":"921064"}
+{"key":"ZM.07","name":"Southern Province","ascii":"Southern Province","id":"896972"}
+{"key":"ZM.08","name":"Copperbelt","ascii":"Copperbelt","id":"917524"}
+{"key":"ZW.06","name":"Matabeleland North","ascii":"Matabeleland North","id":"886748"}
+{"key":"ZW.07","name":"Matabeleland South Province","ascii":"Matabeleland South Province","id":"886747"}

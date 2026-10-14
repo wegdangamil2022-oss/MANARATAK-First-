@@ -10,13 +10,21 @@ describe('M10 offline source quality preparation', () => {
     const root = process.cwd(); const output = await prepareSourceQuality(root);
     verifyOrWriteSourceQuality(root, output, 'check');
     const summary = JSON.parse(output['summary.json']);
-    expect(summary.universities.geography).toMatchObject({ total: 10723, counts: { AMBIGUOUS: 63, TERRITORY_MISMATCH: 8 } });
+    expect(summary.universities.geography).toMatchObject({ total: 10723, sourceCandidateCount: 10381, counts: { EXACT_SOURCE_CANDIDATE: 10381, SOURCE_REVIEW_REQUIRED: 334, TERRITORY_MISMATCH: 8 } });
+    const geographyQueue = output['universities-geography.jsonl'].trim().split('\n').map(row => JSON.parse(row));
+    expect(geographyQueue).toHaveLength(342);
+    expect(geographyQueue.every(row => row.geographyReviewRequired && row.canonicalCityId === null)).toBe(true);
+    const excluded = fs.readFileSync(path.join(root, 'workspace/reports/active-geography-alignment/2026-10-13/excluded-universities.jsonl'), 'utf8').trim().split('\n').map(row => JSON.parse(row));
+    expect(new Set(excluded.map(row => row.referenceId)).size).toBe(889);
+    // The archive is historical; all identities have been returned to the source workbooks.
+    expect(summary.universities.geography.total).toBe(10723);
     expect(summary.universities.stage34).toMatchObject({ uniqueSourceIds: 1530, stage3Invalid: 1320, stage4Invalid: 558, invalidInBoth: 487, uniqueInvalidIds: 1391, sourceValidBoth: 139 });
     expect(summary.universities.stage34.uniqueInvalidIds).toBe(summary.universities.stage34.stage3Invalid + summary.universities.stage34.stage4Invalid - summary.universities.stage34.invalidInBoth);
     expect(summary.scholarships).toMatchObject({ totalSections: 514, explicitImportedCandidates: 349, summaryDifference: 10, counts: { MERGED_DUPLICATE: 5, UNMARKED: 156 } });
     expect(summary.courses).toMatchObject({ inputRows: 21562, projectedRows: 21559, distinctUrls: 21559, decisions: 4 });
     expect(summary.databaseWrites).toBe(0);
     const manifest = JSON.parse(output['manifest.json']) as { artifacts: Array<{ path: string; sha256: string }> };
+    expect(manifest.artifacts.some(artifact => artifact.path.startsWith('workspace/reports/active-geography-alignment/'))).toBe(false);
     for (const artifact of manifest.artifacts) expect(createHash('sha256').update(fs.readFileSync(path.join(root, artifact.path))).digest('hex')).toBe(artifact.sha256);
     const scholarshipRows = output['scholarships-sections.jsonl'].trim().split('\n').map(row => JSON.parse(row));
     expect(scholarshipRows.filter(row => row.decision === 'HOLD_CANONICAL_AND_OFFICIAL_SOURCE_REVIEW')).toHaveLength(349);

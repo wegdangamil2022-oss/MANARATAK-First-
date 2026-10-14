@@ -1,0 +1,16 @@
+{
+  "vitest": {
+    "files": 4,
+    "cases": 35,
+    "status": "PASS"
+  },
+  "negativeIntegrityTests": {
+    "cases": 3,
+    "status": "PASS"
+  },
+  "currentSourceIntegrity": "PASS",
+  "historicalCloseoutSnapshot": "d0b4ec29:PASS",
+  "offlineSourceQualityReproduction": "PASS",
+  "databaseWrites": 0,
+  "largeTestsRun": false
+}

@@ -1,0 +1,703 @@
+{"id":2656,"country_code":"CM","iso3166_2":"CM-EN","name":"Far North","native":"Grand Nord","type":"region","level":"1","wikiDataId":"Q823976"}
+{"id":1257,"country_code":"CF","iso3166_2":"CF-HS","name":"Mambéré-Kadéï","native":"Mugely-Kadéï","type":"prefecture","level":"1","wikiDataId":"Q848567"}
+{"id":1253,"country_code":"CF","iso3166_2":"CF-KB","name":"Nana-Grébizi","native":"Nana-Grébizi","type":"economic prefecture","level":"1","wikiDataId":"Q856227"}
+{"id":3586,"country_code":"TD","iso3166_2":"TD-ND","name":"N'Djamena","native":"N'Djamena","type":"province","level":"1","wikiDataId":"Q3659"}
+{"id":3446,"country_code":"GQ","iso3166_2":"GQ-BN","name":"Bioko Norte","native":"Bioko norte","type":"province","level":null,"wikiDataId":"Q845834"}
+{"id":11,"country_code":"ET","iso3166_2":"ET-AA","name":"Addis Ababa","native":"አዲስ አበባ","type":"administration","level":"1","wikiDataId":"Q3624"}
+{"id":5465,"country_code":"ET","iso3166_2":"ET-SI","name":"Sidama","native":"ሲዳማ","type":"region","level":"1","wikiDataId":"Q1070673"}
+{"id":2,"country_code":"ET","iso3166_2":"ET-SO","name":"Somali","native":"ሶማሌ","type":"region","level":"1","wikiDataId":"Q202800"}
+{"id":5466,"country_code":"ET","iso3166_2":"ET-SW","name":"Southwest Ethiopia Peoples","native":"ደቡብ ምዕራብ የኢትዮጵያ ሕዝቦች","type":"region","level":"1","wikiDataId":"Q109788993"}
+{"id":9,"country_code":"ET","iso3166_2":"ET-BE","name":"Benishangul-Gumuz","native":"ቤኒሻል-ጉሙዝ","type":"region","level":"1","wikiDataId":"Q207635"}
+{"id":2666,"country_code":"GM","iso3166_2":"GM-B","name":"Banjul","native":"Banjul","type":"city","level":"1","wikiDataId":"Q3726"}
+{"id":254,"country_code":"ML","iso3166_2":"ML-3","name":"Sikasso","native":"Sikasso","type":"region","level":"1","wikiDataId":"Q461298"}
+{"id":293,"country_code":"NG","iso3166_2":"NG-FC","name":"Abuja Federal Capital Territory","native":"Abuja Federal Capital Territory","type":"capital territory","level":"1","wikiDataId":"Q509300"}
+{"id":1475,"country_code":"TZ","iso3166_2":"TZ-15","name":"Zanzibar West","native":"Zanzibar West","type":"region","level":"1","wikiDataId":"Q180822"}
+{"id":4880,"country_code":"AR","iso3166_2":"AR-C","name":"Autonomous City of Buenos Aires","native":"Ciudad autónoma de Buenos Aires","type":"city","level":"1","wikiDataId":"Q1486"}
+{"id":3650,"country_code":"AR","iso3166_2":"AR-V","name":"Tierra del Fuego","native":"Tierra del Fuego","type":"province","level":"1","wikiDataId":"Q44832"}
+{"id":4881,"country_code":"BS","iso3166_2":"BS-NP","name":"New Providence","native":"New Providence","type":"island","level":"1","wikiDataId":"Q3339000"}
+{"id":2824,"country_code":"CL","iso3166_2":"CL-RM","name":"Región Metropolitana de Santiago","native":"Región Metropolitana de Santiago","type":"region","level":"1","wikiDataId":"Q2131"}
+{"id":2826,"country_code":"CL","iso3166_2":"CL-AR","name":"La Araucanía","native":"La Araucanía","type":"region","level":"1","wikiDataId":"Q2176"}
+{"id":2836,"country_code":"CL","iso3166_2":"CL-MA","name":"Magallanes y de la Antártica Chilena","native":"Magallanes y de la Antártica Chilena","type":"region","level":"1","wikiDataId":"Q2189"}
+{"id":2828,"country_code":"CL","iso3166_2":"CL-AI","name":"Aisén del General Carlos Ibañez del Campo","native":"Aisén del General Carlos Ibañez del Campo","type":"region","level":"1","wikiDataId":"Q2181"}
+{"id":4921,"country_code":"CO","iso3166_2":"CO-DC","name":"Bogotá D.C.","native":"Bogotá D.C.","type":"capital district","level":"1","wikiDataId":"Q2841"}
+{"id":2900,"country_code":"CO","iso3166_2":"CO-SAP","name":"San Andrés, Providencia y Santa Catalina","native":"San Andrés, Providencia y Santa Catalina","type":"department","level":"1","wikiDataId":"Q26855"}
+{"id":4119,"country_code":"HT","iso3166_2":"HT-GA","name":"Grand'Anse","native":"Grand'Anse","type":"department","level":"1","wikiDataId":"Q913231"}
+{"id":3474,"country_code":"MX","iso3166_2":"MX-MIC","name":"Michoacán de Ocampo","native":"Michoacán de Ocampo","type":"state","level":"1","wikiDataId":"Q79861"}
+{"id":3471,"country_code":"MX","iso3166_2":"MX-COA","name":"Coahuila de Zaragoza","native":"Coahuila de Zaragoza","type":"state","level":"1","wikiDataId":"Q53079"}
+{"id":3464,"country_code":"MX","iso3166_2":"MX-VER","name":"Veracruz de Ignacio de la Llave","native":"Veracruz de Ignacio de la Llave","type":"state","level":"1","wikiDataId":"Q60130"}
+{"id":3701,"country_code":"PE","iso3166_2":"PE-CAL","name":"Callao","native":"Callao","type":"region","level":"1","wikiDataId":"Q2071352"}
+{"id":3693,"country_code":"PE","iso3166_2":"PE-JUN","name":"Junín","native":"Junín","type":"region","level":"1","wikiDataId":"Q207973"}
+{"id":3699,"country_code":"PE","iso3166_2":"PE-APU","name":"Apurímac","native":"Apurímac","type":"region","level":"1","wikiDataId":"Q208185"}
+{"id":3685,"country_code":"PE","iso3166_2":"PE-AMA","name":"Amazonas","native":"Amazonas","type":"region","level":"1","wikiDataId":"Q201162"}
+{"id":2028,"country_code":"AM","iso3166_2":"AM-GR","name":"Gegharkunik","native":"Գեղարքունիք","type":"region","level":"1","wikiDataId":"Q199905"}
+{"id":2030,"country_code":"AM","iso3166_2":"AM-ER","name":"Yerevan","native":"Yerevan","type":"city","level":"1","wikiDataId":"Q1953"}
+{"id":1216,"country_code":"BN","iso3166_2":"BN-BM","name":"Brunei-Muara","native":"Brunei-Muara","type":"district","level":"1","wikiDataId":"Q153009"}
+{"id":2269,"country_code":"CN","iso3166_2":"CN-NM","name":"Inner Mongolia","native":"内蒙古自治区","type":"autonomous region","level":"1","wikiDataId":"Q41079"}
+{"id":2264,"country_code":"CN","iso3166_2":"CN-XZ","name":"Tibet","native":"西藏自治区","type":"autonomous region","level":"1","wikiDataId":"Q17269"}
+{"id":744,"country_code":"CY","iso3166_2":"CY-06","name":"Kyrenia (Keryneia)","native":"Kyrenia (Keryneia)","type":"district","level":"1","wikiDataId":"Q59146"}
+{"id":746,"country_code":"CY","iso3166_2":"CY-05","name":"Paphos (Pafos)","native":"Paphos (PAFOS)","type":"district","level":"1","wikiDataId":"Q59133"}
+{"id":1366,"country_code":"IL","iso3166_2":"IL-Z","name":"Northern","native":"Northern","type":"district","level":"1","wikiDataId":"Q189942"}
+{"id":1368,"country_code":"IL","iso3166_2":"IL-D","name":"Southern","native":"Southern","type":"district","level":"1","wikiDataId":"Q188781"}
+{"id":1371,"country_code":"IL","iso3166_2":"IL-TA","name":"Tel Aviv","native":"Tel Aviv","type":"district","level":"1","wikiDataId":"Q192811"}
+{"id":1370,"country_code":"IL","iso3166_2":"IL-JM","name":"Jerusalem","native":"Jerusalem","type":"district","level":"1","wikiDataId":"Q192232"}
+{"id":1369,"country_code":"IL","iso3166_2":"IL-HA","name":"Haifa","native":"Haifa","type":"district","level":"1","wikiDataId":"Q185845"}
+{"id":1367,"country_code":"IL","iso3166_2":"IL-M","name":"Central","native":"Central","type":"district","level":"1","wikiDataId":"Q188785"}
+{"id":3971,"country_code":"IQ","iso3166_2":"IQ-KI","name":"Kirkuk","native":"كركوك","type":"governorate","level":"1","wikiDataId":"Q193268"}
+{"id":1000,"country_code":"KG","iso3166_2":"KG-J","name":"Jalal-Abad","native":"Жалал Абад","type":"region","level":"1","wikiDataId":"Q487640"}
+{"id":1004,"country_code":"KG","iso3166_2":"KG-C","name":"Chuy","native":"Чүй","type":"region","level":"1","wikiDataId":"Q486370"}
+{"id":1001,"country_code":"KG","iso3166_2":"KG-GB","name":"Bishkek","native":"Бишкек","type":"city","level":"1","wikiDataId":"Q9361"}
+{"id":1002,"country_code":"KG","iso3166_2":"KG-Y","name":"Issyk-Kul","native":"Ыссык Көл","type":"region","level":"1","wikiDataId":"Q487413"}
+{"id":3990,"country_code":"KH","iso3166_2":"KH-16","name":"Ratanakiri","native":"រតនគិរី","type":"province","level":"1","wikiDataId":"Q747846"}
+{"id":3976,"country_code":"KH","iso3166_2":"KH-2","name":"Battambang","native":"បាត់ដំបង","type":"province","level":"1","wikiDataId":"Q810923"}
+{"id":3988,"country_code":"KH","iso3166_2":"KH-5","name":"Kampong Speu","native":"ភូមិសែ","type":"province","level":"1","wikiDataId":"Q652867"}
+{"id":3991,"country_code":"KH","iso3166_2":"KH-3","name":"Kampong Cham","native":"កំពង់ចាម","type":"province","level":"1","wikiDataId":"Q142258"}
+{"id":5070,"country_code":"KH","iso3166_2":"KH-6","name":"Kampong Thom","native":"កំពង់ធំ","type":"province","level":"1","wikiDataId":"Q502148"}
+{"id":3982,"country_code":"KH","iso3166_2":"KH-9","name":"Koh Kong","native":"កោះកុង","type":"province","level":"1","wikiDataId":"Q466000"}
+{"id":3986,"country_code":"KH","iso3166_2":"KH-10","name":"Kratie","native":"ក្រចេះ","type":"province","level":"1","wikiDataId":"Q785896"}
+{"id":3978,"country_code":"KH","iso3166_2":"KH-23","name":"Kep","native":"កែប","type":"province","level":"1","wikiDataId":"Q852089"}
+{"id":3984,"country_code":"KH","iso3166_2":"KH-1","name":"Banteay Meanchey","native":"បន្ទាយមានជ័យ","type":"province","level":"1","wikiDataId":"Q3817"}
+{"id":3974,"country_code":"KH","iso3166_2":"KH-14","name":"Prey Veng","native":"បុរស","type":"province","level":"1","wikiDataId":"Q856788"}
+{"id":3977,"country_code":"KH","iso3166_2":"KH-15","name":"Pursat","native":"ឱកាស","type":"province","level":"1","wikiDataId":"Q834464"}
+{"id":3987,"country_code":"KH","iso3166_2":"KH-22","name":"Oddar Meanchey","native":"ឧត្តរមានជ័យ","type":"province","level":"1","wikiDataId":"Q629538"}
+{"id":3992,"country_code":"KH","iso3166_2":"KH-17","name":"Siem Reap","native":"សៀមរាប","type":"province","level":"1","wikiDataId":"Q652818"}
+{"id":3993,"country_code":"KH","iso3166_2":"KH-19","name":"Stung Treng","native":"ត្រូវការស្ទឹង","type":"province","level":"1","wikiDataId":"Q837889"}
+{"id":3972,"country_code":"KH","iso3166_2":"KH-20","name":"Svay Rieng","native":"ស្វាយរៀង","type":"province","level":"1","wikiDataId":"Q751864"}
+{"id":3975,"country_code":"KH","iso3166_2":"KH-21","name":"Takeo","native":"តាកែវ","type":"province","level":"1","wikiDataId":"Q613345"}
+{"id":3997,"country_code":"KP","iso3166_2":"KP-02","name":"South Pyongan","native":"남평안","type":"province","level":"1","wikiDataId":"Q109380"}
+{"id":3995,"country_code":"KP","iso3166_2":"KP-09","name":"North Hamgyong","native":"함경북도","type":"province","level":"1","wikiDataId":"Q109361"}
+{"id":4002,"country_code":"KP","iso3166_2":"KP-03","name":"North Pyongan","native":"평안북도","type":"province","level":"1","wikiDataId":"Q109348"}
+{"id":4003,"country_code":"KP","iso3166_2":"KP-05","name":"South Hwanghae","native":"황해남도","type":"province","level":"1","wikiDataId":"Q626052"}
+{"id":4000,"country_code":"KP","iso3166_2":"KP-08","name":"South Hamgyong","native":"함경남도","type":"province","level":"1","wikiDataId":"Q109368"}
+{"id":3998,"country_code":"KP","iso3166_2":"KP-04","name":"Chagang","native":"차강","type":"province","level":"1","wikiDataId":"Q272406"}
+{"id":3996,"country_code":"KP","iso3166_2":"KP-10","name":"Ryanggang","native":"량강","type":"province","level":"1","wikiDataId":"Q110171"}
+{"id":5719,"country_code":"KP","iso3166_2":"KP-15","name":"Kaesong","native":"개성시","type":"metropolitan city","level":"1","wikiDataId":"Q109079"}
+{"id":3999,"country_code":"KP","iso3166_2":"KP-07","name":"Kangwon","native":"강원도","type":"province","level":"1","wikiDataId":"Q41416"}
+{"id":5718,"country_code":"KP","iso3166_2":"KP-14","name":"Nampho","native":"남포시","type":"metropolitan city","level":"1","wikiDataId":"Q109386"}
+{"id":4001,"country_code":"KP","iso3166_2":"KP-13","name":"Rason","native":"라손","type":"special city","level":"1","wikiDataId":"Q221734"}
+{"id":4004,"country_code":"KP","iso3166_2":"KP-06","name":"North Hwanghae","native":"황해북도","type":"province","level":"1","wikiDataId":"Q109342"}
+{"id":3855,"country_code":"KR","iso3166_2":"KR-47","name":"North Gyeongsang","native":"경상북도","type":"province","level":"1","wikiDataId":"Q41154"}
+{"id":3847,"country_code":"KR","iso3166_2":"KR-41","name":"Gyeonggi","native":"경기도","type":"province","level":"1","wikiDataId":"Q20937"}
+{"id":3859,"country_code":"KR","iso3166_2":"KR-44","name":"South Chungcheong","native":"충청남도","type":"province","level":"1","wikiDataId":"Q41070"}
+{"id":3860,"country_code":"KR","iso3166_2":"KR-26","name":"Busan","native":"부산","type":"metropolitan city","level":"1","wikiDataId":"Q16520"}
+{"id":3857,"country_code":"KR","iso3166_2":"KR-48","name":"South Gyeongsang","native":"경상남도","type":"province","level":"1","wikiDataId":"Q41151"}
+{"id":3854,"country_code":"KR","iso3166_2":"KR-43","name":"North Chungcheong","native":"충청북도","type":"province","level":"1","wikiDataId":"Q41066"}
+{"id":3862,"country_code":"KR","iso3166_2":"KR-42","name":"Gangwon","native":"강원도","type":"special self-governing province","level":"1","wikiDataId":"Q41071"}
+{"id":3846,"country_code":"KR","iso3166_2":"KR-27","name":"Daegu","native":"대구","type":"metropolitan city","level":"1","wikiDataId":"Q20927"}
+{"id":3850,"country_code":"KR","iso3166_2":"KR-30","name":"Daejeon","native":"대전","type":"metropolitan city","level":"1","wikiDataId":"Q20921"}
+{"id":3858,"country_code":"KR","iso3166_2":"KR-29","name":"Gwangju","native":"광주","type":"metropolitan city","level":"1","wikiDataId":"Q41283"}
+{"id":3856,"country_code":"KR","iso3166_2":"KR-46","name":"South Jeolla","native":"전라남도","type":"province","level":"1","wikiDataId":"Q41161"}
+{"id":3851,"country_code":"KR","iso3166_2":"KR-45","name":"North Jeolla","native":"전라북도","type":"province","level":"1","wikiDataId":"Q41157"}
+{"id":3848,"country_code":"KR","iso3166_2":"KR-28","name":"Incheon","native":"인천","type":"metropolitan city","level":"1","wikiDataId":"Q20934"}
+{"id":3853,"country_code":"KR","iso3166_2":"KR-49","name":"Jeju","native":"제주","type":"special self-governing province","level":"1","wikiDataId":"Q41164"}
+{"id":3849,"country_code":"KR","iso3166_2":"KR-11","name":"Seoul","native":"서울","type":"special city","level":"1","wikiDataId":"Q8684"}
+{"id":3852,"country_code":"KR","iso3166_2":"KR-31","name":"Ulsan","native":"울산","type":"metropolitan city","level":"1","wikiDataId":"Q41278"}
+{"id":150,"country_code":"KZ","iso3166_2":"KZ-35","name":"Karaganda","native":"Қарағанды","type":"region","level":"1","wikiDataId":"Q485429"}
+{"id":148,"country_code":"KZ","iso3166_2":"KZ-27","name":"West Kazakhstan","native":"Батыс Қазақстан","type":"region","level":"1","wikiDataId":"Q486007"}
+{"id":146,"country_code":"KZ","iso3166_2":"KZ-55","name":"Pavlodar","native":"Павлодар","type":"region","level":"1","wikiDataId":"Q486144"}
+{"id":141,"country_code":"KZ","iso3166_2":"KZ-47","name":"Mangystau","native":"Маңғыстау","type":"region","level":"1","wikiDataId":"Q238931"}
+{"id":151,"country_code":"KZ","iso3166_2":"KZ-15","name":"Aktobe","native":"Ақтөбе","type":"region","level":"1","wikiDataId":"Q485437"}
+{"id":142,"country_code":"KZ","iso3166_2":"KZ-43","name":"Kyzylorda","native":"Қызылорда","type":"region","level":"1","wikiDataId":"Q485322"}
+{"id":157,"country_code":"KZ","iso3166_2":"KZ-39","name":"Kostanay","native":"Қостанай","type":"region","level":"1","wikiDataId":"Q485605"}
+{"id":149,"country_code":"KZ","iso3166_2":"KZ-61","name":"Turkistan","native":"Түркістан","type":"region","level":"1","wikiDataId":"Q815330"}
+{"id":156,"country_code":"KZ","iso3166_2":"KZ-71","name":"Astana","native":"Астана","type":"city","level":"1","wikiDataId":"Q1520"}
+{"id":145,"country_code":"KZ","iso3166_2":"KZ-11","name":"Akmola","native":"Ақмола","type":"region","level":"1","wikiDataId":"Q485056"}
+{"id":153,"country_code":"KZ","iso3166_2":"KZ-23","name":"Atyrau","native":"Атырау","type":"region","level":"1","wikiDataId":"Q427658"}
+{"id":5455,"country_code":"KZ","iso3166_2":"KZ-10","name":"Abai","native":"Абай","type":"region","level":"1","wikiDataId":"Q111279364"}
+{"id":154,"country_code":"KZ","iso3166_2":"KZ-63","name":"East Kazakhstan","native":"Шығыс Қазақстан","type":"region","level":"1","wikiDataId":"Q36156"}
+{"id":144,"country_code":"KZ","iso3166_2":"KZ-59","name":"North Kazakhstan","native":"Солтүстік Қазақстан","type":"region","level":"1","wikiDataId":"Q485088"}
+{"id":147,"country_code":"KZ","iso3166_2":"KZ-31","name":"Jambyl","native":"Жамбыл","type":"region","level":"1","wikiDataId":"Q486657"}
+{"id":5457,"country_code":"KZ","iso3166_2":"KZ-62","name":"Ulytau","native":"Ұлытау","type":"region","level":"1","wikiDataId":"Q111830286"}
+{"id":5456,"country_code":"KZ","iso3166_2":"KZ-33","name":"Jetisu","native":"Жетісу","type":"region","level":"1","wikiDataId":"Q111281411"}
+{"id":992,"country_code":"LA","iso3166_2":"LA-LM","name":"Luang Namtha","native":"ຫຼວງນ້ຳທາ","type":"province","level":"1","wikiDataId":"Q948691"}
+{"id":2282,"country_code":"LB","iso3166_2":"LB-JL","name":"Mount Lebanon","native":"جبل لبنان","type":"governorate","level":"1","wikiDataId":"Q216945"}
+{"id":2287,"country_code":"LB","iso3166_2":"LB-BI","name":"Beqaa","native":"البقاع","type":"governorate","level":"1","wikiDataId":"Q319632"}
+{"id":2284,"country_code":"LB","iso3166_2":"LB-AS","name":"North","native":"شمال","type":"governorate","level":"1","wikiDataId":"Q390267"}
+{"id":2286,"country_code":"LB","iso3166_2":"LB-BA","name":"Beirut","native":"بير","type":"governorate","level":"1","wikiDataId":"Q651688"}
+{"id":2288,"country_code":"LB","iso3166_2":"LB-NA","name":"Nabatieh","native":"ناباتيه","type":"governorate","level":"1","wikiDataId":"Q458417"}
+{"id":2281,"country_code":"LB","iso3166_2":"LB-JA","name":"South","native":"جنوب","type":"governorate","level":"1","wikiDataId":"Q223643"}
+{"id":2798,"country_code":"LK","iso3166_2":"LK-2","name":"Central","native":"මධ්‍යම","type":"province","level":"1","wikiDataId":"Q190716"}
+{"id":2800,"country_code":"LK","iso3166_2":"LK-7","name":"North Central","native":"උතුරු මැද","type":"province","level":"1","wikiDataId":"Q1057124"}
+{"id":2802,"country_code":"LK","iso3166_2":"LK-1","name":"Western","native":"බටහිර","type":"province","level":"1","wikiDataId":"Q856686"}
+{"id":2811,"country_code":"LK","iso3166_2":"LK-8","name":"Uva","native":"ඌව","type":"province","level":"1","wikiDataId":"Q876293"}
+{"id":2808,"country_code":"LK","iso3166_2":"LK-5","name":"Eastern","native":"නැගෙනහිර","type":"province","level":"1","wikiDataId":"Q1046126"}
+{"id":2801,"country_code":"LK","iso3166_2":"LK-3","name":"Southern","native":"දකුණු","type":"province","level":"1","wikiDataId":"Q876308"}
+{"id":2817,"country_code":"LK","iso3166_2":"LK-6","name":"North Western","native":"වයඹ","type":"province","level":"1","wikiDataId":"Q876339"}
+{"id":2813,"country_code":"LK","iso3166_2":"LK-4","name":"Northern","native":"උතුරු","type":"province","level":"1","wikiDataId":"Q598745"}
+{"id":2803,"country_code":"LK","iso3166_2":"LK-9","name":"Sabaragamuwa","native":"සබරගමුව","type":"province","level":"1","wikiDataId":"Q853272"}
+{"id":2138,"country_code":"MM","iso3166_2":"MM-16","name":"Rakhine","native":"ရခိုင်","type":"state","level":"1","wikiDataId":"Q233838"}
+{"id":2137,"country_code":"MM","iso3166_2":"MM-14","name":"Chin","native":"မေးစေ့","type":"state","level":"1","wikiDataId":"Q46910"}
+{"id":2133,"country_code":"MM","iso3166_2":"MM-13","name":"Kayin","native":"nephy","type":"state","level":"1","wikiDataId":"Q495342"}
+{"id":2139,"country_code":"MM","iso3166_2":"MM-17","name":"Shan","native":"ရှမ်း","type":"state","level":"1","wikiDataId":"Q456847"}
+{"id":2144,"country_code":"MM","iso3166_2":"MM-12","name":"Kayah","native":"ကရင်","type":"state","level":"1","wikiDataId":"Q652845"}
+{"id":2147,"country_code":"MM","iso3166_2":"MM-15","name":"Mon State","native":"မွန်ပြည်နယ်","type":"state","level":"1","wikiDataId":"Q818742"}
+{"id":2143,"country_code":"MM","iso3166_2":"MM-11","name":"Kachin","native":"ကချင်လူမျိုး","type":"state","level":"1","wikiDataId":"Q140646"}
+{"id":2597,"country_code":"MV","iso3166_2":"MV-23","name":"Haa Dhaalu","native":"އޭނާއަށް ވާރުތަވާށިއެވެ .","type":"administrative atoll","level":"1","wikiDataId":"Q2360368"}
+{"id":2609,"country_code":"MV","iso3166_2":"MV-MLE","name":"Malé","native":"ކުޑަ","type":"administrative atoll","level":"1","wikiDataId":"Q9347"}
+{"id":1949,"country_code":"MY","iso3166_2":"MY-14","name":"Kuala Lumpur","native":"Kuala Lumpur","type":"federal territory","level":"1","wikiDataId":"Q1865"}
+{"id":1935,"country_code":"MY","iso3166_2":"MY-15","name":"Labuan","native":"Labuan","type":"federal territory","level":"1","wikiDataId":"Q214504"}
+{"id":1945,"country_code":"MY","iso3166_2":"MY-16","name":"Putrajaya","native":"Putrajaya","type":"federal territory","level":"1","wikiDataId":"Q182378"}
+{"id":2073,"country_code":"NP","iso3166_2":"NP-P3","name":"Bagmati","native":"बागमती","type":"province","level":"1","wikiDataId":"Q25104015"}
+{"id":5240,"country_code":"NP","iso3166_2":"NP-P2","name":"Madhesh","native":"मधेश","type":"province","level":"1","wikiDataId":"Q25104009"}
+{"id":5241,"country_code":"NP","iso3166_2":"NP-P7","name":"Sudurpashchim","native":"सुदर्गेपचिम","type":"province","level":"1","wikiDataId":"Q25104019"}
+{"id":2066,"country_code":"NP","iso3166_2":"NP-P1","name":"Koshi","native":"कोशी","type":"province","level":"1","wikiDataId":"Q25104008"}
+{"id":2067,"country_code":"NP","iso3166_2":"NP-P5","name":"Lumbini","native":"लुम्बिनी","type":"province","level":"1","wikiDataId":"Q25104014"}
+{"id":2069,"country_code":"NP","iso3166_2":"NP-P4","name":"Gandaki","native":"गण्डकी","type":"province","level":"1","wikiDataId":"Q25104016"}
+{"id":1345,"country_code":"PH","iso3166_2":"PH-03","name":"Central Luzon","native":"Central Luzon","type":"region","level":"1","wikiDataId":"Q13617"}
+{"id":1305,"country_code":"PH","iso3166_2":"PH-06","name":"Western Visayas","native":"Western Visayas","type":"region","level":"1","wikiDataId":"Q13665"}
+{"id":1335,"country_code":"PH","iso3166_2":"PH-15","name":"Cordillera Administrative","native":"Cordillera Administrative","type":"region","level":"1","wikiDataId":"Q13606"}
+{"id":1353,"country_code":"PH","iso3166_2":"PH-MOU","name":"Mountain Province","native":"Mountain Province","type":"province","level":"2","wikiDataId":"Q13861"}
+{"id":1316,"country_code":"PH","iso3166_2":"PH-14","name":"Autonomous Region in Muslim Mindanao","native":"Autonomous Region in Muslim Mindanao","type":"region","level":"1","wikiDataId":"Q13708"}
+{"id":1314,"country_code":"PH","iso3166_2":"PH-13","name":"Caraga","native":"Caraga","type":"region","level":"1","wikiDataId":"Q13704"}
+{"id":1339,"country_code":"PH","iso3166_2":"PH-10","name":"Northern Mindanao","native":"Northern Mindanao","type":"region","level":"1","wikiDataId":"Q13690"}
+{"id":1354,"country_code":"PH","iso3166_2":"PH-MDR","name":"Oriental Mindoro","native":"Oriental Mindoro","type":"province","level":"2","wikiDataId":"Q13868"}
+{"id":5324,"country_code":"PH","iso3166_2":"PH-00","name":"National Capital Region (Metro Manila)","native":"National Capital Region (Metro Manila)","type":"region","level":"1","wikiDataId":"Q13580"}
+{"id":1355,"country_code":"PH","iso3166_2":"PH-01","name":"Ilocos","native":"Ilocos","type":"region","level":"1","wikiDataId":"Q12933"}
+{"id":1330,"country_code":"PH","iso3166_2":"PH-MGN","name":"Maguindanao del Norte","native":"Maguindanao del Norte","type":"province","level":"2","wikiDataId":"Q114019739"}
+{"id":1340,"country_code":"PH","iso3166_2":"PH-11","name":"Davao","native":"Davao","type":"region","level":"1","wikiDataId":"Q13694"}
+{"id":1310,"country_code":"PH","iso3166_2":"PH-12","name":"Soccsksargen","native":"Soccsksargen","type":"region","level":"1","wikiDataId":"Q13701"}
+{"id":1308,"country_code":"PH","iso3166_2":"PH-07","name":"Central Visayas","native":"Central Visayas","type":"region","level":"1","wikiDataId":"Q13669"}
+{"id":1294,"country_code":"PH","iso3166_2":"PH-40","name":"Calabarzon","native":"Calabarzon","type":"region","level":"1","wikiDataId":"Q13650"}
+{"id":1356,"country_code":"PH","iso3166_2":"PH-MDC","name":"Occidental Mindoro","native":"Occidental Mindoro","type":"province","level":"2","wikiDataId":"Q13867"}
+{"id":1304,"country_code":"PH","iso3166_2":"PH-05","name":"Bicol","native":"Bicol","type":"region","level":"1","wikiDataId":"Q13662"}
+{"id":1322,"country_code":"PH","iso3166_2":"PH-08","name":"Eastern Visayas","native":"Eastern Visayas","type":"region","level":"1","wikiDataId":"Q13675"}
+{"id":1299,"country_code":"PH","iso3166_2":"PH-41","name":"Mimaropa","native":"Mimaropa","type":"region","level":"1","wikiDataId":"Q13658"}
+{"id":1342,"country_code":"PH","iso3166_2":"PH-02","name":"Cagayan Valley","native":"Cagayan Valley","type":"region","level":"1","wikiDataId":"Q13615"}
+{"id":1325,"country_code":"PH","iso3166_2":"PH-09","name":"Zamboanga Peninsula","native":"Zamboanga Peninsula","type":"region","level":"1","wikiDataId":"Q13682"}
+{"id":3172,"country_code":"PK","iso3166_2":"PK-JK","name":"Azad Kashmir","native":"آزاد کشمیر","type":"administered area","level":"1","wikiDataId":"Q200130"}
+{"id":3480,"country_code":"TH","iso3166_2":"TH-39","name":"Nong Bua Lam Phu","native":"หนองบัวลำภู","type":"province","level":"1","wikiDataId":"Q261241"}
+{"id":2548,"country_code":"UZ","iso3166_2":"UZ-QR","name":"Karakalpakstan","native":"Qoraqalpog'iston","type":"republic","level":"1","wikiDataId":"Q484245"}
+{"id":1232,"country_code":"YE","iso3166_2":"YE-SA","name":"Amanat Al Asimah","native":"أمانة العاصمة","type":"municipality","level":"1","wikiDataId":"Q32130189"}
+{"id":2958,"country_code":"BY","iso3166_2":"BY-HM","name":"Minsk","native":"Мінск","type":"city","level":"1","wikiDataId":"Q2280"}
+{"id":2955,"country_code":"BY","iso3166_2":"BY-HO","name":"Gomel","native":"Гомель","type":"oblast","level":"1","wikiDataId":"Q188732"}
+{"id":2960,"country_code":"BY","iso3166_2":"BY-VI","name":"Vitebsk","native":"Віцебск","type":"oblast","level":"1","wikiDataId":"Q185700"}
+{"id":2956,"country_code":"BY","iso3166_2":"BY-HR","name":"Grodno","native":"Гродна","type":"oblast","level":"1","wikiDataId":"Q191061"}
+{"id":2954,"country_code":"BY","iso3166_2":"BY-MA","name":"Mogilev","native":"Магілёў","type":"oblast","level":"1","wikiDataId":"Q189822"}
+{"id":2959,"country_code":"BY","iso3166_2":"BY-BR","name":"Brest","native":"Брэст","type":"oblast","level":"1","wikiDataId":"Q173822"}
+{"id":2957,"country_code":"BY","iso3166_2":"BY-MI","name":"Minsk","native":"Мінск","type":"oblast","level":"1","wikiDataId":"Q192959"}
+{"id":1376,"country_code":"BE","iso3166_2":"BE-BRU","name":"Brussels-Capital","native":"Brussel-kapitaal","type":"region","level":"1","wikiDataId":"Q240"}
+{"id":1380,"country_code":"BE","iso3166_2":"BE-WAL","name":"Wallonia","native":"Wallonia","type":"region","level":"1","wikiDataId":"Q231"}
+{"id":1373,"country_code":"BE","iso3166_2":"BE-VLG","name":"Flanders","native":"Vlaanderen","type":"region","level":"1","wikiDataId":"Q9337"}
+{"id":467,"country_code":"BA","iso3166_2":"BA-BIH","name":"Federation of Bosnia and Herzegovina","native":"Federacija Bosne i Hercegovine","type":"entity","level":"1","wikiDataId":"Q11198"}
+{"id":470,"country_code":"BA","iso3166_2":"BA-SRP","name":"Republika Srpska","native":"Republika Srpska","type":"entity","level":"1","wikiDataId":"Q11196"}
+{"id":460,"country_code":"BA","iso3166_2":"BA-BRC","name":"Brčko","native":"Brčko","type":"district","level":"1","wikiDataId":"Q194483"}
+{"id":4705,"country_code":"BG","iso3166_2":"BG-22","name":"Sofia City","native":"София град","type":"district","level":"1","wikiDataId":"Q1585725"}
+{"id":736,"country_code":"HR","iso3166_2":"HR-01","name":"Zagreb","native":"Zagreb","type":"county","level":"1","wikiDataId":"Q27038"}
+{"id":4575,"country_code":"CZ","iso3166_2":"CZ-63","name":"Kraj Vysočina","native":"Kraj Vysočina","type":"region","level":"1","wikiDataId":"Q190930"}
+{"id":4806,"country_code":"FR","iso3166_2":"FR-20R","name":"Corse","native":"Corse","type":"metropolitan region","level":"1","wikiDataId":"Q14112"}
+{"id":3009,"country_code":"DE","iso3166_2":"DE-BY","name":"Bavaria","native":"Bayern","type":"land","level":"1","wikiDataId":"Q980"}
+{"id":3017,"country_code":"DE","iso3166_2":"DE-NW","name":"North Rhine-Westphalia","native":"Nordrhein-Westfalen","type":"land","level":"1","wikiDataId":"Q1198"}
+{"id":3021,"country_code":"DE","iso3166_2":"DE-SN","name":"Saxony","native":"Sachsen","type":"land","level":"1","wikiDataId":"Q1202"}
+{"id":3008,"country_code":"DE","iso3166_2":"DE-NI","name":"Lower Saxony","native":"Niedersachsen","type":"land","level":"1","wikiDataId":"Q1197"}
+{"id":3018,"country_code":"DE","iso3166_2":"DE-HE","name":"Hessen","native":"Hessen","type":"land","level":"1","wikiDataId":"Q1199"}
+{"id":3011,"country_code":"DE","iso3166_2":"DE-ST","name":"Saxony-Anhalt","native":"Sachsen-Anhalt","type":"land","level":"1","wikiDataId":"Q1206"}
+{"id":3019,"country_code":"DE","iso3166_2":"DE-RP","name":"Rhineland-Palatinate","native":"Rheinland-Pfalz","type":"land","level":"1","wikiDataId":"Q1200"}
+{"id":3007,"country_code":"DE","iso3166_2":"DE-MV","name":"Mecklenburg-Vorpommern","native":"Mecklenburg-Vorpommern","type":"land","level":"1","wikiDataId":"Q1196"}
+{"id":3015,"country_code":"DE","iso3166_2":"DE-TH","name":"Thuringia","native":"Thüringen","type":"land","level":"1","wikiDataId":"Q1205"}
+{"id":5594,"country_code":"IS","iso3166_2":"IS-RKV","name":"Reykjavík","native":"Reykjavíkurborg","type":"municipality","level":null,"wikiDataId":"Q1764"}
+{"id":1073,"country_code":"IE","iso3166_2":"IE-L","name":"Leinster","native":"Leinster","type":"province","level":null,"wikiDataId":"Q159736"}
+{"id":1705,"country_code":"IT","iso3166_2":"IT-25","name":"Lombardy","native":"Lombardia","type":"region","level":"1","wikiDataId":"Q1210"}
+{"id":1702,"country_code":"IT","iso3166_2":"IT-21","name":"Piedmont","native":"Piemonte","type":"region","level":"1","wikiDataId":"Q1216"}
+{"id":1664,"country_code":"IT","iso3166_2":"IT-52","name":"Tuscany","native":"Toscana","type":"region","level":"1","wikiDataId":"Q1273"}
+{"id":1716,"country_code":"IT","iso3166_2":"IT-23","name":"Aosta Valley","native":"Usando","type":"autonomous region","level":"1","wikiDataId":"Q1222"}
+{"id":4463,"country_code":"LV","iso3166_2":"LV-DGV","name":"Daugavpils","native":"Daugavpils","type":"state city","level":"1","wikiDataId":"Q80021"}
+{"id":4416,"country_code":"LV","iso3166_2":"LV-067","name":"Ogre","native":"Ogre","type":"municipality","level":"1","wikiDataId":"Q2321579"}
+{"id":4473,"country_code":"LV","iso3166_2":"LV-113","name":"Valmiera","native":"Valmiera","type":"municipality","level":"1","wikiDataId":"Q97233086"}
+{"id":4438,"country_code":"LV","iso3166_2":"LV-042","name":"Jēkabpils","native":"Jēkabpils","type":"municipality","level":"1","wikiDataId":"Q1579101"}
+{"id":4402,"country_code":"LV","iso3166_2":"LV-087","name":"Salaspils","native":"Salaspils","type":"municipality","level":"1","wikiDataId":"Q2140753"}
+{"id":4409,"country_code":"LV","iso3166_2":"LV-099","name":"Tukums","native":"Tukums","type":"municipality","level":"1","wikiDataId":"Q369007"}
+{"id":4450,"country_code":"LV","iso3166_2":"LV-062","name":"Mārupe","native":"Mārupe","type":"municipality","level":"1","wikiDataId":"Q2232018"}
+{"id":4469,"country_code":"LV","iso3166_2":"LV-022","name":"Cēsis","native":"Cēsis","type":"municipality","level":"1","wikiDataId":"Q1989164"}
+{"id":4476,"country_code":"LV","iso3166_2":"LV-091","name":"Sigulda","native":"Sigulda","type":"municipality","level":"1","wikiDataId":"Q2299251"}
+{"id":139,"country_code":"MT","iso3166_2":"MT-51","name":"St. Paul's Bay","native":"Bajja ta ’San Pawl","type":"local council","level":"2","wikiDataId":"Q39521"}
+{"id":75,"country_code":"MT","iso3166_2":"MT-49","name":"San Ġwann","native":"San Ġwann","type":"local council","level":"2","wikiDataId":"Q39507"}
+{"id":100,"country_code":"MT","iso3166_2":"MT-48","name":"St. Julian's","native":"San Ġiljan","type":"local council","level":"2","wikiDataId":"Q669979"}
+{"id":80,"country_code":"MT","iso3166_2":"MT-66","name":"Żebbuġ Malta","native":"Żebbuġ Malta","type":"local council","level":"2","wikiDataId":"Q44573"}
+{"id":83,"country_code":"MT","iso3166_2":"MT-46","name":"Rabat","native":"Rabat","type":"local council","level":"2","wikiDataId":"Q44381"}
+{"id":4362,"country_code":"MD","iso3166_2":"MD-BD","name":"Bender","native":"Bender","type":"city","level":"1","wikiDataId":"Q18088065"}
+{"id":1006,"country_code":"NO","iso3166_2":"NO-50","name":"Trøndelag","native":"Trøndelag","type":"county","level":"1","wikiDataId":"Q127676"}
+{"id":2233,"country_code":"PT","iso3166_2":"PT-20","name":"Açores","native":"Açores","type":"autonomous region","level":"1","wikiDataId":"Q25263"}
+{"id":2231,"country_code":"PT","iso3166_2":"PT-30","name":"Madeira","native":"Madeira","type":"autonomous region","level":"1","wikiDataId":"Q26253"}
+{"id":1888,"country_code":"RU","iso3166_2":"RU-NVS","name":"Novosibirsk","native":"Новосибирск","type":"administrative region","level":"1","wikiDataId":"Q5851"}
+{"id":1894,"country_code":"RU","iso3166_2":"RU-SVE","name":"Sverdlovsk","native":"Свердловск","type":"administrative region","level":"1","wikiDataId":"Q5462"}
+{"id":1846,"country_code":"RU","iso3166_2":"RU-OMS","name":"Omsk","native":"Омск","type":"administrative region","level":"1","wikiDataId":"Q5835"}
+{"id":1862,"country_code":"RU","iso3166_2":"RU-SAM","name":"Samara","native":"Самара","type":"administrative region","level":"1","wikiDataId":"Q1727"}
+{"id":1837,"country_code":"RU","iso3166_2":"RU-ROS","name":"Rostov","native":"Ростов","type":"administrative region","level":"1","wikiDataId":"Q3573"}
+{"id":1840,"country_code":"RU","iso3166_2":"RU-KYA","name":"Krasnoyarsk","native":"Красноярск","type":"administrative territory","level":"1","wikiDataId":"Q6563"}
+{"id":1871,"country_code":"RU","iso3166_2":"RU-PER","name":"Perm","native":"Пермь","type":"administrative territory","level":"1","wikiDataId":"Q5400"}
+{"id":4916,"country_code":"RU","iso3166_2":"RU-VGG","name":"Volgograd Oblast","native":"Волгоградская область","type":"administrative region","level":"1","wikiDataId":"Q3819"}
+{"id":1891,"country_code":"RU","iso3166_2":"RU-KDA","name":"Krasnodar","native":"Краснодар","type":"administrative territory","level":"1","wikiDataId":"Q3680"}
+{"id":1907,"country_code":"RU","iso3166_2":"RU-TYU","name":"Tyumen","native":"Тюмень","type":"administrative region","level":"1","wikiDataId":"Q5824"}
+{"id":1887,"country_code":"RU","iso3166_2":"RU-SAR","name":"Saratov","native":"Саратов","type":"administrative region","level":"1","wikiDataId":"Q5334"}
+{"id":1913,"country_code":"RU","iso3166_2":"RU-UD","name":"Udmurt","native":"удмуртский","type":"republic","level":"1","wikiDataId":"Q5422"}
+{"id":1911,"country_code":"RU","iso3166_2":"RU-ALT","name":"Altai","native":"Алтай","type":"administrative territory","level":"1","wikiDataId":"Q5942"}
+{"id":1856,"country_code":"RU","iso3166_2":"RU-ULY","name":"Ulyanovsk","native":"Ульяновск","type":"administrative region","level":"1","wikiDataId":"Q5634"}
+{"id":1880,"country_code":"RU","iso3166_2":"RU-IRK","name":"Irkutsk","native":"Иркутск","type":"administrative region","level":"1","wikiDataId":"Q6585"}
+{"id":1873,"country_code":"RU","iso3166_2":"RU-KHA","name":"Khabarovsk","native":"Хабаровск","type":"administrative territory","level":"1","wikiDataId":"Q7788"}
+{"id":1851,"country_code":"RU","iso3166_2":"RU-YAR","name":"Yaroslavl","native":"Ярославль","type":"administrative region","level":"1","wikiDataId":"Q2448"}
+{"id":1833,"country_code":"RU","iso3166_2":"RU-PRI","name":"Primorsky","native":"Приморский","type":"administrative territory","level":"1","wikiDataId":"Q4341"}
+{"id":1872,"country_code":"RU","iso3166_2":"RU-TOM","name":"Tomsk","native":"Томск","type":"administrative region","level":"1","wikiDataId":"Q5884"}
+{"id":1886,"country_code":"RU","iso3166_2":"RU-ORE","name":"Orenburg","native":"Оренбург","type":"administrative region","level":"1","wikiDataId":"Q5338"}
+{"id":1897,"country_code":"RU","iso3166_2":"RU-KEM","name":"Kemerovo","native":"Кемерово","type":"administrative region","level":"1","wikiDataId":"Q6076"}
+{"id":1905,"country_code":"RU","iso3166_2":"RU-RYA","name":"Ryazan","native":"Рязань","type":"administrative region","level":"1","wikiDataId":"Q2753"}
+{"id":1866,"country_code":"RU","iso3166_2":"RU-AST","name":"Astrakhan","native":"Астрахань","type":"administrative region","level":"1","wikiDataId":"Q3941"}
+{"id":1909,"country_code":"RU","iso3166_2":"RU-PNZ","name":"Penza","native":"Пенза","type":"administrative region","level":"1","wikiDataId":"Q5545"}
+{"id":1889,"country_code":"RU","iso3166_2":"RU-LIP","name":"Lipetsk","native":"Липецк","type":"administrative region","level":"1","wikiDataId":"Q3510"}
+{"id":1890,"country_code":"RU","iso3166_2":"RU-KIR","name":"Kirov","native":"Киров","type":"administrative region","level":"1","wikiDataId":"Q5387"}
+{"id":1902,"country_code":"RU","iso3166_2":"RU-KGD","name":"Kaliningrad","native":"Калининград","type":"administrative region","level":"1","wikiDataId":"Q1749"}
+{"id":1914,"country_code":"RU","iso3166_2":"RU-CU","name":"Chuvash","native":"чувашский","type":"republic","level":"1","wikiDataId":"Q5466"}
+{"id":1895,"country_code":"RU","iso3166_2":"RU-TUL","name":"Tula","native":"Тула","type":"administrative region","level":"1","wikiDataId":"Q2792"}
+{"id":1855,"country_code":"RU","iso3166_2":"RU-KRS","name":"Kursk","native":"Курск","type":"administrative region","level":"1","wikiDataId":"Q3178"}
+{"id":1868,"country_code":"RU","iso3166_2":"RU-STA","name":"Stavropol","native":"Ставрополь","type":"administrative territory","level":"1","wikiDataId":"Q5207"}
+{"id":1842,"country_code":"RU","iso3166_2":"RU-BU","name":"Buryatia","native":"Бурятия","type":"republic","level":"1","wikiDataId":"Q6809"}
+{"id":1860,"country_code":"RU","iso3166_2":"RU-TVE","name":"Tver","native":"Тверь","type":"administrative region","level":"1","wikiDataId":"Q2292"}
+{"id":1864,"country_code":"RU","iso3166_2":"RU-IVA","name":"Ivanovo","native":"Иваново","type":"administrative region","level":"1","wikiDataId":"Q2654"}
+{"id":1867,"country_code":"RU","iso3166_2":"RU-BRY","name":"Bryansk","native":"Брянск","type":"administrative region","level":"1","wikiDataId":"Q2810"}
+{"id":1881,"country_code":"RU","iso3166_2":"RU-VLA","name":"Vladimir","native":"Владимир","type":"administrative region","level":"1","wikiDataId":"Q2702"}
+{"id":1849,"country_code":"RU","iso3166_2":"RU-ARK","name":"Arkhangelsk","native":"Архангельск","type":"administrative region","level":"1","wikiDataId":"Q1875"}
+{"id":1904,"country_code":"RU","iso3166_2":"RU-ZAB","name":"Zabaykalsky","native":"Забайкальский","type":"administrative territory","level":"1","wikiDataId":"Q6838"}
+{"id":1903,"country_code":"RU","iso3166_2":"RU-BEL","name":"Belgorod","native":"Белгород","type":"administrative region","level":"1","wikiDataId":"Q3329"}
+{"id":1885,"country_code":"RU","iso3166_2":"RU-SMO","name":"Smolensk","native":"Смоленск","type":"administrative region","level":"1","wikiDataId":"Q2347"}
+{"id":1898,"country_code":"RU","iso3166_2":"RU-MO","name":"Mordovia","native":"Мордовия","type":"republic","level":"1","wikiDataId":"Q5340"}
+{"id":1874,"country_code":"RU","iso3166_2":"RU-VLG","name":"Vologda","native":"Вологда","type":"administrative region","level":"1","wikiDataId":"Q2015"}
+{"id":1848,"country_code":"RU","iso3166_2":"RU-SA","name":"Sakha","native":"Саха","type":"republic","level":"1","wikiDataId":"Q6605"}
+{"id":1915,"country_code":"RU","iso3166_2":"RU-KGN","name":"Kurgan","native":"Курган","type":"administrative region","level":"1","wikiDataId":"Q5741"}
+{"id":1853,"country_code":"RU","iso3166_2":"RU-SE","name":"North Ossetia-Alania","native":"Северная Осетия-Алания","type":"republic","level":"1","wikiDataId":"Q5237"}
+{"id":1908,"country_code":"RU","iso3166_2":"RU-ORL","name":"Oryol","native":"Орел","type":"administrative region","level":"1","wikiDataId":"Q3129"}
+{"id":1893,"country_code":"RU","iso3166_2":"RU-CE","name":"Chechen","native":"чеченский","type":"republic","level":"1","wikiDataId":"Q5187"}
+{"id":1878,"country_code":"RU","iso3166_2":"RU-TAM","name":"Tambov","native":"Тамбов","type":"administrative region","level":"1","wikiDataId":"Q3550"}
+{"id":1841,"country_code":"RU","iso3166_2":"RU-KR","name":"Karelia","native":"Карелия","type":"republic","level":"1","wikiDataId":"Q1914"}
+{"id":1910,"country_code":"RU","iso3166_2":"RU-KOS","name":"Kostroma","native":"Кострома","type":"administrative region","level":"1","wikiDataId":"Q2596"}
+{"id":1843,"country_code":"RU","iso3166_2":"RU-MUR","name":"Murmansk","native":"Мурманск","type":"administrative region","level":"1","wikiDataId":"Q1759"}
+{"id":1870,"country_code":"RU","iso3166_2":"RU-ME","name":"Mari El","native":"Марий Эл","type":"republic","level":"1","wikiDataId":"Q5446"}
+{"id":1892,"country_code":"RU","iso3166_2":"RU-KB","name":"Kabardino-Balkar","native":"Кабардино-Балкарский","type":"republic","level":"1","wikiDataId":"Q5267"}
+{"id":1858,"country_code":"RU","iso3166_2":"RU-AMU","name":"Amur","native":"Амур","type":"administrative region","level":"1","wikiDataId":"Q6886"}
+{"id":1834,"country_code":"RU","iso3166_2":"RU-NGR","name":"Novgorod","native":"Новгород","type":"administrative region","level":"1","wikiDataId":"Q2240"}
+{"id":1863,"country_code":"RU","iso3166_2":"RU-PSK","name":"Pskov","native":"Псков","type":"administrative region","level":"1","wikiDataId":"Q2218"}
+{"id":1875,"country_code":"RU","iso3166_2":"RU-SAK","name":"Sakhalin","native":"Сахалин","type":"administrative region","level":"1","wikiDataId":"Q7797"}
+{"id":1877,"country_code":"RU","iso3166_2":"RU-KK","name":"Khakassia","native":"Хакасия","type":"republic","level":"1","wikiDataId":"Q6543"}
+{"id":1852,"country_code":"RU","iso3166_2":"RU-AD","name":"Adygea","native":"Адыгея","type":"republic","level":"1","wikiDataId":"Q3734"}
+{"id":1869,"country_code":"RU","iso3166_2":"RU-KC","name":"Karachay-Cherkess","native":"Карачаево-Черкесская","type":"republic","level":"1","wikiDataId":"Q5328"}
+{"id":1838,"country_code":"RU","iso3166_2":"RU-KHM","name":"Khanty-Mansi","native":"Ханты-Мансийский","type":"autonomous district","level":"1","wikiDataId":"Q6320"}
+{"id":1883,"country_code":"RU","iso3166_2":"RU-KL","name":"Kalmykia","native":"Калмыкия","type":"republic","level":"1","wikiDataId":"Q3953"}
+{"id":1896,"country_code":"RU","iso3166_2":"RU-LEN","name":"Leningrad","native":"Ленинград","type":"administrative region","level":"1","wikiDataId":"Q2191"}
+{"id":1839,"country_code":"RU","iso3166_2":"RU-MAG","name":"Magadan","native":"Магадан","type":"administrative region","level":"1","wikiDataId":"Q7971"}
+{"id":1835,"country_code":"RU","iso3166_2":"RU-YEV","name":"Jewish","native":"еврейский","type":"autonomous region","level":"1","wikiDataId":"Q7730"}
+{"id":1876,"country_code":"RU","iso3166_2":"RU-AL","name":"Altai","native":"Алтай","type":"republic","level":"1","wikiDataId":"Q5971"}
+{"id":1847,"country_code":"RU","iso3166_2":"RU-YAN","name":"Yamalo-Nenets","native":"Ямало-Ненецкий","type":"autonomous district","level":"1","wikiDataId":"Q6407"}
+{"id":1836,"country_code":"RU","iso3166_2":"RU-NEN","name":"Nenets","native":"ненецкие","type":"autonomous city","level":"1","wikiDataId":"Q2164"}
+{"id":1882,"country_code":"RU","iso3166_2":"RU-MOS","name":"Moscow","native":"Москва","type":"administrative region","level":"1","wikiDataId":"Q1697"}
+{"id":3711,"country_code":"RS","iso3166_2":"RS-06","name":"South Bačka","native":"Јужна Бачка","type":"district","level":"2","wikiDataId":"Q648718"}
+{"id":3722,"country_code":"RS","iso3166_2":"RS-20","name":"Nišava","native":"Nišava","type":"district","level":"1","wikiDataId":"Q1061076"}
+{"id":3734,"country_code":"RS","iso3166_2":"RS-12","name":"Šumadija","native":"Шумадија","type":"district","level":"1","wikiDataId":"Q544118"}
+{"id":3719,"country_code":"RS","iso3166_2":"RS-08","name":"Mačva","native":"Мач","type":"district","level":"1","wikiDataId":"Q867803"}
+{"id":3741,"country_code":"RS","iso3166_2":"RS-10","name":"Podunavlje","native":"Podunavlje","type":"district","level":"1","wikiDataId":"Q778561"}
+{"id":3724,"country_code":"RS","iso3166_2":"RS-09","name":"Kolubara","native":"Колубара","type":"district","level":"1","wikiDataId":"Q1048139"}
+{"id":3713,"country_code":"RS","iso3166_2":"RS-04","name":"South Banat","native":"Јужни Банат","type":"district","level":"2","wikiDataId":"Q720030"}
+{"id":3740,"country_code":"RS","iso3166_2":"RS-07","name":"Srem","native":"Срем","type":"district","level":"2","wikiDataId":"Q217331"}
+{"id":3727,"country_code":"RS","iso3166_2":"RS-17","name":"Moravica","native":"Моравица","type":"district","level":"1","wikiDataId":"Q915380"}
+{"id":3732,"country_code":"RS","iso3166_2":"RS-11","name":"Braničevo","native":"Браничево","type":"district","level":"1","wikiDataId":"Q861539"}
+{"id":3716,"country_code":"RS","iso3166_2":"RS-02","name":"Central Banat","native":"Централни банат","type":"district","level":"2","wikiDataId":"Q425782"}
+{"id":3725,"country_code":"RS","iso3166_2":"RS-18","name":"Raška","native":"Распадати","type":"district","level":"1","wikiDataId":"Q1061082"}
+{"id":3729,"country_code":"RS","iso3166_2":"RS-16","name":"Zlatibor","native":"Златибор","type":"district","level":"1","wikiDataId":"Q478278"}
+{"id":3720,"country_code":"RS","iso3166_2":"RS-19","name":"Rasina","native":"Смола","type":"district","level":"1","wikiDataId":"Q1043446"}
+{"id":3721,"country_code":"RS","iso3166_2":"RS-24","name":"Pčinja","native":"Пас","type":"district","level":"1","wikiDataId":"Q1061099"}
+{"id":3737,"country_code":"RS","iso3166_2":"RS-13","name":"Pomoravlje","native":"Морски","type":"district","level":"1","wikiDataId":"Q867816"}
+{"id":3726,"country_code":"RS","iso3166_2":"RS-05","name":"West Bačka","native":"Вест Бачка","type":"district","level":"2","wikiDataId":"Q735169"}
+{"id":3712,"country_code":"RS","iso3166_2":"RS-22","name":"Pirot","native":"Пирот","type":"district","level":"1","wikiDataId":"Q580069"}
+{"id":3731,"country_code":"RS","iso3166_2":"RS-15","name":"Zaječar","native":"Зајечар","type":"district","level":"1","wikiDataId":"Q967339"}
+{"id":3718,"country_code":"RS","iso3166_2":"RS-21","name":"Toplica","native":"Топлице","type":"district","level":"1","wikiDataId":"Q1048184"}
+{"id":3717,"country_code":"RS","iso3166_2":"RS-14","name":"Bor","native":"Бор","type":"district","level":"1","wikiDataId":"Q477586"}
+{"id":3714,"country_code":"RS","iso3166_2":"RS-01","name":"North Bačka","native":"Северна Бачка","type":"district","level":"2","wikiDataId":"Q648758"}
+{"id":3715,"country_code":"RS","iso3166_2":"RS-23","name":"Jablanica","native":"Јабланица","type":"district","level":"1","wikiDataId":"Q876541"}
+{"id":3736,"country_code":"RS","iso3166_2":"RS-03","name":"North Banat","native":"Северна Банат","type":"district","level":"2","wikiDataId":"Q728041"}
+{"id":4356,"country_code":"SK","iso3166_2":"SK-BL","name":"Bratislava","native":"Bratislava","type":"region","level":"1","wikiDataId":"Q183498"}
+{"id":4353,"country_code":"SK","iso3166_2":"SK-KI","name":"Košice","native":"Košice","type":"region","level":"1","wikiDataId":"Q186295"}
+{"id":4359,"country_code":"SK","iso3166_2":"SK-ZI","name":"Žilina","native":"Žilina","type":"region","level":"1","wikiDataId":"Q184228"}
+{"id":4354,"country_code":"SK","iso3166_2":"SK-PV","name":"Prešov","native":"Prešov","type":"region","level":"1","wikiDataId":"Q189001"}
+{"id":4357,"country_code":"SK","iso3166_2":"SK-NI","name":"Nitra","native":"Nitra","type":"region","level":"1","wikiDataId":"Q184548"}
+{"id":4352,"country_code":"SK","iso3166_2":"SK-BC","name":"Banská Bystrica","native":"Banská Bystrica","type":"region","level":"1","wikiDataId":"Q183640"}
+{"id":4355,"country_code":"SK","iso3166_2":"SK-TA","name":"Trnava","native":"Trnava","type":"region","level":"1","wikiDataId":"Q181342"}
+{"id":4358,"country_code":"SK","iso3166_2":"SK-TC","name":"Trenčín","native":"Trenčín","type":"region","level":"1","wikiDataId":"Q183139"}
+{"id":5331,"country_code":"ES","iso3166_2":"ES-CT","name":"Catalonia","native":"Cataluña","type":"autonomous community","level":"1","wikiDataId":"Q5705"}
+{"id":5325,"country_code":"ES","iso3166_2":"ES-AN","name":"Andalusia","native":"Andalucía","type":"autonomous community","level":"1","wikiDataId":"Q5783"}
+{"id":5222,"country_code":"ES","iso3166_2":"ES-CN","name":"Canary Islands","native":"Canarias","type":"autonomous community","level":"1","wikiDataId":"Q5813"}
+{"id":5335,"country_code":"ES","iso3166_2":"ES-IB","name":"Balearic Islands","native":"Islas Baleares","type":"autonomous community","level":"1","wikiDataId":"Q107356467"}
+{"id":5329,"country_code":"ES","iso3166_2":"ES-CL","name":"Castile and Leon","native":"Castile and Leon","type":"autonomous community","level":"1","wikiDataId":"Q5739"}
+{"id":5332,"country_code":"ES","iso3166_2":"ES-PV","name":"Basque Country","native":"País vasco","type":"autonomous community","level":"1","wikiDataId":"Q3995"}
+{"id":5339,"country_code":"ES","iso3166_2":"ES-NC","name":"Navarre","native":"Navarra","type":"autonomous community","level":"1","wikiDataId":"Q4018"}
+{"id":5334,"country_code":"ES","iso3166_2":"ES-GA","name":"Galicia","native":"Galicia","type":"autonomous community","level":"1","wikiDataId":"Q3908"}
+{"id":5330,"country_code":"ES","iso3166_2":"ES-CM","name":"Castilla-La Mancha","native":"Castilla-La Mancha","type":"autonomous community","level":"1","wikiDataId":"Q5748"}
+{"id":1551,"country_code":"SE","iso3166_2":"SE-AB","name":"Stockholm","native":"Stockholm","type":"county","level":"1","wikiDataId":"Q104231"}
+{"id":1547,"country_code":"SE","iso3166_2":"SE-O","name":"Västra Götaland","native":"Västra Götaland","type":"county","level":"1","wikiDataId":"Q103093"}
+{"id":1541,"country_code":"SE","iso3166_2":"SE-M","name":"Skåne","native":"Skåne","type":"county","level":"1","wikiDataId":"Q103659"}
+{"id":1545,"country_code":"SE","iso3166_2":"SE-C","name":"Uppsala","native":"Uppsala","type":"county","level":"1","wikiDataId":"Q104926"}
+{"id":1549,"country_code":"SE","iso3166_2":"SE-U","name":"Västmanland","native":"Västmanland","type":"county","level":"1","wikiDataId":"Q105075"}
+{"id":1539,"country_code":"SE","iso3166_2":"SE-T","name":"Örebro","native":"Örebro","type":"county","level":"1","wikiDataId":"Q104257"}
+{"id":1536,"country_code":"SE","iso3166_2":"SE-E","name":"Östergötland","native":"Östergötland","type":"county","level":"1","wikiDataId":"Q104940"}
+{"id":1550,"country_code":"SE","iso3166_2":"SE-F","name":"Jönköping","native":"Jönköping","type":"county","level":"1","wikiDataId":"Q103672"}
+{"id":1533,"country_code":"SE","iso3166_2":"SE-X","name":"Gävleborg","native":"Gävleborg","type":"county","level":"1","wikiDataId":"Q103699"}
+{"id":1543,"country_code":"SE","iso3166_2":"SE-AC","name":"Västerbotten","native":"Västerbotten","type":"county","level":"1","wikiDataId":"Q104877"}
+{"id":1548,"country_code":"SE","iso3166_2":"SE-N","name":"Halland","native":"Halland","type":"county","level":"1","wikiDataId":"Q103691"}
+{"id":1537,"country_code":"SE","iso3166_2":"SE-K","name":"Blekinge","native":"Blekinge","type":"county","level":"1","wikiDataId":"Q102377"}
+{"id":1542,"country_code":"SE","iso3166_2":"SE-G","name":"Kronoberg","native":"Kronoberg","type":"county","level":"1","wikiDataId":"Q104746"}
+{"id":1535,"country_code":"SE","iso3166_2":"SE-S","name":"Värmland","native":"Värmland","type":"county","level":"1","wikiDataId":"Q106789"}
+{"id":5117,"country_code":"SE","iso3166_2":"SE-Z","name":"Jämtland","native":"Jämtland","type":"county","level":"1","wikiDataId":"Q103679"}
+{"id":1538,"country_code":"SE","iso3166_2":"SE-BD","name":"Norrbotten","native":"Norrbotten","type":"county","level":"1","wikiDataId":"Q103686"}
+{"id":1544,"country_code":"SE","iso3166_2":"SE-H","name":"Kalmar","native":"Kalmar","type":"county","level":"1","wikiDataId":"Q103707"}
+{"id":1540,"country_code":"SE","iso3166_2":"SE-D","name":"Södermanland","native":"Södermanland","type":"county","level":"1","wikiDataId":"Q106915"}
+{"id":1534,"country_code":"SE","iso3166_2":"SE-W","name":"Dalarna","native":"Dalarna","type":"county","level":"1","wikiDataId":"Q103732"}
+{"id":1546,"country_code":"SE","iso3166_2":"SE-I","name":"Gotland","native":"Gotland","type":"county","level":"1","wikiDataId":"Q103738"}
+{"id":1552,"country_code":"SE","iso3166_2":"SE-Y","name":"Västernorrland","native":"Västernorrland","type":"county","level":"1","wikiDataId":"Q104891"}
+{"id":1645,"country_code":"CH","iso3166_2":"CH-BE","name":"Bern","native":"Bern","type":"canton","level":"1","wikiDataId":"Q11911"}
+{"id":4676,"country_code":"UA","iso3166_2":"UA-30","name":"Kyiv","native":"Київ","type":"city","level":"1","wikiDataId":"Q1899"}
+{"id":1912,"country_code":"UA","iso3166_2":"UA-40","name":"Sevastopol","native":"Севастополь","type":"city","level":"1","wikiDataId":"Q7525"}
+{"id":4689,"country_code":"UA","iso3166_2":"UA-43","name":"Autonomous Republic of Crimea","native":"Автономна Республіка Крим","type":"republic","level":"1","wikiDataId":"Q756294"}
+{"id":2528,"country_code":"GB","iso3166_2":"GB-CRF","name":"Cardiff","native":"Cardiff","type":"unitary authority","level":"2","wikiDataId":"Q24342199"}
+{"id":2311,"country_code":"GB","iso3166_2":"GB-BFS","name":"Belfast","native":"Belfast","type":"district","level":"2","wikiDataId":"Q1140130"}
+{"id":2475,"country_code":"GB","iso3166_2":"GB-KHL","name":"City of Kingston upon Hull","native":"City of Kingston upon Hull","type":"unitary authority","level":"2","wikiDataId":"Q21885987"}
+{"id":5462,"country_code":"GB","iso3166_2":"GB-WNH","name":"West Northamptonshire","native":"West Northamptonshire","type":"unitary authority","level":"2","wikiDataId":"Q111232469"}
+{"id":2433,"country_code":"GB","iso3166_2":"GB-SWA","name":"Swansea","native":"Swansea","type":"unitary authority","level":"2","wikiDataId":"Q10996863"}
+{"id":2336,"country_code":"GB","iso3166_2":"GB-ENG","name":"England","native":"England","type":"country","level":"1","wikiDataId":"Q21"}
+{"id":2524,"country_code":"GB","iso3166_2":"GB-NWP","name":"Newport","native":"Newport","type":"unitary authority","level":"2","wikiDataId":"Q5283458"}
+{"id":2301,"country_code":"GB","iso3166_2":"GB-RCT","name":"Rhondda Cynon Taf","native":"Rhondda Cynon Taf","type":"unitary authority","level":"2","wikiDataId":"Q817960"}
+{"id":1831,"country_code":"KI","iso3166_2":"KI-G","name":"Gilbert","native":"Gilbert","type":"island","level":"4","wikiDataId":"Q271876"}
+{"id":4065,"country_code":"NZ","iso3166_2":"NZ-WGN","name":"Wellington","native":"Wellington","type":"region","level":"1","wikiDataId":"Q856010"}
+{"id":4060,"country_code":"NZ","iso3166_2":"NZ-MWT","name":"Manawatu-Whanganui","native":"Manawatu-Wanganui","type":"region","level":"1","wikiDataId":"Q139907"}
+{"id":4837,"country_code":"PG","iso3166_2":"PG-NCD","name":"Port Moresby","native":"Port Moresby","type":"district","level":"1","wikiDataId":"Q36526"}
+{"id":4778,"country_code":"SB","iso3166_2":"SB-CT","name":"Honiara","native":"Honeycomb","type":"capital territory","level":"1","wikiDataId":"Q40921"}
+{"id":1111,"country_code":"DZ","iso3166_2":"DZ-09","name":"Blida","native":"البليدة","type":"province","level":"1","wikiDataId":"Q233637"}
+{"id":3239,"country_code":"EG","iso3166_2":"EG-GZ","name":"Giza","native":"الجيزة","type":"governorate","level":"1","wikiDataId":"Q30832"}
+{"id":3223,"country_code":"EG","iso3166_2":"EG-C","name":"Cairo","native":"القاهرة","type":"governorate","level":"1","wikiDataId":"Q30805"}
+{"id":3240,"country_code":"EG","iso3166_2":"EG-BA","name":"Red Sea","native":"البحر الأحمر","type":"governorate","level":"1","wikiDataId":"Q30831"}
+{"id":3228,"country_code":"EG","iso3166_2":"EG-MNF","name":"Monufia","native":"المنوفية","type":"governorate","level":"1","wikiDataId":"Q30786"}
+{"id":2978,"country_code":"LY","iso3166_2":"LY-MI","name":"Misrata","native":"مصراتة","type":"popularate","level":"1","wikiDataId":"Q32845"}
+{"id":2974,"country_code":"LY","iso3166_2":"LY-JG","name":"Jabal al Gharbi","native":"جبل الغربي","type":"popularate","level":"1","wikiDataId":"Q25632"}
+{"id":2961,"country_code":"LY","iso3166_2":"LY-MB","name":"Murqub","native":"مرقب","type":"popularate","level":"1","wikiDataId":"Q209778"}
+{"id":2965,"country_code":"LY","iso3166_2":"LY-SB","name":"Sabha","native":"سبها","type":"popularate","level":"1","wikiDataId":"Q26132"}
+{"id":2975,"country_code":"LY","iso3166_2":"LY-WS","name":"Wadi al Shatii","native":"وادي الشاطئ","type":"popularate","level":"1","wikiDataId":"Q48232"}
+{"id":2554,"country_code":"TN","iso3166_2":"TN-11","name":"Tunis","native":"تونس","type":"governorate","level":"2","wikiDataId":"Q328109"}
+{"id":891,"country_code":"SD","iso3166_2":"SD-NR","name":"River Nile","native":"نهر النيل","type":"state","level":"1","wikiDataId":"Q849297"}
+{"id":895,"country_code":"SD","iso3166_2":"SD-NO","name":"Northern","native":"شمالي","type":"state","level":"1","wikiDataId":"Q310118"}
+{"id":2627,"country_code":"CI","iso3166_2":"CI-LG","name":"Lagunes","native":"Tombé en panne","type":"district","level":"1","wikiDataId":"Q20980365"}
+{"id":2654,"country_code":"CI","iso3166_2":"CI-CM","name":"Comoé","native":"Comoé","type":"district","level":"1","wikiDataId":"Q16629374"}
+{"id":55,"country_code":"GH","iso3166_2":"GH-UE","name":"Upper East","native":"Upper East","type":"region","level":"1","wikiDataId":"Q712828"}
+{"id":52,"country_code":"GH","iso3166_2":"GH-CP","name":"Central","native":"Central","type":"region","level":"1","wikiDataId":"Q846323"}
+{"id":49,"country_code":"GH","iso3166_2":"GH-WP","name":"Western","native":"Western","type":"region","level":"1","wikiDataId":"Q870155"}
+{"id":3043,"country_code":"LR","iso3166_2":"LR-MG","name":"Margibi","native":"Margibi","type":"county","level":"1","wikiDataId":"Q1052737"}
+{"id":67,"country_code":"NE","iso3166_2":"NE-6","name":"Tillabéri","native":"Tilla","type":"region","level":"1","wikiDataId":"Q861914"}
+{"id":316,"country_code":"NG","iso3166_2":"NG-DE","name":"Delta","native":"Delta","type":"state","level":"1","wikiDataId":"Q503910"}
+{"id":313,"country_code":"NG","iso3166_2":"NG-KT","name":"Katsina","native":"Katsina","type":"state","level":"1","wikiDataId":"Q657821"}
+{"id":309,"country_code":"NG","iso3166_2":"NG-EK","name":"Ekiti","native":"Ekiti","type":"state","level":"1","wikiDataId":"Q534917"}
+{"id":300,"country_code":"NG","iso3166_2":"NG-KN","name":"Kano","native":"Kano","type":"state","level":"1","wikiDataId":"Q682571"}
+{"id":290,"country_code":"NG","iso3166_2":"NG-KE","name":"Kebbi","native":"Kebbi","type":"state","level":"1","wikiDataId":"Q748523"}
+{"id":288,"country_code":"NG","iso3166_2":"NG-JI","name":"Jigawa","native":"Jigawa","type":"state","level":"1","wikiDataId":"Q682691"}
+{"id":322,"country_code":"NG","iso3166_2":"NG-OS","name":"Osun","native":"Osun","type":"state","level":"1","wikiDataId":"Q682721"}
+{"id":302,"country_code":"NG","iso3166_2":"NG-PL","name":"Plateau","native":"Plateau","type":"state","level":"1","wikiDataId":"Q503928"}
+{"id":304,"country_code":"NG","iso3166_2":"NG-AK","name":"Akwa Ibom","native":"Immoral","type":"state","level":"1","wikiDataId":"Q424388"}
+{"id":294,"country_code":"NG","iso3166_2":"NG-KD","name":"Kaduna","native":"Kaduna","type":"state","level":"1","wikiDataId":"Q878284"}
+{"id":296,"country_code":"NG","iso3166_2":"NG-OY","name":"Oyo","native":"Oyo","type":"state","level":"1","wikiDataId":"Q503905"}
+{"id":299,"country_code":"NG","iso3166_2":"NG-ZA","name":"Zamfara","native":"Zamfara","type":"state","level":"1","wikiDataId":"Q145793"}
+{"id":318,"country_code":"NG","iso3166_2":"NG-ED","name":"Edo","native":"Or","type":"state","level":"1","wikiDataId":"Q682704"}
+{"id":311,"country_code":"NG","iso3166_2":"NG-EB","name":"Ebonyi","native":"Ebonyi","type":"state","level":"1","wikiDataId":"Q506808"}
+{"id":305,"country_code":"NG","iso3166_2":"NG-BY","name":"Bayelsa","native":"Bayelsa","type":"state","level":"1","wikiDataId":"Q532153"}
+{"id":317,"country_code":"NG","iso3166_2":"NG-NI","name":"Niger","native":"Niger","type":"state","level":"1","wikiDataId":"Q503932"}
+{"id":298,"country_code":"NG","iso3166_2":"NG-KO","name":"Kogi","native":"Kogi","type":"state","level":"1","wikiDataId":"Q387745"}
+{"id":315,"country_code":"NG","iso3166_2":"NG-AN","name":"Anambra","native":"Anambra","type":"state","level":"1","wikiDataId":"Q117714"}
+{"id":295,"country_code":"NG","iso3166_2":"NG-KW","name":"Kwara","native":"Kwara","type":"state","level":"1","wikiDataId":"Q464953"}
+{"id":321,"country_code":"NG","iso3166_2":"NG-ON","name":"Ondo","native":"Ondo","type":"state","level":"1","wikiDataId":"Q836654"}
+{"id":314,"country_code":"NG","iso3166_2":"NG-CR","name":"Cross River","native":"Cross River","type":"state","level":"1","wikiDataId":"Q739676"}
+{"id":4926,"country_code":"NG","iso3166_2":"NG-RI","name":"Rivers","native":"Rivers","type":"state","level":"1","wikiDataId":"Q503923"}
+{"id":480,"country_code":"SN","iso3166_2":"SN-DB","name":"Diourbel Region","native":"Diourbel Region","type":"region","level":"1","wikiDataId":"Q856261"}
+{"id":911,"country_code":"SL","iso3166_2":"SL-N","name":"Northern","native":"Northern","type":"province","level":"1","wikiDataId":"Q912359"}
+{"id":912,"country_code":"SL","iso3166_2":"SL-S","name":"Southern","native":"Southern","type":"province","level":"1","wikiDataId":"Q772185"}
+{"id":2579,"country_code":"TG","iso3166_2":"TG-K","name":"Kara","native":"Kara","type":"region","level":"1","wikiDataId":"Q316216"}
+{"id":222,"country_code":"AO","iso3166_2":"AO-LUA","name":"Luanda","native":"Luanda","type":"province","level":"1","wikiDataId":"Q190066"}
+{"id":213,"country_code":"AO","iso3166_2":"AO-HUA","name":"Huambo","native":"Huambo","type":"province","level":"1","wikiDataId":"Q218848"}
+{"id":2660,"country_code":"CM","iso3166_2":"CM-CE","name":"Centre","native":"Centre","type":"region","level":"1","wikiDataId":"Q739951"}
+{"id":2664,"country_code":"CM","iso3166_2":"CM-OU","name":"West","native":"Ouest","type":"region","level":"1","wikiDataId":"Q165784"}
+{"id":3571,"country_code":"TD","iso3166_2":"TD-MO","name":"Mayo-Kebbi Ouest","native":"Mayo-kebbi Oust","type":"province","level":"1","wikiDataId":"Q910393"}
+{"id":2867,"country_code":"CG","iso3166_2":"CG-5","name":"Kouilou","native":"Kouilou","type":"department","level":"1","wikiDataId":"Q855327"}
+{"id":2758,"country_code":"CD","iso3166_2":"CD-HL","name":"Haut-Lomami","native":"Haut-Lomami","type":"province","level":"1","wikiDataId":"Q605672"}
+{"id":2733,"country_code":"CD","iso3166_2":"CD-TA","name":"Tanganyika","native":"Tanganyika","type":"province","level":"1","wikiDataId":"Q826585"}
+{"id":5551,"country_code":"GQ","iso3166_2":"GQ-DJ","name":"Djibloho","native":"Djibloho","type":"province","level":null,"wikiDataId":"Q28814758"}
+{"id":3,"country_code":"ET","iso3166_2":"ET-AM","name":"Amhara","native":"አማራ","type":"region","level":"1","wikiDataId":"Q203009"}
+{"id":4,"country_code":"ET","iso3166_2":"ET-TI","name":"Tigray","native":"ክልል ትግራይ","type":"region","level":"1","wikiDataId":"Q200127"}
+{"id":185,"country_code":"KE","iso3166_2":"KE-41","name":"Tharaka-Nithi","native":"Tharaka-NITHI","type":"county","level":"1","wikiDataId":"Q2189432"}
+{"id":203,"country_code":"KE","iso3166_2":"KE-31","name":"Nakuru","native":"Nakuru","type":"county","level":"1","wikiDataId":"Q1852202"}
+{"id":180,"country_code":"KE","iso3166_2":"KE-36","name":"Nyeri","native":"Nyeri","type":"county","level":"1","wikiDataId":"Q749665"}
+{"id":164,"country_code":"KE","iso3166_2":"KE-20","name":"Laikipia","native":"Laikipia","type":"county","level":"1","wikiDataId":"Q1800699"}
+{"id":171,"country_code":"KE","iso3166_2":"KE-17","name":"Kisumu","native":"Kisumu","type":"county","level":"1","wikiDataId":"Q1743809"}
+{"id":178,"country_code":"KE","iso3166_2":"KE-29","name":"Murang'a","native":"cheap","type":"county","level":"1","wikiDataId":"Q1781723"}
+{"id":190,"country_code":"KE","iso3166_2":"KE-27","name":"Migori","native":"Migori","type":"county","level":"1","wikiDataId":"Q429955"}
+{"id":199,"country_code":"KE","iso3166_2":"KE-13","name":"Kiambu","native":"Kiambu","type":"county","level":"1","wikiDataId":"Q2575594"}
+{"id":176,"country_code":"KE","iso3166_2":"KE-39","name":"Taita–Taveta","native":"Taita -Taveta","type":"county","level":"1","wikiDataId":"Q7193788"}
+{"id":210,"country_code":"KE","iso3166_2":"KE-02","name":"Bomet","native":"Bomet","type":"county","level":"1","wikiDataId":"Q891952"}
+{"id":3106,"country_code":"MW","iso3166_2":"MW-S","name":"Southern","native":"Southern","type":"region","level":null,"wikiDataId":"Q868784"}
+{"id":3105,"country_code":"MW","iso3166_2":"MW-N","name":"Northern","native":"Northern","type":"region","level":null,"wikiDataId":"Q868827"}
+{"id":3253,"country_code":"MU","iso3166_2":"MU-MO","name":"Moka","native":"Moka","type":"district","level":"1","wikiDataId":"Q911643"}
+{"id":3263,"country_code":"MU","iso3166_2":"MU-PW","name":"Plaines Wilhems","native":"Plaines Wilhems","type":"district","level":"1","wikiDataId":"Q1053595"}
+{"id":3250,"country_code":"MU","iso3166_2":"MU-PA","name":"Pamplemousses","native":"Pamplemousses","type":"district","level":"1","wikiDataId":"Q934126"}
+{"id":259,"country_code":"RW","iso3166_2":"RW-05","name":"Southern","native":"Amajyepfo","type":"province","level":"1","wikiDataId":"Q853162"}
+{"id":261,"country_code":"RW","iso3166_2":"RW-02","name":"Eastern","native":"Iburasirazuba","type":"province","level":"1","wikiDataId":"Q853152"}
+{"id":502,"country_code":"SC","iso3166_2":"SC-05","name":"Anse Royale","native":"Anse Royale","type":"district","level":"1","wikiDataId":"Q3241674"}
+{"id":925,"country_code":"SO","iso3166_2":"SO-AW","name":"Awdal","native":"Awdal","type":"region","level":"1","wikiDataId":"Q791667"}
+{"id":5699,"country_code":"SO","iso3166_2":"SO-SO","name":"Sool","native":"Sool","type":"region","level":"1","wikiDataId":"Q848864"}
+{"id":919,"country_code":"SO","iso3166_2":"SO-SA","name":"Sanaag","native":"Sanaag","type":"region","level":"1","wikiDataId":"Q751387"}
+{"id":1468,"country_code":"TZ","iso3166_2":"TZ-13","name":"Mara","native":"Mara","type":"region","level":"1","wikiDataId":"Q458406"}
+{"id":396,"country_code":"UG","iso3166_2":"UG-C","name":"Central","native":"Central","type":"region","level":null,"wikiDataId":"Q429685"}
+{"id":3067,"country_code":"BW","iso3166_2":"BW-CE","name":"Central","native":"Central","type":"district","level":"1","wikiDataId":"Q57525"}
+{"id":970,"country_code":"SZ","iso3166_2":"SZ-LU","name":"Lubombo","native":"Bitch","type":"region","level":"1","wikiDataId":"Q856657"}
+{"id":934,"country_code":"ZA","iso3166_2":"ZA-NW","name":"North West","native":"North West","type":"province","level":"1","wikiDataId":"Q165956"}
+{"id":938,"country_code":"ZA","iso3166_2":"ZA-EC","name":"Eastern Cape","native":"Eastern Cape","type":"province","level":"1","wikiDataId":"Q130840"}
+{"id":933,"country_code":"ZA","iso3166_2":"ZA-LP","name":"Limpopo","native":"Limpopo","type":"province","level":"1","wikiDataId":"Q134907"}
+{"id":937,"country_code":"ZA","iso3166_2":"ZA-MP","name":"Mpumalanga","native":"East","type":"province","level":"1","wikiDataId":"Q132410"}
+{"id":1986,"country_code":"ZM","iso3166_2":"ZM-02","name":"Central","native":"Central","type":"province","level":"1","wikiDataId":"Q190718"}
+{"id":1990,"country_code":"ZM","iso3166_2":"ZM-07","name":"Southern","native":"Southern","type":"province","level":"1","wikiDataId":"Q738382"}
+{"id":1984,"country_code":"ZM","iso3166_2":"ZM-08","name":"Copperbelt","native":"Copperbelt","type":"province","level":"1","wikiDataId":"Q1131523"}
+{"id":1952,"country_code":"ZW","iso3166_2":"ZW-MS","name":"Matabeleland South","native":"Matabeleland South","type":"province","level":"1","wikiDataId":"Q498355"}
+{"id":1954,"country_code":"ZW","iso3166_2":"ZW-MN","name":"Matabeleland North","native":"Matabeleland North","type":"province","level":"1","wikiDataId":"Q456562"}
+{"id":2856,"country_code":"SA","iso3166_2":"SA-04","name":"Eastern Province","native":"المنطقة الشرقية","type":"region","level":"1","wikiDataId":"Q953508"}
+{"id":2849,"country_code":"SA","iso3166_2":"SA-01","name":"Riyadh","native":"الرياض","type":"region","level":"1","wikiDataId":"Q1249255"}
+{"id":2861,"country_code":"SA","iso3166_2":"SA-05","name":"Al-Qassim","native":"القصيم","type":"region","level":"1","wikiDataId":"Q1105411"}
+{"id":3390,"country_code":"AE","iso3166_2":"AE-SH","name":"Sharjah","native":"الشارقة","type":"emirate","level":"1","wikiDataId":"Q188810"}
+{"id":3048,"country_code":"OM","iso3166_2":"OM-BS","name":"Al Batinah North","native":"شمال الباطنة","type":"governorate","level":"1","wikiDataId":"Q4703564"}
+{"id":1993,"country_code":"BH","iso3166_2":"BH-14","name":"Southern","native":"الجنوب","type":"governorate","level":"1","wikiDataId":"Q838532"}
+{"id":1994,"country_code":"BH","iso3166_2":"BH-17","name":"Northern","native":"شمالي","type":"governorate","level":"1","wikiDataId":"Q840445"}
+{"id":3955,"country_code":"IQ","iso3166_2":"IQ-BB","name":"Babylon","native":"بابل","type":"governorate","level":"1","wikiDataId":"Q59202"}
+{"id":3938,"country_code":"IR","iso3166_2":"IR-02","name":"Mazandaran","native":"مازندران","type":"province","level":"1","wikiDataId":"Q308864"}
+{"id":3940,"country_code":"IR","iso3166_2":"IR-20","name":"Semnan","native":"سمنان","type":"province","level":"1","wikiDataId":"Q168949"}
+{"id":3942,"country_code":"IR","iso3166_2":"IR-28","name":"North Khorasan","native":"خراسان شمالی","type":"province","level":"1","wikiDataId":"Q180075"}
+{"id":3927,"country_code":"IR","iso3166_2":"IR-09","name":"Razavi Khorasan","native":"خراسان رضوی","type":"province","level":"1","wikiDataId":"Q587090"}
+{"id":3939,"country_code":"IR","iso3166_2":"IR-07","name":"Fars","native":"فارس","type":"province","level":"1","wikiDataId":"Q1004666"}
+{"id":3931,"country_code":"IR","iso3166_2":"IR-11","name":"Sistan and Baluchestan","native":"سیستان و بلوچستان","type":"province","level":"1","wikiDataId":"Q939575"}
+{"id":3943,"country_code":"IR","iso3166_2":"IR-08","name":"Kerman","native":"کرمان","type":"province","level":"1","wikiDataId":"Q165352"}
+{"id":3918,"country_code":"IR","iso3166_2":"IR-16","name":"Ilam","native":"ایلام","type":"province","level":"1","wikiDataId":"Q170570"}
+{"id":3917,"country_code":"IR","iso3166_2":"IR-06","name":"Khuzestan","native":"خوزستان","type":"province","level":"1","wikiDataId":"Q241119"}
+{"id":3944,"country_code":"IR","iso3166_2":"IR-03","name":"East Azerbaijan","native":"آذربایجان شرقی","type":"province","level":"1","wikiDataId":"Q176081"}
+{"id":3916,"country_code":"IR","iso3166_2":"IR-00","name":"Markazi","native":"مرکزی","type":"province","level":"1","wikiDataId":"Q134417"}
+{"id":3945,"country_code":"IR","iso3166_2":"IR-23","name":"Tehran","native":"تهران","type":"province","level":"1","wikiDataId":"Q590866"}
+{"id":3892,"country_code":"AF","iso3166_2":"AF-DAY","name":"Daykundi","native":"دیوکونډي","type":"province","level":"1","wikiDataId":"Q181220"}
+{"id":3880,"country_code":"AF","iso3166_2":"AF-NUR","name":"Nuristan","native":"نورستان","type":"province","level":"1","wikiDataId":"Q167485"}
+{"id":3877,"country_code":"AF","iso3166_2":"AF-PKA","name":"Paktika","native":"بسته","type":"province","level":"1","wikiDataId":"Q185575"}
+{"id":3883,"country_code":"AF","iso3166_2":"AF-SAM","name":"Samangan","native":"خدايه","type":"province","level":"1","wikiDataId":"Q183015"}
+{"id":3171,"country_code":"PK","iso3166_2":"PK-KP","name":"Khyber Pakhtunkhwa","native":"خیبر پختوننہوا","type":"province","level":"1","wikiDataId":"Q183314"}
+{"id":3170,"country_code":"PK","iso3166_2":"PK-GB","name":"Gilgit-Baltistan","native":"گلگٹ بلتستان","type":"administered area","level":"1","wikiDataId":"Q200697"}
+{"id":4016,"country_code":"IN","iso3166_2":"IN-UK","name":"Uttarakhand","native":"उत्तराखंड","type":"state","level":"1","wikiDataId":"Q1499"}
+{"id":4027,"country_code":"IN","iso3166_2":"IN-AS","name":"Assam","native":"असम","type":"state","level":"1","wikiDataId":"Q1164"}
+{"id":4014,"country_code":"IN","iso3166_2":"IN-RJ","name":"Rajasthan","native":"राजस्थान","type":"state","level":"1","wikiDataId":"Q1437"}
+{"id":4007,"country_code":"IN","iso3166_2":"IN-HR","name":"Haryana","native":"हरियाणा","type":"state","level":"1","wikiDataId":"Q1174"}
+{"id":4020,"country_code":"IN","iso3166_2":"IN-HP","name":"Himachal Pradesh","native":"हिमाचल प्रदेश","type":"state","level":"1","wikiDataId":"Q1177"}
+{"id":4029,"country_code":"IN","iso3166_2":"IN-JK","name":"Jammu and Kashmir","native":"जम्मू और कश्मीर","type":"union territory","level":"1","wikiDataId":"Q66278313"}
+{"id":4028,"country_code":"IN","iso3166_2":"IN-KL","name":"Kerala","native":"केरल","type":"state","level":"1","wikiDataId":"Q1186"}
+{"id":4013,"country_code":"IN","iso3166_2":"IN-OD","name":"Odisha","native":"ओडिशा","type":"state","level":"1","wikiDataId":"Q22048"}
+{"id":4035,"country_code":"IN","iso3166_2":"IN-TN","name":"Tamil Nadu","native":"तमिलनाडु","type":"state","level":"1","wikiDataId":"Q1445"}
+{"id":4009,"country_code":"IN","iso3166_2":"IN-GA","name":"Goa","native":"गोवा","type":"state","level":"1","wikiDataId":"Q1171"}
+{"id":4015,"country_code":"IN","iso3166_2":"IN-PB","name":"Punjab","native":"पंजाब","type":"state","level":"1","wikiDataId":"Q22424"}
+{"id":4039,"country_code":"IN","iso3166_2":"IN-MP","name":"Madhya Pradesh","native":"मध्य प्रदेश","type":"state","level":"1","wikiDataId":"Q1188"}
+{"id":4008,"country_code":"IN","iso3166_2":"IN-MH","name":"Maharashtra","native":"महाराष्ट्र","type":"state","level":"1","wikiDataId":"Q1191"}
+{"id":4037,"country_code":"IN","iso3166_2":"IN-BR","name":"Bihar","native":"बिहार","type":"state","level":"1","wikiDataId":"Q1165"}
+{"id":4022,"country_code":"IN","iso3166_2":"IN-UP","name":"Uttar Pradesh","native":"उत्तर प्रदेश","type":"state","level":"1","wikiDataId":"Q1498"}
+{"id":4026,"country_code":"IN","iso3166_2":"IN-KA","name":"Karnataka","native":"कर्नाटक","type":"state","level":"1","wikiDataId":"Q1185"}
+{"id":803,"country_code":"BD","iso3166_2":"BD-B","name":"Chittagong","native":"চট্টগ্রাম","type":"division","level":"1","wikiDataId":"Q158087"}
+{"id":2538,"country_code":"UZ","iso3166_2":"UZ-FA","name":"Fergana","native":"Farg'ona","type":"region","level":"1","wikiDataId":"Q487089"}
+{"id":2280,"country_code":"CN","iso3166_2":"CN-HE","name":"Hebei","native":"河北省","type":"province","level":"1","wikiDataId":"Q21208"}
+{"id":2260,"country_code":"CN","iso3166_2":"CN-YN","name":"Yunnan","native":"云南省","type":"province","level":"1","wikiDataId":"Q43194"}
+{"id":2254,"country_code":"CN","iso3166_2":"CN-SX","name":"Shanxi","native":"山西省","type":"province","level":"1","wikiDataId":"Q46913"}
+{"id":2268,"country_code":"CN","iso3166_2":"CN-LN","name":"Liaoning","native":"辽宁省","type":"province","level":"1","wikiDataId":"Q43934"}
+{"id":2253,"country_code":"CN","iso3166_2":"CN-JL","name":"Jilin","native":"吉林省","type":"province","level":"1","wikiDataId":"Q45208"}
+{"id":2247,"country_code":"CN","iso3166_2":"CN-ZJ","name":"Zhejiang","native":"浙江省","type":"province","level":"1","wikiDataId":"Q16967"}
+{"id":2248,"country_code":"CN","iso3166_2":"CN-FJ","name":"Fujian","native":"福建省","type":"province","level":"1","wikiDataId":"Q41705"}
+{"id":2251,"country_code":"CN","iso3166_2":"CN-AH","name":"Anhui","native":"安徽省","type":"province","level":"1","wikiDataId":"Q40956"}
+{"id":2252,"country_code":"CN","iso3166_2":"CN-SD","name":"Shandong","native":"山东省","type":"province","level":"1","wikiDataId":"Q43407"}
+{"id":2259,"country_code":"CN","iso3166_2":"CN-HA","name":"Henan","native":"河南省","type":"province","level":"1","wikiDataId":"Q43684"}
+{"id":2271,"country_code":"CN","iso3166_2":"CN-CQ","name":"Chongqing","native":"重庆市","type":"municipality","level":"1","wikiDataId":"Q11725"}
+{"id":2274,"country_code":"CN","iso3166_2":"CN-HB","name":"Hubei","native":"湖北省","type":"province","level":"1","wikiDataId":"Q46862"}
+{"id":2258,"country_code":"CN","iso3166_2":"CN-HN","name":"Hunan","native":"湖南省","type":"province","level":"1","wikiDataId":"Q45761"}
+{"id":2279,"country_code":"CN","iso3166_2":"CN-GD","name":"Guangdong","native":"广东省","type":"province","level":"1","wikiDataId":"Q15175"}
+{"id":2263,"country_code":"CN","iso3166_2":"CN-XJ","name":"Xinjiang","native":"新疆维吾尔自治区","type":"autonomous region","level":"1","wikiDataId":"Q34800"}
+{"id":2277,"country_code":"CN","iso3166_2":"CN-SC","name":"Sichuan","native":"四川省","type":"province","level":"1","wikiDataId":"Q19770"}
+{"id":2261,"country_code":"CN","iso3166_2":"CN-GZ","name":"Guizhou","native":"贵州省","type":"province","level":"1","wikiDataId":"Q47097"}
+{"id":2270,"country_code":"CN","iso3166_2":"CN-QH","name":"Qinghai","native":"青海省","type":"province","level":"1","wikiDataId":"Q45833"}
+{"id":2272,"country_code":"CN","iso3166_2":"CN-SN","name":"Shaanxi","native":"陕西省","type":"province","level":"1","wikiDataId":"Q47974"}
+{"id":2250,"country_code":"CN","iso3166_2":"CN-JS","name":"Jiangsu","native":"江苏省","type":"province","level":"1","wikiDataId":"Q16963"}
+{"id":2135,"country_code":"MM","iso3166_2":"MM-06","name":"Yangon","native":"ရန်ကုန်","type":"region","level":"1","wikiDataId":"Q856781"}
+{"id":2145,"country_code":"MM","iso3166_2":"MM-01","name":"Sagaing","native":"စစ်ကိုင်းတိုင်း","type":"region","level":"1","wikiDataId":"Q847289"}
+{"id":2134,"country_code":"MM","iso3166_2":"MM-04","name":"Mandalay","native":"မန္တလေး","type":"region","level":"1","wikiDataId":"Q119494"}
+{"id":3487,"country_code":"TH","iso3166_2":"TH-19","name":"Saraburi","native":"สระบุรี","type":"province","level":"1","wikiDataId":"Q337627"}
+{"id":1944,"country_code":"MY","iso3166_2":"MY-10","name":"Selangor","native":"Selangor","type":"state","level":"1","wikiDataId":"Q189710"}
+{"id":1940,"country_code":"MY","iso3166_2":"MY-06","name":"Pahang","native":"Pahang","type":"state","level":"1","wikiDataId":"Q191346"}
+{"id":1948,"country_code":"MY","iso3166_2":"MY-05","name":"Negeri Sembilan","native":"Negeri Sembilan","type":"state","level":"1","wikiDataId":"Q213893"}
+{"id":1947,"country_code":"MY","iso3166_2":"MY-02","name":"Kedah","native":"Kedah","type":"state","level":"1","wikiDataId":"Q188947"}
+{"id":1938,"country_code":"MY","iso3166_2":"MY-09","name":"Perlis","native":"Perlis","type":"state","level":"1","wikiDataId":"Q213467"}
+{"id":1941,"country_code":"MY","iso3166_2":"MY-04","name":"Malacca","native":"Melaka","type":"state","level":"1","wikiDataId":"Q185221"}
+{"id":1946,"country_code":"MY","iso3166_2":"MY-03","name":"Kelantan","native":"Kelantan","type":"state","level":"1","wikiDataId":"Q185944"}
+{"id":1937,"country_code":"MY","iso3166_2":"MY-13","name":"Sarawak","native":"Sarawak","type":"state","level":"1","wikiDataId":"Q170462"}
+{"id":1950,"country_code":"MY","iso3166_2":"MY-01","name":"Johor","native":"Johor","type":"state","level":"1","wikiDataId":"Q183032"}
+{"id":1943,"country_code":"MY","iso3166_2":"MY-08","name":"Perak","native":"Perak","type":"state","level":"1","wikiDataId":"Q188953"}
+{"id":1829,"country_code":"ID","iso3166_2":"ID-YO","name":"DI Yogyakarta","native":"DI Yogyakarta","type":"Special region","level":"1","wikiDataId":"Q3741"}
+{"id":1822,"country_code":"ID","iso3166_2":"ID-AC","name":"Aceh","native":"Aceh","type":"province","level":"1","wikiDataId":"Q1823"}
+{"id":1809,"country_code":"ID","iso3166_2":"ID-RI","name":"Riau","native":"Riau","type":"province","level":"1","wikiDataId":"Q2175"}
+{"id":1826,"country_code":"ID","iso3166_2":"ID-BA","name":"Bali","native":"Bali","type":"province","level":"1","wikiDataId":"Q3125978"}
+{"id":1810,"country_code":"ID","iso3166_2":"ID-BT","name":"Banten","native":"Banten","type":"province","level":"1","wikiDataId":"Q3540"}
+{"id":1811,"country_code":"ID","iso3166_2":"ID-LA","name":"Lampung","native":"Lampung","type":"province","level":"1","wikiDataId":"Q2110"}
+{"id":4516,"country_code":"TL","iso3166_2":"TL-ER","name":"Ermera","native":"Hermera","type":"municipality","level":"1","wikiDataId":"Q668171"}
+{"id":1679,"country_code":"IT","iso3166_2":"IT-65","name":"Abruzzo","native":"Abruzzo","type":"region","level":"1","wikiDataId":"Q1284"}
+{"id":1688,"country_code":"IT","iso3166_2":"IT-75","name":"Apulia","native":"Apulia","type":"region","level":"1","wikiDataId":"Q1447"}
+{"id":1703,"country_code":"IT","iso3166_2":"IT-78","name":"Calabria","native":"Calabria","type":"region","level":"1","wikiDataId":"Q1458"}
+{"id":1678,"country_code":"IT","iso3166_2":"IT-62","name":"Lazio","native":"Lazio","type":"region","level":"1","wikiDataId":"Q1282"}
+{"id":1669,"country_code":"IT","iso3166_2":"IT-72","name":"Campania","native":"Campania","type":"region","level":"1","wikiDataId":"Q1438"}
+{"id":2061,"country_code":"AT","iso3166_2":"AT-5","name":"Salzburg","native":"Salzburg","type":"state","level":"1","wikiDataId":"Q43325"}
+{"id":2064,"country_code":"AT","iso3166_2":"AT-7","name":"Tyrol","native":"Tirol","type":"state","level":"1","wikiDataId":"Q42880"}
+{"id":747,"country_code":"CY","iso3166_2":"CY-03","name":"Larnaca (Larnaka)","native":"Larnaca (Larnaka)","type":"district","level":"1","wikiDataId":"Q59153"}
+{"id":1528,"country_code":"DK","iso3166_2":"DK-85","name":"Zealand","native":"Zealand","type":"region","level":"1","wikiDataId":"Q26589"}
+{"id":4796,"country_code":"FR","iso3166_2":"FR-IDF","name":"Île-de-France","native":"Île-de-France","type":"metropolitan region","level":"1","wikiDataId":"Q13917"}
+{"id":4798,"country_code":"FR","iso3166_2":"FR-ARA","name":"Auvergne-Rhône-Alpes","native":"Auvergne-Rhône-Alpes","type":"metropolitan region","level":"1","wikiDataId":"Q18338206"}
+{"id":4828,"country_code":"FR","iso3166_2":"FR-HDF","name":"Hauts-de-France","native":"Hauts-de-France","type":"metropolitan region","level":"1","wikiDataId":"Q18677767"}
+{"id":3006,"country_code":"DE","iso3166_2":"DE-BW","name":"Baden-Württemberg","native":"Baden-Württemberg","type":"land","level":"1","wikiDataId":"Q985"}
+{"id":3014,"country_code":"DE","iso3166_2":"DE-HB","name":"Bremen","native":"Bremen","type":"land","level":"1","wikiDataId":"Q1209"}
+{"id":3013,"country_code":"DE","iso3166_2":"DE-BB","name":"Brandenburg","native":"Brandenburg","type":"land","level":"1","wikiDataId":"Q1208"}
+{"id":1058,"country_code":"HU","iso3166_2":"HU-BZ","name":"Borsod-Abaúj-Zemplén","native":"Borsod-Abaúj-Zemplén","type":"county","level":"1","wikiDataId":"Q188895"}
+{"id":138,"country_code":"MT","iso3166_2":"MT-06","name":"Cospicua","native":"Evidenti","type":"local council","level":"2","wikiDataId":"Q757225"}
+{"id":77,"country_code":"MT","iso3166_2":"MT-25","name":"Luqa","native":"Luqa","type":"local council","level":"2","wikiDataId":"Q475585"}
+{"id":115,"country_code":"MT","iso3166_2":"MT-39","name":"Paola","native":"Paola","type":"local council","level":"2","wikiDataId":"Q846589"}
+{"id":2619,"country_code":"NL","iso3166_2":"NL-FL","name":"Flevoland","native":"Flevoland","type":"province","level":"1","wikiDataId":"Q707"}
+{"id":2610,"country_code":"NL","iso3166_2":"NL-UT","name":"Utrecht","native":"Utrecht","type":"province","level":"1","wikiDataId":"Q776"}
+{"id":2611,"country_code":"NL","iso3166_2":"NL-GE","name":"Gelderland","native":"Gelderland","type":"province","level":"1","wikiDataId":"Q775"}
+{"id":1638,"country_code":"PL","iso3166_2":"PL-06","name":"Lublin","native":"Lublin","type":"voivodship","level":"1","wikiDataId":"Q54155"}
+{"id":1635,"country_code":"PL","iso3166_2":"PL-12","name":"Lesser Poland","native":"Mniejsza Polska","type":"voivodship","level":"1","wikiDataId":"Q54159"}
+{"id":1633,"country_code":"PL","iso3166_2":"PL-32","name":"West Pomerania","native":"West Pomerania","type":"voivodship","level":"1","wikiDataId":"Q54188"}
+{"id":2228,"country_code":"PT","iso3166_2":"PT-11","name":"Lisbon","native":"Lisbon","type":"district","level":"1","wikiDataId":"Q207199"}
+{"id":2242,"country_code":"PT","iso3166_2":"PT-15","name":"Setúbal","native":"Setúbal","type":"district","level":"1","wikiDataId":"Q274109"}
+{"id":2238,"country_code":"PT","iso3166_2":"PT-14","name":"Santarém","native":"Santarém","type":"district","level":"1","wikiDataId":"Q244510"}
+{"id":4725,"country_code":"RO","iso3166_2":"RO-IF","name":"Ilfov","native":"Ilfov","type":"department","level":"1","wikiDataId":"Q191670"}
+{"id":4748,"country_code":"RO","iso3166_2":"RO-TM","name":"Timiș","native":"Timiș","type":"department","level":"1","wikiDataId":"Q185586"}
+{"id":58,"country_code":"SM","iso3166_2":"SM-07","name":"San Marino","native":"San Marino","type":"municipality","level":"1","wikiDataId":"Q1848"}
+{"id":1158,"country_code":"ES","iso3166_2":"ES-M","name":"Madrid","native":"Madrid","type":"province","level":"2","wikiDataId":"Q24004405"}
+{"id":5326,"country_code":"ES","iso3166_2":"ES-AR","name":"Aragon","native":"Aragón","type":"autonomous community","level":"1","wikiDataId":"Q4040"}
+{"id":1648,"country_code":"CH","iso3166_2":"CH-VS","name":"Valais","native":"Valais","type":"canton","level":"1","wikiDataId":"Q834"}
+{"id":1643,"country_code":"CH","iso3166_2":"CH-TI","name":"Ticino","native":"Ticino","type":"canton","level":"1","wikiDataId":"Q12724"}
+{"id":1651,"country_code":"CH","iso3166_2":"CH-VD","name":"Vaud","native":"Vaud","type":"canton","level":"1","wikiDataId":"Q12771"}
+{"id":1656,"country_code":"CH","iso3166_2":"CH-ZH","name":"Zürich","native":"Zürich","type":"canton","level":"1","wikiDataId":"Q11943"}
+{"id":1639,"country_code":"CH","iso3166_2":"CH-AG","name":"Aargau","native":"Aargau","type":"canton","level":"1","wikiDataId":"Q11972"}
+{"id":2338,"country_code":"GB","iso3166_2":"GB-WLS","name":"Wales","native":"Wales","type":"country","level":"1","wikiDataId":"Q25"}
+{"id":2464,"country_code":"GB","iso3166_2":"GB-KEN","name":"Kent","native":"Kent","type":"two-tier county","level":"2","wikiDataId":"Q21694674"}
+{"id":2303,"country_code":"GB","iso3166_2":"GB-CBF","name":"Central Bedfordshire","native":"Central Bedfordshire","type":"unitary authority","level":"2","wikiDataId":"Q1053723"}
+{"id":2495,"country_code":"GB","iso3166_2":"GB-LAN","name":"Lancashire","native":"Lancashire","type":"two-tier county","level":"2","wikiDataId":"Q21279371"}
+{"id":2312,"country_code":"GB","iso3166_2":"GB-CON","name":"Cornwall","native":"Cornwall","type":"unitary authority","level":"2","wikiDataId":"Q22338583"}
+{"id":2447,"country_code":"GB","iso3166_2":"GB-STS","name":"Staffordshire","native":"Staffordshire","type":"two-tier county","level":"2","wikiDataId":"Q21694786"}
+{"id":2516,"country_code":"GB","iso3166_2":"GB-LEC","name":"Leicestershire","native":"Leicestershire","type":"two-tier county","level":"2","wikiDataId":"Q21272890"}
+{"id":2462,"country_code":"GB","iso3166_2":"GB-ELN","name":"East Lothian","native":"East Lothian","type":"council area","level":"2","wikiDataId":"Q207257"}
+{"id":2373,"country_code":"GB","iso3166_2":"GB-GLS","name":"Gloucestershire","native":"Gloucestershire","type":"two-tier county","level":"2","wikiDataId":"Q21694733"}
+{"id":2526,"country_code":"GB","iso3166_2":"GB-SRY","name":"Surrey","native":"Surrey","type":"two-tier county","level":"2","wikiDataId":"Q23276"}
+{"id":2316,"country_code":"GB","iso3166_2":"GB-CCG","name":"Causeway Coast and Glens","native":"Causeway Coast and Glens","type":"district","level":"2","wikiDataId":"Q5054638"}
+{"id":2405,"country_code":"GB","iso3166_2":"GB-BKM","name":"Buckinghamshire","native":"Buckinghamshire","type":"unitary authority","level":"2","wikiDataId":"Q21694636"}
+{"id":2296,"country_code":"GB","iso3166_2":"GB-WSX","name":"West Sussex","native":"West Sussex","type":"two-tier county","level":"2","wikiDataId":"Q23287"}
+{"id":2479,"country_code":"GB","iso3166_2":"GB-FIF","name":"Fife","native":"Fife","type":"council area","level":"2","wikiDataId":"Q201149"}
+{"id":2488,"country_code":"GB","iso3166_2":"GB-STG","name":"Stirling","native":"Stirling","type":"council area","level":"2","wikiDataId":"Q217838"}
+{"id":2383,"country_code":"GB","iso3166_2":"GB-HLD","name":"Highland","native":"Highland","type":"council area","level":"2","wikiDataId":"Q208279"}
+{"id":2484,"country_code":"GB","iso3166_2":"GB-CMN","name":"Carmarthenshire","native":"Carmarthenshire","type":"unitary authority","level":"2","wikiDataId":"Q217840"}
+{"id":2435,"country_code":"GB","iso3166_2":"GB-HAM","name":"Hampshire","native":"Hampshire","type":"two-tier county","level":"2","wikiDataId":"Q21694653"}
+{"id":2436,"country_code":"GB","iso3166_2":"GB-WRX","name":"Wrexham","native":"Wrexham","type":"unitary authority","level":"2","wikiDataId":"Q843868"}
+{"id":490,"country_code":"AD","iso3166_2":"AD-06","name":"Sant Julià de Lòria","native":"Sant Julià de Lòria","type":"parish","level":"1","wikiDataId":"Q24282"}
+{"id":2027,"country_code":"AM","iso3166_2":"AM-SU","name":"Syunik","native":"Սյուն","type":"region","level":"1","wikiDataId":"Q2523428"}
+{"id":906,"country_code":"GE","iso3166_2":"GE-SJ","name":"Samtskhe-Javakheti","native":"სამცხე-ჯავახეთი","type":"region","level":"1","wikiDataId":"Q19039"}
+{"id":900,"country_code":"GE","iso3166_2":"GE-AJ","name":"Adjara","native":"აჭარა","type":"autonomous republic","level":"1","wikiDataId":"Q45693"}
+{"id":1845,"country_code":"RU","iso3166_2":"RU-CHE","name":"Chelyabinsk","native":"Челябинск","type":"administrative region","level":"1","wikiDataId":"Q5714"}
+{"id":874,"country_code":"CA","iso3166_2":"CA-NS","name":"Nova Scotia","native":"New Scotia","type":"province","level":"1","wikiDataId":"Q1952"}
+{"id":872,"country_code":"CA","iso3166_2":"CA-AB","name":"Alberta","native":"Alberta","type":"province","level":"1","wikiDataId":"Q1951"}
+{"id":868,"country_code":"CA","iso3166_2":"CA-NB","name":"New Brunswick","native":"New Brunswick","type":"province","level":"1","wikiDataId":"Q1965"}
+{"id":875,"country_code":"CA","iso3166_2":"CA-BC","name":"British Columbia","native":"British Columbia","type":"province","level":"1","wikiDataId":"Q1973"}
+{"id":866,"country_code":"CA","iso3166_2":"CA-ON","name":"Ontario","native":"Ontario","type":"province","level":"1","wikiDataId":"Q1904"}
+{"id":873,"country_code":"CA","iso3166_2":"CA-QC","name":"Quebec","native":"Quebec","type":"province","level":"1","wikiDataId":"Q176"}
+{"id":1451,"country_code":"US","iso3166_2":"US-MO","name":"Missouri","native":"Missouri","type":"state","level":"1","wikiDataId":"Q1581"}
+{"id":1450,"country_code":"US","iso3166_2":"US-CO","name":"Colorado","native":"Colorado","type":"state","level":"1","wikiDataId":"Q1261"}
+{"id":4851,"country_code":"US","iso3166_2":"US-OH","name":"Ohio","native":"Ohio","type":"state","level":"1","wikiDataId":"Q1397"}
+{"id":1426,"country_code":"US","iso3166_2":"US-MI","name":"Michigan","native":"Michigan","type":"state","level":"1","wikiDataId":"Q1166"}
+{"id":1407,"country_code":"US","iso3166_2":"US-TX","name":"Texas","native":"Texas","type":"state","level":"1","wikiDataId":"Q1439"}
+{"id":1422,"country_code":"US","iso3166_2":"US-PA","name":"Pennsylvania","native":"Pennsylvania","type":"state","level":"1","wikiDataId":"Q1400"}
+{"id":1419,"country_code":"US","iso3166_2":"US-KY","name":"Kentucky","native":"Kentucky","type":"state","level":"1","wikiDataId":"Q1603"}
+{"id":1436,"country_code":"US","iso3166_2":"US-FL","name":"Florida","native":"Florida","type":"state","level":"1","wikiDataId":"Q812"}
+{"id":1416,"country_code":"US","iso3166_2":"US-CA","name":"California","native":"California","type":"state","level":"1","wikiDataId":"Q99"}
+{"id":1406,"country_code":"US","iso3166_2":"US-KS","name":"Kansas","native":"Kansas","type":"state","level":"1","wikiDataId":"Q1558"}
+{"id":1440,"country_code":"US","iso3166_2":"US-IN","name":"Indiana","native":"Indiana","type":"state","level":"1","wikiDataId":"Q1415"}
+{"id":1420,"country_code":"US","iso3166_2":"US-MN","name":"Minnesota","native":"Minnesota","type":"state","level":"1","wikiDataId":"Q1527"}
+{"id":1425,"country_code":"US","iso3166_2":"US-IL","name":"Illinois","native":"Illinois","type":"state","level":"1","wikiDataId":"Q1204"}
+{"id":1433,"country_code":"US","iso3166_2":"US-MA","name":"Massachusetts","native":"Massachusetts","type":"state","level":"1","wikiDataId":"Q771"}
+{"id":1452,"country_code":"US","iso3166_2":"US-NY","name":"New York","native":"New York","type":"state","level":"1","wikiDataId":"Q1384"}
+{"id":1445,"country_code":"US","iso3166_2":"US-SD","name":"South Dakota","native":"South Dakota","type":"state","level":"1","wikiDataId":"Q1211"}
+{"id":1430,"country_code":"US","iso3166_2":"US-MS","name":"Mississippi","native":"Mississippi","type":"state","level":"1","wikiDataId":"Q1494"}
+{"id":1459,"country_code":"US","iso3166_2":"US-IA","name":"Iowa","native":"Iowa","type":"state","level":"1","wikiDataId":"Q1546"}
+{"id":1411,"country_code":"US","iso3166_2":"US-HI","name":"Hawaii","native":"Hawaii","type":"state","level":"1","wikiDataId":"Q782"}
+{"id":1460,"country_code":"US","iso3166_2":"US-ID","name":"Idaho","native":"Idaho","type":"state","level":"1","wikiDataId":"Q1221"}
+{"id":1447,"country_code":"US","iso3166_2":"US-NC","name":"North Carolina","native":"North Carolina","type":"state","level":"1","wikiDataId":"Q1454"}
+{"id":1441,"country_code":"US","iso3166_2":"US-WI","name":"Wisconsin","native":"Wisconsin","type":"state","level":"1","wikiDataId":"Q1537"}
+{"id":1417,"country_code":"US","iso3166_2":"US-NJ","name":"New Jersey","native":"New Jersey","type":"state","level":"1","wikiDataId":"Q1408"}
+{"id":1443,"country_code":"US","iso3166_2":"US-SC","name":"South Carolina","native":"South Carolina","type":"state","level":"1","wikiDataId":"Q1456"}
+{"id":1435,"country_code":"US","iso3166_2":"US-CT","name":"Connecticut","native":"Connecticut","type":"state","level":"1","wikiDataId":"Q779"}
+{"id":1423,"country_code":"US","iso3166_2":"US-NM","name":"New Mexico","native":"New Mexico","type":"state","level":"1","wikiDataId":"Q1522"}
+{"id":1455,"country_code":"US","iso3166_2":"US-GA","name":"Georgia","native":"Georgia","type":"state","level":"1","wikiDataId":"Q1428"}
+{"id":1404,"country_code":"US","iso3166_2":"US-NH","name":"New Hampshire","native":"New Hampshire","type":"state","level":"1","wikiDataId":"Q759"}
+{"id":1401,"country_code":"US","iso3166_2":"US-MD","name":"Maryland","native":"Maryland","type":"state","level":"1","wikiDataId":"Q1391"}
+{"id":1415,"country_code":"US","iso3166_2":"US-OR","name":"Oregon","native":"Oregon","type":"state","level":"1","wikiDataId":"Q824"}
+{"id":1457,"country_code":"US","iso3166_2":"US-LA","name":"Louisiana","native":"Louisiana","type":"state","level":"1","wikiDataId":"Q1588"}
+{"id":1444,"country_code":"US","iso3166_2":"US-AR","name":"Arkansas","native":"Arkansa","type":"state","level":"1","wikiDataId":"Q1612"}
+{"id":1462,"country_code":"US","iso3166_2":"US-WA","name":"Washington","native":"Washington","type":"state","level":"1","wikiDataId":"Q1223"}
+{"id":1421,"country_code":"US","iso3166_2":"US-OK","name":"Oklahoma","native":"Oklahola","type":"state","level":"1","wikiDataId":"Q1649"}
+{"id":1454,"country_code":"US","iso3166_2":"US-TN","name":"Tennessee","native":"Tennessee","type":"state","level":"1","wikiDataId":"Q1509"}
+{"id":1453,"country_code":"US","iso3166_2":"US-ME","name":"Maine","native":"Maine","type":"state","level":"1","wikiDataId":"Q724"}
+{"id":1446,"country_code":"US","iso3166_2":"US-MT","name":"Montana","native":"Montana","type":"state","level":"1","wikiDataId":"Q1212"}
+{"id":1434,"country_code":"US","iso3166_2":"US-AZ","name":"Arizona","native":"Arizona","type":"state","level":"1","wikiDataId":"Q816"}
+{"id":1427,"country_code":"US","iso3166_2":"US-VA","name":"Virginia","native":"Virginia","type":"state","level":"1","wikiDataId":"Q1370"}
+{"id":1429,"country_code":"US","iso3166_2":"US-WV","name":"West Virginia","native":"West Virginia","type":"state","level":"1","wikiDataId":"Q1371"}
+{"id":1414,"country_code":"US","iso3166_2":"US-UT","name":"Utah","native":"Utah","type":"state","level":"1","wikiDataId":"Q829"}
+{"id":1456,"country_code":"US","iso3166_2":"US-AL","name":"Alabama","native":"Alabama","type":"state","level":"1","wikiDataId":"Q173"}
+{"id":1400,"country_code":"US","iso3166_2":"US-AK","name":"Alaska","native":"Down","type":"state","level":"1","wikiDataId":"Q797"}
+{"id":1418,"country_code":"US","iso3166_2":"US-ND","name":"North Dakota","native":"North Dakota","type":"state","level":"1","wikiDataId":"Q1207"}
+{"id":1442,"country_code":"US","iso3166_2":"US-WY","name":"Wyoming","native":"Wyoming","type":"state","level":"1","wikiDataId":"Q1214"}
+{"id":3470,"country_code":"MX","iso3166_2":"MX-HID","name":"Hidalgo","native":"Hidalgo","type":"state","level":"1","wikiDataId":"Q80903"}
+{"id":3466,"country_code":"MX","iso3166_2":"MX-YUC","name":"Yucatán","native":"Yucatán","type":"state","level":"1","wikiDataId":"Q60176"}
+{"id":3448,"country_code":"MX","iso3166_2":"MX-OAX","name":"Oaxaca","native":"Oaxaca","type":"state","level":"1","wikiDataId":"Q34110"}
+{"id":3451,"country_code":"MX","iso3166_2":"MX-CHP","name":"Chiapas","native":"Chiapas","type":"state","level":"1","wikiDataId":"Q60123"}
+{"id":3469,"country_code":"MX","iso3166_2":"MX-GUA","name":"Guanajuato","native":"Guanajuato","type":"state","level":"1","wikiDataId":"Q46475"}
+{"id":3455,"country_code":"MX","iso3166_2":"MX-QUE","name":"Querétaro","native":"Querétaro","type":"state","level":"1","wikiDataId":"Q79754"}
+{"id":3458,"country_code":"MX","iso3166_2":"MX-TLA","name":"Tlaxcala","native":"Tlaxcala","type":"state","level":"1","wikiDataId":"Q82681"}
+{"id":3477,"country_code":"MX","iso3166_2":"MX-NAY","name":"Nayarit","native":"Nayarit","type":"state","level":"1","wikiDataId":"Q79920"}
+{"id":3476,"country_code":"MX","iso3166_2":"MX-PUE","name":"Puebla","native":"Puebla","type":"state","level":"1","wikiDataId":"Q79923"}
+{"id":1214,"country_code":"CR","iso3166_2":"CR-SJ","name":"San José","native":"San José","type":"province","level":"1","wikiDataId":"Q647808"}
+{"id":1213,"country_code":"CR","iso3166_2":"CR-L","name":"Limón","native":"Limón","type":"province","level":"1","wikiDataId":"Q642644"}
+{"id":1209,"country_code":"CR","iso3166_2":"CR-G","name":"Guanacaste","native":"Guanacaste","type":"province","level":"1","wikiDataId":"Q690026"}
+{"id":1391,"country_code":"PA","iso3166_2":"PA-NB","name":"Ngöbe-Buglé Comarca","native":"Ngöbe-Buglé Comarca","type":"indigenous region","level":"1","wikiDataId":"Q1129783"}
+{"id":3626,"country_code":"BS","iso3166_2":"BS-FP","name":"Freeport","native":"Freeport","type":"district","level":"1","wikiDataId":"Q867573"}
+{"id":4117,"country_code":"HT","iso3166_2":"HT-ND","name":"Nord","native":"Nord","type":"department","level":"1","wikiDataId":"Q943932"}
+{"id":3838,"country_code":"KN","iso3166_2":"KN-10","name":"Saint Paul Charlestown","native":"Saint Paul Charlestown","type":"parish","level":"1","wikiDataId":"Q1752127"}
+{"id":3844,"country_code":"KN","iso3166_2":"KN-08","name":"Saint Mary Cayon","native":"Saint Mary Cayon","type":"parish","level":"1","wikiDataId":"Q1538034"}
+{"id":3766,"country_code":"LC","iso3166_2":"LC-06","name":"Gros Islet","native":"Gros islet","type":"district","level":"1","wikiDataId":"Q953557"}
+{"id":3909,"country_code":"AU","iso3166_2":"AU-NSW","name":"New South Wales","native":"New South Wales","type":"state","level":"1","wikiDataId":"Q3224"}
+{"id":4066,"country_code":"NZ","iso3166_2":"NZ-CAN","name":"Canterbury","native":"Canterbury","type":"region","level":"1","wikiDataId":"Q657004"}
+{"id":4844,"country_code":"PG","iso3166_2":"PG-SHM","name":"Southern Highlands","native":"Southern Highlands","type":"province","level":"1","wikiDataId":"Q849801"}
+{"id":4848,"country_code":"PG","iso3166_2":"PG-EPW","name":"Enga","native":"Nake","type":"province","level":"1","wikiDataId":"Q862584"}
+{"id":1929,"country_code":"FJ","iso3166_2":"FJ-C","name":"Central","native":"Central","type":"division","level":"1","wikiDataId":"Q1053789"}
+{"id":3656,"country_code":"AR","iso3166_2":"AR-B","name":"Buenos Aires","native":"Buenos Aires","type":"province","level":"1","wikiDataId":"Q44754"}
+{"id":3653,"country_code":"AR","iso3166_2":"AR-F","name":"La Rioja","native":"La Rioja","type":"province","level":"1","wikiDataId":"Q44796"}
+{"id":3636,"country_code":"AR","iso3166_2":"AR-D","name":"San Luis","native":"San Luis","type":"province","level":"1","wikiDataId":"Q44818"}
+{"id":3654,"country_code":"AR","iso3166_2":"AR-E","name":"Entre Ríos","native":"Entre Ríos","type":"province","level":"1","wikiDataId":"Q44762"}
+{"id":3381,"country_code":"BO","iso3166_2":"BO-C","name":"Cochabamba","native":"Cochabamba","type":"department","level":"1","wikiDataId":"Q233917"}
+{"id":2002,"country_code":"BR","iso3166_2":"BR-BA","name":"Bahia","native":"Bahia","type":"state","level":"1","wikiDataId":"Q40430"}
+{"id":2018,"country_code":"BR","iso3166_2":"BR-ES","name":"Espírito Santo","native":"Espírito Santo","type":"state","level":"1","wikiDataId":"Q43233"}
+{"id":2000,"country_code":"BR","iso3166_2":"BR-GO","name":"Goiás","native":"Goiás","type":"state","level":"1","wikiDataId":"Q41587"}
+{"id":2011,"country_code":"BR","iso3166_2":"BR-MT","name":"Mato Grosso","native":"Mato Grosso","type":"state","level":"1","wikiDataId":"Q42824"}
+{"id":1998,"country_code":"BR","iso3166_2":"BR-MG","name":"Minas Gerais","native":"Minas Gerais","type":"state","level":"1","wikiDataId":"Q39109"}
+{"id":2022,"country_code":"BR","iso3166_2":"BR-PR","name":"Paraná","native":"Paraná","type":"state","level":"1","wikiDataId":"Q15499"}
+{"id":1997,"country_code":"BR","iso3166_2":"BR-RJ","name":"Rio de Janeiro","native":"Rio de Janeiro","type":"state","level":"1","wikiDataId":"Q41428"}
+{"id":2001,"country_code":"BR","iso3166_2":"BR-RS","name":"Rio Grande do Sul","native":"Rio Grande do Sul","type":"state","level":"1","wikiDataId":"Q40030"}
+{"id":2014,"country_code":"BR","iso3166_2":"BR-SC","name":"Santa Catarina","native":"Santa Catarina","type":"state","level":"1","wikiDataId":"Q41115"}
+{"id":2021,"country_code":"BR","iso3166_2":"BR-SP","name":"São Paulo","native":"São Paulo","type":"state","level":"1","wikiDataId":"Q175"}
+{"id":2003,"country_code":"BR","iso3166_2":"BR-SE","name":"Sergipe","native":"Sergipe","type":"state","level":"1","wikiDataId":"Q43783"}
+{"id":2913,"country_code":"EC","iso3166_2":"EC-M","name":"Manabí","native":"Manabí","type":"province","level":"1","wikiDataId":"Q504666"}
+{"id":2911,"country_code":"EC","iso3166_2":"EC-I","name":"Imbabura","native":"Imbabura","type":"province","level":"1","wikiDataId":"Q321863"}
+{"id":3683,"country_code":"PE","iso3166_2":"PE-LAL","name":"La Libertad","native":"La Libertad","type":"region","level":"1","wikiDataId":"Q205126"}
+{"id":3695,"country_code":"PE","iso3166_2":"PE-LIM","name":"Lima","native":"Lima","type":"region","level":"1","wikiDataId":"Q211795"}
+{"id":3679,"country_code":"PE","iso3166_2":"PE-HUV","name":"Huancavelica","native":"Huancavelica","type":"region","level":"1","wikiDataId":"Q505220"}
+{"id":2037,"country_code":"VE","iso3166_2":"VE-M","name":"Miranda","native":"Miranda","type":"state","level":"1","wikiDataId":"Q191174"}
+{"id":2048,"country_code":"VE","iso3166_2":"VE-S","name":"Táchira","native":"Táchira","type":"state","level":"1","wikiDataId":"Q41144"}
+{"id":2039,"country_code":"VE","iso3166_2":"VE-F","name":"Bolívar","native":"Bolívar","type":"state","level":"1","wikiDataId":"Q191164"}
