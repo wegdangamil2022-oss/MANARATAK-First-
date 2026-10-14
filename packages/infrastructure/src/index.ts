@@ -254,3 +254,5 @@ export * from './certificates/HttpCertificateAuthorityResolver';
 export * from './certificates/CertificateArtifactReadinessProbe';
 export * from './certificates/CertificateArtifactRecovery';
 export * from './certificates/PrismaCertificateAuthorityDirectory';
+
+export * from './translation-import/PrismaTranslationWorkspaceReadGateway';

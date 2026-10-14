@@ -4,7 +4,7 @@ import type {
   AtomicDomainMutationCoordinator,
   AtomicMutationRequestContext,
 } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
-export type GovernanceApprovalScope = 'DUTY_POLICY' | 'DUTY_EXCEPTION' | 'MFA_RESET';
+export type GovernanceApprovalScope = 'DUTY_POLICY' | 'DUTY_EXCEPTION' | 'MFA_RESET' | 'TRANSLATION_TRANSFER' | 'TRANSLATION_PUBLICATION';
 export interface GovernanceApproval {
   id: string;
   scope: GovernanceApprovalScope;
@@ -64,7 +64,7 @@ export class GovernanceApprovalUseCases {
       !input.id ||
       !input.approverId ||
       input.approverId === context.actorId ||
-      !['DUTY_POLICY', 'DUTY_EXCEPTION', 'MFA_RESET'].includes(input.scope)
+      !['DUTY_POLICY', 'DUTY_EXCEPTION', 'MFA_RESET', 'TRANSLATION_TRANSFER', 'TRANSLATION_PUBLICATION'].includes(input.scope)
     )
       throw new Error('GOVERNANCE_APPROVAL_INVALID');
     const approval: GovernanceApproval = {

@@ -1,5 +1,5 @@
 import {
-  SUPPORTED_LOCALES,
+  PUBLIC_TEMPLATE_LOCALES,
   type SupportedLocale,
 } from '@manaratak/shared';
 import {
@@ -9,7 +9,8 @@ import {
 
 export interface LocalizedSeoLinks {
   canonical: string;
-  alternates: Record<SupportedLocale, string>;
+  alternates: Partial<Record<SupportedLocale, string>>;
+  indexable: boolean;
   xDefault: string;
 }
 
@@ -27,21 +28,23 @@ export function buildLocalizedSeoLinks(input: {
   baseUrl: string;
   pathname: string;
   locale: SupportedLocale;
+  availableLocales?: readonly SupportedLocale[];
 }): LocalizedSeoLinks {
   const baseUrl = normalizePublicBaseUrl(input.baseUrl);
   const barePath = stripLocalePrefix(input.pathname);
 
   const alternates = Object.fromEntries(
-    SUPPORTED_LOCALES.map((locale) => [
+    (input.availableLocales ?? PUBLIC_TEMPLATE_LOCALES).filter(locale=>PUBLIC_TEMPLATE_LOCALES.includes(locale)).map((locale) => [
       locale,
       `${baseUrl}${localizePathname(barePath, locale)}`,
     ]),
-  ) as Record<SupportedLocale, string>;
+  ) as Partial<Record<SupportedLocale, string>>;
 
   return {
-    canonical: alternates[input.locale],
+    canonical: `${baseUrl}${localizePathname(barePath,input.locale)}`,
+    indexable: Boolean(alternates[input.locale]),
     alternates,
-    xDefault: alternates.ar,
+    xDefault: alternates.ar ?? alternates.en ?? `${baseUrl}/ar`,
   };
 }
 

@@ -65,6 +65,7 @@ interface ContentBlock extends EditableBlock {
   version: number;
 }
 interface Announcement {
+  hasPublicSnapshot?: boolean;
   id: string;
   title: string;
   urgency: string;
@@ -859,7 +860,7 @@ export function CmsOperationsPanels({
             {announcements.map((notice) => (
               <li key={notice.id} className="rounded-lg bg-slate-50 p-3 text-sm">
                 <span>
-                  {notice.title} — {notice.status}
+                  {notice.title} — {notice.status} {notice.hasPublicSnapshot ? (uiLanguage === 'ar' ? '(نسخة عامة منشورة)' : '(public version live)') : ''}
                 </span>
                 {notice.status === 'DRAFT' && (
                   <button
@@ -887,12 +888,14 @@ export function CmsOperationsPanels({
                     {uiLanguage === 'ar' ? tr('اعتماد ونشر الإعلان') : 'Approve and publish'}
                   </button>
                 )}
-                {notice.status === 'PUBLISHED' && (
+                {(notice.status === 'PUBLISHED' || notice.hasPublicSnapshot) && (
                   <button
                     type="button"
                     disabled={busy || !canPublish}
                     className={button}
-                    onClick={() =>
+                    onClick={() => {
+                      const reason=window.prompt(uiLanguage==='ar'?'سبب إيقاف الإعلان المنشور (6 أحرف على الأقل)':'Reason for retiring the published announcement (at least 6 characters)');
+                      if(!reason || reason.trim().length<6)return;
                       void submit(
                         () =>
                           adminApiClient.request(
@@ -901,12 +904,12 @@ export function CmsOperationsPanels({
                               '/archive',
                             {
                               method: 'POST',
-                              body: JSON.stringify({ expectedVersion: notice.version }),
+                              body: JSON.stringify({ expectedVersion: notice.version, reason: reason.trim() }),
                             },
                           ),
                         uiLanguage === 'ar' ? tr('أُرشف الإعلان.') : 'Announcement archived.',
                       )
-                    }
+                    }}
                   >
                     {uiLanguage === 'ar' ? tr('أرشفة') : 'Archive'}
                   </button>

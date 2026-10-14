@@ -115,7 +115,7 @@ import {
 
 export default function App() {
   const routerNavigate = useRouterNavigate();
-  const { language } = useTranslation();
+  const { language, t } = useTranslation();
   const publicLive = usePublicLiveData(import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE, language);
   const publicDataMode = publicLive.mode;
   const { scholarships, universities, majors, countries, exams, courses, paidCourses, importedCourses, articles, services, careers, tools } = publicLive.data;
@@ -166,7 +166,7 @@ export default function App() {
   // Access Restriction State
   const [accessDeniedMessage, setAccessDeniedMessage] = useState<string | null>(null);
 
-  const triggerAccessDenied = (msg: string = 'ليس لديك صلاحية الوصول') => {
+  const triggerAccessDenied = (msg: string = t('public_template_access_denied')) => {
     setAccessDeniedMessage(msg);
   };
 
@@ -390,7 +390,7 @@ export default function App() {
 
   const [notifications, setNotifications] = useState<PushNotificationItem[]>(() => {
     if (publicDataMode !== 'prototype') return [];
-    return readStoredArray<PushNotificationItem>('manaratak_notifications', INITIAL_NOTIFICATIONS).filter((item, index, list) => !item.title.includes('مرحباً بك في منصة منارتك') || list.findIndex((candidate) => candidate.title.includes('مرحباً بك في منصة منارتك')) === index).map((item) => item.title.includes('مرحباً بك في منصة منارتك') ? {...item, id: 'welcome-v29', actionType: undefined, targetId: undefined, body: 'هذه معاينة محلية للإشعارات. ستُفعّل التنبيهات الحقيقية بعد ربط الخدمة.'} : item);
+    return readStoredArray<PushNotificationItem>('manaratak_notifications', INITIAL_NOTIFICATIONS).filter((item, index, list) => !item.title.includes('مرحباً بك في منصة منارتك') || list.findIndex((candidate) => candidate.title.includes('مرحباً بك في منصة منارتك')) === index).map((item) => item.title.includes('مرحباً بك في منصة منارتك') ? {...item, id: 'welcome-v29', actionType: undefined, targetId: undefined, body: t('public_template_preview_notifications')} : item);
   });
 
   // Modal Dialogs
@@ -425,7 +425,7 @@ export default function App() {
       } catch (reason) {
         if (active && reason instanceof Error && reason.message === 'CMS content not found') {
           setSelectedArticle(null);
-          setAccessDeniedMessage('هذه المادة لم تعد منشورة للعامة.');
+          setAccessDeniedMessage(t('public_template_content_unpublished'));
         }
       }
     };
@@ -440,7 +440,7 @@ export default function App() {
       (service) => service.id === selectedService.id || service.publicId === selectedService.publicId);
     if (!current) {
       setSelectedService(null);
-      setAccessDeniedMessage('هذه الخدمة لم تعد منشورة للعامة.');
+      setAccessDeniedMessage(t('public_template_service_unpublished'));
     } else if (JSON.stringify(current) !== JSON.stringify(selectedService)) setSelectedService(current);
   }, [publicDataMode, services, publicLive.statuses.services, selectedService?.id]);
   const [serviceReturnTab, setServiceReturnTab] = navigation.field('serviceReturnTab');
@@ -709,7 +709,7 @@ export default function App() {
           if (kind && !cancelled) setFavoriteKeys((prev) => [...new Set([...prev, makeFavoriteKey(kind, pending.entityId)])]);
         } else if (pending?.kind === 'TRACK_APPLICATION') {
           const existing = (await ApiClient.listMyStudentApplicationTrackers()).find((item) => item.scholarshipId === pending.scholarshipId && item.status === 'ACTIVE');
-          if (!existing) await ApiClient.createMyStudentApplicationTracker({ scholarshipId: pending.scholarshipId, scholarshipSlug: pending.scholarshipSlug, notes: pending.notes ?? 'بدء متابعة طلب المنحة بعد تسجيل الدخول', checklistLabels: ['ترجمة وتصديق المستندات', 'إعداد السيرة الذاتية الأكاديمية', 'صياغة خطاب الدافع', 'الحصول على خطابات التوصية', 'تقديم الطلب الإلكتروني الرسمي'] });
+          if (!existing) await ApiClient.createMyStudentApplicationTracker({ scholarshipId: pending.scholarshipId, scholarshipSlug: pending.scholarshipSlug, notes: pending.notes ?? t('public_template_follow_after_login'), checklistLabels: [t('public_template_documents'), t('public_template_cv'), t('public_template_motivation'), t('public_template_references'), t('public_template_official_application')] });
           if (!cancelled) {
             window.history.replaceState({...window.history.state}, '', '/student?tab=journey');
             setActiveTab('account');
@@ -766,11 +766,11 @@ export default function App() {
     if (publicDataMode !== 'prototype') return;
     const newAlert: PushNotificationItem = {
       id: customNotification?.id || `push-${Date.now()}`,
-      title: customNotification?.title || 'تنبيه تجريبي من منارتك',
+      title: customNotification?.title || t('public_template_preview_alert'),
       body:
         customNotification?.body ||
-        'هذا اختبار محلي لعرض الإشعارات، وليس إعلانًا عن فرصة حقيقية.',
-      timestamp: 'الآن',
+        t('public_template_preview_alert_body'),
+      timestamp: t('public_template_now'),
       type: customNotification?.type || 'system',
       read: false,
       actionType: customNotification?.actionType,
@@ -794,9 +794,9 @@ export default function App() {
         (item) => item.id === 'welcome-v29' || item.title.includes('مرحباً بك في منصة منارتك'))) return;
     const timer = setTimeout(() => {
       setNotifications((previous) => previous.some((item) => item.id === 'welcome-v29') ? previous : [{
-        id: 'welcome-v29', timestamp: 'الآن', read: false,
-        title: 'مرحباً بك في منصة منارتك للفرص التعليمية!',
-        body: 'هذه معاينة محلية للإشعارات. ستُفعّل التنبيهات الحقيقية بعد ربط الخدمة.',
+        id: 'welcome-v29', timestamp: t('public_template_now'), read: false,
+        title: t('public_template_welcome'),
+        body: t('public_template_preview_notifications'),
         type: 'system',
       }, ...previous]);
     }, 2500);
@@ -830,8 +830,8 @@ export default function App() {
           timers.push(setTimeout(
             () => {
               triggerInstantPush({
-                title: 'تنبيه الموعد النهائي: 3 أيام متبقية!',
-                body: `باقي 3 أيام فقط على إغلاق التقديم لمنحة ${m.scholarshipTitle}. تأكد من إكمال جميع المتطلبات في نظام المتابعة.`,
+                title: t('public_template_deadline_three_days'),
+                body: t('public_template_deadline_body').replace('{title}',m.scholarshipTitle),
                 type: 'deadline',
                 actionType: 'tracker',
                 targetId: m.scholarshipId,
@@ -878,7 +878,7 @@ export default function App() {
     }
     const entityType = liveSavedItemType(kind);
     if (!entityType) {
-      triggerInstantPush({ title: 'الحفظ غير متاح لهذا النوع بعد', body: 'لن نعرض حفظاً محلياً وهمياً في الوضع الفعلي.', type: 'system' });
+      triggerInstantPush({ title: t('public_template_save_unsupported'), body: t('public_template_save_no_fake'), type: 'system' });
       return;
     }
     try {
@@ -898,7 +898,7 @@ export default function App() {
         setFavoriteKeys((prev) => (prev.includes(key) ? prev : [...prev, key]));
       }
     } catch (error) {
-      triggerInstantPush({ title: 'تعذر تحديث العناصر المحفوظة', body: error instanceof Error ? error.message : 'حاول مرة أخرى.', type: 'system' });
+      triggerInstantPush({ title: t('public_template_save_error'), body: error instanceof Error ? error.message : t('public_template_retry'), type: 'system' });
     }
   };
 
@@ -914,13 +914,13 @@ export default function App() {
         country: sch.country,
         deadline: sch.deadline,
         stage: 'تجهيز المستندات', progress: 0,
-        notes: `بدء إعداد ملف التقديم الرسمي لمنحة ${sch.title}`,
+        notes: t('public_template_application_notes').replace('{title}',sch.title),
         checklist: [
-          { id: `c-${Date.now()}-1`, task: 'ترجمة وتصديق كشف العلامات وشهادة التخرج', completed: false },
-          { id: `c-${Date.now()}-2`, task: 'تجهيز السيرة الذاتية بصيغة أكاديمية', completed: false },
-          { id: `c-${Date.now()}-3`, task: 'صياغة خطاب الدافع بواسطة الذكاء الاصطناعي', completed: false },
-          { id: `c-${Date.now()}-4`, task: 'الحصول على خطابات التوصية الأكاديمية', completed: false },
-          { id: `c-${Date.now()}-5`, task: 'تقديم الطلب الإلكتروني على البوابة الرسمية', completed: false },
+          { id: `c-${Date.now()}-1`, task: t('public_template_certified_transcript'), completed: false },
+          { id: `c-${Date.now()}-2`, task: t('public_template_academic_cv'), completed: false },
+          { id: `c-${Date.now()}-3`, task: t('public_template_ai_motivation'), completed: false },
+          { id: `c-${Date.now()}-4`, task: t('public_template_academic_references'), completed: false },
+          { id: `c-${Date.now()}-5`, task: t('public_template_portal_application'), completed: false },
         ],
       };
       setMilestones((prev) => [newMilestone, ...prev]); setSelectedScholarship(null); setActiveTab('tracker'); return;
@@ -928,19 +928,19 @@ export default function App() {
     try {
       await ApiClient.getCurrentStudentIdentity();
     } catch {
-      preservePostLoginAction({ kind: 'TRACK_APPLICATION', scholarshipId: sch.id, scholarshipSlug: sch.slug ?? sch.id, notes: `بدء إعداد ملف التقديم الرسمي لمنحة ${sch.title}` });
+      preservePostLoginAction({ kind: 'TRACK_APPLICATION', scholarshipId: sch.id, scholarshipSlug: sch.slug ?? sch.id, notes: t('public_template_application_notes').replace('{title}',sch.title) });
       preservePostLoginReturn('/student?tab=journey');
       setSelectedScholarship(null); setActiveTab('auth'); return;
     }
     try {
       const trackers = await ApiClient.listMyStudentApplicationTrackers();
       const existing = trackers.find((item) => item.scholarshipId === sch.id && item.status === 'ACTIVE');
-      if (!existing) await ApiClient.createMyStudentApplicationTracker({ scholarshipId: sch.id, scholarshipSlug: sch.slug ?? sch.id, notes: `بدء إعداد ملف التقديم الرسمي لمنحة ${sch.title}`, checklistLabels: ['ترجمة وتصديق كشف العلامات وشهادة التخرج', 'تجهيز السيرة الذاتية بصيغة أكاديمية', 'صياغة خطاب الدافع', 'الحصول على خطابات التوصية الأكاديمية', 'تقديم الطلب الإلكتروني على البوابة الرسمية'] });
+      if (!existing) await ApiClient.createMyStudentApplicationTracker({ scholarshipId: sch.id, scholarshipSlug: sch.slug ?? sch.id, notes: t('public_template_application_notes').replace('{title}',sch.title), checklistLabels: [t('public_template_certified_transcript'), t('public_template_academic_cv'), t('public_template_motivation'), t('public_template_academic_references'), t('public_template_portal_application')] });
       setSelectedScholarship(null);
       window.history.replaceState({...window.history.state}, '', '/student?tab=journey');
       setActiveTab('account');
     } catch (error) {
-      triggerInstantPush({ title: 'تعذر إضافة المنحة للمتابعة', body: error instanceof Error ? error.message : 'حاول مرة أخرى.', type: 'system' });
+      triggerInstantPush({ title: t('public_template_tracker_error'), body: error instanceof Error ? error.message : t('public_template_retry'), type: 'system' });
     }
   };
 
@@ -997,9 +997,7 @@ export default function App() {
         publicGraph.partial ||
         Boolean(publicGraph.routeUnavailableCount)) && (
         <p role="status" className="px-4 py-2 text-sm bg-amber-50 text-amber-900">
-          {language === 'ar'
-            ? 'العلاقات المعروضة جزئية أو تحتاج تحديثًا؛ قد تتعذر بعض روابط التنقل.'
-            : 'Relationships are partial or need refreshing; some navigation links may be unavailable.'}
+          {t('public_template_partial_relationships')}
         </p>
       )}
       {/* App Header (Top Sticky) */}
@@ -1030,11 +1028,12 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="w-full mx-auto transition-all flex-1 flex flex-col">
+        {[selectedUniversity?.localization,selectedMajor?.localization].some(value=>value && value.availability && value.availability!=='REQUESTED') && <p role="status" className="mx-auto p-3 text-sm">{t('public_template_source_fallback')}</p>}
         <React.Suspense
           fallback={
             <div className="flex min-h-[50vh] flex-col items-center justify-center p-8 text-center">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#142B5F] dark:border-[#D6A43B] border-t-transparent mb-3" />
-              <span className="text-xs font-semibold text-[var(--mn-text-muted)]">جاري التحميل...</span>
+              <span className="text-xs font-semibold text-[var(--mn-text-muted)]">{t('public_template_loading')}</span>
             </div>
           }
         >
@@ -1042,16 +1041,16 @@ export default function App() {
           <div className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-5xl items-center justify-between gap-3 rounded-2xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-3 py-2 text-[11px] text-[var(--mn-danger-text)]">
             <div className="flex min-w-0 items-center gap-2">
               <AlertTriangle className="h-4 w-4 shrink-0" />
-              <span>تعذر تحميل بعض البيانات الحية ({unavailableDomains.join(', ')}). لم يتم استبدالها ببيانات تجريبية.</span>
+              <span>{t('public_template_live_unavailable').replace('{domains}',unavailableDomains.join(', '))}</span>
             </div>
             <button type="button" onClick={publicLive.reload} className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-current px-2.5 py-1.5 font-bold">
-              <RefreshCw className="h-3.5 w-3.5" /> إعادة المحاولة
+              <RefreshCw className="h-3.5 w-3.5" /> {t('public_template_retry_action')}
             </button>
           </div>
         )}
         {publicDataMode === 'api' && unavailableDomains.length === 0 && loadingDomains.length > 0 && (
           <div className="mx-auto mt-3 w-[calc(100%-1rem)] max-w-5xl rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-text-muted)]">
-            جاري تحميل البيانات المنشورة من مصادر منارتك الحية…
+            {t('public_template_loading_sources')}
           </div>
         )}
         {isCompareRoute ? (
@@ -1398,7 +1397,7 @@ export default function App() {
                   window.localStorage.removeItem('mn_is_studying_course');
                 }
               }}
-              onRestrictedAction={(msg) => triggerAccessDenied(msg || 'ليس لديك صلاحية الوصول')}
+              onRestrictedAction={(msg) => triggerAccessDenied(msg || t('public_template_access_denied'))}
             />
           ) : (
             <OwnerCourseDetail
@@ -1981,11 +1980,11 @@ export default function App() {
                   {/* Category Quick Filter Pills */}
                   <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
                     {[
-                      { id: 'scholarships', label: 'المنح الدراسية', icon: GraduationCap },
-                      { id: 'universities', label: 'الجامعات', icon: Building2 },
-                      { id: 'exams', label: 'الاختبارات', icon: ClipboardCheck },
-                      { id: 'courses', label: 'الدورات', icon: BookOpen },
-                      { id: 'majors', label: 'التخصصات', icon: BriefcaseBusiness },
+                      { id: 'scholarships', label: t('public_template_scholarships'), icon: GraduationCap },
+                      { id: 'universities', label: t('public_template_universities'), icon: Building2 },
+                      { id: 'exams', label: t('public_template_exams'), icon: ClipboardCheck },
+                      { id: 'courses', label: t('public_template_courses'), icon: BookOpen },
+                      { id: 'majors', label: t('public_template_majors'), icon: BriefcaseBusiness },
                     ].map((item) => {
                       const ItemIcon = item.icon;
                       return (
@@ -2046,7 +2045,7 @@ export default function App() {
                     <div className="space-y-3 pt-1">
                       {/* Results Count & Filter Bar */}
                       <div className="flex items-center justify-between text-xs text-[var(--mn-text-muted)] font-bold px-1">
-                        <span>{filteredScholarships.length} فرصة دراسية متاحة</span>
+                        <span>{t('public_template_available_count').replace('{count}',String(filteredScholarships.length))}</span>
                         <button
                           onClick={() => {
                             setOnlyFullyFunded(!onlyFullyFunded);
@@ -2057,14 +2056,14 @@ export default function App() {
                               : 'bg-[var(--mn-surface-muted)] text-[var(--mn-text)] border-[var(--mn-border)] mn-panel '
                           }`}
                         >
-                          <span className="inline-flex items-center gap-1.5"><BadgeDollarSign className="h-3.5 w-3.5" aria-hidden="true" />ممولة بالكامل فقط</span>
+                          <span className="inline-flex items-center gap-1.5"><BadgeDollarSign className="h-3.5 w-3.5" aria-hidden="true" />{t('public_template_fully_funded')}</span>
                         </button>
                       </div>
 
                       {filteredScholarships.length === 0 ? (
                         <div className="py-16 text-center text-[var(--mn-text-muted)] text-xs space-y-2">
                           <GraduationCap className="w-10 h-10 mx-auto text-[var(--mn-text-muted)]" />
-                          <p className="font-bold">لم نجد منحاً تطابق معايير البحث الحالية.</p>
+                          <p className="font-bold">{t('public_template_no_results')}</p>
                           <button
                             onClick={() => {
                               setSearchQuery('');
@@ -2074,7 +2073,7 @@ export default function App() {
                             }}
                             className="px-4 py-1.5 bg-[var(--mn-primary)] text-[var(--mn-accent-soft)] rounded-xl text-xs font-bold mn-inverse "
                           >
-                            إعادة ضبط الفلاتر
+                            {t('public_template_reset_filters')}
                           </button>
                         </div>
                       ) : (
@@ -2141,14 +2140,14 @@ export default function App() {
                                 <div className="flex items-center gap-2 text-[var(--mn-text-muted)] font-semibold">
                                   <span className="flex items-center gap-1 text-[var(--mn-danger-text)] font-bold">
                                     <Calendar className="w-3.5 h-3.5" />
-                                    {sch.daysLeft} يوم متبقي
+                                    {t('public_template_days_remaining').replace('{count}',String(sch.daysLeft))}
                                   </span>
                                   <span>•</span>
                                   <span>{sch.degreeLevel.join(', ')}</span>
                                 </div>
 
                                 <span className="text-[11px] font-semibold text-[var(--mn-heading)] flex items-center gap-1">
-                                  <span>التفاصيل والشروط</span>
+                                  <span>{t('public_template_details')}</span>
                                   <ChevronLeft className="w-3 h-3 text-[var(--mn-accent-text)]" />
                                 </span>
                               </div>
@@ -2218,7 +2217,7 @@ export default function App() {
       {/* Bottom Docked Navigation Bar (Always Visible) */}
       {publicDataMode === 'prototype' && (
         <p className="text-center text-xs text-[var(--mn-text-muted)] py-2" role="status">
-          وضع تجريبي محلي — بيانات غير إنتاجية
+          {t('public_template_prototype')}
         </p>
       )}
       <BottomNavBar
@@ -2264,7 +2263,7 @@ export default function App() {
           if (actionType === 'scholarship' && targetId) {
             const found = scholarships.find((s) => s.id === targetId);
             if (found) setSelectedScholarship(found);
-            else triggerInstantPush({title: 'الفرصة غير متاحة في هذه المعاينة', body: 'يمكنك استكشاف الفرص المتاحة من البحث العام. لم نفتح فرصة مختلفة بدلًا منها.', type: 'system'});
+            else triggerInstantPush({title: t('public_template_preview_unavailable'), body: t('public_template_preview_unavailable_body'), type: 'system'});
           } else if (actionType === 'ai-tools') {
             openSection('ai-tools');
           } else if (actionType === 'tracker') {
@@ -2293,7 +2292,7 @@ export default function App() {
             type="button"
             onClick={() => setAccessDeniedMessage(null)}
             className="w-6 h-6 rounded-lg hover:bg-white/10 flex items-center justify-center text-[#E5B54F] transition-colors cursor-pointer"
-            aria-label="إغلاق التنبيه"
+            aria-label={t('public_template_close_alert')}
           >
             <X className="w-4 h-4" />
           </button>

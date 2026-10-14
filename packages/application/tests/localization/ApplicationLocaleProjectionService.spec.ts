@@ -104,8 +104,9 @@ describe('ApplicationLocaleProjectionService', () => {
 
     expect(result.publicId).toBe('MJR-0001');
     expect(result.displayName).toBe('Computer Science');
-    expect(result.contentSections).toHaveLength(2);
-    expect(result.contentSections?.map((section) => section.content)).toEqual(['Overview', 'Careers']);
+    expect(result.contentSections).toHaveLength(1);
+    expect(result.contentSections?.map((section) => section.content)).toEqual(['Overview']);
+    expect(result.contentSections?.some(section=>section.reviewStatus==='APPROVED')).toBe(false);
   });
 
   it('projects International Test names and approved localized content blocks', () => {

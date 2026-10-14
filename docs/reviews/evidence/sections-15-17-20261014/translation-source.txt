@@ -1,0 +1,70 @@
+TRANSLATION_SOURCE_QUALITY_GATE = PASS
+PASS: DATABASE_URL is unset for translation quality gate
+PASS: DATABASE_MUTATIONS_ALLOWED=false
+PASS: DATABASE_ENVIRONMENT=source
+PASS: apps/web/src/i18n/en.ts: dictionary keys detected
+PASS: apps/web/src/i18n/en.ts: no blank dictionary values
+PASS: apps/web/src/i18n/ar.ts: dictionary keys detected
+PASS: apps/web/src/i18n/ar.ts: no blank dictionary values
+PASS: Web UI: AR/EN dictionary key parity
+PASS: apps/admin/src/i18n/en.ts: dictionary keys detected
+PASS: apps/admin/src/i18n/en.ts: no blank dictionary values
+PASS: apps/admin/src/i18n/ar.ts: dictionary keys detected
+PASS: apps/admin/src/i18n/ar.ts: no blank dictionary values
+PASS: Admin UI: AR/EN dictionary key parity
+PASS: Web UI: canonical UI translation calls detected
+PASS: Web UI: no missing literal translation keys / raw-key leakage candidates
+PASS: Admin UI: canonical UI translation calls detected
+PASS: Admin UI: no missing literal translation keys / raw-key leakage candidates
+PASS: Web UI: direction derives from locale contract
+PASS: Web UI: document lang tracks locale
+PASS: Web UI: document direction tracks locale
+PASS: Admin UI: direction derives from locale contract
+PASS: Admin UI: document lang tracks locale
+PASS: Admin UI: document direction tracks locale
+PASS: supported locales remain ar,en
+PASS: default locale remains ar
+PASS: AR/EN RTL/LTR contract remains explicit
+PASS: missing-locale outcome remains explicit
+PASS: translation content mode remains infrastructure-only
+PASS: translation policy registers SCHOLARSHIP
+PASS: translation policy registers UNIVERSITY
+PASS: translation policy registers MAJOR
+PASS: translation policy registers INTERNATIONAL_TEST
+PASS: translation policy registers COURSE
+PASS: translation policy registers CMS
+PASS: translation policy registers REFERENCE_DATA
+PASS: translation policy registers WEBSITE_UI
+PASS: translation policy preserves canonical identity
+PASS: translation policy keeps domain content authoring closed
+PASS: translation policy exposes a fail-closed mutation error
+PASS: translation policy exposes field-level mutation guards
+PASS: University translation persistence is blocked in infrastructure-only mode
+PASS: University compatibility translation fields are guarded
+PASS: Major translation fields are guarded at Application boundary
+PASS: International-test translation fields are guarded at Application boundary
+PASS: Course translation carriers are guarded at Application boundary
+PASS: Scholarship translation carriers are guarded at Application boundary
+PASS: Generic localization mutation use case is read-only in infrastructure-only mode
+PASS: API unsupported-locale error remains explicit
+PASS: API locale validation uses application locale contract
+PASS: API locale default uses application default contract
+PASS: application projection exposes stable projectUniversity contract
+PASS: application projection exposes stable projectMajor contract
+PASS: application projection exposes stable projectInternationalTest contract
+PASS: translation behavior regression suite covers projectUniversity
+PASS: translation behavior regression suite covers projectMajor
+PASS: translation behavior regression suite covers parseRequestLocale
+PASS: translation behavior regression suite covers buildLocalizedSeoLinks
+PASS: translation:ci executes behavioral translation regression tests after source/schema checks
+PASS: public scholarships depend on the canonical projection service
+PASS: public courses depend on the canonical projection service
+PASS: web API client derives locale from the localized route/document
+PASS: translation center renders the shared translation mode
+PASS: translation center authoring is governed by shared policy
+PASS: English shell activation requires public copy parity; unresolved rendered literals=1871
+PASS: public English routes enforce the governed copy gate
+PASS: translation transfer persistence enforces the frozen mode
+MIGRATIONS_APPLIED = 0
+CLOUD_SQL_MUTATIONS = 0
+PROTECTED_ID_REGENERATION = 0

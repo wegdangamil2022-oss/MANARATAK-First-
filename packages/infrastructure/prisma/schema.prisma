@@ -6023,3 +6023,19 @@ model UniversityProgramIntake {
   program UniversityAcademicProgram @relation(fields:[programId], references:[id], onDelete:Restrict)
   @@index([programId,status,applicationClose,id])
 }
+
+// Owner-scoped processing evidence, not a second canonical translation store.
+model OwnerTranslationTransferReceipt {
+  id String @id
+  ownerDomain String
+  targetId String
+  handoffId String
+  approvalId String
+  actorId String
+  reviewerId String
+  digest String
+  outcome String
+  createdAt DateTime @default(now())
+  @@unique([ownerDomain, targetId, handoffId])
+  @@index([approvalId])
+}

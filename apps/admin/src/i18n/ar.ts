@@ -834,7 +834,7 @@ export const ar = {
   "translation_loaded_records": "السجلات المحمّلة",
   "translation_missing_ar": "ناقص العربية",
   "translation_missing_en": "ناقص الإنجليزية",
-  "translation_complete_bilingual": "مكتمل ثنائي اللغة",
+  "translation_complete_bilingual": "الاسم متوفر باللغتين",
   "translation_filter_all": "كل حالات الترجمة",
   "translation_search": "بحث",
   "translation_search_placeholder": "ابحث بالاسم أو الرمز أو المعرّف…",

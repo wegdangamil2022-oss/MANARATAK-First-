@@ -87,16 +87,10 @@ describe('TranslationImportTransferService', () => {
     expect(persistence.applyApproved).not.toHaveBeenCalled();
   });
 
-  it('delegates only explicitly approved candidates to the atomic persistence gateway', async () => {
+  it('keeps an approved import frozen before any gateway write', async () => {
     const persistence = gateway();
     const service = new TranslationImportTransferService(persistence);
-    const staged = candidate();
-    const approval = { decision: 'APPLY' as const, reviewedBy: 'reviewer-1' };
-
-    const result = await service.transfer(staged, approval);
-
-    expect(persistence.applyApproved).toHaveBeenCalledWith(staged, approval);
-    expect(result.publicId).toBe('INS-ITA-0010');
-    expect(result.state).toBe('APPLIED');
+    await expect(service.transfer(candidate(), {decision:'APPLY', reviewedBy:'reviewer-1', actorId:'maker-1', approvalId:'trusted-approval'})).rejects.toThrow();
+    expect(persistence.applyApproved).not.toHaveBeenCalled();
   });
 });

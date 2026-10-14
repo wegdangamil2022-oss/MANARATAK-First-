@@ -27,11 +27,15 @@ export class RedisCmsDeliveryCache implements ICmsDeliveryCache {
   }
 
   public async invalidateSite(siteIdentifier: string, reason: string): Promise<void> {
-    if (!this.client.isReady) return;
+    if (!this.client.isReady) {console.warn('CMS_CACHE_INVALIDATION_UNAVAILABLE', {strategy:'CANONICAL_OWNER_READ_WITH_TTL',ttlSeconds:this.ttlSeconds});return;}
     try {
       await this.client.incr(this.versionKey(siteIdentifier));
       await this.client.publish(this.client.buildKey('cms-events', encodeURIComponent(siteIdentifier)), JSON.stringify({ type: 'CmsDeliveryInvalidated', siteIdentifier, reason, occurredAt: new Date().toISOString() }));
-    } catch { /* Invalidation is fail-open; the short TTL remains a safety net. */ }
+    } catch {
+      // Canonical public owner reads are authoritative. Redis is an optimization
+      // with bounded TTL, not a claim of CDN purge or durable dispatch.
+      console.warn('CMS_CACHE_INVALIDATION_FAILED', {strategy: 'CANONICAL_OWNER_READ_WITH_TTL', ttlSeconds: this.ttlSeconds});
+    }
   }
 
   private async contentKey(siteIdentifier: string, locale: string, slug: string): Promise<string> {

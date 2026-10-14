@@ -270,7 +270,7 @@ export type PublicUniversityDto = Omit<
   | 'revision'
   | 'metadata'
   | 'sourceUrl'
->;
+> & {localization?: Record<string, unknown>};
 
 export interface PaginatedUniversityResult<T = UniversityDto> {
   data: T[];

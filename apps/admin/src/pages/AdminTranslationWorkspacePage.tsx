@@ -1,3 +1,4 @@
+import { resolveSourceLocaleEvidence } from '@manaratak/shared';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BookOpen,
@@ -108,6 +109,11 @@ interface Paginated<T> {
   page: number;
   pageSize: number;
   totalPages: number;
+  coverageScope?: 'GLOBAL';
+  ownerSourceStatus?: string;
+  runtimeProof?: string;
+  importSupported?: boolean;
+  stats?: {complete?:number;pending?:number;rejected?:number;published?:number;missingAr:number;missingEn:number;publicReadyAr:number;publicReadyEn:number};
 }
 
 interface TranslationDraft {
@@ -247,10 +253,7 @@ function coverage(domain: WorkspaceDomain, entity: WorkspaceEntity) {
 function sourceLocaleFrom(
   values: readonly { sourceLocale?: string | null }[] | undefined,
 ): SupportedLocale | null {
-  const found = values?.find(
-    (value) => value.sourceLocale === 'ar' || value.sourceLocale === 'en',
-  )?.sourceLocale;
-  return found === 'ar' || found === 'en' ? found : null;
+  return resolveSourceLocaleEvidence(values).locale;
 }
 
 function makeDraft(domain: WorkspaceDomain, entity: WorkspaceEntity): TranslationDraft {
@@ -311,6 +314,9 @@ export function AdminTranslationWorkspacePage() {
   const [domain, setDomain] = useState<WorkspaceDomain>('SCHOLARSHIP');
   const [coverageFilter, setCoverageFilter] = useState<CoverageFilter>('ALL');
   const [search, setSearch] = useState('');
+  const [reviewState, setReviewState] = useState('ALL');
+  const [reviewLocale, setReviewLocale] = useState<SupportedLocale>('en');
+  const [updatedFrom, setUpdatedFrom] = useState('');
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<Paginated<WorkspaceEntity> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -371,10 +377,11 @@ export function AdminTranslationWorkspacePage() {
     setReadbackFailed(false);
     try {
       const params = new URLSearchParams({ page: String(page), pageSize: '40' });
-      if (domain === 'MAJOR') params.set('catalog', 'false');
-      if (config.searchParam && debouncedSearch) params.set(config.searchParam, debouncedSearch);
+      params.set('domain',domain); params.set('coverage',coverageFilter); params.set('locale',reviewLocale); params.set('reviewState',reviewState);
+      if (updatedFrom) params.set('updatedFrom',new Date(updatedFrom).toISOString());
+      if (debouncedSearch) params.set('q',debouncedSearch);
       const response = await adminApiClient.request<Paginated<WorkspaceEntity>>(
-        `${config.endpoint}?${params.toString()}`,
+        `/admin/translations/workspace?${params.toString()}`,
       );
       if (generation !== listGeneration.current) return;
       if (!Array.isArray(response.data)) throw new Error('Invalid translation list response');
@@ -390,7 +397,7 @@ export function AdminTranslationWorkspacePage() {
     } finally {
       if (generation === listGeneration.current) setLoading(false);
     }
-  }, [domain, page, debouncedSearch, config, t]);
+  }, [domain, page, debouncedSearch, t, coverageFilter, reviewLocale, reviewState, updatedFrom]);
 
   useEffect(() => {
     void load();
@@ -400,21 +407,21 @@ export function AdminTranslationWorkspacePage() {
     };
   }, [load]);
 
-  const records = result?.data ?? [];
+  const records = useMemo(()=>result?.data ?? [],[result]);
 
   const stats = useMemo(() => {
     const states = records.map((entity) => coverage(domain, entity));
     return {
       loaded: records.length,
-      missingAr: states.filter((item) => !item.ar).length,
-      missingEn: states.filter((item) => !item.en).length,
-      complete: states.filter((item) => item.ar && item.en).length,
+      missingAr: result?.stats?.missingAr ?? states.filter((item) => !item.ar).length,
+      missingEn: result?.stats?.missingEn ?? states.filter((item) => !item.en).length,
+      complete: result?.stats?.complete ?? states.filter((item) => item.ar && item.en).length,
     };
-  }, [domain, records]);
+  }, [domain, records, result]);
 
   const visible = useMemo(
     () =>
-      records.filter((entity) => {
+      result?.coverageScope === 'GLOBAL' ? records : records.filter((entity) => {
         const state = coverage(domain, entity);
         if (!config.searchParam && !recordMatchesSearch(entity, search)) return false;
         if (coverageFilter === 'MISSING_AR') return !state.ar;
@@ -422,7 +429,7 @@ export function AdminTranslationWorkspacePage() {
         if (coverageFilter === 'COMPLETE') return state.ar && state.en;
         return true;
       }),
-    [config.searchParam, coverageFilter, domain, records, search],
+    [config.searchParam, coverageFilter, domain, records, search, result?.coverageScope],
   );
 
   const selectRecord = async (entity: WorkspaceEntity) => {
@@ -738,15 +745,22 @@ export function AdminTranslationWorkspacePage() {
 
       <p className="text-xs font-semibold text-slate-500">
         {language === 'ar'
-          ? 'المؤشرات وفلتر التغطية يخصان أسماء السجلات في الصفحة الحالية؛ وجود الاسم لا يعني اعتماد الترجمة أو نشرها.'
-          : 'Coverage metrics and filters apply to names on this page. A name does not imply translation approval or publication.'}
+          ? 'التغطية والفلترة من جميع سجلات المجال في الخادم؛ وجود الاسم منفصل عن جاهزية النشر.'
+          : 'Coverage filters query all owner records on the server. Name availability is separate from publication readiness.'}
       </p>
 
+      <section className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
+        <label>{language === 'ar' ? 'لغة المراجعة' : 'Review locale'}<select value={reviewLocale} onChange={e=>{if(allowNavigation()){setPage(1);setReviewLocale(e.target.value as SupportedLocale);}}}><option value="ar">العربية</option><option value="en">English</option></select></label>
+        <label>{language === 'ar' ? 'قائمة مهام المراجعة' : 'Review work queue'}<select value={reviewState} onChange={e=>{if(allowNavigation()){setPage(1);setReviewState(e.target.value);}}}><option value="ALL">{language==='ar'?'الكل':'All'}</option><option value="NEEDS_REVIEW">{language==='ar'?'تحتاج مراجعة / غير منشورة':'Needs review / unpublished'}</option><option value="PUBLISHED">{language==='ar'?'منشورة':'Published'}</option></select></label>
+        <label>{language === 'ar' ? 'عُدّلت منذ' : 'Updated since'}<input type="date" value={updatedFrom} onChange={e=>{if(allowNavigation()){setPage(1);setUpdatedFrom(e.target.value);}}}/></label>
+        <p role="status">{language==='ar'?'مصدر المالك · جاهزية تشغيل غير مثبتة · الاستيراد للجامعات والتخصصات فقط':'Canonical owner · runtime unverified · imports support universities and majors only'}</p>
+        {result?.stats && <p>{language==='ar'?'جاهزة للنشر بالحقول المطلوبة':'Required-field publication ready'}: AR {result.stats.publicReadyAr} · EN {result.stats.publicReadyEn} · {language==='ar'?'معلّقة / مرفوضة / منشورة':'Pending / rejected / published'}: {result.stats.pending ?? 0} / {result.stats.rejected ?? 0} / {result.stats.published ?? 0}</p>}
+      </section>
       <section className="grid gap-3 rounded-2xl border border-[#DDEFF2] bg-white p-4 md:grid-cols-[220px_1fr_auto]">
         <select
           value={coverageFilter}
           disabled={Boolean(saving)}
-          onChange={(event) => setCoverageFilter(event.target.value as CoverageFilter)}
+          onChange={(event) => {if (allowNavigation()) {setPage(1);setCoverageFilter(event.target.value as CoverageFilter);}}}
           className="min-h-11 rounded-xl border border-[#DDEFF2] bg-[#FAF7F0]/60 px-3 text-xs font-bold outline-none focus:border-[#21A7B4]"
         >
           <option value="ALL">{t('translation_filter_all')}</option>
@@ -854,6 +868,7 @@ export function AdminTranslationWorkspacePage() {
                       <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-bold text-slate-400">
                         <span>{entity.publicId || entity.slug || entity.id}</span>
                         {entity.status && <span>• {entity.status}</span>}
+                        <span>{entity.translations?.map(row=>`${row.locale}: ${row.reviewStatus}`).join(' · ') || (language==='ar'?'وجود قيمة لا يثبت النشر':'Value presence does not prove publication')}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

@@ -270,6 +270,7 @@ export type PublicMajorDto = Omit<
 > & {
   contentSections?: Array<Pick<MajorContentSectionDto, 'sectionKey' | 'title' | 'content' | 'reviewStatus' | 'metadata'>>;
   phaseLinks?: MajorPhaseLinkDto[];
+  localization?: Record<string,unknown>;
 };
 
 export class MajorPhaseLinkingService {

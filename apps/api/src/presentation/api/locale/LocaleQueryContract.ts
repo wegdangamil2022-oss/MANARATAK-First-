@@ -9,7 +9,7 @@ import {
 export const UNSUPPORTED_LOCALE_ERROR_CODE = 'UNSUPPORTED_LOCALE' as const;
 
 function normalizeQueryValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.at(-1);
+  if (Array.isArray(value)) return value.length === 1 ? value[0] : undefined;
   return value;
 }
 

@@ -28,9 +28,9 @@ describe('multilingual SEO contract', () => {
       }),
     ).toEqual({
       canonical: 'https://manaratak.example/en/universities/example-university',
+      indexable: false,
       alternates: {
         ar: 'https://manaratak.example/ar/universities/example-university',
-        en: 'https://manaratak.example/en/universities/example-university',
       },
       xDefault:
         'https://manaratak.example/ar/universities/example-university',

@@ -1,4 +1,6 @@
 import React from 'react';
+import {useTranslation} from '../../../i18n/I18nProvider';
+import {isPublicTemplateLocaleEnabled} from '@manaratak/shared';
 import { ArrowRight, Globe, HelpCircle, Mail, ShieldCheck } from 'lucide-react';
 
 const questions = [
@@ -9,9 +11,10 @@ const questions = [
   ['أين تحفظ المفضلة في هذه النسخة؟', 'تُحفظ محليًا في هذا المتصفح. حذف بيانات المتصفح قد يحذفها، ولا تتم مزامنتها مع جهاز آخر قبل ربط الحساب.'],
 ];
 export function PublicInfoPage({page, onBack, onServices}: {page: 'faq' | 'contact' | 'language'; onBack: () => void; onServices: () => void}) {
+  const {language,setLanguage,dir}=useTranslation();
   const title = page === 'faq' ? 'الأسئلة الشائعة' : page === 'contact' ? 'الاتصال والدعم' : 'لغة الواجهة';
   const Icon = page === 'faq' ? HelpCircle : page === 'contact' ? Mail : Globe;
-  return <div className="min-h-screen bg-[var(--mn-page)] pb-24" dir="rtl">
+  return <div className="min-h-screen bg-[var(--mn-page)] pb-24" dir={dir}>
     <div className="mn-search-hero mn-inverse p-4 text-white">
       <button onClick={onBack} aria-label="رجوع" className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center"><ArrowRight className="w-5 h-5" /></button>
       <h1 className="text-xl font-bold mt-3 flex items-center gap-2"><Icon className="w-5 h-5" />{title}</h1>
@@ -20,7 +23,8 @@ export function PublicInfoPage({page, onBack, onServices}: {page: 'faq' | 'conta
       {page === 'faq' ? questions.map(([question, answer]) => <details key={question} className="mn-panel rounded-2xl p-4 border border-[var(--mn-border)] bg-[var(--mn-surface)]">
         <summary className="font-bold text-sm cursor-pointer">{question}</summary><p className="text-sm leading-7 mt-3 text-[var(--mn-text-muted)]">{answer}</p>
       </details>) : page === 'language' ? <section className="mn-panel rounded-2xl p-4 border border-[var(--mn-border)] bg-[var(--mn-surface)]">
-        <h2 className="font-bold">العربية — اللغة المفعّلة</h2>
+        <h2 className="font-bold">{language==='ar'?'لغة الواجهة':'Interface language'}</h2>
+        <div className="mt-3 flex gap-3"><button type="button" onClick={()=>setLanguage('ar')}>العربية</button><button type="button" disabled={!isPublicTemplateLocaleEnabled('en')} onClick={()=>setLanguage('en')}>English</button></div>
         <p className="mt-3 text-sm leading-7 text-[var(--mn-text-muted)]">English — قيد التجهيز. ستُفعّل الإنجليزية بعد اكتمال ترجمة الصفحات والبيانات. تبقى الواجهة عربية باتجاه صحيح حتى ذلك الحين.</p>
       </section> : <section className="mn-panel rounded-2xl p-4 border border-[var(--mn-border)] bg-[var(--mn-surface)]">
         <h2 className="font-bold">قنوات التواصل والوكلاء</h2>

@@ -167,12 +167,17 @@ export class AuthorizationAdminRouter {
     }catch(error){next(error);}});
     router.post('/governance/approvals',async(req,res,next)=>{try{
       if(!governanceApprovalUseCases)throw new Error('GOVERNANCE_APPROVAL_UNAVAILABLE');
-      const body=z.object({id:z.string().min(1).max(120),scope:z.enum(['DUTY_POLICY','DUTY_EXCEPTION','MFA_RESET']),approverId:z.string().min(1).max(240),payload:z.unknown()}).strict().parse(req.body);
+      const body=z.object({id:z.string().min(1).max(120),scope:z.enum(['DUTY_POLICY','DUTY_EXCEPTION','MFA_RESET','TRANSLATION_TRANSFER','TRANSLATION_PUBLICATION']),approverId:z.string().min(1).max(240),payload:z.unknown()}).strict().parse(req.body);
       const actor=requireAuthenticatedPrincipal(req).principalId;
       const approval=await verifyMakerChecker(req,actor);if(approval.secondApproverId!==body.approverId)throw new Error('GOVERNANCE_APPROVAL_INVALID');
       const ticket=z.string().trim().min(6).max(240);
       if(body.scope==='DUTY_POLICY')body.payload=z.object({pairs:z.array(z.object({id:z.string().min(1).max(80),first:z.enum(KNOWN_ADMIN_PERMISSIONS),second:z.enum(KNOWN_ADMIN_PERMISSIONS),description:z.string().max(500)}).strict()).max(100),expectedRevision:z.string().datetime().nullable(),reason:z.string().trim().min(6).max(2000),changeTicket:ticket}).strict().parse(body.payload);
       if(body.scope==='DUTY_EXCEPTION')body.payload=z.object({id:z.string().min(1).max(120),principalId:z.string().min(1).max(240),pairIds:z.array(z.string().min(1).max(80)).min(1).max(100),policyRevision:z.string().datetime(),startsAt:z.string().datetime(),expiresAt:z.string().datetime(),reason:z.string().trim().min(12).max(2000),changeTicket:ticket}).strict().parse(body.payload);
+      if(body.scope==='TRANSLATION_TRANSFER' || body.scope==='TRANSLATION_PUBLICATION') {
+        const parsed=z.object({target:z.object({locator:z.object({entityKind:z.enum(['UNIVERSITY','MAJOR'])}).passthrough()}).passthrough()}).passthrough().parse(body.payload);
+        const grant=parsed.target.locator.entityKind==='UNIVERSITY'?'admin:universities:manage':'admin:majors:manage';
+        for(const principal of [actor,body.approverId])if(!authEvaluatorService || !(await authEvaluatorService.evaluatePermission(principal,grant,{requestTime:new Date()})).isGranted)throw new Error('GOVERNANCE_APPROVAL_DENIED');
+      }
       if(body.scope==='MFA_RESET'){
         body.payload=z.object({identityId:z.string().min(1).max(240),reason:z.string().trim().min(12).max(2000),changeTicket:ticket}).strict().parse(body.payload);
         if(!authEvaluatorService || !(await authEvaluatorService.evaluatePermission(actor,'admin:credentials:manage',{requestTime:new Date()})).isGranted || !(await authEvaluatorService.evaluatePermission(body.approverId,'admin:credentials:manage',{requestTime:new Date()})).isGranted)throw new Error('GOVERNANCE_APPROVAL_DENIED');

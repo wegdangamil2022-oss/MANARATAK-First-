@@ -1,0 +1,30 @@
+{
+  "source_base": "4e203a88ac766a5da6af3e726fe7f6547c531ae0",
+  "node": "22.23.3",
+  "vitest": {
+    "files": 18,
+    "tests": 108,
+    "failed": 0,
+    "duration_seconds": 16.18
+  },
+  "typecheck": "PASS",
+  "copy_gate_tests": 2,
+  "source_quality": "PASS",
+  "translation_source": "PASS",
+  "targeted_eslint": {
+    "errors": 0,
+    "warnings": 2
+  },
+  "database_connections": 0,
+  "migrations_applied": 0,
+  "heavy_tests_run": 0,
+  "public_english_copy_ready": false,
+  "translation_content_mode": "INFRASTRUCTURE_ONLY",
+  "section15_additional_fixtures": {
+    "files": 3,
+    "tests": 32,
+    "failed": 0,
+    "duration_seconds": 4.31
+  },
+  "total_lightweight_tests": 142
+}
