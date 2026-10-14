@@ -1,3 +1,4 @@
+import { parseHistory, type History } from '../features/health/HealthHistoryContract';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, RefreshCw, X } from 'lucide-react';
@@ -23,38 +24,6 @@ const owners: Record<string, { href: string; permission: string }> = {
   notifications: { href: '/notifications', permission: 'admin:notifications:view' },
   'student-tools-quota': { href: '/student-tools', permission: 'admin:student-tools:manage' },
 };
-type History = {
-  protocolVersion: 2;
-  availability: string;
-  scope: string;
-  window: string;
-  nextCursor: string | null;
-  total: number;
-  samples: Array<{ checkedAt: string; components: Array<{ id: string; status: string }> }>;
-};
-function parseHistory(value: unknown): History {
-  const data = value as History;
-  if (
-    !data ||
-    data.protocolVersion !== 2 ||
-    typeof data.availability !== 'string' ||
-    data.scope !== 'PROCESS_LOCAL_SESSION' ||
-    !Array.isArray(data.samples) ||
-    data.samples.length > 200 ||
-    !data.samples.every(
-      (s) =>
-        Number.isFinite(Date.parse(s.checkedAt)) &&
-        Array.isArray(s.components) &&
-        s.components.length <= 100 &&
-        s.components.every(
-          (c) =>
-            typeof c.id === 'string' && ['UP', 'DOWN', 'UNKNOWN', 'DEGRADED'].includes(c.status),
-        ),
-    )
-  )
-    throw new Error('SCHEMA_MISMATCH');
-  return data;
-}
 export function AdminHealthReadinessPage() {
   const { language, dir } = useTranslation(),
     { hasPermission } = useAdminAuthorization();
@@ -90,8 +59,12 @@ export function AdminHealthReadinessPage() {
         setNow(Date.now());
       }
     } catch (e) {
-      if (current === generation.current && !controller.signal.aborted)
+      if (current === generation.current && !controller.signal.aborted) {
+        if (e instanceof Error && /\[(401|403)\]/.test(e.message)) {
+          setOverview(null); setHistory(null); setSelected(null);
+        }
         setError(e instanceof Error && e.message === 'SCHEMA_MISMATCH' ? 'schema' : 'error');
+      }
     } finally {
       if (current === generation.current && !controller.signal.aborted) setLoading(false);
     }
@@ -116,7 +89,7 @@ export function AdminHealthReadinessPage() {
         { signal: controller.signal },
       )
       .then((raw) => {
-        const parsed = parseHistory(raw);
+        const parsed = parseHistory(raw, window);
         if (!controller.signal.aborted)
           setHistory((previous) =>
             cursor && previous
@@ -124,8 +97,11 @@ export function AdminHealthReadinessPage() {
               : parsed,
           );
       })
-      .catch(() => {
-        if (!controller.signal.aborted) setHistoryError(true);
+      .catch((cause) => {
+        if (!controller.signal.aborted) {
+          if (cause instanceof Error && /\[(401|403)\]/.test(cause.message)) setHistory(null);
+          setHistoryError(true);
+        }
       });
     return () => controller.abort();
   }, [tab, window, cursor]);

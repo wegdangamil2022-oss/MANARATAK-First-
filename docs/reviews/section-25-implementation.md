@@ -1,3 +1,5 @@
+> Current follow-up (2026-10-14): [Section 25 completion](SECTION_25_COMPLETION_2026-10-14.md). 79 source/security tests, two UI tests and Node 22 compilation passed. CODE_CLOSED — RUNTIME_DEFERRED within supported evidence contracts. Historical checkpoint below.
+
 # Section 25 — Health & Readiness
 
 Branch: `fix/codex-section-25-health-readiness`. Base: notification merge `6e844d82` on `main`.

@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 /workspace/manaratak
+
+
+ Test Files  4 passed (4)
+      Tests  71 passed (71)
+   Start at  19:08:00
+   Duration  2.13s (transform 461ms, setup 0ms, import 1.33s, tests 242ms, environment 3ms)
+
+HEALTH_READINESS_SOURCE_CLOSURE=PASS; semantic source/security contracts; live runtime deferred

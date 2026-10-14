@@ -5,13 +5,19 @@ export class HealthObservationHistory {
   private readonly startedAt = new Date().toISOString();
   private samples: Sample[] = [];
   record(sample: Sample): void {
+    const capturedAt = Date.parse(sample.checkedAt);
+    if (!Number.isFinite(capturedAt) || capturedAt > Date.now() + 1000 ||
+      capturedAt < Date.now() - 7 * 86_400_000 || !Array.isArray(sample.components) || sample.components.length > 100 ||
+      sample.components.some(c => !c || !/^[a-z][a-z0-9-]{0,79}$/.test(c.id) || !['UP','DOWN','UNKNOWN','DEGRADED'].includes(c.status)) ||
+      new Set(sample.components.map(c => c.id)).size !== sample.components.length)
+      throw new Error('HEALTH_HISTORY_SAMPLE_INVALID');
     if (
       this.samples.length &&
       Date.parse(sample.checkedAt) - Date.parse(this.samples.at(-1)!.checkedAt) < 30_000
     )
       return;
     this.samples.push({
-      checkedAt: sample.checkedAt,
+      checkedAt: new Date(capturedAt).toISOString(),
       components: sample.components.map(({ id, status }) => ({ id, status })),
     });
     const cutoff = Date.now() - 7 * 86_400_000;
@@ -39,7 +45,7 @@ export class HealthObservationHistory {
       retentionDays: 7,
       samplingMinimumMs: 30_000,
       maximumSamples: 10_000,
-      samples,
+      samples: structuredClone(samples),
     };
   }
 }

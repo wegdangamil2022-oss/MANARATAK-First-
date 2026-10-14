@@ -1,3 +1,4 @@
+import { parseHistory } from '../../apps/admin/src/features/health/HealthHistoryContract';
 import { describe, it, expect, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
@@ -307,4 +308,59 @@ describe('section 25 non-mutating provider and worker evidence', () => {
     expect(result.continuousCoverage).toBe(false);
     expect(result.samples.map((s) => s.components[0].status)).toEqual(['UP', 'DOWN', 'UP']);
   });
+});
+
+
+describe('section 25 follow-up evidence consistency', () => {
+  it('does not accept a green release contrary to its report or coverage', async () => {
+    const response = await request(app(serviceGraph())).get('/overview');
+    for (const edit of [
+      (x: any) => { x.productionReadiness.ready = false; },
+      (x: any) => { x.productionReadiness.blockerCount = 1; },
+      (x: any) => { x.coverage.missingCount = 1; },
+      (x: any) => { x.coverage.requiredUnverified = ['database']; },
+      (x: any) => { x.coverage.matchedCount -= 1; },
+    ]) {
+      const value = structuredClone(response.body); edit(value);
+      expect(() => parseHealthOverview(value)).toThrow('SCHEMA_MISMATCH');
+    }
+  });
+  it('returns detached history samples so consumers cannot rewrite previous evidence', () => {
+    const history = new HealthObservationHistory();
+    history.record({ checkedAt: now(), components: [{ id: 'database', status: HealthStatus.DOWN }] });
+    const first = history.read('1h'); first.samples[0].components[0].status = HealthStatus.UP;
+    first.samples[0].checkedAt = 'invalid';
+    expect(history.read('1h').samples[0].components[0].status).toBe(HealthStatus.DOWN);
+    expect(history.read('1h').samples[0].checkedAt).not.toBe('invalid');
+  });
+  it('rejects invalid or future history instead of suppressing later genuine observations', () => {
+    const history = new HealthObservationHistory();
+    for (const checkedAt of ['invalid', new Date(Date.now() + 86400000).toISOString()])
+      expect(() => history.record({ checkedAt, components: [] })).toThrow('HEALTH_HISTORY_SAMPLE_INVALID');
+    history.record({ checkedAt: now(), components: [{ id: 'database', status: HealthStatus.UP }] });
+    expect(history.read('1h').samples).toHaveLength(1);
+  });
+  it('rejects repeated component identities in a historical snapshot', () => {
+    const history = new HealthObservationHistory();
+    expect(() => history.record({ checkedAt: now(), components: [{ id: 'database', status: HealthStatus.UP }, { id: 'database', status: HealthStatus.DOWN }] })).toThrow('HEALTH_HISTORY_SAMPLE_INVALID');
+    expect(history.read('1h').availability).toBe('UNAVAILABLE');
+  });
+  const page = () => ({ protocolVersion: 2, availability: 'PARTIAL_OBSERVATIONS', scope: 'PROCESS_LOCAL_SESSION', window: '1h', total: 1, nextCursor: null, samples: [{ checkedAt: now(), components: [{ id: 'database', status: 'DOWN' }] }] });
+  it('accepts a bounded history page for the selected window', () => expect(parseHistory(page(), '1h').total).toBe(1));
+  it('rejects a history response from another requested window', () => expect(() => parseHistory(page(), '7d')).toThrow('SCHEMA_MISMATCH'));
+  it('rejects malformed history totals, cursor and availability', () => {
+    for (const patch of [{ total: NaN }, { total: 10001 }, { total: 0 }, { nextCursor: 'invalid' }, { availability: 'UNKNOWN' }, { availability: 'UNAVAILABLE' }])
+      expect(() => parseHistory({ ...page(), ...patch })).toThrow('SCHEMA_MISMATCH');
+  });
+});
+
+it('rejects coverage counters and identities inconsistent with actual components', async () => {
+  const response = await request(app(serviceGraph())).get('/overview');
+  for (const edit of [
+    (x: any) => { x.coverage.expectedCount += 1; },
+    (x: any) => { x.coverage.monitored.push(x.coverage.monitored[0]); },
+    (x: any) => { x.coverage.extraProbes.push('invented'); },
+    (x: any) => { x.coverage.operationalCount = 0.5; },
+    (x: any) => { x.summary.monitoredComponents += 1; },
+  ]) { const value = structuredClone(response.body); value.releaseReady = false; edit(value); expect(() => parseHealthOverview(value)).toThrow('SCHEMA_MISMATCH'); }
 });
