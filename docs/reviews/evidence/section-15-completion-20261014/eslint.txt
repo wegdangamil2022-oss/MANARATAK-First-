@@ -1,0 +1,31 @@
+
+/workspace/manaratak/apps/admin/src/pages/StudentSupportAdminPage.tsx
+  355:16  warning  'cause' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  362:5   warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                                     react-hooks/exhaustive-deps
+  367:21  warning  The ref value 'listRequest.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'listRequest.current' to a variable inside the effect, and use that variable in the cleanup function      react-hooks/exhaustive-deps
+  384:14  warning  'cause' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  390:6   warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                                     react-hooks/exhaustive-deps
+  420:23  warning  The ref value 'detailRequest.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'detailRequest.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  421:22  warning  The ref value 'ownerRequest.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ownerRequest.current' to a variable inside the effect, and use that variable in the cleanup function    react-hooks/exhaustive-deps
+  422:22  warning  The ref value 'resetRequest.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'resetRequest.current' to a variable inside the effect, and use that variable in the cleanup function    react-hooks/exhaustive-deps
+  477:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  484:32  warning  The ref value 'ownerRequest.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ownerRequest.current' to a variable inside the effect, and use that variable in the cleanup function    react-hooks/exhaustive-deps
+  485:5   warning  React Hook useEffect has a missing dependency: 't'. Either include it or remove the dependency array                                                                                                                                                                       react-hooks/exhaustive-deps
+  542:6   warning  React Hook useEffect has a missing dependency: 'detail'. Either include it or remove the dependency array                                                                                                                                                                  react-hooks/exhaustive-deps
+  552:12  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  589:12  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  608:12  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  629:14  warning  'cause' is defined but never used. Allowed unused caught errors must match /^_/u                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+
+/workspace/manaratak/apps/admin/tests/students/StudentSupportInteractions.spec.tsx
+  21:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:87  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  60:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  86:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  98:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  99:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 25 problems (0 errors, 25 warnings)

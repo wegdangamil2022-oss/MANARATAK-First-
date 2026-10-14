@@ -317,6 +317,7 @@ export function StudentSupportAdminPage() {
   const historyRequest = useRef(0);
   const diagnosticRequest=useRef(0);
   const triageRequest = useRef(0);
+  const resetRequest = useRef(0);
   const detailAnchor = useRef<HTMLDivElement>(null);
 
   const load = useCallback(
@@ -388,6 +389,14 @@ export function StudentSupportAdminPage() {
     }
   }, [language]);
   useEffect(() => {
+    ++resetRequest.current;
+    setResetTarget(null);
+    setReason('');
+    setResetting(false);
+    ++ownerRequest.current;
+    loadedOwnerTabs.current.clear();
+    setOwnerLoading(null);
+    setOwnerError(null);
     ++trackerRequest.current;
     ++diagnosticRequest.current;
     setProvisionDiagnostic(null);setDiagnosticError(null);setDiagnosticLoading(false);
@@ -409,6 +418,8 @@ export function StudentSupportAdminPage() {
     }
     return () => {
       ++detailRequest.current;
+      ++ownerRequest.current;
+      ++resetRequest.current;
     };
   }, [selectedId, inspect]);
   const ownerPermission=tab==='LEARNING'?'admin:courses:manage':
@@ -475,7 +486,8 @@ export function StudentSupportAdminPage() {
 
   async function loadOwnerNext(domain:OwnerDomain) {
     const page=detail?.ownerPages?.[domain];
-    if(!selectedId||ownerLoading||!page?.hasMore)return;
+    const permission = {learning:'admin:courses:manage',certificates:'admin:certificates:view',services:'admin:services:manage'}[domain];
+    if(!selectedId||ownerLoading||!page?.hasMore||!hasPermission(permission))return;
     const request=++ownerRequest.current;
     setOwnerLoading(domain);setOwnerError(null);
     try {
@@ -487,13 +499,32 @@ export function StudentSupportAdminPage() {
         `/admin/students/support/${encodeURIComponent(selectedId)}/owner/${domain}?${query}`, {cache:'no-store'},
       );
       if(request!==ownerRequest.current)return;
+      if(result.diagnosticObservationStatus==='NOT_RECORDED')setOwnerError(t('stu_support_observation_warning'));
       setDetail(previous=>{
         if(!previous||previous.studentReferenceId!==selectedId)return previous;
+        const readable=result.status==='AVAILABLE'||result.status==='TRUNCATED';
         return {...previous,
+          ownerReadStatus:{
+            learning:previous.ownerReadStatus?.learning??'RESTRICTED',
+            certificates:previous.ownerReadStatus?.certificates??'RESTRICTED',
+            services:previous.ownerReadStatus?.services??'RESTRICTED',
+            [domain]:result.status,
+          },
+          ownerReadProvenance:{
+            learning:previous.ownerReadProvenance?.learning??null,
+            certificates:previous.ownerReadProvenance?.certificates??null,
+            services:previous.ownerReadProvenance?.services??null,
+            [domain]:result.provenance,
+          },
+          linkedSummaries:{...previous.linkedSummaries,
+            ...(domain==='learning'?{activeCourseCount:result.activeCourseCount??null}:{}),
+            ...(domain==='certificates'?{certificateCount:result.certificateCount??null}:{}),
+          },
+          ...(domain==='services'?{serviceRequestCount:result.serviceRequestCount??null}:{}),
           ownerPages:{...previous.ownerPages,[domain]:{hasMore:result.hasMore,nextCursor:result.nextCursor,nextPage:result.nextPage}},
-          ...(domain==='learning'?{learning:[...new Map([...(previous.learning??[]),...(result.learning??[])].map(row=>[row.enrollmentId,row])).values()]}:{}),
-          ...(domain==='certificates'?{certificates:[...new Map([...(previous.certificates??[]),...(result.certificates??[])].map(row=>[row.id,row])).values()]}:{}),
-          ...(domain==='services'?{recentServiceRequests:[...new Map([...(previous.recentServiceRequests??[]),...(result.recentServiceRequests??[])].map(row=>[row.id,row])).values()]}:{}),
+          ...(domain==='learning'?{learning:readable?[...new Map([...(previous.learning??[]),...(result.learning??[])].map(row=>[row.enrollmentId,row])).values()]:undefined}:{}),
+          ...(domain==='certificates'?{certificates:readable?[...new Map([...(previous.certificates??[]),...(result.certificates??[])].map(row=>[row.id,row])).values()]:undefined}:{}),
+          ...(domain==='services'?{recentServiceRequests:readable?[...new Map([...(previous.recentServiceRequests??[]),...(result.recentServiceRequests??[])].map(row=>[row.id,row])).values()]:undefined}:{}),
         };
       });
     }catch {if(request===ownerRequest.current)setOwnerError(t('stu_support_owner_error'));}
@@ -628,6 +659,7 @@ export function StudentSupportAdminPage() {
   async function resetLayout(event: FormEvent) {
     event.preventDefault();
     if (!resetTarget || resetTarget.status !== 'ACTIVE' || reason.trim().length < 6 || resetting) return;
+    const request = ++resetRequest.current;
     setResetting(true);
     setError(null);
     setNotice(null);
@@ -639,22 +671,30 @@ export function StudentSupportAdminPage() {
           body: JSON.stringify({ expectedVersion: resetTarget.version, reason: reason.trim() }),
         },
       );
+      if(request!==resetRequest.current)return;
       setResetTarget(null);
       setReason('');
       setNotice(t('stu_support_reset_success'));
       await load();
+      if(request!==resetRequest.current)return;
       if (selectedId === resetTarget.studentReferenceId) await inspect(selectedId);
     } catch (cause) {
+      if(request!==resetRequest.current)return;
       const message = cause instanceof Error ? cause.message : '';
       if (message.includes('STUDENT_WORKSPACE_VERSION_CONFLICT') || message.startsWith('[409]')) {
         try {
           const current = await adminApiClient.request<StudentSupportDetail>(
             `/admin/students/support/${encodeURIComponent(resetTarget.studentReferenceId)}`, {cache:'no-store'},
           );
+          if(request!==resetRequest.current)return;
+          ++ownerRequest.current;
+          loadedOwnerTabs.current.clear();
+          setOwnerLoading(null);
           setDetail(current);
           setResetTarget(current);
           setError(t('stu_support_reset_conflict'));
         } catch {
+          if(request!==resetRequest.current)return;
           setResetTarget(null);
           setError(t('stu_support_reset_conflict_reload'));
         }
@@ -662,7 +702,7 @@ export function StudentSupportAdminPage() {
         setError(t('stu_support_reset_error'));
       }
     } finally {
-      setResetting(false);
+      if(request===resetRequest.current)setResetting(false);
     }
   }
   const learningComplete = hasPermission('admin:courses:manage') && detail?.ownerReadStatus?.learning === 'AVAILABLE';

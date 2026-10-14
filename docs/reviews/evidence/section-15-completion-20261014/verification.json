@@ -1,0 +1,44 @@
+{
+  "sourceBaseline": "4e203a88ac766a5da6af3e726fe7f6547c531ae0",
+  "node": "22.23.3",
+  "section": 15,
+  "status": "CODE_CLOSED_RUNTIME_DEFERRED",
+  "vitest": {
+    "exitCode": 0,
+    "filesPassed": 26,
+    "testsPassed": 187,
+    "durationSeconds": 56.45,
+    "config": ".section15-completion-vitest.config.ts"
+  },
+  "interactions": {
+    "exitCode": 0,
+    "testsPassed": 5,
+    "includedIn187": true
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "command": "tsc -b packages/infrastructure apps/api apps/admin --pretty false"
+  },
+  "eslint": {
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 25
+  },
+  "diffCheck": {
+    "exitCode": 0
+  },
+  "runtime": {
+    "databaseConnected": false,
+    "migrationsApplied": 0,
+    "workerStarted": false,
+    "liveProviderCalls": 0,
+    "browserE2E": false,
+    "deployment": false
+  },
+  "logs": {
+    "interactions.txt": "88c2e2281c7a6ea0c5078a9e0299ceb05b4ce5c34796fc7a6937d340cca7118b",
+    "vitest.txt": "c49f610b434634a6ab7c586e9811841887fa223f947f86b2531e3256761125dc",
+    "typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "eslint.txt": "4d74e8df3bb65cb8d344fe2d85bc24a0864ce85b878ea05da5d4ecf30f6150a5"
+  }
+}
