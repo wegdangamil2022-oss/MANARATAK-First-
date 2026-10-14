@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { MemoryRouter } from 'react-router-dom';
+import { createRequire } from 'node:module';
+const { MemoryRouter } = createRequire(new URL('../../apps/admin/package.json', import.meta.url))('react-router-dom');
 import {
   dashboardAllowed,
   dashboardMetricHref,
@@ -611,4 +612,27 @@ test('integration source boundaries: owner guards retained, activity GET query-o
   assert.ok(page.includes('removeEventListener'));
   assert.ok(page.includes('disabled={busy}'));
   assert.ok(!/method:\s*['"](?:POST|PATCH|DELETE|PUT)/.test(page));
+});
+
+
+test('malformed owner and receipt clocks cannot turn a response into fresh evidence', () => {
+  assert.throws(() => parseDashboardResponse(source('scholarships:review'), { total: 1, checkedAt: 'invalid' }, when), /SCHEMA_MISMATCH/);
+  assert.throws(() => parseDashboardResponse(source('scholarships:review'), { total: 1 }, 'invalid'), /SCHEMA_MISMATCH/);
+});
+test('invalid and future receipt clocks are stale even when capture time is valid', () => {
+  const reading = parseDashboardResponse(source('scholarships:review'), { total: 1 }, when);
+  for (const patch of [{ capturedAt: 'invalid' }, { receivedAt: 'invalid' }, { receivedAt: new Date(now + 60000).toISOString() }])
+    assert.equal(effectiveDashboardState({ ...reading, ...patch }, now), 'stale');
+});
+test('partial activity semantics must match the owner availability', () => {
+  const value = { protocolVersion: 1, availability: 'AVAILABLE', partial: true, scope: 'PERMISSIONED_OWNER_AUDIT_EVENTS', checkedAt: when, items: [] };
+  assert.throws(() => parseDashboardResponse(source('activity'), value, when), /SCHEMA_MISMATCH/);
+  const partial = parseDashboardResponse(source('activity'), { ...value, availability: 'PARTIAL' }, when);
+  assert.equal(partial.state, 'partial');
+});
+test('activity cannot carry blank event identities or action fields', () => {
+  const item = { id: 'event', action: 'RECORD_UPDATED', targetClass: 'FINANCE', owner: 'finance', actorAlias: 'SYSTEM', timestamp: when, result: 'SUCCESS' };
+  const value = { protocolVersion: 1, availability: 'AVAILABLE', partial: false, scope: 'PERMISSIONED_OWNER_AUDIT_EVENTS', checkedAt: when, items: [item] };
+  for (const key of ['id', 'action', 'targetClass', 'owner'])
+    assert.throws(() => parseDashboardResponse(source('activity'), { ...value, items: [{ ...item, [key]: ' ' }] }, when), /SCHEMA_MISMATCH/);
 });

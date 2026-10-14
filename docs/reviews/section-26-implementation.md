@@ -1,3 +1,5 @@
+> Current follow-up (2026-10-14): [Section 26 completion](SECTION_26_COMPLETION_2026-10-14.md). 32 contract tests, two UI tests and Node 22 compilation passed; documented owner metric limits remain. Historical checkpoint below.
+
 # Section 26 — Admin Executive Dashboard
 
 Branch: `fix/codex-section-26-executive-dashboard`. Base: `main@4af2c2cf`, including sections 24/25 (`aec45841` / `423e699c`) merged via `195eb166` and documented at `52ad7c63`.

@@ -77,7 +77,9 @@ export function parseDashboardResponse(
   value: unknown,
   receivedAt = new Date().toISOString(),
 ): DashboardReading {
-  if (!object(value)) throw new Error('SCHEMA_MISMATCH');
+  if (!object(value) || !timestamp(receivedAt)) throw new Error('SCHEMA_MISMATCH');
+  const ownerClock = value.checkedAt ?? value.generatedAt;
+  if (ownerClock !== undefined && !timestamp(ownerClock)) throw new Error('SCHEMA_MISMATCH');
   const reading = initialDashboardReading(source, true);
   reading.state = 'available';
   reading.receivedAt = receivedAt;
@@ -144,14 +146,15 @@ export function parseDashboardResponse(
         !Array.isArray(value.items) ||
         value.items.length > 10 ||
         typeof value.partial !== 'boolean' ||
-        value.scope !== 'PERMISSIONED_OWNER_AUDIT_EVENTS'
+        value.scope !== 'PERMISSIONED_OWNER_AUDIT_EVENTS' ||
+        (value.availability === 'PARTIAL') !== value.partial
       )
         throw new Error('SCHEMA_MISMATCH');
       reading.activity = value.items.map((item: unknown) => {
         if (
           !object(item) ||
           !['id', 'action', 'targetClass', 'owner'].every(
-            (key) => typeof item[key] === 'string' && String(item[key]).length <= 200,
+            (key) => typeof item[key] === 'string' && String(item[key]).trim().length > 0 && String(item[key]).length <= 200,
           ) ||
           !timestamp(item.timestamp) ||
           !['IDENTITY', 'SYSTEM', 'UNKNOWN'].includes(String(item.actorAlias)) ||
@@ -193,6 +196,9 @@ export function effectiveDashboardState(reading: DashboardReading, now: number):
   if (!['available', 'partial', 'stale'].includes(reading.state)) return reading.state;
   return !reading.capturedAt ||
     !reading.receivedAt ||
+    !Number.isFinite(Date.parse(reading.capturedAt)) ||
+    !Number.isFinite(Date.parse(reading.receivedAt)) ||
+    Date.parse(reading.receivedAt) > now + 5000 ||
     Date.parse(reading.capturedAt) > now + 5000 ||
     now - Math.min(Date.parse(reading.capturedAt), Date.parse(reading.receivedAt)) >
       reading.source.ttlMs

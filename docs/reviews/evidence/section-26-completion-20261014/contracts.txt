@@ -1,0 +1,204 @@
+TAP version 13
+# (node:11861) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: dashboard counter schema: zero distinct from missing, fractional, negative, coerced or nonfinite
+ok 1 - dashboard counter schema: zero distinct from missing, fractional, negative, coerced or nonfinite
+  ---
+  duration_ms: 2.074298
+  type: 'test'
+  ...
+# Subtest: strict aggregation and qualified partial arithmetic never drop a missing operand silently
+ok 2 - strict aggregation and qualified partial arithmetic never drop a missing operand silently
+  ---
+  duration_ms: 0.741089
+  type: 'test'
+  ...
+# Subtest: permission matrix: platform-only omits owner reads and domain grants never imply audit access
+ok 3 - permission matrix: platform-only omits owner reads and domain grants never imply audit access
+  ---
+  duration_ms: 0.482336
+  type: 'test'
+  ...
+# Subtest: scholarship review 3 is independent of imported 15 and ready 7
+ok 4 - scholarship review 3 is independent of imported 15 and ready 7
+  ---
+  duration_ms: 0.484616
+  type: 'test'
+  ...
+# Subtest: course canonical review, imported review and link/verification workload stay separate
+ok 5 - course canonical review, imported review and link/verification workload stay separate
+  ---
+  duration_ms: 0.204856
+  type: 'test'
+  ...
+# Subtest: CMS 5 in review and 8 ready remain distinct lifecycle counts
+ok 6 - CMS 5 in review and 8 ready remain distinct lifecycle counts
+  ---
+  duration_ms: 0.155921
+  type: 'test'
+  ...
+# Subtest: owner failure in one metric preserves valid independent counts
+ok 7 - owner failure in one metric preserves valid independent counts
+  ---
+  duration_ms: 0.901018
+  type: 'test'
+  ...
+# Subtest: identity envelope reads only human total and routes to identity owner
+ok 8 - identity envelope reads only human total and routes to identity owner
+  ---
+  duration_ms: 0.195172
+  type: 'test'
+  ...
+# Subtest: import owner counters distinguish observed zero, absent statuses and NaN
+ok 9 - import owner counters distinguish observed zero, absent statuses and NaN
+  ---
+  duration_ms: 0.294115
+  type: 'test'
+  ...
+# Subtest: finance projection validates statuses and strips raw attention/financial details
+ok 10 - finance projection validates statuses and strips raw attention/financial details
+  ---
+  duration_ms: 0.435959
+  type: 'test'
+  ...
+# Subtest: 403 revocation erases previous finance evidence; 500/503 keep marked stale evidence
+ok 11 - 403 revocation erases previous finance evidence; 500/503 keep marked stale evidence
+  ---
+  duration_ms: 0.786314
+  type: 'test'
+  ...
+# Subtest: browser read failure never proves health DOWN
+ok 12 - browser read failure never proves health DOWN
+  ---
+  duration_ms: 0.539808
+  type: 'test'
+  ...
+# Subtest: dashboard consumes protected v2 health status/gate unchanged, including DEGRADED
+ok 13 - dashboard consumes protected v2 health status/gate unchanged, including DEGRADED
+  ---
+  duration_ms: 2.705226
+  type: 'test'
+  ...
+# Subtest: freshness ceilings expire health sooner than catalogs and reject future evidence
+ok 14 - freshness ceilings expire health sooner than catalogs and reject future evidence
+  ---
+  duration_ms: 0.364842
+  type: 'test'
+  ...
+# Subtest: source timestamps preserve owner capture separately from receipt and are non-atomic
+ok 15 - source timestamps preserve owner capture separately from receipt and are non-atomic
+  ---
+  duration_ms: 0.148721
+  type: 'test'
+  ...
+# Subtest: timeout is bounded and distinct from runtime failure
+ok 16 - timeout is bounded and distinct from runtime failure
+  ---
+  duration_ms: 0.939426
+  type: 'test'
+  ...
+# Subtest: three concurrent sources progress independently despite one failure
+ok 17 - three concurrent sources progress independently despite one failure
+  ---
+  duration_ms: 11.881882
+  type: 'test'
+  ...
+# Subtest: replacement/unmount abort suppresses late updates
+ok 18 - replacement/unmount abort suppresses late updates
+  ---
+  duration_ms: 0.481295
+  type: 'test'
+  ...
+# Subtest: contextual attention links use registered queue enums; identities and generic handoffs are explicit
+ok 19 - contextual attention links use registered queue enums; identities and generic handoffs are explicit
+  ---
+  duration_ms: 0.884304
+  type: 'test'
+  ...
+# Subtest: coverage gaps and analytics stay unmeasured; no private application source exists
+ok 20 - coverage gaps and analytics stay unmeasured; no private application source exists
+  ---
+  duration_ms: 0.201194
+  type: 'test'
+  ...
+# Subtest: activity requires platform, audit and owner grants before querying; denied is not empty history
+ok 21 - activity requires platform, audit and owner grants before querying; denied is not empty history
+  ---
+  duration_ms: 0.625759
+  type: 'test'
+  ...
+# Subtest: authorization-only activity excludes finance; finance grant permits only its own event and PII is stripped
+ok 22 - authorization-only activity excludes finance; finance grant permits only its own event and PII is stripped
+  ---
+  duration_ms: 9.089972
+  type: 'test'
+  ...
+# Subtest: activity bounded latest ten sort, record policy denial and unknown-target isolation
+ok 23 - activity bounded latest ten sort, record policy denial and unknown-target isolation
+  ---
+  duration_ms: 1.581204
+  type: 'test'
+  ...
+# Subtest: failed activity sources have partial/unavailable scope, not a no-activity verdict
+ok 24 - failed activity sources have partial/unavailable scope, not a no-activity verdict
+  ---
+  duration_ms: 0.471255
+  type: 'test'
+  ...
+# Subtest: activity parser returns only allowlisted event fields and rejects over-limit/malformed feed
+ok 25 - activity parser returns only allowlisted event fields and rejects over-limit/malformed feed
+  ---
+  duration_ms: 0.352667
+  type: 'test'
+  ...
+# Subtest: AR/EN static rendering: accessible exact/partial/forbidden states and zero distinct from unknown
+ok 26 - AR/EN static rendering: accessible exact/partial/forbidden states and zero distinct from unknown
+  ---
+  duration_ms: 26.445738
+  type: 'test'
+  ...
+# Subtest: stale health render never advertises a current green/UP gate
+ok 27 - stale health render never advertises a current green/UP gate
+  ---
+  duration_ms: 4.148225
+  type: 'test'
+  ...
+# Subtest: integration source boundaries: owner guards retained, activity GET query-only, lifecycle cleanup fenced
+ok 28 - integration source boundaries: owner guards retained, activity GET query-only, lifecycle cleanup fenced
+  ---
+  duration_ms: 3.001202
+  type: 'test'
+  ...
+# Subtest: malformed owner and receipt clocks cannot turn a response into fresh evidence
+ok 29 - malformed owner and receipt clocks cannot turn a response into fresh evidence
+  ---
+  duration_ms: 0.197361
+  type: 'test'
+  ...
+# Subtest: invalid and future receipt clocks are stale even when capture time is valid
+ok 30 - invalid and future receipt clocks are stale even when capture time is valid
+  ---
+  duration_ms: 0.15665
+  type: 'test'
+  ...
+# Subtest: partial activity semantics must match the owner availability
+ok 31 - partial activity semantics must match the owner availability
+  ---
+  duration_ms: 0.20531
+  type: 'test'
+  ...
+# Subtest: activity cannot carry blank event identities or action fields
+ok 32 - activity cannot carry blank event identities or action fields
+  ---
+  duration_ms: 0.271478
+  type: 'test'
+  ...
+1..32
+# tests 32
+# suites 0
+# pass 32
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 789.510125
