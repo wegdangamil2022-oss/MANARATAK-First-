@@ -109,6 +109,8 @@ function ToolCatalog() {
     const id = ++generation.current;
     setLoading(true);
     setError('');
+    setResult({ data: [], total: 0, page: Number(query.get('page')) || 1, pageSize: 25 });
+    setOverview(null);
     try {
       const [page, summary] = await Promise.allSettled([
         adminApiClient.request<Page<Tool>>(`/admin/student-tools?${query}`),
@@ -268,9 +270,15 @@ function ToolDetail({ toolKey }: { toolKey: string }) {
   const [testInput, setTestInput] = useState('{}');
   const [testResult, setTestResult] = useState<unknown>(null);
   const [eligibility, setEligibility] = useState<unknown>(null);
+  const eligibilityGeneration = useRef(0);
   const [consumerType, setConsumerType] = useState<'ANONYMOUS' | 'AUTHENTICATED_STUDENT'>(
     'ANONYMOUS',
   );
+  useEffect(() => {
+    ++eligibilityGeneration.current;
+    setEligibility(null);
+    return () => { ++eligibilityGeneration.current; };
+  }, [consumerType, language]);
   const [traceFilter, setTraceFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [testFilter, setTestFilter] = useState('');
@@ -310,6 +318,8 @@ function ToolDetail({ toolKey }: { toolKey: string }) {
   useEffect(() => {
     if (!canReadExecutions) return;
     let active = true;
+    setExecutions({ data: [], total: 0, page: executionPage, pageSize: 25 });
+    setAudit({ data: [], total: 0, page: auditPage, pageSize: 25 });
     void Promise.all([
       adminApiClient.request<Page<Record<string, unknown>>>(
         `${base}/executions?page=${executionPage}&pageSize=25&${executionQuery}`,
@@ -659,13 +669,27 @@ function ToolDetail({ toolKey }: { toolKey: string }) {
           type="button"
           disabled={busy || !can('manage-availability')}
           onClick={() => {
+            if (fence.current) return;
+            const id = ++eligibilityGeneration.current;
+            fence.current = true;
+            setBusy(true);
+            setError('');
+            setEligibility(null);
             void adminApiClient
               .request<{ data: unknown }>(`${base}/eligibility`, {
                 method: 'POST',
                 body: JSON.stringify({ consumerType, locale: language }),
               })
-              .then((value) => setEligibility(value.data))
-              .catch(() => setError('tools19_action_failed'));
+              .then((value) => {
+                if (id === eligibilityGeneration.current) setEligibility(value.data);
+              })
+              .catch(() => {
+                if (id === eligibilityGeneration.current) setError('tools19_action_failed');
+              })
+              .finally(() => {
+                fence.current = false;
+                setBusy(false);
+              });
           }}
         >
           {t('tools19_evaluate')}

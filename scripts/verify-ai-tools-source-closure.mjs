@@ -73,7 +73,7 @@ const checks = {
   dead_student_tools_list_removed: !exists('apps/web/src/features/student-tools/StudentToolsList.tsx'),
   official_registry_category_keys: /DOCUMENTS_AND_WRITING/.test(liveSource) && /UNIVERSITIES/.test(liveSource) && /SCHOLARSHIPS/.test(liveSource) && /STUDENT_PLANNING/.test(liveSource),
   tool_details_from_registry_schema: /dto\.inputSchema\?\.fields/.test(liveSource) && /dto\.outputSchema\?\.fields/.test(liveSource),
-  tool_detail_real_launch_cta: /فتح الأداة/.test(toolsPage) && /\/tools\/\$\{encodeURIComponent\(tool\.toolKey\)\}/.test(toolsPage),
+  tool_detail_real_launch_cta: /publicT\('public_open_tool'\)/.test(toolsPage) && /public_open_tool.*فتح الأداة/.test(read('apps/web/src/i18n/ar.ts')) && /public_open_tool.*Open tool/.test(read('apps/web/src/i18n/en.ts')) && /\/tools\/\$\{encodeURIComponent\(tool\.toolKey\)\}/.test(toolsPage),
   banner_direct_tool_launch: /onOpenAiTools\(tool\.id\)/.test(banner) && /motivation-letter-generator/.test(banner),
   public_ai_entry_uses_phase18: /openStudentTools\('motivation-letter-generator'\)/.test(publicApp),
   canonical_university_gateway: /CanonicalUniversityComparisonGateway/.test(toolGateways),

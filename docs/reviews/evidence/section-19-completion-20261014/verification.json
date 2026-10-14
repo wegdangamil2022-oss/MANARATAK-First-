@@ -1,0 +1,39 @@
+{
+  "section": 19,
+  "phase": "P18",
+  "date": "2026-10-14",
+  "baseCommit": "5f6ad437ea9942a12c3f02ef01f1b5cf10d5ed1f",
+  "verdict": "CODE_CLOSED_RUNTIME_DEFERRED_WITH_PREEXISTING_GLOBAL_GUARD_FAILURE",
+  "node": "22.23.3",
+  "targetedTests": {
+    "files": 15,
+    "tests": 115,
+    "status": "PASS",
+    "baselineTests": 100
+  },
+  "typecheck": "PASS",
+  "lint": {
+    "errors": 0,
+    "warnings": 9
+  },
+  "phase18Source": "15/15 PASS",
+  "globalAiToolsSource": "63/64; architecture gate fails on four unchanged preexisting findings",
+  "runtimeTask": "TOOL-ADM-028 deferred after section 28",
+  "scope": {
+    "registeredTools": 83,
+    "implementedHandlers": 4,
+    "regionalResolver": "UNAVAILABLE_FAIL_CLOSED"
+  },
+  "databaseMutations": false,
+  "liveProviders": false,
+  "heavyTests": false,
+  "sha256": {
+    "baseline-vitest.txt": "b58072c036feeb5b85c1118aa3b0103b20d6e185e5dd049ccf47ead984fb3ddb",
+    "vitest.txt": "1cf2456dc17a6c66883e84e02fd0164f2f6ee21119bb8d14ba8f34a0183b9fe6",
+    "typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "eslint.txt": "752de715b1986713e7a4e089a46f942f96221dc93fda7e97a6bd56ef7609b0e5",
+    "phase18-source.txt": "e3388f7d49b5febd10162c7d845efe452032c7c36faec8c591f51215ec1b68c1",
+    "ai-tools-source.txt": "f1d6b7cda827445f56520fa0c9b82c7f0a1b80456e69e88d59aa06e5aa6a8050",
+    "architecture.txt": "62a922e24a0302ef626e9c304ec7b0e66936ffa60650a2e073fd7477148b4369"
+  }
+}

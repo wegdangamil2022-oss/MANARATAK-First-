@@ -1,3 +1,5 @@
+> Current follow-up (2026-10-14): [Section 19 completion](SECTION_19_COMPLETION_2026-10-14.md), 115 targeted tests and Node 22 typecheck passed. Runtime remains deferred; global architecture baseline remains blocked. Historical report below.
+
 # Section 19 — student tools source remediation
 
 Authoritative request: section **19 / P18**, including **TOOL-ADM-001–028** and **FGA-19-001–002**, in the supplied `MANARATAK_ADMIN_REVIEW_CODEX.md`. This work does not start section 20. Base: `51fdc22` (main, P17 merged); branch: `fix/codex-section-19-student-tools`.

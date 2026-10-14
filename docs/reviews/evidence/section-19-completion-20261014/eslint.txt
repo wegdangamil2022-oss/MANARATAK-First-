@@ -1,0 +1,17 @@
+
+/workspace/manaratak/apps/admin/src/pages/StudentToolsAdminPage.tsx
+  133:20  warning  The ref value 'generation.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'generation.current' to a variable inside the effect, and use that variable in the cleanup function                        react-hooks/exhaustive-deps
+  280:44  warning  The ref value 'eligibilityGeneration.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'eligibilityGeneration.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  315:20  warning  The ref value 'generation.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'generation.current' to a variable inside the effect, and use that variable in the cleanup function                        react-hooks/exhaustive-deps
+
+/workspace/manaratak/apps/admin/tests/pages/StudentToolsInteractions.spec.tsx
+  51:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/workspace/manaratak/packages/application/tests/student-tools/StudentToolExecutionPipeline.spec.ts
+  23:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  67:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  68:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  70:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  84:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 9 problems (0 errors, 9 warnings)

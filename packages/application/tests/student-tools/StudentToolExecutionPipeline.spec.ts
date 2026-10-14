@@ -128,6 +128,7 @@ describe('Phase 18 governed execution pipeline', () => {
       consumerType: 'AUTHENTICATED_STUDENT',
       studentReferenceHash: hash('student-owner'),
       resultDigest: digest,
+      resultExpiresAt: expiry,
     };
     setEnvelopeRecord(ownerRecord);
     repository.findExecution.mockResolvedValue(ownerRecord);
@@ -152,7 +153,7 @@ describe('Phase 18 governed execution pipeline', () => {
   });
 
   it('replays a pinned prior release after a version increment without redispatch', async () => {
-    const { useCases, repository, setEnvelopeRecord } = harness();
+    const { useCases, repository, setEnvelopeRecord, expiry } = harness();
     const record = {
       executionId: 'stx_winner',
       toolKey: 'gpa-calculator',
@@ -162,7 +163,8 @@ describe('Phase 18 governed execution pipeline', () => {
       anonymousSessionHash: hash('signed-session-id'),
       startedAt: new Date(),
       completedAt: new Date(),
-      resultDigest: null,
+      resultDigest: resultDigest({ semesterGpa: 4, totalSemesterCredits: 3, qualityPoints: 12, scale: 4, courses: [] }),
+      resultExpiresAt: expiry,
       safeUsageMetadata: {
         handlerContractVersion: '2:2',
         requestFingerprint: resultDigest({

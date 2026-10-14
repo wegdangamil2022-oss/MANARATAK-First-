@@ -395,7 +395,19 @@ export class StudentToolExecutionUseCases {
 
   private async recoverResult(record: StudentToolExecutionRecord) {
     const stored = await this.repository.loadTransientResult(record.executionId);
+    const expiresAt = stored ? new Date(stored.resultExpiresAt).getTime() : NaN;
+    const assertLiveResult = () => {
+      if (!Number.isFinite(expiresAt) || expiresAt <= Date.now())
+        throw new Error('TOOL_IDEMPOTENT_RESULT_EXPIRED');
+    };
+    assertLiveResult();
     if (!stored) throw new Error('TOOL_IDEMPOTENT_RESULT_EXPIRED');
+    if (
+      !record.resultDigest ||
+      !record.resultExpiresAt ||
+      new Date(record.resultExpiresAt).getTime() !== expiresAt
+    )
+      throw new Error('TOOL_RESULT_BINDING_INVALID');
     const envelope = this.resultProtector.unprotect(stored.protectedResult) as Record<
       string,
       unknown
@@ -418,6 +430,7 @@ export class StudentToolExecutionUseCases {
     const digest = resultDigest(result);
     if (digest !== stored.resultDigest || (record.resultDigest && digest !== record.resultDigest))
       throw new Error('TOOL_RESULT_PROVENANCE_MISMATCH');
+    assertLiveResult();
     return result;
   }
 }
