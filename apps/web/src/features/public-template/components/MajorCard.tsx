@@ -1,3 +1,5 @@
+import { publicEnumLabel } from '../publicEnumCopy';
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import {
   Heart,
@@ -33,6 +35,8 @@ export const MajorCard: React.FC<MajorCardProps> = ({
   onSelectMajor,
   designStyle = 'minimalist',
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   // Select specialty icon in green outline style matching the design
   const renderSpecialtyIcon = (iconSizeClass?: string) => {
     const iconClass = iconSizeClass || 'w-6 h-6 sm:w-7 sm:h-7 text-[#D6A43B] dark:text-[var(--mn-accent)] stroke-[1.75]';
@@ -142,18 +146,18 @@ export const MajorCard: React.FC<MajorCardProps> = ({
 
   // Keep the duration badge compact without inventing a duration for postgraduate/fellowship records.
   const formatDurationYears = (dur?: string) => {
-    if (!dur?.trim()) return 'حسب البرنامج';
+    if (!dur?.trim()) return publicT('public_duration_depends_on_program');
 
     const normalized = dur.replace(/[–—]/g, '-');
     const numericRange = normalized.match(/(\d+)\s*(?:-|إلى|الى)\s*(\d+)\s*(?:سنوات|سنة)?/);
-    if (numericRange) return `${numericRange[1]}-${numericRange[2]} سنوات`;
+    if (numericRange) return publicT('public_duration_range_years', { v0: numericRange[1], v1: numericRange[2] });
 
-    if (/سنة\s*(?:-|إلى|الى)\s*سنتين/.test(normalized)) return '1-2 سنة';
+    if (/سنة\s*(?:-|إلى|الى)\s*سنتين/.test(normalized)) return publicT('public_duration_range_years', { v0: '1', v1: '2' });
 
     const singleYear = normalized.match(/(\d+)\s*(?:سنوات|سنة)/);
-    if (singleYear) return `${singleYear[1]} ${singleYear[1] === '1' ? 'سنة' : 'سنوات'}`;
+    if (singleYear) return publicT('public_duration_year_count', { v0: singleYear[1], v1: publicT(singleYear[1] === '1' ? 'public_year_singular' : 'public_year_plural') });
 
-    return 'حسب البرنامج';
+    return publicT('public_duration_depends_on_program');
   };
 
   const durationText = formatDurationYears(major.duration);
@@ -177,8 +181,8 @@ export const MajorCard: React.FC<MajorCardProps> = ({
           }
         }}
         onClick={() => onSelectMajor && onSelectMajor(major)}
-        className="group relative overflow-hidden bg-[var(--mn-surface)] rounded-[24px] sm:rounded-[28px] border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] active:border-[#142B5F] shadow-sm transition-all duration-150 active:scale-[0.985] p-3 sm:p-4 text-right cursor-pointer select-none mn-panel "
-        dir="rtl"
+        className="group relative overflow-hidden bg-[var(--mn-surface)] rounded-[24px] sm:rounded-[28px] border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] active:border-[#142B5F] shadow-sm transition-all duration-150 active:scale-[0.985] p-3 sm:p-4 text-start cursor-pointer select-none mn-panel "
+        dir={publicDir}
       >
         {/* Top-Right Metallic Gold Corner Ribbon */}
         <div className="absolute top-0 right-0 w-12 sm:w-14 h-12 sm:h-14 pointer-events-none z-10">
@@ -239,7 +243,7 @@ export const MajorCard: React.FC<MajorCardProps> = ({
               <div className="flex items-center">
                 <span className="inline-flex items-center gap-1.5 bg-[var(--mn-surface)] text-[var(--mn-accent-text)] border border-[var(--mn-border-gold)] rounded-lg sm:rounded-xl px-2 py-0.5 text-[10px] font-bold font-['Cairo',sans-serif] leading-tight mn-panel ">
                   <School className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
-                  <span className="truncate">{facultyCategory}</span>
+                  <span className="truncate">{publicEnumLabel(facultyCategory, publicT)}</span>
                 </span>
               </div>
 
@@ -248,7 +252,7 @@ export const MajorCard: React.FC<MajorCardProps> = ({
                 {/* Blue Degree Pill */}
                 <span className="inline-flex items-center gap-1 bg-[var(--mn-surface-muted)] text-[var(--mn-link)] border border-[var(--mn-border-brand)] rounded-lg sm:rounded-xl px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-bold font-['Cairo',sans-serif] shrink-0 mn-panel ">
                   <GraduationCap className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[var(--mn-link)] shrink-0" />
-                  <span>{primaryDegree}</span>
+                  <span>{publicEnumLabel(primaryDegree, publicT)}</span>
                 </span>
 
                 {/* Slate/Neutral Duration Pill */}
@@ -270,7 +274,7 @@ export const MajorCard: React.FC<MajorCardProps> = ({
                 if (onToggleFavorite) onToggleFavorite(major.id);
               }}
               className="p-1.5 rounded-full hover:bg-[var(--mn-danger-soft)] text-[var(--mn-text-muted)] hover:text-[var(--mn-danger-text)] transition-all active:scale-90 cursor-pointer"
-              title="أضف إلى المفضلة"
+              title={publicT('public_add_to_favorites')}
             >
               <Heart
                 className={`w-5 h-5 transition-colors stroke-[2] ${
@@ -289,7 +293,7 @@ export const MajorCard: React.FC<MajorCardProps> = ({
               className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold transition-all active:scale-95 cursor-pointer font-['Cairo',sans-serif] shadow-2xs mn-inverse hover:mn-inverse "
               data-mn-design="26ecd1db9e"
             >
-              <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">عرض التفاصيل</span>
+              <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">{publicT('public_view_details')}</span>
               <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[var(--mn-accent-soft)]" />
             </button>
           </div>
@@ -313,8 +317,8 @@ export const MajorCard: React.FC<MajorCardProps> = ({
           }
         }}
         onClick={() => onSelectMajor && onSelectMajor(major)}
-        className="group relative overflow-hidden bg-[var(--mn-surface)] rounded-2xl border border-[var(--mn-accent)]/20 hover:border-[var(--mn-accent)] hover:shadow-md transition-all duration-200 p-3.5 sm:p-4 text-right cursor-pointer select-none mn-panel "
-        dir="rtl"
+        className="group relative overflow-hidden bg-[var(--mn-surface)] rounded-2xl border border-[var(--mn-accent)]/20 hover:border-[var(--mn-accent)] hover:shadow-md transition-all duration-200 p-3.5 sm:p-4 text-start cursor-pointer select-none mn-panel "
+        dir={publicDir}
       >
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           {/* Logo & Texts - Grid Col 9 */}
@@ -378,7 +382,7 @@ export const MajorCard: React.FC<MajorCardProps> = ({
               className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold transition-all active:scale-95 cursor-pointer font-['Cairo',sans-serif] shadow-2xs mn-inverse hover:mn-inverse "
               data-mn-design="26ecd1db9e"
             >
-              <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">عرض التفاصيل</span>
+              <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">{publicT('public_view_details')}</span>
               <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[var(--mn-accent-soft)]" />
             </button>
           </div>
@@ -401,8 +405,8 @@ export const MajorCard: React.FC<MajorCardProps> = ({
         }
       }}
       onClick={() => onSelectMajor && onSelectMajor(major)}
-      className="group relative overflow-hidden bg-[var(--mn-surface)] rounded-r-[4px] rounded-l-2xl border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-3 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-xs transition-all duration-200 p-2.5 sm:p-3 text-right cursor-pointer select-none mn-panel "
-      dir="rtl"
+      className="group relative overflow-hidden bg-[var(--mn-surface)] rounded-r-[4px] rounded-l-2xl border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-3 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-xs transition-all duration-200 p-2.5 sm:p-3 text-start cursor-pointer select-none mn-panel "
+      dir={publicDir}
     >
       {/* Top Header Row: Icon + Title + Favorite Button */}
       <div className="flex items-start justify-between gap-2.5">
@@ -433,7 +437,7 @@ export const MajorCard: React.FC<MajorCardProps> = ({
             if (onToggleFavorite) onToggleFavorite(major.id);
           }}
           className="p-1 rounded-full hover:bg-[var(--mn-danger-soft)] text-[var(--mn-text-muted)] hover:text-[var(--mn-danger-text)] transition-all active:scale-90 cursor-pointer shrink-0"
-          title="أضف إلى المفضلة"
+          title={publicT('public_add_to_favorites')}
         >
           <Heart
             className={`w-4.5 h-4.5 transition-colors stroke-[2] ${
@@ -476,7 +480,7 @@ export const MajorCard: React.FC<MajorCardProps> = ({
           className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2 py-1 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse shrink-0"
           data-mn-design="26ecd1db9e"
         >
-          <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">عرض التفاصيل</span>
+          <span className="text-[10px] sm:text-[11px] font-bold text-center font-['Cairo',sans-serif] leading-tight text-[var(--mn-accent-soft)]">{publicT('public_view_details')}</span>
           <ChevronLeft className="w-3 h-3 rotate-180 text-[var(--mn-accent-soft)]" />
         </button>
       </div>

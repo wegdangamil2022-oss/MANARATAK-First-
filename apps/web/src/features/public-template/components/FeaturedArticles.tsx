@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState } from 'react';
 import type { PublicArticle } from '../types';
 import { Newspaper, Clock, ArrowUpLeft, ChevronLeft, Award, FileText, Plane, GraduationCap, Cpu, Search } from 'lucide-react';
@@ -10,6 +11,8 @@ interface FeaturedArticlesProps {
 
 // Vector SVG Covers for 100% guaranteed high-res display without network errors
 const ArticleVectorCover: React.FC<{ category: string; title: string; className?: string }> = ({ category, title, className = 'w-full h-full' }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const normTitle = title.toLowerCase();
   const normCat = category.toLowerCase();
 
@@ -37,9 +40,7 @@ const ArticleVectorCover: React.FC<{ category: string; title: string; className?
         <circle cx="250" cy="108" r="4" fill="#FFC72C" />
         {/* Banner Overlay */}
         <rect x="20" y="175" width="360" height="42" rx="10" fill="black" fillOpacity="0.3" />
-        <text x="200" y="202" textAnchor="middle" fill="#FFC72C" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">
-          المنحة التركية المباشرة YTB 2026
-        </text>
+        <text x="200" y="202" textAnchor="middle" fill="#FFC72C" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">{publicT('public_tu_rkiye_scholarships_direct_application_ytb_2026')}</text>
       </svg>
     );
   }
@@ -70,9 +71,7 @@ const ArticleVectorCover: React.FC<{ category: string; title: string; className?
         <path d="M 224 150 L 228 154 L 236 145" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         {/* Banner Overlay */}
         <rect x="20" y="175" width="360" height="42" rx="10" fill="black" fillOpacity="0.4" />
-        <text x="200" y="202" textAnchor="middle" fill="white" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">
-          خطاب الدافع المتميز (Motivation Letter)
-        </text>
+        <text x="200" y="202" textAnchor="middle" fill="white" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">{publicT('public_writing_an_outstanding_motivation_letter')}</text>
       </svg>
     );
   }
@@ -96,9 +95,7 @@ const ArticleVectorCover: React.FC<{ category: string; title: string; className?
         <path d="M 175 95 L 225 95 L 210 70 Z" fill="#CF142B" />
         {/* Text Banner */}
         <rect x="20" y="175" width="360" height="42" rx="10" fill="black" fillOpacity="0.4" />
-        <text x="200" y="202" textAnchor="middle" fill="#FFC72C" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">
-          دليل السفر والدراسة في بريطانيا 🇬🇧
-        </text>
+        <text x="200" y="202" textAnchor="middle" fill="#FFC72C" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">{publicT('public_travel_and_study_guide_for_the_united_kingdom')}</text>
       </svg>
     );
   }
@@ -119,9 +116,7 @@ const ArticleVectorCover: React.FC<{ category: string; title: string; className?
           IELTS
         </text>
         <rect x="20" y="175" width="360" height="42" rx="10" fill="black" fillOpacity="0.3" />
-        <text x="200" y="202" textAnchor="middle" fill="white" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">
-          معايير اختبار آيلتس 2026
-        </text>
+        <text x="200" y="202" textAnchor="middle" fill="white" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">{publicT('public_ielts_exam_criteria_for_2026')}</text>
       </svg>
     );
   }
@@ -140,9 +135,7 @@ const ArticleVectorCover: React.FC<{ category: string; title: string; className?
         <circle cx="200" cy="90" r="42" fill="#3B82F6" fillOpacity="0.2" stroke="#60A5FA" strokeWidth="3" />
         <path d="M 180 90 L 195 75 L 210 105 L 220 90" stroke="#60A5FA" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
         <rect x="20" y="175" width="360" height="42" rx="10" fill="black" fillOpacity="0.4" />
-        <text x="200" y="202" textAnchor="middle" fill="#60A5FA" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">
-          الذكاء الاصطناعي vs هندسة البرمجيات
-        </text>
+        <text x="200" y="202" textAnchor="middle" fill="#60A5FA" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">{publicT('public_artificial_intelligence_vs_software_engineering')}</text>
       </svg>
     );
   }
@@ -161,8 +154,7 @@ const ArticleVectorCover: React.FC<{ category: string; title: string; className?
       <path d="M 200 65 L 235 80 L 200 95 L 165 80 Z" fill="#D6A43B" />
       <rect x="20" y="175" width="360" height="42" rx="10" fill="black" fillOpacity="0.4" />
       <text x="200" y="202" textAnchor="middle" fill="#D6A43B" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">
-        {category} • منارتك الأكاديمية
-      </text>
+        {category}{' '}{publicT('public_manaratak_academy')}</text>
     </svg>
   );
 };
@@ -171,55 +163,57 @@ const ArticleVectorCover: React.FC<{ category: string; title: string; className?
 const DEFAULT_FEATURED_ARTICLES = [
   {
     id: 'art_101',
-    title: 'الدليل الشامل للتقديم على المنح الدراسية التركية المباشرة YTB 2026',
-    summary: 'دليل تفصيلي يتناول شروط التقديم على المنحة التركية وآلية رفع المستندات.',
-    category: 'منح وقبولات',
-    readTime: '5 دقائق',
+    title: "public_a_comprehensive_guide_to_direct_applications_for_tu",
+    summary: "public_a_detailed_guide_to_tu_rkiye_scholarships_application",
+    category: "public_scholarships_and_admission",
+    readTime: "public_5_minutes",
     image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=600',
   },
   {
     id: 'art_102',
-    title: 'كيفية كتابة خطاب الدافع المتميز (Motivation Letter) للجامعات الألمانية',
-    summary: 'أهم النماذج والأخطاء الفادحة التي يجب تجنبها عند تراسل الجامعات الأوروبية.',
-    category: 'نصائح القبول',
-    readTime: '4 دقائق',
+    title: "public_how_to_write_an_outstanding_motivation_letter_for",
+    summary: "public_important_templates_and_mistakes_to_avoid_when_contacting",
+    category: "public_admission_advice",
+    readTime: "public_4_minutes",
     image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=600',
   },
   {
     id: 'art_103',
-    title: 'قائمة التحقق الميدانية قبل السفر والدراسة في المملكة المتحدة',
-    summary: 'كل ما يحتاجه الطالب الدولي من تأمين وطبابة وفتح حساب بنكي بريطاني.',
-    category: 'الحياة الطلابية',
-    readTime: '6 دقائق',
+    title: "public_a_practical_checklist_before_traveling_and_studying_in",
+    summary: "public_what_international_students_need_to_know_about_insurance",
+    category: "public_student_life",
+    readTime: "public_6_minutes",
     image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&q=80&w=600',
   },
   {
     id: 'art_104',
-    title: 'تحديثات معايير الكفاءة اللغوية المطلوبة باختبار IELTS لعام 2026',
-    summary: 'دليل سريع لفهم درجات IELTS وطرق معادلة النتيجة مع التوفل والدولينجو.',
-    category: 'اختبارات دولية',
-    readTime: '5 دقائق',
+    title: "public_ielts_language_proficiency_requirement_updates_for_2026",
+    summary: "public_a_quick_guide_to_ielts_scores_and_comparisons",
+    category: "public_international_exams_2",
+    readTime: "public_5_minutes",
     image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=600',
   },
   {
     id: 'art_105',
-    title: 'مقارنة شاملة بين تخصص الذكاء الاصطناعي وهندسة البرمجيات',
-    summary: 'أيهما أنسب لمستقبلك المهني؟ دليل تحليلي للمهارات والفرص الوظيفية.',
-    category: 'توجيه أكاديمي',
-    readTime: '7 دقائق',
+    title: "public_a_comprehensive_comparison_of_artificial_intelligence_and_software",
+    summary: "public_which_suits_your_career_goals_an_analytical_guide",
+    category: "public_academic_guidance",
+    readTime: "public_7_minutes",
     image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80',
   },
   {
     id: 'art_106',
-    title: 'أفضل 10 أدوات بالذكاء الاصطناعي لتسريع البحث العلمي والمراجعة',
-    summary: 'أدوات موثوقة لمساعدة طلاب الماجستير والدكتوراه في تلخيص الأوراق البحثية.',
-    category: 'أدوات البحث',
-    readTime: '4 دقائق',
+    title: "public_top_10_ai_tools_to_accelerate_research_and",
+    summary: "public_tools_to_help_masters_and_doctoral_students_summarize",
+    category: "public_research_tools",
+    readTime: "public_4_minutes",
     image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80',
   },
 ];
 
 export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, onViewAllClick, onSelectArticle }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [imageErrorIds, setImageErrorIds] = useState<Record<string, boolean>>({});
 
   const featuredList = (articles && articles.length >= 6)
@@ -231,7 +225,7 @@ export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, on
         readTime: article.readingTime || '4 دقائق',
         image: DEFAULT_FEATURED_ARTICLES[index % DEFAULT_FEATURED_ARTICLES.length].image,
       }))
-    : DEFAULT_FEATURED_ARTICLES;
+    : DEFAULT_FEATURED_ARTICLES.map(article => ({ ...article, title: publicT(article.title), summary: publicT(article.summary), category: publicT(article.category), readTime: publicT(article.readTime) }));
 
   const handleImageError = (id: string) => {
     setImageErrorIds((prev) => ({ ...prev, [id]: true }));
@@ -255,13 +249,11 @@ export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, on
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
                   <Newspaper className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" />
                 </span>
-                <span>منصة المعرفة والمقالات</span>
+                <span>{publicT('public_knowledge_and_articles_platform')}</span>
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">
-              أحدث النصائح والأدلة الشاملة لرحلتك الدراسية
-            </p>
+            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_the_latest_tips_and_comprehensive_guides_for_your')}</p>
           </div>
 
           {/* Horizontal Scrollable Articles List - 6 cards with left drag/swipe */}
@@ -339,7 +331,7 @@ export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, on
               onClick={onViewAllClick}
               className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-1.5 sm:py-2 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs"
             >
-              <span className="text-[12px] sm:text-sm font-bold">المزيد من المقالات والأدلة</span>
+              <span className="text-[12px] sm:text-sm font-bold">{publicT('public_more_articles_and_guides')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
             </button>
           </div>

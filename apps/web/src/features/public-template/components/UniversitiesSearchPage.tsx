@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import {ApiClient} from '../../../api/client';
 import {mapPublicUniversityDto} from '../publicLiveDataSource';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
@@ -33,6 +34,8 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
   favoriteIds,
   onToggleFavorite,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   const[universities,setUniversities]=useState(initialUniversities);const[cursor,setCursor]=useState<string|undefined>();
   const[nextCursor,setNextCursor]=useState<string|null>(null);const[cursorHistory,setCursorHistory]=useState<Array<string|undefined>>([]);
   const[serverLoading,setServerLoading]=useState(false);const[serverError,setServerError]=useState('');
@@ -140,13 +143,13 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
   return (
     <div
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
-      dir="rtl"
+      dir={publicDir}
     >
-      <section className="space-y-2 rounded border p-3" aria-label="صفحات الجامعات">
-        <p>البحث من خادم الجامعات. فلاتر القارة والبلد والمدينة أدناه تخص الصفحة المحملة، وليست أعداد العالم كاملة.</p>
-        {serverLoading&&<p role="status">جارٍ تحميل صفحة الجامعات</p>}{serverError&&<p role="status">{serverError}</p>}
-        <button type="button" disabled={serverLoading||!cursorHistory.length} onClick={()=>{setCursor(cursorHistory.at(-1));setCursorHistory(old=>old.slice(0,-1));}}>الصفحة السابقة</button>
-        <button type="button" disabled={serverLoading||!nextCursor} onClick={()=>{setCursorHistory(old=>[...old,cursor]);setCursor(nextCursor??undefined);setSelectedContinent('الكل');setSelectedCountry('الكل');setSelectedCity('الكل');}}>الصفحة التالية</button>
+      <section className="space-y-2 rounded border p-3" aria-label={publicT('public_university_pages')}>
+        <p>{publicT('public_search_uses_the_university_server_continent_country_and')}</p>
+        {serverLoading&&<p role="status">{publicT('public_loading_university_page')}</p>}{serverError&&<p role="status">{serverError}</p>}
+        <button type="button" disabled={serverLoading||!cursorHistory.length} onClick={()=>{setCursor(cursorHistory.at(-1));setCursorHistory(old=>old.slice(0,-1));}}>{publicT('public_previous_page')}</button>
+        <button type="button" disabled={serverLoading||!nextCursor} onClick={()=>{setCursorHistory(old=>[...old,cursor]);setCursor(nextCursor??undefined);setSelectedContinent('الكل');setSelectedCountry('الكل');setSelectedCity('الكل');}}>{publicT('public_next_page')}</button>
       </section>
       {/* ========================================================================= */}
       {/* HERO EMERALD BANNER - COMPACT LUXURY ARABIC DESIGN WITH GOLD ACCENTS       */}
@@ -157,8 +160,8 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
           <button
             onClick={onBack}
             className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-8 h-8 bg-black/25 hover:bg-black/40 border border-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all z-30 cursor-pointer text-white shadow-xs active:scale-95"
-            title="العودة"
-            aria-label="العودة"
+            title={publicT('public_back')}
+            aria-label={publicT('public_back')}
           >
             <ChevronLeft className="w-4 h-4 rotate-180 text-white" />
           </button>
@@ -219,9 +222,8 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
 
           {/* Main Title */}
           <div className="space-y-0.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">
-              خطوتك الأولى نحو{' '}
-              <span className="text-[var(--mn-accent-text)]">الجامعة المناسبة</span>
+            <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">{publicT('public_your_first_step_toward')}{' '}
+              <span className="text-[var(--mn-accent-text)]">{publicT('public_the_right_university')}</span>
             </h1>
 
             {/* Small Gold Horizontal Divider */}
@@ -230,9 +232,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
             </div>
 
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-xs sm:max-w-sm mx-auto">
-              اكتشف أفضل الجامعات حول العالم بشروط قبول واضحة وفرص متنوعة.
-            </p>
+            <p className="text-[11px] sm:text-xs text-white font-medium font-['Cairo',sans-serif] leading-relaxed max-w-xs sm:max-w-sm mx-auto">{publicT('public_discover_leading_universities_worldwide_with_clear_admission_requirements')}</p>
           </div>
 
           {/* Integrated Clean White Search Bar in Hero */}
@@ -242,7 +242,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث باسم الجامعة، الدولة، أو التخصص..."
+                placeholder={publicT('public_search_by_university_country_or_major')}
                 className="w-full py-2.5 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[12px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[12px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
                 data-mn-design="cd18739893"
               />
@@ -266,7 +266,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
               className="text-[10px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-surface-elevated)]/95 px-2.5 py-0.5 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-panel "
             >
               <RotateCcw className="w-3 h-3" />
-              <span>إعادة ضبط الفلاتر ({activeFiltersCount})</span>
+              <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>
             </button>
           </div>
         )}
@@ -280,7 +280,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
             <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
               <Globe2 className="w-3.5 h-3.5 text-[var(--mn-accent-text)] shrink-0" />
               <span className="truncate">
-                {selectedContinent === 'الكل' ? 'القارة' : selectedContinent}
+                {selectedContinent === 'الكل' ? publicT('public_continent') : selectedContinent}
               </span>
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
@@ -288,11 +288,11 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
               value={selectedContinent}
               onChange={(e) => handleContinentChange(e.target.value)}
               className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-              title="اختر القارة"
+              title={publicT('public_choose_continent')}
             >
               {continents.map((c) => (
                 <option key={c} value={c}>
-                  {c === 'الكل' ? 'جميع القارات' : c}
+                  {c === 'الكل' ? publicT('public_all_continents') : c}
                 </option>
               ))}
             </select>
@@ -303,7 +303,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
             <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
               <MapPin className="w-3.5 h-3.5 text-[var(--mn-accent-text)] shrink-0" />
               <span className="truncate">
-                {selectedCountry === 'الكل' ? 'الدولة' : selectedCountry}
+                {selectedCountry === 'الكل' ? publicT('public_country') : selectedCountry}
               </span>
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
@@ -311,11 +311,11 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
               value={selectedCountry}
               onChange={(e) => handleCountryChange(e.target.value)}
               className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-              title="اختر الدولة"
+              title={publicT('public_choose_country')}
             >
               {countries.map((cnt) => (
                 <option key={cnt} value={cnt}>
-                  {cnt === 'الكل' ? 'جميع الدول' : cnt}
+                  {cnt === 'الكل' ? publicT('public_all_countries_2') : cnt}
                 </option>
               ))}
             </select>
@@ -325,18 +325,18 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
           <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-gold-surface)]/40 border-1.5 border-[var(--mn-accent)]/70 hover:border-[var(--mn-accent)] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[58px] sm:h-[64px] cursor-pointer mn-panel ">
             <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-semibold text-[11px] sm:text-xs font-['Cairo',sans-serif] w-full">
               <Building2 className="w-3.5 h-3.5 text-[var(--mn-accent-text)] shrink-0" />
-              <span className="truncate">{selectedCity === 'الكل' ? 'المدينة' : selectedCity}</span>
+              <span className="truncate">{selectedCity === 'الكل' ? publicT('public_city') : selectedCity}</span>
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[var(--mn-accent-soft)] mt-0.5" />
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
               className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-              title="اختر المدينة"
+              title={publicT('public_choose_city')}
             >
               {cities.map((cty) => (
                 <option key={cty} value={cty}>
-                  {cty === 'الكل' ? 'جميع المدن' : cty}
+                  {cty === 'الكل' ? publicT('public_all_cities') : cty}
                 </option>
               ))}
             </select>
@@ -353,11 +353,9 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
         <div className="flex items-center justify-between px-1">
           <span className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif] flex items-center gap-1.5">
             <Landmark className="w-4 h-4 text-[var(--mn-heading)]" />
-            <span>دليل الجامعات العالمية</span>
+            <span>{publicT('public_international_university_directory')}</span>
           </span>
-          <span className="text-[10px] sm:text-[11px] text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">
-            محدثة باستمرار
-          </span>
+          <span className="text-[10px] sm:text-[11px] text-[var(--mn-accent-text)] font-bold font-['Cairo',sans-serif]">{publicT('public_updated_regularly')}</span>
         </div>
 
         {/* Cards Container */}
@@ -367,18 +365,12 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
               <div className="w-12 h-12 rounded-full bg-[var(--mn-surface-muted)] flex items-center justify-center text-[var(--mn-text-muted)] mn-panel ">
                 <Search className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">
-                لا توجد جامعات مطابقة للبحث
-              </h3>
-              <p className="text-xs text-[var(--mn-text-muted)] max-w-xs font-['Cairo',sans-serif]">
-                جرب تغيير خيارات التصفية أو البحث باسم جامعة أخرى.
-              </p>
+              <h3 className="text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_no_matching_universities_found')}</h3>
+              <p className="text-xs text-[var(--mn-text-muted)] max-w-xs font-['Cairo',sans-serif]">{publicT('public_try_changing_the_filters_or_searching_for_another')}</p>
               <button
                 onClick={handleResetFilters}
                 className="mt-2 text-xs font-bold text-[var(--mn-heading)] bg-[var(--mn-primary)]/10 px-4 py-2 rounded-xl hover:bg-[var(--mn-primary)]/20 transition-colors font-['Cairo',sans-serif]"
-              >
-                مسح جميع الفلاتر
-              </button>
+              >{publicT('public_clear_all_filters')}</button>
             </div>
           ) : (
             filteredUniversities.map((univ) => {
@@ -401,7 +393,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
 
                   {/* Top Row: Logo & Names + Actions */}
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 sm:gap-2.5 text-right min-w-0 flex-1">
+                    <div className="flex items-center gap-2 sm:gap-2.5 text-start min-w-0 flex-1">
                       {/* Circular Flag Badge like the Scholarship Card */}
                       <div className="w-9.5 h-9.5 sm:w-10.5 sm:h-10.5 rounded-full p-0.5 bg-gradient-to-tr from-[var(--mn-primary)] via-[var(--mn-hero-secondary)] to-[var(--mn-accent-soft)] shadow-xs shrink-0 flex items-center justify-center mn-inverse ">
                         <div className="w-full h-full rounded-full overflow-hidden bg-[var(--mn-surface)] border border-white flex items-center justify-center text-lg sm:text-xl shadow-inner mn-panel ">
@@ -410,7 +402,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
                       </div>
 
                       {/* Names with beautiful responsive typography */}
-                      <div className="flex flex-col items-start text-right min-w-0 flex-1">
+                      <div className="flex flex-col items-start text-start min-w-0 flex-1">
                         <h3 className="text-[13px] sm:text-[14px] font-bold text-[var(--mn-heading)] dark:text-[var(--mn-accent-soft)] font-['Cairo',sans-serif] leading-tight truncate w-full">
                           {univ.name}
                         </h3>
@@ -424,7 +416,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
                     <button
                       onClick={(e) => toggleSave(e, univ.id)}
                       className="w-8 h-8 rounded-full bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)] border border-[var(--mn-border)] flex items-center justify-center transition-all active:scale-90 cursor-pointer shadow-2xs shrink-0 mn-panel hover:mn-panel "
-                      title="حفظ في المفضلة"
+                      title={publicT('public_save_to_favorites')}
                     >
                       <Heart
                         className={`w-4 h-4 ${isSaved ? 'fill-[var(--mn-accent)] text-[var(--mn-accent-text)]' : 'text-[var(--mn-text-muted)]'}`}
@@ -437,7 +429,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
                     {/* 1. Ownership / Type */}
                     <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
                       <Briefcase className="w-3 h-3 text-[var(--mn-accent-text)] shrink-0" />
-                      <span className="truncate">{univ.ownership || univ.type || 'حكومية'}</span>
+                      <span className="truncate">{univ.ownership || univ.type || publicT('public_government')}</span>
                     </div>
 
                     {/* 2. Location */}
@@ -445,7 +437,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
                       <MapPin className="w-3 h-3 text-[var(--mn-heading)] shrink-0" />
                       <span className="truncate">
                         {univ.country}
-                        {univ.city ? `، ${univ.city}` : ''}
+                        {univ.city ? publicT('public_city_suffix', { v0: univ.city }) : ''}
                       </span>
                     </div>
 
@@ -453,7 +445,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
                     <div className="bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-lg px-2 py-1 flex items-center justify-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--mn-text)] font-['Cairo',sans-serif] mn-panel ">
                       <History className="w-3 h-3 text-[var(--mn-link)] shrink-0" />
                       <span className="truncate">
-                        {univ.foundationYear ? `تأسست ${univ.foundationYear}` : 'جامعة معتمدة'}
+                        {univ.foundationYear ? publicT('public_founded_year', { v0: univ.foundationYear }) : publicT('public_accredited_university')}
                       </span>
                     </div>
 
@@ -466,7 +458,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
                       className="bg-[var(--mn-primary)] hover:bg-[var(--mn-primary)] text-white rounded-lg px-2.5 py-1.5 flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs mn-inverse hover:mn-inverse "
                       data-mn-design="26ecd1db9e"
                     >
-                      <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">عرض التفاصيل</span>
+                      <span className="text-[10px] sm:text-[11px] font-bold text-center leading-tight text-[var(--mn-accent-soft)]">{publicT('public_view_details')}</span>
                       <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[var(--mn-accent-soft)]" />
                     </button>
                   </div>

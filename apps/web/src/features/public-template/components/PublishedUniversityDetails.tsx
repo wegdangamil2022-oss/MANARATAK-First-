@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import { UniversityProgramDiscovery } from './UniversityProgramDiscovery';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -30,47 +31,49 @@ const text = (value: unknown): string =>
         : String(value);
 const url = (value: unknown) => (/^https?:\/\//i.test(text(value)) ? text(value) : undefined);
 const labels: Record<string, string> = {
-  minimumScore: 'الدرجة المطلوبة',
-  sectionScores: 'درجات الأقسام',
-  validityMetadata: 'صلاحية النتيجة',
-  restrictionMetadata: 'قيود القبول',
-  note: 'ملاحظة',
-  description: 'الوصف',
-  scope: 'النطاق',
-  scopeLabel: 'اسم النطاق',
-  effectiveFrom: 'ساري من',
-  effectiveTo: 'ساري إلى',
+  minimumScore: "public_published_required_score",
+  sectionScores: "public_published_section_scores",
+  validityMetadata: "public_published_score_validity",
+  restrictionMetadata: "public_published_admission_restrictions",
+  note: "public_published_note",
+  description: "public_published_description",
+  scope: "public_published_scope",
+  scopeLabel: "public_published_scope_name",
+  effectiveFrom: "public_published_effective_from",
+  effectiveTo: "public_published_effective_until",
   officialSourceUrl: 'المصدر الرسمي',
-  officialWebsite: 'الموقع الرسمي',
-  contactEmail: 'البريد الإلكتروني',
-  contactPhone: 'الهاتف',
-  profileType: 'نوع الرسوم',
-  organizationUnitName: 'الكلية / البرنامج',
-  amount: 'المبلغ',
-  currencyCode: 'العملة',
-  accommodationAvailable: 'السكن متاح',
-  internationalEligible: 'متاح للطلاب الدوليين',
-  typicalCost: 'تكلفة السكن',
-  averageMonthlyLivingCost: 'متوسط المعيشة الشهرية',
-  livingCostCurrencyCode: 'عملة المعيشة',
-  costVariationNote: 'ملاحظات التكلفة',
-  verifiedAt: 'تاريخ التحقق',
-  provider: 'الجهة',
-  rankingYear: 'السنة',
-  rank: 'المرتبة',
-  campusType: 'نوع الحرم',
-  address: 'العنوان',
-  unitType: 'نوع الوحدة',
-  latitude: 'خط العرض',
-  longitude: 'خط الطول',
-  acceptsDescription: 'تفاصيل القبول',
-  acceptsInternationalStudents: 'قبول الطلاب الدوليين',
+  officialWebsite: "public_published_official_website",
+  contactEmail: "public_published_email",
+  contactPhone: "public_published_phone",
+  profileType: "public_published_fee_type",
+  organizationUnitName: "public_published_faculty_program",
+  amount: "public_published_amount",
+  currencyCode: "public_published_currency",
+  accommodationAvailable: "public_published_accommodation_available",
+  internationalEligible: "public_published_available_to_international_students",
+  typicalCost: "public_published_accommodation_cost",
+  averageMonthlyLivingCost: "public_published_average_monthly_living_costs",
+  livingCostCurrencyCode: "public_published_living_cost_currency",
+  costVariationNote: "public_published_cost_notes",
+  verifiedAt: "public_published_verification_date",
+  provider: "public_published_organization",
+  rankingYear: "public_published_year",
+  rank: "public_published_rank",
+  campusType: "public_published_campus_type",
+  address: "public_published_address",
+  unitType: "public_published_unit_type",
+  latitude: "public_published_latitude",
+  longitude: "public_published_longitude",
+  acceptsDescription: "public_published_admission_details",
+  acceptsInternationalStudents: "public_published_international_student_admission",
   undergradAdmissionUrl: 'قبول البكالوريوس',
-  postgradAdmissionUrl: 'قبول الدراسات العليا',
-  internationalStudentsUrl: 'الطلاب الدوليون',
-  applicationPortalUrl: 'بوابة التقديم',
+  postgradAdmissionUrl: "public_published_postgraduate_admission",
+  internationalStudentsUrl: "public_published_international_students",
+  applicationPortalUrl: "public_published_application_portal",
 };
 function Value({ value }: { value: unknown }) {
+  const { t: publicT } = usePublicTemplateTranslation();
+  if (typeof value === 'boolean') return <span>{publicT(value ? 'public_yes' : 'public_no')}</span>;
   if (Array.isArray(value))
     return (
       <ul className="list-disc pr-4">
@@ -88,7 +91,7 @@ function Value({ value }: { value: unknown }) {
           .filter(([key]) => !key.endsWith('Id'))
           .map(([key, item]) => (
             <div key={key}>
-              <dt className="text-[var(--mn-primary)]">{labels[key] ?? key}</dt>
+              <dt className="text-[var(--mn-primary)]">{labels[key] ? publicT(labels[key]) : key}</dt>
               <dd>
                 <Value value={item} />
               </dd>
@@ -127,13 +130,14 @@ function Value({ value }: { value: unknown }) {
   );
 }
 function Fields({ row, keys }: { row: Row; keys: string[] }) {
+  const { t: publicT } = usePublicTemplateTranslation();
   return (
     <dl className="grid gap-2 sm:grid-cols-2">
       {keys
         .filter((key) => row[key] != null && row[key] !== '')
         .map((key) => (
           <div key={key} className="rounded-lg bg-[var(--mn-surface-muted)] p-2">
-            <dt className="text-[var(--mn-primary)]">{labels[key] ?? key}</dt>
+            <dt className="text-[var(--mn-primary)]">{labels[key] ? publicT(labels[key]) : key}</dt>
             <dd>
               <Value value={row[key]} />
             </dd>
@@ -151,6 +155,8 @@ export function PublishedUniversityDetails({
   onOpenMajor?: (id: string) => void;
   onOpenExam?: (id: string) => void;
 }) {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const dto = university.publishedData!;
   const data = dto as unknown as Row;
   const programs = dto.academicPrograms ?? [];
@@ -186,22 +192,22 @@ export function PublishedUniversityDetails({
       {dto.publicId && <UniversityProgramDiscovery universityPublicId={dto.publicId}/>}
       {section(
         'university-about',
-        'نبذة عن الجامعة',
+        publicT('public_published_university_overview'),
         BookOpen,
-        <Value value={dto.description || 'لم تُضف نبذة في البيانات المنشورة.'} />,
+        <Value value={dto.description || publicT('public_no_overview_has_been_added_to_the_published')} />,
       )}
       {section(
         'university-programs',
-        'الدراسة والكليات والبرامج',
+        publicT('public_published_study_faculties_and_programs'),
         GraduationCap,
         <>
           {!!dto.languagesOfInstruction?.length && (
-            <p>لغات الدراسة: {dto.languagesOfInstruction.join('، ')}</p>
+            <p>{publicT('public_study_languages')}{' '}{dto.languagesOfInstruction.join('، ')}</p>
           )}
           {!!dto.availableDegrees?.length && (
-            <p>الدرجات العلمية: {dto.availableDegrees.join('، ')}</p>
+            <p>{publicT('public_degrees_2')}{' '}{dto.availableDegrees.join('، ')}</p>
           )}
-          {!!dto.studyModes?.length && <p>أنماط الدراسة: {dto.studyModes.join('، ')}</p>}
+          {!!dto.studyModes?.length && <p>{publicT('public_study_arrangements')}{' '}{dto.studyModes.join('، ')}</p>}
           {collection(dto.organizationUnits ?? [], ['unitType'])}
           {!!dto.faculties?.length && <Value value={dto.faculties} />}
           {programs.map((program, index) => {
@@ -217,9 +223,7 @@ export function PublishedUniversityDetails({
                   <button
                     onClick={() => onOpenMajor?.(text(program.majorId))}
                     className="text-[var(--mn-primary)] underline"
-                  >
-                    تفاصيل التخصص
-                  </button>
+                  >{publicT('public_major_details')}</button>
                 )}
                 {Array.isArray(program.admissionRequirements) &&
                   program.admissionRequirements.map((raw, index) => {
@@ -233,7 +237,7 @@ export function PublishedUniversityDetails({
                         <p>
                           {text(test.displayName) ||
                             text(test.canonicalName) ||
-                            'متطلب اختبار قبول'}
+                            publicT('public_admission_exam_requirement')}
                         </p>
                         <Fields
                           row={requirement}
@@ -248,9 +252,7 @@ export function PublishedUniversityDetails({
                           <button
                             className="text-[var(--mn-primary)] underline"
                             onClick={() => onOpenExam?.(text(test.slug))}
-                          >
-                            تفاصيل الاختبار
-                          </button>
+                          >{publicT('public_exam_details')}</button>
                         )}
                       </div>
                     );
@@ -259,28 +261,28 @@ export function PublishedUniversityDetails({
             );
           })}
           {!programs.length && (
-            <p className="text-[var(--mn-text-muted)]">لم تُنشر برامج أكاديمية لهذه الجامعة.</p>
+            <p className="text-[var(--mn-text-muted)]">{publicT('public_no_academic_programs_have_been_published_for_this')}</p>
           )}
         </>,
       )}
       {!!dto.campuses?.length &&
         section(
           'university-campuses',
-          'الحرم الجامعي والموقع',
+          publicT('public_published_campus_and_location'),
           Building2,
           collection(dto.campuses, ['campusType', 'address', 'latitude', 'longitude']),
         )}
       {!!Object.keys(admissions).length &&
         section(
           'university-admissions',
-          'قبول الطلاب الدوليين والتقديم',
+          publicT('public_published_international_student_admission_and_applications'),
           Globe,
           <Fields row={admissions} keys={Object.keys(labels).filter((key) => key in admissions)} />,
         )}
       {!!dto.admissionRequirements?.length &&
         section(
           'university-requirements',
-          'متطلبات القبول',
+          publicT('public_published_admission_requirements'),
           FileText,
           collection(
             dto.admissionRequirements,
@@ -291,18 +293,18 @@ export function PublishedUniversityDetails({
       {(documents.length > 0 || graduateDocuments.length > 0) &&
         section(
           'university-documents',
-          'الوثائق المطلوبة',
+          publicT('public_published_required_documents'),
           FileText,
           <>
             {documents.length > 0 && (
               <>
-                <h3>الوثائق العامة</h3>
+                <h3>{publicT('public_general_documents')}</h3>
                 <Value value={documents} />
               </>
             )}
             {graduateDocuments.length > 0 && (
               <>
-                <h3>متطلبات الدراسات العليا</h3>
+                <h3>{publicT('public_postgraduate_requirements')}</h3>
                 <Value value={graduateDocuments} />
               </>
             )}
@@ -312,7 +314,7 @@ export function PublishedUniversityDetails({
       {!!dto.tuitionProfiles?.length &&
         section(
           'university-tuition',
-          'الرسوم الدراسية',
+          publicT('public_published_tuition_fees'),
           Coins,
           collection(dto.tuitionProfiles, [
             'profileType',
@@ -327,14 +329,14 @@ export function PublishedUniversityDetails({
       {!!dto.tuitionReferences?.length &&
         section(
           'university-tuition-references',
-          'مراجع الرسوم',
+          publicT('public_published_fee_references'),
           Coins,
           <Value value={dto.tuitionReferences} />,
         )}
       {!!dto.accommodationProfiles?.length &&
         section(
           'university-housing',
-          'السكن والمعيشة',
+          publicT('public_published_accommodation_and_living'),
           Building2,
           collection(dto.accommodationProfiles, [
             'accommodationAvailable',
@@ -349,7 +351,7 @@ export function PublishedUniversityDetails({
       {!!dto.rankings?.length &&
         section(
           'university-rankings',
-          'التصنيفات العالمية',
+          publicT('public_published_international_rankings'),
           Trophy,
           collection(dto.rankings, [
             'provider',
@@ -365,13 +367,13 @@ export function PublishedUniversityDetails({
       {!!dto.accreditations?.length &&
         section(
           'university-accreditation',
-          'الاعتمادات',
+          publicT('public_published_accreditations'),
           GraduationCap,
           <Value value={dto.accreditations} />,
         )}
       {section(
         'university-contacts',
-        'التواصل والروابط الرسمية',
+        publicT('public_published_contact_details_and_official_links'),
         Phone,
         <>
           <Fields

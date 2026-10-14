@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import {
   ArrowLeft,
@@ -57,9 +58,11 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
   searchAnchor,
   searchTerm,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   useDetailSearchTarget(searchAnchor, searchTerm);
   return (
-    <div className="min-h-screen bg-[var(--mn-page)] pb-24 text-[var(--mn-heading)] mn-panel " dir="rtl">
+    <div className="min-h-screen bg-[var(--mn-page)] pb-24 text-[var(--mn-heading)] mn-panel " dir={publicDir}>
       <div className="relative overflow-hidden border-b border-[var(--mn-accent)]/20 bg-gradient-to-br from-[var(--mn-primary)] via-[var(--mn-primary)] to-[var(--mn-primary)] px-4 pb-8 pt-4 text-white shadow-sm mn-inverse ">
         <div className="pointer-events-none absolute inset-0 opacity-20">
           <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full border border-[var(--mn-accent)]/50" />
@@ -89,7 +92,7 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
             <div className="min-w-0">
               <div className="mb-1 flex flex-wrap items-center gap-1.5">
                 <span className="text-[10px] font-bold text-[var(--mn-accent-soft)]">{course.provider}</span>
-                <span className="rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[8px] font-bold text-white">دورة مستوردة</span>
+                <span className="rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[8px] font-bold text-white">{publicT('public_imported_course')}</span>
               </div>
               <h1 className="text-[20px] font-bold leading-7 text-white sm:text-[22px]">{course.title}</h1>
             </div>
@@ -100,13 +103,11 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
           <div className="mt-3 flex flex-wrap gap-1.5">
             {course.studyFree && (
               <span className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-success-border)] bg-[var(--mn-success-solid)]/10 px-2.5 py-1 text-[9px] font-bold text-[var(--mn-success-text)]">
-                <CheckCircle2 className="h-3 w-3" /> الدراسة مجانية
-              </span>
+                <CheckCircle2 className="h-3 w-3" />{' '}{publicT('public_free_to_study')}</span>
             )}
             {course.freeCertificate && (
               <span className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-border-gold)] bg-[var(--mn-accent)]/10 px-2.5 py-1 text-[9px] font-bold text-[var(--mn-accent-soft)]">
-                <BadgeCheck className="h-3 w-3" /> شهادة مجانية
-              </span>
+                <BadgeCheck className="h-3 w-3" />{' '}{publicT('public_free_certificate')}</span>
             )}
           </div>
         </div>
@@ -123,30 +124,30 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
         </section>
 
         <section className="rounded-[20px] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-sm mn-panel ">
-          <DetailSectionHeader id="course-about" icon={Layers3} title="معلومات الدورة" subtitle="البيانات المستوردة من المصدر الرسمي" />
+          <DetailSectionHeader id="course-about" icon={Layers3} title={publicT('public_course_information')} subtitle="البيانات المستوردة من المصدر الرسمي" />
 
           <div className="divide-y divide-[var(--mn-border)] rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-page)]/60 px-3">
             <div className="flex items-center justify-between gap-3 py-2.5">
-              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">المنصة / الجامعة</span>
+              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">{publicT('public_platform_university')}</span>
               <span className="text-left text-[10.5px] font-bold text-[var(--mn-heading)]">{course.provider}</span>
             </div>
             <div className="flex items-center justify-between gap-3 py-2.5">
-              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">مجانية الدراسة</span>
-              <span className="text-[10.5px] font-bold text-[var(--mn-success-text)]">{course.studyFree ? 'نعم — مجانية' : 'لا'}</span>
+              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">{publicT('public_free_study')}</span>
+              <span className="text-[10.5px] font-bold text-[var(--mn-success-text)]">{course.studyFree ? publicT('public_yes_free') : publicT('public_no')}</span>
             </div>
             <div className="flex items-center justify-between gap-3 py-2.5">
-              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">الشهادة المجانية</span>
-              <span className="text-[10.5px] font-bold text-[var(--mn-success-text)]">{course.freeCertificate ? 'نعم — مجانية' : 'غير متوفرة'}</span>
+              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">{publicT('public_free_certification')}</span>
+              <span className="text-[10.5px] font-bold text-[var(--mn-success-text)]">{course.freeCertificate ? publicT('public_yes_free') : publicT('public_unavailable_3')}</span>
             </div>
             <div className="flex items-center justify-between gap-3 py-2.5">
-              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">نوع الشهادة</span>
+              <span className="text-[10px] font-bold text-[var(--mn-text-muted)]">{publicT('public_certificate_type')}</span>
               <span className="text-left text-[10.5px] font-bold text-[var(--mn-heading)]">{course.certificateType}</span>
             </div>
           </div>
         </section>
 
         <section className="rounded-[20px] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-sm mn-panel ">
-          <DetailSectionHeader id="course-topics" icon={BookOpen} title="موضوعات الدورة" subtitle="أبرز الموضوعات المسجلة في ملف الدورة" />
+          <DetailSectionHeader id="course-topics" icon={BookOpen} title={publicT('public_course_topics_2')} subtitle="أبرز الموضوعات المسجلة في ملف الدورة" />
 
           <div className="grid grid-cols-2 gap-2">
             {course.topics.map((topic) => (
@@ -164,14 +165,14 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
           course.relatedCountries?.length ||
           course.relatedExams?.length) ? (
           <section className="rounded-[20px] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-sm mn-panel ">
-            <DetailSectionHeader id="course-related" icon={Compass} title="روابط تعليمية مرتبطة" subtitle="انتقل إلى الكيانات المرتبطة داخل منارتك" />
+            <DetailSectionHeader id="course-related" icon={Compass} title={publicT('public_related_educational_links')} subtitle={publicT('public_go_to_related_entities_within_manaratak')} />
 
             <div className="space-y-3">
               {course.relatedMajors?.length ? (
                 <div>
                   <div className="mb-1.5 flex items-center gap-1.5 text-[9.5px] font-bold text-[var(--mn-text-muted)]">
                     <GraduationCap className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" />
-                    <span>تخصصات مرتبطة</span>
+                    <span>{publicT('public_related_majors')}</span>
                   </div>
                   <div className="mn-detail-small-grid">
                     {course.relatedMajors.map((item) => (
@@ -180,7 +181,7 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
                         type="button"
                         disabled={!item.id || !onOpenMajor}
                         onClick={() => item.id && onOpenMajor?.(item.id)}
-                        className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/75 px-3 py-2.5 text-right transition-all enabled:hover:border-[var(--mn-border-gold)] enabled:hover:bg-[var(--mn-surface)] disabled:cursor-default enabled:hover:mn-panel "
+                        className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/75 px-3 py-2.5 text-start transition-all enabled:hover:border-[var(--mn-border-gold)] enabled:hover:bg-[var(--mn-surface)] disabled:cursor-default enabled:hover:mn-panel "
                       >
                         <div className="min-w-0">
                           <div className="text-[10.5px] font-bold text-[var(--mn-heading)]">{item.name}</div>
@@ -197,11 +198,11 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
                 <div>
                   <div className="mb-1.5 flex items-center gap-1.5 text-[9.5px] font-bold text-[var(--mn-text-muted)]">
                     <Building2 className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" />
-                    <span>جامعات مرتبطة</span>
+                    <span>{publicT('public_related_universities')}</span>
                   </div>
                   <div className="mn-detail-small-grid">
                     {course.relatedUniversities.map((item) => (
-                      <button key={`${item.id ?? item.name}-university`} type="button" disabled={!item.id || !onOpenUniversity} onClick={() => item.id && onOpenUniversity?.(item.id)} className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/75 px-3 py-2.5 text-right transition-all enabled:hover:border-[var(--mn-border-gold)] enabled:hover:bg-[var(--mn-surface)] disabled:cursor-default enabled:hover:mn-panel ">
+                      <button key={`${item.id ?? item.name}-university`} type="button" disabled={!item.id || !onOpenUniversity} onClick={() => item.id && onOpenUniversity?.(item.id)} className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/75 px-3 py-2.5 text-start transition-all enabled:hover:border-[var(--mn-border-gold)] enabled:hover:bg-[var(--mn-surface)] disabled:cursor-default enabled:hover:mn-panel ">
                         <div className="min-w-0"><div className="text-[10.5px] font-bold text-[var(--mn-heading)]">{item.name}</div>{item.meta && <div className="mt-0.5 text-[8.5px] font-bold leading-4 text-[var(--mn-text-muted)]">{item.meta}</div>}</div>
                         <ArrowLeft className="h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)]" />
                       </button>
@@ -212,10 +213,10 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
 
               {course.relatedScholarships?.length ? (
                 <div>
-                  <div className="mb-1.5 flex items-center gap-1.5 text-[9.5px] font-bold text-[var(--mn-text-muted)]"><Award className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" /><span>منح مرتبطة</span></div>
+                  <div className="mb-1.5 flex items-center gap-1.5 text-[9.5px] font-bold text-[var(--mn-text-muted)]"><Award className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" /><span>{publicT('public_related_scholarships')}</span></div>
                   <div className="mn-detail-small-grid">
                     {course.relatedScholarships.map((item) => (
-                      <button key={`${item.id ?? item.name}-scholarship`} type="button" disabled={!item.id || !onOpenScholarship} onClick={() => item.id && onOpenScholarship?.(item.id)} className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/75 px-3 py-2.5 text-right transition-all enabled:hover:border-[var(--mn-border-gold)] enabled:hover:bg-[var(--mn-surface)] disabled:cursor-default enabled:hover:mn-panel ">
+                      <button key={`${item.id ?? item.name}-scholarship`} type="button" disabled={!item.id || !onOpenScholarship} onClick={() => item.id && onOpenScholarship?.(item.id)} className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/75 px-3 py-2.5 text-start transition-all enabled:hover:border-[var(--mn-border-gold)] enabled:hover:bg-[var(--mn-surface)] disabled:cursor-default enabled:hover:mn-panel ">
                         <div className="min-w-0"><div className="text-[10.5px] font-bold text-[var(--mn-heading)]">{item.name}</div>{item.meta && <div className="mt-0.5 text-[8.5px] font-bold leading-4 text-[var(--mn-text-muted)]">{item.meta}</div>}</div>
                         <ArrowLeft className="h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)]" />
                       </button>
@@ -226,10 +227,10 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
 
               {course.relatedCountries?.length ? (
                 <div>
-                  <div className="mb-1.5 flex items-center gap-1.5 text-[9.5px] font-bold text-[var(--mn-text-muted)]"><Globe2 className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" /><span>دول مرتبطة</span></div>
+                  <div className="mb-1.5 flex items-center gap-1.5 text-[9.5px] font-bold text-[var(--mn-text-muted)]"><Globe2 className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" /><span>{publicT('public_related_countries')}</span></div>
                   <div className="mn-detail-small-grid">
                     {course.relatedCountries.map((item) => (
-                      <button key={`${item.id ?? item.name}-country`} type="button" disabled={!onOpenCountry || !item.id} onClick={() => item.id && onOpenCountry?.(item.id)} className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/75 px-3 py-2.5 text-right transition-all enabled:hover:border-[var(--mn-border-gold)] enabled:hover:bg-[var(--mn-surface)] disabled:cursor-default enabled:hover:mn-panel ">
+                      <button key={`${item.id ?? item.name}-country`} type="button" disabled={!onOpenCountry || !item.id} onClick={() => item.id && onOpenCountry?.(item.id)} className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/75 px-3 py-2.5 text-start transition-all enabled:hover:border-[var(--mn-border-gold)] enabled:hover:bg-[var(--mn-surface)] disabled:cursor-default enabled:hover:mn-panel ">
                         <div className="min-w-0"><div className="text-[10.5px] font-bold text-[var(--mn-heading)]">{item.name}</div>{item.meta && <div className="mt-0.5 text-[8.5px] font-bold leading-4 text-[var(--mn-text-muted)]">{item.meta}</div>}</div>
                         <ArrowLeft className="h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)]" />
                       </button>
@@ -240,10 +241,10 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
 
               {course.relatedExams?.length ? (
                 <div>
-                  <div className="mb-1.5 flex items-center gap-1.5 text-[9.5px] font-bold text-[var(--mn-text-muted)]"><ShieldCheck className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" /><span>اختبارات مرتبطة</span></div>
+                  <div className="mb-1.5 flex items-center gap-1.5 text-[9.5px] font-bold text-[var(--mn-text-muted)]"><ShieldCheck className="h-3.5 w-3.5 text-[var(--mn-accent-text)]" /><span>{publicT('public_related_exams')}</span></div>
                   <div className="mn-detail-small-grid">
                     {course.relatedExams.map((item) => (
-                      <button key={`${item.id ?? item.name}-exam`} type="button" disabled={!item.id || !onOpenExam} onClick={() => item.id && onOpenExam?.(item.id)} className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/75 px-3 py-2.5 text-right transition-all enabled:hover:border-[var(--mn-border-gold)] enabled:hover:bg-[var(--mn-surface)] disabled:cursor-default enabled:hover:mn-panel ">
+                      <button key={`${item.id ?? item.name}-exam`} type="button" disabled={!item.id || !onOpenExam} onClick={() => item.id && onOpenExam?.(item.id)} className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/75 px-3 py-2.5 text-start transition-all enabled:hover:border-[var(--mn-border-gold)] enabled:hover:bg-[var(--mn-surface)] disabled:cursor-default enabled:hover:mn-panel ">
                         <div className="min-w-0"><div className="text-[10.5px] font-bold text-[var(--mn-heading)]">{item.name}</div>{item.meta && <div className="mt-0.5 text-[8.5px] font-bold leading-4 text-[var(--mn-text-muted)]">{item.meta}</div>}</div>
                         <ArrowLeft className="h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)]" />
                       </button>
@@ -256,12 +257,12 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
         ) : null}
 
         <section className="rounded-[20px] border border-[var(--mn-border-gold)] bg-gradient-to-br from-[var(--mn-gold-surface)]/70 to-[var(--mn-surface)] p-3.5 shadow-sm">
-          <DetailSectionHeader id="course-certificate" icon={ShieldCheck} title="المصدر الرسمي للدورة" />
+          <DetailSectionHeader id="course-certificate" icon={ShieldCheck} title={publicT('public_official_course_source')} />
           <div>
               <p className="mt-0.5 text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)]">
                 {course.freeCertificate
-                  ? `ستنتقل إلى صفحة الدورة المباشرة على ${course.provider} للدراسة وإكمال متطلبات الشهادة.`
-                  : `ستنتقل إلى صفحة الدورة المباشرة على ${course.provider} للدراسة من المصدر الرسمي.`}
+                  ? publicT('public_course_provider_certificate', { v0: course.provider })
+                  : publicT('public_course_provider_study', { v0: course.provider })}
               </p>
           </div>
 
@@ -273,12 +274,12 @@ export const ImportedCourseDetail: React.FC<ImportedCourseDetailProps> = ({
           >
             <span className="flex items-center gap-2">
               <ExternalLink className="h-4 w-4 text-[var(--mn-accent-text)]" />
-              <span className="text-[12px] font-bold">ابدأ الدورة</span>
+              <span className="text-[12px] font-bold">{publicT('public_start_course')}</span>
             </span>
             <ArrowLeft className="h-4 w-4 text-[var(--mn-accent-text)]" />
           </a>
 
-          <p className="mt-2 text-center text-[8.5px] font-bold text-[var(--mn-text-muted)]">رابط مباشر إلى صفحة الدورة الرسمية — يفتح في نافذة جديدة</p>
+          <p className="mt-2 text-center text-[8.5px] font-bold text-[var(--mn-text-muted)]">{publicT('public_direct_link_to_the_official_course_page_opens')}</p>
         </section>
       </main>
     </div>

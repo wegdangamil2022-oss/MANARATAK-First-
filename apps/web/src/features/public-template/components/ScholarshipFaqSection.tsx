@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState, useMemo } from "react";
 import {
   HelpCircle,
@@ -9,6 +10,8 @@ import {
 import { SCHOLARSHIPS_FAQ_ITEMS } from "../data/scholarshipsFaqData";
 
 export function ScholarshipFaqSection() {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [openIds, setOpenIds] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -38,7 +41,7 @@ export function ScholarshipFaqSection() {
   }, [searchQuery]);
 
   return (
-    <div className="relative w-full bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[var(--mn-border)] shadow-xs space-y-3 text-right font-['Cairo',sans-serif]">
+    <div className="relative w-full bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[var(--mn-border)] shadow-xs space-y-3 text-start font-['Cairo',sans-serif]">
       {/* Top Accent Line */}
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
 
@@ -49,12 +52,8 @@ export function ScholarshipFaqSection() {
             <HelpCircle className="w-3.5 h-3.5 text-[#D6A43B]" />
           </div>
           <div>
-            <h3 className="text-[13px] sm:text-[13.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-tight">
-              الأسئلة الشائعة عن المنح الدراسية
-            </h3>
-            <p className="text-[11px] font-bold text-[var(--mn-text-muted)] mt-0.5">
-              إجابات موثوقة ومفصلة مع أمثلة واقعية على أهم ٤٠ سؤالاً يطرحها الطلاب حول التقديم، الأعمار، الشروط، والتخصصات.
-            </p>
+            <h3 className="text-[13px] sm:text-[13.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-tight">{publicT('public_scholarship_frequently_asked_questions')}</h3>
+            <p className="text-[11px] font-bold text-[var(--mn-text-muted)] mt-0.5">{publicT('public_detailed_answers_with_real_examples_to_the_40')}</p>
           </div>
         </div>
       </div>
@@ -68,7 +67,7 @@ export function ScholarshipFaqSection() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ابحث في الأسئلة أو الإجابات..."
+            placeholder={publicT('public_search_questions_or_answers')}
             className="w-full pr-7 pl-2.5 py-1 text-[11.5px] font-bold rounded-md bg-[var(--mn-surface)] border border-[var(--mn-border)] text-[var(--mn-text)] placeholder:text-[var(--mn-text-muted)] focus:outline-none focus:border-[#D6A43B] transition-colors"
           />
         </div>
@@ -76,22 +75,17 @@ export function ScholarshipFaqSection() {
         {/* Action Controls */}
         <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
           <span className="text-[10.5px] font-bold text-[var(--mn-text-muted)] hidden md:inline-block ml-1">
-            {filteredFaqs.length} سؤال
-          </span>
+            {filteredFaqs.length}{' '}{publicT('public_question')}</span>
           <button
             type="button"
             onClick={expandAll}
             className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[#142B5F]/10 hover:bg-[#142B5F]/15 text-[#142B5F] dark:bg-[#F2CD78]/10 dark:text-[#F2CD78] border border-[#142B5F]/20 dark:border-[#F2CD78]/25 transition-colors cursor-pointer"
-          >
-            فتح الكل
-          </button>
+          >{publicT('public_expand_all')}</button>
           <button
             type="button"
             onClick={collapseAll}
             className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-border)] text-[var(--mn-text-muted)] border border-[var(--mn-border)] transition-colors cursor-pointer"
-          >
-            إغلاق الكل
-          </button>
+          >{publicT('public_collapse_all')}</button>
         </div>
       </div>
 
@@ -112,7 +106,7 @@ export function ScholarshipFaqSection() {
               <button
                 type="button"
                 onClick={() => toggleQuestion(faq.id)}
-                className={`w-full px-2.5 py-2 sm:px-3 sm:py-2.5 flex items-center justify-between gap-2.5 text-right cursor-pointer transition-colors select-none ${
+                className={`w-full px-2.5 py-2 sm:px-3 sm:py-2.5 flex items-center justify-between gap-2.5 text-start cursor-pointer transition-colors select-none ${
                   isOpen
                     ? "bg-[#142B5F]/5 dark:bg-[#F2CD78]/5"
                     : "hover:bg-[var(--mn-surface-muted)]/50"
@@ -152,9 +146,7 @@ export function ScholarshipFaqSection() {
                     <div className="mt-1 flex items-start gap-1.5 text-[11px] leading-[1.7] bg-[#142B5F]/5 dark:bg-[#F2CD78]/5 border border-[#142B5F]/15 dark:border-[#F2CD78]/20 rounded-md p-2 shadow-2xs">
                       <div className="flex items-center gap-1 shrink-0 text-[#D6A43B] dark:text-[#F2CD78] mt-0.5">
                         <Lightbulb className="w-3.5 h-3.5" />
-                        <span className="font-bold text-[#142B5F] dark:text-[#F2CD78]">
-                          مثال توضيحي:
-                        </span>
+                        <span className="font-bold text-[#142B5F] dark:text-[#F2CD78]">{publicT('public_example')}</span>
                       </div>
                       <span className="font-bold text-[var(--mn-text)] text-justify">
                         {faq.example}
@@ -169,21 +161,15 @@ export function ScholarshipFaqSection() {
       </div>
 
       {/* Important Golden Rule Card at the End of FAQ (Compact) */}
-      <div className="rounded-lg bg-[#D6A43B]/10 dark:bg-[#D6A43B]/15 border border-[#D6A43B]/30 p-2.5 sm:p-3 space-y-1 text-right shadow-2xs">
+      <div className="rounded-lg bg-[#D6A43B]/10 dark:bg-[#D6A43B]/15 border border-[#D6A43B]/30 p-2.5 sm:p-3 space-y-1 text-start shadow-2xs">
         <div className="flex items-center gap-1.5">
           <div className="w-5 h-5 rounded-md bg-[#D6A43B] text-white flex items-center justify-center shrink-0 shadow-2xs">
             <Sparkles className="w-3 h-3" />
           </div>
-          <h4 className="text-[12px] font-bold text-[#142B5F] dark:text-[#F2CD78]">
-            قاعدة مهمة
-          </h4>
+          <h4 className="text-[12px] font-bold text-[#142B5F] dark:text-[#F2CD78]">{publicT('public_important_principle')}</h4>
         </div>
-        <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
-          لا تحاول حفظ قاعدة واحدة وتطبيقها على جميع المنح. قد تكون منحة مفتوحة لكل الأعمار تقريبًا وأخرى تضع حدًا للعمر، ومنحة تطلب IELTS وأخرى لا تطلبه، ومنحة تقبل جميع الجنسيات وأخرى تحدد دولًا معينة، ومنحة تسمح بالتقديم المباشر وأخرى تتطلب ترشيحًا رسميًا.
-        </p>
-        <p className="text-[11.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-[1.8] text-justify">
-          لذلك الحكم دائمًا يكون من شروط المنحة في دورتها الحالية، وليس من تجربة طالب سابق أو منشور قديم على الإنترنت.
-        </p>
+        <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">{publicT('public_do_not_apply_one_rule_to_every_scholarship')}</p>
+        <p className="text-[11.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-[1.8] text-justify">{publicT('public_always_use_the_requirements_of_the_scholarships_current')}</p>
       </div>
     </div>
   );

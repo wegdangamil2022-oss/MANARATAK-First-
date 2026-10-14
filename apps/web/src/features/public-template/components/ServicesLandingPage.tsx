@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import {
   ArrowLeft,
@@ -40,11 +41,13 @@ function ServicePathCard({
   footer,
   onClick,
 }: ServicePathCardProps) {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group w-full overflow-hidden rounded-[22px] border border-[var(--mn-border)] bg-[var(--mn-surface)] text-right shadow-sm transition-all hover:border-[var(--mn-accent)]/45 hover:shadow-md active:scale-[0.99] mn-panel "
+      className="group w-full overflow-hidden rounded-[22px] border border-[var(--mn-border)] bg-[var(--mn-surface)] text-start shadow-sm transition-all hover:border-[var(--mn-accent)]/45 hover:shadow-md active:scale-[0.99] mn-panel "
     >
       <div className="h-1 bg-gradient-to-l from-[var(--mn-accent)] via-[var(--mn-accent-soft)] to-[var(--mn-primary)] mn-gold " />
       <div className="p-3.5 sm:p-4">
@@ -86,9 +89,7 @@ function ServicePathCard({
 
         <div className="mt-3 flex items-center justify-between gap-2 border-t border-[var(--mn-border)] pt-2.5">
           <span className="truncate text-[10px] font-bold text-[var(--mn-text-muted)]">{footer}</span>
-          <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] font-bold text-[var(--mn-heading)]">
-            استكشف الخدمات
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_explore_services')}<ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
           </span>
         </div>
       </div>
@@ -97,8 +98,10 @@ function ServicePathCard({
 }
 
 export const ServicesLandingPage: React.FC<ServicesLandingPageProps> = ({ onBack, onOpenTrack }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   return (
-    <div className="min-h-screen bg-[var(--mn-page)] pb-24 text-[var(--mn-heading)] font-['Cairo',sans-serif] select-none mn-panel " dir="rtl">
+    <div className="min-h-screen bg-[var(--mn-page)] pb-24 text-[var(--mn-heading)] font-['Cairo',sans-serif] select-none mn-panel " dir={publicDir}>
       <div className="relative mn-search-hero overflow-hidden border-b border-[var(--mn-accent)]/20 px-3 pb-12 pt-4 text-white shadow-xs sm:px-4 sm:pb-14 mn-inverse ">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-5 top-3 grid grid-cols-5 gap-1.5 opacity-20">
@@ -117,8 +120,8 @@ export const ServicesLandingPage: React.FC<ServicesLandingPageProps> = ({ onBack
             type="button"
             onClick={onBack}
             className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-8 h-8 bg-black/25 hover:bg-black/40 border border-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all z-30 cursor-pointer text-white shadow-xs active:scale-95"
-            title="العودة"
-            aria-label="العودة"
+            title={publicT('public_back')}
+            aria-label={publicT('public_back')}
           >
             <ChevronLeft className="w-4 h-4 rotate-180 text-white" />
           </button>
@@ -127,8 +130,7 @@ export const ServicesLandingPage: React.FC<ServicesLandingPageProps> = ({ onBack
         <div className="relative z-10 mx-auto max-w-md space-y-3 pt-6 text-center sm:max-w-xl">
           <div className="relative inline-block mb-2">
             <div className="absolute -inset-x-6 -inset-y-3 rounded-full bg-[var(--mn-accent)]/10 blur-xl" />
-            <h1 className="relative font-['Cairo',sans-serif] text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl">
-              خدمات <span className="text-[var(--mn-accent-soft)]">منارتك</span>
+            <h1 className="relative font-['Cairo',sans-serif] text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl">{publicT('public_services')}{' '}<span className="text-[var(--mn-accent-soft)]">{publicT('public_manaratak')}</span>
             </h1>
           </div>
           <div className="flex items-center justify-center gap-2 pb-2 pt-1">
@@ -136,22 +138,16 @@ export const ServicesLandingPage: React.FC<ServicesLandingPageProps> = ({ onBack
             <Briefcase className="h-4 w-4 text-[var(--mn-accent-text)]" />
             <div className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--mn-accent-soft)]/50" />
           </div>
-          <p className="mx-auto max-w-[90%] font-['Cairo',sans-serif] text-[13px] font-medium leading-relaxed text-[var(--mn-on-dark-muted)] drop-shadow-md sm:text-sm">
-            دعم متكامل في رحلتك الدراسية من الاختيار والتجهيز إلى التقديم والإجراءات المساندة.
-          </p>
+          <p className="mx-auto max-w-[90%] font-['Cairo',sans-serif] text-[13px] font-medium leading-relaxed text-[var(--mn-on-dark-muted)] drop-shadow-md sm:text-sm">{publicT('public_support_throughout_your_study_journey_from_choosing_and')}</p>
         </div>
       </div>
 
       <div className="relative z-20 mx-auto -mt-5 max-w-md mn-inline-gutter pb-24 sm:max-w-xl">
         <div className="mb-3.5 rounded-[22px] border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3.5 py-3.5 shadow-lg mn-panel ">
           <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0 text-right">
-              <h2 className="font-['Cairo',sans-serif] text-[15px] font-bold text-[var(--mn-heading)] sm:text-base">
-                اختر نوع الخدمة
-              </h2>
-              <p className="mt-0.5 font-['Cairo',sans-serif] text-[10.5px] font-semibold leading-5 text-[var(--mn-text-muted)] sm:text-[11px]">
-                اختر المسار أولاً، ثم تظهر الخدمات والبحث داخل القسم المختار.
-              </p>
+            <div className="min-w-0 text-start">
+              <h2 className="font-['Cairo',sans-serif] text-[15px] font-bold text-[var(--mn-heading)] sm:text-base">{publicT('public_choose_service_type')}</h2>
+              <p className="mt-0.5 font-['Cairo',sans-serif] text-[10.5px] font-semibold leading-5 text-[var(--mn-text-muted)] sm:text-[11px]">{publicT('public_choose_a_path_first_to_see_the_services')}</p>
             </div>
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--mn-accent)]/20 bg-[var(--mn-accent)]/10">
               <Search className="h-5 w-5 text-[var(--mn-accent-text)]" />
@@ -161,30 +157,30 @@ export const ServicesLandingPage: React.FC<ServicesLandingPageProps> = ({ onBack
 
         <div className="space-y-3">
           <ServicePathCard
-            title="الخدمات الطلابية"
+            title={publicT('public_student_services')}
             eyebrow="استشارات وتجهيز أكاديمي للطالب"
             badge="طلاب"
             description="اختيار الجامعة والتخصص، مراجعة وثائق التقديم، SOP، خطاب الدافع، المنح والسيرة الذاتية الأكاديمية."
             icon={GraduationCap}
             features={[
-              { label: 'اختيار أكاديمي', icon: Search },
-              { label: 'ملف التقديم', icon: CheckCircle2 },
-              { label: 'إرشاد', icon: BookOpenCheck },
+              { label: publicT('public_academic_choices'), icon: Search },
+              { label: publicT('public_application_profile'), icon: CheckCircle2 },
+              { label: publicT('public_guidance'), icon: BookOpenCheck },
             ]}
             footer="البحث وبطاقات الخدمات داخل القسم"
             onClick={() => onOpenTrack?.('student')}
           />
 
           <ServicePathCard
-            title="الخدمات العامة والدعم"
+            title={publicT('public_general_services_and_support')}
             eyebrow="وثائق وإجراءات مساندة لرحلة الدراسة"
             badge="دعم عام"
             description="ترجمة وتصديق الوثائق، التأشيرات والنماذج والإجراءات المساندة والسكن والاستقبال عند توفر الخدمة."
             icon={FileText}
             features={[
-              { label: 'ترجمة', icon: Languages },
-              { label: 'وثائق', icon: CheckCircle2 },
-              { label: 'إجراءات', icon: Plane },
+              { label: publicT('public_translation'), icon: Languages },
+              { label: publicT('public_documents'), icon: CheckCircle2 },
+              { label: publicT('public_procedures'), icon: Plane },
             ]}
             footer="التوفر الفعلي يحدد حسب نوع الخدمة"
             onClick={() => onOpenTrack?.('general')}

@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import {
   ArrowLeft,
@@ -59,7 +60,7 @@ const EntityCard: React.FC<{
     type="button"
     onClick={onClick}
     disabled={!onClick}
-    className="min-w-[154px] max-w-[176px] flex-1 rounded-2xl border border-[var(--mn-border)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] p-3 text-right shadow-2xs transition-all enabled:hover:border-[var(--mn-border-brand)] enabled:active:scale-[0.99] disabled:cursor-default mn-panel dark:mn-panel "
+    className="min-w-[154px] max-w-[176px] flex-1 rounded-2xl border border-[var(--mn-border)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] p-3 text-start shadow-2xs transition-all enabled:hover:border-[var(--mn-border-brand)] enabled:active:scale-[0.99] disabled:cursor-default mn-panel dark:mn-panel "
   >
     <div className="flex items-start gap-2">
       <div className="w-7 h-7 rounded-lg bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border-brand)]/20 flex items-center justify-center text-[var(--mn-accent-text)] shrink-0 mn-panel ">
@@ -101,45 +102,47 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
   searchAnchor,
   searchTerm,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   useDetailSearchTarget(searchAnchor, searchTerm);
   const facts = [
     {
-      label: 'العاصمة',
+      label: publicT('public_capital'),
       value: country.capitalCity || 'غير متوفر',
       icon: <MapPin className="w-3.5 h-3.5" />,
     },
     {
-      label: 'العملة',
+      label: publicT('public_currency_2'),
       value: country.currencyCode || 'غير متوفر',
       icon: <Banknote className="w-3.5 h-3.5" />,
     },
     {
-      label: 'رمز الدولة',
+      label: publicT('public_country_code'),
       value: [country.iso2Code, country.iso3Code].filter(Boolean).join(' / ') || 'غير متوفر',
       icon: <Flag className="w-3.5 h-3.5" />,
     },
     {
-      label: 'الاتصال',
+      label: publicT('public_contact'),
       value: country.callingCode || 'غير متوفر',
       icon: <Phone className="w-3.5 h-3.5" />,
     },
     {
-      label: 'اللغة المرجعية',
+      label: publicT('public_reference_language'),
       value: country.officialLanguages?.join('، ') || 'غير متوفر',
       icon: <Languages className="w-3.5 h-3.5" />,
     },
     {
-      label: 'المنطقة',
+      label: publicT('public_region'),
       value: country.subregion || country.continent,
       icon: <Globe2 className="w-3.5 h-3.5" />,
     },
     {
-      label: 'التوقيت',
+      label: publicT('public_time_zone'),
       value: country.timezones?.join('، ') || 'غير متوفر',
       icon: <Globe2 className="w-3.5 h-3.5" />,
     },
     {
-      label: 'لغات الدراسة',
+      label: publicT('public_study_languages_2'),
       value: country.languageOfStudy.join('، ') || 'غير متوفر',
       icon: <Languages className="w-3.5 h-3.5" />,
     },
@@ -148,8 +151,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
   const costItems = country.costHighlights?.length
     ? country.costHighlights
     : [
-        { label: 'متوسط المعيشة', value: country.averageLivingCostUsd },
-        { label: 'تصنيف التكلفة', value: country.livingCost },
+        { label: publicT('public_average_living_costs'), value: country.averageLivingCostUsd },
+        { label: publicT('public_cost_category'), value: country.livingCost },
       ];
 
   const extendedUniversities = country.featuredUniversities ?? [];
@@ -158,7 +161,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
   return (
     <div
       className="w-full bg-[var(--mn-page)] overflow-y-auto animate-fade-in font-['Cairo',sans-serif] pb-12 mn-panel "
-      dir="rtl"
+      dir={publicDir}
     >
       {/* 1. TOP HERO CONTAINER (Compact horizontal layout with flag + title + tags) */}
       <div className="relative w-full overflow-hidden shrink-0">
@@ -235,7 +238,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           {/* Hero Content: Horizontal Row (Flag Badge Right -> Arrow -> Title Left) */}
           <div
             className="absolute inset-0 flex items-start justify-between px-4 sm:px-6 pt-5 pb-6 z-10"
-            dir="rtl"
+            dir={publicDir}
           >
             {/* Right Side: Flag Badge + Arrow */}
             <div className="flex items-center gap-2.5 shrink-0 mt-1">
@@ -249,15 +252,15 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             </div>
 
             {/* Left Side (in RTL): Title, English Subtitle & Tags */}
-            <div className="flex flex-col text-right min-w-0 flex-1 pr-1.5">
+            <div className="flex flex-col text-start min-w-0 flex-1 pr-1.5">
               <div className="flex items-center gap-2">
                 <h1 className="text-[17px] sm:text-[18px] font-bold text-white leading-tight truncate drop-shadow-sm">
                   {country.name}
                 </h1>
                 <div className="flex items-center gap-1 text-[8px] sm:text-[8.5px] font-bold text-[var(--mn-accent-text)] bg-black/20 border border-white/10 rounded-full px-1.5 py-0.5 shadow-sm">
                   <Sparkles className="w-2.5 h-2.5" />
-                  <span className="hidden sm:inline">وجهة دراسية</span>
-                  <span className="sm:hidden">وجهة</span>
+                  <span className="hidden sm:inline">{publicT('public_study_destination')}</span>
+                  <span className="sm:hidden">{publicT('public_destination')}</span>
                 </div>
               </div>
               <p className="text-[11.5px] sm:text-[12px] font-bold text-white/90 font-['Cairo',sans-serif] mt-0.5 tracking-wider truncate">
@@ -271,13 +274,13 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                 </span>
                 <span className="px-1.5 py-0.5 rounded border border-white/20 bg-white/10 text-[9px] sm:text-[9.5px] font-bold text-white shadow-sm backdrop-blur-sm">
                   {country.universitiesCount == null
-                    ? 'غير متوفر'
-                    : `${country.universitiesCount} جامعة`}
+                    ? publicT('public_unavailable_2')
+                    : publicT('public_university_count', { v0: country.universitiesCount })}
                 </span>
                 <span className="px-1.5 py-0.5 rounded border border-white/20 bg-white/10 text-[9px] sm:text-[9.5px] font-bold text-white shadow-sm backdrop-blur-sm">
                   {country.scholarshipsCount == null
-                    ? 'غير متوفر'
-                    : `${country.scholarshipsCount} منحة`}
+                    ? publicT('public_unavailable_2')
+                    : publicT('public_scholarship_count', { v0: country.scholarshipsCount })}
                 </span>
               </div>
             </div>
@@ -312,7 +315,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           <SectionTitle
             icon={<Globe2 className="w-4 h-4" />}
             id="country-about"
-            title={`الدراسة في ${country.name}`}
+            title={publicT('public_study_in_country', { v0: country.name })}
             subtitle="نظرة سريعة تساعد الطالب على تقييم الوجهة"
           />
           <div className="rounded-xl border border-[var(--mn-border)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] p-3 mn-panel dark:mn-panel ">
@@ -335,8 +338,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
               <SectionTitle
                 icon={<Building2 className="w-4 h-4" />}
                 id="country-universities"
-                title="جامعات بارزة"
-                subtitle="أهم الجامعات للطلاب الدوليين"
+                title={publicT('public_notable_universities')}
+                subtitle={publicT('public_leading_universities_for_international_students')}
               />
               <button
                 type="button"
@@ -348,7 +351,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                 data-mn-design="45c440a9fe"
                 className="absolute left-0 top-0 h-6.5 px-2.5 sm:px-3 text-[10.5px] font-bold text-[var(--mn-link)] border border-[var(--mn-border)] bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-surface-elevated)] transition-colors rounded-full flex items-center gap-1.5 justify-center whitespace-nowrap cursor-pointer hover:shadow-2xs active:scale-95"
               >
-                <span>عرض الكل</span>
+                <span>{publicT('public_view_all')}</span>
                 <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-link)] shrink-0" />
               </button>
             </div>
@@ -361,7 +364,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => onOpenUniversity?.(item.id)}
-                  className="w-full snap-start flex items-center gap-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/45 p-2 text-right transition-all group cursor-pointer"
+                  className="w-full snap-start flex items-center gap-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/45 p-2 text-start transition-all group cursor-pointer"
                 >
                   <div className="w-7 h-7 rounded-full bg-[var(--mn-primary)] flex items-center justify-center shrink-0 border border-[var(--mn-accent)]/55 shadow-2xs mn-inverse">
                     <Building2 className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
@@ -404,8 +407,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
               <SectionTitle
                 icon={<GraduationCap className="w-4 h-4" />}
                 id="country-scholarships"
-                title="منح دراسية"
-                subtitle="منح مرتبطة بهذه الدولة"
+                title={publicT('public_scholarships_2')}
+                subtitle={publicT('public_scholarships_related_to_this_country')}
               />
               {onBrowseScholarships && (
                 <button
@@ -414,7 +417,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                   data-mn-design="45c440a9fe"
                   className="absolute left-0 top-0 h-6.5 px-2.5 sm:px-3 text-[10.5px] font-bold text-[var(--mn-link)] border border-[var(--mn-border)] bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-surface-elevated)] transition-colors rounded-full flex items-center gap-1.5 justify-center whitespace-nowrap cursor-pointer hover:shadow-2xs active:scale-95"
                 >
-                  <span>عرض الكل</span>
+                  <span>{publicT('public_view_all')}</span>
                   <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-link)] shrink-0" />
                 </button>
               )}
@@ -428,7 +431,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => onOpenScholarship?.(item.id)}
-                  className="w-full snap-start flex items-center gap-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/45 p-2 text-right transition-all group cursor-pointer"
+                  className="w-full snap-start flex items-center gap-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/45 p-2 text-start transition-all group cursor-pointer"
                 >
                   <div className="w-7 h-7 rounded-full bg-[var(--mn-primary)] flex items-center justify-center shrink-0 border border-[var(--mn-accent)]/55 shadow-2xs mn-inverse">
                     <GraduationCap className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
@@ -471,8 +474,8 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
               <SectionTitle
                 icon={<BookOpen className="w-4 h-4" />}
                 id="country-study"
-                title="تخصصات بارزة للدراسة"
-                subtitle="علاقة مشتقة من برامج الجامعات في الدولة"
+                title={publicT('public_notable_fields_of_study')}
+                subtitle={publicT('public_a_relationship_derived_from_university_programs_in_this')}
               />
             </div>
             <div
@@ -484,7 +487,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => onOpenMajor?.(item.id)}
-                  className="w-full snap-start flex items-center gap-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/45 p-2 text-right transition-all group cursor-pointer"
+                  className="w-full snap-start flex items-center gap-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/45 p-2 text-start transition-all group cursor-pointer"
                 >
                   <div className="w-7 h-7 rounded-full bg-[var(--mn-primary)] flex items-center justify-center shrink-0 border border-[var(--mn-accent)]/55 shadow-2xs mn-inverse">
                     <BookOpen className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
@@ -525,7 +528,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           <SectionTitle
             icon={<FileCheck2 className="w-4 h-4" />}
             id="country-exams"
-            title="القبول والاختبارات"
+            title={publicT('public_admission_and_exams')}
             subtitle="المتطلبات النهائية تختلف حسب الجامعة والبرنامج"
           />
           {country.admissionHighlights && country.admissionHighlights.length > 0 && (
@@ -563,7 +566,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           <SectionTitle
             icon={<ShieldCheck className="w-4 h-4" />}
             id="country-visa"
-            title="التأشيرة وشروط الدراسة"
+            title={publicT('public_visa_and_study_requirements')}
             subtitle={country.visaEase}
           />
           {country.visaSummary && (
@@ -592,7 +595,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           <SectionTitle
             icon={<WalletCards className="w-4 h-4" />}
             id="country-costs"
-            title="تكاليف المعيشة والدراسة"
+            title={publicT('public_living_and_study_costs')}
           />
           <div className="grid grid-cols-2 gap-2">
             {costItems.map((item) => (
@@ -615,7 +618,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
           <SectionTitle
             icon={<Users className="w-4 h-4" />}
             id="country-cities"
-            title="المدن والحياة الطلابية"
+            title={publicT('public_cities_and_student_life')}
           />
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none mb-2.5">
             {country.popularCities.map((city) => (
@@ -648,15 +651,15 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
         <RelatedArticlesStrip articles={country.relatedArticles} onOpenArticle={onOpenArticle} />
 
         {/* 10. Official links; source/audit and SEO stay admin-only */}
-        {country.sourceAuditDate && <p className="text-xs text-[var(--mn-text-muted)]">آخر تدقيق للمصادر: {country.sourceAuditDate.slice(0, 10)}</p>}
+        {country.sourceAuditDate && <p className="text-xs text-[var(--mn-text-muted)]">{publicT('public_last_source_review')}{' '}{country.sourceAuditDate.slice(0, 10)}</p>}
         {country.officialLinks && country.officialLinks.length > 0 && (
           <section className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] dark:border-[var(--mn-border)] bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] px-3 py-3 shadow-2xs mn-panel dark:mn-panel ">
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
             <SectionTitle
               icon={<ExternalLink className="w-4 h-4" />}
               id="country-official-links"
-              title="روابط رسمية"
-              subtitle="مصادر حكومية أو رسمية مرتبطة بالدراسة"
+              title={publicT('public_official_links')}
+              subtitle={publicT('public_government_or_official_sources_related_to_studying')}
             />
             <div className="grid grid-cols-2 gap-2">
               {country.officialLinks.map((link) => (
@@ -691,7 +694,7 @@ export const CountryDetailModal: React.FC<CountryDetailModalProps> = ({
             className="w-full min-h-11 rounded-xl bg-gradient-to-r from-[var(--mn-primary)] via-[var(--mn-hero-secondary)] to-[var(--mn-primary)] text-white font-bold text-[11px] flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] mn-inverse "
           >
             <GraduationCap className="w-4 h-4 text-[var(--mn-accent-text)]" />
-            <span>استعرض جميع منح {country.name}</span>
+            <span>{publicT('public_browse_all_scholarships_in')}{' '}{country.name}</span>
             <ArrowLeft className="w-3.5 h-3.5" />
           </button>
         )}

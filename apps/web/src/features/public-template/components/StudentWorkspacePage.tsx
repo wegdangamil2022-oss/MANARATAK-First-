@@ -1,3 +1,5 @@
+import { publicEnumLabel } from '../publicEnumCopy';
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useMemo, useState } from 'react';
 import {
   User,
@@ -87,6 +89,8 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
   onToggleDarkMode,
   onRestrictedAction,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   const [section, setSection] = useState<WorkspaceSection>('hub');
   const [recommendationsEnabled, setRecommendationsEnabled] = useState(true);
   const [activityTrackingEnabled, setActivityTrackingEnabled] = useState(true);
@@ -145,10 +149,10 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
     .slice(0, 6) as [FavoriteKind, number][];
 
   const navigation = [
-    { id: 'hub' as const, label: 'الرئيسية', icon: LayoutDashboard },
-    { id: 'vault' as const, label: 'المحفوظات', icon: Heart },
-    { id: 'journey' as const, label: 'رحلتي', icon: History },
-    { id: 'control' as const, label: 'الإعدادات', icon: Settings2 },
+    { id: 'hub' as const, label: publicT('public_home'), icon: LayoutDashboard },
+    { id: 'vault' as const, label: publicT('public_saved_items'), icon: Heart },
+    { id: 'journey' as const, label: publicT('public_my_journey'), icon: History },
+    { id: 'control' as const, label: publicT('public_settings'), icon: Settings2 },
   ];
 
   const EmptyWidget = ({ icon: Icon, title, text }: { icon: React.ElementType; title: string; text: string }) => (
@@ -160,7 +164,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
   );
 
   return (
-    <section className="w-full max-w-4xl mx-auto mn-inline-gutter pb-12 text-right font-['Cairo',sans-serif]" dir="rtl">
+    <section className="w-full max-w-4xl mx-auto mn-inline-gutter pb-12 text-start font-['Cairo',sans-serif]" dir={publicDir}>
       <div className="pt-3 sm:pt-5">
         {/* Main Hero Card with Golden Top Bar & Royal Gradient */}
         <div className="relative overflow-hidden rounded-[26px] border border-[#142B5F] dark:border-[#B38018]/50 bg-gradient-to-br from-[#142B5F] via-[#112450] to-[#0c1a3b] text-white shadow-md relative group">
@@ -182,13 +186,13 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
 
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-xl font-bold text-white leading-tight">
-                  {profile?.name || 'حساب الطالب في منارتك'}
+                  {profile?.name || publicT('public_manaratak_student_account')}
                 </h1>
 
                 <p className="text-[11.5px] sm:text-[12.5px] leading-relaxed text-white/80 mt-1 max-w-xl font-medium">
                   {profile
-                    ? 'مساحتك الشخصية المتكاملة لمتابعة رحلتك التعليمية، محفوظاتك، تنبيهاتك وإدارة ملفك الأكاديمي.'
-                    : 'مساحتك الخاصة لمتابعة الفرص والمنح الدراسية، حفظ المسارات المفضلة، ومتابعة خطوات تقديمك خطوة بخطوة.'}
+                    ? publicT('public_your_personal_space_to_follow_your_learning_journey')
+                    : publicT('public_your_space_to_follow_opportunities_and_scholarships_save')}
                 </p>
               </div>
             </div>
@@ -203,7 +207,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
               >
                 <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
                 <LogIn className="w-4 h-4 text-[#E5B54F] stroke-[2.2]" />
-                <span data-mn-design="01abfae3c9" className="text-white font-bold">تسجيل الدخول أو إنشاء حساب</span>
+                <span data-mn-design="01abfae3c9" className="text-white font-bold">{publicT('public_sign_in_or_create_an_account')}</span>
               </button>
             )}
           </div>
@@ -237,10 +241,10 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
             {/* Quick Stat Counters */}
             <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
               {[
-                { label: 'محفوظ', value: favoritesCount, icon: Heart, action: () => handleAction(onOpenFavorites) },
-                { label: 'تنبيهات', value: unreadCount, icon: Bell, action: () => handleAction(onOpenNotifications) },
-                { label: 'متابعات', value: activeMilestones.length, icon: ListChecks, action: () => setSection('journey') },
-                { label: 'التقدم', value: `${journeyProgress}%`, icon: CheckCircle2, action: () => setSection('journey') },
+                { label: publicT('public_saved_4'), value: favoritesCount, icon: Heart, action: () => handleAction(onOpenFavorites) },
+                { label: publicT('public_alerts'), value: unreadCount, icon: Bell, action: () => handleAction(onOpenNotifications) },
+                { label: publicT('public_tracked_applications_2'), value: activeMilestones.length, icon: ListChecks, action: () => setSection('journey') },
+                { label: publicT('public_progress'), value: `${journeyProgress}%`, icon: CheckCircle2, action: () => setSection('journey') },
               ].map((item) => {
                 const Icon = item.icon;
                 return (
@@ -264,19 +268,19 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                     <GraduationCap className="w-3.5 h-3.5 text-[#E5B54F]" />
                   </div>
-                  <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">ملفي الأكاديمي</h2>
+                  <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_my_academic_profile')}</h2>
                 </div>
                 <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                <p className="text-[10.5px] text-[var(--mn-text-muted)] font-medium">ملخص بياناتك الأكاديمية والدرجة والتخصص المستهدف.</p>
+                <p className="text-[10.5px] text-[var(--mn-text-muted)] font-medium">{publicT('public_a_summary_of_your_academic_information_target_degree')}</p>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {[
-                  ['الدرجة المستهدفة', profile?.degreeLevel || 'غير محدد'],
-                  ['التخصص المستهدف', profile?.targetMajor || 'غير محدد'],
-                  ['المعدل التراكمي', profile?.gpa || 'غير مرتبط'],
-                  ['مستوى الإنجليزية', profile?.englishLevel || 'غير محدد'],
-                  ['الدول المستهدفة', profile?.targetCountries?.length ? profile.targetCountries.join('، ') : 'غير محدد'],
-                  ['حالة الحساب', profile ? 'مرتبط ومفعل' : 'معاينة فقط'],
+                  [publicT('public_target_degree'), profile?.degreeLevel || publicT('public_not_specified_5')],
+                  [publicT('public_target_major'), profile?.targetMajor || publicT('public_not_specified_5')],
+                  [publicT('public_gpa_2'), profile?.gpa || publicT('public_not_linked')],
+                  [publicT('public_english_level'), profile?.englishLevel || publicT('public_not_specified_5')],
+                  [publicT('public_target_countries'), profile?.targetCountries?.length ? profile.targetCountries.join('، ') : publicT('public_not_specified_5')],
+                  [publicT('public_account_status'), profile ? publicT('public_linked_and_active') : publicT('public_preview_only')],
                 ].map(([label, value]) => (
                   <div key={label} className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] dark:border-white/10 p-2.5 mn-panel text-center">
                     <div className="text-[9.5px] font-bold text-[var(--mn-text-muted)]">{label}</div>
@@ -292,7 +296,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   className="mt-3.5 w-full min-h-[36px] rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs py-2 px-3 relative overflow-hidden group"
                 >
                   <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B]/60 to-transparent" />
-                  <span data-mn-design="3b7dc7a9b0">تسجيل الدخول لإكمال ملفك الأكاديمي</span>
+                  <span data-mn-design="3b7dc7a9b0">{publicT('public_sign_in_to_complete_your_academic_profile')}</span>
                   <ChevronLeft className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] group-hover:-translate-x-0.5 transition-transform" />
                 </button>
               )}
@@ -308,23 +312,23 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                       <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                         <History className="w-3.5 h-3.5 text-[#E5B54F]" />
                       </div>
-                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">رحلتي الآن</h2>
+                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_my_current_journey')}</h2>
                     </div>
                     <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                    <p className="text-[10.5px] text-[var(--mn-text-muted)] font-medium">ملخص الخطوات والمتابعات الجارية.</p>
+                    <p className="text-[10.5px] text-[var(--mn-text-muted)] font-medium">{publicT('public_a_summary_of_your_ongoing_steps_and_tracked')}</p>
                   </div>
                   {latestJourneyItems.length ? (
                     <div className="space-y-2">
                       {latestJourneyItems.slice(0, 3).map((item) => (
                         <div key={item.id} className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 border border-[var(--mn-border)] dark:border-white/10 mn-panel">
-                          <div className="text-[9.5px] font-bold text-[#142B5F] dark:text-[#E5B54F]">{item.type}</div>
+                          <div className="text-[9.5px] font-bold text-[#142B5F] dark:text-[#E5B54F]">{publicEnumLabel(item.type, publicT)}</div>
                           <div className="text-[11px] font-bold text-[var(--mn-heading)] mt-0.5 line-clamp-1">{item.title}</div>
                           <div className="text-[9.5px] text-[var(--mn-text-muted)] mt-1">{item.meta}</div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <EmptyWidget icon={History} title="رحلتك ستظهر هنا" text="تظهر الخطوات والأحداث بعد تسجيل الدخول وبدء التقديم." />
+                    <EmptyWidget icon={History} title={publicT('public_your_journey_will_appear_here')} text={publicT('public_steps_and_events_appear_after_you_sign_in')} />
                   )}
                 </div>
                 {latestJourneyItems.length > 0 && (
@@ -335,7 +339,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                     className="mt-3 w-full min-h-[36px] rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs py-2 px-3 relative overflow-hidden group"
                   >
                     <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
-                    <span data-mn-design="3b7dc7a9b0">عرض الرحلة والمتابعة</span>
+                    <span data-mn-design="3b7dc7a9b0">{publicT('public_view_journey_and_tracking')}</span>
                     <ChevronLeft className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] group-hover:-translate-x-0.5 transition-transform" />
                   </button>
                 )}
@@ -349,10 +353,10 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                       <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                         <CalendarClock className="w-3.5 h-3.5 text-[#E5B54F]" />
                       </div>
-                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">المواعيد المهمة</h2>
+                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_important_dates')}</h2>
                     </div>
                     <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                    <p className="text-[10.5px] text-[var(--mn-text-muted)] font-medium">المواعيد النهائية القادمة لفرصك.</p>
+                    <p className="text-[10.5px] text-[var(--mn-text-muted)] font-medium">{publicT('public_upcoming_deadlines_for_your_opportunities')}</p>
                   </div>
                   {activeMilestones.length ? (
                     <div className="space-y-2">
@@ -360,7 +364,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                         <button
                           key={item.id}
                           onClick={() => setSection('journey')}
-                          className="w-full rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 text-right mn-panel cursor-pointer"
+                          className="w-full rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 text-start mn-panel cursor-pointer"
                         >
                           <div className="text-[11px] font-bold text-[var(--mn-heading)] line-clamp-1">{item.scholarshipTitle}</div>
                           <div className="mt-1.5 flex items-center justify-between gap-2 text-[9.5px] text-[var(--mn-text-muted)]">
@@ -371,7 +375,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                       ))}
                     </div>
                   ) : (
-                    <EmptyWidget icon={CalendarClock} title="لا توجد مواعيد حالية" text="سيظهر هنا أي موعد نهائي أو موعد تقديم يتطلب انتباهك." />
+                    <EmptyWidget icon={CalendarClock} title={publicT('public_no_current_deadlines')} text={publicT('public_application_dates_and_deadlines_requiring_your_attention_will')} />
                   )}
                 </div>
               </div>
@@ -387,16 +391,16 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                       <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                         <Award className="w-3.5 h-3.5 text-[#E5B54F]" />
                       </div>
-                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">إنجازاتي والشهادات</h2>
+                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_my_achievements_and_certificates')}</h2>
                     </div>
                     <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                    <p className="text-[10px] text-[var(--mn-text-muted)] font-medium">الشهادات المكتسبة والأوسمة الرقمية.</p>
+                    <p className="text-[10px] text-[var(--mn-text-muted)] font-medium">{publicT('public_earned_certificates_and_digital_badges')}</p>
                   </div>
 
                   <EmptyWidget
                     icon={Award}
-                    title="لا توجد شهادات مرتبطة بعد"
-                    text="عند إتمام دورة تدريبية أو اجتياز برنامج بنجاح، ستصدر شهادتك المعتمدة وتظهر هنا تلقائياً مع خيار التحميل والمشاركة."
+                    title={publicT('public_no_linked_certificates_yet')}
+                    text={publicT('public_when_you_complete_a_course_or_program_successfully')}
                   />
                 </div>
               </div>
@@ -409,16 +413,16 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                       <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                         <BookOpen className="w-3.5 h-3.5 text-[#E5B54F]" />
                       </div>
-                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">متابعة الدورات والتعلم</h2>
+                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_course_and_learning_progress')}</h2>
                     </div>
                     <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                    <p className="text-[10px] text-[var(--mn-text-muted)] font-medium">الدورات الجارية ونسبة الإنجاز والدروس.</p>
+                    <p className="text-[10px] text-[var(--mn-text-muted)] font-medium">{publicT('public_ongoing_courses_completion_progress_and_lessons')}</p>
                   </div>
 
                   <EmptyWidget
                     icon={BookOpen}
-                    title="لم تسجل في أي دورة بعد"
-                    text="استكشف دليل الدورات وسجل في دوراتك المفضلة لمتابعة تقدمك التعليمي والدروس خطوة بخطوة."
+                    title={publicT('public_you_have_not_enrolled_in_any_courses_yet')}
+                    text={publicT('public_explore_the_course_directory_and_enroll_in_your')}
                   />
                 </div>
               </div>
@@ -431,12 +435,10 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                     <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
                   </div>
-                  <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">توصيات مخصصة لك</h2>
+                  <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_personalized_recommendations')}</h2>
                 </div>
                 <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">
-                  اكتشف أفضل الفرص والمنح والدورات المتوافقة مع أهدافك وتخصصك الأكاديمي عبر محرك البحث الذكي.
-                </p>
+                <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">{publicT('public_find_scholarships_courses_and_opportunities_that_fit_your')}</p>
                 <button
                   type="button"
                   onClick={() => handleAction(onOpenSmartSearch)}
@@ -444,7 +446,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   className="mt-3 inline-flex items-center justify-center gap-1.5 min-h-[34px] px-4 rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold transition-all cursor-pointer shadow-2xs py-1.5 relative overflow-hidden group"
                 >
                   <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
-                  <span data-mn-design="3b7dc7a9b0">استخدم البحث الذكي الآن</span>
+                  <span data-mn-design="3b7dc7a9b0">{publicT('public_use_smart_search_now')}</span>
                   <ChevronLeft className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] group-hover:-translate-x-0.5 transition-transform" />
                 </button>
               </div>
@@ -458,16 +460,16 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
             <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">خزنة المحفوظات</span>
-                  <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">المفضلة والمحفوظات</h2>
-                  <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">مساحة موحدة لكل ما تحفظه من منح، جامعات، تخصصات ودورات.</p>
+                  <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">{publicT('public_saved_items_vault')}</span>
+                  <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">{publicT('public_favorites_and_saved_items')}</h2>
+                  <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">{publicT('public_one_space_for_all_your_saved_scholarships_universities')}</p>
                 </div>
                 <div className="w-11 h-11 rounded-2xl bg-red-500/10 dark:bg-red-500/15 flex items-center justify-center shrink-0">
                   <Heart className="w-5 h-5 text-red-600 dark:text-red-400 fill-red-500/20" />
                 </div>
               </div>
               <div className="mt-4 text-3xl font-bold text-[var(--mn-heading)]">{favoritesCount}</div>
-              <div className="text-[11px] font-medium text-[var(--mn-text-muted)] mt-0.5">عنصر محفوظ في حسابك</div>
+              <div className="text-[11px] font-medium text-[var(--mn-text-muted)] mt-0.5">{publicT('public_item_saved_in_your_account')}</div>
             </div>
 
             {savedGroups.length ? (
@@ -476,15 +478,15 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   <button
                     key={kind}
                     onClick={() => handleAction(onOpenFavorites)}
-                    className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-right shadow-2xs active:scale-[0.98] transition-all mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
+                    className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-start shadow-2xs active:scale-[0.98] transition-all mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
                   >
                     <div className="text-xl font-bold text-[var(--mn-heading)]">{count}</div>
-                    <div className="text-[10.5px] font-bold text-[var(--mn-text-muted)] mt-1">{kindLabels[kind] || kind}</div>
+                    <div className="text-[10.5px] font-bold text-[var(--mn-text-muted)] mt-1">{publicEnumLabel(kindLabels[kind] || kind, publicT)}</div>
                   </button>
                 ))}
               </div>
             ) : (
-              <EmptyWidget icon={Heart} title="خزنتك فارغة حالياً" text="احفظ أي منحة أو جامعة أو دورة تعجبك للوصول إليها هنا في أي وقت." />
+              <EmptyWidget icon={Heart} title={publicT('public_your_vault_is_currently_empty')} text={publicT('public_save_a_scholarship_university_or_course_you_like')} />
             )}
 
             <button
@@ -492,7 +494,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
               onClick={() => handleAction(onOpenFavorites)}
               className="w-full min-h-[44px] rounded-xl bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white border border-[#E5B54F]/40 font-bold text-xs sm:text-[13px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xs cursor-pointer mn-inverse"
             >
-              <span>فتح كل المفضلة والمحفوظات</span>
+              <span>{publicT('public_open_all_favorites_and_saved_items')}</span>
               <ChevronLeft className="w-4 h-4 text-[#E5B54F]" />
             </button>
           </div>
@@ -502,28 +504,28 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
         {section === 'journey' && (
           <div className="mt-3.5 space-y-3.5">
             <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
-              <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">مسار التقديم</span>
-              <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">رحلتي التعليمية</h2>
-              <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">سجل تفاعلي يجمع كافة خطوات تقديمك على المنح والدورات والجامعات.</p>
+              <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">{publicT('public_application_process')}</span>
+              <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">{publicT('public_my_learning_journey')}</h2>
+              <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">{publicT('public_an_interactive_record_of_your_scholarship_course_and')}</p>
               <div className="mt-4 grid grid-cols-3 gap-2">
                 <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 text-center mn-panel">
                   <div className="text-lg font-bold text-[var(--mn-heading)]">{activeMilestones.length}</div>
-                  <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-1">متابعة نشطة</div>
+                  <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-1">{publicT('public_active_tracking')}</div>
                 </div>
                 <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 text-center mn-panel">
                   <div className="text-lg font-bold text-[var(--mn-heading)]">{journeyProgress}%</div>
-                  <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-1">تقدم المهام</div>
+                  <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-1">{publicT('public_task_progress')}</div>
                 </div>
                 <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 text-center mn-panel">
                   <div className="text-lg font-bold text-[var(--mn-heading)]">{notifications.length}</div>
-                  <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-1">تنبيهات الفرص</div>
+                  <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-1">{publicT('public_opportunity_alerts')}</div>
                 </div>
               </div>
             </div>
 
             <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <h3 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)]">آخر النشاطات</h3>
+                <h3 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)]">{publicT('public_latest_activity')}</h3>
                 <Clock3 className="w-4 h-4 text-[#142B5F] dark:text-[#E5B54F]" />
               </div>
               {latestJourneyItems.length ? (
@@ -540,7 +542,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   ))}
                 </div>
               ) : (
-                <EmptyWidget icon={History} title="لا توجد أحداث مسجلة بعد" text="سيتم بناء سجل نشاطاتك تلقائياً عند التفاعل مع المنح والتقديمات." />
+                <EmptyWidget icon={History} title={publicT('public_no_events_recorded_yet')} text={publicT('public_your_activity_record_will_be_built_automatically_as')} />
               )}
             </div>
           </div>
@@ -550,30 +552,30 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
         {section === 'control' && (
           <div className="mt-3.5 space-y-3.5">
             <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
-              <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">إعدادات الحساب</span>
-              <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">الإعدادات والخصوصية</h2>
-              <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">تحكم في تفضيلات حسابك، الإشعارات، واللغة والمظهر.</p>
+              <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">{publicT('public_account_settings')}</span>
+              <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">{publicT('public_settings_and_privacy')}</h2>
+              <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">{publicT('public_manage_account_preferences_notifications_language_and_appearance')}</p>
             </div>
 
             <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] overflow-hidden shadow-2xs mn-panel">
               {[
                 {
-                  title: 'التوصيات المخصصة',
-                  text: 'السماح بعرض فرص وبرامج مقترحة تتوافق مع اهتماماتك.',
+                  title: publicT('public_personalized_recommendations_2'),
+                  text: publicT('public_allow_suggested_opportunities_and_programs_that_fit_your'),
                   icon: Sparkles,
                   enabled: recommendationsEnabled,
                   toggle: () => setRecommendationsEnabled((value) => !value),
                 },
                 {
-                  title: 'سجل النشاط والبحث',
-                  text: 'حفظ آخر ما قمت بالبحث عنه لتسهيل الرجوع إليه.',
+                  title: publicT('public_activity_and_search_history'),
+                  text: publicT('public_save_recent_searches_to_make_them_easier_to'),
                   icon: History,
                   enabled: activityTrackingEnabled,
                   toggle: () => setActivityTrackingEnabled((value) => !value),
                 },
                 {
-                  title: 'التنبيهات الفورية',
-                  text: 'إظهار تنبيهات مواعيد التقديم والمستجدات الهامة.',
+                  title: publicT('public_instant_notifications'),
+                  text: publicT('public_show_application_deadline_alerts_and_important_updates'),
                   icon: Bell,
                   enabled: notificationPreviewEnabled,
                   toggle: () => setNotificationPreviewEnabled((value) => !value),
@@ -593,7 +595,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                       type="button"
                       onClick={() => handleAction(item.toggle)}
                       className={`w-11 h-6 p-0.5 rounded-full transition-colors shrink-0 cursor-pointer ${item.enabled ? 'bg-[#142B5F] dark:bg-[#E5B54F]' : 'bg-slate-300 dark:bg-slate-700'}`}
-                      aria-label={`تبديل ${item.title}`}
+                      aria-label={`${publicT('public_toggle')} ${item.title}`}
                     >
                       <span className={`block w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${item.enabled ? '-translate-x-5' : 'translate-x-0'}`} />
                     </button>
@@ -606,22 +608,22 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
               <button
                 type="button"
                 onClick={() => handleAction(onToggleLanguage)}
-                className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-right flex items-center justify-between gap-2 mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
+                className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-start flex items-center justify-between gap-2 mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
               >
                 <div>
-                  <div className="text-[11px] font-bold text-[var(--mn-heading)]">اللغة</div>
-                  <div className="text-[10px] font-medium text-[var(--mn-text-muted)] mt-0.5">{language === 'ar' ? 'العربية' : 'English'}</div>
+                  <div className="text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_language')}</div>
+                  <div className="text-[10px] font-medium text-[var(--mn-text-muted)] mt-0.5">{language === 'ar' ? publicT('public_arabic') : 'English'}</div>
                 </div>
                 <Languages className="w-4 h-4 text-[#142B5F] dark:text-[#E5B54F]" />
               </button>
               <button
                 type="button"
                 onClick={onToggleDarkMode}
-                className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-right flex items-center justify-between gap-2 mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
+                className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-start flex items-center justify-between gap-2 mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
               >
                 <div>
-                  <div className="text-[11px] font-bold text-[var(--mn-heading)]">المظهر</div>
-                  <div className="text-[10px] font-medium text-[var(--mn-text-muted)] mt-0.5">{isDarkMode ? 'الوضع الليلي' : 'الوضع النهاري'}</div>
+                  <div className="text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_appearance')}</div>
+                  <div className="text-[10px] font-medium text-[var(--mn-text-muted)] mt-0.5">{isDarkMode ? publicT('public_dark_mode') : publicT('public_light_mode')}</div>
                 </div>
                 {isDarkMode ? <Moon className="w-4 h-4 text-[#E5B54F]" /> : <Sun className="w-4 h-4 text-[#142B5F]" />}
               </button>
@@ -629,9 +631,9 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
 
             <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] divide-y divide-[var(--mn-border)] dark:divide-white/10 shadow-2xs mn-panel">
               {[
-                { label: 'إدارة مركز التنبيهات والإشعارات', icon: Bell, action: onOpenNotifications },
-                { label: 'البحث داخل مساحة الطالب', icon: Search, action: onOpenGlobalSearch },
-                { label: 'إعدادات الحساب وكلمة المرور', icon: LockKeyhole, action: onOpenAuth },
+                { label: publicT('public_manage_the_notification_and_alert_center'), icon: Bell, action: onOpenNotifications },
+                { label: publicT('public_search_within_the_student_workspace'), icon: Search, action: onOpenGlobalSearch },
+                { label: publicT('public_account_and_password_settings'), icon: LockKeyhole, action: onOpenAuth },
               ].map((item) => {
                 const Icon = item.icon;
                 return (
@@ -639,7 +641,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                     key={item.label}
                     type="button"
                     onClick={() => handleAction(item.action)}
-                    className="w-full min-h-[48px] px-4 flex items-center justify-between gap-3 text-right cursor-pointer hover:bg-[var(--mn-page)]/50 transition-colors"
+                    className="w-full min-h-[48px] px-4 flex items-center justify-between gap-3 text-start cursor-pointer hover:bg-[var(--mn-page)]/50 transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
                       <Icon className="w-4 h-4 text-[#142B5F] dark:text-[#E5B54F]" />
@@ -654,11 +656,9 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
             <div className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 space-y-1.5 mn-panel">
               <div className="flex items-center gap-2 text-[11px] font-bold text-[var(--mn-heading)]">
                 <ShieldCheck className="w-4 h-4 text-[#142B5F] dark:text-[#E5B54F]" />
-                <span>خصوصيتك وأمان بياناتك في منارتك</span>
+                <span>{publicT('public_your_privacy_and_data_security_in_manaratak')}</span>
               </div>
-              <p className="text-[10px] leading-relaxed text-[var(--mn-text-muted)] font-medium">
-                بياناتك وملفاتك الأكاديمية مشفرة ومحمية بالكامل، ولا يتم مشاركتها إلا مع الجامعات والجهات التعليمية التي تختار التقديم إليها بنفسك.
-              </p>
+              <p className="text-[10px] leading-relaxed text-[var(--mn-text-muted)] font-medium">{publicT('public_your_academic_information_and_files_are_encrypted_and')}</p>
             </div>
           </div>
         )}

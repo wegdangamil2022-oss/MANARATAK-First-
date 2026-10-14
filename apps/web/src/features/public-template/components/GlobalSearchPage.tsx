@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight, BookOpen, BriefcaseBusiness, Building2, ChevronLeft, FileText, GraduationCap,
@@ -44,16 +45,16 @@ interface GlobalSearchPageProps {
 }
 
 const CATEGORY_META: Record<GlobalResultKind, { label: string; icon: React.ReactNode }> = {
-  scholarships: { label: 'المنح', icon: <GraduationCap className="h-4 w-4" /> },
-  universities: { label: 'الجامعات', icon: <Building2 className="h-4 w-4" /> },
-  majors: { label: 'التخصصات', icon: <BookOpen className="h-4 w-4" /> },
-  countries: { label: 'الدول', icon: <Landmark className="h-4 w-4" /> },
-  courses: { label: 'الدورات', icon: <BookOpen className="h-4 w-4" /> },
-  exams: { label: 'الاختبارات', icon: <FileText className="h-4 w-4" /> },
-  articles: { label: 'المحتوى', icon: <FileText className="h-4 w-4" /> },
-  services: { label: 'الخدمات', icon: <Stethoscope className="h-4 w-4" /> },
-  tools: { label: 'الأدوات', icon: <Wrench className="h-4 w-4" /> },
-  jobs: { label: 'الوظائف والتدريب', icon: <BriefcaseBusiness className="h-4 w-4" /> },
+  scholarships: { label: "public_scholarships", icon: <GraduationCap className="h-4 w-4" /> },
+  universities: { label: "public_universities_2", icon: <Building2 className="h-4 w-4" /> },
+  majors: { label: "public_majors", icon: <BookOpen className="h-4 w-4" /> },
+  countries: { label: "public_countries", icon: <Landmark className="h-4 w-4" /> },
+  courses: { label: "public_courses", icon: <BookOpen className="h-4 w-4" /> },
+  exams: { label: "public_exams", icon: <FileText className="h-4 w-4" /> },
+  articles: { label: "public_content", icon: <FileText className="h-4 w-4" /> },
+  services: { label: "public_services_2", icon: <Stethoscope className="h-4 w-4" /> },
+  tools: { label: "public_tools_2", icon: <Wrench className="h-4 w-4" /> },
+  jobs: { label: "public_jobs_and_internships", icon: <BriefcaseBusiness className="h-4 w-4" /> },
 };
 
 const favoriteKindForResult = (kind: GlobalResultKind): FavoriteKind => {
@@ -77,6 +78,8 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
   onOpenUniversity, onOpenMajor, onOpenExam, onOpenCourse, onOpenArticle, onOpenService,
   onOpenCountry, onNavigateCategory, favoriteKeys = [], onToggleFavorite,
 }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [selectedKind, setSelectedKind] = useState<'all' | GlobalResultKind>('all');
   const [serverItems, setServerItems] = useState<PublicGlobalSearchItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -197,8 +200,8 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
           <button
             onClick={onBack}
             className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 w-8 h-8 bg-black/25 hover:bg-black/40 border border-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all z-30 cursor-pointer text-white shadow-xs active:scale-95"
-            title="العودة"
-            aria-label="العودة"
+            title={publicT('public_back')}
+            aria-label={publicT('public_back')}
           >
             <ChevronLeft className="w-4 h-4 rotate-180 text-white" />
           </button>
@@ -242,10 +245,8 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
           {/* Headline with Gold Curve */}
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-white font-['Cairo',sans-serif] tracking-tight">
-              <span>نتائج </span>
-              <span className="relative inline-block text-white">
-                البحث العام
-                {/* Gold brush accent line underneath */}
+              <span>{publicT('public_results')}{' '}</span>
+              <span className="relative inline-block text-white">{publicT('public_global_search')}{/* Gold brush accent line underneath */}
                 <svg
                   className="absolute -bottom-1.5 inset-x-0 w-full h-2 text-[var(--mn-accent-text)]"
                   viewBox="0 0 100 12"
@@ -263,9 +264,7 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
             </h1>
 
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] mt-1.5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">
-              بحث موحّد في البيانات العامة المنشورة للمنح والجامعات والتخصصات
-            </p>
+            <p className="text-[11px] sm:text-xs text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] mt-1.5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">{publicT('public_search_across_published_public_scholarship_university_and_major')}</p>
           </div>
         </div>
       </div>
@@ -283,32 +282,30 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
           {/* Inner button container with smooth Indigo-Turquoise gradient matching the top hero */}
           <div 
             data-mn-design="543c901a7d"
-            className="relative flex w-full items-center justify-between gap-3 rounded-[14px] bg-gradient-to-r from-[#142B5F] to-[#0E7C86] px-5 py-3 text-right"
+            className="relative flex w-full items-center justify-between gap-3 rounded-[14px] bg-gradient-to-r from-[#142B5F] to-[#0E7C86] px-5 py-3 text-start"
           >
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 text-[13px] sm:text-[14px] mn-font-emphasis text-white">
                 <Sparkles className="h-4 w-4 animate-pulse text-[var(--mn-accent-text)]" />
-                <span>جرّب البحث الذكي</span>
+                <span>{publicT('public_try_smart_search')}</span>
               </div>
-              <div className="mt-1 text-[10px] sm:text-[11px] text-white/95 font-medium">
-                للاستكشاف المركب بالذكاء الاصطناعي وبلغة طبيعية.
-              </div>
+              <div className="mt-1 text-[10px] sm:text-[11px] text-white/95 font-medium">{publicT('public_for_more_complex_exploration_using_ai_and_natural')}</div>
             </div>
             <ChevronLeft className="h-5 w-5 shrink-0 text-white transition-transform group-hover:-translate-x-1" />
           </div>
         </button>
 
         <div className="flex gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
-          <button type="button" onClick={() => setSelectedKind('all')} aria-pressed={selectedKind === 'all'} className={`mn-filter-chip whitespace-nowrap ${selectedKind === 'all' ? 'is-selected' : ''}`}>الكل{totalVisible ? ` · ${totalVisible}${hasMore && searchMode === 'api' ? '+' : ''}` : ''}</button>
+          <button type="button" onClick={() => setSelectedKind('all')} aria-pressed={selectedKind === 'all'} className={`mn-filter-chip whitespace-nowrap ${selectedKind === 'all' ? 'is-selected' : ''}`}>{publicT('public_all')}{totalVisible ? ` · ${totalVisible}${hasMore && searchMode === 'api' ? '+' : ''}` : ''}</button>
           {(Object.keys(CATEGORY_META) as GlobalResultKind[]).map((kind) => (
             <button type="button" key={kind} onClick={() => setSelectedKind(kind)} aria-pressed={selectedKind === kind} className={`mn-filter-chip flex items-center gap-1.5 whitespace-nowrap ${selectedKind === kind ? 'is-selected' : ''}`}>
-              {CATEGORY_META[kind].icon}{CATEGORY_META[kind].label}{counts[kind] ? ` · ${counts[kind]}${hasMore && selectedKind === kind ? '+' : ''}` : ''}
+              {CATEGORY_META[kind].icon}{publicT(CATEGORY_META[kind].label)}{counts[kind] ? ` · ${counts[kind]}${hasMore && selectedKind === kind ? '+' : ''}` : ''}
             </button>
           ))}
         </div>
 
-        {loading ? <div className="mn-card py-12 text-center"><Loader2 className="mx-auto h-7 w-7 animate-spin" /><div className="mt-2 text-xs">جارٍ البحث في الفهرس المنشور…</div></div> : null}
-        {!loading && searchError ? <div className="mn-card border-red-200 py-10 text-center"><div className="text-xs font-semibold">تعذر تحميل نتائج البحث.</div><div className="mt-1 text-[10px] text-[var(--mn-text-muted)]">{searchError}</div><button type="button" onClick={() => void executeServerSearch()} className="mt-3 mn-filter-chip is-selected">إعادة المحاولة</button></div> : null}
+        {loading ? <div className="mn-card py-12 text-center"><Loader2 className="mx-auto h-7 w-7 animate-spin" /><div className="mt-2 text-xs">{publicT('public_searching_the_published_index')}</div></div> : null}
+        {!loading && searchError ? <div className="mn-card border-red-200 py-10 text-center"><div className="text-xs font-semibold">{publicT('public_could_not_load_search_results')}</div><div className="mt-1 text-[10px] text-[var(--mn-text-muted)]">{searchError}</div><button type="button" onClick={() => void executeServerSearch()} className="mt-3 mn-filter-chip is-selected">{publicT('public_try_again')}</button></div> : null}
 
         {!loading && !searchError && query.trim() && searchMode === 'api' && serverItems.length > 0 ? (
           <div className="space-y-2.5">
@@ -316,11 +313,11 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
               const kind = result.kind as GlobalResultKind;
               const favoriteKind = favoriteKindForResult(kind);
               const favoriteKey = `${favoriteKind}:${result.id}` as FavoriteKey;
-              return <article key={`${result.kind}:${result.id}`} role="link" tabIndex={0} aria-label={`فتح ${result.title}`} onClick={() => handleResultClick(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleResultClick(result); } }} className="mn-card w-full cursor-pointer p-3.5 text-right transition hover:-translate-y-0.5 hover:border-[var(--mn-accent)]/60 hover:shadow-md">
-                <div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--mn-primary)] text-white mn-inverse">{CATEGORY_META[kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--mn-accent-text)]">{CATEGORY_META[kind].label}</div><h2 className="mt-0.5 text-[14px] font-semibold leading-snug text-[var(--mn-heading)] sm:text-[15px]">{result.title}</h2>{result.subtitle && <p className="mt-1 line-clamp-2 text-[11px] leading-5 text-[var(--mn-text-muted)] sm:text-xs">{result.subtitle}</p>}</div><div className="flex shrink-0 flex-col items-center gap-1.5">{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.id); }} />}<ChevronLeft className="mn-card-arrow h-4 w-4" /></div></div>
+              return <article key={`${result.kind}:${result.id}`} role="link" tabIndex={0} aria-label={publicT('public_open_title', { v0: result.title })} onClick={() => handleResultClick(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleResultClick(result); } }} className="mn-card w-full cursor-pointer p-3.5 text-start transition hover:-translate-y-0.5 hover:border-[var(--mn-accent)]/60 hover:shadow-md">
+                <div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--mn-primary)] text-white mn-inverse">{CATEGORY_META[kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--mn-accent-text)]">{publicT(CATEGORY_META[kind].label)}</div><h2 className="mt-0.5 text-[14px] font-semibold leading-snug text-[var(--mn-heading)] sm:text-[15px]">{result.title}</h2>{result.subtitle && <p className="mt-1 line-clamp-2 text-[11px] leading-5 text-[var(--mn-text-muted)] sm:text-xs">{result.subtitle}</p>}</div><div className="flex shrink-0 flex-col items-center gap-1.5">{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.id); }} />}<ChevronLeft className="mn-card-arrow h-4 w-4" /></div></div>
               </article>;
             })}
-            {hasMore && nextCursor && <button type="button" disabled={loadingMore} onClick={() => void executeServerSearch(nextCursor, true)} className="mn-card w-full py-3 text-center text-xs font-semibold disabled:opacity-60">{loadingMore ? 'جارٍ تحميل المزيد…' : 'تحميل المزيد'}</button>}
+            {hasMore && nextCursor && <button type="button" disabled={loadingMore} onClick={() => void executeServerSearch(nextCursor, true)} className="mn-card w-full py-3 text-center text-xs font-semibold disabled:opacity-60">{loadingMore ? publicT('public_loading_more') : publicT('public_load_more')}</button>}
           </div>
         ) : null}
 
@@ -328,13 +325,13 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
           <div className="space-y-2.5">
             {visiblePrototype.map((result) => {
               const favoriteKind = favoriteKindForResult(result.kind); const favoriteKey = `${favoriteKind}:${result.targetId}` as FavoriteKey;
-              return <article key={`${result.key}:${result.anchor || 'top'}`} role="button" tabIndex={0} onClick={() => openPrototypeResult(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openPrototypeResult(result); } }} className="mn-card w-full cursor-pointer p-3.5 text-right"><div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--mn-primary)] text-white mn-inverse">{CATEGORY_META[result.kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--mn-accent-text)]">{result.category}</div><h2 className="mt-0.5 text-[14px] font-semibold text-[var(--mn-heading)]">{result.title}</h2><p className="mt-1 line-clamp-2 text-[11px] text-[var(--mn-text-muted)]">{result.excerpt || result.subtitle}</p></div>{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.targetId); }} />}</div></article>;
+              return <article key={`${result.key}:${result.anchor || 'top'}`} role="button" tabIndex={0} onClick={() => openPrototypeResult(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openPrototypeResult(result); } }} className="mn-card w-full cursor-pointer p-3.5 text-start"><div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--mn-primary)] text-white mn-inverse">{CATEGORY_META[result.kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--mn-accent-text)]">{result.category}</div><h2 className="mt-0.5 text-[14px] font-semibold text-[var(--mn-heading)]">{result.title}</h2><p className="mt-1 line-clamp-2 text-[11px] text-[var(--mn-text-muted)]">{result.excerpt || result.subtitle}</p></div>{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.targetId); }} />}</div></article>;
             })}
           </div>
         ) : null}
 
-        {!loading && !searchError && query.trim() && ((searchMode === 'api' && serverItems.length === 0) || (searchMode === 'prototype' && visiblePrototype.length === 0)) ? <div className="mn-card py-14 text-center border-dashed"><Search className="mx-auto h-9 w-9 text-[var(--mn-text-muted)]" /><div className="mt-2 text-xs font-semibold text-[var(--mn-heading)]">لا توجد نتائج منشورة بهذه العبارة.</div><button type="button" onClick={onOpenSmartSearch} className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-[11px] font-semibold text-white mn-inverse"><Sparkles className="h-3.5 w-3.5 text-[var(--mn-accent-soft)]" />جرّب البحث الذكي</button></div> : null}
-        {!query.trim() ? <div className="mn-card py-14 text-center border-dashed"><Search className="mx-auto h-9 w-9 text-[var(--mn-text-muted)]" /><div className="mt-2 text-xs font-semibold text-[var(--mn-heading)]">ابدأ باسم منحة، جامعة، تخصص، دورة، اختبار أو فرصة.</div><div className="mt-1 text-[11px] text-[var(--mn-text-muted)]">يبحث الفهرس في الحقول العامة المنشورة فقط.</div></div> : null}
+        {!loading && !searchError && query.trim() && ((searchMode === 'api' && serverItems.length === 0) || (searchMode === 'prototype' && visiblePrototype.length === 0)) ? <div className="mn-card py-14 text-center border-dashed"><Search className="mx-auto h-9 w-9 text-[var(--mn-text-muted)]" /><div className="mt-2 text-xs font-semibold text-[var(--mn-heading)]">{publicT('public_no_published_results_match_this_phrase')}</div><button type="button" onClick={onOpenSmartSearch} className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-[11px] font-semibold text-white mn-inverse"><Sparkles className="h-3.5 w-3.5 text-[var(--mn-accent-soft)]" />{publicT('public_try_smart_search')}</button></div> : null}
+        {!query.trim() ? <div className="mn-card py-14 text-center border-dashed"><Search className="mx-auto h-9 w-9 text-[var(--mn-text-muted)]" /><div className="mt-2 text-xs font-semibold text-[var(--mn-heading)]">{publicT('public_start_with_a_scholarship_university_major_course_exam')}</div><div className="mt-1 text-[11px] text-[var(--mn-text-muted)]">{publicT('public_the_index_searches_published_public_fields_only')}</div></div> : null}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { CmsRichText } from '@manaratak/ui';
 import {
@@ -84,6 +85,8 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
   searchAnchor,
   searchTerm,
 }) => {
+  const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
+
   useDetailSearchTarget(searchAnchor, searchTerm);
   const openEntity = (entity: ArticleEntityRef) => {
     if (!entity.id) return;
@@ -98,7 +101,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
   return (
     <div
       className="min-h-screen bg-[var(--mn-page)] pb-20 font-['Cairo',sans-serif] mn-panel "
-      dir="rtl"
+      dir={publicDir}
     >
       <header className="relative overflow-hidden border-b-[3px] border-[var(--mn-accent)]/70 bg-gradient-to-b from-[var(--mn-primary)] via-[var(--mn-hero-secondary)] to-[var(--mn-primary)] px-4 pb-6 pt-3 text-white shadow-md mn-inverse ">
         <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full border border-[var(--mn-accent)]/20" />
@@ -224,8 +227,8 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
             <DetailSectionHeader
               id="article-related"
               icon={Globe2}
-              title="مرتبط في منارتك"
-              subtitle="انتقل مباشرة إلى الكيان المرتبط بالمقال"
+              title={publicT('public_related_in_manaratak')}
+              subtitle={publicT('public_go_directly_to_the_entity_related_to_this')}
             />
             <div className="grid grid-cols-2 gap-2">
               {article.linkedEntities.map((entity) => (
@@ -233,7 +236,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
                   key={`${entity.type}-${entity.id || entity.name}`}
                   type="button"
                   onClick={() => openEntity(entity)}
-                  className="min-h-[84px] rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2.5 text-right transition hover:border-[var(--mn-accent)] active:scale-[0.99] mn-panel "
+                  className="min-h-[84px] rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2.5 text-start transition hover:border-[var(--mn-accent)] active:scale-[0.99] mn-panel "
                 >
                   <div className="flex items-center gap-1.5 text-[var(--mn-heading)]">
                     {entityIcon(entity.type)}
@@ -260,7 +263,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
             <DetailSectionHeader
               id="article-official-links"
               icon={ExternalLink}
-              title={article.body !== undefined ? 'روابط المادة' : 'مصادر رسمية مرتبطة بالمقال'}
+              title={article.body !== undefined ? publicT('public_article_links') : publicT('public_official_sources_related_to_this_article')}
             />
             <div className="space-y-2">
               {article.officialLinks.map((link) => (

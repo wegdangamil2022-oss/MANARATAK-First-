@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState } from 'react';
 import {
   ArrowUpLeft,
@@ -58,6 +59,8 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
   onViewAllClick,
   onSelectService,
 }) => {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   const [activeTab, setActiveTab] = useState<'student' | 'general'>('student');
   const allServicesList = sourceServices;
   const services = allServicesList.filter((service) => service.audience === activeTab);
@@ -75,13 +78,11 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
                   <Briefcase className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" />
                 </span>
-                <span>خدمات منارتك</span>
+                <span>{publicT('public_manaratak_services')}</span>
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="mx-auto text-[11px] sm:text-xs font-medium text-[var(--mn-text-muted)] max-w-md font-['Cairo',sans-serif]">
-              خدمات طلابية ودعم عام مرتبطة برحلة الدراسة والتقديم
-            </p>
+            <p className="mx-auto text-[11px] sm:text-xs font-medium text-[var(--mn-text-muted)] max-w-md font-['Cairo',sans-serif]">{publicT('public_student_services_and_general_support_for_your_study')}</p>
           </div>
 
           <div className="group relative w-full max-w-[285px] shrink-0 overflow-hidden rounded-[14px] p-[2px]">
@@ -98,7 +99,7 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
                 }`}
               >
                 <GraduationCap className={`h-4 w-4 shrink-0 transition-colors ${activeTab === 'student' ? 'text-[#D6A43B] dark:text-[#142B5F]' : 'text-[var(--mn-text-muted)]'}`} />
-                <span>خدمات طلابية</span>
+                <span>{publicT('public_student_services_2')}</span>
               </button>
               <button
                 type="button"
@@ -111,7 +112,7 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
                 }`}
               >
                 <Building2 className={`h-4 w-4 shrink-0 transition-colors ${activeTab === 'general' ? 'text-[#D6A43B] dark:text-[#142B5F]' : 'text-[var(--mn-text-muted)]'}`} />
-                <span>خدمات عامة</span>
+                <span>{publicT('public_general_services')}</span>
               </button>
             </div>
           </div>
@@ -123,7 +124,7 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
               type="button"
               key={service.id}
               onClick={() => onSelectService?.(service)}
-              className="group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 text-right shadow-2xs transition-all hover:border-[#142B5F]/40 dark:hover:border-[#D6A43B]/50 hover:shadow-xs mn-panel cursor-pointer"
+              className="group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 text-start shadow-2xs transition-all hover:border-[#142B5F]/40 dark:hover:border-[#D6A43B]/50 hover:shadow-xs mn-panel cursor-pointer"
             >
               <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-[#142B5F] border border-[#D6A43B]/60 shadow-2xs transition-transform group-hover:scale-105">
                 {getServiceIcon(service, index)}
@@ -150,7 +151,7 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
               onClick={onViewAllClick}
               className="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#142B5F]/50 dark:border-[#D6A43B]/50 bg-[var(--mn-surface-muted)] px-6 py-2.5 text-xs font-bold text-[#142B5F] dark:text-[#D6A43B] transition-all hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 active:scale-95 sm:w-auto sm:px-8 sm:py-3 font-['Cairo',sans-serif] shadow-xs "
             >
-              <span className="text-[12px] sm:text-sm font-bold">تصفح جميع الخدمات</span>
+              <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_all_services')}</span>
               <ChevronLeft className="h-4 w-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
             </button>
           </div>

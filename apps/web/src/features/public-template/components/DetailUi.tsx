@@ -1,3 +1,4 @@
+import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useEffect } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { ArrowRight, X } from 'lucide-react';
@@ -44,13 +45,15 @@ export function DetailBackButton({
   mode?: 'back' | 'close';
   className?: string;
 }) {
+  const { t: publicT } = usePublicTemplateTranslation();
+
   return (
     <button
       type="button"
       onClick={onBack}
       className={`mn-detail-close ${className}`}
-      aria-label={mode === 'close' ? 'إغلاق' : 'العودة'}
-      title={mode === 'close' ? 'إغلاق' : 'العودة'}
+      aria-label={mode === 'close' ? publicT('public_close') : publicT('public_back')}
+      title={mode === 'close' ? publicT('public_close') : publicT('public_back')}
     >
       {mode === 'close' ? <X className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
     </button>

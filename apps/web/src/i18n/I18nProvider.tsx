@@ -8,12 +8,13 @@ import { localizeLocation, getPathLocale } from './localeRouting';
 import { resolvePublicLocationLocale } from './localeRouting';
 import { en } from './en';
 import { ar } from './ar';
+import { formatTranslation, type TranslationValues } from './formatTranslation';
 
 type Translations = typeof en;
 
 interface I18nContextType {
   language: SupportedLocale;
-  t: (key: keyof Translations | (string & {})) => string;
+  t: (key: keyof Translations | (string & {}), values?: TranslationValues) => string;
   setLanguage: (lang: SupportedLocale) => void;
   dir: 'rtl' | 'ltr';
   isRTL: boolean;
@@ -52,8 +53,9 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     document.documentElement.dir = dir;
   }, [language, dir]);
 
-  const t = useCallback((key: string): string => {
-    return (dictionaries[language] as Record<string, string>)[key] || key;
+  const t = useCallback((key: string, values?: TranslationValues): string => {
+    const copy = (dictionaries[language] as Record<string, string>)[key] || key;
+    return formatTranslation(copy, values);
   }, [language]);
 
   const isRTL = dir === 'rtl';
