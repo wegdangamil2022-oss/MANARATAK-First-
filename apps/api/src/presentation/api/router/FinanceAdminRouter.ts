@@ -208,7 +208,7 @@ export class FinanceAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:invoice:manage');
         const body = z
-          .object({ amount: moneySchema, reason: z.string().trim().min(3).max(500) })
+          .object({ expectedVersion: z.number().int().positive(), amount: moneySchema, reason: z.string().trim().min(3).max(500) }).strict()
           .parse(req.body);
         res
           .status(201)

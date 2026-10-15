@@ -1851,4 +1851,10 @@ export const en = {
   finance_create_installments: "Create installment plan",
   finance_confirm_installments: "Create this installment plan for the invoice?",
   finance_invalid_installments: "Check installment amounts and due dates.",
+  finance_credit_note: "Credit note",
+  finance_credit_reason: "Credit note reason",
+  finance_credit_amount: "Credit note amount",
+  finance_create_credit: "Create credit note",
+  finance_confirm_credit: "Create a credit note and reduce this invoice's outstanding amount?",
+  finance_credit_notice: "Finance validates the eligible amount and version. A credit note does not send a provider refund.",
 };

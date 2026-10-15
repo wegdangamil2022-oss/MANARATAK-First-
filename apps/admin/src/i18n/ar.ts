@@ -1849,4 +1849,10 @@ export const ar = {
   finance_create_installments: "إنشاء خطة تقسيط",
   finance_confirm_installments: "تأكيد إنشاء خطة التقسيط لهذه الفاتورة؟",
   finance_invalid_installments: "تحقق من مبالغ الأقساط ومواعيد الاستحقاق.",
+  finance_credit_note: "إشعار دائن",
+  finance_credit_reason: "سبب الإشعار الدائن",
+  finance_credit_amount: "مبلغ الإشعار الدائن",
+  finance_create_credit: "إنشاء إشعار دائن",
+  finance_confirm_credit: "تأكيد إنشاء إشعار دائن وتقليل المستحق على هذه الفاتورة؟",
+  finance_credit_notice: "تتحقق المالية من المبلغ المؤهل والإصدار؛ الإشعار الدائن لا يرسل استردادًا عبر مزود دفع.",
 };

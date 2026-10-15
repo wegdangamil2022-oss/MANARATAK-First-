@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
+import { FinanceCreditNoteForm } from './FinanceCreditNoteForm';
 import { FinanceInstallmentsForm } from './FinanceInstallmentsForm';
 import { financeMoney, financeParseAmount, type FinanceMoney } from './financePresentation';
 type Line = {
@@ -35,7 +36,7 @@ type Draft = {
   scale: number;
   metadata?: Record<string, unknown> | null;
 };
-type Intent = { action: 'items' | 'issue' | 'void' | 'installment-plans'; body: string; key: string; invoiceId: string };
+type Intent = { action: 'items' | 'issue' | 'void' | 'installment-plans' | 'credit-notes'; body: string; key: string; invoiceId: string };
 const invoiceLines = (invoice: Invoice): Draft[] =>
   invoice.lineItems.map((line) => ({
     description: line.description,
@@ -406,6 +407,11 @@ export function FinanceInvoiceDetailPage() {
             <FinanceInstallmentsForm key={`${invoice.id}:${invoice.version}`}
               amount={invoice.amountDue} disabled={busy || Boolean(intent) || editing}
               submit={fields => advanced('installment-plans', fields)} />
+          )}
+          {['ISSUED', 'PARTIALLY_PAID', 'OVERDUE'].includes(invoice.status) && (
+            <FinanceCreditNoteForm key={`credit:${invoice.id}:${invoice.version}`}
+              amount={invoice.amountDue} disabled={busy || Boolean(intent) || editing}
+              submit={fields => advanced('credit-notes', fields)} />
           )}
           <h2 className="text-xl font-bold">{t('finance_tab_payments')}</h2>
           {payments.length ? (

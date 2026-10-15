@@ -1145,22 +1145,12 @@ export class FinancePlatformUseCases {
     reason: string,
     identity: FinanceCommandIdentity,
   ) {
-    if (!reason.trim()) throw new Error('Credit note reason is required');
+    if (reason.trim().length < 3 || reason.trim().length > 500)
+      throw new Error('Credit note reason is required');
     await this.assertCanonicalMoney(amount);
-    const invoice = await this.requireInvoice(invoiceId);
-    if (
-      ![InvoiceStatus.ISSUED, InvoiceStatus.PARTIALLY_PAID, InvoiceStatus.OVERDUE].includes(
-        invoice.status,
-      )
-    )
-      throw new Error('Credit note requires an issued invoice with outstanding value');
-    assertSameCurrency(invoice.amountDue, amount);
-    if (
-      BigInt(amount.amountMinorUnits) <= 0n ||
-      compareMoneyAmounts(amount, invoice.amountDue) === 1
-    )
-      throw new Error('Credit note cannot exceed current invoice amountDue');
-    return this.repository.createCreditNote(invoiceId, amount, reason, context(identity));
+    assertPositiveFinanceMoney(amount);
+    // The owner performs state/version checks after durable replay lookup.
+    return this.repository.createCreditNote(invoiceId, amount, reason.trim(), context(identity));
   }
 
   async generateEstimate(

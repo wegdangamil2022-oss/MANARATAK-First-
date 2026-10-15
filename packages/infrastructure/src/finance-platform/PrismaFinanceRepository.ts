@@ -830,7 +830,15 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     reason: string,
     ctx: FinanceMutationContext,
   ) {
+    assertPositiveFinanceMoney(amount);
+    const payload = {amount, reason, expectedVersion: ctx.expectedVersion};
     return this.tx(async (tx) => {
+      const replay = await this.commandReplay(tx, ctx, 'INVOICE_CREDIT_NOTE', invoiceId, payload);
+      if (replay) return replay;
+      if (!Number.isSafeInteger(ctx.expectedVersion) || ctx.expectedVersion! < 1)
+        throw new Error('FINANCE_EXPECTED_VERSION_REQUIRED');
+      if (reason.trim().length < 3 || reason.trim().length > 500)
+        throw new Error('FINANCE_CREDIT_REASON_INVALID');
       const invoice = await tx.financeInvoiceRecord.findUnique({ where: { id: invoiceId } });
       if (
         !invoice ||
@@ -906,7 +914,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
         invoiceId,
         remainingDueMinorUnits: remaining.toString(),
       });
-      return {
+      const response = {
         id: row.id,
         publicId: row.publicId,
         invoiceId,
@@ -915,6 +923,8 @@ export class PrismaFinanceRepository implements IFinanceRepository {
         issuedBy: row.issuedBy,
         issuedAt: row.issuedAt,
       };
+      await this.storeCommand(tx, ctx, 'INVOICE_CREDIT_NOTE', invoiceId, payload, response);
+      return response;
     });
   }
   async createReceipt(

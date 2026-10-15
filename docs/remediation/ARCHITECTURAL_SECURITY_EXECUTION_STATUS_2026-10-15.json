@@ -507,13 +507,14 @@
     "findings": [
       "ADM-07"
     ],
-    "currentStep": "CREDIT_NOTES",
+    "currentStep": "WALLET_HOLD_RELEASE_CAPTURE",
     "completedSteps": [
       "FINANCIAL_ACCOUNT_READ_SOURCE_VERIFIED",
-      "INVOICE_INSTALLMENTS_SOURCE_REVIEWED_LIGHT_CHECKED"
+      "INVOICE_INSTALLMENTS_SOURCE_REVIEWED_LIGHT_CHECKED",
+      "CREDIT_NOTE_SOURCE_REVIEWED_CHECKS_INCOMPLETE"
     ],
     "specification": "docs/remediation/specs/B13_FINANCE_OWNER_CONTRACT_2026-10-15.md",
-    "report": "docs/reviews/B13b_INVOICE_INSTALLMENTS_2026-10-15.md",
+    "report": "docs/reviews/B13c_INVOICE_CREDIT_NOTE_2026-10-15.md",
     "runtimeDatabaseStatus": "PENDING",
     "deploymentStatus": "NOT_PERFORMED",
     "schemaChanged": false,
@@ -535,7 +536,6 @@
       }
     },
     "remainingSteps": [
-      "Credit note operator contract and UI",
       "Wallet hold/release/capture operator contracts and UI",
       "Append-only ledger reversal operator contract and UI"
     ],
@@ -599,6 +599,66 @@
       "uiHttpTests": "NOT_RUN_EXEC_ENVIRONMENT_DISCONNECTED",
       "runtimeDatabaseStatus": "PENDING"
     },
-    "sourceMilestone": "INSTALLMENT_OWNER_AND_OPERATOR_IMPLEMENTED"
+    "sourceMilestone": "INSTALLMENT_OWNER_AND_OPERATOR_IMPLEMENTED",
+    "creditNoteAcceptance": {
+      "status": "SOURCE_REVIEWED_CHECKS_INCOMPLETE",
+      "report": "docs/reviews/B13c_INVOICE_CREDIT_NOTE_2026-10-15.md",
+      "checks": {
+        "kind": "V8_EXTRACTED_CREDIT_TRANSACTION_BODY_WITH_IN_MEMORY_DOUBLES",
+        "passed": 3,
+        "failed": 2,
+        "cases": [
+          {
+            "name": "full credit retry replays after invoice is CREDITED without second posting",
+            "result": "FAIL",
+            "message": "ReferenceError: InvoiceStatus is not defined"
+          },
+          {
+            "name": "changed reason with same key rejects",
+            "result": "FAIL",
+            "message": "ReferenceError: InvoiceStatus is not defined"
+          },
+          {
+            "name": "overdue balance",
+            "result": "NOT_VERIFIED_HARNESS_BINDING_MISSING"
+          },
+          {
+            "name": "different currency",
+            "result": "NOT_VERIFIED_HARNESS_BINDING_MISSING"
+          },
+          {
+            "name": "different scale",
+            "result": "NOT_VERIFIED_HARNESS_BINDING_MISSING"
+          },
+          {
+            "name": "missing version",
+            "result": "PASS"
+          },
+          {
+            "name": "stale version",
+            "result": "NOT_VERIFIED_HARNESS_BINDING_MISSING"
+          },
+          {
+            "name": "zero value",
+            "result": "PASS"
+          },
+          {
+            "name": "missing reason",
+            "result": "PASS"
+          }
+        ],
+        "limitations": [
+          "Not Vitest, TypeScript typecheck, Prisma SQL or PostgreSQL execution",
+          "No provider, operational database, build or broad suite",
+          "Original transaction body executed after removing TypeScript-only annotations; dependencies are explicit doubles"
+        ],
+        "notVerified": 4,
+        "failureCause": "The extracted-body harness omitted the InvoiceStatus import binding; the repository source already imports InvoiceStatus. Binding correction is documented; no rerun as requested when failures do not exceed two.",
+        "rerunPerformed": false
+      },
+      "typesNoEmit": "NOT_RUN_EXEC_ENVIRONMENT_DISCONNECTED",
+      "uiHttpTests": "NOT_RUN_EXEC_ENVIRONMENT_DISCONNECTED",
+      "runtimeDatabaseStatus": "PENDING"
+    }
   }
 }
