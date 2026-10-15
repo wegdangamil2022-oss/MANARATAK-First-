@@ -123,7 +123,8 @@
         "docs/reviews/B14_FINAL_SOURCE_RECONCILIATION_2026-10-15.md"
       ],
       "runtimeStatus": "PENDING_NOT_CERTIFIED",
-      "productionStatus": "NOT_VERIFIED"
+      "productionStatus": "NOT_VERIFIED",
+      "followupReport": "docs/reviews/POST_CLOSURE_PLAN_SOURCE_REVIEW_2026-10-15.md"
     },
     {
       "id": "FK-01",
@@ -468,7 +469,8 @@
         "docs/reviews/B12_ALUMNI_CONSENT_PROGRESS_2026-10-15.md"
       ],
       "runtimeStatus": "PENDING_NOT_CERTIFIED",
-      "productionStatus": "NOT_VERIFIED"
+      "productionStatus": "NOT_VERIFIED",
+      "followupReport": "docs/reviews/POST_CLOSURE_PLAN_SOURCE_REVIEW_2026-10-15.md"
     },
     {
       "id": "ADM-07",
@@ -483,7 +485,8 @@
         "docs/reviews/B13_FINANCE_SOURCE_CLOSURE_2026-10-15.md"
       ],
       "runtimeStatus": "PENDING_NOT_CERTIFIED",
-      "productionStatus": "NOT_VERIFIED"
+      "productionStatus": "NOT_VERIFIED",
+      "followupReport": "docs/reviews/POST_CLOSURE_PLAN_SOURCE_REVIEW_2026-10-15.md"
     },
     {
       "id": "ADM-08",
@@ -830,5 +833,6 @@
       "status": "DEFERRED_OUT_OF_CURRENT_RELEASE",
       "evidence": "docs/remediation/specs/B12_CAREER_SCOPE_CONTRACT_2026-10-15.md"
     }
-  ]
+  ],
+  "latestFollowupReport": "docs/reviews/POST_CLOSURE_PLAN_SOURCE_REVIEW_2026-10-15.md"
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import {financeCommandFixture} from './FinanceCommandFixture';
 import { FinancePlatformUseCases } from '../../../application/src/finance-platform/use-cases/FinancePlatformUseCases';
 import { PrismaFinanceRepository } from '../../src/finance-platform/PrismaFinanceRepository';
 const identity = {
@@ -33,6 +34,7 @@ const rate = {
 };
 function database(models: Record<string, unknown>) {
   const db: any = {
+    financeCommandRecord: financeCommandFixture(),
     ...models,
     auditRecord: { create: vi.fn() },
     transactionalOutboxRecord: { create: vi.fn() },

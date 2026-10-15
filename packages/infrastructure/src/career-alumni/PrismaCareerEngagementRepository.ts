@@ -16,6 +16,8 @@ const paging = (page = 1, pageSize = 20) => {
   return { page, pageSize };
 };
 const strings = (value: unknown): string[] => Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+// Match ECMAScript String.trim(), including tabs, NBSP and BOM, for legacy consent proof.
+const consentSourceTrimCharacters = '\u0009\u000a\u000b\u000c\u000d\u0020\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff';
 
 export class PrismaCareerEngagementRepository implements ICareerEngagementRepository {
   constructor(private readonly prisma: PrismaClient, private readonly context?: { actorId: string; reason: string; correlationId: string }) {}
@@ -151,7 +153,7 @@ export class PrismaCareerEngagementRepository implements ICareerEngagementReposi
     const audience=network?Prisma.sql`"visibility" IN ('PUBLIC','ALUMNI_ONLY')`:Prisma.sql`"visibility"='PUBLIC'`;
     const where=Prisma.sql`${audience} AND "consentGrantedAt" IS NOT NULL AND "consentGrantedAt"<=${new Date()}
       AND "consentGrantedBy"="studentReferenceId" AND "consentSource" IS NOT NULL
-      AND btrim("consentSource")<>'' AND "consentRevokedAt" IS NULL`;
+      AND btrim("consentSource", ${consentSourceTrimCharacters})<>'' AND "consentRevokedAt" IS NULL`;
     return this.prisma.$transaction(async tx=>{
       const [data,counts]=await Promise.all([
         tx.$queryRaw<Array<Pick<CareerAlumniProfileDto,'id'|'displayName'|'graduationYear'|'employerName'>>>(Prisma.sql`SELECT id,"displayName","graduationYear","employerName" FROM "CareerAlumniProfileRecord" WHERE ${where} ORDER BY id ASC LIMIT ${bounds.pageSize} OFFSET ${(bounds.page-1)*bounds.pageSize}`),

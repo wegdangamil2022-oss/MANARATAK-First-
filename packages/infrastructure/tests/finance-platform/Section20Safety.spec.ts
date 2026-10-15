@@ -1,5 +1,6 @@
 import { createHash, createHmac } from 'node:crypto';
 import { describe, it, expect, vi } from 'vitest';
+import {financeCommandFixture} from './FinanceCommandFixture';
 import { PrismaFinanceRepository } from '../../src/finance-platform/PrismaFinanceRepository';
 import {
   EnvironmentPaymentGatewayAdapter,
@@ -17,6 +18,7 @@ const digest = (v: string) => createHash('sha256').update(v).digest('hex');
 function transactional(models: any) {
   let tail = Promise.resolve();
   const db: any = {
+    financeCommandRecord: financeCommandFixture(),
     ...models,
     auditRecord: { create: vi.fn() },
     transactionalOutboxRecord: { create: vi.fn() },

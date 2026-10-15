@@ -54,7 +54,7 @@ describe('P19 API safety', () => {
       const response = await request(setup({ createWalletHold }))
         .post('/finance/wallets/id/holds')
         .set('Idempotency-Key', 'key')
-        .send({ amount: { ...money, amountMinorUnits }, businessReferenceId: 'invoice' });
+        .send({ expectedVersion: 1, amount: { ...money, amountMinorUnits }, businessReferenceId: 'invoice' });
       expect(response.status).toBe(400);
       expect(createWalletHold).not.toHaveBeenCalled();
     },

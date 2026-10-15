@@ -288,7 +288,8 @@
         "No global phase acceptance is inferred from schema, filenames or source presence.",
         "B13 native test corrections are not reported as passed; earlier V8 credit harness errors remain explicit.",
         "Translation content authoring remains INFRASTRUCTURE_ONLY as recorded by B11; no activation claimed."
-      ]
+      ],
+      "followupVerification": "10 new native targeted cases and current-source noEmit passed; original two HTTP status corrections not rerun; SQL/runtime still pending."
     },
     {
       "phase": "P20",
@@ -319,7 +320,8 @@
         "No global phase acceptance is inferred from schema, filenames or source presence.",
         "Mentorship opportunities remain supported; session booking explicitly deferred out of release.",
         "Translation content authoring remains INFRASTRUCTURE_ONLY as recorded by B11; no activation claimed."
-      ]
+      ],
+      "followupVerification": "10 new native targeted cases and current-source noEmit passed; original two HTTP status corrections not rerun; SQL/runtime still pending."
     },
     {
       "phase": "P22",
@@ -355,7 +357,8 @@
         "No global phase acceptance is inferred from schema, filenames or source presence.",
         "B13 native test corrections are not reported as passed; earlier V8 credit harness errors remain explicit.",
         "Consumers compose owner data; section27 and section28 are still not globally closed."
-      ]
+      ],
+      "followupVerification": "10 new native targeted cases and current-source noEmit passed; original two HTTP status corrections not rerun; SQL/runtime still pending."
     },
     {
       "phase": "P24",
@@ -380,5 +383,6 @@
     "docs/reviews/section-28-task-status.json"
   ],
   "runtimeStatus": "PENDING",
-  "productionStatus": "NOT_VERIFIED"
+  "productionStatus": "NOT_VERIFIED",
+  "latestFollowupReport": "docs/reviews/POST_CLOSURE_PLAN_SOURCE_REVIEW_2026-10-15.md"
 }

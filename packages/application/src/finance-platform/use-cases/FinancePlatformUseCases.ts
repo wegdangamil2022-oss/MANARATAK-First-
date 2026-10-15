@@ -219,14 +219,17 @@ export class FinancePlatformUseCases {
   }
 
   async reverseLedger(transactionId: string, approvalId: string, identity: FinanceCommandIdentity) {
+    const transaction = await this.repository.getLedgerTransaction(transactionId);
+    if (!transaction) throw new Error('Financial transaction not found');
+    const canonicalId = transaction.id;
     const approval = await this.requireBoundApproval(
       approvalId,
       'MANUAL_LEDGER_REVERSE',
-      transactionId,
+      canonicalId,
       identity.actorId,
-      payloadHash({ transactionId }),
+      payloadHash({ transactionId: canonicalId }),
     );
-    return this.repository.reverseLedgerTransaction(transactionId, context(identity), approval);
+    return this.repository.reverseLedgerTransaction(canonicalId, context(identity), approval);
   }
 
   async createDraftInvoice(
@@ -1022,7 +1025,8 @@ export class FinancePlatformUseCases {
     const approval = await this.repository.getApproval(id);
     if (!approval) throw new Error('Approval not found');
     if (checkerId !== identity.actorId) throw new Error('FINANCE_CHECKER_IDENTITY_MISMATCH');
-    // Eligibility and replay must be checked atomically by the owner.
+    if (approval.makerId === checkerId) throw new Error('Maker cannot approve their own financial action');
+    // Prior checker decisions and replay must be checked atomically by the owner.
     if (decision === 'REJECT' && !reason?.trim()) throw new Error('Reject reason is required');
     return this.repository.decideApproval(id, decision, checkerId, reason, context(identity));
   }

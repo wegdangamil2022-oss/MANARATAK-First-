@@ -55,7 +55,7 @@
   "verifiedFindings": "docs/reviews/ARCHITECTURAL_SECURITY_VERIFIED_FINDINGS_2026-10-15.md",
   "workBranch": "fix/b02-auth-session-boundary-20261015",
   "mainPushRequiresExplicitUserInstruction": true,
-  "lastIntegratedMainCommit": "93a1c4d1946db9480bd94ca2a3291be34b742c68",
+  "lastIntegratedMainCommit": "38c84e60f7be5cb9e0f4db8ceb588a3637c78c20",
   "B03": {
     "status": "SOURCE_VERIFIED",
     "baselineCommit": "5cf33d33d1cd2988ceb583eed6a0bb86066672f7",
@@ -495,7 +495,8 @@
     "scopeDecisionAuthority": "User delegated the proposed booking deferral decision after explanation; assistant explicitly scoped booking out, preserving mentorship opportunities and alumni consent.",
     "deferredCapabilities": [
       "Mentorship session booking, cancellation and retention policy; no session model or API introduced"
-    ]
+    ],
+    "followupReport": "docs/reviews/POST_CLOSURE_PLAN_SOURCE_REVIEW_2026-10-15.md"
   },
   "B13": {
     "status": "SOURCE_IMPLEMENTED_CORRECTED_WITHOUT_RERUN",
@@ -793,7 +794,9 @@
       "No second run of native command suite after two status corrections",
       "Credit V8 fixture binding correction not rerun; unsuccessful/unverified cases remain recorded",
       "PostgreSQL isolation, rollback, browser and providers remain runtime pending"
-    ]
+    ],
+    "latestTypesNoEmit": "PASS_POST_CLOSURE_FOLLOWUP_CURRENT_SOURCE",
+    "followupReport": "docs/reviews/POST_CLOSURE_PLAN_SOURCE_REVIEW_2026-10-15.md"
   },
   "B14": {
     "status": "SOURCE_RECONCILED_WITH_EXPLICIT_UNRECHECKED_CORRECTIONS",
@@ -830,7 +833,8 @@
     "usedAiOperationsRetained": true,
     "databaseOrProvidersContacted": false,
     "heavyTestsOrBuildPerformed": false,
-    "nativeB13FailuresCorrectedNotRerun": 2
+    "nativeB13FailuresCorrectedNotRerun": 2,
+    "followupReport": "docs/reviews/POST_CLOSURE_PLAN_SOURCE_REVIEW_2026-10-15.md"
   },
   "approvedSourceScopeImplemented": true,
   "sourceAssurance": "PLAN_SOURCE_GATES_PASS_WITH_B13_TWO_CORRECTIONS_NOT_RERUN",
@@ -848,5 +852,34 @@
     "B13 two native status corrections and the credit V8 fixture correction were not rerun, as requested",
     "Runtime/DB/provider/browser/worker and supported Node22 proof remain separately pending",
     "Section27/28 open gates and production NO_GO are retained"
-  ]
+  ],
+  "postClosureReview": {
+    "status": "SOURCE_FOLLOWUP_FIXED_TARGETED_CHECKS_PASSED",
+    "baselineMainCommit": "38c84e60f7be5cb9e0f4db8ceb588a3637c78c20",
+    "report": "docs/reviews/POST_CLOSURE_PLAN_SOURCE_REVIEW_2026-10-15.md",
+    "remainingValidation": "docs/remediation/ARCHITECTURAL_SECURITY_REMAINING_VALIDATION_2026-10-15.md",
+    "evidence": "docs/reviews/evidence/postclosure-review-2026-10-15/summary.json",
+    "fixed": [
+      "Canonical ledger identity shared by reversal approval and execution",
+      "ECMAScript whitespace matches SQL consent-source trimming",
+      "Application maker separation retained without blocking owner receipt replay",
+      "Legacy finance receipt fixtures and mandatory-version test inputs aligned"
+    ],
+    "targetedNativeTests": {
+      "files": 2,
+      "passed": 10,
+      "failed": 0,
+      "runs": 1
+    },
+    "typesNoEmit": "PASS_CURRENT_SOURCE_ONE_RUN",
+    "eslintErrors": 0,
+    "eslintWarnings": 55,
+    "originalB13StatusChecksRerun": false,
+    "entireSection20SuiteRerun": false,
+    "runtimeDatabaseStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "historicalMigrationsChanged": false,
+    "realEffectsPerformed": false,
+    "mainWriteAuthority": "User explicitly requested all work be pushed to main in the current session; follow-up fixes remain within the same approved remediation scope."
+  }
 }
