@@ -68,8 +68,13 @@ export class DurableBackgroundWorker {
     private readonly runtimeState: BackgroundWorkerRuntimeState,
   ) {}
 
-  public async runOnce(options: DurableBackgroundWorkerOptions): Promise<void> {
-    if (this.draining) return;
+  public runOnce(options: DurableBackgroundWorkerOptions): Promise<void> {
+    if (this.draining) return Promise.resolve();
+    // Track the claim request too: drain must not return while a claim is pending.
+    return this.track(this.poll(options));
+  }
+
+  private async poll(options: DurableBackgroundWorkerOptions): Promise<void> {
     this.validateOptions(options);
     const claims = await this.queue.claimDue({
       workerId: options.workerId,
@@ -96,7 +101,7 @@ export class DurableBackgroundWorker {
 
   private track(task: Promise<void>): Promise<void> {
     this.active.add(task);
-    void task.finally(() => this.active.delete(task));
+    void task.then(() => this.active.delete(task), () => this.active.delete(task));
     return task;
   }
 
@@ -120,6 +125,10 @@ export class DurableBackgroundWorker {
         leaseDurationMs: options.leaseDurationMs,
       }).then(owned => {
         if (!owned) { leaseLost = true; controller.abort(new Error('BACKGROUND_JOB_LEASE_LOST')); }
+      }).catch(() => {
+        // Uncertain ownership must never produce a completion or an unhandled rejection.
+        leaseLost = true;
+        controller.abort(new Error('BACKGROUND_JOB_LEASE_LOST'));
       }).finally(() => { heartbeatTask = null; });
     }, options.heartbeatIntervalMs);
     heartbeatTimer.unref?.();

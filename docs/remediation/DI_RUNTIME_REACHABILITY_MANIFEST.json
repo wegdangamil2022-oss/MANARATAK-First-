@@ -1411,7 +1411,6 @@
       "name": "certificateCompletionOutboxWorker",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/infrastructure/runtime/PollingWorkerBootstrapper.ts",
         "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts"
       ],
       "reachableThroughRegistrations": [],
@@ -3136,8 +3135,8 @@
       "name": "manageBackgroundJobsUseCase",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/BackgroundJobRouter.ts",
-        "apps/api/src/server.ts"
+        "apps/api/src/infrastructure/workers/RegisterRecurringJobs.ts",
+        "apps/api/src/presentation/api/router/BackgroundJobRouter.ts"
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
@@ -3492,7 +3491,6 @@
       "name": "ownerDomainOutboxWorker",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/infrastructure/runtime/PollingWorkerBootstrapper.ts",
         "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts"
       ],
       "reachableThroughRegistrations": [],
@@ -3603,7 +3601,6 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/app.ts",
-        "apps/api/src/infrastructure/runtime/PollingWorkerBootstrapper.ts",
         "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts"
       ],
       "reachableThroughRegistrations": [
@@ -5269,7 +5266,6 @@
       "name": "studentWorkspaceOutboxWorker",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
-        "apps/api/src/infrastructure/runtime/PollingWorkerBootstrapper.ts",
         "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts"
       ],
       "reachableThroughRegistrations": [],

@@ -37,3 +37,84 @@ The PostgreSQL durable worker now owns recurring execution for these W3 sweeps: 
 Identity/Settings/Career/Services owner-domain outbox projection and the P13→P15 Student Workspace projection remain lightweight pollers over the same durable outbox lease/fencing contract. Their runtime state is recorded through `PollingWorkerRuntimeRegistry`; Health/Readiness exposes `state`, last start/success/failure and success lag. Certificate-completion delivery uses the same runtime-state registry and explicit production configuration.
 
 Production/staging must explicitly enable and configure all required workers. Source verification does not certify PostgreSQL/provider behavior; disposable-DB concurrency/reclaim tests and real provider delivery remain `DB_RUNTIME_PENDING` / `PROVIDER_RUNTIME_PENDING` until executed in the target environment.
+
+## B09 host authority and inventory — 2026-10-15
+
+Source-verified host: the persistent Node process started by `apps/api/src/server.ts`
+(`npm run start --workspace @manaratak/api` after the existing build). The same process
+owns HTTP and worker shutdown. `RegisterRecurringJobs.ts` is the sole definition
+registration entry; `PollingWorkerRuntime.ts` is the sole interval scheduler. Flags
+remain opt-in. No request handler starts workers. The unused older bootstrapper was
+removed after checking all callers and preserving every delivery route.
+
+This is a supported **source topology**, not evidence of an active deployment.
+No persistent worker host or authenticated external cron deployment was provisioned
+or observed here. A serverless HTTP deployment must keep request handling separate
+from worker startup; enabling flags alone does not establish a scheduler. Before
+using serverless HTTP with a separate persistent worker, provide a deployment entry,
+resource lifecycle, shared database/Redis environment and matching revision/origin
+namespace, then verify them in isolation. Do not add per-request `setInterval` calls
+or expose an unauthenticated cron endpoint.
+
+| Route / owner | Cadence (default) | Lease / retry / terminal handling |
+|---|---|---|
+| Certificate completion, expiry, artifact delivery/recovery | `CERTIFICATE_COMPLETION_WORKER_INTERVAL_MS` (5s) | Completion/artifact outbox: 30s claim, renewal at claim/3, 8 attempts, 1s→60s exponential backoff, exhausted outbox parking. Expiry/recovery use owner methods, not a new generic queue. |
+| Student identity → role → catchup → learning → certificates → replay → reminders → tracker owners | `STUDENT_WORKSPACE_OUTBOX_WORKER_INTERVAL_MS` (2s), same order | Dispatch paths: 60s claim, renewal at claim/3, 8 attempts, 1s→120s exponential backoff and parking. Replay/tracker reconciliation retain owner-specific recovery, not independent leases/DLQ. |
+| Settings → career → services delivery | `OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS` (2s) | Domain-filtered outbox, 60s claim, renewal at claim/3, 8 attempts, 1s→120s exponential backoff and parking. |
+| Durable jobs below | `BACKGROUND_WORKER_INTERVAL_MS` (2s), batch 10 | Claim 60s, heartbeat 15s by default; stable job reference, fenced completion/failure, 5 attempts per recurring definition, exponential retry, `BackgroundJobDeadLetterRecord`. |
+
+Production values must be explicit according to the existing config validator.
+Do not treat defaults here as deployment configuration or assume every owner
+maintenance operation has an independent distributed lock. Delivery remains
+at-least-once; external effects require owner/provider idempotency.
+
+All recurring definitions retain their stable references and existing enable flags:
+
+| Stable reference (`system.` prefix) | UTC cron default / source |
+|---|---|
+| `assets.lifecycle-recovery` | `*/5 * * * *`, lifecycle flag |
+| `audit.alerts` | `* * * * *`, audit flag |
+| `assets.activation-recovery` | explicit `ASSET_ACTIVATION_RECOVERY_CRON`, activation flag |
+| `retention.sweep` | `BACKGROUND_RETENTION_CRON` / `15 2 * * *` |
+| `cms.scheduled-publishing` | `BACKGROUND_CMS_CRON` / `* * * * *` |
+| `import.queue-sweep` | `BACKGROUND_IMPORT_CRON` / `* * * * *` |
+| `ai.async-sweep` | `BACKGROUND_AI_CRON` / `* * * * *` |
+| `finance.reconciliation` | `BACKGROUND_FINANCE_RECONCILIATION_CRON` / `*/5 * * * *` |
+| `careers.maintenance` | `*/5 * * * *`, careers flag |
+| `services.maintenance` | `*/5 * * * *`, services flag |
+| `notification.delivery` | `BACKGROUND_NOTIFICATION_CRON` / `* * * * *` |
+
+Registration uses the existing `ensureRecurringJob` stable-reference upsert; it does
+not deliver notifications or perform the business action. All definitions are
+registered only with durable workers enabled. Existing rows are not automatically
+cancelled by turning a definition flag off; use the governed job cancellation
+operation when that is intended, and inspect queue state before restart.
+
+## B09 operations and rollback
+
+The deployment operator owns the persistent Node process and termination grace.
+For SIGTERM/SIGINT the existing server budget is 15 seconds: stop intervals and new
+claims, await current iterations (including pending claim requests), then flush
+telemetry and close resources. If the budget expires, the existing forced cleanup
+and nonzero exit apply. Handlers must honor abort and provider idempotency; a timer
+or promise alone cannot cancel an external side effect. Set the host termination
+grace above the application budget and verify long-running jobs reclaim safely.
+
+Monitor `worker.iterations`, `worker.iterations.completed`, `worker.iterations.failed`,
+`worker.iteration.duration_ms` tagged by route, plus durable queue in-flight,
+completed/failed/lease-lost totals, oldest-due age and DLQ size. Investigate a
+sustained oldest-due increase, missing fresh observation, repeated lease loss or
+any new DLQ record; do not silently replay failed provider actions.
+
+HTTP liveness alone never proves worker health. Polling/background health requires
+fresh Redis observations from worker activity and shared deployment namespace;
+health reads do not write evidence. Absent, stale or unavailable observations keep
+worker capability `RUNTIME_PENDING` even if HTTP is responding. Node-local STOPPED
+can coexist with a healthy remote worker only when fresh cluster evidence exists.
+
+Rollback: stop the replacement host and wait for drain/lease expiry before starting
+the previous version with the same durable queue. Never run old and replacement
+versions as an uncontrolled rollout or clear tokens/DLQ to make health green.
+No historical migrations or queue data were changed by B09. Target-host shutdown,
+Redis observation propagation, disposable-DB claim contention and provider effects
+remain runtime acceptance tasks; local adapter substitutes do not certify them.

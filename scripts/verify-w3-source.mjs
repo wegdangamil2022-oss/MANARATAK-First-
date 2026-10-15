@@ -14,6 +14,7 @@ const backgroundGateway = read('packages/infrastructure/src/background-jobs/Pris
 const backgroundRouter = read('apps/api/src/presentation/api/router/BackgroundJobRouter.ts');
 const apiContainer = read('apps/api/src/infrastructure/di/container.ts');
 const apiServer = read('apps/api/src/server.ts');
+const recurringJobs = read('apps/api/src/infrastructure/workers/RegisterRecurringJobs.ts');
 const pollingRuntime = read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts');
 const apiApp = read('apps/api/src/app.ts');
 const appConfig = read('packages/config/src/AppConfig.ts');
@@ -108,7 +109,7 @@ check('MNT-AUD-0007 production DI composes Prisma persistence, generic worker an
   apiContainer.includes('durableBackgroundWorker:') && apiContainer.includes('retentionBackgroundJobHandler:') &&
   retentionHandler.includes('platform.retention.sweep'));
 check('MNT-AUD-0007 server lifecycle registers recurring Retention, polls durable worker and drains on shutdown',
-  apiServer.includes("stableReference: 'system.retention.sweep'") && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('backgroundWorker.runOnce') &&
+  recurringJobs.includes("stableReference: 'system.retention.sweep'") && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('backgroundWorker.runOnce') &&
   apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('BACKGROUND_WORKER_HEARTBEAT_MS') && apiServer.includes('backgroundWorker?.drain?.()'));
 check('MNT-AUD-0007 production configuration/readiness fail closed when worker durability is unavailable',
   appConfig.includes("'BACKGROUND_WORKER_ENABLED'") && appConfig.includes('BACKGROUND_WORKER_HEARTBEAT_MS') &&
@@ -241,14 +242,14 @@ check('MNT-AUD-0016 Identity to StudentWorkspace bridge is idempotent on outbox 
   studentOutboxGateway.includes("role.roleId === 'student'") && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('runRoleOnce') && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED'));
 
 check('MNT-AUD-0017 CMS due schedules execute through a recurring durable background job',
-  cmsHandler.includes('processDueSchedules') && apiServer.includes('CMS_SCHEDULED_PUBLISH_JOB_TYPE') && appConfig.includes('BACKGROUND_CMS_CRON'));
+  cmsHandler.includes('processDueSchedules') && recurringJobs.includes('CMS_SCHEDULED_PUBLISH_JOB_TYPE') && apiServer.includes('await registerRecurringJobs(container, config)') && appConfig.includes('BACKGROUND_CMS_CRON'));
 check('MNT-AUD-0054 AI queued/stale async jobs execute through a recurring durable background job',
-  aiHandler.includes('processDueAsyncJobs') && apiServer.includes('AI_ASYNC_SWEEP_JOB_TYPE') && appConfig.includes('BACKGROUND_AI_CRON'));
+  aiHandler.includes('processDueAsyncJobs') && recurringJobs.includes('AI_ASYNC_SWEEP_JOB_TYPE') && apiServer.includes('await registerRecurringJobs(container, config)') && appConfig.includes('BACKGROUND_AI_CRON'));
 check('MNT-AUD-0086 import due/reclaimable queue work executes through a recurring durable background job',
-  importHandler.includes('processNextQueuedBatch') && apiServer.includes('IMPORT_QUEUE_SWEEP_JOB_TYPE') && appConfig.includes('BACKGROUND_IMPORT_CRON'));
+  importHandler.includes('processNextQueuedBatch') && recurringJobs.includes('IMPORT_QUEUE_SWEEP_JOB_TYPE') && apiServer.includes('await registerRecurringJobs(container, config)') && appConfig.includes('BACKGROUND_IMPORT_CRON'));
 
 check('MNT-AUD-0077 finance reconciliation autonomously covers payments, transfers and PROCESSING refunds',
-  financeHandler.includes('reconcileProviderStates') && apiServer.includes('FINANCE_RECONCILIATION_JOB_TYPE') &&
+  financeHandler.includes('reconcileProviderStates') && recurringJobs.includes('FINANCE_RECONCILIATION_JOB_TYPE') && apiServer.includes('await registerRecurringJobs(container, config)') &&
   financeUseCases.includes('claimReconciliationCandidates') && read('packages/infrastructure/src/finance-platform/PrismaFinanceRepository.ts').includes("refund: ['PROCESSING', 'UNKNOWN_OUTCOME']") && financeUseCases.includes('getRefundStatus') &&
   financeProvider.includes('/v1/finance/payments/refund-status') && financeProvider.includes('refundReference'));
 check('MNT-AUD-0077 payment health reports the real provider runtime capability instead of stale transport-pending text',

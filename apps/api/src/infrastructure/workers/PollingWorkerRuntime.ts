@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { AwilixContainer } from '@manaratak-vendor/awilix-core';
 import type { IConfigurationService } from '@manaratak/core';
 
@@ -37,163 +38,106 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
 
   const timers: NodeJS.Timeout[] = [];
   const inFlightTasks = new Set<Promise<void>>();
+  const names: string[] = [];
+  const runtimeId = `${process.pid}-${randomUUID()}`;
+  let stopping = false;
+  let stopTask: Promise<void> | null = null;
+  // Resolve and validate all routes before creating any timer or invoking a worker.
+  const routes: Array<{ name: string; intervalMs: number; action: () => Promise<unknown> }> = [];
+  const register = (name: string, intervalMs: number, action: () => Promise<unknown>): void => {
+    if (!Number.isSafeInteger(intervalMs) || intervalMs < 1) throw new Error(`POLLING_INTERVAL_INVALID:${name}`);
+    routes.push({ name, intervalMs, action });
+  };
 
-  // 1. Certificate Completion Worker
   if (config.getOptional<boolean>('CERTIFICATE_COMPLETION_WORKER_ENABLED') === true) {
     const intervalMs = config.getOptional<number>('CERTIFICATE_COMPLETION_WORKER_INTERVAL_MS') ?? 5_000;
     const worker = container.resolve<any>('certificateCompletionOutboxWorker');
-    const workerId = `certificate-completion-${process.pid}`;
-    let certificateWorkerTask: Promise<void> | null = null;
-    const tick = (): Promise<void> => {
-      if (certificateWorkerTask) return certificateWorkerTask;
-      certificateWorkerTask = (async () => {
-        pollingWorkerRuntimeRegistry.started('certificate-completion');
-        try {
-          await observeWorkerIteration('certificate-completion', () => worker.runOnce(workerId));
-          pollingWorkerRuntimeRegistry.success('certificate-completion');
-        } catch (error) {
-          pollingWorkerRuntimeRegistry.failure('certificate-completion', error);
-          console.error('[Certificates] Completion worker iteration failed.');
-        } finally {
-          certificateWorkerTask = null;
-        }
-      })();
-      inFlightTasks.add(certificateWorkerTask);
-      const task = certificateWorkerTask;
-      void task.finally(() => inFlightTasks.delete(task));
-      return certificateWorkerTask;
-    };
-    void tick();
-    const timer = setInterval(() => { void tick(); }, intervalMs);
-    timer.unref?.();
-    timers.push(timer);
+    const workerId = `certificate-completion-${runtimeId}`;
+    register('certificate-completion', intervalMs, () => worker.runOnce(workerId));
   }
-
-  // 2. Student Workspace Outbox Worker
   if (config.getOptional<boolean>('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED') === true) {
     const intervalMs = config.getOptional<number>('STUDENT_WORKSPACE_OUTBOX_WORKER_INTERVAL_MS') ?? 2_000;
     const worker = container.resolve<any>('studentWorkspaceOutboxWorker');
-    const workerId = `student-workspace-${process.pid}`;
-    let studentWorkspaceOutboxTask: Promise<void> | null = null;
-    const tick = (): Promise<void> => {
-      if (studentWorkspaceOutboxTask) return studentWorkspaceOutboxTask;
-      studentWorkspaceOutboxTask = (async () => {
-        pollingWorkerRuntimeRegistry.started('student-workspace-outbox');
-        try {
-          await observeWorkerIteration('student-workspace-outbox', async () => {
-            await worker.runIdentityOnce(`${workerId}-identity`);
-            await worker.runRoleOnce(`${workerId}-role`);
-            await worker.runCatchupOnce(`${workerId}-catchup`);
-            await worker.runLearningOnce(`${workerId}-learning`);
-            await worker.runCertificatesOnce(`${workerId}-certificates`);
-            await worker.runReplayOnce(`${workerId}-replay`);
-            await worker.runRemindersOnce(`${workerId}-reminders`);
-            await worker.runTrackerOwnersOnce(`${workerId}-tracker-owners`);
-          });
-          pollingWorkerRuntimeRegistry.success('student-workspace-outbox');
-        } catch (error) {
-          pollingWorkerRuntimeRegistry.failure('student-workspace-outbox', error);
-          console.error('[StudentWorkspace] Outbox projection worker iteration failed.');
-        } finally {
-          studentWorkspaceOutboxTask = null;
-        }
-      })();
-      inFlightTasks.add(studentWorkspaceOutboxTask);
-      const task = studentWorkspaceOutboxTask;
-      void task.finally(() => inFlightTasks.delete(task));
-      return studentWorkspaceOutboxTask;
-    };
-    void tick();
-    const timer = setInterval(() => { void tick(); }, intervalMs);
-    timer.unref?.();
-    timers.push(timer);
+    const workerId = `student-workspace-${runtimeId}`;
+    register('student-workspace-outbox', intervalMs, async () => {
+      await worker.runIdentityOnce(`${workerId}-identity`);
+      await worker.runRoleOnce(`${workerId}-role`);
+      await worker.runCatchupOnce(`${workerId}-catchup`);
+      await worker.runLearningOnce(`${workerId}-learning`);
+      await worker.runCertificatesOnce(`${workerId}-certificates`);
+      await worker.runReplayOnce(`${workerId}-replay`);
+      await worker.runRemindersOnce(`${workerId}-reminders`);
+      await worker.runTrackerOwnersOnce(`${workerId}-tracker-owners`);
+    });
   }
-
-  // 3. Owner Domain Outbox Worker
   if (config.getOptional<boolean>('OWNER_DOMAIN_OUTBOX_WORKER_ENABLED') === true) {
     const intervalMs = config.getOptional<number>('OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS') ?? 2_000;
     const worker = container.resolve<any>('ownerDomainOutboxWorker');
-    const workerId = `owner-domain-${process.pid}`;
-    let ownerDomainOutboxTask: Promise<void> | null = null;
-    const tick = (): Promise<void> => {
-      if (ownerDomainOutboxTask) return ownerDomainOutboxTask;
-      ownerDomainOutboxTask = (async () => {
-        pollingWorkerRuntimeRegistry.started('owner-domain-outbox');
-        try {
-          await observeWorkerIteration('owner-domain-outbox', async () => {
-            await worker.runSettingsOnce(`${workerId}-settings`);
-            await worker.runCareerOnce(`${workerId}-career`);
-            await worker.runServicesOnce(`${workerId}-services`);
-          });
-          pollingWorkerRuntimeRegistry.success('owner-domain-outbox');
-        } catch (error) {
-          pollingWorkerRuntimeRegistry.failure('owner-domain-outbox', error);
-          console.error('[OwnerDomainEvents] Outbox delivery iteration failed.');
-        } finally {
-          ownerDomainOutboxTask = null;
-        }
-      })();
-      inFlightTasks.add(ownerDomainOutboxTask);
-      const task = ownerDomainOutboxTask;
-      void task.finally(() => inFlightTasks.delete(task));
-      return ownerDomainOutboxTask;
-    };
-    void tick();
-    const timer = setInterval(() => { void tick(); }, intervalMs);
-    timer.unref?.();
-    timers.push(timer);
+    const workerId = `owner-domain-${runtimeId}`;
+    register('owner-domain-outbox', intervalMs, async () => {
+      await worker.runSettingsOnce(`${workerId}-settings`);
+      await worker.runCareerOnce(`${workerId}-career`);
+      await worker.runServicesOnce(`${workerId}-services`);
+    });
   }
-
-  // 4. Background Worker (durable background jobs)
-  const backgroundWorkerEnabled = config.getOptional<boolean>('BACKGROUND_WORKER_ENABLED') === true;
-  const backgroundWorker = backgroundWorkerEnabled ? container.resolve<any>('durableBackgroundWorker') : null;
-  if (backgroundWorkerEnabled && backgroundWorker) {
+  if (config.getOptional<boolean>('BACKGROUND_WORKER_ENABLED') === true) {
+    const backgroundWorker = container.resolve<any>('durableBackgroundWorker');
     const intervalMs = config.getOptional<number>('BACKGROUND_WORKER_INTERVAL_MS') ?? 2_000;
     const batchSize = config.getOptional<number>('BACKGROUND_WORKER_BATCH_SIZE') ?? 10;
     const leaseDurationMs = config.getOptional<number>('BACKGROUND_WORKER_LEASE_MS') ?? 60_000;
     const heartbeatIntervalMs = config.getOptional<number>('BACKGROUND_WORKER_HEARTBEAT_MS') ?? 15_000;
-    const workerId = `background-${process.pid}`;
-    let backgroundWorkerTask: Promise<void> | null = null;
-    const tick = (): Promise<void> => {
-      if (backgroundWorkerTask) return backgroundWorkerTask;
-      backgroundWorkerTask = (async () => {
-        try {
-          await observeWorkerIteration('durable-background-jobs', () => backgroundWorker.runOnce({ workerId, batchSize, leaseDurationMs, heartbeatIntervalMs }));
-        } catch {
-          console.error('[BackgroundJobs] Worker iteration failed.');
-        } finally {
-          backgroundWorkerTask = null;
-        }
+    const workerId = `background-${runtimeId}`;
+    register('durable-background-jobs', intervalMs, () => backgroundWorker.runOnce({ workerId, batchSize, leaseDurationMs, heartbeatIntervalMs }));
+  }
+  const handle: PollingWorkerHandle = {
+    stop: () => {
+      if (stopTask) return stopTask;
+      stopping = true;
+      for (const timer of timers) clearInterval(timer);
+      timers.length = 0;
+      stopTask = (async () => {
+        await Promise.allSettled([...inFlightTasks]);
+        for (const name of names) pollingWorkerRuntimeRegistry.stopped?.(name);
+        if (activeWorkerHandle === handle) activeWorkerHandle = null;
       })();
-      inFlightTasks.add(backgroundWorkerTask);
-      const task = backgroundWorkerTask;
-      void task.finally(() => inFlightTasks.delete(task));
-      return backgroundWorkerTask;
+      return stopTask;
+    },
+  };
+  activeWorkerHandle = handle;
+  for (const { name, intervalMs, action } of routes) {
+    names.push(name);
+    let task: Promise<void> | null = null;
+    const tick = (): void => {
+      if (stopping || task) return;
+      // Defer execution until task ownership is recorded, including synchronous failures.
+      task = Promise.resolve().then(async () => {
+        try {
+          pollingWorkerRuntimeRegistry.started(name);
+          await observeWorkerIteration(name, action);
+          pollingWorkerRuntimeRegistry.success(name);
+        } catch (error) {
+          pollingWorkerRuntimeRegistry.failure(name, error);
+          console.error(`[Workers] ${name} iteration failed.`);
+        }
+      });
+      const current = task;
+      inFlightTasks.add(current);
+      void current.then(() => {
+        inFlightTasks.delete(current);
+        task = null;
+      }, () => {
+        inFlightTasks.delete(current);
+        task = null;
+      });
     };
-    void tick();
-    const timer = setInterval(() => { void tick(); }, intervalMs);
+    tick();
+    const timer = setInterval(tick, intervalMs);
     timer.unref?.();
     timers.push(timer);
   }
-
-  const handle: PollingWorkerHandle = {
-    stop: async () => {
-      for (const timer of timers) {
-        clearInterval(timer);
-      }
-      timers.length = 0;
-      await Promise.allSettled(Array.from(inFlightTasks));
-      inFlightTasks.clear();
-      activeWorkerHandle = null;
-    },
-  };
-
-  activeWorkerHandle = handle;
   return handle;
 }
 
 export async function stopPollingWorkers(): Promise<void> {
-  if (activeWorkerHandle) {
-    await activeWorkerHandle.stop();
-  }
+  if (activeWorkerHandle) await activeWorkerHandle.stop();
 }

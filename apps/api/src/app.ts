@@ -42,7 +42,6 @@ import { SecurityMiddlewareFactory } from './presentation/security/SecurityMiddl
 import { SecurityValidator } from './presentation/security/SecurityValidator.js';
 import { MutationAuditMiddleware } from './presentation/audit/MutationAuditMiddleware.js';
 import { RuntimeResourceRegistry } from './infrastructure/runtime/RuntimeResourceRegistry.js';
-import { startPollingWorkers } from './infrastructure/runtime/PollingWorkerBootstrapper.js';
 import { buildCanonicalCorsOrigins } from './presentation/security/CanonicalApiCorsPolicy.js';
 
 export interface CreateApiAppOptions {

@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B09",
+  "next": "B10a",
   "remaining": [
-    "B09",
     "B10a",
     "B10b",
     "B10c",
@@ -278,5 +277,37 @@
       "Non-production browser smoke for each catalog, filters, locale switch, saved-item interaction and publication withdrawal",
       "Existing B01/B02/B05 deployment and database prerequisites remain pending"
     ]
+  },
+  "B09": {
+    "status": "SOURCE_VERIFIED",
+    "baselineCommit": "8cb0c8f",
+    "findings": [
+      "ARCH-07"
+    ],
+    "runtimeStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "lightTestsPassed": 26,
+    "lightTestsFailed": 0,
+    "report": "docs/reviews/B09_UNIFIED_WORKER_RUNTIME_2026-10-15.md",
+    "runbook": "docs/operations/BACKGROUND_WORKER_RUNTIME.md",
+    "checks": {
+      "apiTypecheck": "PASS",
+      "targetedEslint": "PASS_WITH_WARNINGS",
+      "sourceQuality": "PASS",
+      "diReachability": "PASS_424_OF_424",
+      "recurringDefinitionParity": "PASS_11_OF_11",
+      "w3Source": "BASELINE_FAILURE_53_OF_55"
+    },
+    "knownExistingGuardFailures": [
+      "MNT-AUD-0011 upload grant source guard",
+      "MNT-AUD-0016 role event source guard"
+    ],
+    "runtimePrerequisites": [
+      "Disposable PostgreSQL claim/reclaim/lease contention proof",
+      "Persistent host and SIGTERM grace verification",
+      "Shared Redis observation namespace and freshness across HTTP/worker",
+      "Provider/owner idempotency and abort handling; no real effects tested"
+    ],
+    "hostDecision": "Existing persistent Node server is the source host; no external deployment certified. Serverless HTTP must not start polling per request."
   }
 }

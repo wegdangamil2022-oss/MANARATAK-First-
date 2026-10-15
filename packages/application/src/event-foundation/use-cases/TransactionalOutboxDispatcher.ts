@@ -32,7 +32,10 @@ export class TransactionalOutboxDispatcher implements ITransactionalOutboxDispat
     const heartbeatMs = Math.max(1_000, Math.floor(request.claimDurationMs / 3));
     const timer = setInterval(() => {
       if (heartbeatTask || active.size === 0) return;
-      heartbeatTask = this.heartbeatActive(active, request.claimDurationMs).finally(() => { heartbeatTask = null; });
+      heartbeatTask = this.heartbeatActive(active, request.claimDurationMs).catch(() => {
+        // Stop background renewal after an outage; terminal writes still require ownership CAS.
+        active.clear();
+      }).finally(() => { heartbeatTask = null; });
     }, heartbeatMs);
     timer.unref?.();
 

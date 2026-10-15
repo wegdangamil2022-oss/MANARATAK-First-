@@ -45,3 +45,23 @@ function fakeStore(entries: TransactionalOutboxEntry[]): ITransactionalOutboxSto
     renewLease: vi.fn().mockResolvedValue(true), markProcessed: vi.fn().mockResolvedValue(true), markFailed: vi.fn().mockResolvedValue(true),
   };
 }
+
+describe('B09 outbox renewal availability', () => {
+  it('handles a background renewal rejection and still requires final ownership CAS', async () => {
+    vi.useFakeTimers();
+    try {
+      const store = fakeStore([entry()]);
+      (store.renewLease as any).mockResolvedValueOnce(true).mockRejectedValue(new Error('temporary outage'));
+      (store.markProcessed as any).mockResolvedValue(false);
+      let release!: () => void;
+      const delivery = { deliver: vi.fn(() => new Promise<void>(resolve => { release = resolve; })) };
+      const dispatcher = new TransactionalOutboxDispatcher(store, delivery);
+      const run = dispatcher.dispatchBatch(request);
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(store.renewLease).toHaveBeenCalledTimes(2);
+      release();
+      await expect(run).resolves.toEqual({ claimed: 1, processed: 0, failed: 0, exhausted: 0, leaseLost: 1 });
+      expect(vi.getTimerCount()).toBe(0);
+    } finally { vi.useRealTimers(); }
+  });
+});

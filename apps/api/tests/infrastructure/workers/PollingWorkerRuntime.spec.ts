@@ -90,3 +90,39 @@ describe('server-composed P15 polling routes', () => {
     release();await stop;expect(f.student.runCertificatesOnce).toHaveBeenCalledOnce();
   });
 });
+
+describe('B09 atomic startup and shutdown ownership', () => {
+  it('rejects an invalid later route before starting any earlier worker', async () => {
+    const f = fixture();
+    const certificate = { runOnce: vi.fn().mockResolvedValue(undefined) };
+    f.container.register({ certificateCompletionOutboxWorker: asValue(certificate) });
+    const config = { getOptional: (key: string) => ({ CERTIFICATE_COMPLETION_WORKER_ENABLED: true, OWNER_DOMAIN_OUTBOX_WORKER_ENABLED: true, OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS: 0 } as Record<string, unknown>)[key] } as IConfigurationService;
+    await expect(startPollingWorkers(f.container, config)).rejects.toThrow('POLLING_INTERVAL_INVALID');
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(certificate.runOnce).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it('keeps the active handle through drain and an old stop cannot stop its replacement', async () => {
+    const f = fixture(); let release!: () => void;
+    f.worker.runSettingsOnce.mockImplementationOnce(() => new Promise<void>(r => { release = r; }));
+    const first = await startPollingWorkers(f.container, f.config);
+    await vi.advanceTimersByTimeAsync(0);
+    const stop = first.stop();
+    expect(await startPollingWorkers(f.container, f.config)).toBe(first);
+    release(); await stop;
+    const next = await startPollingWorkers(f.container, f.config);
+    expect(next).not.toBe(first);
+    await first.stop();
+    expect(await startPollingWorkers(f.container, f.config)).toBe(next);
+  });
+  it('marks every registered route stopped after draining, including durable jobs', async () => {
+    const f = fixture(); const stopped = vi.fn(); const runOnce = vi.fn().mockResolvedValue(undefined);
+    f.container.register({ durableBackgroundWorker: asValue({ runOnce }), pollingWorkerRuntimeRegistry: asValue({ ...f.registry, stopped }) });
+    const config = { getOptional: (key: string) => key === 'BACKGROUND_WORKER_ENABLED' ? true : undefined } as IConfigurationService;
+    const handle = await startPollingWorkers(f.container, config);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(f.registry.success).toHaveBeenCalledWith('durable-background-jobs');
+    await handle.stop(); expect(stopped).toHaveBeenCalledWith('durable-background-jobs');
+    await vi.advanceTimersByTimeAsync(10000); expect(runOnce).toHaveBeenCalledOnce();
+  });
+});
