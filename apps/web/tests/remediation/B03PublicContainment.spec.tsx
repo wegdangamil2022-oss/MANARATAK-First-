@@ -43,9 +43,16 @@ const course = (ownerId: string, originType = 'NATIVE_MANARATAK_COURSE') =>
   }) as Course;
 
 describe('B03 public cards and canonical learner navigation', () => {
-  it('does not invent scholarship cards on empty/omitted data', () => {
-    expect(markup(<FeaturedScholarships onViewAllClick={noop} />)).toBe('');
-    expect(markup(<FeaturedScholarships scholarships={[]} onViewAllClick={noop} />)).toBe('');
+  it('keeps scholarship layout without inventing owner records on empty/omitted data', () => {
+    for (const html of [
+      markup(<FeaturedScholarships onViewAllClick={noop} />),
+      markup(<FeaturedScholarships scholarships={[]} onViewAllClick={noop} />),
+    ]) {
+      expect(html).toContain('featured-scholarships-section');
+      expect(html).toContain('data-home-empty-kind="scholarships"');
+      expect(html).not.toContain('csc-china');
+      expect(html).not.toContain('role="button"');
+    }
   });
   it('renders only owner-provided featured scholarships, never fuzzy-matches a display card', async () => {
     const actual = {
@@ -101,11 +108,13 @@ describe('B03 public cards and canonical learner navigation', () => {
       ),
     ).toContain('840');
   });
-  it('does not advertise absent exams or operational tools in api mode', () => {
-    expect(markup(<FeaturedExams exams={[]} onViewAllClick={noop} />)).toBe('');
+  it('keeps exam and tool designs visible without advertising unavailable owner records or executable tools', () => {
+    const exams = markup(<FeaturedExams exams={[]} onViewAllClick={noop} />);
+    expect(exams).toContain('data-home-empty-kind="exams"');
+    expect(exams).not.toContain('IELTS');
     const html = markup(<AIToolsBanner onOpenAiTools={noop} />);
-    expect(html).not.toContain('university-comparison');
-    expect(html).not.toContain(ar.public_gpa_calculator);
+    expect(html).toContain('disabled=""');
+    expect(html).toContain(ar.public_home_tools_preview_notice);
     expect(html).toContain('btn-view-all-ai-tools');
     expect(markup(<FeaturedExams dataMode="prototype" onViewAllClick={noop} />)).toContain('IELTS');
     expect(markup(<AIToolsBanner dataMode="prototype" onOpenAiTools={noop} />)).toContain(
