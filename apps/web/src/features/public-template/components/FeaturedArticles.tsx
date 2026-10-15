@@ -1,10 +1,16 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState } from 'react';
 import type { PublicArticle } from '../types';
+import { HomeSectionEmptyCards } from './HomeSectionEmptyCards';
+import { homeCatalogStatus } from '../homeCatalogState';
+import type { PublicLiveDomainStatus } from '../publicLiveDataSource';
 import { Newspaper, Clock, ArrowUpLeft, ChevronLeft, Award, FileText, Plane, GraduationCap, Cpu, Search } from 'lucide-react';
 
 interface FeaturedArticlesProps {
   articles: PublicArticle[];
+  dataMode?: 'api' | 'prototype';
+  status?: PublicLiveDomainStatus;
+  onRetry?: () => void;
   onViewAllClick: () => void;
   onSelectArticle: (id: string) => void;
 }
@@ -211,13 +217,14 @@ const DEFAULT_FEATURED_ARTICLES = [
   },
 ];
 
-export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, onViewAllClick, onSelectArticle }) => {
+export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, dataMode = 'api', status, onRetry, onViewAllClick, onSelectArticle }) => {
   const { t: publicT } = usePublicTemplateTranslation();
 
   const [imageErrorIds, setImageErrorIds] = useState<Record<string, boolean>>({});
 
-  const featuredList = (articles && articles.length >= 6)
-    ? articles.slice(0, 6).map((article, index) => ({
+  // Never substitute editorial fixtures in a production/live view.
+  const featuredList = (dataMode === 'api' || (articles && articles.length > 0))
+    ? (articles ?? []).slice(0, 6).map((article, index) => ({
         id: article.id,
         title: article.titleAr,
         summary: article.excerptAr || '',
@@ -227,6 +234,7 @@ export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, on
       }))
     : DEFAULT_FEATURED_ARTICLES.map(article => ({ ...article, title: publicT(article.title), summary: publicT(article.summary), category: publicT(article.category), readTime: publicT(article.readTime) }));
 
+  const displayStatus = homeCatalogStatus(status, featuredList.length);
   const handleImageError = (id: string) => {
     setImageErrorIds((prev) => ({ ...prev, [id]: true }));
   };
@@ -258,7 +266,9 @@ export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, on
 
           {/* Horizontal Scrollable Articles List - 6 cards with left drag/swipe */}
           <div className="flex overflow-x-auto pb-2 pt-0.5 -mx-1 px-1 gap-2.5 snap-x snap-mandatory scroll-smooth touch-pan-x no-scrollbar">
-            {featuredList.map((article) => (
+            {featuredList.length === 0 ? (
+              <HomeSectionEmptyCards kind="articles" status={displayStatus === 'ready' ? 'empty' : displayStatus} onRetry={onRetry} />
+            ) : featuredList.map((article) => (
               <div
                 key={article.id}
                 role="button"
