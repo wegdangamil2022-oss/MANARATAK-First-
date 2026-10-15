@@ -5,11 +5,16 @@ import {
   FinancePaymentFilters,
   IFinanceRepository,
   PaginatedFinanceResult,
+  FinancialAccountFilters,
+  normalizeFinancialAccountFilters,
 } from '@manaratak/domain';
 
 /** Read-only compatibility facade. All financial commands use FinancePlatformUseCases. */
 export class FinanceAdminUseCases {
   constructor(private readonly repository: IFinanceRepository) {}
+  listFinancialAccounts(filters: FinancialAccountFilters) {
+    return this.repository.listFinancialAccounts(normalizeFinancialAccountFilters(filters));
+  }
   listInvoices(filters: FinanceInvoiceFilters): Promise<PaginatedFinanceResult<FinanceInvoiceDto>> {
     return this.repository.listInvoices(filters);
   }

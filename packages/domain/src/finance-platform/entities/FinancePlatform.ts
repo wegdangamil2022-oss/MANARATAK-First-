@@ -75,6 +75,14 @@ export interface FinancialAccountDto {
   systemManaged: boolean;
   createdAt: Date | string;
 }
+export interface FinancialAccountFilters {
+  page?: number;
+  pageSize?: number;
+  ownerReferenceId?: string;
+  currencyCode?: string;
+  type?: FinancialAccountType;
+  active?: boolean;
+}
 export interface LedgerPostingInput {
   accountId: string;
   direction: LedgerDirection;

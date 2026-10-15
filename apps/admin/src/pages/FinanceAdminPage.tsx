@@ -3,11 +3,13 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { financeMoney } from './financePresentation';
+import { FinanceAccountsPanel } from './FinanceAccountsPanel';
 
 type Row = Record<string, any>;
 type Page = { data: Row[]; page: number; total: number; totalPages: number };
 const tabs = [
   'overview',
+  'accounts',
   'invoices',
   'payments',
   'refunds',
@@ -31,6 +33,7 @@ const listTabs = new Set<Tab>([
 ]);
 const endpoints: Record<Tab, string> = {
   overview: 'overview',
+  accounts: 'accounts',
   invoices: 'invoices',
   payments: 'payments',
   refunds: 'refunds',
@@ -98,6 +101,10 @@ export function FinanceAdminPage() {
     setLoading(true);
     setError('');
     setData(null);
+    if (tab === 'accounts') {
+      setLoading(false);
+      return;
+    }
     const query = new URLSearchParams(currentQuery);
     query.delete('tab');
     query.set('pageSize', '20');
@@ -253,6 +260,7 @@ export function FinanceAdminPage() {
               </button>
             </div>
           )}
+          {tab === 'accounts' && <FinanceAccountsPanel refreshToken={refresh} />}
           {error && (
             <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">
               {error}

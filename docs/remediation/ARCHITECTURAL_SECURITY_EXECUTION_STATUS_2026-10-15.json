@@ -499,5 +499,50 @@
     "deferredCapabilities": [
       "Mentorship session booking, cancellation and retention policy; no session model or API introduced"
     ]
+  },
+  "B13": {
+    "status": "IN_PROGRESS",
+    "packageClosed": false,
+    "baselineCommit": "44467b3a",
+    "findings": [
+      "ADM-07"
+    ],
+    "currentStep": "INVOICE_INSTALLMENTS",
+    "completedSteps": [
+      "FINANCIAL_ACCOUNT_READ_SOURCE_VERIFIED"
+    ],
+    "specification": "docs/remediation/specs/B13_FINANCE_OWNER_CONTRACT_2026-10-15.md",
+    "report": "docs/reviews/B13a_FINANCIAL_ACCOUNT_READ_2026-10-15.md",
+    "runtimeDatabaseStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "schemaChanged": false,
+    "historicalSqlChanged": false,
+    "financialEffectsPerformed": false,
+    "financialRuntimeApprovalChanged": false,
+    "accountReadAcceptance": {
+      "status": "SOURCE_VERIFIED",
+      "lightTestsPassed": 19,
+      "lightTestFiles": 3,
+      "lightTestsFailed": 0,
+      "sourceChecks": {
+        "typesNoEmit": "PASS",
+        "persistence": "PASS_281_OF_281",
+        "targetedEslintErrors": 0,
+        "targetedEslintWarnings": 95,
+        "sourceQuality": "PASS",
+        "diffCheck": "PASS"
+      }
+    },
+    "remainingSteps": [
+      "Invoice installment operator contract and UI",
+      "Credit note operator contract and UI",
+      "Wallet hold/release/capture operator contracts and UI",
+      "Append-only ledger reversal operator contract and UI"
+    ],
+    "runtimePrerequisites": [
+      "Isolated PostgreSQL account snapshot/read and role/browser rehearsal",
+      "Per-operation idempotency/version/approval and financial append-only database rehearsal before enabling effects",
+      "Existing section 20 financial runtime approval remains pending; no provider invoked"
+    ]
   }
 }

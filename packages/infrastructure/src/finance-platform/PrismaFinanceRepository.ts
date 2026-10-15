@@ -25,6 +25,9 @@ import {
   PostLedgerTransactionInput,
   TransferStatus,
   validateBalancedPostings,
+  FinancialAccountFilters,
+  FinancialAccountDto,
+  normalizeFinancialAccountFilters,
 } from '@manaratak/domain';
 
 type Db = any;
@@ -48,6 +51,21 @@ const money = (units: string, currencyCode: string, scale: number): MoneyAmount 
 
 export class PrismaFinanceRepository implements IFinanceRepository {
   constructor(private readonly db: Db) {}
+
+  async listFinancialAccounts(filters: FinancialAccountFilters): Promise<PaginatedFinanceResult<FinancialAccountDto>> {
+    const {page, pageSize, ...fields} = normalizeFinancialAccountFilters(filters);
+    const where = Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== undefined));
+    return this.db.$transaction(async (tx: Db) => {
+      const [data, total] = await Promise.all([
+        tx.financialAccountRecord.findMany({where,
+          select: {id: true, publicId: true, ownerReferenceId: true, type: true,
+            currencyCode: true, scale: true, version: true, active: true, systemManaged: true, createdAt: true},
+          orderBy: [{createdAt: 'desc'}, {id: 'desc'}], skip: (page - 1) * pageSize, take: pageSize}),
+        tx.financialAccountRecord.count({where}),
+      ]);
+      return {data, total, page, pageSize, totalPages: Math.ceil(total / pageSize)};
+    }, {isolationLevel: 'RepeatableRead'});
+  }
 
   async createAdjustmentCase(input: any, ctx: FinanceMutationContext) {
     return this.tx(async (tx) => {

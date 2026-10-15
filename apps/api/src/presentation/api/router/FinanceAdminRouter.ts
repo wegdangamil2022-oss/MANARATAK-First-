@@ -276,6 +276,22 @@ export class FinanceAdminRouter {
         res.json(financePlatformUseCases.runtimeReadiness()),
       ),
     );
+    router.get(
+      '/accounts',
+      asyncHandler(async (req: Request, res: Response) => {
+        res.setHeader('Cache-Control', 'no-store');
+        await requireFinancePermission(req, 'admin:finance:manage');
+        const filters = z.object({
+          page: z.coerce.number().int().min(1).max(10000).default(1),
+          pageSize: z.coerce.number().int().min(1).max(50).default(20),
+          ownerReferenceId: z.string().trim().min(1).max(160).optional(),
+          currencyCode: z.string().regex(/^[A-Z]{3}$/).optional(),
+          type: z.enum(['ASSET', 'LIABILITY', 'REVENUE', 'EXPENSE', 'EQUITY']).optional(),
+          active: z.enum(['true', 'false']).transform(value => value === 'true').optional(),
+        }).strict().parse(req.query);
+        res.json(await financeAdminUseCases.listFinancialAccounts(filters));
+      }),
+    );
     router.post(
       '/accounts',
       asyncHandler(async (req: Request, res: Response) => {

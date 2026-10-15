@@ -1,4 +1,19 @@
 import { MoneyAmount, assertValidMoneyAmount } from './value-objects';
+import type { FinancialAccountFilters } from './entities/FinancePlatform';
+
+export function normalizeFinancialAccountFilters(filters: FinancialAccountFilters) {
+  const page = filters.page ?? 1, pageSize = filters.pageSize ?? 20;
+  if (!Number.isInteger(page) || page < 1 || page > 10000 ||
+      !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50 ||
+      (filters.ownerReferenceId !== undefined &&
+        (!filters.ownerReferenceId.trim() || filters.ownerReferenceId.length > 160)) ||
+      (filters.currencyCode !== undefined && !/^[A-Z]{3}$/.test(filters.currencyCode)) ||
+      (filters.type !== undefined && !['ASSET', 'LIABILITY', 'REVENUE', 'EXPENSE', 'EQUITY'].includes(filters.type)) ||
+      (filters.active !== undefined && typeof filters.active !== 'boolean'))
+    throw new Error('FINANCE_ACCOUNT_QUERY_INVALID');
+  return {page, pageSize, ownerReferenceId: filters.ownerReferenceId?.trim(),
+    currencyCode: filters.currencyCode, type: filters.type, active: filters.active};
+}
 
 export function assertPositiveFinanceMoney(amount: MoneyAmount): void {
   if (!/^[1-9]\d{0,29}$/.test(amount.amountMinorUnits)) throw new Error('FINANCE_AMOUNT_INVALID');
