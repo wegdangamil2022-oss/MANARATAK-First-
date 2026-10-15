@@ -27,6 +27,7 @@ describe('ApplicationLocaleProjectionService', () => {
       translations: [
         {
           id: 'tr-ar',
+          publicationSourceStatus: 'CURRENT',
           locale: 'ar',
           displayName: 'جامعة فلورنسا',
           description: 'وصف عربي',

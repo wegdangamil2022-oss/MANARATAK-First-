@@ -114,6 +114,7 @@ interface Paginated<T> {
   coverageScope?: 'GLOBAL';
   ownerSourceStatus?: string;
   runtimeProof?: string;
+  publicationReadiness?: string;
   importSupported?: boolean;
   stats?: {complete?:number;pending?:number;rejected?:number;published?:number;missingAr:number;missingEn:number;publicReadyAr:number;publicReadyEn:number};
 }
@@ -757,7 +758,7 @@ export function AdminTranslationWorkspacePage() {
         <label>{language === 'ar' ? 'قائمة مهام المراجعة' : 'Review work queue'}<select value={reviewState} onChange={e=>{if(allowNavigation()){setPage(1);setReviewState(e.target.value);}}}><option value="ALL">{language==='ar'?'الكل':'All'}</option><option value="NEEDS_REVIEW">{language==='ar'?'تحتاج مراجعة / غير منشورة':'Needs review / unpublished'}</option><option value="PUBLISHED">{language==='ar'?'منشورة':'Published'}</option></select></label>
         <label>{language === 'ar' ? 'عُدّلت منذ' : 'Updated since'}<input type="date" value={updatedFrom} onChange={e=>{if(allowNavigation()){setPage(1);setUpdatedFrom(e.target.value);}}}/></label>
         <p role="status">{language==='ar'?'مصدر المالك · جاهزية تشغيل غير مثبتة · الاستيراد للجامعات والتخصصات فقط':'Canonical owner · runtime unverified · imports support universities and majors only'}</p>
-        {result?.stats && <p>{language==='ar'?'جاهزة للنشر بالحقول المطلوبة':'Required-field publication ready'}: AR {result.stats.publicReadyAr} · EN {result.stats.publicReadyEn} · {language==='ar'?'معلّقة / مرفوضة / منشورة':'Pending / rejected / published'}: {result.stats.pending ?? 0} / {result.stats.rejected ?? 0} / {result.stats.published ?? 0}</p>}
+        {result?.stats && <p>{result.publicationReadiness?.startsWith('UNKNOWN_') ? (language==='ar'?'جاهزية النشر غير محسومة؛ تُراجع في مسار المالك':'Publication readiness requires owner verification') : `${language==='ar'?'جاهزة للنشر بالحقول المطلوبة':'Required-field publication ready'}: AR ${result.stats.publicReadyAr} · EN ${result.stats.publicReadyEn}`} · {language==='ar'?'معلّقة / مرفوضة / منشورة':'Pending / rejected / published'}: {result.stats.pending ?? 0} / {result.stats.rejected ?? 0} / {result.stats.published ?? 0}</p>}
       </section>
       <section className="grid gap-3 rounded-2xl border border-[#DDEFF2] bg-white p-4 md:grid-cols-[220px_1fr_auto]">
         <select

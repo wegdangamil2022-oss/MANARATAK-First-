@@ -22,8 +22,8 @@ describe('translation quality gates', () => {
       optionalFields: {},
       sourceRecords: [{ sourceLocale: 'en' }],
       translations: [
-        { locale: 'ar', displayName: 'جامعة المثال', description: 'وصف عربي', reviewStatus: 'PUBLISHED' },
-        { locale: 'en', displayName: 'Example University', description: 'English description', reviewStatus: 'PUBLISHED' },
+        { locale: 'ar', displayName: 'جامعة المثال', description: 'وصف عربي', reviewStatus: 'PUBLISHED', publicationSourceStatus: 'CURRENT' },
+        { locale: 'en', displayName: 'Example University', description: 'English description', reviewStatus: 'PUBLISHED', publicationSourceStatus: 'CURRENT' },
       ],
       localizedTexts: [],
       createdAt: new Date('2026-01-01T00:00:00Z'),

@@ -32,10 +32,9 @@ export class PrismaTranslationWorkspaceReadGateway implements ITranslationWorksp
         : input.domain === 'MAJOR'
           ? Prisma.sql`COALESCE(o."optionalFields"->'translationNameCandidates'->${locale}->>'reviewStatus',CASE WHEN NULLIF(trim(${name(locale)}),'') IS NULL THEN 'MISSING' ELSE 'VALUE_PRESENT_NOT_PUBLIC_READY' END)`
           : Prisma.sql`CASE WHEN NULLIF(trim(${name(locale)}), '') IS NULL THEN 'MISSING' ELSE 'VALUE_PRESENT_NOT_PUBLIC_READY' END`;
-    const published = (locale: 'ar' | 'en') =>
-      university
-        ? Prisma.sql`o.status='PUBLISHED' AND EXISTS(SELECT 1 FROM "UniversityTranslation" t WHERE t."universityId"=o.id AND t.locale=${locale} AND t."reviewStatus"='PUBLISHED' AND NULLIF(trim(t."displayName"),'') IS NOT NULL AND NULLIF(trim(t.description),'') IS NOT NULL)`
-        : Prisma.sql`false`; // No owner field-level publication evidence: never manufacture readiness.
+    // This SQL coverage projection does not compute the owner source/value proof.
+    // A stored PUBLISHED state is never promoted into verified public readiness here.
+    const published = () => Prisma.sql`false`;
     const coverage =
       input.coverage === 'MISSING_AR'
         ? Prisma.sql`NOT "hasAr"`
@@ -55,7 +54,7 @@ export class PrismaTranslationWorkspaceReadGateway implements ITranslationWorksp
           ? Prisma.sql`${statusField} = 'PUBLISHED'`
           : Prisma.sql`true`;
     const where = Prisma.sql`${coverage} AND ${review} AND (${input.updatedFrom ?? null}::timestamptz IS NULL OR "updatedAt" >= ${input.updatedFrom ?? null})`;
-    const cte = Prisma.sql`WITH source AS (SELECT o.id,o."publicId",o.slug,o."displayName",o.status,o."updatedAt", ${name('ar')} AS "localizedNameAr",${name('en')} AS "localizedNameEn",${state('ar')} AS "translationStateAr",${state('en')} AS "translationStateEn", ${published('ar')} AS "publicReadyAr",${published('en')} AS "publicReadyEn" FROM ${table} o WHERE (${input.q ?? ''}='' OR o."displayName" ILIKE ${'%' + (input.q ?? '') + '%'} OR o."publicId" ILIKE ${'%' + (input.q ?? '') + '%'})), coverage AS (SELECT *,NULLIF(trim("localizedNameAr"),'') IS NOT NULL AS "hasAr",NULLIF(trim("localizedNameEn"),'') IS NOT NULL AS "hasEn" FROM source)`;
+    const cte = Prisma.sql`WITH source AS (SELECT o.id,o."publicId",o.slug,o."displayName",o.status,o."updatedAt", ${name('ar')} AS "localizedNameAr",${name('en')} AS "localizedNameEn",${state('ar')} AS "translationStateAr",${state('en')} AS "translationStateEn", ${published()} AS "publicReadyAr",${published()} AS "publicReadyEn" FROM ${table} o WHERE (${input.q ?? ''}='' OR o."displayName" ILIKE ${'%' + (input.q ?? '') + '%'} OR o."publicId" ILIKE ${'%' + (input.q ?? '') + '%'})), coverage AS (SELECT *,NULLIF(trim("localizedNameAr"),'') IS NOT NULL AS "hasAr",NULLIF(trim("localizedNameEn"),'') IS NOT NULL AS "hasEn" FROM source)`;
     // Stable owner ordering, server-side filtering before count and pagination.
     return this.prisma.$transaction(
       async (tx) => {
@@ -98,7 +97,7 @@ export class PrismaTranslationWorkspaceReadGateway implements ITranslationWorksp
           ownerSourceStatus: 'CANONICAL_OWNER_READ',
           runtimeProof: 'UNVERIFIED',
           migrationRequired: input.domain === 'SCHOLARSHIP' || input.domain === 'COURSE',
-          publicationReadiness: university ? 'OWNER_FIELD_PROFILE' : 'UNKNOWN_OWNER_FIELD_EVIDENCE',
+          publicationReadiness: university ? 'UNKNOWN_OWNER_SOURCE_EVIDENCE' : 'UNKNOWN_OWNER_FIELD_EVIDENCE',
           importSupported: ['UNIVERSITY', 'MAJOR'].includes(input.domain),
           stats: {
             complete: Number(counts.complete),

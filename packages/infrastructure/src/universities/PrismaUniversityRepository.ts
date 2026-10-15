@@ -1,3 +1,4 @@
+import { universityTranslationSourceSelect, universityTranslationSourceStatus } from './UniversityTranslationSourceEvidence';
 import {publicProgramTestMatchSql} from './PublicProgramTestSql';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -605,7 +606,10 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         },
         university: {
           select: { id: true, publicId: true, slug: true, displayName: true,
-            translations: {where:{reviewStatus:'PUBLISHED'},select:{locale:true,displayName:true}},
+            status: true, canonicalName: true, officialWebsite: true, sourceUrl: true,
+            officialSourceUrl: true, optionalFields: true,
+            sourceRecords: {select:{id:true,sourceHash:true,sourceUri:true,sourceLocale:true}},
+            translations: {where:{reviewStatus:'PUBLISHED'},select:{locale:true,displayName:true,description:true,metadata:true}},
             localizedTexts: {where:{targetType:'ACADEMIC_PROGRAM',targetId:{in:[...new Set(ids)]},fieldKey:'sourceProgramName',reviewStatus:'PUBLISHED'},select:{targetId:true,locale:true,value:true}},
           },
         },
@@ -617,7 +621,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       universityPublicId: row.university.publicId,
       universitySlug: row.university.slug,
       universityDisplayName: row.university.displayName,
-      universityLocalizedNames: Object.fromEntries((row.university.translations??[]).filter(text=>text.displayName).map(text=>[text.locale,text.displayName!])),
+      universityLocalizedNames: Object.fromEntries((row.university.translations??[]).filter(text=>text.displayName && universityTranslationSourceStatus(row.university, text) === 'CURRENT').map(text=>[text.locale,text.displayName!])),
       localizedNames: Object.fromEntries((row.university.localizedTexts??[]).filter(text=>text.targetId===row.id).map(text=>[text.locale,text.value])),
       sourceProgramName: row.sourceProgramName,
       degreeLevelId: row.degreeLevelId,
@@ -628,7 +632,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   }
 
   async listTranslations(id: string): Promise<UniversityTranslationDto[]> {
-    await this.prisma.university.findUniqueOrThrow({ where: { id }, select: { id: true } });
+    const owner = await this.prisma.university.findUniqueOrThrow({ where: { id }, select: universityTranslationSourceSelect });
     const records = await this.prisma.universityTranslation.findMany({
       where: { universityId: id },
       orderBy: { locale: 'asc' },
@@ -640,6 +644,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       displayName: record.displayName,
       description: record.description,
       reviewStatus: parseUniversityTranslationReviewStatus(record.reviewStatus),
+      publicationSourceStatus: universityTranslationSourceStatus(owner, record),
       sourceRecordId: record.sourceRecordId,
       metadata: asMetadata(record.metadata),
       createdAt: record.createdAt,
@@ -651,6 +656,13 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     id: string,
     data: Omit<UniversityTranslationDto, 'id' | 'universityId' | 'createdAt' | 'updatedAt'>,
   ): Promise<UniversityTranslationDto> {
+    // This is the authoring port. Only the governed handover may publish or carry proof.
+    if (data.reviewStatus && data.reviewStatus !== 'NEEDS_REVIEW') {
+      throw new Error('TRANSLATION_OWNER_REVIEW_WORKFLOW_REQUIRED');
+    }
+    const metadata = { ...(data.metadata ?? {}) };
+    for (const key of ['publishedTranslationEvidence', 'publishedTranslationApprovalId',
+      'pendingTranslationFields', 'translationFieldEvidence', 'translationImport']) delete metadata[key];
     await this.prisma.university.findUniqueOrThrow({ where: { id }, select: { id: true } });
     await this.assertSourceRecordOwnedByUniversity(id, data.sourceRecordId);
     const record = await this.prisma.universityTranslation.upsert({
@@ -660,16 +672,16 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         locale: data.locale,
         displayName: data.displayName,
         description: data.description,
-        reviewStatus: data.reviewStatus ?? 'NEEDS_REVIEW',
+        reviewStatus: 'NEEDS_REVIEW',
         sourceRecordId: data.sourceRecordId,
-        metadata: data.metadata as Prisma.InputJsonObject | undefined,
+        metadata: metadata as Prisma.InputJsonObject,
       },
       update: {
         displayName: data.displayName,
         description: data.description,
-        reviewStatus: data.reviewStatus,
+        reviewStatus: 'NEEDS_REVIEW',
         sourceRecordId: data.sourceRecordId,
-        metadata: data.metadata as Prisma.InputJsonObject | undefined,
+        metadata: metadata as Prisma.InputJsonObject,
       },
     });
     return {
@@ -1107,7 +1119,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     const safeOptionalFields = sanitizeUniversityOptionalFields(optionalFields);
     const localizedNames = Object.fromEntries(
       translations
-        .filter((translation) => Boolean(translation.displayName))
+        .filter((translation) => translation.reviewStatus === 'PUBLISHED' && universityTranslationSourceStatus(record, translation) === 'CURRENT' && Boolean(translation.displayName))
         .map((translation) => [translation.locale, translation.displayName as string]),
     );
     return {
@@ -1161,6 +1173,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         displayName: translation.displayName,
         description: translation.description,
         reviewStatus: parseUniversityTranslationReviewStatus(translation.reviewStatus),
+        publicationSourceStatus: universityTranslationSourceStatus(record, translation),
         sourceRecordId: translation.sourceRecordId,
         metadata: asMetadata(translation.metadata),
         createdAt: translation.createdAt,

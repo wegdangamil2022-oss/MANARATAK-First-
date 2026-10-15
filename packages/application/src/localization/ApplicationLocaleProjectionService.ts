@@ -139,7 +139,8 @@ export class ApplicationLocaleProjectionService {
     const translations = (university.translations ?? []).filter(
       (translation) =>
         isSupportedLocale(translation.locale) &&
-        PUBLIC_UNIVERSITY_TRANSLATION_STATUSES.has(translation.reviewStatus ?? ''),
+        PUBLIC_UNIVERSITY_TRANSLATION_STATUSES.has(translation.reviewStatus ?? '') &&
+        translation.publicationSourceStatus === 'CURRENT',
     );
     const localizedTexts = (university.localizedTexts ?? []).filter(
       (text) =>

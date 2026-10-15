@@ -23,6 +23,8 @@ export type UniversityTranslationReviewStatus =
   | 'REJECTED';
 
 export interface UniversityTranslationDto {
+  /** Computed by the owner reader; never accepted as publication approval. */
+  publicationSourceStatus?: 'CURRENT' | 'STALE' | 'UNVERIFIED';
   id?: string;
   universityId?: string;
   locale: string;

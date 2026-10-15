@@ -1,3 +1,4 @@
+import { universityTranslationSourceDigest } from '../../src/universities/UniversityTranslationSourceEvidence';
 import { createHash } from 'node:crypto';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { governanceApprovalDigest } from '../../../application/src/authorization/use-cases/GovernanceApprovalUseCases';
@@ -34,7 +35,7 @@ function fixture() {
       currentReviewStatus: 'PUBLISHED',
       ownerRevision: '2026-10-14T00:00:00.000Z',
       sourceDigest: digest({source:{id:'owner',publicId:'INS-TEST-001',status:'PUBLISHED'},translation:null}),
-      ownerSourceDigest:digest({id:'owner',publicId:'INS-TEST-001',status:'PUBLISHED'}),
+      ownerSourceDigest:universityTranslationSourceDigest({id:'owner',publicId:'INS-TEST-001',status:'PUBLISHED'}),
     },
     translatedValue: 'Name',
     expectedCurrentValue: 'Name',
@@ -206,4 +207,42 @@ describe('B11 canonical source freshness and durable replay',()=>{
   f.tx.policyRecord.findUnique.mockResolvedValue({id:'publish',ruleType:'GOVERNANCE_APPROVAL',ruleConfiguration:JSON.stringify({scope:'TRANSLATION_PUBLICATION',requestedBy:'publisher',approverId:'checker',digest:governanceApprovalDigest('TRANSLATION_PUBLICATION',{target}),expiresAt:new Date(Date.now()+60000).toISOString(),approvedAt:new Date().toISOString(),usedAt:null})});
   await expect(f.gateway.publishApproved(target!,{decision:'APPLY',actorId:'publisher',reviewedBy:'checker',approvalId:'publish'})).rejects.toThrow('SOURCE_CHANGED_REVIEW_REQUIRED');
  });
+});
+
+async function publicationFixture(pendingDescription = true) {
+  policy.enable = true;
+  const f = fixture();
+  const metadata: any = {
+    pendingTranslationFields: {
+      displayName: {value:'Reviewed name',reviewStatus:'APPROVED',actorId:'maker'},
+      ...(pendingDescription ? {description:{value:'Reviewed description',reviewStatus:'APPROVED',actorId:'maker'}} : {}),
+    },
+    translationFieldEvidence: {
+      displayName:{ownerSourceDigest:f.candidate.target.ownerSourceDigest},
+      description:{ownerSourceDigest:f.candidate.target.ownerSourceDigest},
+    },
+  };
+  const row: any = {id:'translation',locale:'en',displayName:'Old name',description:'Old description',reviewStatus:'PUBLISHED',updatedAt:new Date('2026-10-14'),metadata};
+  f.tx.universityTranslation.findUnique.mockResolvedValue(row);
+  f.tx.universityTranslation.findUniqueOrThrow=vi.fn(async()=>row);
+  f.tx.universityTranslation.updateMany=vi.fn(async()=>({count:1}));
+  const target=await f.gateway.resolveExact(f.candidate.target.locator);
+  const approval={decision:'APPLY' as const,actorId:'publisher',reviewedBy:'checker',approvalId:'publication'};
+  f.tx.policyRecord.findUnique.mockResolvedValue({id:'publication',ruleType:'GOVERNANCE_APPROVAL',ruleConfiguration:JSON.stringify({scope:'TRANSLATION_PUBLICATION',requestedBy:'publisher',approverId:'checker',digest:governanceApprovalDigest('TRANSLATION_PUBLICATION',{target}),expiresAt:new Date(Date.now()+60000).toISOString(),approvedAt:new Date().toISOString(),usedAt:null})});
+  return {...f,row,target:target!,publicationApproval:approval};
+}
+describe('B11 grouped university publication evidence',()=>{
+  it('records proof for the exact locale and both reviewed fields in one CAS write',async()=>{
+    const f=await publicationFixture();
+    await f.gateway.publishApproved(f.target,f.publicationApproval);
+    const data=f.tx.universityTranslation.updateMany.mock.calls[0][0].data;
+    const {universityTranslationValueDigest}=await import('../../src/universities/UniversityTranslationSourceEvidence');
+    expect(data).toMatchObject({displayName:'Reviewed name',description:'Reviewed description',reviewStatus:'PUBLISHED',metadata:{publishedTranslationApprovalId:'publication',publishedTranslationEvidence:{ownerSourceDigest:f.target.ownerSourceDigest,valueDigest:universityTranslationValueDigest({locale:'en',displayName:'Reviewed name',description:'Reviewed description'})}}});
+    expect(data.metadata.pendingTranslationFields).toEqual({});
+  });
+  it('requires review of a legacy counterpart instead of silently legitimizing it',async()=>{
+    const f=await publicationFixture(false);
+    await expect(f.gateway.publishApproved(f.target,f.publicationApproval)).rejects.toThrow('SOURCE_CHANGED_REVIEW_REQUIRED');
+    expect(f.tx.universityTranslation.updateMany).not.toHaveBeenCalled();
+  });
 });

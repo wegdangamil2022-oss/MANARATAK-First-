@@ -1,3 +1,4 @@
+import { universityTranslationSourceSelect, universityTranslationSourceDigest, universityTranslationValueDigest } from '../universities/UniversityTranslationSourceEvidence';
 import { createHash, randomUUID } from 'node:crypto';
 import { assertTranslationContentAuthoringEnabled } from '@manaratak/shared';
 import type { AtomicPersistenceContext, AuthorizationEvaluatorService } from '@manaratak/domain';
@@ -171,9 +172,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
     if (locator.entityKind === 'UNIVERSITY') {
       const university = await client.university.findUnique({
         where: { publicId: locator.entityPublicId },
-        select: { id: true, publicId: true, status: true, displayName:true, canonicalName:true,
-          officialWebsite:true, sourceUrl:true, officialSourceUrl:true, optionalFields:true,
-          sourceRecords:{orderBy:{id:'asc'},select:{id:true,sourceHash:true,sourceUri:true,sourceLocale:true}} },
+        select: universityTranslationSourceSelect,
       });
       if (!university) return null;
 
@@ -215,7 +214,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         storageRecordId: translation?.id ?? null,
         ownerRevision: translation?.updatedAt.toISOString() ?? 'ABSENT',
         sourceDigest: this.digest({source:university,translation:translation?.metadata ?? null}),
-        ownerSourceDigest:this.digest(university),
+        ownerSourceDigest:universityTranslationSourceDigest(university),
         proposedFields: this.pendingValues(translation?.metadata, 'pendingTranslationFields'),
       };
     }
@@ -608,7 +607,8 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           for (const entry of [pendingName,pendingDescription])
             if (
               entry &&
-              (entry.reviewStatus !== 'APPROVED' || entry.actorId === approval.reviewedBy)
+              (entry.reviewStatus !== 'APPROVED' || entry.actorId === approval.reviewedBy ||
+                typeof entry.value !== 'string' || !entry.value.trim())
             )
               throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
           for (const key of ['displayName','description']) {
@@ -622,6 +622,16 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
               : row.description;
           if (!nextName?.trim() || !nextDescription?.trim())
             throw new Error('TRANSLATION_OWNER_REQUIRED_FIELDS_MISSING');
+          // An unchanged counterpart must already belong to this source and published pair.
+          // Re-review both fields when legacy evidence is absent or the source changed.
+          if ((!pendingName || !pendingDescription)) {
+            const publishedEvidence = metadata.publishedTranslationEvidence as Prisma.JsonObject | undefined;
+            if (row.reviewStatus !== 'PUBLISHED' || publishedEvidence?.ownerSourceDigest !== latest.ownerSourceDigest ||
+                publishedEvidence?.valueDigest !== universityTranslationValueDigest(row) ||
+                typeof metadata.publishedTranslationApprovalId !== 'string') {
+              throw new Error('TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED');
+            }
+          }
           const remaining = { ...pending };
           delete remaining.displayName;
           delete remaining.description;
@@ -635,6 +645,10 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
                 ...metadata,
                 pendingTranslationFields: remaining,
                 publishedTranslationApprovalId: approval.approvalId!,
+                publishedTranslationEvidence: {
+                  ownerSourceDigest: latest.ownerSourceDigest!,
+                  valueDigest: universityTranslationValueDigest({locale: row.locale, displayName: nextName, description: nextDescription}),
+                },
               },
             },
           });

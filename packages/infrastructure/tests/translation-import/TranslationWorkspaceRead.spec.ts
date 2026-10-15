@@ -49,6 +49,7 @@ describe('Translation workspace global owner projection contracts', () => {
       page: 2,
       coverageScope: 'GLOBAL',
       runtimeProof: 'UNVERIFIED',
+      publicationReadiness: 'UNKNOWN_OWNER_SOURCE_EVIDENCE',
       importSupported: true,
       stats: { pending: 40, published: 0, publicReadyEn: 0 },
     });
@@ -68,6 +69,8 @@ describe('Translation workspace global owner projection contracts', () => {
     expect(count.sql).toContain('count(*) AS total');
     expect(count.sql).toMatch(/FROM coverage WHERE .*NOT "hasEn"/s);
     expect(page.values).toContain(40);
+    expect(page.sql).toContain('false AS "publicReadyAr"');
+    expect(page.sql).toContain('false AS "publicReadyEn"');
   });
   it('binds user search values and does not invent publication evidence for legacy owner storage', async () => {
     const { reader, tx } = fixture();
