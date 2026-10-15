@@ -40,13 +40,14 @@ const sectionDefinitions: {
       { key: 'name', label: 'الاسم' },
       { key: 'address', label: 'العنوان' },
       { key: 'campusType', label: 'نوع الحرم' },
+      { key: 'status', label: 'الحالة', type: 'select', options: ['ACTIVE','ARCHIVED'] },
     ],
   },
   {
     key: 'organizationUnits',
     title: 'الكليات والأقسام',
     canAdd: true,
-    defaults: { unitType: 'FACULTY' },
+    defaults: { unitType: 'FACULTY', status: 'ACTIVE' },
     fields: [
       { key: 'name', label: 'الاسم' },
       {
@@ -55,6 +56,7 @@ const sectionDefinitions: {
         type: 'select',
         options: ['FACULTY', 'SCHOOL', 'COLLEGE', 'DEPARTMENT'],
       },
+      { key: 'status', label: 'الحالة', type: 'select', options: ['ACTIVE','ARCHIVED'] },
     ],
   },
   {
@@ -132,6 +134,7 @@ const admissionsFields: Field[] = [
   { key: 'applicationPortalUrl', label: 'بوابة التقديم' },
 ];
 const nullableKeys = new Set([
+  'campusSourceReferenceId', 'parentSourceReferenceId',
   'campusType',
   'address',
   'organizationUnitName',
@@ -233,6 +236,12 @@ function fieldsForm(
     </fieldset>
   );
 }
+export function hydrateUniversityStructureRows(key: string, source: Row[]): Row[] {
+  return source.map(row => key === 'organizationUnits' ? {...row,
+    campusSourceReferenceId: row.campusSourceReferenceId ?? row.campusId ?? null,
+    parentSourceReferenceId: row.parentSourceReferenceId ?? row.parentOrganizationUnitId ?? null,
+  } : {...row});
+}
 export function UniversitySectionsEditor({
   id,
   initial,
@@ -259,9 +268,10 @@ export function UniversitySectionsEditor({
   const [admissions, setAdmissions] = useState<Row>((initial.internationalAdmissions as Row) ?? {});
   const [rows, setRows] = useState<Record<string, Row[]>>(() =>
     Object.fromEntries(
-      sectionDefinitions.map((section) => [section.key, (initial[section.key] as Row[]) ?? []]),
+      sectionDefinitions.map((section) => [section.key, hydrateUniversityStructureRows(section.key, (initial[section.key] as Row[]) ?? [])]),
     ),
   );
+  const [revision, setRevision] = useState(initial.revision);
   const [dirty, setDirty] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState('');
   const [error, setError] = useState('');
@@ -337,13 +347,14 @@ export function UniversitySectionsEditor({
             key === 'identity' || key === 'admissions' || key === 'accreditations'
               ? 'PATCH'
               : 'PUT',
-          headers: { 'X-Review-Reason': reviewReason.trim() },
+          headers: { 'X-Review-Reason': reviewReason.trim(), 'If-Match': String(revision) },
           body: JSON.stringify(data),
         },
       );
       const saved = await adminApiClient.request<Row>(
         `/admin/universities/${encodeURIComponent(id)}`,
       );
+      setRevision(saved.revision);
       if (key === 'identity')
         setIdentity(
           Object.fromEntries(
@@ -354,7 +365,7 @@ export function UniversitySectionsEditor({
           ),
         );
       else if (key === 'admissions') setAdmissions((saved.internationalAdmissions as Row) ?? {});
-      else setRows((current) => ({ ...current, [key]: (saved[key] as Row[]) ?? [] }));
+      else setRows((current) => ({ ...current, [key]: hydrateUniversityStructureRows(key, (saved[key] as Row[]) ?? []) }));
       const next = new Set(dirty);
       next.delete(key);
       setDirty(next);
@@ -428,18 +439,18 @@ export function UniversitySectionsEditor({
                       ...section.fields,
                       {
                         key: 'campusSourceReferenceId', label: 'الحرم الجامعي', type: 'select' as const,
-                        options: rows.campuses.map(item => String(item.sourceReferenceId ?? item.id ?? '')).filter(Boolean),
+                        options: rows.campuses.map(item => String(item.id ?? item.sourceReferenceId ?? '')).filter(Boolean),
                         optionLabels: Object.fromEntries(rows.campuses.map(item => [
-                          String(item.sourceReferenceId ?? item.id ?? ''), String(item.name ?? ''),
+                          String(item.id ?? item.sourceReferenceId ?? ''), String(item.name ?? ''),
                         ])),
                       },
                       {
                         key: 'parentSourceReferenceId', label: 'الكلية أو الوحدة الأم', type: 'select' as const,
                         options: rows.organizationUnits
-                          .filter(item => item !== row && item.unitType !== 'DEPARTMENT')
-                          .map(item => String(item.sourceReferenceId ?? item.id ?? '')).filter(Boolean),
+                          .filter(item => item !== row && item.unitType !== 'DEPARTMENT' && item.status !== 'ARCHIVED')
+                          .map(item => String(item.id ?? item.sourceReferenceId ?? '')).filter(Boolean),
                         optionLabels: Object.fromEntries(rows.organizationUnits.map(item => [
-                          String(item.sourceReferenceId ?? item.id ?? ''), String(item.name ?? ''),
+                          String(item.id ?? item.sourceReferenceId ?? ''), String(item.name ?? ''),
                         ])),
                       },
                     ]

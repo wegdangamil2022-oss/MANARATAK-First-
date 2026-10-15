@@ -168,8 +168,8 @@ export interface UniversityNormalizedDetailsUpdate {
   organizationUnits?: Array<{
     id?: string;
     sourceReferenceId?: string;
-    campusSourceReferenceId?: string;
-    parentSourceReferenceId?: string;
+    campusSourceReferenceId?: string | null;
+    parentSourceReferenceId?: string | null;
     unitType: 'FACULTY' | 'SCHOOL' | 'COLLEGE' | 'DEPARTMENT';
     name: string;
     status?: string;

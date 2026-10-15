@@ -125,7 +125,7 @@ export class UniversityCanonicalRelationshipValidator {
 
     if (input.organizationUnitId) {
       const organizationUnit = await this.client.universityOrganizationUnit.findFirst({
-        where: { id: input.organizationUnitId, universityId },
+        where: { id: input.organizationUnitId, universityId, status: 'ACTIVE' },
         select: { id: true },
       });
       if (!organizationUnit) throw new Error('UNIVERSITY_PROGRAM_ORGANIZATION_UNIT_NOT_FOUND');
@@ -134,7 +134,7 @@ export class UniversityCanonicalRelationshipValidator {
     const campusIds = [...new Set(input.campusIds ?? [])];
     if (campusIds.length) {
       const campuses = await this.client.universityCampus.findMany({
-        where: { universityId, id: { in: campusIds } },
+        where: { universityId, id: { in: campusIds }, status: 'ACTIVE' },
         select: { id: true },
       });
       if (campuses.length !== campusIds.length) throw new Error('UNIVERSITY_PROGRAM_CAMPUS_NOT_FOUND');

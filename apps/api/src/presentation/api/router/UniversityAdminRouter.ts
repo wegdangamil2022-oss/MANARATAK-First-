@@ -155,8 +155,8 @@ export class UniversityAdminRouter {
             z.object({
               id: z.string().min(1).optional(),
               sourceReferenceId: z.string().optional(),
-              campusSourceReferenceId: z.string().optional(),
-              parentSourceReferenceId: z.string().optional(),
+              campusSourceReferenceId: z.string().min(1).nullable().optional(),
+              parentSourceReferenceId: z.string().min(1).nullable().optional(),
               unitType: z.enum(['FACULTY', 'SCHOOL', 'COLLEGE', 'DEPARTMENT']),
               name: z.string().trim().min(1),
               status: z.string().optional(),
@@ -357,6 +357,7 @@ export class UniversityAdminRouter {
           details,
           mutationContext(req),
         );
+        res.setHeader('X-Entity-Revision', String(university.revision));
         res.json(university);
       }),
     );

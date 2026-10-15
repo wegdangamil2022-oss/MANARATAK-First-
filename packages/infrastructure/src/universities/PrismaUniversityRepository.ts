@@ -857,6 +857,21 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     details: UniversityNormalizedDetailsUpdate,
   ): Promise<UniversityDto> {
     await this.prisma.university.findUniqueOrThrow({ where: { id }, select: { id: true } });
+    for (const [kind, rows] of [['CAMPUS', details.campuses], ['ORGANIZATION_UNIT', details.organizationUnits]] as const) {
+      for (const row of rows ?? []) {
+        if (row.status && !['ACTIVE','ARCHIVED'].includes(row.status)) throw new Error('UNIVERSITY_STRUCTURE_STATUS_INVALID');
+        if (row.status !== 'ARCHIVED') continue;
+        const where = {universityId:id,...(row.id ? {id:row.id} : {sourceReferenceId:row.sourceReferenceId ?? ''})};
+        const existing = kind === 'CAMPUS'
+          ? await this.prisma.universityCampus.findFirst({where,select:{id:true}})
+          : await this.prisma.universityOrganizationUnit.findFirst({where,select:{id:true}});
+        if (!existing) throw new Error('UNIVERSITY_DETAIL_OWNERSHIP_MISMATCH');
+        const used = kind === 'CAMPUS'
+          ? await this.prisma.universityProgramCampus.count({where:{campusId:existing.id}}) + await this.prisma.universityOrganizationUnit.count({where:{campusId:existing.id}})
+          : await this.prisma.universityAcademicProgram.count({where:{organizationUnitId:existing.id}}) + await this.prisma.universityOrganizationUnit.count({where:{parentOrganizationUnitId:existing.id}});
+        if (used) throw new Error('UNIVERSITY_STRUCTURE_HAS_DEPENDENTS');
+      }
+    }
     await new UniversityCanonicalRelationshipValidator(this.prisma).validate(details);
 
     // A section write is an upsert, never a destructive replacement of unmentioned children.
@@ -918,6 +933,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         : undefined;
       if (unit.campusSourceReferenceId && !campusId)
         throw new Error(`UNIVERSITY_CAMPUS_REFERENCE_NOT_FOUND:${unit.campusSourceReferenceId}`);
+      if (campusId && !await this.prisma.universityCampus.findFirst({where:{id:campusId,universityId:id,status:'ACTIVE'},select:{id:true}})) throw new Error('UNIVERSITY_ORGANIZATION_CAMPUS_NOT_ACTIVE');
       const { id: rowId } = unit;
       const targetId = rowId ?? match?.id;
       if (rowId && !(await this.prisma.universityOrganizationUnit.findFirst({ where: { id: rowId, universityId: id }, select: { id: true } }))) throw new Error('UNIVERSITY_DETAIL_OWNERSHIP_MISMATCH');
@@ -953,7 +969,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     if (details.organizationUnits !== undefined) {
       const nodes = await this.prisma.universityOrganizationUnit.findMany({
         where: { universityId: id },
-        select: { id: true, parentOrganizationUnitId: true, campusId: true, unitType: true },
+        select: { id: true, parentOrganizationUnitId: true, campusId: true, unitType: true, status: true },
       });
       const owners = new Map(nodes.map((node) => [node.id, node]));
       for (const node of nodes) {
@@ -963,6 +979,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
           const parent = owners.get(cursor.parentOrganizationUnitId);
           if (!parent) throw new Error('UNIVERSITY_ORGANIZATION_CROSS_OWNER_PARENT');
           if (seen.has(parent.id)) throw new Error('UNIVERSITY_ORGANIZATION_HIERARCHY_CYCLE');
+          if (parent.status === 'ARCHIVED') throw new Error('UNIVERSITY_ORGANIZATION_PARENT_NOT_ACTIVE');
           if (parent.unitType === 'DEPARTMENT') throw new Error('UNIVERSITY_DEPARTMENT_CANNOT_BE_PARENT');
           if (cursor.campusId && parent.campusId && cursor.campusId !== parent.campusId)
             throw new Error('UNIVERSITY_ORGANIZATION_CAMPUS_MISMATCH');

@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B10b",
+  "next": "B10c",
   "remaining": [
-    "B10b",
     "B10c",
     "B10d",
     "B11",
@@ -328,6 +327,25 @@
       "Isolated PostgreSQL locking and browser/API/DB review-publication-withdrawal rehearsal",
       "Existing B01/B02/B05/B09 runtime prerequisites",
       "Runtime acceptance on supported Node 22"
+    ]
+  },
+  "B10b": {
+    "status": "SOURCE_VERIFIED",
+    "baselineCommit": "648e0433",
+    "runtimeDatabaseStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "findings": [
+      "ADM-02"
+    ],
+    "report": "docs/reviews/B10b_UNIVERSITY_STRUCTURE_2026-10-15.md",
+    "specification": "docs/remediation/specs/B10b_UNIVERSITY_STRUCTURE_CONTRACT_2026-10-15.md",
+    "lightTestsPassed": 47,
+    "lightTestsFailed": 0,
+    "schemaChanged": false,
+    "historicalSqlChanged": false,
+    "runtimePrerequisites": [
+      "Isolated concurrent editor and browser/API/DB structure/program rehearsal",
+      "Existing runtime prerequisites remain pending"
     ]
   }
 }

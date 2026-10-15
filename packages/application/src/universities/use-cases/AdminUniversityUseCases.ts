@@ -201,6 +201,8 @@ export class AdminUniversityUseCases {
         if (!repository.replaceNormalizedDetails) {
           throw new Error('UNIVERSITY_NORMALIZED_PERSISTENCE_NOT_AVAILABLE');
         }
+        const current = await repository.findById(id);
+        if (!current || [UniversityStatus.PUBLISHED, UniversityStatus.ARCHIVED, UniversityStatus.REJECTED].includes(current.status)) throw new Error('UNIVERSITY_NON_EDITABLE_STATUS');
         const result = await repository.replaceNormalizedDetails(id, details);
         if (existing.status === UniversityStatus.READY_TO_PUBLISH) {
           await repository.updateStatus(id, UniversityStatus.READY_TO_REVIEW);
