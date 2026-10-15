@@ -117,7 +117,12 @@ export function evaluateAdmissionScores(
       return { state: 'UNVERIFIED', reason: 'SCALE_BOUNDS_UNKNOWN' };
     if (step !== undefined && step !== null && (!Number.isFinite(step) || step <= 0))
       return { state: 'UNVERIFIED', reason: 'SCALE_INCREMENT_UNKNOWN' };
-    if(typeof step==='number'&&(!Number.isFinite((score-min)/step)||Math.abs((score-min)/step)>Number.MAX_SAFE_INTEGER))return {state:'UNVERIFIED',reason:'SCALE_PRECISION_UNKNOWN'};
+    if (
+      typeof step === 'number' &&
+      (!Number.isFinite((score - min) / step) ||
+        Math.abs((score - min) / step) > Number.MAX_SAFE_INTEGER)
+    )
+      return { state: 'UNVERIFIED', reason: 'SCALE_PRECISION_UNKNOWN' };
     if (
       score < min ||
       score > max ||

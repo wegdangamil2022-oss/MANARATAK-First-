@@ -71,6 +71,9 @@ export class ScholarshipStudentApplicationTrackerGateway implements IStudentAppl
       (publiclyVisible as any).applicationDeadline ?? (publiclyVisible as any).deadline ?? null;
     return {
       id: publiclyVisible.id,
+      publicId:publiclyVisible.publicId,
+      ownerRevision:s.revision,
+      ...(s.updatedAt&&Number.isFinite(new Date(s.updatedAt).getTime())?{ownerEffectiveAt:new Date(s.updatedAt).toISOString()}:{}),
       slug: publiclyVisible.slug,
       displayName: publiclyVisible.displayName,
       country: (publiclyVisible as any).countryName ?? null,

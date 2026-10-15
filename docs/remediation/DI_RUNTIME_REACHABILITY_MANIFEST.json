@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 422,
-  "reachableCount": 422,
+  "registrationCount": 423,
+  "reachableCount": 423,
   "unreachable": [],
   "registrations": [
     {
@@ -877,6 +877,7 @@
         "apps/api/src/presentation/api/router/CrossModuleIntegrityRouter.ts",
         "apps/api/src/presentation/api/router/FinanceAdminRouter.ts",
         "apps/api/src/presentation/api/router/NotificationRouter.ts",
+        "apps/api/src/presentation/api/router/SearchRouter.ts",
         "apps/api/src/presentation/api/router/ServiceAdminRouter.ts",
         "apps/api/src/presentation/api/router/SettingsAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentDocumentReviewRouter.ts",
@@ -898,6 +899,15 @@
         "roleAssignmentRepository",
         "roleRepository"
       ]
+    },
+    {
+      "name": "authRateLimitKey",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
     },
     {
       "name": "authRouter",
@@ -2171,9 +2181,7 @@
     {
       "name": "emailDeliveryGateway",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/AuthRouter.ts"
-      ],
+      "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "forgotPasswordUseCase",
         "registerUserUseCase",
@@ -3288,6 +3296,7 @@
         "apps/api/src/app.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
+        "apps/api/src/presentation/api/router/SearchRouter.ts",
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
       ],
       "reachableThroughRegistrations": [
@@ -3545,9 +3554,7 @@
     {
       "name": "passwordResetTokenRepository",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/AuthRouter.ts"
-      ],
+      "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "forgotPasswordUseCase",
         "resetPasswordUseCase"
@@ -3615,6 +3622,7 @@
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
+        "apps/api/src/presentation/api/router/SearchRouter.ts",
         "apps/api/src/presentation/api/router/SettingsAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts",
         "apps/api/src/presentation/middleware/AuthMiddleware.ts",
@@ -3637,8 +3645,7 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/app.ts",
-        "apps/api/src/infrastructure/runtime/RuntimeResourceRegistry.ts",
-        "apps/api/src/presentation/api/router/AuthRouter.ts"
+        "apps/api/src/infrastructure/runtime/RuntimeResourceRegistry.ts"
       ],
       "reachableThroughRegistrations": [
         "academicTaxonomyImportGateway",
@@ -4577,6 +4584,7 @@
         "apps/api/src/app.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
+        "apps/api/src/presentation/api/router/SearchRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts",
         "apps/api/src/presentation/middleware/AuthMiddleware.ts",
         "apps/api/src/presentation/middleware/OptionalAuthMiddleware.ts",
@@ -5402,6 +5410,7 @@
         "apps/api/src/app.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
+        "apps/api/src/presentation/api/router/SearchRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts",
         "apps/api/src/presentation/middleware/AuthMiddleware.ts",
         "apps/api/src/presentation/middleware/OptionalAuthMiddleware.ts",

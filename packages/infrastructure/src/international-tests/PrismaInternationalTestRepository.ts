@@ -145,7 +145,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
   }
   private async publishedSnapshot(record: {id:string;currentPublishedVersionId?:string|null}): Promise<InternationalTestDto|null> {
     if (!record.currentPublishedVersionId) return null;
-    const rows = await this.prisma.$queryRaw<Array<{payload:InternationalTestDto}>>(Prisma.sql`SELECT s."payload" FROM "InternationalTestPublicationSnapshot" s JOIN "InternationalTestVersion" v ON v."id"=s."id" AND v."testId"=s."testId" WHERE s."id"=${record.currentPublishedVersionId} AND s."testId"=${record.id}`);
+    const rows = await this.prisma.$queryRaw<Array<{payload:InternationalTestDto}>>(Prisma.sql`SELECT s."payload" FROM "InternationalTestPublicationSnapshot" s JOIN "InternationalTestVersion" v ON v."id"=s."id" AND v."testId"=s."testId" WHERE s."id"=${record.currentPublishedVersionId} AND s."testId"=${record.id} AND v.status='PUBLISHED'`);
     return rows[0]?.payload??null;
   }
   // --- Legacy & Core Methods ---
@@ -253,7 +253,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
   }
 
   async findPublishedBySlug(slug: string): Promise<InternationalTestDto | null> {
-    const record = await this.prisma.internationalTest.findFirst({where:{slug,isPubliclyVisible:true},select:{id:true,currentPublishedVersionId:true}});
+    const record = await this.prisma.internationalTest.findFirst({where:{slug,isPubliclyVisible:true,status:{notIn:['ARCHIVED','REJECTED']}},select:{id:true,currentPublishedVersionId:true}});
     return record ? this.publishedSnapshot(record) : null;
   }
 
@@ -608,7 +608,7 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
 
   async listPublished(filters: Omit<InternationalTestFilters,'status'> = {}): Promise<PaginatedInternationalTestResult<InternationalTestDto>> {
     const page = Math.max(1,Math.min(1000,Math.floor(Number(filters.page)||1))); const limit = Math.min(50,Math.max(1,Math.floor(Number(filters.pageSize)||20)));
-    const clauses = [Prisma.sql`t."isPubliclyVisible"=true`];
+    const clauses = [Prisma.sql`t."isPubliclyVisible"=true AND t.status NOT IN ('ARCHIVED','REJECTED') AND v.status='PUBLISHED'`];
     const search = filters.searchQuery??filters.q;
     if (search) clauses.push(Prisma.sql`(s."payload"->>'canonicalName' ILIKE ${'%'+search+'%'} OR s."payload"->>'localizedNameAr' ILIKE ${'%'+search+'%'} OR s."payload"->>'localizedNameEn' ILIKE ${'%'+search+'%'})`);
     if (filters.providerName) clauses.push(Prisma.sql`s."payload"->>'providerName'=${filters.providerName}`);

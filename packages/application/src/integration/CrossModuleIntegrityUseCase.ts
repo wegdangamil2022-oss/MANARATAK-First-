@@ -134,7 +134,7 @@ export class CrossModuleIntegrityUseCase {
         if(ref.owner==='COUNTRIES'){if(!this.references?.getCountryById)throw new Error('OWNER_PORT_MISSING');const row=await this.references.getCountryById(ref.id);return {key:`${ref.owner}:${ref.id}`,exists:!!row,published:row?.isActive===true&&row.lifecycleState==='ACTIVE',unavailable:false};}
         if(ref.owner==='CMS'){const row=await this.cms?.findContentById(ref.id);return {key:`${ref.owner}:${ref.id}`,exists:!!row,published:row?.status==='PUBLISHED',unavailable:false};}
         const target=await repositories[ref.owner].findById(ref.id);
-        const published=!!target&&(ref.owner==='SCHOLARSHIPS'?isPublicScholarshipOwner(target as NonNullable<Awaited<ReturnType<IScholarshipRepository['findById']>>>):ref.owner==='TESTS'?Boolean((target as import('@manaratak/domain').InternationalTestDto).isPubliclyVisible&&(target as import('@manaratak/domain').InternationalTestDto).currentPublishedVersionId):target.status==='PUBLISHED');
+        const published=!!target&&(ref.owner==='SCHOLARSHIPS'?isPublicScholarshipOwner(target as NonNullable<Awaited<ReturnType<IScholarshipRepository['findById']>>>):ref.owner==='TESTS'?Boolean(typeof (target as import('@manaratak/domain').InternationalTestDto).slug==='string'&&(await this.tests.findPublishedBySlug(String((target as import('@manaratak/domain').InternationalTestDto).slug)))?.id===target.id):target.status==='PUBLISHED');
         return {key:`${ref.owner}:${ref.id}`,exists:!!target,published,unavailable:false};
       }catch{return {key:`${ref.owner}:${ref.id}`,exists:false,published:false,unavailable:true};}
     }));

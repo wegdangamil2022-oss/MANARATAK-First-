@@ -455,7 +455,7 @@ test('review access: auditing a read does not advance tracker version or invalid
   };
   const tx = {
     studentApplicationDocumentBinding: {
-      findUnique: async () => ({ ...binding, trackerId: 'tracker', tracker }),
+      findUnique: async () => ({ ...binding, attestation: null, trackerId: 'tracker', tracker }),
     },
     studentApplicationTracker: {
       updateMany: async () => {
@@ -641,14 +641,132 @@ test('admission variant: a mutable active root variant is not proof it belonged 
     true,
   );
 });
-test('private review delivery: grant is capped by both consent and original asset retention, and access leaves reminder version intact',async()=>{
- const deadline=new Date(Date.now()+25000),item={binding,tracker:{studentReferenceId:'student',scholarshipId:'scholarship',cycleReferenceId:'cycle',version:2,status:'ACTIVE'}};let ttl=0,accesses=0;
- const service=new StudentDocumentReviewUseCases({findDocumentReview:async()=>item,recordDocumentReviewAccess:async()=>{++accesses;}} as any,{resolve:async()=>({id:'scholarship',cycleId:'cycle',ownerVersionId:'version',available:true,requirements:[{id:'requirement'}]})} as any,{assertUsable:async()=>({checksum:{hash:'a'.repeat(64)},metadata:{mimeType:'application/pdf'},retention:{expiresAt:deadline}})} as any,{requestDeliveryGrant:async(input:any)=>{ttl=input.expiresInSeconds;return {url:'https://storage.example/private',headers:{},expiresAt:new Date(Date.now()+ttl*1000).toISOString()};}} as any);
- const result=await service.open('binding','reviewer');assert.ok(ttl>0&&ttl<=25);assert.equal(accesses,1);assert.equal(result.expectedVersion,2);assert.equal(result.retentionUntil.getTime(),deadline.getTime());assert.equal('studentReferenceId' in result,false);assert.equal('assetId' in result,false);
+test('private review delivery: grant is capped by both consent and original asset retention, and access leaves reminder version intact', async () => {
+  const deadline = new Date(Date.now() + 25000),
+    item = {
+      binding: { ...binding, attestation: null },
+      tracker: {
+        studentReferenceId: 'student',
+        scholarshipId: 'scholarship',
+        cycleReferenceId: 'cycle',
+        version: 2,
+        status: 'ACTIVE',
+      },
+    };
+  let ttl = 0,
+    accesses = 0;
+  const service = new StudentDocumentReviewUseCases(
+    {
+      findDocumentReview: async () => item,
+      recordDocumentReviewAccess: async () => {
+        ++accesses;
+      },
+    } as any,
+    {
+      resolve: async () => ({
+        id: 'scholarship',
+        cycleId: 'cycle',
+        ownerVersionId: 'version',
+        available: true,
+        requirements: [{ id: 'requirement' }],
+      }),
+    } as any,
+    {
+      assertUsable: async () => ({
+        checksum: { hash: 'a'.repeat(64) },
+        metadata: { mimeType: 'application/pdf' },
+        retention: { expiresAt: deadline },
+      }),
+    } as any,
+    {
+      requestDeliveryGrant: async (input: any) => {
+        ttl = input.expiresInSeconds;
+        return {
+          url: 'https://storage.example/private',
+          headers: {},
+          expiresAt: new Date(Date.now() + ttl * 1000).toISOString(),
+        };
+      },
+    } as any,
+  );
+  const result = await service.open('binding', 'reviewer');
+  assert.ok(ttl > 0 && ttl <= 25);
+  assert.equal(accesses, 1);
+  assert.equal(result.expectedVersion, 2);
+  assert.equal(result.retentionUntil.getTime(), deadline.getTime());
+  assert.equal('studentReferenceId' in result, false);
+  assert.equal('assetId' in result, false);
 });
-import {UniversityStudentSavedItemHydrationGateway} from '../../../packages/infrastructure/src/students/StudentSavedItemHydrationGateways';
-test('saved owner lifecycle: reuse of an old slug cannot silently move private history to another canonical owner',async()=>{
- const gateway=new UniversityStudentSavedItemHydrationGateway({findById:async()=>null,findBySlug:async()=>({id:'new-owner',publicId:'new-public',slug:'old-slug',status:'PUBLISHED',displayName:'New owner'})} as any),item={id:'saved',studentReferenceId:'student',entityId:'deleted-owner',entitySlug:'old-slug',entityType:'UNIVERSITY'} as any;
- const retained=await gateway.hydrate(item);assert.equal(retained.available,false);assert.equal(retained.ownerId,'deleted-owner');
- const explicitNewSave=await gateway.hydrate(item,'CANONICALIZE_NEW_SAVE');assert.equal(explicitNewSave.ownerId,'new-owner');assert.equal(explicitNewSave.available,true);
+import { UniversityStudentSavedItemHydrationGateway } from '../../../packages/infrastructure/src/students/StudentSavedItemHydrationGateways';
+test('saved owner lifecycle: reuse of an old slug cannot silently move private history to another canonical owner', async () => {
+  const gateway = new UniversityStudentSavedItemHydrationGateway({
+      findById: async () => null,
+      findBySlug: async () => ({
+        id: 'new-owner',
+        publicId: 'new-public',
+        slug: 'old-slug',
+        status: 'PUBLISHED',
+        displayName: 'New owner',
+      }),
+    } as any),
+    item = {
+      id: 'saved',
+      studentReferenceId: 'student',
+      entityId: 'deleted-owner',
+      entitySlug: 'old-slug',
+      entityType: 'UNIVERSITY',
+    } as any;
+  const retained = await gateway.hydrate(item);
+  assert.equal(retained.available, false);
+  assert.equal(retained.ownerId, 'deleted-owner');
+  const explicitNewSave = await gateway.hydrate(item, 'CANONICALIZE_NEW_SAVE');
+  assert.equal(explicitNewSave.ownerId, 'new-owner');
+  assert.equal(explicitNewSave.available, true);
+});
+test('private review: withdrawal during grant issuance prevents the URL from being returned', async () => {
+  let consented = true;
+  const pending = { ...binding, attestation: null },
+    tracker = {
+      studentReferenceId: 'student',
+      scholarshipId: 'scholarship',
+      cycleReferenceId: 'cycle',
+      version: 2,
+      status: 'ACTIVE',
+    };
+  const service = new StudentDocumentReviewUseCases(
+    {
+      findDocumentReview: async () => ({
+        binding: consented ? pending : { ...pending, reviewConsentGrantedAt: null },
+        tracker,
+      }),
+      recordDocumentReviewAccess: async () => {},
+    } as any,
+    {
+      resolve: async () => ({
+        id: 'scholarship',
+        cycleId: 'cycle',
+        ownerVersionId: 'version',
+        available: true,
+        requirements: [{ id: 'requirement' }],
+      }),
+    } as any,
+    {
+      assertUsable: async () => ({
+        checksum: { hash: 'a'.repeat(64) },
+        metadata: { mimeType: 'application/pdf' },
+        retention: {},
+      }),
+    } as any,
+    {
+      requestDeliveryGrant: async () => {
+        consented = false;
+        return {
+          url: 'https://storage.example/SECRET',
+          headers: {},
+          expiresAt: new Date(Date.now() + 30000).toISOString(),
+        };
+      },
+    } as any,
+  );
+  await assert.rejects(() => service.open('binding', 'reviewer'), /UNAVAILABLE/);
 });

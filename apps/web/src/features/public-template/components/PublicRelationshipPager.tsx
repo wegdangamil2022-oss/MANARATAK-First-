@@ -99,10 +99,11 @@ export function PublicRelationshipPager({
       </button>
       {open && (
         <div className="space-y-4 mt-3">
-          {Object.keys(cursors).length > 0 && <button type="button" disabled={busy}
-            onClick={() => setCursors({})}>
-            {en ? 'Reset relationship pages' : 'إعادة صفحات العلاقات إلى البداية'}
-          </button>}
+          {Object.keys(cursors).length > 0 && (
+            <button type="button" disabled={busy} onClick={() => setCursors({})}>
+              {en ? 'Reset relationship pages' : 'إعادة صفحات العلاقات إلى البداية'}
+            </button>
+          )}
           {busy && <p role="status">{en ? 'Loading relationships…' : 'جارٍ تحميل العلاقات…'}</p>}
           {error && (
             <p role="alert">

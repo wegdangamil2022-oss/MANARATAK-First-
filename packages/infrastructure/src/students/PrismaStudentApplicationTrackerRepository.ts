@@ -152,7 +152,7 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
   }
   private async documentReviewAudit(tx:any,bindingId:string,expectedVersion:number,actorId:string,action:string,reason:string,mutateTracker=true){
     const row=await tx.studentApplicationDocumentBinding.findUnique({where:{id:bindingId},include:{tracker:{include:{workspace:{select:{status:true}}}}}});
-    if(!row||row.tracker.status!=='ACTIVE'||row.tracker.workspace.status!=='ACTIVE'||row.tracker.studentReferenceId===actorId||!row.reviewConsentGrantedAt||row.reviewConsentUntil<=new Date()||row.retentionUntil<=new Date()||(row.expiresAt&&row.expiresAt<=new Date()))throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    if(!row||row.attestation||row.tracker.status!=='ACTIVE'||row.tracker.workspace.status!=='ACTIVE'||row.tracker.studentReferenceId===actorId||!row.reviewConsentGrantedAt||row.reviewConsentUntil<=new Date()||row.retentionUntil<=new Date()||(row.expiresAt&&row.expiresAt<=new Date()))throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
     if(row.tracker.version!==expectedVersion)throw new Error('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT');
     if(mutateTracker)await this.cas(tx,row.tracker,{});
     else{const locked=await tx.$queryRaw(Prisma.sql`SELECT id FROM "StudentApplicationTracker" WHERE id=${row.trackerId} AND version=${expectedVersion} AND status='ACTIVE' FOR UPDATE`);if(locked.length!==1)throw new Error('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT');}

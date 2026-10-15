@@ -61,6 +61,8 @@ export class StudentDocumentReviewUseCases {
           binding.reviewConsentUntil.getTime() <= now))
     )
       throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    if (reviewerId && binding.attestation)
+      throw new Error('STUDENT_DOCUMENT_REVIEW_ALREADY_DECIDED');
     const owner = await this.scholarships.resolve(tracker.scholarshipId, tracker.cycleReferenceId);
     if (
       !owner?.available ||
@@ -83,7 +85,12 @@ export class StudentDocumentReviewUseCases {
     });
     if (!asset?.checksum?.hash || !/^[a-f0-9]{64}$/i.test(asset.checksum.hash))
       throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
-    if(asset.retention?.expiresAt&&(!Number.isFinite(asset.retention.expiresAt.getTime())||asset.retention.expiresAt.getTime()<=now))throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    if (
+      asset.retention?.expiresAt &&
+      (!Number.isFinite(asset.retention.expiresAt.getTime()) ||
+        asset.retention.expiresAt.getTime() <= now)
+    )
+      throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
     return { binding, tracker, asset };
   }
   async open(bindingId: string, reviewerId: string) {
@@ -91,16 +98,33 @@ export class StudentDocumentReviewUseCases {
     if (!this.repository.recordDocumentReviewAccess)
       throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
     await this.repository.recordDocumentReviewAccess(bindingId, tracker.version, reviewerId);
-    const deadline=Math.min(binding.reviewConsentUntil!.getTime(),binding.retentionUntil.getTime(),binding.expiresAt?.getTime()??Infinity,asset.retention?.expiresAt?.getTime()??Infinity),ttl=Math.min(60,Math.floor((deadline-Date.now())/1000));
-    if(ttl<1)throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
-    const grant = await this.lifecycle.requestDeliveryGrant({assetId:binding.assetId,expiresInSeconds:ttl});
-    if(!Number.isFinite(Date.parse(grant.expiresAt))||Date.parse(grant.expiresAt)>deadline)throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    await this.context(bindingId, reviewerId);
+    const deadline = Math.min(
+        binding.reviewConsentUntil!.getTime(),
+        binding.retentionUntil.getTime(),
+        binding.expiresAt?.getTime() ?? Infinity,
+        asset.retention?.expiresAt?.getTime() ?? Infinity,
+      ),
+      ttl = Math.min(60, Math.floor((deadline - Date.now()) / 1000));
+    if (ttl < 1) throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    const grant = await this.lifecycle.requestDeliveryGrant({
+      assetId: binding.assetId,
+      expiresInSeconds: ttl,
+    });
+    if (!Number.isFinite(Date.parse(grant.expiresAt)) || Date.parse(grant.expiresAt) > deadline)
+      throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    await this.context(bindingId, reviewerId);
     return {
       id: binding.id,
       requirementName: String(binding.requirementSnapshot.displayName ?? 'Document'),
       expectedVersion: tracker.version,
       mimeType: asset.metadata.mimeType,
-      retentionUntil: new Date(Math.min(binding.retentionUntil.getTime(),asset.retention?.expiresAt?.getTime()??Infinity)),
+      retentionUntil: new Date(
+        Math.min(
+          binding.retentionUntil.getTime(),
+          asset.retention?.expiresAt?.getTime() ?? Infinity,
+        ),
+      ),
       documentExpiresAt: binding.expiresAt,
       consentUntil: binding.reviewConsentUntil,
       delivery: { url: grant.url, headers: grant.headers, expiresAt: grant.expiresAt },

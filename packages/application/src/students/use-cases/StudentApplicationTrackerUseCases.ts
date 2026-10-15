@@ -251,7 +251,7 @@ export class StudentApplicationTrackerUseCases {
             (owner?.available ? (owner.deadlineAt?.toISOString() ?? null) : null)
               ? 'CURRENT'
               : 'PENDING_OWNER_PULL',
-          ownerRead:catalogReferenceReadStamp({ownerId:tracker.scholarshipId,publicId:null,version:owner?.ownerVersionId??null,effectiveAt:owner?.referenceState?.effectiveAt??null,changeType:owner?.referenceState?.state??(owner?.available?'CURRENT':'UNAVAILABLE'),subject:`SCHOLARSHIP_APPLICATION_CYCLE:${tracker.cycleReferenceId??'LEGACY'}`}),
+          ownerRead:catalogReferenceReadStamp({ownerId:tracker.scholarshipId,publicId:owner?.available?owner.publicId??null:null,version:owner?.available?owner.ownerRevision!==undefined?String(owner.ownerRevision):owner.ownerVersionId??null:null,effectiveAt:owner?.referenceState?.effectiveAt??owner?.ownerEffectiveAt??null,changeType:owner?.referenceState?.state??(owner?.available?'CURRENT':'UNAVAILABLE'),subject:`SCHOLARSHIP_APPLICATION_CYCLE:${tracker.cycleReferenceId??'LEGACY'}`}),
           applicationMode: 'MANUAL_PLANNING' as const,
           eligibilityState: 'UNKNOWN' as const,
           ownerState: owner ? (owner.available ? 'AVAILABLE' : 'HISTORY_ONLY') : 'UNAVAILABLE',

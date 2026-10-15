@@ -427,6 +427,7 @@ export interface IStudentApplicationTrackerRepository {
 }
 
 export interface StudentApplicationScholarshipOwnerDto {
+  publicId?:string;ownerRevision?:number;ownerEffectiveAt?:string;
   referenceState?:import('../scholarships/contracts').ScholarshipReferenceState;
   requirements?: Array<{ id: string; displayName: string; required: boolean }>;
   cycleId?: string | null; cycleKey?: string | null; ownerVersionId?: string | null; cycles?: Array<{id: string; cycleKey: string; closesAt: Date | null}>;

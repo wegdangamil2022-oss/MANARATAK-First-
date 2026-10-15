@@ -101,7 +101,7 @@ export function StudentDocumentReviewPanel() {
         !Number.isSafeInteger(data.expectedVersion) ||
         !['application/pdf', 'image/png', 'image/jpeg'].includes(data.mimeType) ||
         !data.delivery ||
-        !Number.isFinite(Date.parse(data.delivery.expiresAt))||
+        !Number.isFinite(Date.parse(data.delivery.expiresAt)) ||
         Date.parse(data.delivery.expiresAt) <= Date.now()
       )
         throw new Error('REVIEW_RESPONSE_INVALID');

@@ -133,6 +133,7 @@ export class StudentWorkspaceRouter {
 
     router.use(new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate());
     router.use(createStudentRoleGuard(cradle.roleAssignmentRepository));
+    router.use((_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
     router.use(createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }));
     const ownStudent = (req: Request): string => {
       if (!req.authUserId) throw new Error('STUDENT_AUTHENTICATION_REQUIRED');

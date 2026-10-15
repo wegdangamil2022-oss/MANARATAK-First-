@@ -2866,6 +2866,7 @@ export class ApiClient {
   static async listMyHydratedStudentSavedItems(): Promise<HydratedStudentSavedItemDto[]> {
     const res = await apiFetch(`${API_BASE_URL}/student/saved-items/hydrated`, {
       headers: getStudentHeaders(),
+      cache: 'no-store',
     });
     if (!res.ok) {
       throw new Error(await parseErrorMessage(res, 'تعذر تحميل تفاصيل العناصر المحفوظة'));
@@ -2911,7 +2912,7 @@ export class ApiClient {
     const res=await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(trackerId)}/documents/${encodeURIComponent(requirementId)}/review-consent`,{method:'PUT',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({expectedVersion,granted}),cache:'no-store'});if(!res.ok)throw new Error(await parseErrorMessage(res,'DOCUMENT_REVIEW_UNAVAILABLE'));
   }
   static async getMyApplicationDocuments(id: string): Promise<{ownerState:string; entries:Array<{requirementId:string;displayName:string;required:boolean;state:string;linked:boolean;bindable:boolean;verification?:string;reviewConsentGranted?:boolean;reviewRequested?:boolean;reviewConsentUntil?:string|null}>}> {
-    const res = await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(id)}/documents`, { headers: getStudentHeaders() });
+    const res = await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(id)}/documents`, { headers: getStudentHeaders(), cache: 'no-store' });
     if (!res.ok) throw new Error(await parseErrorMessage(res, 'تعذر قراءة متطلبات المستندات'));
     return (await res.json()).data;
   }
@@ -2926,6 +2927,7 @@ export class ApiClient {
   static async listMyStudentApplicationTrackers(): Promise<StudentApplicationTrackerDto[]> {
     const res = await apiFetch(`${API_BASE_URL}/student/application-trackers`, {
       headers: getStudentHeaders(),
+      cache: 'no-store',
     }); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر تحميل ملفات التقديم');}
     return (await res.json()).data ?? [];
   }
