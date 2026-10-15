@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, type Prisma } from '@prisma/client';
 import {
   DomainSpecification,
   FilterComparison,
@@ -11,6 +11,7 @@ import {
   SearchRequest,
   SearchRequestId,
   SearchRequestState,
+  SearchRequestSpecification,
   SearchScope,
   SearchSorting,
   SortDirection,
@@ -27,6 +28,7 @@ export class PrismaSearchRequestRepository implements ISearchRequestRepository {
         id: request.getId().getValue(),
         reference: request.getReference().getValue(),
         scope: request.scope.getValue(),
+        actorReferenceId: request.getActorReferenceId(),
         query: request.criteria.query,
         filters: request.criteria.filters as unknown as object[],
         logicalOperator: request.criteria.logicalOperator,
@@ -48,7 +50,15 @@ export class PrismaSearchRequestRepository implements ISearchRequestRepository {
   }
 
   public async findBy(specification: DomainSpecification<SearchRequest>): Promise<SearchRequest[]> {
-    const rows = await this.prisma.apiSearchRequestRecord.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
+    const where: Prisma.ApiSearchRequestRecordWhereInput = {};
+    if (specification instanceof SearchRequestSpecification) {
+      where.reference = specification.getReference().getValue();
+      const actorReferenceId = specification.getActorReferenceId();
+      const scope = specification.getScope();
+      if (actorReferenceId !== undefined) where.actorReferenceId = actorReferenceId;
+      if (scope !== undefined) where.scope = scope.getValue();
+    }
+    const rows = await this.prisma.apiSearchRequestRecord.findMany({ where, orderBy: { createdAt: 'desc' }, take: 100 });
     return rows.map((row) => {
       const filters = Array.isArray(row.filters) ? row.filters : [];
       const request = SearchRequest.restore({
@@ -71,6 +81,7 @@ export class PrismaSearchRequestRepository implements ISearchRequestRepository {
         totalCount: row.totalCount ?? undefined,
         executionTimeMs: row.executionTimeMs ?? undefined,
         createdAt: row.createdAt,
+        actorReferenceId: row.actorReferenceId,
       });
       return request;
     }).filter((request) => specification.isSatisfiedBy(request));

@@ -64,9 +64,11 @@ export class SearchRequest {
     public readonly pagination: SearchPagination,
     public readonly sorting?: SearchSorting,
     createdAt: Date = new Date(),
+    private readonly actorReferenceId: string | null = null,
   ) { this.createdAt = new Date(createdAt); }
-  static create(id: SearchRequestId, reference: SearchReference, scope: SearchScope, criteria: SearchCriteria, pagination: SearchPagination, sorting?: SearchSorting): SearchRequest {
-    return new SearchRequest(id, reference, scope, criteria, pagination, sorting);
+  static create(id: SearchRequestId, reference: SearchReference, scope: SearchScope, criteria: SearchCriteria, pagination: SearchPagination, sorting?: SearchSorting, actorReferenceId?: string): SearchRequest {
+    if (actorReferenceId !== undefined && !actorReferenceId.trim()) throw new Error('Search actor reference is required');
+    return new SearchRequest(id, reference, scope, criteria, pagination, sorting, new Date(), actorReferenceId ?? null);
   }
   static restore(input: {
     id: SearchRequestId;
@@ -79,11 +81,13 @@ export class SearchRequest {
     totalCount?: number;
     executionTimeMs?: number;
     createdAt: Date;
+    actorReferenceId?: string | null;
   }): SearchRequest {
-    const request = new SearchRequest(input.id, input.reference, input.scope, input.criteria, input.pagination, input.sorting, input.createdAt);
+    const request = new SearchRequest(input.id, input.reference, input.scope, input.criteria, input.pagination, input.sorting, input.createdAt, input.actorReferenceId ?? null);
     if (input.state === SearchRequestState.COMPLETED) request.complete(input.totalCount ?? 0, input.executionTimeMs ?? 0);
     return request;
   }
+  getActorReferenceId(): string | null { return this.actorReferenceId; }
   getId(): SearchRequestId { return this.id; }
   getReference(): SearchReference { return this.reference; }
   getScope(): SearchScope { return this.scope; }
@@ -102,7 +106,22 @@ export class SearchRequest {
 }
 export interface ISearchRequestRepository { save(request: SearchRequest): Promise<void>; findBy(specification: DomainSpecification<SearchRequest>): Promise<SearchRequest[]>; }
 export class SearchRequestSpecification implements DomainSpecification<SearchRequest> {
-  private constructor(private readonly reference: SearchReference) {}
+  private constructor(
+    private readonly reference: SearchReference,
+    private readonly actorReferenceId?: string,
+    private readonly scope?: SearchScope,
+  ) {}
   static byReference(reference: SearchReference): SearchRequestSpecification { return new SearchRequestSpecification(reference); }
-  isSatisfiedBy(candidate: SearchRequest): boolean { return candidate.getReference().getValue() === this.reference.getValue(); }
+  static byActorAndReference(actorReferenceId: string, reference: SearchReference, scope: SearchScope): SearchRequestSpecification {
+    if (!actorReferenceId.trim()) throw new Error('Search actor reference is required');
+    return new SearchRequestSpecification(reference, actorReferenceId, scope);
+  }
+  getReference(): SearchReference { return this.reference; }
+  getActorReferenceId(): string | undefined { return this.actorReferenceId; }
+  getScope(): SearchScope | undefined { return this.scope; }
+  isSatisfiedBy(candidate: SearchRequest): boolean {
+    return candidate.getReference().getValue() === this.reference.getValue()
+      && (this.actorReferenceId === undefined || candidate.getActorReferenceId() === this.actorReferenceId)
+      && (this.scope === undefined || candidate.getScope().getValue() === this.scope.getValue());
+  }
 }

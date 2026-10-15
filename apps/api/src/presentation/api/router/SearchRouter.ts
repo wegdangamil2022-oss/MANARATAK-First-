@@ -1,16 +1,14 @@
-import { Router } from 'express';
-import { ManageSearchUseCase, type IPublicSearchGateway } from '@manaratak/application';
+import { Router, type RequestHandler } from 'express';
+import { ManageSearchUseCase, INTERNAL_SEARCH_SCOPE, type IPublicSearchGateway, type MfaUseCases } from '@manaratak/application';
+import type { AuthorizationEvaluatorService } from '@manaratak/domain';
+import type { ITokenProvider, ISessionManager, IPrincipalAccessValidator } from '@manaratak/core';
+import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory';
 import { z } from 'zod';
 
 const searchScalar = z.union([z.string().max(500), z.number().finite(), z.boolean(), z.null()]);
 const searchRequestSchema = z
   .object({
-    scope: z
-      .string()
-      .trim()
-      .min(1)
-      .max(80)
-      .regex(/^[a-zA-Z0-9:_-]+$/),
+    scope: z.literal(INTERNAL_SEARCH_SCOPE),
     criteria: z
       .object({
         query: z.string().trim().max(200).optional(),
@@ -89,11 +87,30 @@ export class SearchRouter {
   public static create({
     manageSearchUseCase,
     searchEngineGateway,
+    authEvaluatorService,
+    tokenProvider,
+    sessionManager,
+    principalAccessValidator,
+    mfaUseCases,
   }: {
     manageSearchUseCase: ManageSearchUseCase;
     searchEngineGateway: IPublicSearchGateway;
+    authEvaluatorService: AuthorizationEvaluatorService;
+    tokenProvider: ITokenProvider;
+    sessionManager: ISessionManager;
+    principalAccessValidator: IPrincipalAccessValidator;
+    mfaUseCases: MfaUseCases;
   }): Router {
     const router = Router();
+    const noStore: RequestHandler = (_req, res, next) => {
+      res.setHeader('Cache-Control', 'no-store');
+      next();
+    };
+    const authenticateInternalSearch = SecurityMiddlewareFactory.createAdminGuard({
+      mode: 'strict', tokenProvider, sessionManager, principalAccessValidator, mfaUseCases,
+    });
+    const executePermission = SecurityMiddlewareFactory.createAdminPermissionGuard('admin:search:execute', authEvaluatorService);
+    const historyPermission = SecurityMiddlewareFactory.createAdminPermissionGuard('admin:search:history:read', authEvaluatorService);
 
     // Canonical public global search. Unlike the legacy request API, this contract is
     // cursor/keyset-paginated and queries owner persistence rather than a preloaded UI subset.
@@ -124,7 +141,7 @@ export class SearchRouter {
 
     // Foundation search execution remains available for internal callers/history. Public
     // catalogs must use GET /public so offset/page pagination cannot silently truncate them.
-    router.post('/', async (req, res, next) => {
+    router.post('/', noStore, authenticateInternalSearch, executePermission, async (req, res, next) => {
       try {
         const dto = searchRequestSchema.parse(req.body);
         const { request, result } = await manageSearchUseCase.executeSearch({
@@ -138,7 +155,7 @@ export class SearchRouter {
           sorting: dto.sorting
             ? { field: dto.sorting.field, direction: dto.sorting.direction }
             : undefined,
-        });
+        }, { actorReferenceId: req.authUserId! });
 
         res.status(200).json({
           requestId: request.getId().getValue(),
@@ -154,7 +171,7 @@ export class SearchRouter {
       }
     });
 
-    router.get('/history/:reference', async (req, res, next) => {
+    router.get('/history/:reference', noStore, authenticateInternalSearch, historyPermission, async (req, res, next) => {
       try {
         const reference = z
           .string()
@@ -163,7 +180,7 @@ export class SearchRouter {
           .max(120)
           .regex(/^[a-zA-Z0-9_-]+$/)
           .parse(req.params.reference);
-        const results = await manageSearchUseCase.getSearchRequestHistory(reference);
+        const results = await manageSearchUseCase.getSearchRequestHistory(reference, { actorReferenceId: req.authUserId! });
         res.status(200).json(
           results.map((request) => ({
             id: request.getId().getValue(),

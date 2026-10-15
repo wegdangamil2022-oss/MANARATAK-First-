@@ -18,13 +18,20 @@ import {
 import { SearchRequestDto } from '../dtos/SearchDtos';
 import { ISearchEngineGateway } from '../gateways/ISearchEngineGateway';
 
+// The legacy HTTP execution endpoint is limited to the same published catalog as
+// its gateway; arbitrary caller-supplied owner scopes must never reach persistence.
+export const INTERNAL_SEARCH_SCOPE = 'PUBLIC_CATALOG';
+export interface SearchActorContext { readonly actorReferenceId: string; }
+
 export class ManageSearchUseCase {
   constructor(
     private readonly searchRequestRepository: ISearchRequestRepository,
     private readonly searchEngineGateway: ISearchEngineGateway
   ) {}
 
-  public async executeSearch(dto: SearchRequestDto): Promise<{ request: SearchRequest; result: SearchResult }> {
+  public async executeSearch(dto: SearchRequestDto, context: SearchActorContext): Promise<{ request: SearchRequest; result: SearchResult }> {
+    this.assertActor(context);
+    if (dto.scope !== INTERNAL_SEARCH_SCOPE) throw new Error('SEARCH_SCOPE_UNSUPPORTED');
     const rawId = `search-req-${randomUUID()}`;
     const rawRef = `search-ref-${randomUUID()}`;
 
@@ -59,7 +66,7 @@ export class ManageSearchUseCase {
       sorting = SearchSorting.create(dto.sorting.field, dir);
     }
 
-    const request = SearchRequest.create(id, reference, scope, criteria, pagination, sorting);
+    const request = SearchRequest.create(id, reference, scope, criteria, pagination, sorting, context.actorReferenceId);
 
     await this.searchRequestRepository.save(request);
 
@@ -72,9 +79,19 @@ export class ManageSearchUseCase {
     return { request, result };
   }
 
-  public async getSearchRequestHistory(rawReference: string): Promise<SearchRequest[]> {
+  public async getSearchRequestHistory(rawReference: string, context: SearchActorContext): Promise<SearchRequest[]> {
+    this.assertActor(context);
     const reference = SearchReference.create(rawReference);
-    const spec = SearchRequestSpecification.byReference(reference);
-    return this.searchRequestRepository.findBy(spec);
+    const spec = SearchRequestSpecification.byActorAndReference(
+      context.actorReferenceId, reference, SearchScope.create(INTERNAL_SEARCH_SCOPE),
+    );
+    // Legacy rows have no attributable actor and remain inaccessible here. Never
+    // infer ownership from possession of a reference, a scope, or the current user.
+    const requests = await this.searchRequestRepository.findBy(spec);
+    return requests.filter(request => spec.isSatisfiedBy(request));
+  }
+
+  private assertActor(context: SearchActorContext): void {
+    if (!context?.actorReferenceId?.trim()) throw new Error('SEARCH_ACTOR_REQUIRED');
   }
 }

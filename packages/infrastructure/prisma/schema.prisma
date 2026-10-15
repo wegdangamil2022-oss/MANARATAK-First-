@@ -5754,6 +5754,8 @@ model ApiIdempotencyRecord {
 // W4 — durable search execution history; public result pagination is cursor/keyset based.
 model ApiSearchRequestRecord {
   id              String   @id
+  // Server-authenticated principal; legacy rows remain unattributed and private.
+  actorReferenceId String?
   reference       String
   scope           String
   query           String
@@ -5770,6 +5772,7 @@ model ApiSearchRequestRecord {
   updatedAt       DateTime @default(now()) @updatedAt
 
   @@index([reference, createdAt])
+  @@index([actorReferenceId, reference, createdAt])
   @@index([scope, createdAt])
   @@index([createdAt])
 }

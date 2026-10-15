@@ -980,7 +980,8 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/settings', ...protectControlPlane('admin:settings:manage', 'settingsRuntimeRouter'));
     v1Router.use('/files', ...protectControlPlane('admin:assets:manage', 'fileManagementRouter'));
     v1Router.use('/notifications', ...protectControlPlane('admin:platform:manage', 'notificationRouter'));
-      v1Router.use('/search', lazyRouter('searchRouter'));
+    // SearchRouter guards legacy execution/history individually; GET /public stays public.
+    v1Router.use('/search', lazyRouter('searchRouter'));
       v1Router.use('/cache', ...protectControlPlane('admin:platform:manage', 'cacheRouter'));
     v1Router.use('/background-jobs', ...protectControlPlane('admin:platform:manage', 'backgroundJobRouter'));
     v1Router.use('/workflows', ...protectControlPlane('admin:platform:manage', 'workflowRouter'));
@@ -1039,18 +1040,6 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       monitoringService,
       runtimeMode: currentEnv.NODE_ENV || 'development',
     }));
-
-    v1Router.get('/diagnostic-rate-limit', (req, res) => {
-      res.json({
-        diagnosticsList: (globalThis as any).diagnosticsList || [],
-        env: {
-          TRUST_PROXY_HOPS: process.env.TRUST_PROXY_HOPS,
-          SECURITY_RATE_LIMIT_MAX: process.env.SECURITY_RATE_LIMIT_MAX,
-          SECURITY_RATE_LIMIT_WINDOW_MS: process.env.SECURITY_RATE_LIMIT_WINDOW_MS,
-          NODE_ENV: process.env.NODE_ENV,
-        }
-      });
-    });
 
       apiRouter.registerVersion('v1', v1Router);
 

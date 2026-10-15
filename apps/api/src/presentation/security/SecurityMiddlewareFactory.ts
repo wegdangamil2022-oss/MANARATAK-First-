@@ -90,25 +90,6 @@ export class SecurityMiddlewareFactory {
       const ip = req.ip || req.socket?.remoteAddress || 'unknown';
       const result = await securityService.getRateLimiter().consume(ip, options.limit, options.windowMs);
 
-      const diagEntry = {
-        path: req.path,
-        ip,
-        socketRemoteAddress: req.socket?.remoteAddress || 'unknown',
-        forwardedFor: req.headers?.['x-forwarded-for'],
-        trustProxy: req.app?.get('trust proxy'),
-        limit: options.limit,
-        remaining: result.remaining,
-        allowed: result.allowed,
-        timestamp: new Date().toISOString()
-      };
-      if (!(globalThis as any).diagnosticsList) {
-        (globalThis as any).diagnosticsList = [];
-      }
-      (globalThis as any).diagnosticsList.unshift(diagEntry);
-      if ((globalThis as any).diagnosticsList.length > 50) {
-        (globalThis as any).diagnosticsList.pop();
-      }
-
       res.setHeader('X-RateLimit-Limit', options.limit);
       res.setHeader('X-RateLimit-Remaining', result.remaining);
       res.setHeader('X-RateLimit-Reset', result.resetTime);

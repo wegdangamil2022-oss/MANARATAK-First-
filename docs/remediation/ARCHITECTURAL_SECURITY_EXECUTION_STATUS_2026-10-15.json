@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "date": "2026-10-15",
+  "reviewBaseline": "5c0f72cf268f4a127d1f9bc64b8af1bccb7fd1eb",
+  "originalAuditSha256": "432045824c5a1375a884c7983bc3a281b2b42bae7d2030d5760df5eb5758aa7b",
+  "executionMode": "sequential_work_packages_light_checks",
+  "B00": { "status": "REVIEW_COMPLETED", "reviewedFindings": 49 },
+  "B01": {
+    "status": "SOURCE_VERIFIED",
+    "runtimeDatabaseStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "findings": ["SEC-01", "SEC-02"],
+    "migration": "20261015020000_search_request_actor_boundary",
+    "migrationAppliedByThisChange": false,
+    "lightTestsPassed": 33,
+    "lightTestsFailed": 0,
+    "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
+    "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
+  },
+  "next": "B02",
+  "remaining": ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09", "B10a", "B10b", "B10c", "B10d", "B11", "B12", "B13", "B14"]
+}
