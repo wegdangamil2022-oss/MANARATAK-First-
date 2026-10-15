@@ -59,27 +59,27 @@ export function usePublicRelationshipGraph(
       setState((previous) => ({ ...previous, loading: true }));
       try {
         if (selected.majorSlug) {
-          const major = await ApiClient.getMajorGraph(selected.majorSlug, 1, 24, controller.signal);
+          const major = await ApiClient.getMajorGraph(selected.majorSlug, 1, 24, controller.signal, selected.locale === 'en' ? 'en' : 'ar');
           if (active && request === generation) setState({ major, loading: false });
           return;
         }
         if (selected.universitySlug) {
           const university = await ApiClient.getUniversityGraph(selected.universitySlug, 1, 24,
-            controller.signal,
+            controller.signal, selected.locale === 'en' ? 'en' : 'ar',
           );
           if (active && request === generation) setState({ university, loading: false });
           return;
         }
         if (selected.scholarshipSlug) {
           const scholarship = await ApiClient.getScholarshipGraph(selected.scholarshipSlug,
-            controller.signal,
+            controller.signal, selected.locale === 'en' ? 'en' : 'ar',
           );
           if (active && request === generation) setState({ scholarship, loading: false });
           return;
         }
         if (selected.countryIso2Code) {
           const country = await ApiClient.getCountryGraph(selected.countryIso2Code, 1, 24,
-            controller.signal,
+            controller.signal, selected.locale === 'en' ? 'en' : 'ar',
           );
           if (active && request === generation) setState({ country, loading: false });
           return;
@@ -142,7 +142,12 @@ export function usePublicRelationshipGraph(
   }, [state.major]);
 
   const graph = state.country ?? state.major ?? state.university ?? state.scholarship;
-  const partial =
+  const hasLocaleFallback = (value: unknown): boolean => {
+    if (!value || typeof value !== 'object') return false;
+    if ('localeFallback' in value && value.localeFallback === true) return true;
+    return Object.values(value).some(hasLocaleFallback);
+  };
+  const partial = hasLocaleFallback(graph) ||
     graph?.readScope &&
     Object.values(graph.readScope.collections).some(
       (item) => item.state !== 'AVAILABLE' || item.scope === 'PROGRAM_PAGE_SAMPLE' || item.hasMore,

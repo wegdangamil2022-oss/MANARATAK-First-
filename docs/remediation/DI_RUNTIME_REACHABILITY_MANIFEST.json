@@ -3,10 +3,40 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 411,
-  "reachableCount": 411,
+  "registrationCount": 419,
+  "reachableCount": 419,
   "unreachable": [],
   "registrations": [
+    {
+      "name": "academicProgramExplorerAdminRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "academicProgramExplorerPublicRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "academicProgramExplorerUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AcademicProgramExplorerRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "scholarshipRepository",
+        "universityProgramWorkspaceUseCases"
+      ]
+    },
     {
       "name": "academicTaxonomyAdminRouter",
       "classification": "RUNTIME_REACHABLE",
@@ -834,6 +864,7 @@
       "directRuntimeConsumers": [
         "apps/api/src/app.ts",
         "apps/api/src/presentation/api/router/AIAdminRouter.ts",
+        "apps/api/src/presentation/api/router/AcademicProgramExplorerRouter.ts",
         "apps/api/src/presentation/api/router/AuditRouter.ts",
         "apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
@@ -1197,6 +1228,19 @@
       "dependencies": []
     },
     {
+      "name": "certificateAffiliationReadService",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "certificateReadModelService"
+      ],
+      "dependencies": [
+        "certificateAuthorityDirectory",
+        "certificateRepository",
+        "universityRepository"
+      ]
+    },
+    {
       "name": "certificateArtifactOutboxDeliveryGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -1280,6 +1324,7 @@
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [
+        "certificateAffiliationReadService",
         "certificateAuthorityResolver"
       ],
       "dependencies": [
@@ -1384,6 +1429,7 @@
         "certificateStudentDashboardReadGateway"
       ],
       "dependencies": [
+        "certificateAffiliationReadService",
         "certificateRepository",
         "certificateUseCases"
       ]
@@ -1405,9 +1451,11 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
+        "certificateAffiliationReadService",
         "certificateArtifactRecovery",
         "certificateArtifactRenderUseCase",
         "certificateReadModelService",
+        "certificateStudentSavedItemHydrationGateway",
         "certificateUseCases"
       ],
       "dependencies": [
@@ -1434,6 +1482,18 @@
       ],
       "dependencies": [
         "certificateReadModelService"
+      ]
+    },
+    {
+      "name": "certificateStudentSavedItemHydrationGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentSavedItemHydrationService",
+        "studentWorkspaceUseCases"
+      ],
+      "dependencies": [
+        "certificateRepository"
       ]
     },
     {
@@ -1998,6 +2058,8 @@
         "referenceDataRepository",
         "scholarshipRepository",
         "serviceCatalogRepository",
+        "serviceTestDiscovery",
+        "studentToolTestDiscovery",
         "universityRepository"
       ]
     },
@@ -2851,7 +2913,9 @@
         "crossModuleIntegrityUseCase",
         "internationalTestAdminUseCases",
         "internationalTestImportHandoffConsumer",
-        "internationalTestStudentSavedItemHydrationGateway"
+        "internationalTestStudentSavedItemHydrationGateway",
+        "serviceTestDiscovery",
+        "studentToolTestDiscovery"
       ],
       "dependencies": [
         "prisma"
@@ -3652,6 +3716,7 @@
         "searchRequestRepo",
         "serviceOperationsRepository",
         "servicePlatformRepository",
+        "serviceTestDiscovery",
         "sessionManager",
         "settingAssignmentRepo",
         "settingDefinitionRepo",
@@ -3663,6 +3728,7 @@
         "studentOwnerCatchupContinuationQueue",
         "studentPrivateResultRetentionGateway",
         "studentToolRegistryRepository",
+        "studentToolTestDiscovery",
         "studentWorkspaceRepository",
         "studyDestinationRepository",
         "transactionalOutboxStore",
@@ -4248,6 +4314,7 @@
         "apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts"
       ],
       "reachableThroughRegistrations": [
+        "academicProgramExplorerUseCases",
         "adminScholarshipUseCases",
         "crossDomainGraphReadService",
         "crossModuleIntegrityUseCase",
@@ -4340,6 +4407,7 @@
         "publicServiceCatalogUseCases",
         "serviceOperationsUseCases",
         "serviceStudentSavedItemHydrationGateway",
+        "serviceTestDiscovery",
         "studentServiceRequestUseCases"
       ],
       "dependencies": [
@@ -4388,7 +4456,8 @@
       "reachableThroughRegistrations": [
         "adminServiceCatalogUseCases",
         "adminServiceFulfillmentUseCases",
-        "serviceOperationsUseCases"
+        "serviceOperationsUseCases",
+        "serviceTestDiscovery"
       ],
       "dependencies": [
         "prisma"
@@ -4470,6 +4539,23 @@
       ],
       "dependencies": [
         "serviceCatalogRepository"
+      ]
+    },
+    {
+      "name": "serviceTestDiscovery",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/InternationalTestPublicRouter.ts",
+        "apps/api/src/presentation/api/router/ServiceAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "crossDomainGraphReadService"
+      ],
+      "dependencies": [
+        "internationalTestRepository",
+        "prisma",
+        "serviceCatalogRepository",
+        "serviceOperationsRepository"
       ]
     },
     {
@@ -4810,12 +4896,14 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
+        "certificateStudentSavedItemHydrationGateway",
         "cmsStudentSavedItemHydrationGateway",
         "courseStudentSavedItemHydrationGateway",
         "internationalTestStudentSavedItemHydrationGateway",
         "majorStudentSavedItemHydrationGateway",
         "scholarshipStudentSavedItemHydrationGateway",
         "serviceStudentSavedItemHydrationGateway",
+        "studentToolPrivateSavedItemHydrationGateway",
         "studentWorkspaceRepository",
         "universityStudentSavedItemHydrationGateway"
       ]
@@ -4929,6 +5017,18 @@
       ]
     },
     {
+      "name": "studentToolPrivateSavedItemHydrationGateway",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "studentSavedItemHydrationService",
+        "studentWorkspaceUseCases"
+      ],
+      "dependencies": [
+        "studentWorkspaceRepository"
+      ]
+    },
+    {
       "name": "studentToolRateLimitGateway",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -4958,7 +5058,8 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "studentToolExecutionUseCases",
-        "studentToolRegistryUseCases"
+        "studentToolRegistryUseCases",
+        "studentToolTestDiscovery"
       ],
       "dependencies": [
         "prisma"
@@ -5000,6 +5101,22 @@
       ],
       "dependencies": [
         "studentWorkspaceRepository"
+      ]
+    },
+    {
+      "name": "studentToolTestDiscovery",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/InternationalTestPublicRouter.ts",
+        "apps/api/src/presentation/api/router/StudentToolsAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "crossDomainGraphReadService"
+      ],
+      "dependencies": [
+        "internationalTestRepository",
+        "prisma",
+        "studentToolRegistryRepository"
       ]
     },
     {
@@ -5111,6 +5228,7 @@
         "notificationRecipientGateway",
         "studentContextGateway",
         "studentSavedItemHydrationService",
+        "studentToolPrivateSavedItemHydrationGateway",
         "studentToolSaveGateway",
         "studentWorkspaceUseCases"
       ],
@@ -5141,12 +5259,14 @@
       ],
       "dependencies": [
         "assetReferencePolicy",
+        "certificateStudentSavedItemHydrationGateway",
         "cmsStudentSavedItemHydrationGateway",
         "courseStudentSavedItemHydrationGateway",
         "internationalTestStudentSavedItemHydrationGateway",
         "majorStudentSavedItemHydrationGateway",
         "scholarshipStudentSavedItemHydrationGateway",
         "serviceStudentSavedItemHydrationGateway",
+        "studentToolPrivateSavedItemHydrationGateway",
         "studentWorkspaceDeliveryCache",
         "studentWorkspaceRepository",
         "universityStudentSavedItemHydrationGateway"
@@ -5311,7 +5431,9 @@
       "directRuntimeConsumers": [
         "apps/api/src/presentation/api/router/UniversityProgramWorkspaceRouter.ts"
       ],
-      "reachableThroughRegistrations": [],
+      "reachableThroughRegistrations": [
+        "academicProgramExplorerUseCases"
+      ],
       "dependencies": [
         "atomicDomainMutationCoordinator",
         "prisma"
@@ -5335,6 +5457,7 @@
       ],
       "reachableThroughRegistrations": [
         "adminUniversityUseCases",
+        "certificateAffiliationReadService",
         "certificateAuthorityDirectory",
         "certificateAuthorityResolver",
         "certificateUseCases",

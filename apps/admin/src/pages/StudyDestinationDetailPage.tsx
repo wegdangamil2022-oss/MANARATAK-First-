@@ -1,3 +1,4 @@
+import {AcademicProgramExplorerPanel} from '../features/integration/AcademicProgramExplorerPanel';
 import { listAllReferenceData } from '../api/referenceData';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
@@ -858,6 +859,7 @@ export function StudyDestinationDetailPage() {
           )}
           {tab === 'relations' && (
             <>
+              <AcademicProgramExplorerPanel key={country.id} countryReferenceId={country.id}/>
               <p className="mb-3 text-xs text-slate-500">
                 كل علاقة محفوظة في قسمها الأصلي. تظهر هنا النتائج المنشورة بحسب الصفحة.
               </p>

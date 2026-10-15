@@ -6063,3 +6063,39 @@ model StudentApplicationDocumentBinding {
   @@unique([trackerId, requirementId])
   @@index([retentionUntil])
 }
+
+// Link ownership stays with its producing catalog; Test retains canonical identity ownership.
+model StudentToolTestDiscoveryLink {
+  id String @id @default(uuid())
+  ownerKey String
+  testId String
+  ownerRevision String
+  testRevision String
+  status String @default("PENDING")
+  version Int @default(1)
+  proposedBy String
+  reviewedBy String?
+  reason String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([ownerKey,testId])
+  @@index([testId,status,id])
+}
+
+// Link ownership stays with its producing catalog; Test retains canonical identity ownership.
+model ServiceTestDiscoveryLink {
+  id String @id @default(uuid())
+  ownerKey String
+  testId String
+  ownerRevision String
+  testRevision String
+  status String @default("PENDING")
+  version Int @default(1)
+  proposedBy String
+  reviewedBy String?
+  reason String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([ownerKey,testId])
+  @@index([testId,status,id])
+}

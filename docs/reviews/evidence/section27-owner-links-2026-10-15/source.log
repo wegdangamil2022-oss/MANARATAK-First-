@@ -1,0 +1,652 @@
+TAP version 13
+# Subtest: academic explorer: selected filters reach the program owner and scholarships are queried by exact program
+ok 1 - academic explorer: selected filters reach the program owner and scholarships are queried by exact program
+  ---
+  duration_ms: 1.738789
+  type: 'test'
+  ...
+# Subtest: academic explorer: failed optional scholarship owner never becomes a zero count
+ok 2 - academic explorer: failed optional scholarship owner never becomes a zero count
+  ---
+  duration_ms: 0.254774
+  type: 'test'
+  ...
+# Subtest: academic explorer: scholarship pagination checks the program against the exact current scope
+ok 3 - academic explorer: scholarship pagination checks the program against the exact current scope
+  ---
+  duration_ms: 0.550606
+  type: 'test'
+  ...
+# Subtest: academic explorer SQL: all canonical filters apply to one program; total excludes cursor and page limit
+ok 4 - academic explorer SQL: all canonical filters apply to one program; total excludes cursor and page limit
+  ---
+  duration_ms: 1.290177
+  type: 'test'
+  ...
+# Subtest: academic explorer API: public caller cannot request administrative visibility
+ok 5 - academic explorer API: public caller cannot request administrative visibility
+  ---
+  duration_ms: 13.035238
+  type: 'test'
+  ...
+# Subtest: academic explorer API: university permission alone cannot read private major and test states
+ok 6 - academic explorer API: university permission alone cannot read private major and test states
+  ---
+  duration_ms: 1.228994
+  type: 'test'
+  ...
+# Subtest: academic explorer: one owner batch supplies exact per-program scholarship pages
+ok 7 - academic explorer: one owner batch supplies exact per-program scholarship pages
+  ---
+  duration_ms: 1.318846
+  type: 'test'
+  ...
+# Subtest: scholarship owner batch: count and continuation stay independent per canonical program
+ok 8 - scholarship owner batch: count and continuation stay independent per canonical program
+  ---
+  duration_ms: 0.650509
+  type: 'test'
+  ...
+# Subtest: academic explorer: a hidden test is excluded even when its published version and score are valid
+ok 9 - academic explorer: a hidden test is excluded even when its published version and score are valid
+  ---
+  duration_ms: 0.511133
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: renamed university label is current while historical issuer name remains immutable
+ok 10 - certificate affiliation: renamed university label is current while historical issuer name remains immutable
+  ---
+  duration_ms: 1.198265
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: archived university retires affiliation without invalidating certificate signature
+ok 11 - certificate affiliation: archived university retires affiliation without invalidating certificate signature
+  ---
+  duration_ms: 0.225513
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: reviewed successor binding is explicit and preserves historical owner status
+ok 12 - certificate affiliation: reviewed successor binding is explicit and preserves historical owner status
+  ---
+  duration_ms: 0.158244
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: changed binding without current delegation proof is unverified
+ok 13 - certificate affiliation: changed binding without current delegation proof is unverified
+  ---
+  duration_ms: 0.182697
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: absent owner and legacy snapshots never invent an affiliation
+ok 14 - certificate affiliation: absent owner and legacy snapshots never invent an affiliation
+  ---
+  duration_ms: 0.128625
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: invalid signature never triggers current affiliation lookup
+ok 15 - certificate affiliation: invalid signature never triggers current affiliation lookup
+  ---
+  duration_ms: 0.179875
+  type: 'test'
+  ...
+# Subtest: certificate affiliation: new signed envelope captures owner identity independently of later issuer edits
+ok 16 - certificate affiliation: new signed envelope captures owner identity independently of later issuer edits
+  ---
+  duration_ms: 1.196161
+  type: 'test'
+  ...
+# Subtest: graph labels: published major translation beats draft candidates
+ok 17 - graph labels: published major translation beats draft candidates
+  ---
+  duration_ms: 1.307209
+  type: 'test'
+  ...
+# Subtest: graph labels: service public snapshot owns translations instead of a newer draft
+ok 18 - graph labels: service public snapshot owns translations instead of a newer draft
+  ---
+  duration_ms: 0.789124
+  type: 'test'
+  ...
+# Subtest: graph labels: program translations require exact target, field and publication review
+ok 19 - graph labels: program translations require exact target, field and publication review
+  ---
+  duration_ms: 0.791894
+  type: 'test'
+  ...
+# Subtest: graph labels: unpublished test names cannot become reviewed localized labels
+ok 20 - graph labels: unpublished test names cannot become reviewed localized labels
+  ---
+  duration_ms: 0.176747
+  type: 'test'
+  ...
+# Subtest: private saved certificate: exact student ownership is passed to owner repository
+ok 21 - private saved certificate: exact student ownership is passed to owner repository
+  ---
+  duration_ms: 1.373166
+  type: 'test'
+  ...
+# Subtest: private saved certificate: foreign certificate and missing owner return no private identity
+ok 22 - private saved certificate: foreign certificate and missing owner return no private identity
+  ---
+  duration_ms: 0.222523
+  type: 'test'
+  ...
+# Subtest: private saved tool: retained owner-scoped copy is required even for caller-forged metadata
+ok 23 - private saved tool: retained owner-scoped copy is required even for caller-forged metadata
+  ---
+  duration_ms: 0.242589
+  type: 'test'
+  ...
+# Subtest: private hydration: foreign rows are discarded before any owner lookup
+ok 24 - private hydration: foreign rows are discarded before any owner lookup
+  ---
+  duration_ms: 0.412353
+  type: 'test'
+  ...
+# Subtest: private retained artifact inspection: valid purpose, expiry and owner yield minimal reference only
+ok 25 - private retained artifact inspection: valid purpose, expiry and owner yield minimal reference only
+  ---
+  duration_ms: 0.704872
+  type: 'test'
+  ...
+# Subtest: private retained artifact inspection: foreign envelope and expired retention fail closed
+ok 26 - private retained artifact inspection: foreign envelope and expired retention fail closed
+  ---
+  duration_ms: 0.244526
+  type: 'test'
+  ...
+# Subtest: program-parity: mapped DRAFT excluded
+ok 27 - program-parity: mapped DRAFT excluded
+  ---
+  duration_ms: 1.290483
+  type: 'test'
+  ...
+# Subtest: program-parity: mapped ARCHIVED excluded
+ok 28 - program-parity: mapped ARCHIVED excluded
+  ---
+  duration_ms: 0.193044
+  type: 'test'
+  ...
+# Subtest: program-parity: mapped REVIEW_REQUIRED excluded
+ok 29 - program-parity: mapped REVIEW_REQUIRED excluded
+  ---
+  duration_ms: 0.082226
+  type: 'test'
+  ...
+# Subtest: program-parity: mapped PUBLISHED excluded
+ok 30 - program-parity: mapped PUBLISHED excluded
+  ---
+  duration_ms: 0.072158
+  type: 'test'
+  ...
+# Subtest: program-parity: matching active published profile passes
+ok 31 - program-parity: matching active published profile passes
+  ---
+  duration_ms: 0.10986
+  type: 'test'
+  ...
+# Subtest: program-parity: different degree profile fails
+ok 32 - program-parity: different degree profile fails
+  ---
+  duration_ms: 0.084777
+  type: 'test'
+  ...
+# Subtest: program-parity: public university projection omits unpublished children
+ok 33 - program-parity: public university projection omits unpublished children
+  ---
+  duration_ms: 0.456213
+  type: 'test'
+  ...
+# Subtest: program-parent: program-only derives canonical parent
+ok 34 - program-parent: program-only derives canonical parent
+  ---
+  duration_ms: 0.175868
+  type: 'test'
+  ...
+# Subtest: program-parent: mismatched manual/import parent fails
+ok 35 - program-parent: mismatched manual/import parent fails
+  ---
+  duration_ms: 0.629319
+  type: 'test'
+  ...
+# Subtest: program-parent: unknown owner never becomes resolved
+ok 36 - program-parent: unknown owner never becomes resolved
+  ---
+  duration_ms: 0.388189
+  type: 'test'
+  ...
+# Subtest: program-parent: public scholarship retains program-only canonical parent
+ok 37 - program-parent: public scholarship retains program-only canonical parent
+  ---
+  duration_ms: 0.494966
+  type: 'test'
+  ...
+# Subtest: test-proof: published owner/version and verified score passes
+ok 38 - test-proof: published owner/version and verified score passes
+  ---
+  duration_ms: 0.165892
+  type: 'test'
+  ...
+# Subtest: test-proof: {"internationalTest":{"status":"DRAFT"}} fails closed
+ok 39 - test-proof: {"internationalTest":{"status":"DRAFT"}} fails closed
+  ---
+  duration_ms: 0.144233
+  type: 'test'
+  ...
+# Subtest: test-proof: {"testVersionId":"x","testVersion":{"testId":"t","status":"DRAFT"}} fails closed
+ok 40 - test-proof: {"testVersionId":"x","testVersion":{"testId":"t","status":"DRAFT"}} fails closed
+  ---
+  duration_ms: 0.057686
+  type: 'test'
+  ...
+# Subtest: test-proof: {"minimumScore":10} fails closed
+ok 41 - test-proof: {"minimumScore":10} fails closed
+  ---
+  duration_ms: 0.047206
+  type: 'test'
+  ...
+# Subtest: test-proof: {"minimumScore":6,"internationalTest":{"status":"PUBLISHED","currentPublishedVersion":{"status":"PUBLISHED","scoreScales":[]}}} fails closed
+ok 42 - test-proof: {"minimumScore":6,"internationalTest":{"status":"PUBLISHED","currentPublishedVersion":{"status":"PUBLISHED","scoreScales":[]}}} fails closed
+  ---
+  duration_ms: 0.034992
+  type: 'test'
+  ...
+# Subtest: test-proof: {"testVariantId":"var","testVariant":{"testId":"other","isActive":true}} fails closed
+ok 43 - test-proof: {"testVariantId":"var","testVariant":{"testId":"other","isActive":true}} fails closed
+  ---
+  duration_ms: 0.03604
+  type: 'test'
+  ...
+# Subtest: test-proof: {"sectionScores":{"reading":6}} fails closed
+ok 44 - test-proof: {"sectionScores":{"reading":6}} fails closed
+  ---
+  duration_ms: 0.03809
+  type: 'test'
+  ...
+# Subtest: test-proof: missing scale is unverified
+ok 45 - test-proof: missing scale is unverified
+  ---
+  duration_ms: 0.10753
+  type: 'test'
+  ...
+# Subtest: test-proof: retired tests omitted from scholarship public projection
+ok 46 - test-proof: retired tests omitted from scholarship public projection
+  ---
+  duration_ms: 0.613135
+  type: 'test'
+  ...
+# Subtest: country: programs/majors independent of empty university page
+ok 47 - country: programs/majors independent of empty university page
+  ---
+  duration_ms: 1.409874
+  type: 'test'
+  ...
+# Subtest: country: optional failure is unavailable with unknown total, not successful zero
+ok 48 - country: optional failure is unavailable with unknown total, not successful zero
+  ---
+  duration_ms: 0.570923
+  type: 'test'
+  ...
+# Subtest: graph: optional CMS failure also isolated for university
+ok 49 - graph: optional CMS failure also isolated for university
+  ---
+  duration_ms: 0.565003
+  type: 'test'
+  ...
+# Subtest: graph: page two explicitly unsupported
+ok 50 - graph: page two explicitly unsupported
+  ---
+  duration_ms: 0.102845
+  type: 'test'
+  ...
+# Subtest: graph: reviewed locale only; draft translation ignored
+ok 51 - graph: reviewed locale only; draft translation ignored
+  ---
+  duration_ms: 0.088342
+  type: 'test'
+  ...
+# Subtest: graph: owner outage reports sanitized failure
+ok 52 - graph: owner outage reports sanitized failure
+  ---
+  duration_ms: 0.222568
+  type: 'test'
+  ...
+# Subtest: program repository: owner SQL requires exact degree/published profile before counts and cursor
+ok 53 - program repository: owner SQL requires exact degree/published profile before counts and cursor
+  ---
+  duration_ms: 0.594746
+  type: 'test'
+  ...
+# Subtest: student-owner: create replaces forged slug, deadline and canonical alias
+ok 54 - student-owner: create replaces forged slug, deadline and canonical alias
+  ---
+  duration_ms: 0.23528
+  type: 'test'
+  ...
+# Subtest: student-owner: basic published without verification is denied
+ok 55 - student-owner: basic published without verification is denied
+  ---
+  duration_ms: 0.104326
+  type: 'test'
+  ...
+# Subtest: student-owner: caller cannot edit official deadline
+ok 56 - student-owner: caller cannot edit official deadline
+  ---
+  duration_ms: 0.26648
+  type: 'test'
+  ...
+# Subtest: student-owner: orphan history retained without actionable URL/eligibility claim
+ok 57 - student-owner: orphan history retained without actionable URL/eligibility claim
+  ---
+  duration_ms: 0.285811
+  type: 'test'
+  ...
+# Subtest: student-owner: bounded pull updates current facts, owner outage stays retryable
+ok 58 - student-owner: bounded pull updates current facts, owner outage stays retryable
+  ---
+  duration_ms: 0.250956
+  type: 'test'
+  ...
+# Subtest: student-owner: reconcile CAS/outbox failure rolls back tracker update
+ok 59 - student-owner: reconcile CAS/outbox failure rolls back tracker update
+  ---
+  duration_ms: 0.922424
+  type: 'test'
+  ...
+# Subtest: reminder: changed official deadline suppresses stale intent
+ok 60 - reminder: changed official deadline suppresses stale intent
+  ---
+  duration_ms: 0.255519
+  type: 'test'
+  ...
+# Subtest: reminder: unpublished owner suppresses intent
+ok 61 - reminder: unpublished owner suppresses intent
+  ---
+  duration_ms: 0.18133
+  type: 'test'
+  ...
+# Subtest: role: final student role revoked suspends projection
+ok 62 - role: final student role revoked suspends projection
+  ---
+  duration_ms: 0.704502
+  type: 'test'
+  ...
+# Subtest: role: reordered revoke with another valid grant retains active state
+ok 63 - role: reordered revoke with another valid grant retains active state
+  ---
+  duration_ms: 0.192361
+  type: 'test'
+  ...
+# Subtest: role: suspended identity plus remaining grant cannot reactivate
+ok 64 - role: suspended identity plus remaining grant cannot reactivate
+  ---
+  duration_ms: 0.108436
+  type: 'test'
+  ...
+# Subtest: role: forged aggregate refused
+ok 65 - role: forged aggregate refused
+  ---
+  duration_ms: 0.140067
+  type: 'test'
+  ...
+# Subtest: saved: canonical owner replaces caller labels and alias
+ok 66 - saved: canonical owner replaces caller labels and alias
+  ---
+  duration_ms: 0.335382
+  type: 'test'
+  ...
+# Subtest: saved: unsupported private owner fails closed
+ok 67 - saved: unsupported private owner fails closed
+  ---
+  duration_ms: 0.130055
+  type: 'test'
+  ...
+# Subtest: saved: CMS spoofed slug cannot bind draft ID to other published content
+ok 68 - saved: CMS spoofed slug cannot bind draft ID to other published content
+  ---
+  duration_ms: 0.26883
+  type: 'test'
+  ...
+# Subtest: saved: historical hydration hides current private owner draft fields
+ok 69 - saved: historical hydration hides current private owner draft fields
+  ---
+  duration_ms: 0.234839
+  type: 'test'
+  ...
+# Subtest: navigation: no internal ID/publicId fallback
+ok 70 - navigation: no internal ID/publicId fallback
+  ---
+  duration_ms: 0.152338
+  type: 'test'
+  ...
+# Subtest: navigation: refocus freshness bounded at 30s, no polling
+ok 71 - navigation: refocus freshness bounded at 30s, no polling
+  ---
+  duration_ms: 0.076219
+  type: 'test'
+  ...
+# Subtest: registry: all26 owners and reviewed owner opt-in discovery explicit
+ok 72 - registry: all26 owners and reviewed owner opt-in discovery explicit
+  ---
+  duration_ms: 0.144358
+  type: 'test'
+  ...
+# Subtest: integrity: partial sample never asserts missing FK/production readiness
+ok 73 - integrity: partial sample never asserts missing FK/production readiness
+  ---
+  duration_ms: 0.29525
+  type: 'test'
+  ...
+# Subtest: integrity: declared complete broken reference detected without private values
+ok 74 - integrity: declared complete broken reference detected without private values
+  ---
+  duration_ms: 0.11083
+  type: 'test'
+  ...
+# Subtest: integrity: students and finance cannot be added through untyped allowed scope
+ok 75 - integrity: students and finance cannot be added through untyped allowed scope
+  ---
+  duration_ms: 0.093764
+  type: 'test'
+  ...
+# Subtest: API fixture: unsupported graph page rejected before owner invocation
+ok 76 - API fixture: unsupported graph page rejected before owner invocation
+  ---
+  duration_ms: 4.081168
+  type: 'test'
+  ...
+# Subtest: cycle: only canonical published owner-version cycles are offered
+ok 77 - cycle: only canonical published owner-version cycles are offered
+  ---
+  duration_ms: 0.662931
+  type: 'test'
+  ...
+# Subtest: cycle: ambiguous owners require explicit selection instead of reusing an old tracker
+ok 78 - cycle: ambiguous owners require explicit selection instead of reusing an old tracker
+  ---
+  duration_ms: 0.253801
+  type: 'test'
+  ...
+# Subtest: cycle: create overrides forged owner snapshot and cycle references
+ok 79 - cycle: create overrides forged owner snapshot and cycle references
+  ---
+  duration_ms: 0.215903
+  type: 'test'
+  ...
+# Subtest: cycle: archived tracker replay retains history and does not reactivate it
+ok 80 - cycle: archived tracker replay retains history and does not reactivate it
+  ---
+  duration_ms: 0.424448
+  type: 'test'
+  ...
+# Subtest: cycle: concurrent unique collision replays only the exact owned cycle
+ok 81 - cycle: concurrent unique collision replays only the exact owned cycle
+  ---
+  duration_ms: 0.216502
+  type: 'test'
+  ...
+# Subtest: documents: consent and exact current cycle requirement precede persistence
+ok 82 - documents: consent and exact current cycle requirement precede persistence
+  ---
+  duration_ms: 0.527363
+  type: 'test'
+  ...
+# Subtest: documents: foreign tracker, legacy cycle and foreign owner identity are denied
+ok 83 - documents: foreign tracker, legacy cycle and foreign owner identity are denied
+  ---
+  duration_ms: 0.368644
+  type: 'test'
+  ...
+# Subtest: documents: unavailable asset is denied on write and rechecked on read
+ok 84 - documents: unavailable asset is denied on write and rechecked on read
+  ---
+  duration_ms: 0.467516
+  type: 'test'
+  ...
+# Subtest: documents: revision changes, expiry and malformed consent cannot claim readiness
+ok 85 - documents: revision changes, expiry and malformed consent cannot claim readiness
+  ---
+  duration_ms: 0.56282
+  type: 'test'
+  ...
+# Subtest: documents: unavailable owner preserves private requirement history without readiness claim
+ok 86 - documents: unavailable owner preserves private requirement history without readiness claim
+  ---
+  duration_ms: 0.179277
+  type: 'test'
+  ...
+# Subtest: documents: archived tracker can withdraw consent with versioned transaction
+ok 87 - documents: archived tracker can withdraw consent with versioned transaction
+  ---
+  duration_ms: 0.39536
+  type: 'test'
+  ...
+# Subtest: documents: retention purge remains bounded and rechecks expiry before deletion
+ok 88 - documents: retention purge remains bounded and rechecks expiry before deletion
+  ---
+  duration_ms: 0.273755
+  type: 'test'
+  ...
+# Subtest: integrity live owner sample: unauthorized targets are neither read nor returned
+ok 89 - integrity live owner sample: unauthorized targets are neither read nor returned
+  ---
+  duration_ms: 0.654019
+  type: 'test'
+  ...
+# Subtest: integrity live owner sample: explicit missing target is reported without pretending full catalog coverage
+ok 90 - integrity live owner sample: explicit missing target is reported without pretending full catalog coverage
+  ---
+  duration_ms: 0.397771
+  type: 'test'
+  ...
+# Subtest: integrity API: absent identity and denied owner stop before owner reads
+ok 91 - integrity API: absent identity and denied owner stop before owner reads
+  ---
+  duration_ms: 1.113281
+  type: 'test'
+  ...
+# Subtest: integrity live owner sample: canonical program parent mismatch is detected
+ok 92 - integrity live owner sample: canonical program parent mismatch is detected
+  ---
+  duration_ms: 0.443272
+  type: 'test'
+  ...
+# Subtest: cycle: separate canonical cycle creates a clean checklist and cycle-specific reminder aggregate
+ok 93 - cycle: separate canonical cycle creates a clean checklist and cycle-specific reminder aggregate
+  ---
+  duration_ms: 0.819729
+  type: 'test'
+  ...
+# Subtest: documents: removed requirement stays visible for consent withdrawal without claiming current readiness
+ok 94 - documents: removed requirement stays visible for consent withdrawal without claiming current readiness
+  ---
+  duration_ms: 0.292822
+  type: 'test'
+  ...
+# Subtest: documents: concurrent tracker CAS failure prevents binding write and outbox
+ok 95 - documents: concurrent tracker CAS failure prevents binding write and outbox
+  ---
+  duration_ms: 0.721417
+  type: 'test'
+  ...
+# Subtest: test-discovery: published, independently reviewed current owner link is advertised
+ok 96 - test-discovery: published, independently reviewed current owner link is advertised
+  ---
+  duration_ms: 1.258019
+  type: 'test'
+  ...
+# Subtest: test-discovery: unlinked and revision-changed owners do not advertise stale links
+ok 97 - test-discovery: unlinked and revision-changed owners do not advertise stale links
+  ---
+  duration_ms: 0.616777
+  type: 'test'
+  ...
+# Subtest: test-discovery: unknown or unpublished test stops owner reads
+ok 98 - test-discovery: unknown or unpublished test stops owner reads
+  ---
+  duration_ms: 0.546931
+  type: 'test'
+  ...
+# Subtest: test-discovery: empty filtered candidate page with continuation does not assert globally empty
+ok 99 - test-discovery: empty filtered candidate page with continuation does not assert globally empty
+  ---
+  duration_ms: 0.155432
+  type: 'test'
+  ...
+# Subtest: test-discovery: proposal binds current owner and test revisions rather than caller values
+ok 100 - test-discovery: proposal binds current owner and test revisions rather than caller values
+  ---
+  duration_ms: 0.353182
+  type: 'test'
+  ...
+# Subtest: test-discovery: approval requires a different reviewer and unchanged owner revision
+ok 101 - test-discovery: approval requires a different reviewer and unchanged owner revision
+  ---
+  duration_ms: 0.301455
+  type: 'test'
+  ...
+# Subtest: test-discovery: revoke does not need a still-published owner
+ok 102 - test-discovery: revoke does not need a still-published owner
+  ---
+  duration_ms: 0.212842
+  type: 'test'
+  ...
+# Subtest: test-discovery tool owner: locale, lifecycle and access flags are enforced
+ok 103 - test-discovery tool owner: locale, lifecycle and access flags are enforced
+  ---
+  duration_ms: 0.362391
+  type: 'test'
+  ...
+# Subtest: test-discovery service owner: paid price and current provider qualification are checked
+ok 104 - test-discovery service owner: paid price and current provider qualification are checked
+  ---
+  duration_ms: 0.605711
+  type: 'test'
+  ...
+# Subtest: test-discovery persistence: failed CAS cannot write approval or its audit event
+ok 105 - test-discovery persistence: failed CAS cannot write approval or its audit event
+  ---
+  duration_ms: 0.832298
+  type: 'test'
+  ...
+# Subtest: test-discovery API: uppercase or trailing-slash approval cannot bypass reviewer permission
+ok 106 - test-discovery API: uppercase or trailing-slash approval cannot bypass reviewer permission
+  ---
+  duration_ms: 2.538048
+  type: 'test'
+  ...
+# Subtest: test-discovery web contract: rejects unrelated owner, false emptiness and unsafe URLs
+ok 107 - test-discovery web contract: rejects unrelated owner, false emptiness and unsafe URLs
+  ---
+  duration_ms: 0.858087
+  type: 'test'
+  ...
+1..107
+# tests 107
+# suites 0
+# pass 107
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3453.75285

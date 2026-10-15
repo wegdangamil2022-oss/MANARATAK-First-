@@ -3219,11 +3219,11 @@ function CrossPhaseTab({ testId, isRtl }: { testId: string; isRtl: boolean }) {
         </div>
         <div className="border rounded-lg p-4 bg-gray-50">
           <div className="font-semibold text-gray-900">{isRtl ? 'الأدوات الطلابية' : 'Student Tools'}</div>
-          <div className="text-xs text-gray-600 mt-2">{isRtl ? 'غير موصولة — الملكية لمجال الأدوات.' : 'Not integrated — owned by Student Tools.'}</div>
+          <div className="text-xs text-gray-600 mt-2">{relationships.studentTools?.state==='UNAVAILABLE'?(isRtl?'روابط الأدوات غير متاحة':'Tool links unavailable'):relationships.studentTools?.data?.length?relationships.studentTools.data.map((item:any)=><div key={item.publicId}>{item.displayName}</div>):(isRtl?'لا توجد أدوات معتمدة حالية':'No current reviewed tool links')}</div>
         </div>
         <div className="border rounded-lg p-4 bg-gray-50">
           <div className="font-semibold text-gray-900">{isRtl ? 'الخدمات' : 'Services'}</div>
-          <div className="text-xs text-gray-600 mt-2">{isRtl ? 'غير موصولة — الملكية لمجال الخدمات.' : 'Not integrated — owned by Services.'}</div>
+          <div className="text-xs text-gray-600 mt-2">{relationships.services?.state==='UNAVAILABLE'?(isRtl?'روابط الخدمات غير متاحة':'Service links unavailable'):relationships.services?.data?.length?relationships.services.data.map((item:any)=><div key={item.publicId}>{item.displayName}</div>):(isRtl?'لا توجد خدمات معتمدة حالية':'No current reviewed service links')}</div>
         </div>
       </div>
     </div>

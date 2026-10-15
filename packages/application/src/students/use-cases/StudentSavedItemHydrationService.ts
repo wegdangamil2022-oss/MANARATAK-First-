@@ -13,7 +13,7 @@ export class StudentSavedItemHydrationService {
   async listHydrated(studentReferenceId: string): Promise<HydratedStudentSavedItemDto[]> {
     const items = await this.repository.listSavedItems(studentReferenceId);
     return Promise.all(
-      items.map(async (savedItem) => {
+      items.filter(savedItem=>savedItem.studentReferenceId===studentReferenceId).map(async (savedItem) => {
         const gateway = this.gateways.find((candidate) => candidate.supports(savedItem.entityType));
         try {
           const owner = gateway ? await gateway.hydrate(savedItem) : null;

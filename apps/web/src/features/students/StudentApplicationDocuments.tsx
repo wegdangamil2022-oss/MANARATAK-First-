@@ -43,12 +43,14 @@ export function StudentApplicationDocuments({
       ApiClient.getMyApplicationDocuments(tracker.id),
       ApiClient.listMyActiveStudentAssets('application/pdf'),
       ApiClient.getScholarshipApplicationCycles(tracker.scholarshipId),
-    ]).then(([r, a, c]) => {
+      ApiClient.listMyActiveStudentAssets('image/'),
+    ]).then(([r, a, c, images]) => {
       if (current !== generation.current) return;
       if (r.status === 'fulfilled') setReadiness(r.value);
-      if (a.status === 'fulfilled') setAssets(a.value.items);
+      const availableAssets = [a, images].flatMap((result) => result.status === 'fulfilled' ? result.value.items : []);
+      setAssets([...new Map(availableAssets.map((item) => [item.id, item])).values()]);
       if (c.status === 'fulfilled') setCycles(c.value.cycles);
-      if ([r, a, c].some((v) => v.status === 'rejected'))
+      if ([r, a, c, images].some((v) => v.status === 'rejected'))
         setError(
           text(
             'بعض المتطلبات أو الأصول أو الدورات غير متاحة. أعد فتح اللوحة للمحاولة.',
@@ -213,8 +215,8 @@ export function StudentApplicationDocuments({
                     </label>
                     <label>
                       {text(
-                        'ملف PDF من أصولك (أول 100 أصل متاح)',
-                        'PDF from your assets (first 100 available)',
+                        'ملف PDF أو صورة من أصولك (أول 100 ملف لكل نوع)',
+                        'PDF or image from your assets (first 100 of each type)',
                       )}
                       <select value={asset} onChange={(e) => setAsset(e.target.value)}>
                         <option value="">—</option>

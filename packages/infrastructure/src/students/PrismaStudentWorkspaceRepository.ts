@@ -487,6 +487,17 @@ export class PrismaStudentWorkspaceRepository implements IStudentWorkspaceReposi
     });
   }
 
+  public async inspectPrivateToolResult(studentReferenceId:string,executionId:string):Promise<{savedReference:string;toolKey:string}|null>{
+    const workspace=await this.db.studentWorkspace.findUnique({where:{studentReferenceId}});
+    if(!workspace||workspace.status!==StudentWorkspaceStatus.ACTIVE)return null;
+    const row=await this.db.studentSavedItem.findUnique({where:{studentReferenceId_entityType_entityId:{studentReferenceId,entityType:'STUDENT_TOOL',entityId:executionId}}});
+    if(!row||row.studentReferenceId!==studentReferenceId||!row.privateResultEnvelope||!row.privateResultExpiresAt||!Number.isFinite(new Date(row.privateResultExpiresAt).getTime())||new Date(row.privateResultExpiresAt).getTime()<=Date.now())return null;
+    if(!this.privateResults||this.privateResults.status()!=='READY')throw new Error('STUDENT_PRIVATE_RESULT_NOT_CONFIGURED');
+    const value=this.privateResults.unprotect(row.privateResultEnvelope) as Record<string,unknown>;
+    if(value.purpose!=='STUDENT_TOOL_RESULT'||value.owner!==studentReferenceId||value.executionId!==executionId||value.expiresAt!==new Date(row.privateResultExpiresAt).toISOString())return null;
+    return {savedReference:row.id,toolKey:row.entitySlug??''};
+  }
+
   public async readPrivateToolResult(
     studentReferenceId: string,
     savedReference: string,

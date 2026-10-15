@@ -61,6 +61,18 @@ beforeEach(() => {
   });
 });
 describe('private application documents', () => {
+  it('keeps owned image choices when the PDF collection fails', async () => {
+    vi.mocked(ApiClient.listMyActiveStudentAssets).mockImplementation(async (prefix) => {
+      if (prefix === 'application/pdf') throw new Error('PDF owner read unavailable');
+      return {items:[{id:'owned-image',reference:'image',metadata:{originalFilename:'transcript.png',mimeType:'image/png'}}],hasMore:false,nextCursor:null};
+    });
+    const view=await mount();
+    expect(view.root.findAllByType('option').some(option=>option.props.value==='owned-image')).toBe(true);
+    expect(JSON.stringify(view.toJSON())).toContain('first 100 of each type');
+    expect(JSON.stringify(view.toJSON())).toContain('Some requirements');
+    expect(ApiClient.bindMyApplicationDocument).not.toHaveBeenCalled();
+    await act(async()=>view.unmount());
+  });
   it('keeps independent cycle selection available when assets are unavailable', async () => {
     vi.mocked(ApiClient.listMyActiveStudentAssets).mockRejectedValue(new Error('unavailable'));
     const view = await mount();

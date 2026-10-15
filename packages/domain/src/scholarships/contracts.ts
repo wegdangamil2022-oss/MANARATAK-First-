@@ -358,7 +358,10 @@ export type PublicScholarshipDto = Omit<
   | 'notes'
 >;
 
+export interface PublishedProgramScholarshipIdentity {id:string;publicId:string;slug:string;displayName:string;localizedNames?:Record<string,string>;}
+export interface PublishedProgramScholarshipPage {data:PublishedProgramScholarshipIdentity[];total:number;hasMore:boolean;nextCursor:string|null;}
 export interface IScholarshipRepository {
+  listPublishedProgramRelationshipsPage?(programIds:string[],limit:number):Promise<Record<string,PublishedProgramScholarshipPage>>;
   create(data: CreateScholarshipDto): Promise<ScholarshipDto>;
   update(id: string, updates: ScholarshipRepositoryUpdateDto): Promise<ScholarshipDto>;
   assertCurrentRevision?(id: string, expectedRevision: number): Promise<void>;

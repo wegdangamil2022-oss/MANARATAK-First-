@@ -1,3 +1,4 @@
+import {publicProgramTestMatchSql} from './PublicProgramTestSql';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   AtomicPersistenceContext,
@@ -32,7 +33,7 @@ import {
 const universityDetails = {
   campuses: true,
   organizationUnits: true,
-  academicPrograms: { include: { campuses: true, major: { select: { status: true, levelProfiles: { select: { degreeLevelId: true, status: true, currentPublishedVersionId: true } } } }, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true,
+  academicPrograms: { include: { campuses: true, major: { select: { status: true, levelProfiles: { select: { degreeLevelId: true, status: true, currentPublishedVersionId: true } } } }, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true, isPubliclyVisible:true,
               currentPublishedVersion: { include: { scoreScales: true } },
             },
           },
@@ -454,14 +455,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       Prisma.sql`EXISTS (SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)`,
     ];
     if (filters.majorId) programConditions.push(Prisma.sql`p."majorId"=${filters.majorId}`);
-    if (filters.internationalTestId)
-      programConditions.push(Prisma.sql`EXISTS (
-      SELECT 1 FROM "UniversityProgramAdmissionRequirement" r JOIN "InternationalTest" t ON t.id=r."internationalTestId"
-      JOIN "InternationalTestVersion" v ON v.id=COALESCE(r."testVersionId",t."currentPublishedVersionId") AND v."testId"=t.id
-      WHERE r."academicProgramId"=p.id AND r."internationalTestId"=${filters.internationalTestId} AND r.status='ACTIVE' AND t.status='PUBLISHED' AND v.status='PUBLISHED'
-      AND (r."testVariantId" IS NULL OR EXISTS (SELECT 1 FROM "InternationalTestVariant" tv WHERE tv.id=r."testVariantId" AND tv."testId"=t.id AND tv."isActive"=true))
-      AND (r."sectionScores" IS NULL OR r."sectionScores"='{}'::jsonb)
-      AND (r."minimumScore" IS NULL OR ((SELECT count(*) FROM "InternationalTestVersionScoreScale" ss WHERE ss."versionId"=v.id)=1 AND EXISTS (SELECT 1 FROM "InternationalTestVersionScoreScale" ss WHERE ss."versionId"=v.id AND r."minimumScore">=ss."overallMinimum" AND r."minimumScore"<=ss."overallMaximum"))))`);
+    if(filters.internationalTestId)programConditions.push(publicProgramTestMatchSql(filters.internationalTestId));
     conditions.push(
       Prisma.sql`EXISTS (SELECT 1 FROM "UniversityAcademicProgram" p JOIN "Major" m ON m.id=p."majorId" WHERE ${Prisma.join(programConditions, ' AND ')})`,
     );
@@ -526,7 +520,9 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         Array<import('@manaratak/domain').PublishedAcademicProgramReadModel>
       >(Prisma.sql`
         SELECT p.id AS "ownerId", p."sourceProgramName", p."degreeLevelId", p."majorId", p."majorMappingState", p.status,
-          u.id AS "universityOwnerId", u."publicId" AS "universityPublicId", u.slug AS "universitySlug", u."displayName" AS "universityDisplayName"
+          u.id AS "universityOwnerId", u."publicId" AS "universityPublicId", u.slug AS "universitySlug", u."displayName" AS "universityDisplayName",
+          (SELECT jsonb_object_agg(lt.locale,lt.value) FROM "UniversityLocalizedText" lt WHERE lt."universityId"=u.id AND lt."targetType"='ACADEMIC_PROGRAM' AND lt."targetId"=p.id AND lt."fieldKey"='sourceProgramName' AND lt."reviewStatus"='PUBLISHED') AS "localizedNames",
+          (SELECT jsonb_object_agg(ut.locale,ut."displayName") FROM "UniversityTranslation" ut WHERE ut."universityId"=u.id AND ut."reviewStatus"='PUBLISHED' AND ut."displayName" IS NOT NULL) AS "universityLocalizedNames"
         ${base} ${after ? Prisma.sql`AND p.id>${after}` : Prisma.empty} ORDER BY p.id ASC LIMIT ${limit + 1}`),
       this.prisma.$queryRaw<Array<{ total: bigint; majorTotal: bigint }>>(
         Prisma.sql`SELECT count(*) AS total, count(DISTINCT p."majorId") AS "majorTotal" ${base}`,
@@ -592,7 +588,10 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
           },
         },
         university: {
-          select: { id: true, publicId: true, slug: true, displayName: true },
+          select: { id: true, publicId: true, slug: true, displayName: true,
+            translations: {where:{reviewStatus:'PUBLISHED'},select:{locale:true,displayName:true}},
+            localizedTexts: {where:{targetType:'ACADEMIC_PROGRAM',targetId:{in:[...new Set(ids)]},fieldKey:'sourceProgramName',reviewStatus:'PUBLISHED'},select:{targetId:true,locale:true,value:true}},
+          },
         },
       },
     });
@@ -602,6 +601,8 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       universityPublicId: row.university.publicId,
       universitySlug: row.university.slug,
       universityDisplayName: row.university.displayName,
+      universityLocalizedNames: Object.fromEntries((row.university.translations??[]).filter(text=>text.displayName).map(text=>[text.locale,text.displayName!])),
+      localizedNames: Object.fromEntries((row.university.localizedTexts??[]).filter(text=>text.targetId===row.id).map(text=>[text.locale,text.value])),
       sourceProgramName: row.sourceProgramName,
       degreeLevelId: row.degreeLevelId,
       majorId: row.majorId,

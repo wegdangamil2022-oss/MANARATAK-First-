@@ -41,7 +41,10 @@
     "ApiServiceControlRecord": "foundation_control_plane",
     "ApiServiceExposureProjection": "foundation_control_plane",
     "AssetRecord": "assets",
+    "AssetRenditionRecord": "assets",
+    "AuditAlertOccurrenceRecord": "audit",
     "AuditRecord": "audit",
+    "AuditWorkspaceRecord": "audit",
     "BackgroundJobDeadLetterRecord": "background_jobs",
     "BackgroundJobExecutionRecord": "background_jobs",
     "BackgroundJobRecord": "background_jobs",
@@ -51,6 +54,7 @@
     "CareerJobPostingRecord": "careers",
     "CareerProfileRecord": "career",
     "Certificate": "certificates",
+    "CertificateAuthorityDelegation": "certificates",
     "CertificateIssuanceInbox": "certificates",
     "CertificateIssuer": "certificates",
     "CertificateLedgerEntry": "certificates",
@@ -171,6 +175,7 @@
     "MajorAlias": "majors",
     "MajorClassificationMapping": "majors",
     "MajorContentSection": "majors",
+    "MajorImportOwnerReview": "majors",
     "MajorLevelProfile": "majors",
     "MajorPublicationSnapshot": "majors",
     "MajorRelationship": "majors",
@@ -182,6 +187,7 @@
     "NotificationIntentRecord": "notifications",
     "NotificationRateReservation": "notifications",
     "NotificationTemplateRecord": "notifications",
+    "OwnerTranslationTransferReceipt": "import",
     "PasswordResetTokenRecord": "identity",
     "PolicyRecord": "identity",
     "ReferenceAliasRecord": "reference",
@@ -227,6 +233,7 @@
     "ServiceProviderRecord": "services",
     "ServiceProviderServiceRecord": "services",
     "ServiceRequestRecord": "services",
+    "ServiceTestDiscoveryLink": "services",
     "ServiceWorkflowDefinitionRecord": "services",
     "ServiceWorkflowExecutionRecord": "services",
     "SessionRecord": "identity",
@@ -234,9 +241,11 @@
     "SettingDefinitionRecord": "settings",
     "SettingVersionRecord": "settings",
     "Settings": "settings",
+    "SettingsGovernanceRecord": "settings",
     "SharedComponentControlRecord": "foundation_control_plane",
     "SharedComponentRenderingProjection": "foundation_control_plane",
     "StudentApplicationChecklistItem": "student",
+    "StudentApplicationDocumentBinding": "student",
     "StudentApplicationTracker": "student",
     "StudentCertificateReadProjection": "student",
     "StudentLearningProjection": "student",
@@ -248,10 +257,12 @@
     "StudentSavedCollection": "student",
     "StudentSavedItem": "student",
     "StudentSearchHistory": "student",
+    "StudentSupportOwnerReadObservation": "student",
     "StudentTimelineEntry": "student",
     "StudentToolDefinitionRecord": "student_tools",
     "StudentToolDependencyRecord": "student_tools",
     "StudentToolExecutionRecord": "student_tools",
+    "StudentToolTestDiscoveryLink": "student_tools",
     "StudentToolVersionRecord": "student_tools",
     "StudentWorkspace": "student",
     "StudentWorkspaceEventInbox": "student",
@@ -269,14 +280,16 @@
     "UniversityOrganizationUnit": "universities",
     "UniversityProgramAdmissionRequirement": "universities",
     "UniversityProgramCampus": "universities",
+    "UniversityProgramIntake": "universities",
+    "UniversityProgramStudyLanguage": "universities",
+    "UniversityProgramStudyProfile": "universities",
     "UniversityRanking": "universities",
     "UniversitySourceRecord": "universities",
     "UniversityTranslation": "universities",
     "UniversityTuitionProfile": "universities",
     "UserRecord": "identity",
     "WorkflowControlRecord": "foundation_control_plane",
-    "WorkflowExecutionProjection": "foundation_control_plane",
-    "MajorImportOwnerReview": "majors"
+    "WorkflowExecutionProjection": "foundation_control_plane"
   },
   "adapterPathOwners": {
     "packages/infrastructure/src/reference-data/": "reference",
@@ -306,7 +319,9 @@
     "packages/infrastructure/src/background-jobs/": "background_jobs",
     "packages/infrastructure/src/notification/": "notifications",
     "packages/infrastructure/src/search/": "foundation_control_plane",
-    "packages/infrastructure/src/authorization/": "identity"
+    "packages/infrastructure/src/authorization/": "identity",
+    "packages/infrastructure/src/student-tools/PrismaStudentToolTestDiscoveryLinkRepository.ts": "student_tools",
+    "packages/infrastructure/src/services-platform/PrismaServiceTestDiscoveryLinkRepository.ts": "services"
   },
   "approvedCrossContextReadModels": {
     "packages/infrastructure/src/academic-taxonomy/PrismaAcademicTaxonomyImportGateway.ts": [
@@ -381,6 +396,9 @@
       "assets",
       "reference",
       "academic_taxonomy"
+    ],
+    "packages/infrastructure/src/scholarships/PrismaScholarshipRepository.ts": [
+      "universities"
     ]
   },
   "historicalMigrationBaseline": [
@@ -565,6 +583,86 @@
       "decision": "ADR-028",
       "reason": "Reconcile missing ownership annotation without rewriting committed SQL; immutable checksum binds this owner classification. Source-only verification does not assert application.",
       "reviewReference": "docs/reviews/section-21-migration-recovery.md"
+    },
+    "20261014193000_section27_tracker_cycles": {
+      "sha256": "855b062b356d559c8421dab61e42bd49400ecdf521ac44074890620928080dcf",
+      "owner": "student",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Attach P15 ownership to the already committed source-only tracker-cycle migration without rewriting its SQL. No database application is asserted.",
+      "reviewReference": "docs/reviews/SECTION_27_PROGRESS_2026-10-15.md"
+    },
+    "20261012010000_audit_workspace": {
+      "sha256": "1ee8c6f12b2fa6b1595f24d57a2dae20adf4e300ca280373057263a2c2cbfe7f",
+      "owner": "audit",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Reconcile ownership metadata for committed owner-local SQL without modifying the migration or asserting database application. Inspected table/function targets belong to the declared owner.",
+      "reviewReference": "docs/reviews/SECTION_27_OWNER_LINKS_2026-10-15.md"
+    },
+    "20261012020000_asset_rendition_inventory": {
+      "sha256": "876466277b435a252d91ccb17fd5b0084aa081f3a3c1815f52206644cfec41af",
+      "owner": "assets",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Reconcile ownership metadata for committed owner-local SQL without modifying the migration or asserting database application. Inspected table/function targets belong to the declared owner.",
+      "reviewReference": "docs/reviews/SECTION_27_OWNER_LINKS_2026-10-15.md"
+    },
+    "20261012030000_asset_authoritative_reconciliation": {
+      "sha256": "1964f6a60941f355ac8cc13a1aed21b4bd60aea15f194c1162b81115442b8f52",
+      "owner": "assets",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Reconcile ownership metadata for committed owner-local SQL without modifying the migration or asserting database application. Inspected table/function targets belong to the declared owner.",
+      "reviewReference": "docs/reviews/SECTION_27_OWNER_LINKS_2026-10-15.md"
+    },
+    "20261012040000_settings_governance": {
+      "sha256": "58157b939cfb2bafb4ef0420d8a9e9e358f0ac40e06e719d698f0ff82ca466f6",
+      "owner": "settings",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Reconcile ownership metadata for committed owner-local SQL without modifying the migration or asserting database application. Inspected table/function targets belong to the declared owner.",
+      "reviewReference": "docs/reviews/SECTION_27_OWNER_LINKS_2026-10-15.md"
+    },
+    "20261013020000_university_program_workspace": {
+      "sha256": "0d5d0161325251e58e9552aceb8e3e58f872309f9659e14b113a55c001b7f76b",
+      "owner": "universities",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Reconcile ownership metadata for committed owner-local SQL without modifying the migration or asserting database application. Inspected table/function targets belong to the declared owner.",
+      "reviewReference": "docs/reviews/SECTION_27_OWNER_LINKS_2026-10-15.md"
+    },
+    "20261013200000_certificate_authority_delegations": {
+      "sha256": "04d6348f1ba5b00a50e4025c0542f8f9c5c678f67202204957e1cb9c78dab83e",
+      "owner": "certificates",
+      "scope": "cross_context_approved",
+      "decision": "ADR-028",
+      "reason": "Immutable historical P14 delegation DDL also attaches an EAP evidence lifecycle guard to AssetRecord. Classify that existing P3/P14 reference-integrity integration explicitly; no cross-owner canonical data write or database application is authorized or performed by this metadata repair.",
+      "reviewReference": "docs/reviews/SECTION_27_OWNER_LINKS_2026-10-15.md"
+    },
+    "20261013210000_student_support_owner_read_health": {
+      "sha256": "f74dc1fea09ea3b66d55287991240deb3fdc08963a605c5502280fc736126873",
+      "owner": "student",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Reconcile ownership metadata for committed owner-local SQL without modifying the migration or asserting database application. Inspected table/function targets belong to the declared owner.",
+      "reviewReference": "docs/reviews/SECTION_27_OWNER_LINKS_2026-10-15.md"
+    },
+    "20261014010000_owner_translation_receipt": {
+      "sha256": "7dcaa828caa804328973f3a6dd61936d94dd365383ed4c63c08c02af973ed1c7",
+      "owner": "import",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Reconcile ownership metadata for committed owner-local SQL without modifying the migration or asserting database application. Inspected table/function targets belong to the declared owner.",
+      "reviewReference": "docs/reviews/SECTION_27_OWNER_LINKS_2026-10-15.md"
+    },
+    "20261014090000_study_destination_governance_source_only": {
+      "sha256": "7cea01fcf6bd970b9eb5a7ace00a49d02c902740e35c593a5fa10e3c0416effb",
+      "owner": "reference",
+      "scope": "owner_only",
+      "decision": "ADR-028",
+      "reason": "Reconcile ownership metadata for committed owner-local SQL without modifying the migration or asserting database application. Inspected table/function targets belong to the declared owner.",
+      "reviewReference": "docs/reviews/SECTION_27_OWNER_LINKS_2026-10-15.md"
     }
   }
 }

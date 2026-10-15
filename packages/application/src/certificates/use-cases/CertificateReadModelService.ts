@@ -14,6 +14,7 @@ export class CertificateReadModelService {
   constructor(
     private readonly repository: ICertificateRepository,
     private readonly certificates: CertificateUseCases,
+    private readonly affiliations?:import('@manaratak/domain').ICertificateAffiliationReadGateway,
   ) {}
 
   public async listForStudent(studentReferenceId: string, cursor?:string, pageSize=50): Promise<StudentCertificateReadModelDto[]> {
@@ -61,6 +62,7 @@ export class CertificateReadModelService {
       expiresAt: row.expiresAt,
       validityPolicy: row.validityPolicy,
       issuerName: row.issuerName,
+      ...(this.affiliations?{issuerAffiliation:await this.affiliations.resolve(row.issuerId,row.issuerType,row.issuerAffiliationSnapshot)}:{}),
       grade: row.grade,
       skills: [...(row.skills ?? [])],
       competencies: [...(row.competencies ?? [])],

@@ -23,6 +23,7 @@ export interface StudentCertificateReadModelDto {
 /** Public, privacy-minimized P14 verification projection. Internal hashes, student IDs,
  * signing-key references and administrative revocation reasons are deliberately omitted. */
 export interface PublicCertificateVerificationDto {
+  issuerAffiliation?:import('../contracts/ICertificateAffiliationReadGateway').CertificateCurrentAffiliation;
   lifecycleStatus?: CertificateStatus;
   temporalStatus?: 'CURRENT' | 'EXPIRED';
   verificationFailure?: 'INTEGRITY_INVALID' | 'REVALIDATION_REQUIRED';

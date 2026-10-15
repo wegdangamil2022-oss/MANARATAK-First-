@@ -256,3 +256,11 @@ export * from './certificates/CertificateArtifactRecovery';
 export * from './certificates/PrismaCertificateAuthorityDirectory';
 
 export * from './translation-import/PrismaTranslationWorkspaceReadGateway';
+
+export * from './integration/PrismaTestDiscoveryLinkRepository';
+export * from './integration/TestDiscoveryOwnerGateways';
+
+export * from './students/PrivateStudentSavedItemHydrationGateways';
+
+export * from './student-tools/PrismaStudentToolTestDiscoveryLinkRepository';
+export * from './services-platform/PrismaServiceTestDiscoveryLinkRepository';

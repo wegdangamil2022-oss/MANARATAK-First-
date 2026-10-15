@@ -1,3 +1,5 @@
+import { testDiscoveryOwnerRouter } from './TestDiscoveryOwnerRouter.js';
+import type {TestDiscoveryOwnerUseCases} from '@manaratak/application';
 import { randomUUID } from 'node:crypto';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
@@ -20,12 +22,14 @@ import {
 
 export class ServiceAdminRouter {
   public static create(cradle: {
+    serviceTestDiscovery?:TestDiscoveryOwnerUseCases;
     serviceOperationsUseCases: ServiceOperationsUseCases;
     authEvaluatorService: AuthorizationEvaluatorService;
     adminServiceCatalogUseCases: AdminServiceCatalogUseCases;
     adminServiceFulfillmentUseCases: AdminServiceFulfillmentUseCases;
   }): Router {
     const router = Router();
+    if(cradle.serviceTestDiscovery)router.use('/:ownerKey/test-discovery',testDiscoveryOwnerRouter(cradle.serviceTestDiscovery,cradle.authEvaluatorService,{view:'admin:services:manage',propose:'admin:services:manage',review:'admin:services:manage'}));
     const { adminServiceCatalogUseCases, adminServiceFulfillmentUseCases } = cradle;
     const requirePermission = async (req: Request, permission: string) => {
       if (!req.authUserId) throw new Error('SERVICE_AUTHENTICATION_REQUIRED');

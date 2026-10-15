@@ -1,3 +1,4 @@
+import {parseTestDiscoveryPage,type TestDiscoveryPublicPage} from '../features/public-template/TestDiscoveryContract';
 import { CsrfClientManager } from '@manaratak/shared';
 
 function currentPublicLocale(): 'ar' | 'en' {
@@ -772,6 +773,7 @@ export interface StudentCourseQuizAttemptDto {
 }
 
 export interface CertificateVerificationDto {
+  issuerAffiliation?:{state:'CURRENT'|'CHANGED'|'RETIRED'|'UNAVAILABLE'|'UNVERIFIED'|'LEGACY_UNVERIFIED'|'NOT_APPLICABLE';historicalOwnerState?:string;currentDisplayName?:string;currentUniversitySlug?:string};
   publicId: string;
   serialNumber: string;
   verificationCode: string;
@@ -928,6 +930,8 @@ export interface StudentSavedItemDto {
 export interface HydratedStudentSavedItemDto {
   savedItem: StudentSavedItemDto;
   owner: {
+    visibility?:'PUBLIC'|'STUDENT_PRIVATE';
+    privateReference?:string;
     ownerType: string;
     ownerId: string;
     publicId?: string;
@@ -1381,6 +1385,8 @@ export interface PublicCareerJobDto {
 }
 
 export interface StablePublicGraphIdentity {
+  labelLocale?: string;
+  localeFallback?: boolean;
   ownerId: string;
   publicId?: string;
   slug?: string;
@@ -2543,6 +2549,11 @@ export class ApiClient {
     return res.json();
   }
 
+  static async getInternationalTestDiscovery(slug:string,owner:'STUDENT_TOOLS'|'SERVICES',locale:'ar'|'en',after?:string):Promise<TestDiscoveryPublicPage> {
+    const params=new URLSearchParams({owner,locale});if(after)params.set('after',after);
+    const res=await apiFetch(`${API_BASE_URL}/public/international-tests/${encodeURIComponent(slug)}/discovery?${params}`,{cache:'no-store'});
+    if(!res.ok)throw new Error('TEST_DISCOVERY_UNAVAILABLE');return parseTestDiscoveryPage(await res.json(),owner);
+  }
   static async getInternationalTests(
     filters: InternationalTestFilters,
   ): Promise<PaginatedResult<PublicInternationalTestDto>> {
@@ -2625,8 +2636,9 @@ export class ApiClient {
 
   static async getMajorGraph(slug: string, page = 1, pageSize = 12,
     signal?: AbortSignal,
+    locale:'ar'|'en'=currentPublicLocale(),
   ): Promise<PublicMajorGraphDto> {
-    const res = await apiFetch(`${API_BASE_URL}/public/graph/majors/${encodeURIComponent(slug)}?page=${page}&pageSize=${pageSize}&locale=${currentPublicLocale()}`,
+    const res = await apiFetch(`${API_BASE_URL}/public/graph/majors/${encodeURIComponent(slug)}?page=${page}&pageSize=${pageSize}&locale=${locale}`,
       { signal },
     );
     if (!res.ok) throw new Error(res.status === 404 ? 'Major graph not found' : 'Failed to fetch major graph');
@@ -2635,8 +2647,9 @@ export class ApiClient {
 
   static async getUniversityGraph(slug: string, page = 1, pageSize = 12,
     signal?: AbortSignal,
+    locale:'ar'|'en'=currentPublicLocale(),
   ): Promise<PublicUniversityGraphDto> {
-    const res = await apiFetch(`${API_BASE_URL}/public/graph/universities/${encodeURIComponent(slug)}?page=${page}&pageSize=${pageSize}&locale=${currentPublicLocale()}`,
+    const res = await apiFetch(`${API_BASE_URL}/public/graph/universities/${encodeURIComponent(slug)}?page=${page}&pageSize=${pageSize}&locale=${locale}`,
       { signal },
     );
     if (!res.ok) throw new Error(res.status === 404 ? 'University graph not found' : 'Failed to fetch university graph');
@@ -2645,8 +2658,9 @@ export class ApiClient {
 
   static async getScholarshipGraph(slug: string,
     signal?: AbortSignal,
+    locale:'ar'|'en'=currentPublicLocale(),
   ): Promise<PublicScholarshipGraphDto> {
-    const res = await apiFetch(`${API_BASE_URL}/public/graph/scholarships/${encodeURIComponent(slug)}?locale=${currentPublicLocale()}`,
+    const res = await apiFetch(`${API_BASE_URL}/public/graph/scholarships/${encodeURIComponent(slug)}?locale=${locale}`,
       { signal },
     );
     if (!res.ok) throw new Error(res.status === 404 ? 'Scholarship graph not found' : 'Failed to fetch scholarship graph');
@@ -2655,8 +2669,9 @@ export class ApiClient {
 
   static async getCountryGraph(iso2Code: string, page = 1, pageSize = 12,
     signal?: AbortSignal,
+    locale:'ar'|'en'=currentPublicLocale(),
   ): Promise<PublicCountryGraphDto> {
-    const res = await apiFetch(`${API_BASE_URL}/public/graph/countries/${encodeURIComponent(iso2Code)}?page=${page}&pageSize=${pageSize}&locale=${currentPublicLocale()}`,
+    const res = await apiFetch(`${API_BASE_URL}/public/graph/countries/${encodeURIComponent(iso2Code)}?page=${page}&pageSize=${pageSize}&locale=${locale}`,
       { signal },
     );
     if (!res.ok) throw new Error(res.status === 404 ? 'Country graph not found' : 'Failed to fetch country graph');
@@ -2832,6 +2847,10 @@ export class ApiClient {
     }
   }
 
+  static async getMyPrivateToolResult(savedReference:string):Promise<unknown>{
+    const res=await apiFetch(`${API_BASE_URL}/student/saved-items/${encodeURIComponent(savedReference)}/private-result`,{headers:getStudentHeaders(),cache:'no-store'});
+    if(!res.ok)throw new Error('STUDENT_PRIVATE_RESULT_UNAVAILABLE');return (await res.json()).data;
+  }
   static async listMyHydratedStudentSavedItems(): Promise<HydratedStudentSavedItemDto[]> {
     const res = await apiFetch(`${API_BASE_URL}/student/saved-items/hydrated`, {
       headers: getStudentHeaders(),

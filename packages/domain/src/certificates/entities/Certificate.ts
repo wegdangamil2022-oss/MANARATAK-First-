@@ -159,6 +159,7 @@ export interface CertificateSignedEnvelopeV2 {
     versionNumber: string;
   };
   issuer: {
+    affiliation?:import('../contracts/ICertificateAffiliationReadGateway').CertificateAffiliationSnapshot;
     authorityVersion?:number;
     authorityEvidenceHash?:string;
     issuerId: string;
@@ -273,6 +274,8 @@ export interface CertificateDto extends IssueCertificateDto {
 }
 
 export interface CertificateVerificationDto {
+  issuerType?:CertificateIssuerType;
+  issuerAffiliationSnapshot?:import('../contracts/ICertificateAffiliationReadGateway').CertificateAffiliationSnapshot;
   lifecycleStatus?: CertificateStatus;
   temporalStatus?: 'CURRENT' | 'EXPIRED';
   verificationFailure?: 'INTEGRITY_INVALID' | 'REVALIDATION_REQUIRED';

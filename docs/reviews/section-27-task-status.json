@@ -3,7 +3,7 @@
   "sectionClosed": false,
   "sourceStatus": "PARTIAL_SOURCE_IMPLEMENTATION",
   "taskCount": 38,
-  "meaning": "Current follow-up preserves historical findings. Source checks were rerun, but remaining capabilities are genuine code gaps, not only runtime deferrals.",
+  "meaning": "Current owner-links batch implements private saved-owner adapters, reviewed Test discovery, certificate affiliation history and canonical academic exploration. Other graph/lifecycle/document/integrity capabilities remain genuine source gaps.",
   "tasks": [
     {
       "id": "XMI-001",
@@ -70,9 +70,9 @@
     },
     {
       "id": "XMI-010",
-      "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "GraphReadPolicy.reviewedGraphLabel; CrossDomainGraphReadService",
-      "disposition": "Reviewed requested locale for supported identities; owner-default fallback. Complete owner localization adapters absent.",
+      "status": "PARTIAL_SOURCE_IMPLEMENTED",
+      "paths": "GraphOwnerLabels; CrossDomainGraphReadService; usePublicRelationshipGraph",
+      "disposition": "Published owner labels and exact-target reviewed program translations with locale provenance, explicit client locale and fallback marker. Remaining graph localization consumers/contracts stay open.",
       "runtimeVerified": false
     },
     {
@@ -147,9 +147,9 @@
     },
     {
       "id": "XMI-021",
-      "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "StudentWorkspaceUseCases.saveItem; StudentSavedItemHydrationGateways",
-      "disposition": "Seven public owner adapters canonicalize new saves; suspended writes denied; unsupported private Certificate/Tool adapters fail closed and remain unintegrated.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "PrivateStudentSavedItemHydrationGateways; PrismaStudentWorkspaceRepository.inspectPrivateToolResult; StudentPrivateToolResult; StudentCertificatesPanel",
+      "disposition": "Owned certificate references and encrypted retained private tool copies hydrate through owner gateways; foreign rows filtered; lazy private read replaces client metadata rendering. New result creation remains the dedicated owner save flow.",
       "runtimeVerified": false
     },
     {
@@ -175,16 +175,16 @@
     },
     {
       "id": "XMI-025",
-      "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "CertificateUseCases.approveIssuer; DI authority resolver",
-      "disposition": "Maker/checker/owner evidence retained; university activation publication gate strengthened. Governed affiliation registry/merge/retirement still missing.",
+      "status": "SOURCE_IMPLEMENTED_WITH_LIFECYCLE_SCOPE_LIMITS",
+      "paths": "CertificateAffiliationReadService; CertificateUseCases.signedEnvelope; CertificateVerificationPage",
+      "disposition": "New signed affiliation snapshot plus independent current/changed/retired and legacy states using existing governed P14 delegation registry. Historical signature unchanged. University merge itself remains in open020/030, not automated here.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-026",
-      "status": "NOT_INTEGRATED",
-      "paths": "International Test graph; IntegrationRegistry",
-      "disposition": "Opt-in Test→Tools/Services discovery producer contracts/wiring not implemented; NOT_INTEGRATED remains honest.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "TestDiscoveryOwnerUseCases; owner-local Prisma link repositories and migrations; TestDiscoveryOwnerRouter; TestDiscoveryEditor; TestOwnerDiscovery",
+      "disposition": "Owner opt-in, independent reviewer, CAS/audit, current public revisions and locale/provider/price availability; independently paged public UI/API. Two source-only owner-local migrations prepared, not applied.",
       "runtimeVerified": false
     },
     {
@@ -205,7 +205,7 @@
       "id": "XMI-029",
       "status": "PARTIAL_SOURCE_IMPLEMENTED",
       "paths": "StudentApplicationDocumentBinding; StudentApplicationTrackerUseCases; StudentWorkspaceRouter; StudentApplicationDocuments",
-      "disposition": "Private requirement/cycle/asset binding with EAP trust/owner checks, explicit revocable consent, CAS transactions, expiry/revision readiness and bounded retention cleanup. Academic document attestation and in-panel upload/image selection remain unimplemented.",
+      "disposition": "Private cycle/requirement/asset binding and revocable consent preserved. Panel now selects PDF and images, first100 each, with independent availability. Upload and academic attestation remain unimplemented.",
       "runtimeVerified": false
     },
     {
@@ -231,9 +231,9 @@
     },
     {
       "id": "XMI-033",
-      "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "tests/integration/section27; .section27-vitest.config.ts; scripts/verify-cross-module-source-closure.mjs",
-      "disposition": "Final source refinements rechecked: 69 source contracts and 19 targeted unit/UI checks; targeted TypeScript and Prisma schema checks. No exhaustive all-owner/API rollback matrix or live runtime proof.",
+      "status": "PARTIAL_SOURCE_IMPLEMENTED",
+      "paths": "tests/integration/section27; .section27-owner-links-vitest.config.ts; .section27-vitest.config.ts",
+      "disposition": "Targeted source/API/SQL-construction/permission/private-owner/UI checks expanded for this batch. No exhaustive all-owner rollback or live runtime matrix.",
       "runtimeVerified": false
     },
     {
@@ -266,13 +266,13 @@
     },
     {
       "id": "XMI-FG-038",
-      "status": "OPEN_DEPENDENT_CAPABILITY",
-      "paths": "StudyDestinationDetailPage; CrossDomainReadModelRouter; owner query filters",
-      "disposition": "Admin relational degree/major/test/program exploration and canonical teaching language require prerequisite source closures/governed owner model. Not implemented.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "AcademicProgramExplorerUseCases; AcademicProgramExplorerRouter; AcademicProgramExplorerPanel; owner workspace facets and P12 batch port",
+      "disposition": "Country/degree/major/test/program/canonical teaching language explorer, same-program filters, distinct facet counts and paging, exact per-program scholarship pages, public/admin visibility gates and joint owner permissions. Uses existing P11 governed study models. No live SQL execution.",
       "runtimeVerified": false
     }
   ],
   "date": "2026-10-15",
-  "latestReport": "SECTION_27_PROGRESS_2026-10-15.md",
-  "latestValidation": "section-27-followup-validation-2026-10-15.json"
+  "latestReport": "SECTION_27_OWNER_LINKS_2026-10-15.md",
+  "latestValidation": "section-27-owner-links-validation-2026-10-15.json"
 }

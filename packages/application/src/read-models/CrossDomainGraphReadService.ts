@@ -1,7 +1,9 @@
+import {graphProgramLabel,graphPublishedLabel,graphMajorLabel,graphUniversityLabel,graphScholarshipLabel,graphTestLabel,graphServiceLabel,graphCareerLabel,graphCountryLabel} from './GraphOwnerLabels';
+import type {TestDiscoveryPage} from '@manaratak/domain';
+import type {TestDiscoveryOwnerUseCases} from '../integration/TestDiscoveryOwnerUseCases';
 import {
   createGraphReadScope,
   graphOwnerRead,
-  reviewedGraphLabel,
   requireGraphFirstPage,
   type GraphReadScope,
 } from './GraphReadPolicy';
@@ -41,6 +43,8 @@ export interface StableEntityReadIdentity {
   slug?: string;
   canonicalCode?: string;
   displayName: string;
+  labelLocale?: string;
+  localeFallback?: boolean;
 }
 
 export interface AcademicProgramGraphIdentity {
@@ -150,8 +154,8 @@ export interface InternationalTestGraphReadModel {
       providerName?: string | null;
       category?: string | null;
     }>;
-    studentTools: { state: 'OWNER_DOMAIN_NOT_INTEGRATED'; ownerDomain: 'STUDENT_TOOLS' };
-    services: { state: 'OWNER_DOMAIN_NOT_INTEGRATED'; ownerDomain: 'SERVICES' };
+    studentTools: TestDiscoveryPage;
+    services: TestDiscoveryPage;
   };
 }
 
@@ -181,6 +185,7 @@ export interface CrossDomainGraphReadOptions {
   courseFilters?: PublicCourseFilters;
   locale?: 'ar' | 'en';
   programCursor?: string;
+  toolCursor?:string;
   universityCursor?: string;
   scholarshipCursor?: string;
   serviceCursor?: string;
@@ -206,10 +211,13 @@ export class CrossDomainGraphReadService {
     private readonly cmsRepository?: ICmsRepository,
     private readonly serviceCatalogRepository?: IServiceCatalogRepository,
     private readonly careerRepository?: ICareerRepository,
+    private readonly studentToolTestDiscovery?:Pick<TestDiscoveryOwnerUseCases,'publicPage'>,
+    private readonly serviceTestDiscovery?:Pick<TestDiscoveryOwnerUseCases,'publicPage'>,
   ) {}
 
   public async getMajorGraphBySlug(slug: string, options: CrossDomainGraphReadOptions = {}): Promise<MajorGraphReadModel> {
-    const major = await this.majorRepository.findBySlug(this.required(slug, 'MAJOR_SLUG_REQUIRED'));
+    const subjectSlug=this.required(slug,'MAJOR_SLUG_REQUIRED');
+    const major=this.majorRepository.findPublishedSnapshot?await this.majorRepository.findPublishedSnapshot(subjectSlug):await this.majorRepository.findBySlug(subjectSlug);
     if (!major || major.status !== MajorStatus.PUBLISHED) throw new Error('Major not found');
 
     const readScope = createGraphReadScope();
@@ -250,7 +258,7 @@ export class CrossDomainGraphReadService {
             ownerId: course.ownerId,
             publicId: course.publicId,
             slug: course.slug,
-            displayName: course.displayName,
+            ...graphPublishedLabel(course.displayName,course.localizedNames,options.locale),
             directCourseUrl: course.directCourseUrl,
             providerName: course.providerName,
             category: course.category,
@@ -298,6 +306,7 @@ export class CrossDomainGraphReadService {
         academicPrograms: publishedCanonicalPrograms.map((program) => ({
           ownerId: program.id,
           sourceProgramName: program.sourceProgramName,
+          ...graphProgramLabel(university,program,options.locale),
           degreeLevelId: program.degreeLevelId,
           majorOwnerId: program.majorId,
         })),
@@ -354,7 +363,7 @@ export class CrossDomainGraphReadService {
       ownerId: program.universityOwnerId,
       publicId: program.universityPublicId,
       slug: program.universitySlug,
-      displayName: program.universityDisplayName,
+      ...graphPublishedLabel(program.universityDisplayName, program.universityLocalizedNames, options.locale),
     }));
 
     return {
@@ -371,7 +380,8 @@ export class CrossDomainGraphReadService {
           universityOwnerId: program.universityOwnerId,
           universityPublicId: program.universityPublicId,
           universitySlug: program.universitySlug,
-          universityDisplayName: program.universityDisplayName,
+          universityDisplayName: graphPublishedLabel(program.universityDisplayName,program.universityLocalizedNames,options.locale).displayName,
+          ...graphPublishedLabel(program.sourceProgramName,program.localizedNames,options.locale),
           sourceProgramName: program.sourceProgramName,
           degreeLevelId: program.degreeLevelId,
           majorOwnerId: program.majorId,
@@ -385,11 +395,12 @@ export class CrossDomainGraphReadService {
   }
 
   public async getInternationalTestGraphById(id: string, options: CrossDomainGraphReadOptions = {}): Promise<InternationalTestGraphReadModel> {
-    const test = await this.internationalTestRepository.findById(this.required(id, 'INTERNATIONAL_TEST_ID_REQUIRED'));
+    const candidate=await this.internationalTestRepository.findById(this.required(id,'INTERNATIONAL_TEST_ID_REQUIRED'));
+    const test=candidate&&typeof candidate.slug==='string'&&this.internationalTestRepository.findPublishedBySlug?await this.internationalTestRepository.findPublishedBySlug(candidate.slug):candidate;
     if (!test || test.status !== 'PUBLISHED') throw new Error('International test not found');
     const readScope = createGraphReadScope();
     const { pageSize } = this.pagination(options);
-    const [universities, scholarships, preparationCourses, editorialContent] = await Promise.all([
+    const [universities, scholarships, preparationCourses, editorialContent, studentTools, services] = await Promise.all([
       this.universityRepository.listPublished({ internationalTestId: test.id, limit: pageSize }),
       this.scholarshipRepository.listPublished({ internationalTestId: test.id, limit: pageSize }),
       this.courseRelationshipRepository.listPublishedCoursesForInternationalTest(test.id, {
@@ -405,6 +416,8 @@ export class CrossDomainGraphReadService {
           : undefined,
         [],
       ),
+      graphOwnerRead(readScope,'studentTools',this.studentToolTestDiscovery?()=>this.studentToolTestDiscovery!.publicPage(test.id,options.locale??'ar',options.toolCursor,pageSize):undefined,{ownerDomain:'STUDENT_TOOLS',state:'UNAVAILABLE',data:[],hasMore:false,nextCursor:null,scanned:0} as TestDiscoveryPage),
+      graphOwnerRead(readScope,'services',this.serviceTestDiscovery?()=>this.serviceTestDiscovery!.publicPage(test.id,options.locale??'ar',options.serviceCursor,pageSize):undefined,{ownerDomain:'SERVICES',state:'UNAVAILABLE',data:[],hasMore:false,nextCursor:null,scanned:0} as TestDiscoveryPage),
     ]);
 
     return {
@@ -424,6 +437,7 @@ export class CrossDomainGraphReadService {
                 .map((requirement) => ({
                   ownerId: program.id,
                   sourceProgramName: program.sourceProgramName,
+                  ...graphProgramLabel(university,program,options.locale),
                   minimumScore: requirement.minimumScore,
                   status: requirement.status,
                 }))
@@ -442,14 +456,14 @@ export class CrossDomainGraphReadService {
             ownerId: course.ownerId,
             publicId: course.publicId,
             slug: course.slug,
-            displayName: course.displayName,
+            ...graphPublishedLabel(course.displayName,course.localizedNames,options.locale),
             directCourseUrl: course.directCourseUrl,
             providerName: course.providerName,
             category: course.category,
           })),
         },
-        studentTools: { state: 'OWNER_DOMAIN_NOT_INTEGRATED', ownerDomain: 'STUDENT_TOOLS' },
-        services: { state: 'OWNER_DOMAIN_NOT_INTEGRATED', ownerDomain: 'SERVICES' },
+        studentTools,
+        services,
       },
     };
   }
@@ -549,7 +563,10 @@ export class CrossDomainGraphReadService {
 
     const academicPrograms = programPage.data.
         map((program) => ({
-      ...program,
+      ownerId: program.ownerId, universityOwnerId: program.universityOwnerId, universityPublicId:program.universityPublicId,universitySlug:program.universitySlug,
+      universityDisplayName:graphPublishedLabel(program.universityDisplayName,program.universityLocalizedNames,options.locale).displayName,
+      sourceProgramName:program.sourceProgramName,degreeLevelId:program.degreeLevelId,majorMappingState:program.majorMappingState,status:program.status,
+      ...graphPublishedLabel(program.sourceProgramName,program.localizedNames,options.locale),
           majorOwnerId: program.majorId,
     }),
     );
@@ -585,7 +602,7 @@ export class CrossDomainGraphReadService {
       subject: {
         ownerId: country.id,
         canonicalCode: country.iso2Code,
-        displayName: country.name,
+        ...graphCountryLabel(country,options.locale),
       },
       relationships: {
         universities: {
@@ -610,7 +627,7 @@ export class CrossDomainGraphReadService {
             ownerId: service.id,
             publicId: service.publicId,
             slug: service.slug,
-            displayName: service.displayName,
+            ...graphServiceLabel(service,options.locale),
             serviceCategory: service.serviceCategory,
             deliveryMode: service.deliveryMode,
           })),
@@ -621,7 +638,7 @@ export class CrossDomainGraphReadService {
             ownerId: job.id,
             publicId: job.publicId,
             slug: job.slug,
-            displayName: job.title,
+            ...graphCareerLabel(job,options.locale),
             opportunityType: job.opportunityType,
             employmentType: job.employmentType,
           })),
@@ -632,7 +649,7 @@ export class CrossDomainGraphReadService {
             ownerId: course.ownerId,
             publicId: course.publicId,
             slug: course.slug,
-            displayName: course.displayName,
+            ...graphPublishedLabel(course.displayName,course.localizedNames,options.locale),
             directCourseUrl: course.directCourseUrl,
             providerName: course.providerName,
             category: course.category,
@@ -671,6 +688,7 @@ export class CrossDomainGraphReadService {
       matchingPrograms: programs.map((program) => ({
         ownerId: program.id,
         sourceProgramName: program.sourceProgramName,
+        ...graphProgramLabel(university,program,locale),
         degreeLevelId: program.degreeLevelId,
         majorOwnerId: program.majorId,
       })),
@@ -685,11 +703,7 @@ export class CrossDomainGraphReadService {
       ownerId: test.id,
       publicId: extended.publicId,
       slug: extended.slug,
-      // Legacy localized fields carry no reviewed-locale evidence.
-      ...reviewedGraphLabel(
-        { displayName: extended.displayName, canonicalName: test.canonicalName },
-        locale,
-      ),
+      ...graphTestLabel(test,locale),
       providerName: test.providerName,
       status: test.status,
     };
@@ -697,13 +711,13 @@ export class CrossDomainGraphReadService {
 
   private majorIdentity(major: MajorDto, locale = 'ar'): StableEntityReadIdentity {
     return { ownerId: major.id, publicId: major.publicId, slug: major.slug,
-      ...reviewedGraphLabel(major, locale),
+      ...graphMajorLabel(major,locale),
     };
   }
 
   private universityIdentity(university: UniversityDto, locale = 'ar'): StableEntityReadIdentity {
     return { ownerId: university.id, publicId: university.publicId, slug: university.slug,
-      ...reviewedGraphLabel(university, locale),
+      ...graphUniversityLabel(university,locale),
     };
   }
 
@@ -711,7 +725,7 @@ export class CrossDomainGraphReadService {
     locale = 'ar',
   ): StableEntityReadIdentity {
     return { ownerId: scholarship.id, publicId: scholarship.publicId, slug: scholarship.slug,
-      ...reviewedGraphLabel(scholarship, locale),
+      ...graphScholarshipLabel(scholarship,locale),
     };
   }
 

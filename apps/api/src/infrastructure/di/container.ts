@@ -1,3 +1,9 @@
+import {AcademicProgramExplorerUseCases} from '@manaratak/application';
+import {AcademicProgramExplorerRouter} from '../../presentation/api/router/AcademicProgramExplorerRouter.js';
+import {CertificateStudentSavedItemHydrationGateway,StudentToolPrivateSavedItemHydrationGateway} from '@manaratak/infrastructure';
+import {CertificateAffiliationReadService} from '@manaratak/application';
+import { TestDiscoveryOwnerUseCases } from '@manaratak/application';
+import { PrismaStudentToolTestDiscoveryLinkRepository, PrismaServiceTestDiscoveryLinkRepository, StudentToolTestDiscoveryOwnerGateway, ServiceTestDiscoveryOwnerGateway } from '@manaratak/infrastructure';
 import { CrossModuleIntegrityUseCase } from '@manaratak/application';
 import { CrossModuleIntegrityRouter } from '../../presentation/api/router/CrossModuleIntegrityRouter.js';
 import { CertificateVerificationPolicy, VaultTransitCertificateSignatureService, HttpCertificateAuthorityResolver, CertificateArtifactReadinessProbe, CertificateArtifactRecovery, PrismaCertificateAuthorityDirectory } from '@manaratak/infrastructure';
@@ -923,10 +929,15 @@ export function registerDependencies(
     publicCourseUseCases: asFunction(({ courseRepository, courseCurriculumRepository }) => new PublicCourseUseCases(courseRepository, courseCurriculumRepository)).scoped(),
     courseRelationshipQueryService: asFunction(({ courseRelationshipRepository }) => new CourseRelationshipQueryService(courseRelationshipRepository)).scoped(),
     courseRelationshipResolutionService: asFunction(({ courseRelationshipRepository }) => new CourseRelationshipResolutionService(courseRelationshipRepository)).scoped(),
+    studentToolTestDiscovery: asFunction(({prisma,studentToolRegistryRepository,internationalTestRepository})=>new TestDiscoveryOwnerUseCases(new PrismaStudentToolTestDiscoveryLinkRepository(prisma),new StudentToolTestDiscoveryOwnerGateway(studentToolRegistryRepository),internationalTestRepository)).scoped(),
+    serviceTestDiscovery: asFunction(({prisma,serviceCatalogRepository,serviceOperationsRepository,internationalTestRepository})=>new TestDiscoveryOwnerUseCases(new PrismaServiceTestDiscoveryLinkRepository(prisma),new ServiceTestDiscoveryOwnerGateway(serviceCatalogRepository,serviceOperationsRepository),internationalTestRepository)).scoped(),
+    academicProgramExplorerUseCases:asFunction(({universityProgramWorkspaceUseCases,scholarshipRepository})=>new AcademicProgramExplorerUseCases(universityProgramWorkspaceUseCases,scholarshipRepository)).scoped(),
+    academicProgramExplorerAdminRouter:asFunction(cradle=>AcademicProgramExplorerRouter.create(cradle,true)).scoped(),
+    academicProgramExplorerPublicRouter:asFunction(cradle=>AcademicProgramExplorerRouter.create(cradle,false)).scoped(),
     crossModuleIntegrityUseCase: asFunction(({majorRepository,universityRepository,scholarshipRepository,internationalTestRepository})=>new CrossModuleIntegrityUseCase(majorRepository,universityRepository,scholarshipRepository,internationalTestRepository)).scoped(),
     crossModuleIntegrityRouter: asFunction((cradle)=>CrossModuleIntegrityRouter.create(cradle)).scoped(),
-    crossDomainGraphReadService: asFunction(({ majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository }) =>
-      new CrossDomainGraphReadService(majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository)).scoped(),
+    crossDomainGraphReadService: asFunction(({ majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository, studentToolTestDiscovery, serviceTestDiscovery }) =>
+      new CrossDomainGraphReadService(majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository, studentToolTestDiscovery, serviceTestDiscovery)).scoped(),
     courseAdminCommandUseCases: asFunction(
       ({
         courseRepository,
@@ -1027,8 +1038,11 @@ export function registerDependencies(
     certificateArtifactOutboxDeliveryGateway: asFunction(({certificateArtifactRenderUseCase}) => new CertificateArtifactOutboxDeliveryGateway(certificateArtifactRenderUseCase)).scoped(),
     certificateArtifactOutboxDispatcher: asFunction(({transactionalOutboxStore,certificateArtifactOutboxDeliveryGateway}) => new TransactionalOutboxDispatcher(transactionalOutboxStore,certificateArtifactOutboxDeliveryGateway)).scoped(),
     certificateCompletionOutboxWorker: asFunction(({ certificateCompletionOutboxDispatcher, certificateUseCases,certificateArtifactOutboxDispatcher,certificateArtifactRecovery }) => new CertificateCompletionOutboxWorker(certificateCompletionOutboxDispatcher, {}, certificateUseCases,certificateArtifactOutboxDispatcher,certificateArtifactRecovery)).scoped(),
-    certificateReadModelService: asFunction(({ certificateRepository, certificateUseCases }) => new CertificateReadModelService(certificateRepository, certificateUseCases)).scoped(),
-    studentWorkspaceUseCases: asFunction(({ studentWorkspaceRepository, studentWorkspaceDeliveryCache, assetReferencePolicy,
+    certificateAffiliationReadService:asFunction(({certificateRepository,universityRepository,certificateAuthorityDirectory})=>new CertificateAffiliationReadService(certificateRepository,universityRepository,certificateAuthorityDirectory)).scoped(),
+    certificateReadModelService: asFunction(({ certificateRepository, certificateUseCases, certificateAffiliationReadService }) => new CertificateReadModelService(certificateRepository, certificateUseCases, certificateAffiliationReadService)).scoped(),
+    certificateStudentSavedItemHydrationGateway:asFunction(({certificateRepository})=>new CertificateStudentSavedItemHydrationGateway(certificateRepository)).scoped(),
+    studentToolPrivateSavedItemHydrationGateway:asFunction(({studentWorkspaceRepository})=>new StudentToolPrivateSavedItemHydrationGateway(studentWorkspaceRepository)).scoped(),
+    studentWorkspaceUseCases: asFunction(({ studentWorkspaceRepository, studentWorkspaceDeliveryCache, assetReferencePolicy, certificateStudentSavedItemHydrationGateway, studentToolPrivateSavedItemHydrationGateway,
         internationalTestStudentSavedItemHydrationGateway,
         majorStudentSavedItemHydrationGateway,
         universityStudentSavedItemHydrationGateway,
@@ -1038,6 +1052,8 @@ export function registerDependencies(
         courseStudentSavedItemHydrationGateway,
       }) => new StudentWorkspaceUseCases(studentWorkspaceRepository, studentWorkspaceDeliveryCache, assetReferencePolicy,
           [
+            certificateStudentSavedItemHydrationGateway,
+            studentToolPrivateSavedItemHydrationGateway,
             internationalTestStudentSavedItemHydrationGateway,
             majorStudentSavedItemHydrationGateway,
             universityStudentSavedItemHydrationGateway,
@@ -1079,7 +1095,7 @@ export function registerDependencies(
     serviceStudentSavedItemHydrationGateway: asFunction(({ serviceCatalogRepository }) => new ServiceStudentSavedItemHydrationGateway(serviceCatalogRepository)).scoped(),
     courseStudentSavedItemHydrationGateway: asFunction(({ courseRepository }) => new CourseStudentSavedItemHydrationGateway(courseRepository)).scoped(),
     internationalTestStudentSavedItemHydrationGateway: asFunction(({internationalTestRepository})=>new InternationalTestStudentSavedItemHydrationGateway(internationalTestRepository)).scoped(),
-    studentSavedItemHydrationService: asFunction(({ studentWorkspaceRepository, internationalTestStudentSavedItemHydrationGateway, majorStudentSavedItemHydrationGateway, universityStudentSavedItemHydrationGateway, scholarshipStudentSavedItemHydrationGateway, cmsStudentSavedItemHydrationGateway, serviceStudentSavedItemHydrationGateway, courseStudentSavedItemHydrationGateway }) => new StudentSavedItemHydrationService(studentWorkspaceRepository, [internationalTestStudentSavedItemHydrationGateway, majorStudentSavedItemHydrationGateway, universityStudentSavedItemHydrationGateway, scholarshipStudentSavedItemHydrationGateway, cmsStudentSavedItemHydrationGateway, serviceStudentSavedItemHydrationGateway, courseStudentSavedItemHydrationGateway])).scoped(),
+    studentSavedItemHydrationService: asFunction(({ studentWorkspaceRepository, certificateStudentSavedItemHydrationGateway, studentToolPrivateSavedItemHydrationGateway, internationalTestStudentSavedItemHydrationGateway, majorStudentSavedItemHydrationGateway, universityStudentSavedItemHydrationGateway, scholarshipStudentSavedItemHydrationGateway, cmsStudentSavedItemHydrationGateway, serviceStudentSavedItemHydrationGateway, courseStudentSavedItemHydrationGateway }) => new StudentSavedItemHydrationService(studentWorkspaceRepository, [certificateStudentSavedItemHydrationGateway, studentToolPrivateSavedItemHydrationGateway, internationalTestStudentSavedItemHydrationGateway, majorStudentSavedItemHydrationGateway, universityStudentSavedItemHydrationGateway, scholarshipStudentSavedItemHydrationGateway, cmsStudentSavedItemHydrationGateway, serviceStudentSavedItemHydrationGateway, courseStudentSavedItemHydrationGateway])).scoped(),
     courseStudentDashboardReadGateway: asFunction(({ courseProgressRepository, courseRepository }) => new CourseStudentDashboardReadGateway(courseProgressRepository, courseRepository)).scoped(),
     certificateStudentDashboardReadGateway: asFunction(({ certificateReadModelService }) => new CertificateStudentDashboardReadGateway(certificateReadModelService)).scoped(),
     studentDashboardHydrationService: asFunction(({ studentWorkspaceUseCases, courseStudentDashboardReadGateway, certificateStudentDashboardReadGateway, studentServiceRequestUseCases }) => new StudentDashboardHydrationService(studentWorkspaceUseCases, courseStudentDashboardReadGateway, certificateStudentDashboardReadGateway, studentServiceRequestUseCases)).scoped(),

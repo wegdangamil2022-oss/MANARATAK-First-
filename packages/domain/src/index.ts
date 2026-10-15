@@ -403,3 +403,7 @@ export * from './settings/services/SettingsDependencyPolicy';
 
 export * from './majors/MajorConsumerRead';
 export * from './universities/UniversityProgramWorkspace';
+
+export * from './integration/TestDiscovery';
+
+export * from './certificates/contracts/ICertificateAffiliationReadGateway';

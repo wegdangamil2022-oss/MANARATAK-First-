@@ -579,7 +579,7 @@ test('saved: historical hydration hides current private owner draft fields', asy
   const svc = new StudentSavedItemHydrationService(
     {
       listSavedItems: async () => [
-        { entityType: 'SCHOLARSHIP', entityId: 's', displayName: 'Historical' },
+        { studentReferenceId:'student', entityType: 'SCHOLARSHIP', entityId: 's', displayName: 'Historical' },
       ],
     } as any,
     [
@@ -610,10 +610,10 @@ test('navigation: refocus freshness bounded at 30s, no polling', () => {
   assert.equal(shouldRefreshPublicGraph(0, 30000, false), false);
   assert.equal(COUNTRY_COURSE_SCOPE, 'PROVIDER_HEADQUARTERS_NOT_STUDY_DESTINATION');
 });
-test('registry: all26 owners and unsupported test discovery explicit', () => {
+test('registry: all26 owners and reviewed owner opt-in discovery explicit', () => {
   validateIntegrationRegistry();
   assert.equal(crossModuleIntegrationRegistry.length, 26);
-  assert.equal(integrationEdges.filter((edge) => edge.publicPolicy === 'NOT_INTEGRATED').length, 2);
+  assert.equal(integrationEdges.filter((edge) => edge.publicPolicy === 'OWNER_OPT_IN_INDEPENDENT_REVIEW_CURRENT_PUBLIC_REVISIONS').length, 2);
 });
 test('integrity: partial sample never asserts missing FK/production readiness', () => {
   const report = crossModuleIntegrityReport(

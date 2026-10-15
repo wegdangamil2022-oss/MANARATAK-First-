@@ -1,3 +1,4 @@
+import {TestDiscoveryEditor} from '../features/integration/TestDiscoveryEditor';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
@@ -419,6 +420,7 @@ function ToolDetail({ toolKey }: { toolKey: string }) {
     <>
       <Link to="/student-tools">{t('tools19_back')}</Link>
       <h2>{language === 'en' ? tool.nameEn : tool.nameAr}</h2>
+      <TestDiscoveryEditor key={`${toolKey}:${tool.revision}`} ownerType="STUDENT_TOOLS" ownerKey={toolKey}/>
       {error && <p role="alert">{t(error as 'tools19_action_failed')}</p>}
       {notice && <p role="status">{t('tools19_saved')}</p>}
       <button
