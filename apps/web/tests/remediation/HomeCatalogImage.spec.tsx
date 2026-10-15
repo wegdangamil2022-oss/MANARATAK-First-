@@ -6,16 +6,16 @@ let tree: ReactTestRenderer | undefined;
 beforeEach(() => { globalThis.IS_REACT_ACT_ENVIRONMENT = true; });
 afterEach(async () => { if (tree) await act(async () => tree!.unmount()); tree = undefined; });
 describe('owner images without invented replacements', () => {
-  it('does not issue an empty img request and falls back to an inert icon', async () => {
+  it('does not issue an empty owner image request and falls back to a bundled illustration', async () => {
     await act(async () => { tree = create(<FeaturedCatalogImage src="" alt="Published title" kind="universities" />); });
-    expect(tree!.root.findAllByType('img')).toHaveLength(0);
+    expect(tree!.root.findByType('img').props.src).toBe('/preview-art/universities.svg');
     expect(tree!.root.findByType('span').props['aria-hidden']).toBe('true');
   });
   it('renders the supplied image, handles a broken grant once and accepts a refreshed URL', async () => {
     await act(async () => { tree = create(<FeaturedCatalogImage src="https://media.example.test/grant-a" alt="Owner title" kind="courses" />); });
     expect(tree!.root.findByType('img').props.src).toBe('https://media.example.test/grant-a');
     await act(async () => tree!.root.findByType('img').props.onError());
-    expect(tree!.root.findAllByType('img')).toHaveLength(0);
+    expect(tree!.root.findByType('img').props.src).toBe('/preview-art/courses.svg');
     expect(JSON.stringify(tree!.toJSON())).not.toContain('unsplash');
     await act(async () => tree!.update(<FeaturedCatalogImage src="https://media.example.test/grant-b" alt="Owner title" kind="courses" />));
     expect(tree!.root.findByType('img').props.src).toBe('https://media.example.test/grant-b');
