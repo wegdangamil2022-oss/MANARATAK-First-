@@ -24,6 +24,7 @@ export const ADMIN_SECTIONS = [
   ['/audit', 'admin:audit:manage'],
   ['/assets', 'admin:assets:manage'],
   ['/students', 'admin:students:support'],
+  ['/student-document-reviews','admin:students:documents:review'],
   ['/settings/reference-data', 'admin:reference-data:manage'],
   ['/settings', 'admin:settings:manage'],
 ] as const;

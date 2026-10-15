@@ -393,6 +393,9 @@ export const ADMIN_PERMISSION_CATALOG = [
     delegable: true,
   },
   {
+    key:'admin:students:documents:review',domain:'students',action:'review',labelAr:'مراجعة مستندات الطالب بموافقته',labelEn:'Review consented student documents',descriptionAr:'وصول مؤقت ومدقق للمستندات التي طلب الطالب مراجعتها صراحة، دون صلاحية دعم شاملة.',descriptionEn:'Audited, time-limited access only to documents explicitly submitted for review by their student owner.',risk:'HIGH',delegable:true,
+  },
+  {
     key: 'admin:students:support',
     domain: 'students',
     action: 'support',

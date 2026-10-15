@@ -333,6 +333,7 @@ export interface PaginatedUniversityOrganizationUnitResult {
 }
 
 export interface IUniversityRepository {
+  readProgramIntegrityReference?(id:string):Promise<{id:string;universityId:string;publiclyEligible:boolean}|null>;
   create(
     data: Omit<UniversityDto, 'id' | 'createdAt' | 'updatedAt'> &
       Partial<Pick<UniversityDto, 'id' | 'createdAt' | 'updatedAt'>>,
@@ -346,6 +347,7 @@ export interface IUniversityRepository {
   listPublished(
     filters: PublicUniversityFilters,
   ): Promise<PaginatedUniversityResult<UniversityDto>>;
+  listPublishedMajorGraph?(filters:{countryReferenceId:string;cursor?:string;limit?:number}):Promise<{data:Array<{ownerId:string}>;total:number;hasMore:boolean;nextCursor:string|null}>;
   listPublishedProgramGraph?(filters: {
     countryReferenceId?: string;
     universityId?: string;

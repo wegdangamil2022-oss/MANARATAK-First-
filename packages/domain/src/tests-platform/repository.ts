@@ -45,6 +45,7 @@ export interface IInternationalTestRepository {
   update(id: string, data: Partial<UpsertInternationalTestDto>): Promise<InternationalTestDto>;
   updateStatus(id: string, status: InternationalTestStatus): Promise<InternationalTestDto>;
   list(filters: InternationalTestFilters): Promise<PaginatedInternationalTestResult<InternationalTestDto>>;
+  getPublishedAdmissionScoreContract?(testId:string,versionId?:string):Promise<{testId:string;versionId:string;scoreScales:import('./AdmissionScoreInterpretation').AdmissionVersionScale[];variants:Array<{id:string;name:string}>;sections:Array<{id:string;name:string}>}|null>;
   listPublished(filters?: Omit<InternationalTestFilters, 'status'>): Promise<PaginatedInternationalTestResult<InternationalTestDto>>;
   
   // Forward-looking Phase 09 profile methods

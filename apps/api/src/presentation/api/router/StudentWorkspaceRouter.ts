@@ -1,3 +1,4 @@
+import type {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases} from '@manaratak/application';
 import { Router, Request, Response, NextFunction } from 'express';
 import { careerStudentRouter } from './CareerStudentRouter.js';
 import { CareerEngagementUseCases } from '@manaratak/application';
@@ -13,6 +14,8 @@ import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
 
 export class StudentWorkspaceRouter {
   public static create(cradle: {
+    studentDocumentUploadUseCases?:StudentDocumentUploadUseCases;
+    studentDocumentReviewUseCases?:StudentDocumentReviewUseCases;
     careerEngagementUseCases: CareerEngagementUseCases;
     certificateReadModelService: CertificateReadModelService;
     studentWorkspaceUseCases: StudentWorkspaceUseCases;
@@ -130,6 +133,7 @@ export class StudentWorkspaceRouter {
 
     router.use(new AuthMiddleware(tokenProvider, sessionManager, principalAccessValidator).generate());
     router.use(createStudentRoleGuard(cradle.roleAssignmentRepository));
+    router.use((_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
     router.use(createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true }));
     const ownStudent = (req: Request): string => {
       if (!req.authUserId) throw new Error('STUDENT_AUTHENTICATION_REQUIRED');
@@ -158,6 +162,20 @@ export class StudentWorkspaceRouter {
       gatewayProvider: z.string().trim().min(1).max(80),
     }).strict();
 
+    router.post('/document-uploads',asyncHandler(async(req:Request,res:Response)=>{
+      if(!cradle.studentDocumentUploadUseCases)return void res.status(503).json({error:'DOCUMENT_UPLOAD_UNAVAILABLE'});
+      const body=z.object({originalFilename:z.string().trim().min(1).max(240),mimeType:z.enum(['application/pdf','image/jpeg','image/png']),byteSize:z.number().int().positive().max(10*1024*1024),consent:z.literal(true)}).strict().parse(req.body);
+      res.setHeader('Cache-Control','no-store');res.status(201).json({data:await cradle.studentDocumentUploadUseCases.allocate(ownStudent(req),body)});
+    }));
+    router.post('/document-uploads/:assetId/complete',asyncHandler(async(req:Request,res:Response)=>{
+      if(!cradle.studentDocumentUploadUseCases)return void res.status(503).json({error:'DOCUMENT_UPLOAD_UNAVAILABLE'});
+      z.object({}).strict().parse(req.body??{});res.setHeader('Cache-Control','no-store');res.json({data:await cradle.studentDocumentUploadUseCases.complete(ownStudent(req),z.string().uuid().parse(req.params.assetId))});
+    }));
+    router.put('/application-trackers/:trackerId/documents/:requirementId/review-consent',asyncHandler(async(req:Request,res:Response)=>{
+      if(!cradle.studentDocumentReviewUseCases)return void res.status(503).json({error:'DOCUMENT_REVIEW_UNAVAILABLE'});
+      const body=z.object({expectedVersion:z.number().int().positive(),granted:z.boolean()}).strict().parse(req.body);
+      res.setHeader('Cache-Control','no-store');await cradle.studentDocumentReviewUseCases.consent(ownStudent(req),req.params.trackerId,req.params.requirementId,body.expectedVersion,body.granted);res.status(204).send();
+    }));
     router.get(
       '/assets',
       asyncHandler(async (req: Request, res: Response) => {

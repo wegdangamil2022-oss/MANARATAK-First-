@@ -490,6 +490,21 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     };
   }
 
+  async readProgramIntegrityReference(id:string){const row=await this.prisma.universityAcademicProgram.findUnique({where:{id},include:{university:{select:{status:true}},major:{select:{status:true,levelProfiles:{select:{degreeLevelId:true,status:true,currentPublishedVersionId:true}}}}}});return row?{id:row.id,universityId:row.universityId,publiclyEligible:row.university.status==='PUBLISHED'&&isPublicUniversityProgram(row)}:null;}
+
+  async listPublishedMajorGraph(filters:{countryReferenceId:string;cursor?:string;limit?:number}) {
+    const limit=boundedCursorLimit(filters.limit,12,50),after=decodeStableCursor(filters.cursor);
+    const base=Prisma.sql`FROM "UniversityAcademicProgram" p JOIN "University" u ON u.id=p."universityId" JOIN "Major" m ON m.id=p."majorId"
+      WHERE u."countryReferenceId"=${filters.countryReferenceId} AND p.status='ACTIVE' AND p."majorMappingState"='CANONICALLY_MAPPED' AND u.status='PUBLISHED' AND m.status='PUBLISHED'
+      AND EXISTS(SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)`;
+    const [rows,counts]=await Promise.all([
+      this.prisma.$queryRaw<Array<{ownerId:string}>>(Prisma.sql`SELECT DISTINCT m.id AS "ownerId" ${base} ${after?Prisma.sql`AND m.id>${after}`:Prisma.empty} ORDER BY m.id LIMIT ${limit+1}`),
+      this.prisma.$queryRaw<Array<{total:bigint}>>(Prisma.sql`SELECT count(DISTINCT m.id) AS total ${base}`),
+    ]);
+    const total=Number(counts[0]?.total??0),data=rows.slice(0,limit);if(!Number.isSafeInteger(total))throw new Error('PUBLIC_MAJOR_TOTAL_INVALID');
+    return {data,total,hasMore:rows.length>limit,nextCursor:rows.length>limit?encodeStableCursor(data.at(-1)!.ownerId):null};
+  }
+
   /** Owner-side country/major/program relationship page; independent of university paging. */
   async listPublishedProgramGraph(filters: {
     countryReferenceId?: string;

@@ -407,3 +407,7 @@ export * from './universities/UniversityProgramWorkspace';
 export * from './integration/TestDiscovery';
 
 export * from './certificates/contracts/ICertificateAffiliationReadGateway';
+
+export * from './tests-platform/AdmissionScoreInterpretation';
+
+export * from './students/StudentDocumentAttestationPolicy';

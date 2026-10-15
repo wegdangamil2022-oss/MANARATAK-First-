@@ -63,6 +63,15 @@ function DiscoveryPage({ slug, owner }: { slug: string; owner: Owner }) {
       ++generation.current;
     };
   }, [slug, owner, language, after, refresh]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const reload = () => {
+      if (document.visibilityState !== 'hidden') setRefresh(value => value + 1);
+    };
+    const timer = window.setInterval(reload, 30000);
+    window.addEventListener('focus', reload);
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', reload); };
+  }, [slug, owner, language]);
   return (
     <div className="my-3">
       <h4>

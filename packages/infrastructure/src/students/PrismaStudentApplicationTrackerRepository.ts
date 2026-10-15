@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { PrismaClient } from '@prisma/client';
+import {Prisma,type PrismaClient} from '@prisma/client';
 import { StudentSupportCursorCodec } from './StudentSupportCursorCodec';
 import {
   CreateStudentApplicationTrackerDto,
@@ -130,6 +130,44 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
       );
     });
   }
+  async setDocumentReviewConsent(studentReferenceId:string,trackerId:string,requirementId:string,expectedVersion:number,granted:boolean){
+    return this.db.$transaction(async(tx:any)=>{
+      const tracker=await tx.studentApplicationTracker.findFirst({where:{id:trackerId,studentReferenceId},include:{workspace:{select:{status:true}}}});
+      const binding=tracker?await tx.studentApplicationDocumentBinding.findUnique({where:{trackerId_requirementId:{trackerId,requirementId}}}):null;
+      if(!tracker||!binding||(granted&&(tracker.status!=='ACTIVE'||tracker.workspace.status!=='ACTIVE'||binding.retentionUntil<=new Date())))throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+      const changed=await tx.studentApplicationTracker.updateMany({where:{id:trackerId,studentReferenceId,version:expectedVersion,status:tracker.status},data:{version:{increment:1}}});
+      if(changed.count!==1)throw new Error('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT');
+      await tx.studentApplicationDocumentBinding.update({where:{id:binding.id},data:{reviewConsentGrantedAt:granted?new Date():null,reviewConsentUntil:granted?new Date(Math.min(binding.retentionUntil.getTime(),Date.now()+7*86400000)):null,attestation:Prisma.DbNull}});
+      const fresh=await tx.studentApplicationTracker.findUnique({where:{id:trackerId},include:this.include});await this.queueReminder(tx,fresh,tracker.version,undefined,granted?'StudentDocumentReviewRequested':'StudentDocumentReviewWithdrawn');
+    });
+  }
+  async listPendingDocumentReviews(after?:string){
+    const rows=await this.db.studentApplicationDocumentBinding.findMany({where:{reviewConsentUntil:{gt:new Date()},retentionUntil:{gt:new Date()},attestation:{equals:Prisma.DbNull},tracker:{status:'ACTIVE',workspace:{status:'ACTIVE'}},...(after?{id:{gt:after}}:{})},orderBy:{id:'asc'},take:21});
+    return {items:rows.slice(0,20).map((row:any)=>({id:row.id,requirementName:String(row.requirementSnapshot?.displayName??'Document'),consentUntil:row.reviewConsentUntil})),hasMore:rows.length>20,nextCursor:rows.length>20?rows[19].id:null};
+  }
+  async findDocumentReview(bindingId:string){
+    const row=await this.db.studentApplicationDocumentBinding.findUnique({where:{id:bindingId},include:{tracker:{include:{...this.include,workspace:{select:{status:true}}}}}});
+    if(!row||row.tracker.workspace.status!=='ACTIVE')return null;
+    const {tracker,...binding}=row;return {binding,tracker:this.dto(tracker)};
+  }
+  private async documentReviewAudit(tx:any,bindingId:string,expectedVersion:number,actorId:string,action:string,reason:string,mutateTracker=true){
+    const row=await tx.studentApplicationDocumentBinding.findUnique({where:{id:bindingId},include:{tracker:{include:{workspace:{select:{status:true}}}}}});
+    if(!row||row.attestation||row.tracker.status!=='ACTIVE'||row.tracker.workspace.status!=='ACTIVE'||row.tracker.studentReferenceId===actorId||!row.reviewConsentGrantedAt||row.reviewConsentUntil<=new Date()||row.retentionUntil<=new Date()||(row.expiresAt&&row.expiresAt<=new Date()))throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
+    if(row.tracker.version!==expectedVersion)throw new Error('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT');
+    if(mutateTracker)await this.cas(tx,row.tracker,{});
+    else{const locked=await tx.$queryRaw(Prisma.sql`SELECT id FROM "StudentApplicationTracker" WHERE id=${row.trackerId} AND version=${expectedVersion} AND status='ACTIVE' FOR UPDATE`);if(locked.length!==1)throw new Error('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT');}
+    const id=randomUUID();await tx.auditRecord.create({data:{id,reference:`student-document-review-${id}`,action,category:'STUDENT_DOCUMENT_REVIEW',severity:'INFO',actorId,actorType:'USER',targetId:bindingId,targetType:'StudentApplicationDocumentBinding',source:'student-document-review',timestamp:new Date(),contextMetadata:{reason,trackerVersion:expectedVersion}}});
+    return row;
+  }
+  async recordDocumentReviewAccess(bindingId:string,expectedVersion:number,actorId:string){await this.db.$transaction(async(tx:any)=>{await this.documentReviewAudit(tx,bindingId,expectedVersion,actorId,'StudentDocumentReviewAccess','CONSENTED_REVIEW',false);});}
+  async saveDocumentAttestation(bindingId:string,expectedVersion:number,attestation:import('@manaratak/domain').StudentDocumentAttestation,reason:string){
+    await this.db.$transaction(async(tx:any)=>{
+      const row=await this.documentReviewAudit(tx,bindingId,expectedVersion,attestation.reviewedBy,'StudentDocumentAttested',reason);
+      if(row.assetId!==attestation.assetId||row.ownerVersionId!==attestation.ownerVersionId||row.tracker.cycleReferenceId!==attestation.cycleId||new Date(attestation.validUntil)>row.retentionUntil)throw new Error('STUDENT_DOCUMENT_REVIEW_STALE');
+      await tx.studentApplicationDocumentBinding.update({where:{id:bindingId},data:{attestation}});
+      const fresh=await tx.studentApplicationTracker.findUnique({where:{id:row.trackerId},include:this.include});await this.queueReminder(tx,fresh,row.tracker.version,undefined,'StudentDocumentAttested',attestation.reviewedBy);
+    });
+  }
   async listDocumentBindings(studentReferenceId: string, trackerId: string) {
     const owned = await this.db.studentApplicationTracker.findFirst({
       where: { id: trackerId, studentReferenceId },
@@ -166,7 +204,7 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
       const saved = await tx.studentApplicationDocumentBinding.upsert({
         where: { trackerId_requirementId: { trackerId, requirementId: binding.requirementId } },
         create: { id: randomUUID(), trackerId, ...binding },
-        update: binding,
+        update: {...binding,reviewConsentGrantedAt:null,reviewConsentUntil:null,attestation:Prisma.DbNull},
       });
       const fresh = await tx.studentApplicationTracker.findUnique({
         where: { id: trackerId },
@@ -478,7 +516,8 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
     row: any,
     previousVersion: number | null,
     ownerHistory?: { previousDeadlineAt: string | null; previousScholarshipSlug: string | null },
-    documentEvent?: 'StudentApplicationDocumentLinked' | 'StudentApplicationDocumentUnlinked',
+    documentEvent?: 'StudentApplicationDocumentLinked' | 'StudentApplicationDocumentUnlinked'|'StudentDocumentReviewRequested'|'StudentDocumentReviewWithdrawn'|'StudentDocumentAttested',
+    documentActorId?:string,
   ): Promise<void> {
     const eventType =
       documentEvent ??
@@ -503,7 +542,7 @@ export class PrismaStudentApplicationTrackerRepository implements IStudentApplic
         action: eventType,
         category: 'STUDENT_APPLICATION',
         severity: 'INFO',
-        actorId: row.studentReferenceId,
+        actorId: documentActorId??row.studentReferenceId,
         actorType: 'USER',
         targetId: row.id,
         targetType: 'StudentApplicationTracker',

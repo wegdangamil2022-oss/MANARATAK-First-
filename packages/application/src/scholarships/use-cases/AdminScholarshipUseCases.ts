@@ -58,6 +58,14 @@ export class AdminScholarshipUseCases {
     private readonly canonicalLookup?: IScholarshipCanonicalLookupGateway,
   ) {}
 
+  async listReferenceTransitions(id:string){if(!this.repository.listReferenceTransitions)throw new Error('SCHOLARSHIP_REFERENCE_NOT_CONFIGURED');return this.repository.listReferenceTransitions(id);}
+  async proposeReferenceTransition(id:string,input:{changeType:'MERGE'|'TOMBSTONE'|'RESTORE';targetOwnerId?:string},context:ScholarshipMutationContext){
+    return this.mutate('SCHOLARSHIP_REFERENCE_PROPOSED',id,context,async repository=>{if(!repository.proposeReferenceTransition)throw new Error('SCHOLARSHIP_REFERENCE_NOT_CONFIGURED');return repository.proposeReferenceTransition({...input,sourceOwnerId:id,sourceRevision:context.expectedRevision!,actorId:context.actorId,reason:context.reason!});});
+  }
+  async approveReferenceTransition(id:string,transitionId:string,context:ScholarshipMutationContext){
+    return this.mutate('SCHOLARSHIP_REFERENCE_APPROVED',id,context,async repository=>{if(!repository.approveReferenceTransition)throw new Error('SCHOLARSHIP_REFERENCE_NOT_CONFIGURED');await repository.approveReferenceTransition(id,transitionId,context.expectedRevision!,context.actorId,context.reason!);});
+  }
+
   public async listScholarships(filters: AdminScholarshipFilters): Promise<PaginatedResult<ScholarshipDto>> {
     return this.repository.list(filters);
   }

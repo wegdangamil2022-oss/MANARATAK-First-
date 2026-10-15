@@ -16,17 +16,22 @@ import {
   UniversityStatus,
 } from '@manaratak/domain';
 
+/** Existing private history may only resolve the same immutable owner identity. Slug resolution is explicit for a new save. */
+function matchesSavedIdentity(item:StudentSavedItemDto,owner:{id:string;publicId?:unknown},context?:'CANONICALIZE_NEW_SAVE'){
+  return context==='CANONICALIZE_NEW_SAVE'||owner.id===item.entityId||(typeof owner.publicId==='string'&&owner.publicId===item.entityId);
+}
+
 export class MajorStudentSavedItemHydrationGateway implements IStudentSavedItemHydrationGateway {
   constructor(private readonly majors: IMajorRepository) {}
   supports(entityType: StudentSavedItemType): boolean {
     return entityType === StudentSavedItemType.MAJOR;
   }
-  async hydrate(item: StudentSavedItemDto) {
+  async hydrate(item: StudentSavedItemDto,context?:'CANONICALIZE_NEW_SAVE') {
     const path = (item.entitySlug ?? item.entityId).split('/');
     const major =
       (await this.majors.findById(item.entityId)) ??
       (await this.majors.findByPublicId?.(item.entityId)) ?? (await this.majors.findBySlug(path[0]));
-    if (!major) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
+    if (!major||!matchesSavedIdentity(item,major,context)) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     const profiles = (await this.majors.listLevelProfiles?.(major.id)) ?? major.profiles ?? [];
     const profile = path[1]
       ? profiles.find((row) => row.level.toLowerCase() === path[1].toLowerCase())
@@ -51,12 +56,12 @@ export class UniversityStudentSavedItemHydrationGateway implements IStudentSaved
   supports(entityType: StudentSavedItemType): boolean {
     return entityType === StudentSavedItemType.UNIVERSITY;
   }
-  async hydrate(item: StudentSavedItemDto) {
+  async hydrate(item: StudentSavedItemDto,context?:'CANONICALIZE_NEW_SAVE') {
     const university =
       (await this.universities.findById(item.entityId)) ??
       (await this.universities.findPublishedByPublicIds?.([item.entityId]))?.[0] ??
       (await this.universities.findBySlug(item.entitySlug ?? item.entityId));
-    if (!university)
+    if (!university||!matchesSavedIdentity(item,university,context))
       return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     return {
       ownerType: item.entityType,
@@ -75,16 +80,18 @@ export class ScholarshipStudentSavedItemHydrationGateway implements IStudentSave
   supports(entityType: StudentSavedItemType): boolean {
     return entityType === StudentSavedItemType.SCHOLARSHIP;
   }
-  async hydrate(item: StudentSavedItemDto) {
+  async hydrate(item: StudentSavedItemDto,context?:'CANONICALIZE_NEW_SAVE') {
+    const referenceState=await this.scholarships.readReferenceState?.(item.entityId)??undefined;
     const scholarship =
       (await this.scholarships.findById(item.entityId)) ??
       (await this.scholarships.findByPublicId?.(item.entityId)) ??
       (await this.scholarships.findBySlug(item.entitySlug ?? item.entityId));
-    if (!scholarship)
-      return { ownerType: item.entityType, ownerId: item.entityId, available: false };
+    if (!scholarship||!matchesSavedIdentity(item,scholarship,context))
+      return { ownerType: item.entityType, ownerId: item.entityId, available: false,referenceState };
     return {
       ownerType: item.entityType,
       ownerId: scholarship.id,
+      referenceState,
       publicId: scholarship.publicId,
       slug: scholarship.slug,
       displayName: scholarship.displayName,
@@ -101,11 +108,11 @@ export class CmsStudentSavedItemHydrationGateway implements IStudentSavedItemHyd
   supports(entityType: StudentSavedItemType): boolean {
     return entityType === StudentSavedItemType.CMS_CONTENT;
   }
-  async hydrate(item: StudentSavedItemDto) {
+  async hydrate(item: StudentSavedItemDto,context?:'CANONICALIZE_NEW_SAVE') {
     const content =
       (await this.cms.findContentById(item.entityId)) ??
       (await this.cms.findContentBySlug(item.entitySlug ?? item.entityId));
-    if (!content) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
+    if (!content||!matchesSavedIdentity(item,content,context)) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     const published = await this.cms.getPublishedBySlug(
       content.slug,
       undefined,
@@ -138,11 +145,11 @@ export class ServiceStudentSavedItemHydrationGateway implements IStudentSavedIte
   supports(entityType: StudentSavedItemType): boolean {
     return entityType === StudentSavedItemType.SERVICE;
   }
-  async hydrate(item: StudentSavedItemDto) {
+  async hydrate(item: StudentSavedItemDto,context?:'CANONICALIZE_NEW_SAVE') {
     const service =
       (await this.services.findById(item.entityId)) ??
       (await this.services.findBySlug(item.entitySlug ?? item.entityId));
-    if (!service) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
+    if (!service||!matchesSavedIdentity(item,service,context)) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     return {
       ownerType: item.entityType,
       ownerId: service.id,
@@ -160,12 +167,12 @@ export class CourseStudentSavedItemHydrationGateway implements IStudentSavedItem
   supports(entityType: StudentSavedItemType): boolean {
     return entityType === StudentSavedItemType.COURSE;
   }
-  async hydrate(item: StudentSavedItemDto) {
+  async hydrate(item: StudentSavedItemDto,context?:'CANONICALIZE_NEW_SAVE') {
     const course =
       (await this.courses.findById(item.entityId)) ??
       (await this.courses.findByPublicId(item.entityId)) ??
       (await this.courses.findBySlug(item.entitySlug ?? item.entityId));
-    if (!course) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
+    if (!course||!matchesSavedIdentity(item,course,context)) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     return {
       ownerType: item.entityType,
       ownerId: course.id,
@@ -183,12 +190,12 @@ export class InternationalTestStudentSavedItemHydrationGateway implements IStude
   supports(entityType: StudentSavedItemType): boolean {
     return entityType === StudentSavedItemType.INTERNATIONAL_TEST;
   }
-  async hydrate(item: StudentSavedItemDto) {
+  async hydrate(item: StudentSavedItemDto,context?:'CANONICALIZE_NEW_SAVE') {
     const candidate = await this.tests.findById(item.entityId);
     const slug =
       typeof candidate?.slug === 'string' ? candidate.slug : (item.entitySlug ?? item.entityId);
     const test = await this.tests.findPublishedBySlug(slug);
-    if (!test) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
+    if (!test||!matchesSavedIdentity(item,test,context)) return { ownerType: item.entityType, ownerId: item.entityId, available: false };
     return {
       ownerType: item.entityType,
       ownerId: test.id,

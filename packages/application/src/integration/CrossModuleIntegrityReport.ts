@@ -1,5 +1,5 @@
 /** Caller supplies already permissioned owner facts. No private student/finance projection is admitted. */
-export type IntegrityOwner = 'UNIVERSITIES' | 'MAJORS' | 'SCHOLARSHIPS' | 'TESTS' | 'CMS';
+export type IntegrityOwner = 'UNIVERSITIES' | 'MAJORS' | 'SCHOLARSHIPS' | 'TESTS' | 'CMS'|'PROGRAMS'|'COURSES'|'COUNTRIES';
 export type IntegrityFact = {
   owner: IntegrityOwner;
   id: string;
@@ -23,7 +23,7 @@ export function crossModuleIntegrityReport(
     'MAJORS',
     'SCHOLARSHIPS',
     'TESTS',
-    'CMS',
+    'CMS','PROGRAMS','COURSES','COUNTRIES',
   ]);
   if (
     facts.length > 1000 ||

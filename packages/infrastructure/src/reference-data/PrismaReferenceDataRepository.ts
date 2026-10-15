@@ -356,6 +356,8 @@ export class PrismaReferenceDataRepository implements ITransactionalReferenceDat
     return (records as unknown as DbCountry[]).map((record) => this.mapToCountryDto(record));
   }
 
+  public async getCountryById(id:string):Promise<ReferenceCountryDto|null>{const row=await this.prisma.referenceCountry.findUnique({where:{id},select:{iso2Code:true}});return row?this.getCountry(row.iso2Code):null;}
+
   public async getCountry(iso2Code: string): Promise<ReferenceCountryDto | null> {
     const record = await this.prisma.referenceCountry.findUnique({
       where: { iso2Code },

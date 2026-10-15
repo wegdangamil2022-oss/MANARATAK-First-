@@ -1,3 +1,4 @@
+import {Link} from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -7,6 +8,7 @@ const owners = {
   UNIVERSITIES: ['admin:universities:manage', 'الجامعات', 'Universities'],
   SCHOLARSHIPS: ['admin:scholarships:manage', 'المنح', 'Scholarships'],
   TESTS: ['admin:international-tests:manage', 'الاختبارات', 'Tests'],
+  CMS:['admin:cms:view','المحتوى التحريري','Editorial content'],
 } as const;
 type Owner = keyof typeof owners;
 type Report = {
@@ -18,7 +20,8 @@ type Report = {
   targetReferencesChecked: number;
   referencesTruncated: boolean;
   capturedAt: string;
-  findings: Array<{ ownerId: string; targetOwner: string; targetId: string; code: string }>;
+  sourceReadFailures?:number;sourceRowsListed?:number;targetOwnerFailures?:number;symmetry?:{pairsChecked:number;failedOwnerReads:number;maxPairs:number};freshness?:{basis:string;productionMetricsFreshness:string};
+  findings: Array<{ owner?:Owner;ownerPublicId?:string|null; ownerId: string; targetOwner: string; targetId: string; code: string }>;
 };
 export function parseIntegrityReport(raw: unknown, owner: Owner, page: number): Report {
   const report = (raw as { data?: Report })?.data;
@@ -49,6 +52,7 @@ export function parseIntegrityReport(raw: unknown, owner: Owner, page: number): 
     throw new Error('INTEGRITY_REPORT_INVALID');
   return report;
 }
+function ownerRepairHref(owner:string,id:string,publicId?:string|null){const encoded=encodeURIComponent(id);return ({MAJORS:`/majors/${encoded}`,UNIVERSITIES:`/universities/${encoded}`,SCHOLARSHIPS:`/scholarships/${encoded}`,TESTS:`/international-tests/${encoded}`,CMS:`/cms?reviewSearch=${encodeURIComponent(publicId??id)}`,COURSES:`/courses/${encoded}`,COUNTRIES:'/settings/reference-data',PROGRAMS:'/universities'} as Record<string,string>)[owner];}
 export function CrossModuleIntegrityPage() {
   const { language, dir } = useTranslation(),
     { hasPermission } = useAdminAuthorization();
@@ -135,6 +139,9 @@ export function CrossModuleIntegrityPage() {
             {en ? 'References checked' : 'المراجع المفحوصة'}: {report.targetReferencesChecked}
           </p>
           <p>{report.capturedAt}</p>
+          <p>{en?'Live owner read time; production metrics freshness is unverified.':'وقت قراءة مباشر للملاك؛ حداثة مقاييس الإنتاج غير مثبتة.'}</p>
+          {Boolean(report.sourceReadFailures||report.targetOwnerFailures)&&<p role="status">{en?'Some owner details could not be read; absence is not established.':'تعذرت قراءة بعض تفاصيل الملاك؛ لا يثبت ذلك فقدانها.'}</p>}
+          {report.symmetry&&<p>{en?'Canonical relationship parity pairs checked':'أزواج العلاقات القانونية المفحوصة للتماثل'}: {report.symmetry.pairsChecked} / {report.symmetry.maxPairs}</p>}
           {report.referencesTruncated && (
             <p role="status">
               {en
@@ -159,7 +166,7 @@ export function CrossModuleIntegrityPage() {
               <tbody>
                 {report.findings.map((f, i) => (
                   <tr key={i}>
-                    <td>{f.ownerId}</td>
+                    <td><Link to={ownerRepairHref(f.owner??owner,f.ownerId,f.ownerPublicId)}>{f.ownerId}</Link></td>
                     <td>{f.targetOwner}</td>
                     <td>{f.targetId}</td>
                     <td>
@@ -167,7 +174,7 @@ export function CrossModuleIntegrityPage() {
                         ? en
                           ? 'Missing owner reference'
                           : 'مرجع مالك مفقود'
-                        : f.code === 'NONPUBLIC_PUBLISHED_EDGE'
+                        : f.code==='UNKNOWN_POLYMORPHIC_OWNER'?(en?'Unknown target owner type':'نوع مالك هدف غير معروف'):f.code==='TARGET_OWNER_UNAVAILABLE'?(en?'Target owner read unavailable':'قراءة مالك الهدف غير متاحة'):f.code==='REVERSE_RELATIONSHIP_MISMATCH'?(en?'Forward and reverse relationship disagree':'تعارض العلاقة الأمامية والعكسية'): f.code === 'NONPUBLIC_PUBLISHED_EDGE'
                           ? en
                             ? 'Published link targets an unavailable owner'
                             : 'رابط منشور إلى مالك غير متاح'

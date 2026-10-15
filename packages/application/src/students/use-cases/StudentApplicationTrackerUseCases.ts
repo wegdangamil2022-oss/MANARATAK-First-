@@ -1,3 +1,5 @@
+import {catalogReferenceReadStamp} from '../../integration/CatalogLifecycleReadPolicy';
+import {studentDocumentAttestationState} from '@manaratak/domain';
 import {
   AssetReferencePolicy,
   assertAssetReferenceUsable,
@@ -88,13 +90,14 @@ export class StudentApplicationTrackerUseCases {
       !requirement
     )
       throw new Error('STUDENT_DOCUMENT_REQUIREMENT_UNAVAILABLE');
-    await assertAssetReferenceUsable(this.assets, input.assetId, {
+    const asset=await assertAssetReferenceUsable(this.assets, input.assetId, {
       purpose: 'STUDENT_APPLICATION_DOCUMENT',
       expectedOwnerId: studentReferenceId,
       allowedClassifications: Object.values(AssetSecurityClassification),
       allowedOwnerTypes: ['STUDENT'],
       allowedMimeTypePrefixes: ['application/pdf', 'image/'],
     });
+    if(asset?.retention?.expiresAt&&(!Number.isFinite(asset.retention.expiresAt.getTime())||asset.retention.expiresAt.getTime()<=Date.now()))throw new Error('STUDENT_DOCUMENT_ASSET_EXPIRED');
     if (!this.repository.saveDocumentBinding)
       throw new Error('STUDENT_DOCUMENT_STORAGE_NOT_CONFIGURED');
     return this.repository.saveDocumentBinding(
@@ -108,7 +111,7 @@ export class StudentApplicationTrackerUseCases {
         requirementSnapshot: { ...requirement, cycleId: tracker.cycleReferenceId },
         consentGrantedAt: new Date(),
         expiresAt: input.expiresAt ?? null,
-        retentionUntil: new Date(Date.now() + 180 * 86400000),
+        retentionUntil: new Date(Math.min(Date.now()+180*86400000,asset?.retention?.expiresAt?.getTime()??Infinity,input.expiresAt?.getTime()??Infinity)),
       },
     );
   }
@@ -167,15 +170,18 @@ export class StudentApplicationTrackerUseCases {
                   new Date(binding.consentGrantedAt).getTime() > Date.now()
                 ? 'EXPIRED'
                 : 'ASSET_AVAILABLE_UNVERIFIED';
+        let verification='NOT_ATTESTED';
         if (state === 'ASSET_AVAILABLE_UNVERIFIED')
           try {
-            await assertAssetReferenceUsable(this.assets, binding!.assetId, {
+            const asset=await assertAssetReferenceUsable(this.assets, binding!.assetId, {
               purpose: 'STUDENT_APPLICATION_DOCUMENT',
               expectedOwnerId: studentReferenceId,
               allowedClassifications: Object.values(AssetSecurityClassification),
               allowedOwnerTypes: ['STUDENT'],
               allowedMimeTypePrefixes: ['application/pdf', 'image/'],
             });
+            if(asset?.retention?.expiresAt&&(!Number.isFinite(asset.retention.expiresAt.getTime())||asset.retention.expiresAt.getTime()<=Date.now()))throw new Error('STUDENT_DOCUMENT_ASSET_EXPIRED');
+            verification=studentDocumentAttestationState(binding!,tracker.cycleReferenceId??undefined,asset?.checksum?.hash);
           } catch {
             state = 'ASSET_UNAVAILABLE';
           }
@@ -186,7 +192,10 @@ export class StudentApplicationTrackerUseCases {
           state,
           linked: Boolean(binding),
           bindable: available && currentRequirements.some(r=>r.id===requirement.id),
-          verification: 'NOT_ATTESTED',
+          verification,
+          reviewConsentGranted:Boolean(binding?.reviewConsentGrantedAt),
+          reviewRequested:Boolean(binding?.reviewConsentUntil&&binding.reviewConsentUntil.getTime()>Date.now()),
+          reviewConsentUntil:binding?.reviewConsentUntil?.toISOString()??null,
         };
       }),
     );
@@ -242,6 +251,7 @@ export class StudentApplicationTrackerUseCases {
             (owner?.available ? (owner.deadlineAt?.toISOString() ?? null) : null)
               ? 'CURRENT'
               : 'PENDING_OWNER_PULL',
+          ownerRead:catalogReferenceReadStamp({ownerId:tracker.scholarshipId,publicId:owner?.available?owner.publicId??null:null,version:owner?.available?owner.ownerRevision!==undefined?String(owner.ownerRevision):owner.ownerVersionId??null:null,effectiveAt:owner?.referenceState?.effectiveAt??owner?.ownerEffectiveAt??null,changeType:owner?.referenceState?.state??(owner?.available?'CURRENT':'UNAVAILABLE'),subject:`SCHOLARSHIP_APPLICATION_CYCLE:${tracker.cycleReferenceId??'LEGACY'}`}),
           applicationMode: 'MANUAL_PLANNING' as const,
           eligibilityState: 'UNKNOWN' as const,
           ownerState: owner ? (owner.available ? 'AVAILABLE' : 'HISTORY_ONLY') : 'UNAVAILABLE',

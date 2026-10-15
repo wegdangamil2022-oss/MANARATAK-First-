@@ -22,7 +22,7 @@ export class StudentSavedItemHydrationService {
             savedItem,
             owner:
               owner && !owner.available
-                ? { ownerType: owner.ownerType, ownerId: owner.ownerId, available: false }
+                ? { ownerType: owner.ownerType, ownerId: owner.ownerId, available: false,...(owner.referenceState?{referenceState:owner.referenceState}:{}) }
                 : owner,
           };
         } catch {

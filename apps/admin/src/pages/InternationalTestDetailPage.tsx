@@ -1,3 +1,4 @@
+import {TestAdmissionScoreEditor} from '../features/integration/TestAdmissionScoreEditor';
 import { InternationalTestGovernanceWorkspace } from '../components/InternationalTestGovernanceWorkspace';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
@@ -394,6 +395,7 @@ export function InternationalTestDetailPage() {
             </span>
           </div>
           <ScoringTab testId={test.id} initialScoreScale={test.scoreScale} onRefresh={fetchDetail} isRtl={isRtl} />
+          <TestAdmissionScoreEditor owner={test} onChanged={()=>void fetchDetail()}/>
         </div>
       );
     }

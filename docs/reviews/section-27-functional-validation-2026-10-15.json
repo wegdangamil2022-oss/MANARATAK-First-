@@ -1,0 +1,136 @@
+{
+  "section": 27,
+  "date": "2026-10-15",
+  "previousMainCommit": "83aa40ed05a743b52932156483be69b00b20fae5",
+  "integratedMainCommit": "a7a282d1925d708dba4c5ca076c9c5a4434245ac",
+  "implementationCommitBeforeFinalRefinements": "0cdcacda55a5e9894c04af6727f7601c6c00987e",
+  "sourceStatus": "FUNCTIONAL_SOURCE_IMPLEMENTED_WITH_EXPLICIT_LIMITS",
+  "functionalSourceImplemented": true,
+  "sectionClosed": false,
+  "runtimeVerified": false,
+  "databaseAccess": false,
+  "migrationsApplied": false,
+  "providersCalled": false,
+  "serverOrWorkerStarted": false,
+  "checks": {
+    "sourceContracts": {
+      "passed": 126,
+      "failed": 0,
+      "command": "npx --yes --package=node@22 node scripts/verify-cross-module-source-closure.mjs",
+      "scope": "Source contracts, mocked owner/repository/API-handler cases, SQL construction and pure policy. Not live API or database E2E."
+    },
+    "ownerLinksUi": {
+      "passed": 11,
+      "files": 6,
+      "config": ".section27-owner-links-vitest.config.ts"
+    },
+    "trackerRegression": {
+      "passed": 20,
+      "files": 4,
+      "config": ".section27-vitest.config.ts"
+    },
+    "discoveryRefreshFollowup": {
+      "passed": 1,
+      "files": 1,
+      "note": "Rerun of an existing case after adding visible refresh, not an additional unique test."
+    },
+    "targetedTypeScript": {
+      "status": "PASS",
+      "projects": [
+        "packages/infrastructure",
+        "apps/api",
+        "apps/admin",
+        "apps/web"
+      ],
+      "log": "Empty output with successful tool exit."
+    },
+    "lint": {
+      "status": "PASS_WITH_WARNINGS",
+      "allTouchedCapture": {
+        "errors": 0,
+        "warnings": 613
+      },
+      "finalThreeFileFollowup": {
+        "errors": 0,
+        "warnings": 64
+      },
+      "note": "Followup overlaps the main capture; warning counts must not be added. No zero-warning claim."
+    },
+    "prismaValidate": "PASS_SOURCE_ONLY",
+    "prismaGenerate": "PASS_LOCAL_CLIENT_ONLY",
+    "schemaDiff": "PASS_DATAMODEL_TO_DATAMODEL_ONLY_NO_DATABASE",
+    "migrationParityReview": "New model/columns and index names match source diff; migrations add owner-local CHECK/trigger safeguards not represented by Prisma schema. No SQL was applied.",
+    "persistence": {
+      "status": "PASS",
+      "ownedModels": 281,
+      "totalModels": 281,
+      "directCrossContextOrmWrites": 0,
+      "approvedReadPaths": 18,
+      "historicalSidecars": 26
+    },
+    "di": {
+      "status": "PASS",
+      "registrations": 423,
+      "reachable": 423
+    }
+  },
+  "newUnappliedMigrations": [
+    "20261015030000_student_document_review",
+    "20261015031000_scholarship_reference_lifecycle"
+  ],
+  "explicitLimits": [
+    "XMI-033 full disposable PostgreSQL/API E2E suite completion and execution are deferred outside user code-only scope. No complete E2E claim.",
+    "Integrity report is intentionally permissioned and sampled:20 sources,50 targets,10 symmetry pairs.",
+    "P12 is the owner of the new merge/tombstone/restore workflow; other catalogs retain their own lifecycle contracts. No automatic private-history or cycle transfer.",
+    "Existing published Test versions are immutable. Missing old scale/variant/section evidence requires owner re-review and republication; no backfill.",
+    "Academic attestation is internal staff review under explicit student consent, not institutional certification or official application submission.",
+    "Persisted tracker catchup depends on successful bounded worker passes; production cadence/SLA remains unverified."
+  ],
+  "evidenceNormalization": "Logs preserve content; trailing whitespace and extra blank lines at EOF normalized for repository whitespace checks.",
+  "evidence": {
+    "source.log": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/source.log",
+      "sha256": "9a288cdff89fe9ba716a2b37c7e93056d116024fa242a3de0d561bae1effd2d3"
+    },
+    "owner-links-ui.log": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/owner-links-ui.log",
+      "sha256": "3bdabe1d0fb5efa93aeb097095bd7729a0b6c12e902486bf7260244048746642"
+    },
+    "tracker-regression.log": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/tracker-regression.log",
+      "sha256": "c0567e65ab5ef4d866116ea43bf786b0ce551f004be522f8e3b88e2c43869360"
+    },
+    "discovery-refresh.log": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/discovery-refresh.log",
+      "sha256": "966f597f6a0ba1abe5897f36508db187c55af6ee0f747d2d62af34ff27142d7c"
+    },
+    "types.log": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lint.log": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/lint.log",
+      "sha256": "2e05ca9d7d2eadd00751d7805ae5645c6cc3053ee1ef2b406c6af6f5fefbed68"
+    },
+    "lint-followup.log": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/lint-followup.log",
+      "sha256": "df1369559167feca545fbb122e10e5d1a17031d2f6a94d994e8a011e9a2f1ecb"
+    },
+    "persistence.log": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/persistence.log",
+      "sha256": "5817c8b4f9d1a9dcf3c7161e640974d88aa42e99ca9589ae3a34738fd28a1434"
+    },
+    "di.log": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/di.log",
+      "sha256": "6dec09ab60bb9a9df7264206d0fa382823162eeb927ae90abdfb90247fa842c7"
+    },
+    "prisma-validate.log": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/prisma-validate.log",
+      "sha256": "9d375ec3d6314cc698d3b8b41079c278b0f08699e8420ed797bfef9f3f5e3fd8"
+    },
+    "schema-diff.sql": {
+      "path": "docs/reviews/evidence/section27-functional-2026-10-15/schema-diff.sql",
+      "sha256": "ef1166db4a1735abdeb11b739d8a01f3a9a89d1a75d9429c6af5ef6e25386843"
+    }
+  }
+}

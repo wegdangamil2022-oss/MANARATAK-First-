@@ -6052,6 +6052,9 @@ model OwnerTranslationTransferReceipt {
 
 /// P15-private requirement/cycle/asset references; no file content or shared document authority.
 model StudentApplicationDocumentBinding {
+  reviewConsentGrantedAt DateTime?
+  reviewConsentUntil DateTime?
+  attestation Json?
   id String @id @default(uuid())
   trackerId String
   requirementId String
@@ -6065,6 +6068,7 @@ model StudentApplicationDocumentBinding {
   tracker StudentApplicationTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
   @@unique([trackerId, requirementId])
   @@index([retentionUntil])
+  @@index([reviewConsentUntil, id])
 }
 
 // Link ownership stays with its producing catalog; Test retains canonical identity ownership.
@@ -6101,4 +6105,25 @@ model ServiceTestDiscoveryLink {
   updatedAt DateTime @updatedAt
   @@unique([ownerKey,testId])
   @@index([testId,status,id])
+}
+
+// P12 owner-local durable reference decisions; no student identity or cross-domain canonical state.
+model ScholarshipReferenceTransition {
+  id String @id @default(uuid())
+  sourceOwnerId String
+  sourcePublicId String
+  sourceSlug String
+  sourceRevision Int
+  targetOwnerId String?
+  targetRevision Int?
+  changeType String
+  status String @default("PENDING")
+  proposedBy String
+  reviewedBy String?
+  reason String
+  createdAt DateTime @default(now())
+  reviewedAt DateTime?
+  @@unique([sourceOwnerId, sourceRevision],map:"ScholarshipReference_source_revision_key")
+  @@index([sourceOwnerId, status, sourceRevision],map:"ScholarshipReference_source_revision_idx")
+  @@index([sourceSlug, status],map:"ScholarshipReference_source_slug_idx")
 }

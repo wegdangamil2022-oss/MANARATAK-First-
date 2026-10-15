@@ -1,3 +1,4 @@
+import {StudentDocumentReviewPanel} from './features/integration/StudentDocumentReviewPanel';
 import { CrossModuleIntegrityPage } from './pages/CrossModuleIntegrityPage';
 import {MfaRequirementBanner} from './components/MfaRequirementBanner';
 import { AccountSecurityPage } from './pages/AccountSecurityPage';
@@ -329,6 +330,7 @@ function AdminLayout() {
                   <Route path="/authorization" element={<RequireAdminPermission permission="admin:authorization:manage"><AuthorizationAdminPage /></RequireAdminPermission>} />
                   <Route path="/audit" element={<RequireAdminPermission permission="admin:audit:manage"><AuditCenterPage /></RequireAdminPermission>} />
                   <Route path="/assets" element={<RequireAdminPermission permission="admin:assets:manage"><AssetAdminPage /></RequireAdminPermission>} />
+                  <Route path="/student-document-reviews" element={<RequireAdminPermission permission="admin:students:documents:review"><StudentDocumentReviewPanel/></RequireAdminPermission>}/>
                   <Route path="/students" element={<RequireAdminPermission permission="admin:students:support"><StudentSupportAdminPage /></RequireAdminPermission>} />
                   <Route path="/settings" element={<RequireAdminPermission permission="admin:settings:manage"><SettingsAdminPage /></RequireAdminPermission>} />
                   <Route path="/settings/reference-data" element={<RequireAdminPermission permission="admin:reference-data:manage"><ReferenceDataAdminPage /></RequireAdminPermission>} />

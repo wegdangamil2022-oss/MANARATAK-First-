@@ -1,3 +1,4 @@
+import {assertAdmissionScoreProfiles} from '@manaratak/domain';
 import { randomUUID } from 'node:crypto';
 import { assertInternationalTestTransition, publicInternationalTest, assertOfficialTestUrl } from '@manaratak/domain';
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
@@ -102,6 +103,7 @@ export class InternationalTestAdminUseCases {
     const canonicalData = { ...data, ...(await this.canonicalRelationshipService.canonicalize(data)), ...(await this.canonicalizeProvider(data)) };
     const existing = await this.get(id);
     const merged = { ...existing, ...canonicalData };
+    assertAdmissionScoreProfiles(merged.optionalFields?.admissionScoreProfiles,existing);
     const report = this.validationService.validate(merged);
     const hasErrors = report.issues.some(i => i.severity === InternationalTestValidationSeverity.ERROR);
     if (hasErrors) {

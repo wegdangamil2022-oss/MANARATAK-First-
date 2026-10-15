@@ -13,6 +13,8 @@ export class PublicScholarshipUseCases {
 
   constructor(private readonly repository: IScholarshipRepository) {}
 
+  async referenceState(slug:string){return await this.repository.readReferenceStateBySlug?.(slug)??null;}
+
   public async listScholarships(
     filters: PublicScholarshipFilters,
     locale: SupportedLocale = DEFAULT_LOCALE,

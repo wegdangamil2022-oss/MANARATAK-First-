@@ -5,6 +5,8 @@ export default defineConfig({
   test: {
     ...base.test,
     include: [
+      'apps/web/tests/integration/PublicRelationshipPager.spec.tsx',
+      'apps/admin/tests/integration/StudentDocumentReview.spec.tsx',
       'apps/admin/tests/integration/AcademicProgramExplorer.spec.tsx',
       'apps/web/tests/integration/PrivateToolResult.spec.tsx',
       'apps/web/tests/integration/TestOwnerDiscovery.spec.tsx',

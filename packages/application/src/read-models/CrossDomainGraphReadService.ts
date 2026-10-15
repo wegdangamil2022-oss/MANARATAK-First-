@@ -1,3 +1,4 @@
+import {finalizeGraph,type GraphEdgeCursors} from './GraphPagination';
 import {graphProgramLabel,graphPublishedLabel,graphMajorLabel,graphUniversityLabel,graphScholarshipLabel,graphTestLabel,graphServiceLabel,graphCareerLabel,graphCountryLabel} from './GraphOwnerLabels';
 import type {TestDiscoveryPage} from '@manaratak/domain';
 import type {TestDiscoveryOwnerUseCases} from '../integration/TestDiscoveryOwnerUseCases';
@@ -179,7 +180,7 @@ export interface CountryGraphReadModel {
   };
 }
 
-export interface CrossDomainGraphReadOptions {
+export interface CrossDomainGraphReadOptions extends GraphEdgeCursors {
   page?: number;
   pageSize?: number;
   courseFilters?: PublicCourseFilters;
@@ -190,6 +191,10 @@ export interface CrossDomainGraphReadOptions {
   scholarshipCursor?: string;
   serviceCursor?: string;
   courseCursor?: string;
+  testCursor?:string;
+  careerCursor?:string;
+  majorCursor?:string;
+  editorialCursor?:string;
   testPage?: number;
   careerPage?: number;
 }
@@ -224,23 +229,24 @@ export class CrossDomainGraphReadService {
 
     const { pageSize } = this.pagination(options);
     const [universities, scholarships, courses, editorialContent] = await Promise.all([
-      this.universityRepository.listPublished({ majorId: major.id, limit: pageSize }),
-      this.scholarshipRepository.listPublished({ majorId: major.id, limit: pageSize }),
-      this.courseRelationshipRepository.listPublishedCoursesForMajor(major.id, {
+      graphOwnerRead(readScope,'universities',()=>this.universityRepository.listPublished({ majorId: major.id, cursor: options.universityCursor, limit: pageSize }),this.emptyPage(pageSize)),
+      graphOwnerRead(readScope,'scholarships',()=>this.scholarshipRepository.listPublished({ majorId: major.id, cursor:options.scholarshipCursor, limit: pageSize }),this.emptyPage(pageSize)),
+      graphOwnerRead(readScope,'courses',()=>this.courseRelationshipRepository.listPublishedCoursesForMajor(major.id, {
         ...options.courseFilters,
+        cursor: options.courseCursor,
         limit: pageSize,
-      }),
+      }),this.emptyPage(pageSize)),
       graphOwnerRead(
         readScope,
         'editorialContent',
         this.cmsRepository?.listPublishedByDomainTarget
-          ? () => this.relatedEditorial(CmsDomainTargetType.MAJOR, major.id, options.locale ?? 'ar')
+          ? () => this.relatedEditorial(CmsDomainTargetType.MAJOR, major.id, options.locale ?? 'ar', options, readScope)
           : undefined,
         [],
       ),
     ]);
 
-    return {
+    return finalizeGraph({
       readScope,
       subject: this.majorIdentity(major, options.locale),
       relationships: {
@@ -266,7 +272,7 @@ export class CrossDomainGraphReadService {
         },
         editorialContent,
       },
-    };
+    }, `getMajorGraphBySlug:${major.id}`, options, pageSize);
   }
 
   public async getUniversityGraphBySlug(slug: string, options: CrossDomainGraphReadOptions = {}): Promise<UniversityGraphReadModel> {
@@ -281,15 +287,14 @@ export class CrossDomainGraphReadService {
     const majorIds = [...new Set(canonicalPrograms.map((program) => program.majorId))];
     const { pageSize } = this.pagination(options);
     const [majors, scholarships, editorialContent] = await Promise.all([
-      this.majorRepository.findPublishedByIds(majorIds),
-      this.scholarshipRepository.listPublished({ universityId: university.id, limit: pageSize }),
+      graphOwnerRead(readScope,'majors',()=>this.majorRepository.findPublishedByIds(majorIds),[]),
+      graphOwnerRead(readScope,'scholarships',()=>this.scholarshipRepository.listPublished({ universityId: university.id, cursor:options.scholarshipCursor, limit: pageSize }),this.emptyPage(pageSize)),
       graphOwnerRead(
         readScope,
         'editorialContent',
         this.cmsRepository?.listPublishedByDomainTarget
           ? () =>
-              this.relatedEditorial(CmsDomainTargetType.UNIVERSITY, university.id, options.locale ?? 'ar',
-              )
+              this.relatedEditorial(CmsDomainTargetType.UNIVERSITY, university.id, options.locale ?? 'ar', options, readScope)
           : undefined,
         [],
       ),
@@ -297,7 +302,7 @@ export class CrossDomainGraphReadService {
     const publishedMajorIds = new Set(majors.map((major) => major.id));
     const publishedCanonicalPrograms = canonicalPrograms.filter((program) => publishedMajorIds.has(program.majorId));
 
-    return {
+    return finalizeGraph({
       readScope,
       subject: this.universityIdentity(university, options.locale),
       countryOwnerId: university.countryReferenceId,
@@ -316,7 +321,7 @@ export class CrossDomainGraphReadService {
         },
         editorialContent,
       },
-    };
+    }, `getUniversityGraphBySlug:${university.id}`, options, pageSize);
   }
 
   public async getScholarshipGraphBySlug(slug: string, options: CrossDomainGraphReadOptions = {}): Promise<ScholarshipGraphReadModel> {
@@ -341,19 +346,18 @@ export class CrossDomainGraphReadService {
     ].filter((id): id is string => Boolean(id)))];
 
     const [universities, programs] = await Promise.all([
-      this.universityRepository.findPublishedByIds(universityIds),
-      this.universityRepository.findPublishedAcademicProgramsByIds(academicProgramIds),
+      graphOwnerRead(readScope,'universities',()=>this.universityRepository.findPublishedByIds(universityIds),[]),
+      graphOwnerRead(readScope,'academicPrograms',()=>this.universityRepository.findPublishedAcademicProgramsByIds(academicProgramIds),[]),
     ]);
     const programMajorIds = programs.map((program) => program.majorId).filter((id): id is string => Boolean(id));
     const [majors, editorialContent] = await Promise.all([
-      this.majorRepository.findPublishedByIds([...new Set([...directMajorIds, ...programMajorIds])]),
+      graphOwnerRead(readScope,'majors',()=>this.majorRepository.findPublishedByIds([...new Set([...directMajorIds, ...programMajorIds])]),[]),
       graphOwnerRead(
         readScope,
         'editorialContent',
         this.cmsRepository?.listPublishedByDomainTarget
           ? () =>
-              this.relatedEditorial(CmsDomainTargetType.SCHOLARSHIP, scholarship.id, options.locale ?? 'ar',
-              )
+              this.relatedEditorial(CmsDomainTargetType.SCHOLARSHIP, scholarship.id, options.locale ?? 'ar', options, readScope)
           : undefined,
         [],
       ),
@@ -366,7 +370,7 @@ export class CrossDomainGraphReadService {
       ...graphPublishedLabel(program.universityDisplayName, program.universityLocalizedNames, options.locale),
     }));
 
-    return {
+    return finalizeGraph({
       readScope,
       subject: this.scholarshipIdentity(scholarship, options.locale),
       countryOwnerId: scholarship.countryReferenceId,
@@ -381,6 +385,7 @@ export class CrossDomainGraphReadService {
           universityPublicId: program.universityPublicId,
           universitySlug: program.universitySlug,
           universityDisplayName: graphPublishedLabel(program.universityDisplayName,program.universityLocalizedNames,options.locale).displayName,
+          universityLocaleFallback:graphPublishedLabel(program.universityDisplayName,program.universityLocalizedNames,options.locale).localeFallback,
           ...graphPublishedLabel(program.sourceProgramName,program.localizedNames,options.locale),
           sourceProgramName: program.sourceProgramName,
           degreeLevelId: program.degreeLevelId,
@@ -391,7 +396,7 @@ export class CrossDomainGraphReadService {
         majors: majors.map((major) => this.majorIdentity(major, options.locale)),
         editorialContent,
       },
-    };
+    }, `getScholarshipGraphBySlug:${scholarship.id}`, options, this.pagination(options).pageSize);
   }
 
   public async getInternationalTestGraphById(id: string, options: CrossDomainGraphReadOptions = {}): Promise<InternationalTestGraphReadModel> {
@@ -401,18 +406,19 @@ export class CrossDomainGraphReadService {
     const readScope = createGraphReadScope();
     const { pageSize } = this.pagination(options);
     const [universities, scholarships, preparationCourses, editorialContent, studentTools, services] = await Promise.all([
-      this.universityRepository.listPublished({ internationalTestId: test.id, limit: pageSize }),
-      this.scholarshipRepository.listPublished({ internationalTestId: test.id, limit: pageSize }),
-      this.courseRelationshipRepository.listPublishedCoursesForInternationalTest(test.id, {
+      graphOwnerRead(readScope,'universities',()=>this.universityRepository.listPublished({ internationalTestId: test.id, cursor:options.universityCursor, limit: pageSize }),this.emptyPage(pageSize)),
+      graphOwnerRead(readScope,'scholarships',()=>this.scholarshipRepository.listPublished({ internationalTestId: test.id, cursor:options.scholarshipCursor, limit: pageSize }),this.emptyPage(pageSize)),
+      graphOwnerRead(readScope,'preparationCourses',()=>this.courseRelationshipRepository.listPublishedCoursesForInternationalTest(test.id, {
         ...options.courseFilters,
+        cursor: options.courseCursor,
         limit: pageSize,
-      }),
+      }),this.emptyPage(pageSize)),
       graphOwnerRead(
         readScope,
         'editorialContent',
         this.cmsRepository?.listPublishedByDomainTarget
           ? () =>
-              this.relatedEditorial(CmsDomainTargetType.INTERNATIONAL_TEST, test.id, options.locale ?? 'ar')
+              this.relatedEditorial(CmsDomainTargetType.INTERNATIONAL_TEST, test.id, options.locale ?? 'ar', options, readScope)
           : undefined,
         [],
       ),
@@ -420,7 +426,7 @@ export class CrossDomainGraphReadService {
       graphOwnerRead(readScope,'services',this.serviceTestDiscovery?()=>this.serviceTestDiscovery!.publicPage(test.id,options.locale??'ar',options.serviceCursor,pageSize):undefined,{ownerDomain:'SERVICES',state:'UNAVAILABLE',data:[],hasMore:false,nextCursor:null,scanned:0} as TestDiscoveryPage),
     ]);
 
-    return {
+    return finalizeGraph({
       readScope,
       subject: this.internationalTestIdentity(test, options.locale),
       relationships: {
@@ -465,7 +471,7 @@ export class CrossDomainGraphReadService {
         studentTools,
         services,
       },
-    };
+    }, `getInternationalTestGraphById:${test.id}`, options, pageSize);
   }
 
   public async getCountryGraphByIso2Code(iso2Code: string, options: CrossDomainGraphReadOptions = {}): Promise<CountryGraphReadModel> {
@@ -502,7 +508,7 @@ export class CrossDomainGraphReadService {
         readScope,
         'internationalTests',
         () =>
-          this.internationalTestRepository.listPublished({ countryIso2Code: normalizedCode, page: options.testPage ?? 1, pageSize }),
+          this.internationalTestRepository.listPublished({ countryIso2Code: normalizedCode, cursorMode:true, cursor:options.testCursor, page: 1, pageSize }),
         { data: [], total: 0, page, limit: pageSize },
       ),
       graphOwnerRead(
@@ -521,7 +527,7 @@ export class CrossDomainGraphReadService {
         'careerJobs',
       this.careerRepository
         ? () =>
-              this.careerRepository!.listPublishedJobs({ countryReferenceId: country.id, page: options.careerPage ?? 1, pageSize })
+              this.careerRepository!.listPublishedJobs({ countryReferenceId: country.id, cursor:options.careerCursor, limit:pageSize, page:1, pageSize })
         : undefined,
         empty,
       ),
@@ -542,7 +548,7 @@ export class CrossDomainGraphReadService {
         'editorialContent',
         this.cmsRepository
           ? () =>
-              this.relatedEditorial(CmsDomainTargetType.REFERENCE_COUNTRY, country.id, options.locale ?? 'ar')
+              this.relatedEditorial(CmsDomainTargetType.REFERENCE_COUNTRY, country.id, options.locale ?? 'ar', options, readScope)
           : undefined,
         [],
       ),
@@ -565,39 +571,18 @@ export class CrossDomainGraphReadService {
         map((program) => ({
       ownerId: program.ownerId, universityOwnerId: program.universityOwnerId, universityPublicId:program.universityPublicId,universitySlug:program.universitySlug,
       universityDisplayName:graphPublishedLabel(program.universityDisplayName,program.universityLocalizedNames,options.locale).displayName,
+      universityLocaleFallback:graphPublishedLabel(program.universityDisplayName,program.universityLocalizedNames,options.locale).localeFallback,
       sourceProgramName:program.sourceProgramName,degreeLevelId:program.degreeLevelId,majorMappingState:program.majorMappingState,status:program.status,
       ...graphPublishedLabel(program.sourceProgramName,program.localizedNames,options.locale),
           majorOwnerId: program.majorId,
     }),
     );
-    const canonicalMajorIds = [...new Set(
-        programPage.data
-          .map((program) => program.majorId)
-          .filter((id): id is string => Boolean(id)))];
-    const majors = await graphOwnerRead(
-      readScope,
-      'majors',
-      () => this.majorRepository.findPublishedByIds(canonicalMajorIds),
-      [],
-    );
-    if (readScope.collections.academicPrograms.state === 'AVAILABLE')
-      Object.assign(readScope.collections.academicPrograms, {
-        total: programPage.total,
-        hasMore: programPage.hasMore,
-        nextCursor: programPage.nextCursor,
-      });
-    readScope.collections.majors = {
-      ...readScope.collections.majors,
-      scope: 'PROGRAM_PAGE_SAMPLE',
-      total:
-        readScope.collections.academicPrograms.state === 'AVAILABLE'
-          ? programPage.majorTotal
-          : null,
-      hasMore: programPage.hasMore,
-      nextCursor: programPage.nextCursor,
-    };
+    const majorPage = await graphOwnerRead(readScope,'majors',this.universityRepository.listPublishedMajorGraph?()=>this.universityRepository.listPublishedMajorGraph!({countryReferenceId:country.id!,cursor:options.majorCursor,limit:pageSize}):undefined,{data:[],total:0,hasMore:false,nextCursor:null});
+    const majors = majorPage.data.length?await graphOwnerRead(readScope,'majors',()=>this.majorRepository.findPublishedByIds(majorPage.data.map(row=>row.ownerId)),[]):[];
+    if (readScope.collections.academicPrograms.state === 'AVAILABLE') Object.assign(readScope.collections.academicPrograms,{scope:'OWNER_QUERY',total:programPage.total,hasMore:programPage.hasMore,nextCursor:programPage.nextCursor});
+    if(readScope.collections.majors.state==='AVAILABLE')Object.assign(readScope.collections.majors,{scope:'OWNER_QUERY',total:majorPage.total,hasMore:majorPage.hasMore,nextCursor:majorPage.nextCursor});
 
-    return {
+    return finalizeGraph({
       readScope,
       subject: {
         ownerId: country.id,
@@ -657,13 +642,17 @@ export class CrossDomainGraphReadService {
         },
         editorialContent,
       },
-    };
+    }, `getCountryGraphByIso2Code:${country.id}`, options, pageSize);
   }
 
 
-  private async relatedEditorial(targetType: CmsDomainTargetType, targetId: string, locale: string): Promise<EditorialGraphIdentity[]> {
+  private emptyPage(pageSize:number){return {data:[],total:0,page:1,pageSize,totalPages:0,hasMore:false,nextCursor:null};}
+
+  private async relatedEditorial(targetType: CmsDomainTargetType, targetId: string, locale: string,options:CrossDomainGraphReadOptions={},scope?:GraphReadScope): Promise<EditorialGraphIdentity[]> {
     if (!this.cmsRepository?.listPublishedByDomainTarget) return [];
-    const rows = await this.cmsRepository.listPublishedByDomainTarget(targetType, targetId, locale, 'manaratak', 6);
+    const ownerPage=this.cmsRepository.listPublishedDomainTargetPage?await this.cmsRepository.listPublishedDomainTargetPage(targetType,targetId,locale,options.editorialCursor,options.pageSize??12):null;
+    const rows=ownerPage?.data??await this.cmsRepository.listPublishedByDomainTarget(targetType,targetId,locale,'manaratak',6);
+    if(ownerPage&&scope)scope.collections.editorialContent={state:'AVAILABLE',scope:'OWNER_QUERY',total:ownerPage.total,hasMore:ownerPage.hasMore,nextCursor:ownerPage.nextCursor};
     return rows.map((item: PublicCmsContentDto) => ({
       contentId: item.contentId,
       publicId: item.publicId,

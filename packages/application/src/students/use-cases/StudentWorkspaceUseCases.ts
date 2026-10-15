@@ -129,7 +129,7 @@ export class StudentWorkspaceUseCases {
         id: 'CANONICAL_READ',
         savedAt: new Date(),
         updatedAt: new Date(),
-      });
+      }, 'CANONICALIZE_NEW_SAVE');
     } catch {
       throw new Error('STUDENT_SAVED_OWNER_UNAVAILABLE');
     }

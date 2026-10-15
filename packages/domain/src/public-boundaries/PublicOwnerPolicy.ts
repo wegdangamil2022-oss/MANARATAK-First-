@@ -1,3 +1,4 @@
+import {evaluateAdmissionScores,type AdmissionVersionScale} from '../tests-platform/AdmissionScoreInterpretation';
 /** Shared owner-publication decisions. Presence of a foreign key is never publication proof. */
 export function isPublicScholarshipOwner(value: {
   publicationStatus?: unknown;
@@ -96,19 +97,18 @@ export function isPublicAdmissionRequirement(value: {
     currentPublishedVersion?: {
       id?: string;
       status?: string;
-      scoreScales?: Array<{ overallMinimum?: number | null; overallMaximum?: number | null }>;
+      metadata?:unknown;
+      scoreScales?: AdmissionVersionScale[];
     } | null;
   };
   testVariant?: { testId?: string; isActive?: boolean } | null;
   testVersion?: {
     testId?: string;
     status?: string;
-    scoreScales?: Array<{ overallMinimum?: number | null; overallMaximum?: number | null }>;
+    metadata?:unknown;
+    scoreScales?: AdmissionVersionScale[];
   } | null;
 }): boolean {
-  if(value.sectionScores!==undefined&&value.sectionScores!==null){
-    if(typeof value.sectionScores!=='object'||Array.isArray(value.sectionScores)||Object.keys(value.sectionScores).length)return false;
-  }
   if (value.status !== 'ACTIVE' || value.internationalTest?.status !== 'PUBLISHED' || value.internationalTest.isPubliclyVisible === false) return false;
   const version = value.testVersionId
     ? value.testVersion
@@ -120,16 +120,8 @@ export function isPublicAdmissionRequirement(value: {
     (value.testVariant?.testId !== value.internationalTestId || value.testVariant?.isActive !== true)
   )
     return false;
-  const scales = version.scoreScales ?? [];
-  if (value.minimumScore != null && scales.length !== 1) return false;
-  return (
-    publicScoreDecision(
-      value.minimumScore,
-      scales[0]
-        ? { minimumScore: scales[0].overallMinimum, maximumScore: scales[0].overallMaximum }
-        : null,
-    ) === 'VALID'
-  );
+  if(value.testVariantId){const publishedIds=(version.metadata as {publishedVariantIds?:unknown}|null)?.publishedVariantIds;const scaleProof=(version.scoreScales??[]).some(scale=>(scale.metadata as {admissionScoreScope?:{variantId?:string}}|null)?.admissionScoreScope?.variantId===value.testVariantId);if(!(Array.isArray(publishedIds)&&publishedIds.includes(value.testVariantId))&&!scaleProof)return false;}
+  return evaluateAdmissionScores({variantId:value.testVariantId,minimumScore:value.minimumScore,sectionScores:value.sectionScores},version.scoreScales??[]).state==='VALID';
 }
 
 /** Canonical parent and joined-owner proof for a public scholarship institution edge. */

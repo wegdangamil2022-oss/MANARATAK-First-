@@ -1,9 +1,9 @@
 {
   "section": 27,
   "sectionClosed": false,
-  "sourceStatus": "PARTIAL_SOURCE_IMPLEMENTATION",
+  "sourceStatus": "FUNCTIONAL_SOURCE_IMPLEMENTED_WITH_EXPLICIT_LIMITS",
   "taskCount": 38,
-  "meaning": "Current owner-links batch implements private saved-owner adapters, reviewed Test discovery, certificate affiliation history and canonical academic exploration. Other graph/lifecycle/document/integrity capabilities remain genuine source gaps.",
+  "meaning": "Previously listed functional source gaps are implemented with explicit owner-local and bounded-read contracts. No full production or E2E closure is claimed. The full disposable PostgreSQL/API test suite and execution are deferred outside this user-authorized code-only follow-up.",
   "tasks": [
     {
       "id": "XMI-001",
@@ -49,9 +49,9 @@
     },
     {
       "id": "XMI-007",
-      "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "CrossDomainReadModelRouter; GraphReadPolicy",
-      "disposition": "Page>1 explicitly unsupported, bounded country program cursor supplied. Full per-edge pagination UI not implemented.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "GraphPagination; CrossDomainReadModelRouter; owner-native paged ports; PublicRelationshipPager",
+      "disposition": "Independent per-edge cursors, scope validation, stable structural relation pages, owner-native Test/CMS/career cursors and public forward/reset controls. Shared page>1 remains explicitly rejected.",
       "runtimeVerified": false
     },
     {
@@ -63,16 +63,16 @@
     },
     {
       "id": "XMI-009",
-      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
       "paths": "GraphReadPolicy; CrossDomainGraphReadService",
-      "disposition": "Country owner isolation; optional CMS isolated in other graphs; Source fixture rechecked; live five-second response budget unverified.",
+      "disposition": "Per-collection failure isolation extended across all graph subjects. Unavailable owner totals remain unknown. Live latency/SLA unverified.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-010",
-      "status": "PARTIAL_SOURCE_IMPLEMENTED",
-      "paths": "GraphOwnerLabels; CrossDomainGraphReadService; usePublicRelationshipGraph",
-      "disposition": "Published owner labels and exact-target reviewed program translations with locale provenance, explicit client locale and fallback marker. Remaining graph localization consumers/contracts stay open.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "GraphOwnerLabels; GraphReadPolicy; PublicRelationshipPager; usePublicRelationshipGraph",
+      "disposition": "Owner-published localized identities/program/parent labels, requested locale, fallback provenance and warning, same canonical IDs/slugs and translated relationship captions. Missing translations remain explicit fallbacks.",
       "runtimeVerified": false
     },
     {
@@ -91,9 +91,9 @@
     },
     {
       "id": "XMI-013",
-      "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "PublicOwnerPolicy.isPublicAdmissionRequirement",
-      "disposition": "Owner published-version overall scale checked; ambiguous/missing/section-scale semantics fail closed. Reviewed variant/section interpretation workflow missing.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "AdmissionScoreInterpretation; InternationalTestGovernancePersistence; AdmissionScoreSql; TestAdmissionScoreEditor; AdmissionRequirementScoreEditor",
+      "disposition": "Owner-reviewed version-local overall/variant/section scale interpretation and increment validation; public owner contract; published variant membership; approval hash includes interpretation; publication now freezes scale rows. Unknown legacy scales need owner re-review/republication, not backfill or guessed rules.",
       "runtimeVerified": false
     },
     {
@@ -119,9 +119,9 @@
     },
     {
       "id": "XMI-017",
-      "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "StudentApplicationTrackerUseCases.reconcileOwnerPage; PrismaStudentApplicationTrackerRepository; delivery policy",
-      "disposition": "Bounded CAS/transactional-outbox deadline/slug pull, delivery-time owner recheck. Production cadence, extension delivery, aliases and tombstones not verified.",
+      "status": "SOURCE_IMPLEMENTED_WITH_BOUNDED_PULL",
+      "paths": "CatalogLifecycleReadPolicy; StudentApplicationTrackerUseCases; ScholarshipStudentApplicationTrackerGateway; existing reconciliation worker and delivery guard",
+      "disposition": "Exact-cycle owner facts and revision/effective-time read stamp; visible30s refresh; durable private snapshots, bounded50-row owner pull and pre-delivery owner guard. SLA depends on successful calls/full pass; runtime cadence not certified.",
       "runtimeVerified": false
     },
     {
@@ -140,16 +140,16 @@
     },
     {
       "id": "XMI-020",
-      "status": "PARTIAL_SOURCE_IMPLEMENTED",
-      "paths": "StudentApplicationTrackerUseCases; tracker cycle migration and snapshots",
-      "disposition": "Canonical-cycle and legacy owner snapshots preserve private history while current owner links fail closed. Governed alias/merge reconciliation still unimplemented.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "ScholarshipReferenceLifecycle; ScholarshipReferenceTransition; owner Admin/public reference APIs; OwnerReferenceNotice; source migration",
+      "disposition": "Immutable P12 identity policy, governed source/target-revision-fenced merge/tombstone/restore and independent reviewer, durable immutable decisions, no physical deletion and no student cycle/history transfer. Published replacement is rechecked and offered separately; restore returns same identity to draft review.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-021",
       "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
-      "paths": "PrivateStudentSavedItemHydrationGateways; PrismaStudentWorkspaceRepository.inspectPrivateToolResult; StudentPrivateToolResult; StudentCertificatesPanel",
-      "disposition": "Owned certificate references and encrypted retained private tool copies hydrate through owner gateways; foreign rows filtered; lazy private read replaces client metadata rendering. New result creation remains the dedicated owner save flow.",
+      "paths": "PrivateStudentSavedItemHydrationGateways; StudentSavedItemHydrationGateways; StudentWorkspaceUseCases; StudentSavedItemHydrationService",
+      "disposition": "Owned certificate/private tool adapters preserved. Existing saved history now requires the same canonical/public identity and cannot silently follow a reused slug; slug canonicalization is an explicit new-save context. New artifact creation remains owner-controlled.",
       "runtimeVerified": false
     },
     {
@@ -196,23 +196,23 @@
     },
     {
       "id": "XMI-028",
-      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
-      "paths": "usePublicRelationshipGraph; PublicGraphNavigationPolicy",
-      "disposition": "All selected graph types refocus with30s freshness, request abort/generation fence, stale state and selection reset; browser behavior unrun.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "usePublicRelationshipGraph; PublicRelationshipPager; TestOwnerDiscovery",
+      "disposition": "Selected graphs and opt-in discovery refresh on visible30s cadence/refocus with generation fencing; unavailable pages fail closed and page cursors can reset. Browser/runtime observation deferred.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-029",
-      "status": "PARTIAL_SOURCE_IMPLEMENTED",
-      "paths": "StudentApplicationDocumentBinding; StudentApplicationTrackerUseCases; StudentWorkspaceRouter; StudentApplicationDocuments",
-      "disposition": "Private cycle/requirement/asset binding and revocable consent preserved. Panel now selects PDF and images, first100 each, with independent availability. Upload and academic attestation remain unimplemented.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "StudentDocumentUploadUseCases; StudentDocumentReviewUseCases; StudentDocumentAttestationPolicy; StudentDocumentReviewRouter; StudentDocumentReviewPanel; StudentApplicationDocuments; source migration",
+      "disposition": "Private PDF/image upload through EAP quarantine/verify/scan/sanitize/activate; separate revocable review consent and dedicated permission; audited short grants; version/cycle/asset/hash-bound human academic review with CAS, withdrawal and expiry/revision readiness. Internal staff review does not replace institutional certification or submit an application.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-030",
-      "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "Public graph live reads/refocus; Student tracker bounded owner pull",
-      "disposition": "No unified versioned lifecycle/tombstone/merge/opt-in propagation across every owner/consumer.",
+      "status": "SOURCE_IMPLEMENTED_WITH_BOUNDED_PULL",
+      "paths": "CatalogLifecycleReadPolicy; live graph/saved/Student/CMS owner reads; P12 reference transitions; existing P15 worker/delivery guards",
+      "disposition": "Explicit opt-in consumer contracts, no shared canonical mirror, live reads and visible30s refresh, exact-cycle pre-delivery safety and bounded catchup. Native owner retire/merge states respected; no speculative merge commands in catalogs without that workflow. P12 governed aliases preserve P15 history.",
       "runtimeVerified": false
     },
     {
@@ -224,16 +224,16 @@
     },
     {
       "id": "XMI-032",
-      "status": "PARTIAL_SOURCE_IMPLEMENTED",
-      "paths": "CrossModuleIntegrityUseCase; CrossModuleIntegrityRouter; CrossModuleIntegrityPage",
-      "disposition": "Permissioned real four-owner sample API/UI with pagination, missing-target/current-publication/parent checks and explicit partial coverage. CMS/all-owner relationship and audit coverage remain open.",
+      "status": "SOURCE_IMPLEMENTED_WITH_DECLARED_SAMPLE_SCOPE",
+      "paths": "CrossModuleIntegrityUseCase; CrossModuleIntegrityReport; CrossModuleIntegrityRouter; CrossModuleIntegrityPage; owner integrity-read ports",
+      "disposition": "Five source catalogs including CMS; permissioned polymorphic Program/Course/Country targets; source detail hydration; missing/nonpublic/parent/type checks; exact-ID reverse relationship parity probes; owner repair links and truthful freshness. Bounded20 sources/50 targets/10 pairs is intentional, not full production certification.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-033",
-      "status": "PARTIAL_SOURCE_IMPLEMENTED",
+      "status": "TARGETED_SOURCE_CONTRACTS_IMPLEMENTED_FULL_E2E_DEFERRED",
       "paths": "tests/integration/section27; .section27-owner-links-vitest.config.ts; .section27-vitest.config.ts",
-      "disposition": "Targeted source/API/SQL-construction/permission/private-owner/UI checks expanded for this batch. No exhaustive all-owner rollback or live runtime matrix.",
+      "disposition": "Expanded targeted score/version/variant, graph cursor, privacy/consent, EAP phase, attestation, alias/revision and integrity/API/UI contracts. Full disposable PostgreSQL plus API E2E suite completion/execution remains deferred outside this user code-only scope. No mock-based E2E success claim.",
       "runtimeVerified": false
     },
     {
@@ -245,9 +245,9 @@
     },
     {
       "id": "XMI-035",
-      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
-      "paths": "PrismaUniversityRepository.listPublishedProgramGraph/listPublishedAcademicUniversityPage; public program predicate",
-      "disposition": "Country program query independent and same exact degree profile policy; native country-major UI cursor remaining007.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "PrismaUniversityRepository.listPublishedMajorGraph/listPublishedProgramGraph; CrossDomainGraphReadService; PublicRelationshipPager",
+      "disposition": "Country majors have independent distinct owner query/count/cursor over the same active mapped degree-profile predicate as program graph. No university/program first-page inference; public continuation is available.",
       "runtimeVerified": false
     },
     {
@@ -273,6 +273,14 @@
     }
   ],
   "date": "2026-10-15",
-  "latestReport": "SECTION_27_OWNER_LINKS_2026-10-15.md",
-  "latestValidation": "section-27-owner-links-validation-2026-10-15.json"
+  "latestReport": "SECTION_27_FUNCTIONAL_COMPLETION_2026-10-15.md",
+  "latestValidation": "section-27-functional-validation-2026-10-15.json",
+  "functionalSourceImplemented": true,
+  "deferredByUserScope": [
+    {
+      "id": "XMI-033",
+      "scope": "Full disposable PostgreSQL/API E2E suite completion and execution; live rollback/concurrency, provider/worker and deployment evidence",
+      "reason": "User requested functional code completion without heavy tests or runtime."
+    }
+  ]
 }

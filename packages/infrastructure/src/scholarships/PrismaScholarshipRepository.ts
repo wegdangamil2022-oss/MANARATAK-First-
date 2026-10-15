@@ -1,3 +1,4 @@
+import {ScholarshipReferenceLifecycle} from './ScholarshipReferenceLifecycle';
 import {encodeStableCursor} from '../api-foundation/StableCursor';
 import type {PublishedProgramScholarshipPage} from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
@@ -65,6 +66,12 @@ const RESERVED_OPTIONAL_KEYS = new Set([
 
 export class PrismaScholarshipRepository implements ITransactionalScholarshipRepository {
   constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
+
+  listReferenceTransitions(id:string){return new ScholarshipReferenceLifecycle(this.prisma).list(id);}
+  readReferenceState(id:string){return new ScholarshipReferenceLifecycle(this.prisma).state(id);}
+  readReferenceStateBySlug(slug:string){return new ScholarshipReferenceLifecycle(this.prisma).stateBySlug(slug);}
+  proposeReferenceTransition(input:Parameters<ScholarshipReferenceLifecycle['propose']>[0]){return new ScholarshipReferenceLifecycle(this.prisma,this.transactionBound).propose(input);}
+  approveReferenceTransition(sourceId:string,transitionId:string,revision:number,actor:string,reason:string){return new ScholarshipReferenceLifecycle(this.prisma,this.transactionBound).approve(sourceId,transitionId,revision,actor,reason);}
 
   /** Runs on the same transaction-bound repository as import/manual writes. */
   private async normalizeProgramParents<
@@ -558,6 +565,8 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       completenessStatus: ScholarshipCompletenessState.COMPLETE,
     };
     const constraints: Prisma.ScholarshipWhereInput[] = [];
+    if(filters.ownerId)where.id=filters.ownerId;
+    if(filters.search)constraints.push({OR:[{displayName:{contains:filters.search,mode:'insensitive'}},{publicId:{contains:filters.search,mode:'insensitive'}}]});
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
     if (filters.studyLanguageReferenceId) where.studyLanguageReferenceId = filters.studyLanguageReferenceId;
     if (filters.currencyReferenceId) constraints.push({ benefits: { some: { currencyReferenceId: filters.currencyReferenceId } } });

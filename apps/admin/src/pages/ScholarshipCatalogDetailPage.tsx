@@ -1,3 +1,4 @@
+import {ScholarshipReferenceLifecycleEditor} from '../features/integration/ScholarshipReferenceLifecycleEditor';
 import type {
 ScholarshipDegreeTargetDto,
 ScholarshipDto,
@@ -1376,6 +1377,7 @@ export function ScholarshipDetailPage() {
           )}
 
           {/* Tab 6: Required Documents */}
+          {activeTab==='identity'&&<ScholarshipReferenceLifecycleEditor ownerId={scholarship.id} onChanged={()=>void load()}/>}
           {activeTab === 'documents' && (
             <div className="space-y-6">
               <Card

@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 419,
-  "reachableCount": 419,
+  "registrationCount": 423,
+  "reachableCount": 423,
   "unreachable": [],
   "registrations": [
     {
@@ -572,7 +572,8 @@
         "ingestAssetUseCase",
         "nativeCourseUseCases",
         "processAssetLifecycleUseCase",
-        "recoverAssetActivationsUseCase"
+        "recoverAssetActivationsUseCase",
+        "studentDocumentUploadUseCases"
       ],
       "dependencies": [
         "prisma"
@@ -596,6 +597,7 @@
         "referenceDataUseCases",
         "serviceOperationsUseCases",
         "studentApplicationTrackerUseCases",
+        "studentDocumentReviewUseCases",
         "studentServiceRequestUseCases",
         "studentToolRegistryUseCases",
         "studentWorkspaceUseCases",
@@ -875,8 +877,10 @@
         "apps/api/src/presentation/api/router/CrossModuleIntegrityRouter.ts",
         "apps/api/src/presentation/api/router/FinanceAdminRouter.ts",
         "apps/api/src/presentation/api/router/NotificationRouter.ts",
+        "apps/api/src/presentation/api/router/SearchRouter.ts",
         "apps/api/src/presentation/api/router/ServiceAdminRouter.ts",
         "apps/api/src/presentation/api/router/SettingsAdminRouter.ts",
+        "apps/api/src/presentation/api/router/StudentDocumentReviewRouter.ts",
         "apps/api/src/presentation/api/router/StudentSupportAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentToolsAdminRouter.ts",
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
@@ -895,6 +899,15 @@
         "roleAssignmentRepository",
         "roleRepository"
       ]
+    },
+    {
+      "name": "authRateLimitKey",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/AuthRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
     },
     {
       "name": "authRouter",
@@ -1606,6 +1619,7 @@
         "adminCmsUseCases",
         "cmsStudentSavedItemHydrationGateway",
         "crossDomainGraphReadService",
+        "crossModuleIntegrityUseCase",
         "publicCmsUseCases"
       ],
       "dependencies": [
@@ -1993,6 +2007,7 @@
         "coursePublicationService",
         "courseStudentDashboardReadGateway",
         "courseStudentSavedItemHydrationGateway",
+        "crossModuleIntegrityUseCase",
         "learningPathUseCases",
         "nativeCourseUseCases",
         "publicCourseUseCases"
@@ -2089,8 +2104,11 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": [
+        "cmsRepository",
+        "courseRepository",
         "internationalTestRepository",
         "majorRepository",
+        "referenceDataRepository",
         "scholarshipRepository",
         "universityRepository"
       ]
@@ -2163,9 +2181,7 @@
     {
       "name": "emailDeliveryGateway",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/AuthRouter.ts"
-      ],
+      "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "forgotPasswordUseCase",
         "registerUserUseCase",
@@ -2820,7 +2836,8 @@
         "apps/api/src/presentation/api/router/AssetPlatformRouter.ts"
       ],
       "reachableThroughRegistrations": [
-        "certificateArtifactStore"
+        "certificateArtifactStore",
+        "studentDocumentUploadUseCases"
       ],
       "dependencies": [
         "assetRecordRepository",
@@ -3279,6 +3296,7 @@
         "apps/api/src/app.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
+        "apps/api/src/presentation/api/router/SearchRouter.ts",
         "apps/api/src/presentation/security/SecurityMiddlewareFactory.ts"
       ],
       "reachableThroughRegistrations": [
@@ -3536,9 +3554,7 @@
     {
       "name": "passwordResetTokenRepository",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [
-        "apps/api/src/presentation/api/router/AuthRouter.ts"
-      ],
+      "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "forgotPasswordUseCase",
         "resetPasswordUseCase"
@@ -3606,6 +3622,7 @@
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/AuthorizationAdminRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
+        "apps/api/src/presentation/api/router/SearchRouter.ts",
         "apps/api/src/presentation/api/router/SettingsAdminRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts",
         "apps/api/src/presentation/middleware/AuthMiddleware.ts",
@@ -3628,8 +3645,7 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
         "apps/api/src/app.ts",
-        "apps/api/src/infrastructure/runtime/RuntimeResourceRegistry.ts",
-        "apps/api/src/presentation/api/router/AuthRouter.ts"
+        "apps/api/src/infrastructure/runtime/RuntimeResourceRegistry.ts"
       ],
       "reachableThroughRegistrations": [
         "academicTaxonomyImportGateway",
@@ -3758,6 +3774,8 @@
         "certificateRenderingService",
         "recoverAssetActivationsUseCase",
         "serviceDeliveryGateway",
+        "studentDocumentReviewUseCases",
+        "studentDocumentUploadUseCases",
         "studyDestinationUseCases"
       ],
       "dependencies": [
@@ -3909,6 +3927,7 @@
       "reachableThroughRegistrations": [
         "careerReferenceGateway",
         "crossDomainGraphReadService",
+        "crossModuleIntegrityUseCase",
         "referenceDataUseCases",
         "referenceResolver",
         "studyDestinationUseCases"
@@ -4565,6 +4584,7 @@
         "apps/api/src/app.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
+        "apps/api/src/presentation/api/router/SearchRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts",
         "apps/api/src/presentation/middleware/AuthMiddleware.ts",
         "apps/api/src/presentation/middleware/OptionalAuthMiddleware.ts",
@@ -4805,7 +4825,8 @@
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
         "studentApplicationReminderDeliveryPolicy",
-        "studentApplicationTrackerUseCases"
+        "studentApplicationTrackerUseCases",
+        "studentDocumentReviewUseCases"
       ],
       "dependencies": [
         "scholarshipRepository"
@@ -4818,7 +4839,8 @@
       "reachableThroughRegistrations": [
         "studentApplicationReminderDeliveryPolicy",
         "studentApplicationReminderOutboxDeliveryGateway",
-        "studentApplicationTrackerUseCases"
+        "studentApplicationTrackerUseCases",
+        "studentDocumentReviewUseCases"
       ],
       "dependencies": [
         "prisma"
@@ -4864,6 +4886,44 @@
         "courseStudentDashboardReadGateway",
         "studentServiceRequestUseCases",
         "studentWorkspaceUseCases"
+      ]
+    },
+    {
+      "name": "studentDocumentReviewRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "studentDocumentReviewUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/StudentDocumentReviewRouter.ts",
+        "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "assetReferencePolicy",
+        "processAssetLifecycleUseCase",
+        "studentApplicationScholarshipGateway",
+        "studentApplicationTrackerRepository"
+      ]
+    },
+    {
+      "name": "studentDocumentUploadUseCases",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "assetRecordRepository",
+        "ingestAssetUseCase",
+        "processAssetLifecycleUseCase",
+        "studentWorkspaceRepository"
       ]
     },
     {
@@ -5227,6 +5287,7 @@
         "careerStudentOwnershipGateway",
         "notificationRecipientGateway",
         "studentContextGateway",
+        "studentDocumentUploadUseCases",
         "studentSavedItemHydrationService",
         "studentToolPrivateSavedItemHydrationGateway",
         "studentToolSaveGateway",
@@ -5349,6 +5410,7 @@
         "apps/api/src/app.ts",
         "apps/api/src/presentation/api/router/AuthRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
+        "apps/api/src/presentation/api/router/SearchRouter.ts",
         "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts",
         "apps/api/src/presentation/middleware/AuthMiddleware.ts",
         "apps/api/src/presentation/middleware/OptionalAuthMiddleware.ts",
