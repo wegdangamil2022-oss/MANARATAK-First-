@@ -1577,6 +1577,8 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedScholarships selection={publicDataMode === 'api' ? 'published-preview' : 'featured'}
                         scholarships={scholarships}
+                        status={publicLive.statuses.scholarships}
+                        onRetry={publicLive.reload}
                         onSelectScholarship={setSelectedScholarship}
                         onToggleFavorite={(id) => handleToggleFavorite('scholarship', id)}
                         favoriteIds={favoriteIdsFor('scholarship')}
@@ -1610,6 +1612,8 @@ export default function App() {
                       <FeaturedCountries
                         countries={countries}
                         dataMode={publicDataMode}
+                        status={publicLive.statuses.countries}
+                        onRetry={publicLive.reload}
                         onSelectCountry={(country) => {
                           setCountryNavigationName(country);
                           setSelectedCategory('countries');
@@ -1643,6 +1647,8 @@ export default function App() {
                       <FeaturedExams
                         exams={exams}
                         dataMode={publicDataMode}
+                        status={publicLive.statuses.exams}
+                        onRetry={publicLive.reload}
                         onSelectExam={(exam) => {
                           setSelectedExam(exam);
                           window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1712,6 +1718,9 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedArticles
                         articles={articles}
+                        dataMode={publicDataMode}
+                        status={publicLive.statuses.articles}
+                        onRetry={publicLive.reload}
                         onSelectArticle={(articleId) => {
                           const article = articles.find((item) => item.id === articleId);
                           if (!article) return;
@@ -1726,6 +1735,8 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedServices
                         services={services}
+                        status={publicLive.statuses.services}
+                        onRetry={publicLive.reload}
                         onViewAllClick={() => openSection('services')}
                         onSelectService={(service) => {
                           setSelectedServiceTrack(service.audience);
