@@ -23,10 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B14",
-  "remaining": [
-    "B14"
-  ],
+  "next": null,
+  "remaining": [],
   "B02": {
     "status": "SOURCE_VERIFIED",
     "baselineCommit": "0a8c649",
@@ -798,8 +796,8 @@
     ]
   },
   "B14": {
-    "status": "IN_PROGRESS",
-    "packageClosed": false,
+    "status": "SOURCE_RECONCILED_WITH_EXPLICIT_UNRECHECKED_CORRECTIONS",
+    "packageClosed": true,
     "findings": [
       "ARCH-08",
       "ADM-08"
@@ -809,6 +807,46 @@
     "closureRegister": "docs/remediation/ARCHITECTURAL_SECURITY_CLOSURE_REGISTER_2026-10-15.json",
     "phaseRegister": "docs/remediation/ARCHITECTURAL_SECURITY_PHASE_STATUS_2026-10-15.json",
     "runtimeStatus": "PENDING",
-    "deploymentStatus": "NOT_PERFORMED"
-  }
+    "deploymentStatus": "NOT_PERFORMED",
+    "closureLevel": "SOURCE_SCOPE_ONLY",
+    "sourceCheckpointCommit": "2f3048f82a75379bb16b1e82aa71b8fda409a779",
+    "requiredPlanSourceGatesPassed": 7,
+    "additionalSourceChecksPassed": 2,
+    "gateRuns": 1,
+    "gateEvidence": "docs/reviews/evidence/b14-source-gates-2026-10-15/summary.json",
+    "findingsReconciled": 54,
+    "originalFindings": 49,
+    "additionalFindings": 5,
+    "phasesReconciled": 24,
+    "sourceChecks": {
+      "sevenPlanVerifiers": "PASS_7_OF_7",
+      "closureCoverageVerifier": "PASS_54_FINDINGS_24_PHASES",
+      "sourceQuality": "PASS",
+      "newVerifierEslintErrors": 0,
+      "diffCheck": "PASS",
+      "typecheck": "B13_SINGLE_RUN_PASS_BEFORE_TWO_SMALL_CORRECTIONS_NO_RERUN"
+    },
+    "unusedLegacyPageRemoved": "apps/admin/src/pages/ScholarshipDetailPage.tsx",
+    "usedAiOperationsRetained": true,
+    "databaseOrProvidersContacted": false,
+    "heavyTestsOrBuildPerformed": false,
+    "nativeB13FailuresCorrectedNotRerun": 2
+  },
+  "approvedSourceScopeImplemented": true,
+  "sourceAssurance": "PLAN_SOURCE_GATES_PASS_WITH_B13_TWO_CORRECTIONS_NOT_RERUN",
+  "runtimeClosureStatus": "PENDING",
+  "productionReadiness": "NOT_VERIFIED_SECTION28_NO_GO",
+  "sourceCheckpointCommit": "2f3048f82a75379bb16b1e82aa71b8fda409a779",
+  "requestedUndefinedPackage": {
+    "id": "B15",
+    "status": "NOT_DEFINED_IN_APPROVED_PLAN",
+    "implemented": false,
+    "reason": "The approved plan enumerates B00–B14 only. No scope or acceptance criteria were invented; P15 is an existing roadmap phase, not a B15 remediation package."
+  },
+  "resumeRequirements": [
+    "No next B package exists in the approved plan; a new scope reference is needed for B15",
+    "B13 two native status corrections and the credit V8 fixture correction were not rerun, as requested",
+    "Runtime/DB/provider/browser/worker and supported Node22 proof remain separately pending",
+    "Section27/28 open gates and production NO_GO are retained"
+  ]
 }

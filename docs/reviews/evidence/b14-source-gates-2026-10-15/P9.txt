@@ -1,0 +1,98 @@
+PASS P9-PICKER-001 canonical picker API exists
+PASS P9-PICKER-001 canonical option carries id
+PASS P9-PICKER-001 canonical option carries label
+PASS P9-PICKER-001 canonical option carries lifecycle
+PASS P9-PICKER-002 inactive lifecycle states are blocked
+PASS P9-PICKER-002 picker disables blocked options
+PASS P9-PICKER-003 existing missing canonical IDs are explicit
+PASS P9-PICKER-003 blocked existing relation is explicit
+PASS P9-PICKER-004 country owner loader exists
+PASS P9-PICKER-004 language owner loader exists
+PASS P9-PICKER-004 currency owner loader exists
+PASS P9-PICKER-004 degree/major/test owner loaders exist
+PASS P9-PICKER-004 university/program owner loaders exist
+PASS P9-REF-001 P7 language owner read is exposed
+PASS P9-REF-001 P7 currency owner read is exposed
+PASS P9-BOUNDARY-001 no @prisma/client import in Admin source
+PASS P9-BOUNDARY-001 no Prisma repository import in Admin source
+PASS P9-BOUNDARY-001 no direct prisma client usage in Admin source
+PASS P9-UNI-001 University relationship editor route exists
+PASS P9-UNI-001 geography writes canonical IDs
+PASS P9-UNI-001 geography mutation calls owner PATCH API
+PASS P9-UNI-002 AcademicProgram authoring uses stable owner CRUD API
+PASS P9-UNI-002 program editor consumes Degree/Major/Test canonical pickers
+PASS P9-UNI-003 University owner router accepts canonical geography IDs
+PASS P9-UNI-003 organization-unit identity is retained in read DTO path
+PASS P9-UNI-004 Program canonical ID is preserved on edit
+PASS P9-UNI-004 Program removal archives instead of hard-deleting canonical identity
+PASS P9-UNI-004 Admin editor no longer uses destructive normalized-details replacement for programs
+PASS P9-UNI-005 owner validation constrains Program campus/unit to the same University
+PASS P9-UNI-005 owner validation rejects inactive canonical relationships
+PASS P9-UNI-006 published University relationship structure is immutable
+PASS P9-UNI-007 stable Program authoring regression tests exist
+PASS P9-SCH-001 Scholarship relationship editor route exists
+PASS P9-SCH-001 Admin sends one canonical relationship replacement payload
+PASS P9-SCH-002 owner API route exists
+PASS P9-SCH-002 owner Application use case is called by router
+PASS P9-SCH-003 owner use case validates canonical references
+PASS P9-SCH-003 inactive references fail closed
+PASS P9-SCH-003 missing references fail closed
+PASS P9-SCH-004 program/university ownership mismatch fails closed
+PASS P9-SCH-004 published structure remains immutable
+PASS P9-SCH-005 canonical lookup supports internal owner identity
+PASS P9-SCH-005 canonical lookup exposes lifecycle to authoring guard
+PASS P9-SCH-005 unsupported canonical lookup targets fail closed
+PASS P9-SCH-006 DI injects canonical lookup gateway into owner use case
+PASS P9-SCH-007 focused canonical authoring specification exists
+PASS P9-COURSE-001 relationship analysis is owner-API driven
+PASS P9-COURSE-001 language canonical relationship is owner-API driven
+PASS P9-COURSE-002 major projection is owner-API driven
+PASS P9-COURSE-002 major projection decision is owner-API driven
+PASS P9-COURSE-003 taxonomy proposal approval/rejection remains owner-API driven
+PASS P9-SVC-001 Service Admin writes canonical country IDs
+PASS P9-SVC-001 Service Admin writes canonical language IDs
+PASS P9-SVC-002 Service Admin uses canonical multi picker for country/language
+PASS P9-SVC-002 old text relationship form fields are absent
+PASS P9-CAREER-001 employer/job forms carry countryReferenceId
+PASS P9-CAREER-001 employer/job forms carry cityReferenceId
+PASS P9-CAREER-002 Career Admin uses P7 country/city canonical pickers
+PASS P9-CAREER-002 Career owner API receives canonical geography
+PASS P9-CAREER-003 text geography is not the create-job relationship payload
+PASS P9-EXISTING-001 R-049 owner Admin page/router remain present
+PASS P9-EXISTING-001 R-050 owner Admin page/router remain present
+PASS P9-EXISTING-001 R-051 owner Admin page/router remain present
+PASS P9-EXISTING-001 R-052 owner Admin page/router remain present
+PASS P9-EXISTING-001 R-053 owner Admin page/router remain present
+PASS P9-MATRIX-001 active matrix is current source-rebaseline authority
+PASS P9-MATRIX-002 R-042 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-042 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-043 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-043 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-044 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-044 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-045 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-045 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-046 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-046 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-047 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-047 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-048 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-048 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-049 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-049 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-050 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-050 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-051 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-051 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-052 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-052 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-053 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-053 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-054 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-054 no longer reports a P9 source gap
+PASS P9-MATRIX-002 R-055 is source-closed with runtime proof pending
+PASS P9-MATRIX-003 R-055 no longer reports a P9 source gap
+PASS P9-DOC-001 closure record exists
+PASS P9-DOC-001 closure record preserves source/runtime boundary
+PASS P9-DOC-001 closure record states no live migration was executed
+P9_PLAN_CLOSURE_VERIFIER = PASS 97/97

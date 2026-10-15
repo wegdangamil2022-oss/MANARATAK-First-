@@ -39,7 +39,7 @@ This roadmap documents both the approved phase model and the current source-stat
 - **Runtime / Database Status:**
   - PostgreSQL-backed migration, backfill, recovery, provider, concurrency, and end-to-end runtime proofs are **not closed by source presence alone**.
   - These remain runtime-pending and must follow the Greenfield database mutation gate plus backup/rollback evidence appropriate to the operation before any data mutation.
-- **Future Roadmap Status:**
+- **Scope and Deferred Status:**
   - **Phases 20–24:** Services/Careers owner code and Admin/Public consumers now have linked source evidence. Full product, runtime and production completion is not inferred.
 
 ## 5. Complete Roadmap

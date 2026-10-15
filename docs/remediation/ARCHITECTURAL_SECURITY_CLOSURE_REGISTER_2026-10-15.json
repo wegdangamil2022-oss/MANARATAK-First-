@@ -1,7 +1,7 @@
 {
   "date": "2026-10-15",
   "baselineReview": "5c0f72cf268f4a127d1f9bc64b8af1bccb7fd1eb",
-  "currentSourceBaseline": "e8f67b7d8ee30c2daef2a65eb5512bb40929e3b2",
+  "currentSourceBaseline": "2f3048f82a75379bb16b1e82aa71b8fda409a779",
   "originalFindingsCount": 49,
   "additionalFindingsCount": 5,
   "findings": [
@@ -117,8 +117,8 @@
       "packages": [
         "B14"
       ],
-      "disposition": "B14_IN_PROGRESS",
-      "evidenceCommit": "e8f67b7d8ee30c2daef2a65eb5512bb40929e3b2",
+      "disposition": "SOURCE_DOCUMENTATION_AND_CLEANUP_RECONCILED",
+      "evidenceCommit": "2f3048f82a75379bb16b1e82aa71b8fda409a779",
       "reports": [
         "docs/reviews/B14_FINAL_SOURCE_RECONCILIATION_2026-10-15.md"
       ],
@@ -492,8 +492,8 @@
       "packages": [
         "B14"
       ],
-      "disposition": "B14_IN_PROGRESS",
-      "evidenceCommit": "e8f67b7d8ee30c2daef2a65eb5512bb40929e3b2",
+      "disposition": "SOURCE_DOCUMENTATION_AND_CLEANUP_RECONCILED",
+      "evidenceCommit": "2f3048f82a75379bb16b1e82aa71b8fda409a779",
       "reports": [
         "docs/reviews/B14_FINAL_SOURCE_RECONCILIATION_2026-10-15.md"
       ],
