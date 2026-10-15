@@ -668,3 +668,9 @@ export class FellowshipDeduplicationService {
     return [name, fellowshipType, professionalDomain].join('|');
   }
 }
+
+/** Owner import review transport contract; contains no application implementation. */
+export interface MajorImportReview {
+ id:string;receiptId:string;requestHash:string;payload:MajorImportPayload;preview:{targetId:string|null;targetRevision:number|null};previewHash:string;version:number;
+ status:'PREVIEWED'|'APPROVED'|'REJECTED'|'APPLIED';reviewer?:string|null;reason?:string|null;result?:unknown;
+}

@@ -1,8 +1,6 @@
 import type { AtomicPersistenceContext, MajorImportPayload } from '@manaratak/domain';
-export interface MajorImportReview {
- id:string;receiptId:string;requestHash:string;payload:MajorImportPayload;preview:{targetId:string|null;targetRevision:number|null};previewHash:string;version:number;
- status:'PREVIEWED'|'APPROVED'|'REJECTED'|'APPLIED';reviewer?:string|null;reason?:string|null;result?:unknown;
-}
+import type { MajorImportReview } from '@manaratak/domain';
+export type { MajorImportReview } from '@manaratak/domain';
 export interface IMajorImportReviewGateway {
  withTransaction(context:AtomicPersistenceContext):IMajorImportReviewGateway;lock():Promise<void>;
  screening(id:string):Promise<{requestHash:string;result:unknown}|null>;verifyArtifact(id:string,sha256:string):Promise<void>;

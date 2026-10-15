@@ -100,3 +100,19 @@ test('scripts/** permits explicitly classified direct Prisma tooling', () => {
   });
   assert.deepEqual(collectOperationalToolingViolations(root), []);
 });
+
+test('reviewed reference-only Prisma strings grant no database implementation access', () => {
+  const file = 'scripts/release/metadata.mjs';
+  const contract = {purpose:'Describe runtime',access:'reference-only',environment:['source only'],gate:'no DB',review:'B04',requiredSourceMarkers:['externalModules']};
+  const policy = JSON.stringify({reviewedPrismaScriptContracts:{[file]:contract}});
+  const root=fixture({'scripts/architecture/operational-tooling-boundary.json':policy,[file]:"const externalModules = ['@prisma/client'];"});
+  assert.deepEqual(collectOperationalToolingViolations(root),[]);
+  fs.appendFileSync(path.join(root,file),"\nimport { PrismaClient } from '@prisma/client';");
+  assert.ok(kinds(collectOperationalToolingViolations(root)).includes('operational-prisma-contract-drift'));
+});
+
+test('reviewed contracts fail closed when their required isolation gates disappear', () => {
+  const file = 'scripts/database/manual.mjs';
+  const root=fixture({'scripts/architecture/operational-tooling-boundary.json':JSON.stringify({reviewedPrismaScriptContracts:{[file]:{purpose:'Isolated test',access:'isolated-read-write',environment:['isolated'],gate:'isolation',review:'B04',requiredSourceMarkers:['DISPOSABLE_REQUIRED']}}}),[file]:"import {PrismaClient} from '@prisma/client';"});
+  assert.ok(kinds(collectOperationalToolingViolations(root)).includes('operational-prisma-contract-drift'));
+});

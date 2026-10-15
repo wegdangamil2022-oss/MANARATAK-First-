@@ -15,6 +15,7 @@ const scholarshipRepo = read('packages/infrastructure/src/scholarships/PrismaSch
 const scholarshipPublic = read('apps/api/src/presentation/api/router/ScholarshipPublicRouter.ts');
 const scholarshipAdmin = read('apps/api/src/presentation/api/router/ScholarshipAdminRouter.ts');
 const scholarshipImportAdminApi = read('apps/admin/src/api/scholarshipImportCenter.ts');
+const canonicalReviewInput = read('apps/admin/src/api/scholarshipCanonicalReviewInput.ts');
 const scholarshipImportAdminPage = read('apps/admin/src/pages/ScholarshipImportCenterPage.tsx');
 const scholarshipCatalogAdminApi = read('apps/admin/src/api/scholarshipCatalog.ts');
 const closureMatrix = read('docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md');
@@ -80,7 +81,7 @@ assert('Publication guard checks monetary Currency canonical id', /area: 'CURREN
 assert('Admin Import Center API exposes AcademicProgram canonical target', /ScholarshipCanonicalTarget[\s\S]*'ACADEMIC_PROGRAM'/.test(scholarshipImportAdminApi));
 assert('Admin Import Center renders AcademicProgram canonical screening decisions', /allowedTargets:[\s\S]*'ACADEMIC_PROGRAM'/.test(scholarshipImportAdminPage));
 assert('Import screening preserves requested canonical id as review input when source label is absent', /rawValue: this\.string\(item\.rawValue \?\? item\.requestedCanonicalId \?\? item\.canonicalId\)/.test(screeningReader));
-assert('Admin Import Center preserves requested canonical id for unresolved review rows', /entry\.rawValue\) \?\? stringValue\(entry\.requestedCanonicalId\) \?\? stringValue\(entry\.canonicalId\)/.test(scholarshipImportAdminPage));
+assert('Admin Import Center preserves requested canonical id for unresolved review rows', scholarshipImportAdminPage.includes('scholarshipCanonicalReviewInput(entry)') && /entry\.rawValue\)\s*\?\?\s*stringValue\(entry\.requestedCanonicalId\)\s*\?\?\s*stringValue\(entry\.canonicalId\)/.test(canonicalReviewInput));
 assert('Admin Scholarship Catalog contract exposes Currency and AcademicProgram unresolved areas', /ScholarshipCatalogUnresolvedLink[\s\S]*'CURRENCY'[\s\S]*'ACADEMIC_PROGRAM'/.test(scholarshipCatalogAdminApi));
 assert('P3 relationship matrix marks R-001 through R-013 source-closed/runtime-pending',
   Array.from({ length: 13 }, (_, index) => `R-${String(index + 1).padStart(3, '0')}`).every((id) => {

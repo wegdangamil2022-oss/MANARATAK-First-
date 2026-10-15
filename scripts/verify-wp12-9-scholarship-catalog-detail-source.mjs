@@ -68,7 +68,7 @@ assert(useCases.includes('countrySemanticsCompatible('), 'Country label/scope se
 assert(useCases.includes('isNonSingleCountryScope(nextScope)'), 'global/multi-country Country guard missing');
 assert(useCases.includes("resolutionStatus: 'INCONSISTENT_SCOPE'"), 'inconsistent Country scope/reference health missing');
 assert(useCases.includes('else if (!nonSingleCountry && scholarship.countrySourceLabel'), 'global Country unresolved behavior missing');
-assert(useCases.includes("result.studyLanguageReferenceId = equivalent ? existing.studyLanguageReferenceId"), 'Study Language semantic invalidation missing');
+assert(/result\.studyLanguageReferenceId\s*=\s*equivalent\s*\?\s*\(?existing\.studyLanguageReferenceId/.test(useCases), 'Study Language semantic invalidation missing');
 assert(useCases.includes('delete result.countryReferenceId'), 'generic catalog update can still replace country reference');
 assert(useCases.includes('delete result.studyLanguageReferenceId'), 'generic catalog update can still replace language reference');
 assert(!router.includes('countryReferenceId: nullableText'), 'router exposes blind country-reference authoring');

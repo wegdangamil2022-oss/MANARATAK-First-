@@ -259,6 +259,16 @@ export function collectOperationalToolingViolations(root) {
   }
   const policy = JSON.parse(fs.readFileSync(policyPath, 'utf8'));
   const classifiedPrisma = new Set(policy.classifiedDirectPrismaScripts ?? []);
+  const reviewed = policy.reviewedPrismaScriptContracts ?? {};
+  for (const [file, contract] of Object.entries(reviewed)) {
+    if (!file.startsWith('scripts/') || file.includes('..') || !fs.existsSync(path.join(root, file)) ||
+        !['reference-only', 'isolated-read-write'].includes(contract.access) ||
+        !contract.purpose?.trim() || !contract.gate?.trim() || !contract.review?.trim() ||
+        !Array.isArray(contract.environment) || !contract.environment.length ||
+        !Array.isArray(contract.requiredSourceMarkers) || !contract.requiredSourceMarkers.length) {
+      violations.push({kind: 'operational-prisma-contract-invalid', file, line: 1, detail: 'Reviewed tooling needs purpose/access/environment/gate/review and verifiable source constraints.'});
+    }
+  }
   const classifiedPresentation = new Set(policy.classifiedPresentationImportScripts ?? []);
   for (const file of walk(root, 'scripts')) {
     const relativeFile = path.relative(root, file).replaceAll('\\', '/');
@@ -269,7 +279,17 @@ export function collectOperationalToolingViolations(root) {
         violations.push(violation('operational-presentation-bypass', root, file, source, imported.index, 'Operational tooling may not import Web/Admin presentation implementation.'));
       }
     }
-    if (source.includes('@prisma/client') && !classifiedPrisma.has(relativeFile)) {
+    const contract = reviewed[relativeFile];
+    if (contract) {
+      const databaseCode = importsOf(source).some(item => item.specifier === '@prisma/client') ||
+        /(?:import|require)\s*\(\s*['"]@prisma\/client['"]/.test(source) || /\bnew\s+PrismaClient\s*\(/.test(source) ||
+        /\.(?:\$queryRaw|\$executeRaw)\b/.test(source);
+      if ((contract.access === 'reference-only' && databaseCode) ||
+          !Array.isArray(contract.requiredSourceMarkers) || !contract.requiredSourceMarkers.every(marker => typeof marker === 'string' && source.includes(marker))) {
+        violations.push(violation('operational-prisma-contract-drift', root, file, source, 0, 'Tooling access classification or required gates no longer match reviewed source.'));
+      }
+    }
+    if (source.includes('@prisma/client') && !classifiedPrisma.has(relativeFile) && !contract) {
       violations.push(violation('operational-prisma-unclassified', root, file, source, source.indexOf('@prisma/client'), 'Direct Prisma use in scripts/** must be explicitly classified in the operational tooling policy.'));
     }
   }

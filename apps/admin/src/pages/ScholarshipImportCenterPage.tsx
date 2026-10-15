@@ -1,3 +1,4 @@
+import { scholarshipCanonicalReviewInput } from '../api/scholarshipCanonicalReviewInput';
 import { useSearchParams } from 'react-router-dom';
 import { reviewOwnerBatch } from '../features/review-queue/ReviewOwnerNavigation';
 import {
@@ -625,10 +626,7 @@ function canonicalItems(record: ScholarshipImportCenterRecordView): Array<{
       stringValue(entry.fieldOrRequirementKey) ??
       stringValue(entry.target);
     const target = stringValue(entry.canonicalEntityType) ?? stringValue(entry.target);
-    const rawValue =
-      stringValue(entry.rawValue) ??
-      stringValue(entry.requestedCanonicalId) ??
-      stringValue(entry.canonicalId);
+    const rawValue = scholarshipCanonicalReviewInput(entry);
     const state = stringValue(entry.state) ?? 'NOT_EXECUTED';
     const allowedTargets: ScholarshipCanonicalTarget[] = [
       'PROVIDER_UNIVERSITY',

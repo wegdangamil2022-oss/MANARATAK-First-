@@ -24,6 +24,7 @@ const DIRECT_USAGE_CHECKS: DelegateCheck[] = [
   { delegate: 'certificate', field: 'signatureAssetId', consumer: 'CERTIFICATE_SIGNATURE' },
   { delegate: 'university', field: 'logoAssetId', consumer: 'UNIVERSITY_LOGO' },
   { delegate: 'internationalTestPreparationMaterial', field: 'assetId', consumer: 'INTERNATIONAL_TEST_MATERIAL' },
+  { delegate: 'studentApplicationDocumentBinding', field: 'assetId', consumer: 'STUDENT_APPLICATION_DOCUMENT' },
   { delegate: 'studentWorkspace', field: 'avatarAssetId', consumer: 'STUDENT_AVATAR' },
   { delegate: 'studentCertificateReadProjection', field: 'certificatePdfAssetId', consumer: 'STUDENT_CERTIFICATE_PDF' },
   { delegate: 'studentCertificateReadProjection', field: 'previewImageAssetId', consumer: 'STUDENT_CERTIFICATE_PREVIEW' },

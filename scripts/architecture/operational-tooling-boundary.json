@@ -111,5 +111,47 @@
   ],
   "classifiedPresentationImportScripts": [
     "scripts/generate-localized-public-sitemap.ts"
-  ]
+  ],
+  "reviewedPrismaScriptContracts": {
+    "scripts/certificates/verify-isolated-runtime.mjs": {
+      "purpose": "Manual certificate migration/rehearsal on an empty disposable local database only",
+      "access": "isolated-read-write",
+      "environment": [
+        "CERTIFICATE_RUNTIME_ISOLATED=1",
+        "DATABASE_URL local manaratak_certificate_verification",
+        "DIRECT_URL equals DATABASE_URL"
+      ],
+      "gate": "Reject existing tables and nonisolated targets before migrate deploy",
+      "requiredSourceMarkers": [
+        "CERTIFICATE_DISPOSABLE_DATABASE_REQUIRED",
+        "CERTIFICATE_DATABASE_MUST_BE_EMPTY_NO_EXISTING_DATABASE_CHANGES"
+      ],
+      "review": "B04 2026-10-15; no execution authorized by classification"
+    },
+    "scripts/release/build-immutable-artifacts.mjs": {
+      "purpose": "Record external runtime module names in release artifact metadata",
+      "access": "reference-only",
+      "environment": [
+        "CI or local source build; no DB credential needed"
+      ],
+      "gate": "Must not import/instantiate Prisma or query a database",
+      "requiredSourceMarkers": [
+        "externalModules:",
+        "'@prisma/client'"
+      ],
+      "review": "B04 2026-10-15"
+    },
+    "scripts/release/lib/ReleaseContracts.mjs": {
+      "purpose": "Validate release metadata declaring required runtime modules",
+      "access": "reference-only",
+      "environment": [
+        "Filesystem release fixtures only; no DB credential needed"
+      ],
+      "gate": "Must not import/instantiate Prisma or query a database",
+      "requiredSourceMarkers": [
+        "runtime.externalModules.includes('@prisma/client')"
+      ],
+      "review": "B04 2026-10-15"
+    }
+  }
 }

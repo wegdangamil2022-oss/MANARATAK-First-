@@ -166,6 +166,15 @@ describe('WP12-9 AdminScholarshipUseCases catalog detail', () => {
     expect((sameRepo.update as any).mock.calls[0][1]).toMatchObject({ countryReferenceId: 'country-1', studyLanguageReferenceId: 'lang-en', studyLanguageResolutionStatus: 'RESOLVED' });
   });
 
+  it('does not rewrite language resolution on an unrelated catalog update', async () => {
+    const current = scholarship({studyLanguageSourceLabel:'English',studyLanguageReferenceId:'lang-en',studyLanguageResolutionStatus:'RESOLVED'});
+    const repo=repository(current);
+    await new AdminScholarshipUseCases(repo,atomic).updateScholarship('sch-1',{fundingCoverage:'Reviewed coverage',studyLanguageReferenceId:'injected',studyLanguageResolutionStatus:'UNRESOLVED'},mutationContext);
+    const updates=vi.mocked(repo.update).mock.calls[0][1];
+    expect(updates).not.toHaveProperty('studyLanguageReferenceId');
+    expect(updates).not.toHaveProperty('studyLanguageResolutionStatus');
+  });
+
   it('uses Country label and scope together and never retains a specific id for global scope', async () => {
     const current = scholarship({ countrySourceLabel: 'Qatar', countryScope: 'SINGLE_COUNTRY', countryReferenceId: 'country-qa' });
     const changedLabel = repository(current);

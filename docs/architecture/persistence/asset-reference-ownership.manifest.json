@@ -173,6 +173,32 @@
       "field": "cvAssetId",
       "purpose": "CAREER_APPLICATION_CV",
       "authoring": "packages/application/src/career-alumni/use-cases/CareerEngagementUseCases.ts"
+    },
+    {
+      "model": "CertificateAuthorityDelegation",
+      "field": "evidenceAssetId",
+      "purpose": "CERTIFICATE_AUTHORITY_EVIDENCE",
+      "authoring": "packages/application/src/certificates/use-cases/CertificateUseCases.ts"
+    },
+    {
+      "model": "AssetRenditionRecord",
+      "field": "assetId",
+      "purpose": "ASSET_RENDITION_SOURCE",
+      "authoring": "packages/application/src/asset-platform/use-cases/AssetGovernanceUseCases.ts",
+      "validation": "ASSET_GOVERNANCE"
+    },
+    {
+      "model": "AssetRenditionRecord",
+      "field": "generatedAssetId",
+      "purpose": "ASSET_RENDITION_OUTPUT",
+      "authoring": "packages/application/src/asset-platform/use-cases/AssetGovernanceUseCases.ts",
+      "validation": "ASSET_GOVERNANCE"
+    },
+    {
+      "model": "StudentApplicationDocumentBinding",
+      "field": "assetId",
+      "purpose": "STUDENT_APPLICATION_DOCUMENT",
+      "authoring": "packages/application/src/students/use-cases/StudentApplicationTrackerUseCases.ts"
     }
   ],
   "jsonReferences": [

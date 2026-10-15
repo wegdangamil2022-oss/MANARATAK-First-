@@ -21,7 +21,7 @@ for (const line of schema.split(/\r?\n/)) {
 const declared = new Set(manifest.directReferences.map((r) => `${r.model}.${r.field}`));
 const missing = schemaRefs.filter((ref) => !declared.has(ref));
 const stale = [...declared].filter((ref) => !schemaRefs.includes(ref));
-if (missing.length || stale.length) {
+if (declared.size !== manifest.directReferences.length || missing.length || stale.length) {
   console.error('ASSET_REFERENCE_MANIFEST_DRIFT', { missing, stale });
   process.exit(1);
 }
@@ -32,7 +32,9 @@ for (const ref of manifest.directReferences) {
     console.error(`ASSET_AUTHORING_FIELD_NOT_FOUND:${ref.model}.${ref.field}:${ref.authoring}`);
     process.exit(1);
   }
-  if (!registry.includes(`field: '${ref.field}'`) && !registry.includes(`field: \"${ref.field}\"`)) {
+  const delegate = ref.model[0].toLowerCase() + ref.model.slice(1);
+  const mappings = [...registry.matchAll(/\{\s*delegate:\s*['"](\w+)['"],\s*field:\s*['"](\w+)['"]/g)];
+  if (mappings.filter((entry) => entry[1] === delegate && entry[2] === ref.field).length !== 1) {
     console.error(`ASSET_USAGE_REGISTRY_FIELD_MISSING:${ref.model}.${ref.field}`);
     process.exit(1);
   }
@@ -53,7 +55,9 @@ for (const file of new Set(weakConsumerFiles)) {
     console.error(`ASSET_REFERENCE_POLICY_OPTIONAL_BYPASS:${file}`);
     process.exit(1);
   }
-  if (!source.includes('AssetReferencePolicy') && !source.includes('assetRepository.findById')) {
+  const governedRendition = file === 'packages/application/src/asset-platform/use-cases/AssetGovernanceUseCases.ts' &&
+    ['parent.assertCanDeliver()', 'child.assertCanDeliver()', 'ASSET_RENDITION_OWNER_MISMATCH', 'ASSET_RENDITION_EVIDENCE_INVALID'].every(marker => source.includes(marker));
+  if (!governedRendition && !source.includes('AssetReferencePolicy') && !source.includes('assertAssetReferenceUsable') && !source.includes('assetRepository.findById')) {
     console.error(`ASSET_REFERENCE_POLICY_NOT_COMPOSED:${file}`);
     process.exit(1);
   }

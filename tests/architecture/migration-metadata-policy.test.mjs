@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { validateMigrationMetadata } from '../../scripts/architecture/migration-metadata-policy.mjs';
 
@@ -8,24 +8,17 @@ const manifest = JSON.parse(readFileSync('docs/architecture/persistence/persiste
 
 test('explicitly reviewed historical migrations retain exact SQL bytes via sidecar metadata', () => {
   const names = Object.keys(manifest.historicalMigrationMetadataExceptions);
-  assert.deepEqual(names.sort(), [
-    "20260907030000_m7_batch_a2_structural_reconciliation",
-    "20260907033000_m7_batch_b_index_reconciliation",
-    "20260907040000_m7_batch_c_fk_reconciliation",
-    "20261009010000_eap_asset_reference_serialization",
-    "20261009020000_eap_restore_operation_barrier",
-    "20261009030000_eap_archive_operation_barrier",
-    "20261009040000_settings_override_history",
-    "20261009050000_settings_current_version_ownership",
-    "20261009060000_settings_definition_validation_rules",
-    "20261010000000_course_assessment_type",
-    "20261010170000_p11_unit_source_identity",
-    "20261010180000_certificate_issuer_pending_default",
-    "20261010183000_p12_scholarship_revision",
-    "20261011221500_section20_financial_safety",
-    "20261012000000_section21_service_safety",
-    "20261012010000_section21_close_source"
-  ]);
+  // Coverage comes from every current non-baseline migration, not a stale count/list.
+  const inventory = JSON.parse(readFileSync('docs/reviews/evidence/b04-migration-inventory-2026-10-15.json', 'utf8'));
+  assert.ok(names.length > 0);
+  const actualNames = readdirSync('packages/infrastructure/prisma/migrations').filter(name => existsSync(`packages/infrastructure/prisma/migrations/${name}/migration.sql`)).sort();
+  assert.deepEqual(inventory.migrations.map(entry => entry.name).sort(), actualNames);
+  for (const entry of inventory.migrations) {
+    const sql = readFileSync(`packages/infrastructure/prisma/migrations/${entry.name}/migration.sql`);
+    assert.equal(createHash('sha256').update(sql).digest('hex'), entry.sha256);
+    assert.equal(entry.databaseApplicationStatus, 'UNKNOWN_NOT_QUERIED');
+    if (entry.metadataSource !== 'historical-baseline') assert.deepEqual(validateMigrationMetadata(entry.name, sql, manifest), []);
+  }
   for (const name of names) {
     const sql = readFileSync(`packages/infrastructure/prisma/migrations/${name}/migration.sql`);
     assert.equal(createHash('sha256').update(sql).digest('hex'), manifest.historicalMigrationMetadataExceptions[name].sha256);
