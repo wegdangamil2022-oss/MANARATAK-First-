@@ -13,7 +13,8 @@ export interface ILearningPathRepository {
   create(data: CreateLearningPathDto): Promise<LearningPathDto>;
   findById(id: string): Promise<LearningPathDto | null>;
   findBySlug(slug: string): Promise<LearningPathDto | null>;
-  list(): Promise<LearningPathDto[]>;
+  list(options?:{page:number;pageSize:number}): Promise<LearningPathDto[]>;
+  updateDraft?(id:string,input:Omit<CreateLearningPathDto,'publicId'|'slug'>):Promise<LearningPathDto>;
   updateStatus(id: string, status: LearningPathStatus): Promise<LearningPathDto>;
   enroll(pathId: string, version: number, studentReferenceId: string): Promise<LearningPathEnrollmentDto>;
   findEnrollment(pathId: string, studentReferenceId: string): Promise<LearningPathEnrollmentDto | null>;

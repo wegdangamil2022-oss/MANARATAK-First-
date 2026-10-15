@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B10d",
+  "next": "B11",
   "remaining": [
-    "B10d",
     "B11",
     "B12",
     "B13",
@@ -367,5 +366,40 @@
       "Existing runtime prerequisites remain pending"
     ],
     "degreeLevelDecision": "Existing independent finite canonical reference owner; no implicit creation or additional degree codes."
+  },
+  "B10d": {
+    "status": "SOURCE_VERIFIED",
+    "baselineCommit": "73ccbc83",
+    "runtimeDatabaseStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "findings": [
+      "ADM-05"
+    ],
+    "report": "docs/reviews/B10d_COURSE_AUTHORING_2026-10-15.md",
+    "specification": "docs/remediation/specs/B10d_COURSE_AUTHORING_CONTRACT_2026-10-15.md",
+    "lightTestsPassed": 53,
+    "lightTestsFailed": 0,
+    "B10bVerifierRegressionTestsPassed": 8,
+    "schemaChanged": false,
+    "historicalSqlChanged": false,
+    "sourceChecks": {
+      "typesNoEmit": "PASS",
+      "targetedEslintErrors": 0,
+      "targetedEslintWarnings": 7,
+      "persistence": "PASS_281_OF_281",
+      "assetReferences": "PASS_32_DIRECT_4_JSON",
+      "architecture": "PASS",
+      "WP8": "PASS",
+      "P3": "PASS_57_OF_57",
+      "WP12.9": "PASS",
+      "P9": "PASS_97_OF_97",
+      "sourceQuality": "PASS",
+      "secretScan": "PASS"
+    },
+    "runtimePrerequisites": [
+      "Isolated PostgreSQL concurrent version/lock and audit/outbox rollback rehearsal",
+      "Browser/API/DB bank/path authoring and pinned enrollment progress rehearsal, including legacy snapshots",
+      "Existing runtime prerequisites and supported Node 22 acceptance remain pending"
+    ]
   }
 }

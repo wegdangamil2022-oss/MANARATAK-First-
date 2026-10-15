@@ -115,9 +115,9 @@ export class CourseCurriculumUseCases {
     questionBankId?: string | null,
   ): Promise<void> {
     const snapshot = await this.curriculumRepository.getCurriculumSnapshot(courseId);
-    if (quizId && !snapshot.quizzes.some((item) => item.id === quizId))
+    if (quizId && !snapshot.quizzes.some((item) => item.id === quizId && item.status !== 'ARCHIVED'))
       throw new Error('COURSE_CURRICULUM_SCOPE_MISMATCH');
-    if (questionBankId && !snapshot.questionBanks.some((item) => item.id === questionBankId))
+    if (questionBankId && !snapshot.questionBanks.some((item) => item.id === questionBankId && item.status !== 'ARCHIVED'))
       throw new Error('COURSE_CURRICULUM_SCOPE_MISMATCH');
   }
 
@@ -292,6 +292,7 @@ export class CourseCurriculumUseCases {
     data: CreateCourseQuestionBankDto,
   ): Promise<CourseQuestionBankDto> {
     await this.ensureMutableCourse(data.courseId);
+    if (!data.title.trim()) throw new Error('COURSE_QUESTION_BANK_TITLE_REQUIRED');
     const created = await this.curriculumRepository.createQuestionBank(data);
     await this.checkpointCourseVersion(data.courseId);
     return created;
@@ -304,6 +305,7 @@ export class CourseCurriculumUseCases {
   ): Promise<CourseQuestionBankDto> {
     await this.ensureMutableCourse(courseId);
     await this.ensureCurriculumMember(courseId, 'questionBanks', bankId);
+    if (data.title !== undefined && !data.title.trim()) throw new Error('COURSE_QUESTION_BANK_TITLE_REQUIRED');
     const updated = await this.curriculumRepository.updateQuestionBank(bankId, data);
     await this.checkpointCourseVersion(courseId);
     return updated;
@@ -312,12 +314,15 @@ export class CourseCurriculumUseCases {
   public async deleteQuestionBank(courseId: string, bankId: string): Promise<void> {
     await this.ensureMutableCourse(courseId);
     await this.ensureCurriculumMember(courseId, 'questionBanks', bankId);
+    const snapshot = await this.curriculumRepository.getCurriculumSnapshot(courseId);
+    if (snapshot.questions.some(question => question.questionBankId === bankId)) throw new Error('COURSE_QUESTION_BANK_HAS_REFERENCES');
     await this.curriculumRepository.deleteQuestionBank(bankId);
     await this.checkpointCourseVersion(courseId);
   }
 
   public async createQuestion(data: CreateCourseQuestionDto): Promise<CourseQuestionDto> {
     await this.ensureMutableCourse(data.courseId);
+    if (!data.prompt.trim()) throw new Error('COURSE_QUESTION_PROMPT_REQUIRED');
     await this.assertQuestionReferences(data.courseId, data.quizId, data.questionBankId);
     const created = await this.curriculumRepository.createQuestion(data);
     await this.checkpointCourseVersion(data.courseId);
@@ -331,6 +336,7 @@ export class CourseCurriculumUseCases {
   ): Promise<CourseQuestionDto> {
     await this.ensureMutableCourse(courseId);
     await this.ensureCurriculumMember(courseId, 'questions', questionId);
+    if (data.prompt !== undefined && !data.prompt.trim()) throw new Error('COURSE_QUESTION_PROMPT_REQUIRED');
     await this.assertQuestionReferences(courseId, data.quizId, data.questionBankId);
     const updated = await this.curriculumRepository.updateQuestion(questionId, data);
     await this.checkpointCourseVersion(courseId);

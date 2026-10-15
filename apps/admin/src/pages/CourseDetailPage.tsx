@@ -1,3 +1,5 @@
+import {CourseDraftStructurePanel} from '../components/CourseDraftStructurePanel';
+import {CourseQuestionBanksPanel} from '../components/CourseQuestionBanksPanel';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { adminApiClient, setCourseReviewReason } from '../api/client';
@@ -18,6 +20,7 @@ import { AssetPicker } from '../components/AssetPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 
 interface CourseDetail {
+  version:number;
   id: string;
   displayName: string;
   status: string;
@@ -83,6 +86,9 @@ interface CourseQuiz {
 }
 
 interface CourseQuestion {
+  correctAnswer?:unknown;
+  questionBankId?:string|null;
+  status?:string;
   id: string;
   quizId?: string | null;
   questionType: string;
@@ -125,7 +131,7 @@ interface CurriculumSnapshot {
   lessons: CourseLesson[];
   assets: LessonAsset[];
   quizzes: CourseQuiz[];
-  questionBanks: unknown[];
+  questionBanks: Array<{id:string;title:string;status:string}>;
   questions: CourseQuestion[];
 }
 
@@ -1004,6 +1010,8 @@ export function CourseDetailPage() {
                 </div>
               </div>
 
+              {snapshot && <CourseDraftStructurePanel courseId={course.id} version={course.version} status={course.status} snapshot={snapshot} onSaved={fetchCourse}/>}
+              {snapshot && <CourseQuestionBanksPanel courseId={course.id} version={course.version} status={course.status} snapshot={snapshot} onSaved={fetchCourse}/>}
               <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
                 <h3 className="font-semibold mb-4">{t('add_lesson')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-3">

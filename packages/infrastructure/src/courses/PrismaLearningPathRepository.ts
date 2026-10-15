@@ -51,7 +51,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
           learningPathId: path.id,
           versionNumber: 1,
           status: LearningPathStatus.DRAFT,
-          snapshot: json({ title: path.title, description: path.description, courses }),
+          snapshot: json({ title: path.title, description: path.description, isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:path.completionLogic,courses }),
           courses: { create: courses.map(item => ({
             courseId: item.courseId,
             position: item.position,
@@ -86,11 +86,14 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
       this.prisma.learningPathVersion.findUnique({where:{learningPathId_versionNumber:{learningPathId:id,versionNumber}},include:{courses:true}}),
     ]);
     if(!path || !version) return null;
-    return this.map({...path,version:versionNumber,status:version.status},version.courses);
+    const snapshot=version.snapshot && typeof version.snapshot==='object' && !Array.isArray(version.snapshot)?version.snapshot:{};
+    return this.map({...path,title:typeof snapshot.title==='string'?snapshot.title:path.title,description:typeof snapshot.description==='string'||snapshot.description===null?snapshot.description:path.description,isStrictlyOrdered:typeof snapshot.isStrictlyOrdered==='boolean'?snapshot.isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:snapshot.completionLogic==='ALL'||snapshot.completionLogic==='ALL_REQUIRED'?snapshot.completionLogic:path.completionLogic,version:versionNumber,status:version.status},version.courses);
   }
 
-  public async list(): Promise<LearningPathDto[]> {
-    const paths = await this.prisma.learningPath.findMany({ orderBy: { updatedAt: 'desc' } });
+  public async list(options={page:1,pageSize:50}): Promise<LearningPathDto[]> {
+    const page=Math.max(1,Math.min(1000,Math.trunc(options.page)));
+    const pageSize=Math.max(1,Math.min(50,Math.trunc(options.pageSize)));
+    const paths = await this.prisma.learningPath.findMany({ orderBy: [{updatedAt:'desc'},{id:'desc'}],take:pageSize,skip:(page-1)*pageSize });
     return Promise.all(paths.map(async path => {
       const version = await this.prisma.learningPathVersion.findUnique({
         where: { learningPathId_versionNumber: { learningPathId: path.id, versionNumber: path.version } },
@@ -98,6 +101,20 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
       });
       return this.map(path, version?.courses ?? []);
     }));
+  }
+
+  public async updateDraft(id:string,input:Omit<CreateLearningPathDto,'publicId'|'slug'>):Promise<LearningPathDto> {
+    if(!this.transactionBound) throw new Error('LEARNING_PATH_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    await this.prisma.$queryRaw`SELECT id FROM "LearningPath" WHERE id = ${id} FOR UPDATE`;
+    const current=await this.prisma.learningPath.findUnique({where:{id}});
+    if(!current) throw new Error('LEARNING_PATH_NOT_FOUND');
+    if(current.status!==LearningPathStatus.DRAFT) throw new Error('LEARNING_PATH_PUBLISHED_STRUCTURE_IMMUTABLE');
+    const path=await this.prisma.learningPath.update({where:{id},data:{title:input.title,description:input.description,isStrictlyOrdered:input.isStrictlyOrdered,completionLogic:input.completionLogic,version:{increment:1}}});
+    const courses=input.courses ?? [];
+    const version=await this.prisma.learningPathVersion.create({data:{learningPathId:id,versionNumber:path.version,status:LearningPathStatus.DRAFT,
+      snapshot:json({title:path.title,description:path.description,isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:path.completionLogic,previousVersion:current.version,courses}),
+      courses:{create:courses.map(item=>({courseId:item.courseId,position:item.position,required:item.required,prerequisiteCourseIds:json(item.prerequisiteCourseIds)}))}},include:{courses:true}});
+    return this.map(path,version.courses);
   }
 
   public async updateStatus(id: string, status: LearningPathStatus): Promise<LearningPathDto> {
@@ -117,7 +134,7 @@ export class PrismaLearningPathRepository implements ITransactionalLearningPathR
           learningPathId: id,
           versionNumber: nextVersion,
           status,
-          snapshot: json({ title: path.title, description: path.description, previousVersion: current.version }),
+          snapshot: json({ title: path.title, description: path.description, isStrictlyOrdered:path.isStrictlyOrdered,completionLogic:path.completionLogic,previousVersion: current.version }),
           courses: { create: currentVersion.courses.map(item => ({
             courseId: item.courseId,
             position: item.position,

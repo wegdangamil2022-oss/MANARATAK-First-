@@ -25,6 +25,7 @@ export class LearningPathUseCases {
     const courses = input.courses ?? [];
     if (!input.title.trim()) throw new Error('LEARNING_PATH_TITLE_REQUIRED');
     this.assertCourseGraph(courses);
+    if(input.isStrictlyOrdered) this.assertStrictOrder(courses);
     if(input.completionLogic !== 'ALL' && courses.length && !courses.some(course=>course.required)) throw new Error('LEARNING_PATH_REQUIRED_COURSE_MISSING');
     for (const item of courses) {
       const course = await this.courseRepository.findById(item.courseId);
@@ -38,8 +39,24 @@ export class LearningPathUseCases {
     return this.repository.create({ ...input, courses, publicId: `LP-${identity.slice(0, 12).toUpperCase()}`, slug });
   }
 
-  public async list(): Promise<LearningPathDto[]> {
-    return this.repository.list();
+  public async list(options?:{page:number;pageSize:number}): Promise<LearningPathDto[]> {
+    return this.repository.list(options);
+  }
+
+  public async updateDraft(id:string,input:Omit<CreateLearningPathDto,'publicId'|'slug'>):Promise<LearningPathDto> {
+    const path=await this.get(id);
+    if(path.status!==LearningPathStatus.DRAFT) throw new Error('LEARNING_PATH_PUBLISHED_STRUCTURE_IMMUTABLE');
+    if(!input.title.trim()) throw new Error('LEARNING_PATH_TITLE_REQUIRED');
+    const courses=input.courses ?? path.courses;
+    this.assertCourseGraph(courses);
+    if(input.isStrictlyOrdered ?? path.isStrictlyOrdered) this.assertStrictOrder(courses);
+    if((input.completionLogic ?? path.completionLogic)!=='ALL' && courses.length && !courses.some(course=>course.required)) throw new Error('LEARNING_PATH_REQUIRED_COURSE_MISSING');
+    for(const item of courses) {
+      const course=await this.courseRepository.findById(item.courseId);
+      if(!course || course.originType!==CourseOriginType.NATIVE_MANARATAK_COURSE) throw new Error('LEARNING_PATH_NATIVE_COURSE_REQUIRED');
+    }
+    if(!this.repository.updateDraft) throw new Error('LEARNING_PATH_DRAFT_PERSISTENCE_REQUIRED');
+    return this.repository.updateDraft(id,{...input,courses});
   }
 
   public async get(id: string): Promise<LearningPathDto> {
@@ -52,6 +69,7 @@ export class LearningPathUseCases {
     const path = await this.get(id);
     if (path.status !== LearningPathStatus.DRAFT) throw new Error('LEARNING_PATH_INVALID_REVIEW_TRANSITION');
     this.assertCourseGraph(path.courses);
+    if(path.isStrictlyOrdered) this.assertStrictOrder(path.courses);
     if (path.courses.length === 0) throw new Error('LEARNING_PATH_COURSES_REQUIRED');
     return this.repository.updateStatus(id, LearningPathStatus.READY_TO_PUBLISH);
   }
@@ -124,6 +142,7 @@ export class LearningPathUseCases {
   }
 
   private assertCourseGraph(courses: NonNullable<CreateLearningPathDto['courses']>): void {
+    if(courses.length>100) throw new Error('LEARNING_PATH_COURSE_LIMIT');
     const ids = new Set(courses.map(item => item.courseId));
     if (ids.size !== courses.length) throw new Error('LEARNING_PATH_DUPLICATE_COURSE');
     const positions = new Set(courses.map(item => item.position));
@@ -144,6 +163,10 @@ export class LearningPathUseCases {
       visiting.delete(id);visited.add(id);
     };
     for(const id of ids) visit(id);
+  }
+  private assertStrictOrder(courses:NonNullable<CreateLearningPathDto['courses']>):void {
+    const positions=new Map(courses.map(item=>[item.courseId,item.position]));
+    if(courses.some(item=>item.prerequisiteCourseIds.some(id=>positions.get(id)!>=item.position))) throw new Error('LEARNING_PATH_PREREQUISITE_ORDER_INVALID');
   }
   private async enrolledVersion(id:string,version:number):Promise<LearningPathDto> {
     if(!this.repository.findByVersion) throw new Error('LEARNING_PATH_VERSION_READER_REQUIRED');

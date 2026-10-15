@@ -219,8 +219,8 @@ export class CourseAdminRouter {
       courses: z.array(z.object({
         courseId: z.string().min(1), position: z.number().int().positive(), required: z.boolean(),
         prerequisiteCourseIds: z.array(z.string().min(1)).default([]),
-      })).default([]),
-    });
+      })).max(100).default([]),
+    }).strict();
 
     const taxonomyRelationshipBodySchema = z.object({
       taxonomyNodeId: z.string().trim().min(1),
@@ -252,8 +252,9 @@ export class CourseAdminRouter {
       res.json(result);
     }));
 
-    router.get('/learning-paths', asyncHandler(async (_req: Request, res: Response) => {
-      res.json({ data: await learningPathUseCases.list() });
+    router.get('/learning-paths', asyncHandler(async (req: Request, res: Response) => {
+      const query=z.object({page:z.coerce.number().int().min(1).max(1000).default(1),pageSize:z.coerce.number().int().min(1).max(50).default(20)}).strict().parse(req.query);
+      res.json({ data: await learningPathUseCases.list(query) });
     }));
     router.post('/learning-paths', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {learningPathUseCases}=scope;
@@ -264,6 +265,10 @@ export class CourseAdminRouter {
       const path=await learningPathUseCases.get(req.params.pathId);
       res.setHeader('ETag', `"${path.version}"`);
       res.json(path);
+    }));
+    router.patch('/learning-paths/:pathId',asyncHandler(async(req:Request,res:Response,scope:CourseAdminScope)=>{
+      const input=learningPathSchema.omit({slug:true}).extend({courses:learningPathSchema.shape.courses.removeDefault().optional()}).parse(req.body);
+      res.json(await scope.learningPathUseCases.updateDraft(req.params.pathId,input));
     }));
     router.post('/learning-paths/:pathId/mark-publishable', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {learningPathUseCases}=scope;
