@@ -1004,6 +1004,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/admin/certificates', lazyRouter('certificateAdminRouter'));
       v1Router.use('/public/certificates', lazyRouter('certificatePublicRouter'));
       v1Router.use('/student', lazyRouter('studentWorkspaceRouter'));
+    v1Router.use('/admin/student-document-reviews',requireAdminPermission('admin:students:documents:review'),lazyRouter('studentDocumentReviewRouter'));
     v1Router.use('/admin/students', requireAdminPermission('admin:students:support'), lazyRouter('studentSupportAdminRouter'));
       v1Router.use('/admin/student-tools', lazyRouter('studentToolsAdminRouter'));
     v1Router.use(

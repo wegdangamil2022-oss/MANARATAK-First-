@@ -713,6 +713,7 @@ export function StudentSupportAdminPage() {
 
   return (
     <div dir={dir} className="mx-auto max-w-7xl space-y-6">
+      {hasPermission('admin:students:documents:review')&&<Link to="/student-document-reviews">{dir==='ltr'?'Consented academic document reviews':'مراجعات المستندات الأكاديمية بموافقة أصحابها'}</Link>}
       <header className="rounded-3xl bg-gradient-to-l from-[#0E7C86] to-[#142B5F] p-6 text-white sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>

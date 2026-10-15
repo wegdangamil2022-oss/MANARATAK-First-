@@ -7,6 +7,10 @@ export const INTEGRITY_OWNER_PERMISSIONS = {
   UNIVERSITIES: 'admin:universities:manage',
   SCHOLARSHIPS: 'admin:scholarships:manage',
   TESTS: 'admin:international-tests:manage',
+  CMS:'admin:cms:view',
+  PROGRAMS:'admin:universities:manage',
+  COURSES:'admin:courses:manage',
+  COUNTRIES:'admin:reference-data:manage',
 } as const;
 export class CrossModuleIntegrityRouter {
   static create(cradle: {
@@ -19,7 +23,7 @@ export class CrossModuleIntegrityRouter {
       if (!req.authUserId) return void res.status(401).json({ error: 'AUTHENTICATION_REQUIRED' });
       const parsed = z
         .object({
-          owner: z.enum(['MAJORS', 'UNIVERSITIES', 'SCHOLARSHIPS', 'TESTS']),
+          owner: z.enum(['MAJORS', 'UNIVERSITIES', 'SCHOLARSHIPS', 'TESTS','CMS']),
           page: z.coerce.number().int().min(1).max(10000).default(1),
         })
         .strict()

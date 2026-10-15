@@ -35,6 +35,14 @@ export class IngestAssetUseCase {
     return this.allocateUpload(input);
   }
 
+  /** Internal P15 entry records purpose/consent while retaining the normal quarantine pipeline. */
+  public async requestStudentDocumentUpload(input:RequestAssetUploadLocatorDto):Promise<AssetUploadLocatorDto>{
+    AssetValidator.validate(input);
+    const expiry=input.expiresAt?new Date(input.expiresAt).getTime():NaN;
+    if(input.ownerType!=='STUDENT'||input.classification!==AssetSecurityClassification.CONFIDENTIAL||input.retentionCategory!==AssetRetentionCategory.TEMPORARY||!Number.isFinite(expiry)||expiry<=Date.now()||expiry>Date.now()+180*86400000||!input.assetReference.startsWith('STUDENT-DOCUMENT-'))throw new Error('STUDENT_DOCUMENT_UPLOAD_POLICY_INVALID');
+    return this.allocateUpload(input,{purpose:'STUDENT_APPLICATION_PREPARATION',consentGrantedAt:new Date().toISOString(),retentionPolicy:'MAX_180_DAYS'});
+  }
+
   private async allocateUpload(
     input: RequestAssetUploadLocatorDto,
     extraMetadata?: Record<string, unknown>,

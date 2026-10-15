@@ -13,6 +13,7 @@ export class ScholarshipPublicRouter {
 
     const date = z.string().datetime({ offset: true }).transform((value) => new Date(value));
     const listQuerySchema = z.object({
+      search:z.string().trim().max(200).optional(),
       countryReferenceId: z.string().min(1).optional(),
       studyLanguageReferenceId: z.string().min(1).optional(),
       currencyReferenceId: z.string().min(1).optional(),
@@ -38,6 +39,7 @@ export class ScholarshipPublicRouter {
       res.json(await publicScholarshipUseCases.listScholarships(filters, locale));
     }));
 
+    router.get('/:slug/reference',asyncHandler(async(req:Request,res:Response)=>{z.object({}).strict().parse(req.query);res.setHeader('Cache-Control','no-store');const reference=await publicScholarshipUseCases.referenceState(req.params.slug);if(!reference)return void res.status(404).json({error:'Not found'});res.json({data:reference});}));
     router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
       try {
         const locale = parseRequestLocale(req.query);

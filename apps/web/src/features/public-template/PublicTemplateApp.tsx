@@ -1,3 +1,6 @@
+import {OwnerReferenceNotice} from '../students/OwnerReferenceNotice';
+import type {PublicScholarshipReferenceState} from '../../api/client';
+import {PublicRelationshipPager} from './components/PublicRelationshipPager';
 import { applicationCycleLabel } from '../students/ApplicationCycleLabel';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate as useRouterNavigate } from 'react-router-dom';
@@ -219,7 +222,7 @@ export default function App() {
     else if (section === 'scholarships') {
       const selected = key ? scholarships.find(matchesKey) || null : null;
       if (key && publicDataMode === 'api') {
-        fetchOnce(`scholarships:${key}`, async () => finish({ activeTab: 'search', selectedCategory: 'scholarships', selectedScholarship: mapPublicScholarshipDto(await ApiClient.getScholarshipBySlug(key)) }));
+        fetchOnce(`scholarships:${key}`, async () => {setRetiredScholarshipReference(undefined);try{finish({ activeTab: 'search', selectedCategory: 'scholarships', selectedScholarship: mapPublicScholarshipDto(await ApiClient.getScholarshipBySlug(key)) });}catch(error){const reference=await ApiClient.getScholarshipReference(key);if(reference)setRetiredScholarshipReference(reference);throw error;}});
         return;
       }
       patch = { activeTab: 'search', selectedCategory: 'scholarships', selectedScholarship: selected };
@@ -488,6 +491,7 @@ export default function App() {
     country.iso2Code === activeCountryIdentity.toUpperCase(),
   );
 
+  const [retiredScholarshipReference,setRetiredScholarshipReference]=useState<PublicScholarshipReferenceState|undefined>();
   const publicGraph = usePublicRelationshipGraph(publicDataMode, {
     majorSlug: selectedMajor?.slug || (selectedMajor ? selectedMajor.id : undefined),
     universitySlug: selectedUniversity?.slug || (selectedUniversity ? selectedUniversity.id : undefined),
@@ -1012,6 +1016,11 @@ export default function App() {
           {t('public_template_partial_relationships')}
         </p>
       )}
+      {publicDataMode==='api'&&(selectedMajor?.slug||selectedUniversity?.slug||selectedScholarship?.slug||selectedExam?.ownerId||activeCountryForGraph?.iso2Code)&&<PublicRelationshipPager
+        key={`${selectedMajor?.slug??selectedUniversity?.slug??selectedScholarship?.slug??selectedExam?.ownerId??activeCountryForGraph?.iso2Code}:${language}`}
+        kind={selectedMajor?.slug?'majors':selectedUniversity?.slug?'universities':selectedScholarship?.slug?'scholarships':selectedExam?.ownerId?'tests':'countries'}
+        identity={selectedMajor?.slug??selectedUniversity?.slug??selectedScholarship?.slug??selectedExam?.ownerId??activeCountryForGraph?.iso2Code??''}/> }
+      {retiredScholarshipReference&&<div className="m-4 rounded border p-3"><OwnerReferenceNotice reference={retiredScholarshipReference}/><button type="button" onClick={()=>setRetiredScholarshipReference(undefined)}>{language==='en'?'Dismiss':'إغلاق'}</button></div>}
       {/* App Header (Top Sticky) */}
       <Header
         language={language}

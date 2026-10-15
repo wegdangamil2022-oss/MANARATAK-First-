@@ -248,3 +248,8 @@ export * from './integration/TestDiscoveryOwnerUseCases';
 export * from './certificates/use-cases/CertificateAffiliationReadService';
 
 export * from './read-models/AcademicProgramExplorerUseCases';
+
+export * from './students/use-cases/StudentDocumentUploadUseCases';
+export * from './students/use-cases/StudentDocumentReviewUseCases';
+
+export * from './integration/CatalogLifecycleReadPolicy';

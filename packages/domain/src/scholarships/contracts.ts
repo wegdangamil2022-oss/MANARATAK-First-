@@ -311,6 +311,9 @@ export interface ScholarshipAdminSummary {
 }
 
 export interface PublicScholarshipFilters {
+  /** Internal exact-owner parity probe; public HTTP filters do not accept this field. */
+  ownerId?:string;
+  search?:string;
   fundingType?: 'FULL' | 'PARTIAL';
   countryReferenceId?: string;
   studyLanguageReferenceId?: string;
@@ -360,7 +363,15 @@ export type PublicScholarshipDto = Omit<
 
 export interface PublishedProgramScholarshipIdentity {id:string;publicId:string;slug:string;displayName:string;localizedNames?:Record<string,string>;}
 export interface PublishedProgramScholarshipPage {data:PublishedProgramScholarshipIdentity[];total:number;hasMore:boolean;nextCursor:string|null;}
+export interface ScholarshipReferenceTransitionDto {id:string;sourceOwnerId:string;sourcePublicId:string;sourceSlug:string;sourceRevision:number;targetOwnerId:string|null;targetRevision:number|null;changeType:'MERGE'|'TOMBSTONE'|'RESTORE';status:'PENDING'|'APPROVED'|'SUPERSEDED';proposedBy:string;reviewedBy:string|null;reason:string;createdAt:Date;reviewedAt:Date|null;}
+export interface ScholarshipReferenceState {ownerId:string;state:'MERGED'|'TOMBSTONE'|'RESTORED';ownerRevision:number;effectiveAt:string;replacement?:{ownerId:string;publicId:string;slug:string;displayName:string};}
 export interface IScholarshipRepository {
+ listReferenceTransitions?(sourceOwnerId:string):Promise<ScholarshipReferenceTransitionDto[]>;
+ readReferenceState?(sourceOwnerId:string):Promise<ScholarshipReferenceState|null>;
+ readReferenceStateBySlug?(sourceSlug:string):Promise<ScholarshipReferenceState|null>;
+ proposeReferenceTransition?(input:{sourceOwnerId:string;sourceRevision:number;changeType:'MERGE'|'TOMBSTONE'|'RESTORE';targetOwnerId?:string;actorId:string;reason:string}):Promise<ScholarshipReferenceTransitionDto>;
+ approveReferenceTransition?(sourceOwnerId:string,transitionId:string,sourceRevision:number,actorId:string,reason:string):Promise<void>;
+
   listPublishedProgramRelationshipsPage?(programIds:string[],limit:number):Promise<Record<string,PublishedProgramScholarshipPage>>;
   create(data: CreateScholarshipDto): Promise<ScholarshipDto>;
   update(id: string, updates: ScholarshipRepositoryUpdateDto): Promise<ScholarshipDto>;

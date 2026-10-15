@@ -14,6 +14,7 @@ import { CanonicalDegreeLevelCode } from '../degree-level/DegreeLevel';
 export type { InternationalTestCompletenessReport, InternationalTestValidationIssue };
 
 export interface InternationalTestDto {
+  optionalFields?:Record<string,unknown>;
   id: string;
   canonicalName: string;
   localizedNameAr?: string;
@@ -71,6 +72,7 @@ export interface InternationalTestDto {
 }
 
 export interface UpsertInternationalTestDto {
+  optionalFields?:Record<string,unknown>;
   canonicalName: string;
   localizedNameAr?: string;
   localizedNameEn?: string;
@@ -670,6 +672,8 @@ export interface UpsertInternationalTestContentBlockDto {
 
 
 export interface InternationalTestFilters {
+  cursor?:string;
+  cursorMode?:boolean;
   searchQuery?: string;
   status?: InternationalTestStatus | InternationalTestStatus[];
   category?: InternationalTestCategory | InternationalTestCategory[];
@@ -684,6 +688,8 @@ export interface InternationalTestFilters {
 }
 
 export interface PaginatedInternationalTestResult<T> {
+  hasMore?:boolean;
+  nextCursor?:string|null;
   data: T[];
   total: number;
   page: number;

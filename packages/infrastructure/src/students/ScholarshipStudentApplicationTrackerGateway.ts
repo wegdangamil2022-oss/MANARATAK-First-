@@ -7,7 +7,8 @@ export class ScholarshipStudentApplicationTrackerGateway implements IStudentAppl
   constructor(private readonly scholarships: IScholarshipRepository) {}
   async resolve(scholarshipId: string, cycleId?: string) {
     const s = await this.scholarships.findById(scholarshipId);
-    if (!s) return null;
+    const referenceState=await this.scholarships.readReferenceState?.(scholarshipId)??undefined;
+    if (!s) return referenceState?{id:scholarshipId,displayName:'SCHOLARSHIP_HISTORY_ONLY',available:false,referenceState}:null;
     const publiclyVisible = isPublicScholarshipOwner(s)
       ? await this.scholarships.findPublishedBySlug(s.slug)
       : null;
@@ -18,6 +19,7 @@ export class ScholarshipStudentApplicationTrackerGateway implements IStudentAppl
         displayName: 'SCHOLARSHIP_NOT_PUBLIC',
         deadlineAt: null,
         lifecycleStatus: String(s.publicationStatus ?? s.status),
+        referenceState,
         available: false,
       };
     const versions = new Set(

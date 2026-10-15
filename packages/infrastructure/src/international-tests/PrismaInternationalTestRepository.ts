@@ -1,3 +1,4 @@
+import {decodeStableCursor,encodeStableCursor} from '../api-foundation/StableCursor';
 import { randomUUID } from 'node:crypto';
 import { InternationalTestGovernancePersistence } from './InternationalTestGovernancePersistence';
 import { PrismaClient, Prisma } from '@prisma/client';
@@ -595,6 +596,16 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     return result;
   }
 
+  async getPublishedAdmissionScoreContract(testId:string,versionId?:string){
+    const test=await this.prisma.internationalTest.findUnique({where:{id:testId},select:{id:true,status:true,isPubliclyVisible:true,currentPublishedVersionId:true}});
+    if(!test||test.status!=='PUBLISHED'||!test.isPubliclyVisible)return null;
+    const id=versionId??test.currentPublishedVersionId;if(!id)return null;
+    const version=await this.prisma.internationalTestVersion.findFirst({where:{id,testId,status:'PUBLISHED'},include:{scoreScales:true}});
+    if(!version)return null;
+    const snapshot=await this.prisma.internationalTestPublicationSnapshot.findUnique({where:{id:version.id},select:{testId:true,payload:true}}),payload=snapshot?.testId===testId?snapshot.payload as unknown as InternationalTestDto:null;
+    return {testId,versionId:version.id,scoreScales:version.scoreScales.map(scale=>({overallMinimum:scale.overallMinimum,overallMaximum:scale.overallMaximum,scoreIncrement:scale.scoreIncrement,metadata:scale.metadata})),variants:(payload?.variants??[]).filter(v=>v.isActive).map(v=>({id:v.id,name:v.variantName})),sections:(payload?.sections??[]).map(section=>({id:section.id,name:section.sectionName}))};
+  }
+
   async listPublished(filters: Omit<InternationalTestFilters,'status'> = {}): Promise<PaginatedInternationalTestResult<InternationalTestDto>> {
     const page = Math.max(1,Math.min(1000,Math.floor(Number(filters.page)||1))); const limit = Math.min(50,Math.max(1,Math.floor(Number(filters.pageSize)||20)));
     const clauses = [Prisma.sql`t."isPubliclyVisible"=true`];
@@ -606,8 +617,10 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     if (filters.countryIso2Code) clauses.push(Prisma.sql`EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(s."payload"->'countryRelationships','[]'::jsonb)) r WHERE r->>'referenceCode'=${String(filters.countryIso2Code).toUpperCase()})`);
     const where=Prisma.join(clauses,' AND ');
     const from=Prisma.sql`FROM "InternationalTest" t JOIN "InternationalTestPublicationSnapshot" s ON s."id"=t."currentPublishedVersionId" AND s."testId"=t."id" JOIN "InternationalTestVersion" v ON v."id"=s."id" AND v."testId"=t."id" WHERE ${where}`;
-    const [rows,counts] = await Promise.all([this.prisma.$queryRaw<Array<{payload:InternationalTestDto}>>(Prisma.sql`SELECT s."payload" ${from} ORDER BY s."publishedAt" DESC,s."id" DESC LIMIT ${limit} OFFSET ${(page-1)*limit}`),this.prisma.$queryRaw<Array<{total:bigint}>>(Prisma.sql`SELECT COUNT(*) AS total ${from}`)]);
-    return {data:rows.map(row=>row.payload),total:Number(counts[0]?.total??0),page,limit};
+    const cursorMode=filters.cursorMode||filters.cursor!==undefined, after=decodeStableCursor(typeof filters.cursor==='string'?filters.cursor:undefined);
+    const [rows,counts] = await Promise.all([this.prisma.$queryRaw<Array<{id:string;payload:InternationalTestDto}>>(cursorMode?Prisma.sql`SELECT t.id,s."payload" ${from} ${after?Prisma.sql`AND t.id>${after}`:Prisma.empty} ORDER BY t.id ASC LIMIT ${limit+1}`:Prisma.sql`SELECT t.id,s."payload" ${from} ORDER BY s."publishedAt" DESC,s."id" DESC LIMIT ${limit} OFFSET ${(page-1)*limit}`),this.prisma.$queryRaw<Array<{total:bigint}>>(Prisma.sql`SELECT COUNT(*) AS total ${from}`)]);
+    const selected=cursorMode?rows.slice(0,limit):rows;
+    return {data:selected.map(row=>row.payload),total:Number(counts[0]?.total??0),page:cursorMode?1:page,limit,...(cursorMode?{hasMore:rows.length>limit,nextCursor:rows.length>limit?encodeStableCursor(selected.at(-1)!.id):null}:{})};
   }
 
   // --- Normalized Profile & Discovery Methods ---

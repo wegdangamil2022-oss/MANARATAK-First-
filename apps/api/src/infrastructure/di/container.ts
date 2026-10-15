@@ -1,5 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { DEVELOPMENT_CSRF_SECRET, isStrongRuntimeSecret } from '@manaratak/config';
+import {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases} from '@manaratak/application';
+import {StudentDocumentReviewRouter} from '../../presentation/api/router/StudentDocumentReviewRouter.js';
 import {AcademicProgramExplorerUseCases} from '@manaratak/application';
 import {AcademicProgramExplorerRouter} from '../../presentation/api/router/AcademicProgramExplorerRouter.js';
 import {CertificateStudentSavedItemHydrationGateway,StudentToolPrivateSavedItemHydrationGateway} from '@manaratak/infrastructure';
@@ -937,7 +939,7 @@ export function registerDependencies(
     academicProgramExplorerUseCases:asFunction(({universityProgramWorkspaceUseCases,scholarshipRepository})=>new AcademicProgramExplorerUseCases(universityProgramWorkspaceUseCases,scholarshipRepository)).scoped(),
     academicProgramExplorerAdminRouter:asFunction(cradle=>AcademicProgramExplorerRouter.create(cradle,true)).scoped(),
     academicProgramExplorerPublicRouter:asFunction(cradle=>AcademicProgramExplorerRouter.create(cradle,false)).scoped(),
-    crossModuleIntegrityUseCase: asFunction(({majorRepository,universityRepository,scholarshipRepository,internationalTestRepository})=>new CrossModuleIntegrityUseCase(majorRepository,universityRepository,scholarshipRepository,internationalTestRepository)).scoped(),
+    crossModuleIntegrityUseCase: asFunction(({majorRepository,universityRepository,scholarshipRepository,internationalTestRepository,cmsRepository,courseRepository,referenceDataRepository})=>new CrossModuleIntegrityUseCase(majorRepository,universityRepository,scholarshipRepository,internationalTestRepository,cmsRepository,courseRepository,referenceDataRepository)).scoped(),
     crossModuleIntegrityRouter: asFunction((cradle)=>CrossModuleIntegrityRouter.create(cradle)).scoped(),
     crossDomainGraphReadService: asFunction(({ majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository, studentToolTestDiscovery, serviceTestDiscovery }) =>
       new CrossDomainGraphReadService(majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository, studentToolTestDiscovery, serviceTestDiscovery)).scoped(),
@@ -1074,6 +1076,9 @@ export function registerDependencies(
     studentApplicationReminderGateway: asFunction(({ intentsUseCase, templatesUseCase }) => new StudentApplicationReminderNotificationGateway(intentsUseCase, templatesUseCase)).scoped(),
     studentApplicationReminderOutboxDeliveryGateway: asFunction(({ studentApplicationReminderGateway, studentApplicationTrackerRepository }) => new StudentApplicationReminderOutboxDeliveryGateway(studentApplicationReminderGateway, studentApplicationTrackerRepository)).scoped(),
     studentApplicationReminderOutboxDispatcher: asFunction(({ transactionalOutboxStore, studentApplicationReminderOutboxDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, studentApplicationReminderOutboxDeliveryGateway)).scoped(),
+    studentDocumentUploadUseCases:asFunction(({studentWorkspaceRepository,assetRecordRepository,ingestAssetUseCase,processAssetLifecycleUseCase})=>new StudentDocumentUploadUseCases(studentWorkspaceRepository,assetRecordRepository,ingestAssetUseCase,processAssetLifecycleUseCase)).scoped(),
+    studentDocumentReviewUseCases:asFunction(({studentApplicationTrackerRepository,studentApplicationScholarshipGateway,assetReferencePolicy,processAssetLifecycleUseCase})=>new StudentDocumentReviewUseCases(studentApplicationTrackerRepository,studentApplicationScholarshipGateway,assetReferencePolicy,processAssetLifecycleUseCase)).scoped(),
+    studentDocumentReviewRouter:asFunction(cradle=>StudentDocumentReviewRouter.create(cradle)).scoped(),
     studentApplicationTrackerUseCases: asFunction(({ studentApplicationTrackerRepository, studentApplicationScholarshipGateway, assetReferencePolicy }) => new StudentApplicationTrackerUseCases(studentApplicationTrackerRepository, studentApplicationScholarshipGateway, assetReferencePolicy)).scoped(),
     studentOwnerCatchupContinuationQueue: asFunction(({prisma}) => new PrismaStudentOwnerCatchupContinuationQueue(prisma)).scoped(),
     studentWorkspaceOutboxDeliveryGateway: asFunction(({ studentWorkspaceUseCases, roleAssignmentRepository, identityRepository, courseStudentDashboardReadGateway, certificateStudentDashboardReadGateway, studentOwnerCatchupContinuationQueue }) => new StudentWorkspaceOutboxDeliveryGateway(studentWorkspaceUseCases, roleAssignmentRepository, identityRepository, courseStudentDashboardReadGateway, certificateStudentDashboardReadGateway, studentOwnerCatchupContinuationQueue)).scoped(),

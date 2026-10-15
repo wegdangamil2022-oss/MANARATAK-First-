@@ -1,3 +1,4 @@
+import {decodeStableCursor,encodeStableCursor,boundedCursorLimit} from '../api-foundation/StableCursor';
 import { PrismaCmsDomainOwnerReadGateway } from './PrismaCmsDomainOwnerReadGateway';
 /* eslint-disable @typescript-eslint/no-explicit-any -- Prisma CMS delegates are generated after the source-only migration is accepted by runtime. */
 import { createHash, randomUUID } from 'node:crypto';
@@ -1174,6 +1175,20 @@ export class PrismaCmsRepository implements ICmsRepository {
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
     return rows.map((row: any) => this.domainLink(row));
+  }
+
+  public async listPublishedDomainTargetPage(targetType:string,targetId:string,locale:string,cursor?:string,requestedLimit=12){
+    await new PrismaCmsDomainOwnerReadGateway(this.db).assertPublished(targetType as CmsDomainTargetType,targetId);
+    const limit=boundedCursorLimit(requestedLimit,12,50),after=decodeStableCursor(cursor);
+    const where=Prisma.sql`p."siteIdentifier"='manaratak' AND p.locale=${locale} AND p.status=${CmsContentStatus.PUBLISHED} AND EXISTS(SELECT 1 FROM "CmsContentDomainLink" l WHERE l."contentId"=p."contentId" AND l."targetType"=${targetType} AND l."targetId"=${targetId})`;
+    const [rows,counts]=await Promise.all([
+      this.db.$queryRaw(Prisma.sql`SELECT p.id,p."contentId" FROM "CmsPublishedContent" p WHERE ${where} ${after?Prisma.sql`AND p.id>${after}`:Prisma.empty} ORDER BY p.id LIMIT ${limit+1}`) as Promise<Array<{id:string;contentId:string}>>,
+      this.db.$queryRaw(Prisma.sql`SELECT count(*) AS total FROM "CmsPublishedContent" p WHERE ${where}`) as Promise<Array<{total:bigint}>>,
+    ]);
+    const selected=rows.slice(0,limit),ids=selected.map(row=>row.id),records=await this.db.cmsPublishedContent.findMany({where:{id:{in:ids},status:CmsContentStatus.PUBLISHED,locale,siteIdentifier:'manaratak'}});
+    const byId=new Map<string,any>(records.map((row:any)=>[row.id,row])),locales=await this.availableLocales(selected.map(row=>row.contentId)),total=Number(counts[0]?.total??0);
+    if(!Number.isSafeInteger(total))throw new Error('CMS_PUBLIC_TOTAL_INVALID');
+    return {data:ids.flatMap(id=>{const row=byId.get(id);return row?[this.publicContent(row,locales.get(row.contentId)??[])]:[]}),total,hasMore:rows.length>limit,nextCursor:rows.length>limit?encodeStableCursor(selected.at(-1)!.id):null};
   }
 
   public async listPublishedByDomainTarget(

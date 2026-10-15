@@ -31,7 +31,7 @@ export async function graphOwnerRead<T>(
     const value = await Promise.race([read(), new Promise<T>((_, reject) => {
       timer = setTimeout(() => reject(new Error('OWNER_READ_TIMEOUT')), 5000);
     })]);
-    scope.collections[name] = { state: 'AVAILABLE', scope: 'OWNER_QUERY' };
+    scope.collections[name] = { ...scope.collections[name],state: 'AVAILABLE', scope: 'OWNER_QUERY' };
     return value;
   } catch {
     scope.collections[name] = {

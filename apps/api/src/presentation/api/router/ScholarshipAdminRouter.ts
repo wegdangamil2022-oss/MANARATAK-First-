@@ -513,6 +513,9 @@ export class ScholarshipAdminRouter {
       }),
     );
 
+    router.get('/:id/reference-transitions',asyncHandler(async(req:Request,res:Response)=>{res.setHeader('Cache-Control','no-store');res.json({data:await adminScholarshipUseCases.listReferenceTransitions(req.params.id)});}));
+    router.post('/:id/reference-transitions',asyncHandler(async(req:Request,res:Response)=>{const body=z.object({changeType:z.enum(['MERGE','TOMBSTONE','RESTORE']),targetOwnerId:z.string().trim().min(1).max(160).optional()}).strict().parse(req.body);res.status(201).json({data:await adminScholarshipUseCases.proposeReferenceTransition(req.params.id,body,ownerContext(req))});}));
+    router.post('/:id/reference-transitions/:transitionId/approve',asyncHandler(async(req:Request,res:Response)=>{z.object({}).strict().parse(req.body??{});await adminScholarshipUseCases.approveReferenceTransition(req.params.id,z.string().uuid().parse(req.params.transitionId),ownerContext(req));res.status(204).send();}));
     router.patch(
       '/import-center/sources/:sourceId/status',
       asyncHandler(async (req: Request, res: Response) => {
@@ -892,6 +895,8 @@ export class ScholarshipAdminRouter {
     // Simple error handler for Zod errors and Use Case errors
     router.use((err: any, req: Request, res: Response, next: NextFunction) => {
       if (err instanceof Error && err.message === 'SCHOLARSHIP_REVISION_PRECONDITION_REQUIRED') return res.status(428).json({ error: err.message, code: err.message });
+      if(err instanceof Error&&err.message==='SCHOLARSHIP_REFERENCE_INDEPENDENT_REVIEW_REQUIRED')return res.status(403).json({error:err.message});
+      if(err instanceof Error&&err.message.startsWith('SCHOLARSHIP_REFERENCE_'))return res.status(409).json({error:err.message});
       if (err instanceof Error && err.message === 'SCHOLARSHIP_STALE_REVISION') return res.status(409).json({ error: err.message, code: err.message });
       if (err instanceof Error && err.message === 'SCHOLARSHIP_INVALID_REVISION_PRECONDITION') return res.status(400).json({ error: err.message, code: err.message });
       if (err instanceof Error && err.message === 'IMPORT_REVIEW_LEASE_REQUIRED')

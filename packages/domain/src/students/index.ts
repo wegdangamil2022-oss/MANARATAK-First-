@@ -381,11 +381,19 @@ export interface StudentSupportTrackerHistoryPage {
   nextCursor:string|null;
 }
 
+export interface StudentDocumentAttestation {verdict:'VERIFIED'|'REJECTED';reviewedBy:string;reviewedAt:string;assetId:string;checksumSha256:string;ownerVersionId:string;cycleId:string;evidenceReference:string;validUntil:string;}
 export interface StudentApplicationDocumentBindingDto {
+ reviewConsentGrantedAt?:Date|null;reviewConsentUntil?:Date|null;attestation?:StudentDocumentAttestation|null;
  id: string; trackerId: string; requirementId: string; assetId: string; ownerVersionId: string;
  requirementSnapshot: Record<string, unknown>; consentGrantedAt: Date; expiresAt: Date | null; retentionUntil: Date;
 }
 export interface IStudentApplicationTrackerRepository {
+ setDocumentReviewConsent?(studentReferenceId:string,trackerId:string,requirementId:string,expectedVersion:number,granted:boolean):Promise<void>;
+ listPendingDocumentReviews?(after?:string):Promise<{items:Array<{id:string;requirementName:string;consentUntil:Date}>;hasMore:boolean;nextCursor:string|null}>;
+ findDocumentReview?(bindingId:string):Promise<{binding:StudentApplicationDocumentBindingDto;tracker:StudentApplicationTrackerDto}|null>;
+ recordDocumentReviewAccess?(bindingId:string,expectedVersion:number,actorId:string):Promise<void>;
+ saveDocumentAttestation?(bindingId:string,expectedVersion:number,attestation:StudentDocumentAttestation,reason:string):Promise<void>;
+
  removeDocumentBinding?(studentReferenceId: string, trackerId: string, requirementId: string, expectedVersion: number): Promise<void>;
  purgeExpiredDocumentBindings?(limit: number): Promise<number>;
  listDocumentBindings?(studentReferenceId: string, trackerId: string): Promise<StudentApplicationDocumentBindingDto[]>;
@@ -419,6 +427,7 @@ export interface IStudentApplicationTrackerRepository {
 }
 
 export interface StudentApplicationScholarshipOwnerDto {
+  referenceState?:import('../scholarships/contracts').ScholarshipReferenceState;
   requirements?: Array<{ id: string; displayName: string; required: boolean }>;
   cycleId?: string | null; cycleKey?: string | null; ownerVersionId?: string | null; cycles?: Array<{id: string; cycleKey: string; closesAt: Date | null}>;
   id: string; slug?: string | null; displayName: string; country?: string | null; deadlineAt?: Date | null; lifecycleStatus?: string | null; available: boolean;
@@ -542,6 +551,7 @@ export interface IStudentWorkspaceRepository {
 
 /** P8 cross-domain read contract: Phase 15 stores only references; owner domains hydrate display truth. */
 export interface StudentSavedItemOwnerReadModel {
+  referenceState?:import('../scholarships/contracts').ScholarshipReferenceState;
   visibility?:'PUBLIC'|'STUDENT_PRIVATE';
   privateReference?:string;
   ownerType: StudentSavedItemType;
@@ -558,7 +568,7 @@ export interface HydratedStudentSavedItemDto {
 }
 export interface IStudentSavedItemHydrationGateway {
   supports(entityType: StudentSavedItemType): boolean;
-  hydrate(item: StudentSavedItemDto): Promise<StudentSavedItemOwnerReadModel | null>;
+  hydrate(item: StudentSavedItemDto, context?: 'CANONICALIZE_NEW_SAVE'): Promise<StudentSavedItemOwnerReadModel | null>;
 }
 
 /** P7/P13 owner-read contracts: P15 composes learning/certificate truth but does not own it. */

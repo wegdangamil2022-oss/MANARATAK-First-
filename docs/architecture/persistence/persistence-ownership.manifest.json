@@ -289,7 +289,8 @@
     "UniversityTuitionProfile": "universities",
     "UserRecord": "identity",
     "WorkflowControlRecord": "foundation_control_plane",
-    "WorkflowExecutionProjection": "foundation_control_plane"
+    "WorkflowExecutionProjection": "foundation_control_plane",
+    "ScholarshipReferenceTransition": "scholarships"
   },
   "adapterPathOwners": {
     "packages/infrastructure/src/reference-data/": "reference",

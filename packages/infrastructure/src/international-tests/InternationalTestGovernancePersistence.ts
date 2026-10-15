@@ -1,3 +1,4 @@
+import {admissionPublicationScales,assertAdmissionScoreProfiles} from '@manaratak/domain';
 import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { InternationalTestDto, InternationalTestPublicationReadinessPolicy, publicInternationalTest, assertOfficialTestUrl } from '@manaratak/domain';
@@ -25,6 +26,8 @@ export class InternationalTestGovernancePersistence {
     const versions = await this.prisma.internationalTestVersion.findMany({where:{testId:test.id, sourceHash:{not:null}, sourceFileName:{not:null}}, orderBy:[{versionNumber:'desc'}],take:1,include:{contentBlocks:true}});
     const evidence = await this.prisma.internationalTestEvidence.findUnique({where:{testId:test.id}});
     const provider = test.providerId ? await this.prisma.internationalTestProvider.findUnique({where:{id:test.providerId}}) : null;
+    const scoreProfiles=assertAdmissionScoreProfiles(test.optionalFields?.admissionScoreProfiles,test);
+    for(const profile of scoreProfiles)assertOfficialTestUrl(profile.sourceUrl,provider?.officialWebsite??undefined);
     const payload = publicInternationalTest(test); delete payload.currentPublishedVersionId; payload.status = 'PUBLISHED' as InternationalTestDto['status'];
     const countryIds=test.availability?.availableCountryIds??[];const cityIds=test.availability?.availableCityIds??[];
     if(countryIds.length>500||cityIds.length>5000)throw new Error('INTERNATIONAL_TEST_AVAILABILITY_LIMIT_EXCEEDED');
@@ -32,7 +35,7 @@ export class InternationalTestGovernancePersistence {
     if(countries.length!==countryIds.length||cities.length!==cityIds.length||[...countries,...cities].some(row=>!row.isActive||row.lifecycleState!=='ACTIVE')||cities.some(city=>!countries.some(country=>country.iso2Code===city.countryIso2Code)))throw new Error('INTERNATIONAL_TEST_AVAILABILITY_REFERENCE_INVALID');
     payload.locations={countries:countries.map(({id,name,nameAr,iso2Code})=>({id,name,nameAr,iso2Code})),cities:cities.map(({id,name,nameAr,countryIso2Code})=>({id,name,nameAr,countryIso2Code}))};
     const version = versions[0];
-    return {payload,version,evidence,provider,hash:internationalTestCandidateHash({payload,sourceHash:version?.sourceHash,sourceVersionId:version?.id,blocks:version?.contentBlocks.map(b=>({id:b.id,reviewStatus:b.reviewStatus,content:b.content,metadata:b.metadata})),evidence,providerWebsite:provider?.officialWebsite})};
+    return {payload,version,evidence,provider,scoreProfiles,hash:internationalTestCandidateHash({payload,scoreProfiles,sourceHash:version?.sourceHash,sourceVersionId:version?.id,blocks:version?.contentBlocks.map(b=>({id:b.id,reviewStatus:b.reviewStatus,content:b.content,metadata:b.metadata})),evidence,providerWebsite:provider?.officialWebsite})};
   }
   async execute(test: InternationalTestDto, action: string, input: Record<string,unknown>, actorId: string): Promise<unknown> {
     const testId = test.id; const page = Math.min(1000,Math.max(1,Number(input.page)||1)); const offset = (page-1)*25;
@@ -143,7 +146,7 @@ export class InternationalTestGovernancePersistence {
       if (!approval?.reviewerId || approval.candidateHash !== candidate.hash) throw new Error('INTERNATIONAL_TEST_APPROVAL_STALE');
       const latest = await this.prisma.internationalTestVersion.findFirst({where:{testId},orderBy:{versionNumber:'desc'}});
       const versionId = randomUUID();
-      await this.prisma.internationalTestVersion.create({data:{id:versionId,testId,versionNumber:(latest?.versionNumber??0)+1,status:'PUBLISHED',sourceHash:candidate.version?.sourceHash??ev.contentHash,publishedAt:new Date(),approvedBy:String(approval.reviewerId),metadata:{publicationSnapshot:true,candidateHash:candidate.hash}}});
+      await this.prisma.internationalTestVersion.create({data:{id:versionId,testId,versionNumber:(latest?.versionNumber??0)+1,status:'PUBLISHED',sourceHash:candidate.version?.sourceHash??ev.contentHash,publishedAt:new Date(),approvedBy:String(approval.reviewerId),metadata:{publicationSnapshot:true,candidateHash:candidate.hash,publishedVariantIds:(test.variants??[]).filter(v=>v.isActive).map(v=>v.id),publishedSectionIds:(test.sections??[]).map(section=>section.id)},scoreScales:{create:admissionPublicationScales({...test,optionalFields:{admissionScoreProfiles:candidate.scoreProfiles}})}}});
       const payload = {...candidate.payload,currentPublishedVersionId:versionId};
       await this.prisma.$executeRaw(Prisma.sql`INSERT INTO "InternationalTestPublicationSnapshot" ("id","testId","candidateHash","payload","reviewerId") VALUES (${versionId},${testId},${candidate.hash},${JSON.stringify(payload)}::jsonb,${String(approval.reviewerId)})`);
       return {versionId};

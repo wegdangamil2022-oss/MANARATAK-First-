@@ -100,6 +100,7 @@ export interface ICmsRepository {
     expectedVersion: number,
   ): Promise<CmsContentDomainLinkDto[]>;
   listDomainLinks?(contentId: string): Promise<CmsContentDomainLinkDto[]>;
+  listPublishedDomainTargetPage?(targetType:string,targetId:string,locale:string,cursor?:string,limit?:number):Promise<{data:PublicCmsContentDto[];total:number;hasMore:boolean;nextCursor:string|null}>;
   listPublishedByDomainTarget?(
     targetType: string,
     targetId: string,

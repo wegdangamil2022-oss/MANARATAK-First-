@@ -110,10 +110,12 @@ export function usePublicRelationshipGraph(
           ),
         )
       ) void load(); };
+    const refreshTimer=window.setInterval(refresh,30000);
     window.addEventListener('focus', refresh);
     document.addEventListener('visibilitychange', refresh);
     return () => { active = false;
       controller?.abort();
+      window.clearInterval(refreshTimer);
       ++generation; window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
   }, [mode, selected.majorSlug, selected.universitySlug, selected.scholarshipSlug, selected.countryIso2Code,
     selected.locale,
@@ -126,25 +128,25 @@ export function usePublicRelationshipGraph(
         .filter((identity) => Boolean(publicRelationshipRouteKey(identity)))
         .map((identity) => ({
         id: identityRouteKey(identity), ownerId: identity.ownerId, name: identity.displayName,
-        meta: identity.matchingPrograms?.[0]?.sourceProgramName || 'برنامج أكاديمي منشور مرتبط',
+        meta: identity.matchingPrograms?.[0]?.displayName || identity.matchingPrograms?.[0]?.sourceProgramName || (selected.locale==='en'?'Linked published academic program':'برنامج أكاديمي منشور مرتبط'),
       })),
       scholarships: state.major.relationships.scholarships.data.filter((identity) => Boolean(publicRelationshipRouteKey(identity)))
         .map((identity) => ({
-        id: identityRouteKey(identity), ownerId: identity.ownerId, name: identity.displayName, meta: 'منحة منشورة مرتبطة بالتخصص',
+        id: identityRouteKey(identity), ownerId: identity.ownerId, name: identity.displayName, meta: selected.locale==='en'?'Published scholarship linked to this major':'منحة منشورة مرتبطة بالتخصص',
       })),
       courses: state.major.relationships.courses.data
         .filter((identity) => Boolean(publicRelationshipRouteKey(identity)))
         .map((identity) => ({
         id: identityRouteKey(identity), ownerId: identity.ownerId, name: identity.displayName,
-        meta: [identity.providerName, identity.category].filter(Boolean).join(' · ') || 'دورة منشورة مرتبطة بالتخصص',
+        meta: [identity.providerName, identity.category].filter(Boolean).join(' · ') || (selected.locale==='en'?'Published course linked to this major':'دورة منشورة مرتبطة بالتخصص'),
       })),
     };
-  }, [state.major]);
+  }, [state.major,selected.locale]);
 
   const graph = state.country ?? state.major ?? state.university ?? state.scholarship;
   const hasLocaleFallback = (value: unknown): boolean => {
     if (!value || typeof value !== 'object') return false;
-    if ('localeFallback' in value && value.localeFallback === true) return true;
+    if (('localeFallback' in value && value.localeFallback === true)||('universityLocaleFallback' in value&&value.universityLocaleFallback===true)) return true;
     return Object.values(value).some(hasLocaleFallback);
   };
   const partial = hasLocaleFallback(graph) ||

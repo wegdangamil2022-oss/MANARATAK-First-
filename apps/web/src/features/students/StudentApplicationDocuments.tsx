@@ -1,3 +1,4 @@
+import {StudentDocumentUpload} from './StudentDocumentUpload';
 import { applicationCycleLabel } from './ApplicationCycleLabel';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import {
@@ -97,8 +98,8 @@ export function StudentApplicationDocuments({
         <div className="space-y-2">
           <p>
             {text(
-              'هذه متابعة شخصية وليست تقديمًا رسميًا أو تحققًا أكاديميًا من المستند.',
-              'This is personal planning, not official submission or academic document verification.',
+              'هذه متابعة شخصية وليست تقديمًا رسميًا. الربط وحده لا يوثق المستند؛ تظهر نتيجة المراجعة البشرية مستقلة إن طلبتها.',
+              'This is personal planning, not official submission. Linking does not certify a document; a requested human review has a separate result.',
             )}
           </p>
           <p>
@@ -120,6 +121,7 @@ export function StudentApplicationDocuments({
             </p>
           )}
           {error && <p role="alert">{error}</p>}
+          {tracker.status==='ACTIVE'&&<StudentDocumentUpload key={tracker.id} onUploaded={item=>{setAssets(previous=>[item,...previous.filter(a=>a.id!==item.id)]);setAsset(item.id);setConsent(false);}}/>}
           {readiness && (
             <>
               <p>
@@ -133,6 +135,8 @@ export function StudentApplicationDocuments({
               {readiness.entries.map((r) => (
                 <p key={r.requirementId}>
                   {r.displayName} — {labels[r.state]?.[language === 'en' ? 1 : 0] ?? r.state}
+                  {r.verification&&<span> — {({VERIFIED:text('راجعه مختص أكاديميًا','Academically reviewed by staff'),REJECTED:text('رفض المراجع المستند','Reviewer rejected the document'),STALE:text('المراجعة تحتاج تحديثًا','Review needs updating'),NOT_ATTESTED:text('غير مصدق أكاديميًا','Not academically attested')} as Record<string,string>)[r.verification]??r.verification}</span>}
+                  {r.linked&&<><span> {text('طلب المراجعة يتيح لمراجع مخول الاطلاع على المستند لمدة سبعة أيام، وحفظ نتيجة المراجعة حتى نهاية احتفاظ الربط. يمكنك سحب الموافقة وإزالة النتيجة.','A review request permits an authorized reviewer to access this document for seven days and retain the result until the binding retention ends. You can withdraw consent and remove the result.')}</span><button type="button" disabled={busy||(!r.reviewConsentGranted&&(!r.bindable||r.state!=='ASSET_AVAILABLE_UNVERIFIED'))} onClick={()=>{const current=generation.current;if(!r.reviewConsentGranted&&!window.confirm(text('أوافق على إتاحة المستند للمراجعة الأكاديمية البشرية وحفظ نتيجتها حسب المدة الموضحة.','I consent to human academic review of this document and retention of its result for the stated period.')))return;setBusy(true);void ApiClient.setMyDocumentReviewConsent(tracker.id,r.requirementId,tracker.version,!r.reviewConsentGranted).then(()=>{if(current===generation.current)onChanged();}).catch(()=>{if(current===generation.current)setError(text('تعذر تحديث موافقة المراجعة؛ حدّث الملف.','Could not update review consent; refresh the tracker.'));}).finally(()=>{if(current===generation.current)setBusy(false);});}}>{r.reviewConsentGranted?text('سحب موافقة المراجعة وإزالة نتيجتها','Withdraw review consent and result'):text('طلب مراجعة أكاديمية بموافقتي','Request academic review with my consent')}</button></>}
                   {r.linked && (
                     <button
                       type="button"

@@ -26,6 +26,15 @@ export class InternationalTestPublicRouter {
       res.json(await localized.listPublished(filters, locale));
     }));
 
+    router.get('/id/:id/admission-score-scales',asyncHandler(async(req:Request,res:Response)=>{const {versionId}=z.object({versionId:z.string().trim().min(1).max(160).optional()}).strict().parse(req.query);res.setHeader('Cache-Control','no-store');const data=await cradle.internationalTestRepository.getPublishedAdmissionScoreContract?.(z.string().trim().min(1).max(160).parse(req.params.id),versionId);if(!data)return void res.status(404).json({error:'PUBLISHED_SCORE_CONTRACT_UNAVAILABLE'});res.json({data});}));
+    router.get('/:slug/admission-score-scales',asyncHandler(async(req:Request,res:Response)=>{
+      const {versionId}=z.object({versionId:z.string().trim().min(1).max(160).optional()}).strict().parse(req.query);
+      res.setHeader('Cache-Control','no-store');
+      const test=await cradle.internationalTestRepository.findPublishedBySlug(req.params.slug);
+      const contract=test?await cradle.internationalTestRepository.getPublishedAdmissionScoreContract?.(test.id,versionId):null;
+      if(!contract)return void res.status(404).json({error:'PUBLISHED_SCORE_CONTRACT_UNAVAILABLE'});
+      res.json({data:contract});
+    }));
     router.get('/:slug/discovery',asyncHandler(async(req:Request,res:Response)=>{
       const query=z.object({locale:z.enum(['ar','en']).default('ar'),owner:z.enum(['STUDENT_TOOLS','SERVICES']),after:z.string().trim().min(1).max(160).optional(),limit:z.coerce.number().int().min(1).max(50).default(12)}).strict().parse(req.query);
       const test=await cradle.internationalTestRepository.findPublishedBySlug(req.params.slug);

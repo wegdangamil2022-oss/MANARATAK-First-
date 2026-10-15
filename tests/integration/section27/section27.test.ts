@@ -211,6 +211,7 @@ function graph(universityRows: any[] = []) {
       listPublished: async () => page(universityRows),
       findBySlug: async () => university,
       listPublishedProgramGraph: async () => programs,
+      listPublishedMajorGraph:async()=>({data:[{ownerId:'m'}],total:8,hasMore:true,nextCursor:'major-cursor'}),
     } as any,
     { listPublished: async () => page() } as any,
     { listPublished: async () => page() } as any,
@@ -233,7 +234,8 @@ test('country: programs/majors independent of empty university page', async () =
   assert.equal(dto.relationships.academicPrograms[0].ownerId, 'p');
   assert.equal(dto.readScope?.collections.academicPrograms.total, 40);
   assert.equal(dto.readScope?.collections.majors.total, 8);
-  assert.equal(dto.readScope?.collections.majors.scope, 'PROGRAM_PAGE_SAMPLE');
+  assert.equal(dto.readScope?.collections.majors.scope, 'OWNER_QUERY');
+  assert.equal(dto.readScope?.collections.majors.nextCursor,'major-cursor');
   assert.equal(dto.readScope?.collections.academicPrograms.nextCursor, 'cursor-2');
 });
 test('country: optional failure is unavailable with unknown total, not successful zero', async () => {
@@ -773,12 +775,12 @@ test('documents: retention purge remains bounded and rechecks expiry before dele
   assert.equal(await repo.purgeExpiredDocumentBindings(1000),1);assert.equal(query.take,100);assert.deepEqual(deleted.where.id.in,['expired']);assert.ok(deleted.where.retentionUntil.lte instanceof Date);
 });
 test('integrity live owner sample: unauthorized targets are neither read nor returned',async()=>{
-  let targetRead=false;const service=new CrossModuleIntegrityUseCase({} as any,{findById:async()=>{targetRead=true;}} as any,{list:async()=>page([{...scholarship,universityLinks:[{universityId:'private-target'}]}])} as any,{} as any);
+  let targetRead=false;const service=new CrossModuleIntegrityUseCase({} as any,{findById:async()=>{targetRead=true;}} as any,{list:async()=>page([{...scholarship,universityLinks:[{universityId:'private-target'}]}]),findById:async()=>({...scholarship,universityLinks:[{universityId:'private-target'}]})} as any,{} as any);
   const report=await service.execute('SCHOLARSHIPS',new Set(['SCHOLARSHIPS']));assert.equal(targetRead,false);assert.equal(report.findings.length,0);assert.equal(report.coverage,'PARTIAL_OWNER_SAMPLE');assert.equal(report.targetReferencesChecked,0);
   await assert.rejects(()=>service.execute('UNIVERSITIES',new Set(['SCHOLARSHIPS'])),/SCOPE_INVALID/);
 });
 test('integrity live owner sample: explicit missing target is reported without pretending full catalog coverage',async()=>{
-  const service=new CrossModuleIntegrityUseCase({} as any,{findById:async()=>null} as any,{list:async()=>page([{...scholarship,universityLinks:[{universityId:'gone'}]}])} as any,{} as any);
+  const service=new CrossModuleIntegrityUseCase({} as any,{findById:async()=>null} as any,{list:async()=>page([{...scholarship,universityLinks:[{universityId:'gone'}]}]),findById:async()=>({...scholarship,universityLinks:[{universityId:'gone'}]})} as any,{} as any);
   const report=await service.execute('SCHOLARSHIPS',new Set(['SCHOLARSHIPS','UNIVERSITIES']));assert.equal(report.findings.some(f=>f.code==='MISSING_OWNER_REFERENCE'),true);assert.equal(report.productionIntegrity,'UNVERIFIED');assert.equal(report.coverage,'PARTIAL_OWNER_SAMPLE');
 });
 test('integrity API: absent identity and denied owner stop before owner reads',async()=>{
@@ -789,7 +791,7 @@ test('integrity API: absent identity and denied owner stop before owner reads',a
   assert.equal(called,false);
 });
 test('integrity live owner sample: canonical program parent mismatch is detected',async()=>{
-  const service=new CrossModuleIntegrityUseCase({} as any,{findById:async()=>({id:'u',status:'PUBLISHED'}),findPublishedAcademicProgramsByIds:async()=>[{ownerId:'program',universityOwnerId:'other'}]} as any,{list:async()=>page([{...scholarship,universityLinks:[{universityId:'u',academicProgramId:'program'}]}])} as any,{} as any);
+  const service=new CrossModuleIntegrityUseCase({} as any,{findById:async()=>({id:'u',status:'PUBLISHED'}),findPublishedAcademicProgramsByIds:async()=>[{ownerId:'program',universityOwnerId:'other'}]} as any,{list:async()=>page([{...scholarship,universityLinks:[{universityId:'u',academicProgramId:'program'}]}]),findById:async()=>({...scholarship,universityLinks:[{universityId:'u',academicProgramId:'program'}]})} as any,{} as any);
   const report=await service.execute('SCHOLARSHIPS',new Set(['SCHOLARSHIPS','UNIVERSITIES']));assert.equal(report.findings.some(f=>f.code==='OWNER_PARENT_MISMATCH'),true);
 });
 test('cycle: separate canonical cycle creates a clean checklist and cycle-specific reminder aggregate',async()=>{

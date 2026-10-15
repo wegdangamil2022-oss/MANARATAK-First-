@@ -1,3 +1,4 @@
+import {OwnerReferenceNotice} from './OwnerReferenceNotice';
 import {useTranslation} from '../../i18n/I18nProvider';
 import {StudentPrivateToolResult} from './StudentPrivateToolResult';
 import { StudentApplicationDocuments } from './StudentApplicationDocuments';
@@ -58,6 +59,8 @@ function resolveTabFromQuery(queryTab: string | null): CanonicalWorkspaceTab | n
   if (normalized === 'profile' || normalized === 'settings') return 'PROFILE';
   return null;
 }
+
+function trackerDisplayName(tracker:StudentApplicationTrackerDto):string {return tracker.owner?.available?tracker.owner.displayName:typeof tracker.ownerSnapshot?.displayName==='string'?tracker.ownerSnapshot.displayName:'منحة محفوظة / Saved scholarship';}
 
 export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: WorkspaceTab } = {}) {
   const location = useLocation();
@@ -120,6 +123,21 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
     document.addEventListener('visibilitychange', refreshCertificates);
     return () => {active=false;window.removeEventListener('focus',refreshCertificates);document.removeEventListener('visibilitychange',refreshCertificates);};
   }, [tab, studentReferenceId]);
+
+  // Live owner reads bound stale catalog links without persisting a second canonical catalog.
+  useEffect(()=>{
+    if(!studentReferenceId)return;let active=true,latest=0;
+    const refreshOwners=async()=>{
+      if(document.visibilityState==='hidden'||mutationPending.current)return;const request=++latest;
+      const [trackers,saved]=await Promise.allSettled([ApiClient.listMyStudentApplicationTrackers(),ApiClient.listMyHydratedStudentSavedItems()]);
+      if(!active||request!==latest||mutationPending.current)return;
+      if(trackers.status==='fulfilled')setApplicationTrackers(current=>trackers.value.map(fresh=>{const prior=current.find(item=>item.id===fresh.id);return prior&&prior.version>fresh.version?{...prior,owner:fresh.owner}:fresh;}));
+      else setApplicationTrackers(current=>current.map(item=>({...item,deadlineAt:null,scholarshipSlug:null,owner:item.owner?{...item.owner,available:false,slug:null,deadlineAt:null}:null})));
+      setHydratedSavedItems(current=>saved.status==='fulfilled'?saved.value:current.map(item=>({...item,owner:null})));
+    };
+    const timer=window.setInterval(()=>void refreshOwners(),30000);window.addEventListener('focus',refreshOwners);document.addEventListener('visibilitychange',refreshOwners);
+    return()=>{active=false;++latest;window.clearInterval(timer);window.removeEventListener('focus',refreshOwners);document.removeEventListener('visibilitychange',refreshOwners);};
+  },[studentReferenceId]);
 
   // Synchronize Tab with URL query param and browser history (back/forward & refresh support)
   const handleTabChange = (nextTab: CanonicalWorkspaceTab, push = true) => {
@@ -1201,7 +1219,7 @@ function SummaryView({
                       )}
                     </div>
                     <h3 className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] mt-1 truncate">
-                      {item.owner?.displayName || item.scholarshipSlug || item.scholarshipId}
+                      {trackerDisplayName(item)}
                     </h3>
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
@@ -1497,7 +1515,7 @@ function OpportunitiesView({
                 <div className="space-y-2">
                   {upcomingDeadlines.slice(0, 4).map((tracker) => {
                     const deadlineStr = tracker.deadlineAt || tracker.owner?.deadlineAt;
-                    const title = tracker.owner?.displayName || tracker.scholarshipSlug || tracker.scholarshipId;
+                    const title = trackerDisplayName(tracker);
                     return (
                       <div
                         key={tracker.id}
@@ -1644,8 +1662,8 @@ function ApplicationTrackerCard({
   const completed = tracker.checklist.filter((item) => item.completed).length;
   const total = tracker.checklist.length;
   const progress = total ? Math.round((completed / total) * 100) : 0;
-  const displayName = tracker.owner?.displayName || tracker.scholarshipSlug || tracker.scholarshipId;
-  const slug = tracker.owner?.slug || tracker.scholarshipSlug;
+  const displayName = trackerDisplayName(tracker);
+  const slug = tracker.owner?.available===true ? tracker.owner.slug : null;
   const isArchived = tracker.status === 'ARCHIVED';
   const deadlineStr = tracker.deadlineAt || tracker.owner?.deadlineAt;
 
@@ -1656,6 +1674,7 @@ function ApplicationTrackerCard({
 
   return (
     <article className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel transition-all hover:border-[#D6A43B]/40">
+      <OwnerReferenceNotice reference={tracker.owner?.referenceState}/>
       <StudentApplicationDocuments tracker={tracker} onChanged={onDocumentsChanged} />
       {/* Top Header Row */}
       <div className="flex items-start justify-between gap-3">
@@ -3305,6 +3324,7 @@ function VaultView({
                     </div>
                   )}
 
+                  <OwnerReferenceNotice reference={owner?.referenceState}/>
                   {item.entityType==='STUDENT_TOOL'&&<StudentPrivateToolResult savedReference={owner?.privateReference??item.id} available={owner?.visibility==='STUDENT_PRIVATE'&&available===true}/>}
                   {/* Saved Date */}
                   <div className="mt-2 text-[10.5px] text-[var(--mn-text-muted)]">

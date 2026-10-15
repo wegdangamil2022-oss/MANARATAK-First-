@@ -1,3 +1,4 @@
+import {parsePublicRelationshipGraphPage,type PublicRelationshipGraphPage} from '../features/public-template/PublicGraphPageContract';
 import {parseTestDiscoveryPage,type TestDiscoveryPublicPage} from '../features/public-template/TestDiscoveryContract';
 import { CsrfClientManager } from '@manaratak/shared';
 
@@ -930,6 +931,7 @@ export interface StudentSavedItemDto {
 export interface HydratedStudentSavedItemDto {
   savedItem: StudentSavedItemDto;
   owner: {
+    referenceState?:PublicScholarshipReferenceState;
     visibility?:'PUBLIC'|'STUDENT_PRIVATE';
     privateReference?:string;
     ownerType: string;
@@ -952,12 +954,13 @@ export interface StudentServiceRequestDto {
   fulfillmentMetadata?: Record<string, unknown> | null; createdAt: string; updatedAt: string; completedAt?: string | null; version: number;
 }
 
+export interface PublicScholarshipReferenceState {ownerId:string;state:'MERGED'|'TOMBSTONE'|'RESTORED';ownerRevision:number;effectiveAt:string;replacement?:{ownerId:string;publicId:string;slug:string;displayName:string};}
 export interface StudentApplicationTrackerDto {
   cycleReferenceId?: string; ownerSnapshot?: Record<string,unknown>|null;
   id: string; studentReferenceId: string; scholarshipId: string; scholarshipSlug?: string | null; stage: string; notes?: string | null;
   deadlineAt?: string | null; status: 'ACTIVE' | 'ARCHIVED'; version: number; createdAt: string; updatedAt: string; archivedAt?: string | null;
   checklist: Array<{ id: string; trackerId: string; label: string; completed: boolean; position: number; completedAt?: string | null; createdAt: string; updatedAt: string }>;
-  owner?: { id: string; slug?: string | null; displayName: string; country?: string | null; deadlineAt?: string | null; lifecycleStatus?: string | null; available: boolean } | null;
+  owner?: {referenceState?:PublicScholarshipReferenceState; id: string; slug?: string | null; displayName: string; country?: string | null; deadlineAt?: string | null; lifecycleStatus?: string | null; available: boolean } | null;
 }
 
 export interface StudentSavedCollectionDto {
@@ -1425,7 +1428,7 @@ export interface PublicMajorGraphDto {
   readScope?: PublicGraphReadScope;
   subject: StablePublicGraphIdentity;
   relationships: {
-    universities: PaginatedResult<StablePublicGraphIdentity & { matchingPrograms?: Array<{ ownerId: string; sourceProgramName: string; degreeLevelId?: string | null; majorOwnerId: string }> }>;
+    universities: PaginatedResult<StablePublicGraphIdentity & { matchingPrograms?: Array<{ ownerId: string; displayName?:string;labelLocale?:string;localeFallback?:boolean; sourceProgramName: string; degreeLevelId?: string | null; majorOwnerId: string }> }>;
     scholarships: PaginatedResult<StablePublicGraphIdentity>;
     courses: PaginatedResult<StablePublicGraphIdentity & { directCourseUrl: string; providerName?: string | null; category?: string | null }>;
     editorialContent: PublicEditorialGraphIdentity[];
@@ -1438,7 +1441,7 @@ export interface PublicUniversityGraphDto {
   countryOwnerId?: string | null;
   relationships: {
     majors: StablePublicGraphIdentity[];
-    academicPrograms: Array<{ ownerId: string; sourceProgramName: string; degreeLevelId?: string | null; majorOwnerId: string }>;
+    academicPrograms: Array<{ ownerId: string; displayName?:string;labelLocale?:string;localeFallback?:boolean; sourceProgramName: string; degreeLevelId?: string | null; majorOwnerId: string }>;
     scholarships: PaginatedResult<StablePublicGraphIdentity>;
     editorialContent: PublicEditorialGraphIdentity[];
   };
@@ -2635,6 +2638,14 @@ export class ApiClient {
     return res.json();
   }
 
+  static async getScholarshipReference(slug:string):Promise<PublicScholarshipReferenceState|null>{const res=await apiFetch(`${API_BASE_URL}/public/scholarships/${encodeURIComponent(slug)}/reference`,{cache:'no-store'});if(res.status===404)return null;if(!res.ok)throw new Error('SCHOLARSHIP_REFERENCE_UNAVAILABLE');const value=(await res.json()).data as PublicScholarshipReferenceState;if(!value||!['MERGED','TOMBSTONE','RESTORED'].includes(value.state)||typeof value.ownerId!=='string')throw new Error('SCHOLARSHIP_REFERENCE_INVALID');return value;}
+  static async getPublicGraphPage(kind:'majors'|'universities'|'scholarships'|'countries'|'tests',key:string,locale:'ar'|'en',cursors:Record<string,string>={},signal?:AbortSignal):Promise<PublicRelationshipGraphPage>{
+    const query=new URLSearchParams({locale,pageSize:'24',...cursors});
+    const res=await apiFetch(`${API_BASE_URL}/public/graph/${kind}/${encodeURIComponent(key)}?${query}`,{signal,cache:'no-store'});
+    if(!res.ok)throw new Error('PUBLIC_GRAPH_UNAVAILABLE');
+    return parsePublicRelationshipGraphPage(await res.json());
+  }
+
   static async getMajorGraph(slug: string, page = 1, pageSize = 12,
     signal?: AbortSignal,
     locale:'ar'|'en'=currentPublicLocale(),
@@ -2890,7 +2901,16 @@ export class ApiClient {
     if (!res.ok) throw new Error(await parseErrorMessage(res, 'تعذر قراءة دورات المنحة'));
     return (await res.json()).data;
   }
-  static async getMyApplicationDocuments(id: string): Promise<{ownerState:string; entries:Array<{requirementId:string;displayName:string;required:boolean;state:string;linked:boolean;bindable:boolean}>}> {
+  static async requestMyDocumentUpload(input:{originalFilename:string;mimeType:string;byteSize:number;consent:true}):Promise<{assetId:string;uploadGrant?:{uploadUrl:string;method:'PUT'|'POST';headers:Record<string,string>;expiresAt:string}}>{
+    const res=await apiFetch(`${API_BASE_URL}/student/document-uploads`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify(input),cache:'no-store'});if(!res.ok)throw new Error(await parseErrorMessage(res,'DOCUMENT_UPLOAD_UNAVAILABLE'));return (await res.json()).data;
+  }
+  static async completeMyDocumentUpload(assetId:string):Promise<{assetId:string;lifecycleState:string}>{
+    const res=await apiFetch(`${API_BASE_URL}/student/document-uploads/${encodeURIComponent(assetId)}/complete`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({}),cache:'no-store'});if(!res.ok)throw new Error(await parseErrorMessage(res,'DOCUMENT_UPLOAD_INCOMPLETE'));return (await res.json()).data;
+  }
+  static async setMyDocumentReviewConsent(trackerId:string,requirementId:string,expectedVersion:number,granted:boolean):Promise<void>{
+    const res=await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(trackerId)}/documents/${encodeURIComponent(requirementId)}/review-consent`,{method:'PUT',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({expectedVersion,granted}),cache:'no-store'});if(!res.ok)throw new Error(await parseErrorMessage(res,'DOCUMENT_REVIEW_UNAVAILABLE'));
+  }
+  static async getMyApplicationDocuments(id: string): Promise<{ownerState:string; entries:Array<{requirementId:string;displayName:string;required:boolean;state:string;linked:boolean;bindable:boolean;verification?:string;reviewConsentGranted?:boolean;reviewRequested?:boolean;reviewConsentUntil?:string|null}>}> {
     const res = await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(id)}/documents`, { headers: getStudentHeaders() });
     if (!res.ok) throw new Error(await parseErrorMessage(res, 'تعذر قراءة متطلبات المستندات'));
     return (await res.json()).data;
