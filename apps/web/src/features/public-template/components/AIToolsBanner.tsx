@@ -82,7 +82,10 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
           </div>
 
           {/* Horizontal Scrollable Container with 2-by-2 Stacked Tools */}
-          {dataMode === 'prototype' && <div className="relative w-full">
+          {dataMode !== 'prototype' && (
+            <p id="home-tools-preview-note" role="note" className="mb-2 text-center text-[10px] font-medium text-[var(--mn-text-muted)]">{publicT('public_home_tools_preview_notice')}</p>
+          )}
+          <div className="relative w-full">
             <div className="flex overflow-x-auto gap-2 sm:gap-2.5 pb-2 pt-1 no-scrollbar snap-x snap-mandatory scroll-smooth" dir={publicDir}>
               {TOOL_PAIRS.map((pair, colIdx) => (
                 <div key={colIdx} className="flex-none w-[230px] sm:w-[260px] space-y-2 snap-start">
@@ -90,7 +93,9 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
                     <button
                       key={tool.id}
                       onClick={() => onOpenAiTools(tool.id)}
-                      className="w-full text-start rounded-2xl border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/60 bg-[var(--mn-surface)] p-2.5 shadow-2xs hover:shadow-sm transition-all active:scale-[0.98] cursor-pointer min-w-0 mn-panel group flex items-start gap-2.5"
+                      disabled={dataMode !== 'prototype'}
+                      aria-describedby={dataMode !== 'prototype' ? 'home-tools-preview-note' : undefined}
+                      className="w-full text-start rounded-2xl border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/60 bg-[var(--mn-surface)] p-2.5 shadow-2xs hover:shadow-sm transition-all active:scale-[0.98] cursor-pointer disabled:cursor-default disabled:opacity-75 min-w-0 mn-panel group flex items-start gap-2.5"
                     >
                       <div className="w-8 h-8 rounded-full overflow-hidden p-[1px] bg-[#142B5F] dark:bg-[var(--mn-accent)] border border-[#D6A43B]/60 shrink-0 shadow-2xs flex items-center justify-center">
                         <img
@@ -121,7 +126,7 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
                 </div>
               ))}
             </div>
-          </div>}
+          </div>
 
           <div className="mt-3 flex justify-center">
             <button
