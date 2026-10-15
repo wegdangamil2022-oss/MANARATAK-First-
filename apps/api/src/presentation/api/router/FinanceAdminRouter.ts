@@ -373,6 +373,18 @@ export class FinanceAdminRouter {
           );
       }),
     );
+    router.get(
+      '/wallets/:id',
+      asyncHandler(async (req: Request, res: Response) => {
+        res.setHeader('Cache-Control', 'no-store');
+        await requireFinancePermission(req, 'admin:finance:manage');
+        const query = z.object({
+          page: z.coerce.number().int().min(1).max(10000).default(1),
+          pageSize: z.coerce.number().int().min(1).max(50).default(20),
+        }).strict().parse(req.query);
+        res.json(await financeAdminUseCases.getWalletOperations(req.params.id, query.page, query.pageSize));
+      }),
+    );
     router.post(
       '/wallets',
       asyncHandler(async (req: Request, res: Response) => {
@@ -393,13 +405,13 @@ export class FinanceAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:wallet:manage');
         const body = z
-          .object({ amount: moneySchema, businessReferenceId: z.string().trim().min(1).max(160) })
+          .object({ expectedVersion: z.number().int().positive(), amount: moneySchema, businessReferenceId: z.string().trim().min(1).max(160) }).strict()
           .parse(req.body);
         res
           .status(201)
           .json(
             await financePlatformUseCases.createWalletHold(
-              { walletId: req.params.id, ...body },
+              { walletId: req.params.id, amount: body.amount, businessReferenceId: body.businessReferenceId },
               identity(req),
             ),
           );
@@ -409,6 +421,7 @@ export class FinanceAdminRouter {
       '/wallet-holds/:id/release',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:wallet:manage');
+        z.object({expectedVersion: z.number().int().positive()}).strict().parse(req.body);
         return res.json(
           await financePlatformUseCases.resolveWalletHold(req.params.id, 'RELEASE', identity(req)),
         );

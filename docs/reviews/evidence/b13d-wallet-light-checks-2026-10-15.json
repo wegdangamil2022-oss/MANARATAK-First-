@@ -1,0 +1,40 @@
+{
+  "kind": "V8_EXTRACTED_WALLET_RESOLVE_BODY_WITH_IN_MEMORY_DOUBLES",
+  "passed": 7,
+  "failed": 0,
+  "cases": [
+    {
+      "name": "RELEASE replay resolves once",
+      "result": "PASS"
+    },
+    {
+      "name": "CAPTURE replay resolves once",
+      "result": "PASS"
+    },
+    {
+      "name": "missing expected version",
+      "result": "PASS"
+    },
+    {
+      "name": "stale hold version",
+      "result": "PASS"
+    },
+    {
+      "name": "managed transfer hold",
+      "result": "PASS"
+    },
+    {
+      "name": "invalid action",
+      "result": "PASS"
+    },
+    {
+      "name": "same key cannot change release to capture",
+      "result": "PASS"
+    }
+  ],
+  "limitations": [
+    "Not Vitest, TypeScript typecheck, Prisma SQL or PostgreSQL execution",
+    "No provider, operational database, build or broad suite",
+    "Original transaction body executed after removing TypeScript-only annotations; dependencies are explicit doubles"
+  ]
+}

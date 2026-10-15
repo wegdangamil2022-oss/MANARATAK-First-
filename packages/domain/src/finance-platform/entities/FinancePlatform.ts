@@ -161,6 +161,12 @@ export interface WalletHoldDto {
   resolvedAt?: Date | string | null;
 }
 
+export interface WalletOperationsDto {
+  wallet: WalletDto;
+  balance: WalletBalanceDto;
+  holds: {data: WalletHoldDto[]; total: number; page: number; pageSize: number; totalPages: number};
+}
+
 export interface ExchangeRateDto {
   id: string;
   version?: number;

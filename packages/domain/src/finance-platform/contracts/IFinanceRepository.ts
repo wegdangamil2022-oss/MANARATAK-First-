@@ -28,6 +28,7 @@ import {
   WalletBalanceDto,
   WalletDto,
   WalletHoldDto,
+  WalletOperationsDto,
 } from '../entities/FinancePlatform';
 
 export interface FinanceMutationContext {
@@ -201,6 +202,7 @@ export interface IFinanceRepository {
     data: Omit<WalletDto, 'id' | 'createdAt' | 'updatedAt' | 'version'>,
     context: FinanceMutationContext,
   ): Promise<WalletDto>;
+  getWalletOperations(walletId: string, page: number, pageSize: number): Promise<WalletOperationsDto>;
   getWallet(walletId: string): Promise<WalletDto | null>;
   getWalletBalance(walletId: string): Promise<WalletBalanceDto>;
   createWalletHold(

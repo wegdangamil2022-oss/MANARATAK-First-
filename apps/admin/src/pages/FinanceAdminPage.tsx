@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { financeMoney } from './financePresentation';
+import { FinanceWalletPanel } from './FinanceWalletPanel';
 import { FinanceAccountsPanel } from './FinanceAccountsPanel';
 
 type Row = Record<string, any>;
@@ -10,6 +11,7 @@ type Page = { data: Row[]; page: number; total: number; totalPages: number };
 const tabs = [
   'overview',
   'accounts',
+  'wallets',
   'invoices',
   'payments',
   'refunds',
@@ -34,6 +36,7 @@ const listTabs = new Set<Tab>([
 const endpoints: Record<Tab, string> = {
   overview: 'overview',
   accounts: 'accounts',
+  wallets: 'wallets',
   invoices: 'invoices',
   payments: 'payments',
   refunds: 'refunds',
@@ -101,7 +104,7 @@ export function FinanceAdminPage() {
     setLoading(true);
     setError('');
     setData(null);
-    if (tab === 'accounts') {
+    if (tab === 'accounts' || tab === 'wallets') {
       setLoading(false);
       return;
     }
@@ -260,6 +263,7 @@ export function FinanceAdminPage() {
               </button>
             </div>
           )}
+          {tab === 'wallets' && <FinanceWalletPanel refreshToken={refresh} />}
           {tab === 'accounts' && <FinanceAccountsPanel refreshToken={refresh} />}
           {error && (
             <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">

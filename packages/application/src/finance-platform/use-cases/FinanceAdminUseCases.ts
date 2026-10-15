@@ -15,6 +15,9 @@ export class FinanceAdminUseCases {
   listFinancialAccounts(filters: FinancialAccountFilters) {
     return this.repository.listFinancialAccounts(normalizeFinancialAccountFilters(filters));
   }
+  getWalletOperations(walletId: string, page: number, pageSize: number) {
+    return this.repository.getWalletOperations(walletId, page, pageSize);
+  }
   listInvoices(filters: FinanceInvoiceFilters): Promise<PaginatedFinanceResult<FinanceInvoiceDto>> {
     return this.repository.listInvoices(filters);
   }

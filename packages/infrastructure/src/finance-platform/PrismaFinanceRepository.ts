@@ -28,6 +28,7 @@ import {
   validateInstallmentPlan,
   FinancialAccountFilters,
   FinancialAccountDto,
+  WalletOperationsDto,
   normalizeFinancialAccountFilters,
 } from '@manaratak/domain';
 
@@ -1134,6 +1135,32 @@ export class PrismaFinanceRepository implements IFinanceRepository {
       return row;
     });
   }
+  async getWalletOperations(id: string, page: number, pageSize: number): Promise<WalletOperationsDto> {
+    if (!Number.isInteger(page) || page < 1 || page > 10000 ||
+        !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50)
+      throw new Error('FINANCE_WALLET_QUERY_INVALID');
+    return this.db.$transaction(async (tx: Db) => {
+      const record = await tx.financeWalletRecord.findFirst({
+        where: {OR: [{id}, {publicId: id}]}, include: {account: true},
+      });
+      if (!record || !record.account?.active) throw new Error('Wallet not found');
+      if (record.currencyCode !== record.account.currencyCode || record.scale !== record.account.scale)
+        throw new Error('Wallet denomination mismatch');
+      const wallet = {
+        id: record.id, publicId: record.publicId, ownerReferenceId: record.ownerReferenceId,
+        accountId: record.accountId, currencyCode: record.currencyCode, scale: record.scale,
+        status: record.status, version: record.version, createdAt: record.createdAt, updatedAt: record.updatedAt,
+      };
+      const [balance, rows, total] = await Promise.all([
+        this.walletBalanceWithinTx(tx, record),
+        tx.financeWalletHoldRecord.findMany({where: {walletId: record.id},
+          orderBy: [{createdAt: 'desc'}, {id: 'desc'}], skip: (page - 1) * pageSize, take: pageSize}),
+        tx.financeWalletHoldRecord.count({where: {walletId: record.id}}),
+      ]);
+      return {wallet, balance, holds: {data: rows.map((row: any) => this.hold(row)),
+        total, page, pageSize, totalPages: Math.ceil(total / pageSize)}};
+    }, {isolationLevel: 'RepeatableRead'});
+  }
   async getWallet(id: string) {
     return this.db.financeWalletRecord.findFirst({ where: { OR: [{ id }, { publicId: id }] } });
   }
@@ -1158,7 +1185,10 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     ctx: FinanceMutationContext,
   ) {
     assertPositiveFinanceMoney(amount);
+    const payload = {amount, businessReferenceId, expectedVersion: ctx.expectedVersion};
     return this.tx(async (tx) => {
+      const replay = await this.commandReplay(tx, ctx, 'WALLET_HOLD_CREATE', walletId, payload);
+      if (replay) return replay;
       const wallet = await tx.financeWalletRecord.findUnique({
         where: { id: walletId },
         include: { account: true },
@@ -1172,6 +1202,8 @@ export class PrismaFinanceRepository implements IFinanceRepository {
         wallet.account.scale !== amount.scale
       )
         throw new Error('Wallet hold denomination mismatch');
+      if (ctx.actorId !== wallet.ownerReferenceId)
+        throw new Error('FINANCE_PAYER_CONSENT_REQUIRED');
       const duplicate = await tx.financeWalletHoldRecord.findUnique({
         where: { idempotencyKeyHash: hash(ctx.idempotencyKey) },
       });
@@ -1223,7 +1255,9 @@ export class PrismaFinanceRepository implements IFinanceRepository {
         },
       });
       await this.govern(tx, ctx, 'FINANCE_WALLET_HOLD_CREATED', row.id, {});
-      return this.hold(row);
+      const response = this.hold(row);
+      await this.storeCommand(tx, ctx, 'WALLET_HOLD_CREATE', walletId, payload, response);
+      return response;
     });
   }
   async resolveWalletHold(
@@ -1231,7 +1265,13 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     action: 'RELEASE' | 'CAPTURE',
     ctx: FinanceMutationContext,
   ) {
+    if (!['RELEASE', 'CAPTURE'].includes(action)) throw new Error('FINANCE_HOLD_ACTION_INVALID');
+    const payload = {action, expectedVersion: ctx.expectedVersion};
     return this.tx(async (tx) => {
+      const replay = await this.commandReplay(tx, ctx, 'WALLET_HOLD_RESOLVE', holdId, payload);
+      if (replay) return replay;
+      if (!Number.isSafeInteger(ctx.expectedVersion) || ctx.expectedVersion! < 1)
+        throw new Error('FINANCE_EXPECTED_VERSION_REQUIRED');
       const current = await tx.financeWalletHoldRecord.findUnique({ where: { id: holdId } });
       if (!current || current.status !== 'ACTIVE') throw new Error('Wallet hold is not active');
       this.checkVersion(current.version, ctx);
@@ -1260,7 +1300,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
         data: { version: { increment: 1 } },
       });
       const row = await tx.financeWalletHoldRecord.update({
-        where: { id: holdId },
+        where: { id: holdId, version: current.version },
         data: {
           status: action === 'RELEASE' ? 'RELEASED' : 'CAPTURED',
           resolvedAt: new Date(),
@@ -1312,7 +1352,9 @@ export class PrismaFinanceRepository implements IFinanceRepository {
         });
       }
       await this.govern(tx, ctx, `FINANCE_WALLET_HOLD_${action}D`, row.id, {});
-      return this.hold(row);
+      const response = this.hold(row);
+      await this.storeCommand(tx, ctx, 'WALLET_HOLD_RESOLVE', holdId, payload, response);
+      return response;
     });
   }
 
