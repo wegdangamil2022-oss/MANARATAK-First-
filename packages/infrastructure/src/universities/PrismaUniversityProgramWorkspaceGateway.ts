@@ -1,3 +1,5 @@
+import { publicProgramTestMatchSql } from './PublicProgramTestSql';
+import { isPublicAdmissionRequirement } from '@manaratak/domain';
 import { Prisma, type PrismaClient } from '@prisma/client';
 import {
   type IUniversityProgramWorkspaceGateway,
@@ -14,9 +16,10 @@ import {
 import { PrismaUniversityRepository } from './PrismaUniversityRepository';
 export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgramWorkspaceGateway {
   constructor(private readonly db: PrismaClient) {}
-  async query(input: ProgramQuery, publicOnly = false) {
+  private where(input: ProgramQuery, publicOnly: boolean) {
     const clauses: Prisma.Sql[] = [Prisma.sql`TRUE`];
     const fields: Record<string, Prisma.Sql> = {
+      academicProgramId: Prisma.sql`p.id`,
       universityId: Prisma.sql`p."universityId"`,
       universityPublicId: Prisma.sql`u."publicId"`,
       majorId: Prisma.sql`p."majorId"`,
@@ -45,13 +48,15 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
       );
     if (input.internationalTestId)
       clauses.push(
-        Prisma.sql`EXISTS(SELECT 1 FROM "UniversityProgramAdmissionRequirement" r WHERE r."academicProgramId"=p.id AND r."internationalTestId"=${input.internationalTestId} AND r.status='ACTIVE' ${publicOnly ? Prisma.sql`AND EXISTS(SELECT 1 FROM "InternationalTest" t WHERE t.id=r."internationalTestId" AND t.status='PUBLISHED' AND t."isPubliclyVisible")` : Prisma.empty})`,
+        publicOnly
+          ? publicProgramTestMatchSql(input.internationalTestId)
+          : Prisma.sql`EXISTS(SELECT 1 FROM "UniversityProgramAdmissionRequirement" r WHERE r."academicProgramId"=p.id AND r."internationalTestId"=${input.internationalTestId})`,
       );
     if (input.languageReferenceId)
       clauses.push(
         Prisma.sql`EXISTS(SELECT 1 FROM "UniversityProgramStudyLanguage" pl JOIN "ReferenceLanguage" l ON l.id=pl."languageReferenceId" WHERE pl."programId"=p.id AND l.id=${input.languageReferenceId} AND l."isActive" AND l."lifecycleState"='ACTIVE')${publicOnly ? Prisma.sql` AND s."verificationStatus"='VERIFIED'` : Prisma.empty}`,
       );
-    const scholarship = Prisma.sql`EXISTS(SELECT 1 FROM "ScholarshipUniversityLink" sl JOIN "Scholarship" sh ON sh.id=sl."scholarshipId" WHERE sl."academicProgramId"=p.id ${publicOnly ? Prisma.sql`AND sh."publicationStatus"='PUBLISHED' AND sh."verificationStatus"='VERIFIED'` : Prisma.empty})`;
+    const scholarship = Prisma.sql`EXISTS(SELECT 1 FROM "ScholarshipUniversityLink" sl JOIN "Scholarship" sh ON sh.id=sl."scholarshipId" WHERE sl."academicProgramId"=p.id ${publicOnly ? Prisma.sql`AND (sl."universityId" IS NULL OR sl."universityId"=p."universityId") AND sl."resolutionStatus"='RESOLVED' AND sh.status='PUBLISHED' AND sh."publicationStatus"='PUBLISHED' AND sh."verificationStatus"='VERIFIED' AND sh."completenessStatus"='COMPLETE' AND EXISTS(SELECT 1 FROM "ScholarshipVersion" sv WHERE sv."scholarshipId"=sh.id AND sv.status='PUBLISHED')` : Prisma.empty})`;
     if (input.hasScholarships !== undefined)
       clauses.push(input.hasScholarships ? scholarship : Prisma.sql`NOT ${scholarship}`);
     if (publicOnly)
@@ -65,7 +70,10 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
         (input.teachingDelivery && input.teachingDelivery !== 'UNKNOWN'))
     )
       clauses.push(Prisma.sql`s."verificationStatus"='VERIFIED'`);
-    const where = Prisma.join(clauses, ' AND ');
+    return Prisma.join(clauses, ' AND ');
+  }
+  async query(input: ProgramQuery, publicOnly = false) {
+    const where = this.where(input, publicOnly);
     const cursor = input.cursor ? Prisma.sql`AND p.id>${input.cursor}` : Prisma.empty;
     return this.db.$transaction(
       async (tx) => {
@@ -91,6 +99,35 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
                 cityReferenceId: true,
               },
             },
+            major: {
+              select: {
+                id: true,
+                displayName: true,
+                localizedNameAr: true,
+                localizedNameEn: true,
+                status: true,
+              },
+            },
+            degreeLevel: {
+              select: { id: true, nameAr: true, nameEn: true, canonicalCode: true, status: true },
+            },
+            admissionRequirements: {
+              include: {
+                internationalTest: {
+                  select: {
+                    id: true,
+                    displayName: true,
+                    localizedNameAr: true,
+                    localizedNameEn: true,
+                    status: true,
+                    isPubliclyVisible: true,
+                    currentPublishedVersion: { include: { scoreScales: true } },
+                  },
+                },
+                testVariant: { select: { testId: true, isActive: true } },
+                testVersion: { include: { scoreScales: true } },
+              },
+            },
             studyProfile: { include: { languages: { include: { language: true } } } },
             intakes: { orderBy: [{ applicationClose: 'asc' }, { id: 'asc' }] },
             _count: {
@@ -99,6 +136,8 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
                   ? {
                       where: {
                         scholarship: {
+                          status: 'PUBLISHED',
+                          completenessStatus: 'COMPLETE',
                           publicationStatus: 'PUBLISHED',
                           verificationStatus: 'VERIFIED',
                         },
@@ -201,6 +240,26 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
                 }),
             sourceProgramName: row.sourceProgramName,
             degreeLevelId: row.degreeLevelId,
+            degreeLevelName:
+              input.locale === 'ar' ? row.degreeLevel?.nameAr : row.degreeLevel?.nameEn,
+            majorName:
+              input.locale === 'en'
+                ? (row.major?.localizedNameEn ?? row.major?.displayName)
+                : (row.major?.localizedNameAr ?? row.major?.displayName),
+            majorStatus: row.major?.status,
+            tests: (row.admissionRequirements ?? [])
+              .filter((requirement) => !publicOnly || isPublicAdmissionRequirement(requirement))
+              .map((requirement) => ({
+                id: requirement.internationalTestId,
+                displayName:
+                  input.locale === 'en'
+                    ? (requirement.internationalTest.localizedNameEn ??
+                      requirement.internationalTest.displayName)
+                    : (requirement.internationalTest.localizedNameAr ??
+                      requirement.internationalTest.displayName),
+                status: requirement.internationalTest.status,
+                requirementStatus: requirement.status,
+              })),
             majorId: row.majorId,
             status: row.status,
             study,
@@ -218,6 +277,76 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
       { isolationLevel: 'RepeatableRead' },
     );
   }
+  async facet(
+    input: ProgramQuery,
+    kind: 'DEGREE' | 'MAJOR' | 'TEST' | 'LANGUAGE',
+    after: string | undefined,
+    search: string | undefined,
+    publicOnly: boolean,
+  ) {
+    const where = this.where(input, publicOnly);
+    const definitions = {
+      DEGREE: {
+        join: Prisma.sql`JOIN "DegreeLevel" f ON f.id=p."degreeLevelId"`,
+        label: input.locale === 'ar' ? Prisma.sql`f."nameAr"` : Prisma.sql`f."nameEn"`,
+        status: Prisma.sql`f.status`,
+        extra: publicOnly ? Prisma.sql`AND f.status='ACTIVE'` : Prisma.empty,
+      },
+      MAJOR: {
+        join: Prisma.sql`JOIN "Major" f ON f.id=p."majorId"`,
+        label:
+          input.locale === 'ar'
+            ? Prisma.sql`COALESCE(f."localizedNameAr",f."displayName")`
+            : Prisma.sql`COALESCE(f."localizedNameEn",f."displayName")`,
+        status: Prisma.sql`f.status`,
+        extra: publicOnly ? Prisma.sql`AND f.status='PUBLISHED'` : Prisma.empty,
+      },
+      TEST: {
+        join: Prisma.sql`JOIN "UniversityProgramAdmissionRequirement" fr ON fr."academicProgramId"=p.id JOIN "InternationalTest" f ON f.id=fr."internationalTestId"`,
+        label:
+          input.locale === 'ar'
+            ? Prisma.sql`COALESCE(f."localizedNameAr",f."displayName")`
+            : Prisma.sql`COALESCE(f."localizedNameEn",f."displayName")`,
+        status: Prisma.sql`f.status`,
+        extra: publicOnly
+          ? Prisma.sql`AND fr.status='ACTIVE' AND f.status='PUBLISHED' AND f."isPubliclyVisible" AND ${publicProgramTestMatchSql(undefined, Prisma.sql`f.id`)} AND (fr."sectionScores" IS NULL OR fr."sectionScores"='{}'::jsonb)`
+          : Prisma.empty,
+      },
+      LANGUAGE: {
+        join: Prisma.sql`JOIN "UniversityProgramStudyLanguage" fl ON fl."programId"=p.id JOIN "ReferenceLanguage" f ON f.id=fl."languageReferenceId"`,
+        label: input.locale === 'ar' ? Prisma.sql`COALESCE(f."nameAr",f.name)` : Prisma.sql`f.name`,
+        status: Prisma.sql`f."lifecycleState"`,
+        extra: publicOnly
+          ? Prisma.sql`AND s."verificationStatus"='VERIFIED' AND f."isActive" AND f."lifecycleState"='ACTIVE'`
+          : Prisma.empty,
+      },
+    };
+    const definition = definitions[kind];
+    const base = Prisma.sql`FROM "UniversityAcademicProgram" p JOIN "University" u ON u.id=p."universityId" LEFT JOIN "UniversityProgramStudyProfile" s ON s."programId"=p.id ${definition.join} WHERE ${where} ${definition.extra} ${search ? Prisma.sql`AND ${definition.label} ILIKE ${'%' + search + '%'}` : Prisma.empty}`;
+    return this.db.$transaction(
+      async (tx) => {
+        const rows = await tx.$queryRaw<
+          Array<{ id: string; label: string; status: string; programCount: bigint }>
+        >(
+          Prisma.sql`SELECT f.id,${definition.label} AS label,${definition.status} AS status,count(DISTINCT p.id)::bigint AS "programCount" ${base} ${after ? Prisma.sql`AND f.id>${after}` : Prisma.empty} GROUP BY f.id,${definition.label},${definition.status} ORDER BY f.id LIMIT ${input.limit + 1}`,
+        );
+        const counts = await tx.$queryRaw<Array<{ total: bigint }>>(
+          Prisma.sql`SELECT count(DISTINCT f.id)::bigint AS total ${base}`,
+        );
+        const items = rows
+          .slice(0, input.limit)
+          .map((row) => ({ ...row, programCount: Number(row.programCount) }));
+        return {
+          items,
+          total: Number(counts[0]?.total ?? 0),
+          hasMore: rows.length > input.limit,
+          nextCursor: rows.length > input.limit ? (items.at(-1)?.id ?? null) : null,
+        };
+      },
+      { isolationLevel: 'RepeatableRead' },
+    );
+  }
+
   async save(
     programId: string,
     input: { study?: ProgramStudy; intake?: ProgramIntake },

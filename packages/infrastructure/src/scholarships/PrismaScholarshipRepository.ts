@@ -1,3 +1,5 @@
+import {encodeStableCursor} from '../api-foundation/StableCursor';
+import type {PublishedProgramScholarshipPage} from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   AtomicPersistenceContext,
@@ -524,6 +526,27 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       this.prisma.scholarship.count({ where: { status: ScholarshipStatus.ARCHIVED } }),
     ]);
     return { all, imported, missingFields, needsVerification, needsTranslation, readyToPublish, published, archived };
+  }
+
+  async listPublishedProgramRelationshipsPage(programIds:string[],limit:number):Promise<Record<string,PublishedProgramScholarshipPage>>{
+    const ids=[...new Set(programIds)];
+    if(ids.length>50||!Number.isSafeInteger(limit)||limit<1||limit>12)throw new Error('SCHOLARSHIP_PROGRAM_PAGE_INVALID');
+    const result:Record<string,PublishedProgramScholarshipPage>=Object.fromEntries(ids.map(id=>[id,{data:[],total:0,hasMore:false,nextCursor:null}]));
+    if(!ids.length)return result;
+    const rows=await this.prisma.$queryRaw<Array<{programId:string;id:string;publicId:string;slug:string;displayName:string;localizedNames:Record<string,string>|null;total:bigint}>>(Prisma.sql`
+      WITH eligible AS (
+        SELECT DISTINCT sl."academicProgramId" AS "programId",sh.id,sh."publicId",sh.slug,sh."displayName",sh."optionalFields"->'localizedNames' AS "localizedNames"
+        FROM "ScholarshipUniversityLink" sl JOIN "Scholarship" sh ON sh.id=sl."scholarshipId"
+        JOIN "UniversityAcademicProgram" p ON p.id=sl."academicProgramId" JOIN "University" u ON u.id=p."universityId" JOIN "Major" m ON m.id=p."majorId"
+        WHERE sl."academicProgramId" IN (${Prisma.join(ids)}) AND sl."resolutionStatus"='RESOLVED' AND (sl."universityId" IS NULL OR sl."universityId"=p."universityId")
+          AND sh.status='PUBLISHED' AND sh."publicationStatus"='PUBLISHED' AND sh."verificationStatus"='VERIFIED' AND sh."completenessStatus"='COMPLETE'
+          AND EXISTS(SELECT 1 FROM "ScholarshipVersion" sv WHERE sv."scholarshipId"=sh.id AND sv.status='PUBLISHED')
+          AND p.status='ACTIVE' AND p."majorMappingState"='CANONICALLY_MAPPED' AND u.status='PUBLISHED' AND m.status='PUBLISHED'
+          AND EXISTS(SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)
+      ), ranked AS (SELECT *,row_number() OVER(PARTITION BY "programId" ORDER BY id) AS rn,count(*) OVER(PARTITION BY "programId") AS total FROM eligible)
+      SELECT "programId",id,"publicId",slug,"displayName","localizedNames",total FROM ranked WHERE rn<=${limit+1} ORDER BY "programId",id`);
+    for(const id of ids){const selected=rows.filter(row=>row.programId===id),page=result[id];page.total=Number(selected[0]?.total??0);if(!Number.isSafeInteger(page.total)||page.total<0)throw new Error('SCHOLARSHIP_PUBLIC_COUNT_INVALID');page.data=selected.slice(0,limit).map(({programId:_programId,total:_total,...row})=>({...row,localizedNames:row.localizedNames??undefined}));page.hasMore=selected.length>limit;page.nextCursor=page.hasMore?encodeStableCursor(page.data.at(-1)!.id):null;}
+    return result;
   }
 
   async listPublished(filters: PublicScholarshipFilters): Promise<ScholarshipPage<ScholarshipDto>> {

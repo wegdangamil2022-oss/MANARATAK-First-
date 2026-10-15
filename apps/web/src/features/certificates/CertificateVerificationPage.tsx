@@ -184,6 +184,8 @@ export function CertificateVerificationPage() {
                   />
                   <Info label={copy("رقم الشهادة")} value={result.serialNumber} />
                   <Info label={copy("الجهة المصدرة")} value={result.issuerName || 'MANARATAK'} />
+                  {result.issuerAffiliation&&<div className="rounded-xl border p-3"><p>{language==='en'?'The issuer name above is the signed historical name. Current affiliation:':'اسم الجهة أعلاه هو الاسم التاريخي الموقّع. حالة الانتماء الحالية:'}</p><p>{({CURRENT:language==='en'?'Current approved affiliation':'انتماء حالي معتمد',CHANGED:language==='en'?'Affiliation changed after issuance':'تغيّر الانتماء بعد الإصدار',RETIRED:language==='en'?'Affiliation retired or suspended':'انتماء متقاعد أو موقوف',UNAVAILABLE:language==='en'?'Current owner unavailable':'المالك الحالي غير متاح',UNVERIFIED:language==='en'?'Current authority unverified':'التفويض الحالي غير متحقق',LEGACY_UNVERIFIED:language==='en'?'Historical affiliation not captured':'لم يُحفظ الانتماء التاريخي',NOT_APPLICABLE:language==='en'?'Platform issuer':'جهة إصدار المنصة'})[result.issuerAffiliation.state]}</p>{result.issuerAffiliation.currentDisplayName&&<p>{result.issuerAffiliation.currentDisplayName}</p>}<p>{language==='en'?'Current affiliation status is separate from the historical certificate signature.':'حالة الانتماء الحالية مستقلة عن التوقيع التاريخي للشهادة.'}</p></div>}
+
                   <Info label={copy("تاريخ الإصدار")} value={formatDate(result.issuedAt, language)} />
                   <Info label={copy("تاريخ الإكمال")} value={formatDate(result.completedAt, language)} />
                   <Info

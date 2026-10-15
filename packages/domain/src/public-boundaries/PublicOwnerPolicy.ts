@@ -91,6 +91,7 @@ export function isPublicAdmissionRequirement(value: {
   testVersionId?: string | null;
   minimumScore?: number | null;
   internationalTest?: {
+    isPubliclyVisible?: boolean;
     status?: string;
     currentPublishedVersion?: {
       id?: string;
@@ -105,13 +106,10 @@ export function isPublicAdmissionRequirement(value: {
     scoreScales?: Array<{ overallMinimum?: number | null; overallMaximum?: number | null }>;
   } | null;
 }): boolean {
-  if (
-    value.sectionScores &&
-    typeof value.sectionScores === 'object' &&
-    Object.keys(value.sectionScores).length
-  )
-    return false; // Section-scale interpretation requires its own reviewed owner proof.
-  if (value.status !== 'ACTIVE' || value.internationalTest?.status !== 'PUBLISHED') return false;
+  if(value.sectionScores!==undefined&&value.sectionScores!==null){
+    if(typeof value.sectionScores!=='object'||Array.isArray(value.sectionScores)||Object.keys(value.sectionScores).length)return false;
+  }
+  if (value.status !== 'ACTIVE' || value.internationalTest?.status !== 'PUBLISHED' || value.internationalTest.isPubliclyVisible === false) return false;
   const version = value.testVersionId
     ? value.testVersion
     : value.internationalTest.currentPublishedVersion;

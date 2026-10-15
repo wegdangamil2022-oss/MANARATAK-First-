@@ -242,3 +242,9 @@ export * from './universities/use-cases/UniversityProgramWorkspaceUseCases';
 export * from './localization/TranslationWorkspaceRead';
 
 export * from './integration/CrossModuleIntegrityUseCase';
+
+export * from './integration/TestDiscoveryOwnerUseCases';
+
+export * from './certificates/use-cases/CertificateAffiliationReadService';
+
+export * from './read-models/AcademicProgramExplorerUseCases';

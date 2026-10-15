@@ -8,6 +8,8 @@ import {
 import { AtomicDomainMutationCoordinator } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import type { UniversityMutationContext } from './AdminUniversityUseCases';
 export interface ProgramQuery {
+  academicProgramId?:string;
+  locale?:'ar'|'en';
   universityId?: string;
   universityPublicId?: string;
   majorId?: string;
@@ -28,6 +30,7 @@ export interface ProgramQuery {
 }
 export interface IUniversityProgramWorkspaceGateway {
   query(input: ProgramQuery, publicOnly?: boolean): Promise<any>;
+  facet?(input:ProgramQuery,kind:'DEGREE'|'MAJOR'|'TEST'|'LANGUAGE',after:string|undefined,search:string|undefined,publicOnly:boolean):Promise<any>;
   save(
     programId: string,
     input: { study?: ProgramStudy; intake?: ProgramIntake },
@@ -44,6 +47,11 @@ export class UniversityProgramWorkspaceUseCases {
     if (!Number.isSafeInteger(input.limit) || input.limit < 1 || input.limit > 100)
       throw new Error('UNIVERSITY_PROGRAM_QUERY_INVALID');
     return this.gateway.query(input, publicOnly);
+  }
+  facet(input:ProgramQuery,kind:'DEGREE'|'MAJOR'|'TEST'|'LANGUAGE',after?:string,search?:string,publicOnly=true){
+    if(!this.gateway.facet)throw new Error('UNIVERSITY_PROGRAM_FACETS_UNAVAILABLE');
+    if(!Number.isSafeInteger(input.limit)||input.limit<1||input.limit>50)throw new Error('UNIVERSITY_PROGRAM_QUERY_INVALID');
+    return this.gateway.facet(input,kind,after,search,publicOnly);
   }
   save(
     programId: string,

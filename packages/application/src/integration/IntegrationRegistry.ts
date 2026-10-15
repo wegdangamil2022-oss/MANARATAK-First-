@@ -131,7 +131,7 @@ export const crossModuleIntegrationRegistry = [
     ownerDomain: 'STUDENT_TOOLS',
     canonicalKey: 'toolId+studentReferenceId',
     writeOwner: 'STUDENT_TOOLS',
-    readStatus: 'NOT_INTEGRATED',
+    readStatus: 'SUPPORTED',
   },
   {
     section: 20,
@@ -216,17 +216,17 @@ export const integrationEdges = [
     from: 'TESTS',
     to: 'STUDENT_TOOLS',
     canonicalKey: 'testId',
-    publicPolicy: 'NOT_INTEGRATED',
-    consumerRoutes: [],
-    test: 'section27:unsupported',
+    publicPolicy: 'OWNER_OPT_IN_INDEPENDENT_REVIEW_CURRENT_PUBLIC_REVISIONS',
+    consumerRoutes: ['/public/international-tests/:slug/discovery'],
+    test: 'section27:test-discovery',
   },
   {
     from: 'TESTS',
     to: 'SERVICES',
     canonicalKey: 'testId',
-    publicPolicy: 'NOT_INTEGRATED',
-    consumerRoutes: [],
-    test: 'section27:unsupported',
+    publicPolicy: 'OWNER_OPT_IN_INDEPENDENT_REVIEW_CURRENT_PUBLIC_REVISIONS',
+    consumerRoutes: ['/public/international-tests/:slug/discovery'],
+    test: 'section27:test-discovery',
   },
 ] as const;
 export function validateIntegrationRegistry(): void {

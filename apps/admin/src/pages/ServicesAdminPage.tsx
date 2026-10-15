@@ -1,3 +1,4 @@
+import {TestDiscoveryEditor} from '../features/integration/TestDiscoveryEditor';
 import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
 import { serviceText } from '../i18n/serviceText';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
@@ -1108,6 +1109,7 @@ export function ServicesAdminPage() {
                 </div>
               </fieldset>
             </form>
+            {selectedService&&<TestDiscoveryEditor key={`${selectedService.id}:${selectedService.version}`} ownerType="SERVICES" ownerKey={selectedService.id}/>}
           </div>
           {services && (
             <div className="flex justify-between rounded-xl border bg-white p-4 text-sm">

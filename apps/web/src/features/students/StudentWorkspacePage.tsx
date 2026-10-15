@@ -1,7 +1,8 @@
+import {useTranslation} from '../../i18n/I18nProvider';
+import {StudentPrivateToolResult} from './StudentPrivateToolResult';
 import { StudentApplicationDocuments } from './StudentApplicationDocuments';
 import { StudentCareerWorkspace } from './StudentCareerWorkspace';
 import { StudentServiceBookingPanel } from './StudentServiceBookingPanel';
-import { StudentToolResultView } from '../student-tools/StudentToolResultView';
 import { StudentCertificatesPanel } from '../certificates/StudentCertificatesPanel';
 import { StudentNotificationsView, studentNotificationLink } from './StudentNotificationsView';
 import './student-workspace.css';
@@ -2899,6 +2900,7 @@ function VaultView({
   onMoveSavedItem: (itemId: string, collectionId: string | null) => void;
   onRemoveSavedItem: (item: StudentSavedItemDto) => void;
 }) {
+  const {language}=useTranslation();
   const [typeFilter, setTypeFilter] = useState<'ALL' | string>('ALL');
   const [collectionFilter, setCollectionFilter] = useState<'ALL' | 'UNCOLLECTED' | string>('ALL');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -3251,10 +3253,10 @@ function VaultView({
           {filteredItems.map((item) => {
             const owner = hydratedBySavedItemId.get(item.id);
             const toolTitles: Record<string, string> = { 'gpa-calculator': 'حاسبة المعدل التراكمي', 'university-comparison': 'مقارنة الجامعات', 'motivation-letter-generator': 'خطاب الدافع', 'scholarship-recommendation': 'توصية المنح' };
-            const displayName = owner?.displayName || item.displayName || (item.entityType === 'STUDENT_TOOL' ? toolTitles[item.entitySlug ?? ''] : undefined) || item.entityId;
+            const displayName = (item.entityType==='STUDENT_TOOL'&&owner?.visibility==='STUDENT_PRIVATE'?(language==='en'?'Retained private tool result':'نتيجة أداة محفوظة خاصة'):owner?.displayName) || item.displayName || (item.entityType === 'STUDENT_TOOL' ? toolTitles[item.entitySlug ?? ''] : undefined) || item.entityId;
             const slug = owner?.slug || item.entitySlug || undefined;
             const available = owner ? owner.available : null;
-            const targetUrl = available === false ? null : slug
+            const targetUrl = owner?.visibility==='STUDENT_PRIVATE'?item.entityType==='CERTIFICATE'?'/student?tab=learning#certificates':null:available !== true ? null : slug
               ? buildEntityLink(item.entityType, slug)
               : item.entityType === 'STUDENT_TOOL'
                 ? '/tools'
@@ -3303,10 +3305,7 @@ function VaultView({
                     </div>
                   )}
 
-                  {item.entityType === 'STUDENT_TOOL' && item.metadata?.privateResult != null && <details className="mt-3 rounded-xl border border-[var(--mn-border)] p-3">
-                    <summary className="cursor-pointer text-sm font-bold text-[var(--mn-secondary)]">عرض النتيجة المحفوظة</summary>
-                    <div className="mt-4 min-w-0"><StudentToolResultView value={item.metadata.privateResult} /></div>
-                  </details>}
+                  {item.entityType==='STUDENT_TOOL'&&<StudentPrivateToolResult savedReference={owner?.privateReference??item.id} available={owner?.visibility==='STUDENT_PRIVATE'&&available===true}/>}
                   {/* Saved Date */}
                   <div className="mt-2 text-[10.5px] text-[var(--mn-text-muted)]">
                     حُفظ في: <strong>{formatDate(item.savedAt)}</strong>

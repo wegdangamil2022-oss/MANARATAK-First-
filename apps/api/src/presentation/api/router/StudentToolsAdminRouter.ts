@@ -1,3 +1,5 @@
+import { testDiscoveryOwnerRouter } from './TestDiscoveryOwnerRouter.js';
+import type {TestDiscoveryOwnerUseCases} from '@manaratak/application';
 import { Router, Request, Response, NextFunction } from 'express';
 import { ValidationException } from '@manaratak/core';
 import { StudentToolExecutionUseCases, StudentToolRegistryUseCases } from '@manaratak/application';
@@ -16,11 +18,13 @@ import {
 } from '../../validation/StrictControlPlaneSchemas.js';
 export class StudentToolsAdminRouter {
   static create(cradle: {
+    studentToolTestDiscovery?:TestDiscoveryOwnerUseCases;
     authEvaluatorService: AuthorizationEvaluatorService;
     studentToolRegistryUseCases: StudentToolRegistryUseCases;
     studentToolExecutionUseCases: StudentToolExecutionUseCases;
   }) {
     const router = Router();
+    if(cradle.studentToolTestDiscovery)router.use('/:ownerKey/test-discovery',testDiscoveryOwnerRouter(cradle.studentToolTestDiscovery,cradle.authEvaluatorService,{view:'admin:student-tools:view',propose:'admin:student-tools:manage-availability',review:'admin:student-tools:approve-release'}));
     router.use(async (req, res, next) => {
       if (!req.authUserId) return void res.status(401).json({ error: 'TOOL_AUTH_REQUIRED' });
       const suffix =

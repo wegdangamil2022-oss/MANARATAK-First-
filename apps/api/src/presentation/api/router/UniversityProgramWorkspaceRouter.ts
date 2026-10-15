@@ -5,6 +5,8 @@ import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrinc
 const id = z.string().trim().min(1).max(240);
 const query = z
   .object({
+    academicProgramId:id.optional(),
+    locale:z.enum(['ar','en']).default('ar'),
     universityId: id.optional(),
     universityPublicId: id.optional(),
     majorId: id.optional(),

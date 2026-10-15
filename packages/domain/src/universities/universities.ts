@@ -284,6 +284,8 @@ export interface PaginatedUniversityResult<T = UniversityDto> {
 
 
 export interface PublishedAcademicProgramReadModel {
+  localizedNames?: Record<string, string>;
+  universityLocalizedNames?: Record<string, string>;
   ownerId: string;
   universityOwnerId: string;
   universityPublicId: string;

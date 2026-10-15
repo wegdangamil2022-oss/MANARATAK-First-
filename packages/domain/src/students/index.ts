@@ -470,6 +470,7 @@ export interface IStudentWorkspaceRepository {
     toolKey: string;
     result: unknown;
   }): Promise<{ savedReference: string }>;
+  inspectPrivateToolResult?(studentReferenceId:string,executionId:string):Promise<{savedReference:string;toolKey:string}|null>;
   readPrivateToolResult?(studentReferenceId: string, savedReference: string): Promise<unknown>;
   /** Only P15-owned inbox/tracker filters; no automatic P13/P14/P20 read. */
   listSupportTriage(input:StudentSupportTriageFilters):Promise<StudentSupportTriagePageDto>;
@@ -541,6 +542,8 @@ export interface IStudentWorkspaceRepository {
 
 /** P8 cross-domain read contract: Phase 15 stores only references; owner domains hydrate display truth. */
 export interface StudentSavedItemOwnerReadModel {
+  visibility?:'PUBLIC'|'STUDENT_PRIVATE';
+  privateReference?:string;
   ownerType: StudentSavedItemType;
   ownerId: string;
   publicId?: string;

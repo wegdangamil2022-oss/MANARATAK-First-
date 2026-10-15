@@ -121,6 +121,8 @@ export function StudentCertificatesPanel({
               {new Date(row.issuedAt).toLocaleDateString(language === 'ar' ? 'ar' : 'en')}
             </p>
             <StudentCertificateActions certificate={row} />
+            <button type="button" disabled={busy} onClick={()=>{setBusy(true);setError('');void ApiClient.createMyStudentSavedItem({entityType:'CERTIFICATE',entityId:row.id}).catch(()=>setError(language==='en'?'Could not save this owned certificate.':'تعذر حفظ الشهادة المملوكة لك.')).finally(()=>setBusy(false));}}>{language==='en'?'Save certificate reference':'حفظ مرجع الشهادة'}</button>
+
           </article>
         ))}
       </div>
