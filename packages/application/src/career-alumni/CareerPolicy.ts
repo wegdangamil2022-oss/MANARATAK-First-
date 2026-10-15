@@ -1,4 +1,4 @@
-import type { CareerEmployerDto, CareerJobPostingDto } from '@manaratak/domain';
+import type { CareerEmployerDto, CareerJobPostingDto, CareerAlumniProfileDto } from '@manaratak/domain';
 export const careerRecord = (value: unknown): Record<string, any> =>
   value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
 export const careerGovernance = (value: { metadata?: Record<string, unknown> | null }) => careerRecord(value.metadata?._career);
@@ -59,4 +59,11 @@ export function careerPublicMetadata(metadata?: Record<string, unknown> | null):
   }
   if (Object.keys(languages).length) result.localizedContent = languages;
   return result;
+}
+
+/** Consent has no invented TTL: a valid owner grant remains effective until revoked. */
+export function careerAlumniConsentCurrent(profile:Pick<CareerAlumniProfileDto,'studentReferenceId'|'consentGrantedAt'|'consentGrantedBy'|'consentSource'|'consentRevokedAt'>,now=new Date()):boolean {
+  const grantedAt=profile.consentGrantedAt ? new Date(profile.consentGrantedAt).getTime() : NaN;
+  return Boolean(profile.studentReferenceId && profile.consentGrantedBy===profile.studentReferenceId &&
+    profile.consentSource?.trim() && Number.isFinite(grantedAt) && grantedAt<=now.getTime() && !profile.consentRevokedAt);
 }

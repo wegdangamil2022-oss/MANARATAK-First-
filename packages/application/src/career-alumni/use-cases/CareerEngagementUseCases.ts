@@ -1,3 +1,4 @@
+import {careerAlumniConsentCurrent} from '../CareerPolicy';
 import { createHash } from 'node:crypto';
 import { careerJobOpen, publishedCareerJob } from '../CareerPolicy';
 import { AssetSecurityClassification } from '@manaratak/domain';
@@ -38,7 +39,7 @@ export class CareerEngagementUseCases {
   async getMyAlumni(studentReferenceId: string) { await this.students.assertActiveStudent(studentReferenceId); return this.engagement.findAlumniProfile(studentReferenceId); }
   async alumniNetwork(studentReferenceId: string, page: number) {
     const profile = await this.getMyAlumni(studentReferenceId);
-    if (!profile || profile.visibility === 'PRIVATE' || profile.consentRevokedAt || profile.consentGrantedBy !== studentReferenceId)
+    if (!profile || !['PUBLIC','ALUMNI_ONLY'].includes(profile.visibility) || !careerAlumniConsentCurrent(profile))
       throw new Error('CAREER_ACCESS_DENIED');
     if (!this.engagement.listAlumniNetwork) throw new Error('CAREER_AUDIT_REQUIRED');
     return this.engagement.listAlumniNetwork(page, 20);
@@ -206,7 +207,7 @@ export class CareerEngagementUseCases {
         consentRevokedAt = new Date(); consentRevokedBy = input.studentReferenceId;
       }
     }
-    if (visibility !== AlumniProfileVisibility.PRIVATE && (!consentGrantedAt || !consentGrantedBy || !consentSource || consentRevokedAt)) throw new Error('CAREER_ALUMNI_PUBLIC_VISIBILITY_REQUIRES_CONSENT');
+    if (visibility !== AlumniProfileVisibility.PRIVATE && !careerAlumniConsentCurrent({studentReferenceId:input.studentReferenceId,consentGrantedAt,consentGrantedBy,consentSource,consentRevokedAt})) throw new Error('CAREER_ALUMNI_PUBLIC_VISIBILITY_REQUIRES_CONSENT');
     return this.engagement.upsertAlumniProfile({
       studentReferenceId: input.studentReferenceId,
       displayName: input.displayName.trim(),

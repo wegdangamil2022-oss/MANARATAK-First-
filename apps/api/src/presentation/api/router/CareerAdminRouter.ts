@@ -102,6 +102,7 @@ export class CareerAdminRouter {
       res.json(await cradle.processAssetLifecycleUseCase.requestDeliveryGrant({ assetId, expiresInSeconds: 120 }));
     }));
     router.get('/alumni', careerHandler(async(req,res) => {
+      res.setHeader('Cache-Control','no-store');
       await requirePermission(req,'admin:careers:alumni:view'); const { page, pageSize } = z.object(careerPaging).parse(req.query);
       res.json(await cradle.careerEngagementRepository.listAdminAlumni?.(page, pageSize));
     }));

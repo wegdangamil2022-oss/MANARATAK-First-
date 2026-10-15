@@ -147,13 +147,21 @@ export class PrismaCareerEngagementRepository implements ICareerEngagementReposi
   }
   async listAlumniNetwork(page: number, pageSize: number) { return this.alumniDirectory(page, pageSize, true); }
   private async alumniDirectory(page: number, pageSize: number, network: boolean) {
-    const where = { visibility: network ? { in: ['PUBLIC','ALUMNI_ONLY'] } : 'PUBLIC', consentGrantedAt: { not: null }, consentGrantedBy: { equals: this.p().careerAlumniProfileRecord.fields.studentReferenceId }, consentSource: { not: null }, consentRevokedAt: null };
-    const [data, total] = await Promise.all([
-      this.p().careerAlumniProfileRecord.findMany({ where, select: { id: true, displayName: true, graduationYear: true, employerName: true }, orderBy: { id: 'asc' }, skip: (page-1)*pageSize, take: pageSize }),
-      this.p().careerAlumniProfileRecord.count({ where }),
-    ]);
-    return { data, total, page, totalPages: Math.ceil(total/pageSize) };
+    const bounds=paging(page,pageSize);
+    const audience=network?Prisma.sql`"visibility" IN ('PUBLIC','ALUMNI_ONLY')`:Prisma.sql`"visibility"='PUBLIC'`;
+    const where=Prisma.sql`${audience} AND "consentGrantedAt" IS NOT NULL AND "consentGrantedAt"<=${new Date()}
+      AND "consentGrantedBy"="studentReferenceId" AND "consentSource" IS NOT NULL
+      AND btrim("consentSource")<>'' AND "consentRevokedAt" IS NULL`;
+    return this.prisma.$transaction(async tx=>{
+      const [data,counts]=await Promise.all([
+        tx.$queryRaw<Array<Pick<CareerAlumniProfileDto,'id'|'displayName'|'graduationYear'|'employerName'>>>(Prisma.sql`SELECT id,"displayName","graduationYear","employerName" FROM "CareerAlumniProfileRecord" WHERE ${where} ORDER BY id ASC LIMIT ${bounds.pageSize} OFFSET ${(bounds.page-1)*bounds.pageSize}`),
+        tx.$queryRaw<Array<{total:bigint}>>(Prisma.sql`SELECT count(*) AS total FROM "CareerAlumniProfileRecord" WHERE ${where}`),
+      ]);
+      const total=Number(counts[0]?.total??0);
+      return {data,total,page:bounds.page,totalPages:Math.ceil(total/bounds.pageSize)};
+    },{isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead});
   }
+
   async listAdminAlumni(page: number, pageSize: number) {
     const [data, total] = await Promise.all([
       this.p().careerAlumniProfileRecord.findMany({ select: { id: true, visibility: true, version: true }, orderBy: { id: 'asc' }, skip: (page-1)*pageSize, take: pageSize }),

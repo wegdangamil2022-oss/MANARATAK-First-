@@ -25,7 +25,7 @@ export function careerStudentRouter(useCases: CareerEngagementUseCases) {
     res.json(projection(await owner(req).withdrawApplication({ ...body, applicationId: req.params.id, studentReferenceId: own(req) })));
   }));
   router.get('/alumni-network', careerHandler(async(req,res) => { const { page } = z.object(careerPaging).parse(req.query); res.setHeader('Cache-Control','no-store'); res.json(await useCases.alumniNetwork(own(req),page)); }));
-  router.get('/alumni', careerHandler(async(req,res) => { res.json(await useCases.getMyAlumni(own(req))); }));
+  router.get('/alumni', careerHandler(async(req,res) => { res.setHeader('Cache-Control','no-store'); res.json(await useCases.getMyAlumni(own(req))); }));
   router.put('/alumni', careerHandler(async(req,res) => {
     const body = z.object({ displayName: z.string().trim().min(1).max(240), graduationYear: z.number().int().min(1900).max(new Date().getUTCFullYear()+1).nullable().optional(), employerName: z.string().max(240).nullable().optional(), visibility: z.nativeEnum(AlumniProfileVisibility).default(AlumniProfileVisibility.PRIVATE), consentGranted: z.boolean().optional(), expectedVersion: careerExpected.optional() }).strict().parse(req.body);
     res.json(await owner(req).upsertAlumniProfile({ ...body, studentReferenceId: own(req), consentActorStudentReferenceId: own(req), consentSource: 'STUDENT_CAREER_WORKSPACE_V1' }));

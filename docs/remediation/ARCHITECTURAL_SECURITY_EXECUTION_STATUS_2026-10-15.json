@@ -460,5 +460,39 @@
       "SERVICE",
       "CAREER_JOB"
     ]
+  },
+  "B12": {
+    "status": "AWAITING_PRODUCT_SCOPE_DECISION",
+    "packageClosed": false,
+    "baselineCommit": "6f197e77f1eba0c4350560992beeb0872c86f21a",
+    "findings": [
+      "ADM-06"
+    ],
+    "sourceMilestone": "ALUMNI_CONSENT_HARDENING_IMPLEMENTED",
+    "report": "docs/reviews/B12_ALUMNI_CONSENT_PROGRESS_2026-10-15.md",
+    "specification": "docs/remediation/specs/B12_CAREER_SCOPE_CONTRACT_2026-10-15.md",
+    "runtimeDatabaseStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "schemaChanged": false,
+    "historicalSqlChanged": false,
+    "productScopeDecision": "PENDING_EXPLICIT_BOOKING_POLICY_OR_RELEASE_EXCLUSION",
+    "sourceChecks": {
+      "consentAndDirectoryTests": "PASS_13_OF_13",
+      "persistence": "PASS_281_OF_281",
+      "httpBoundaryTests": "PASS_3_OF_3",
+      "typesNoEmit": "PASS",
+      "targetedEslintErrors": 0,
+      "targetedEslintWarnings": 47,
+      "sourceQuality": "PASS",
+      "diffCheck": "PASS"
+    },
+    "runtimePrerequisites": [
+      "Isolated PostgreSQL SQL/snapshot and consent withdrawal rehearsal",
+      "Non-production browser/API/DB role and legacy data verification",
+      "Prior runtime prerequisites and supported Node 22 remain pending"
+    ],
+    "lightTestsPassed": 16,
+    "lightTestsFailed": 0,
+    "lightTestFiles": 3
   }
 }
