@@ -1,6 +1,5 @@
+import { PublishedCatalogDiscovery } from './PublishedCatalogDiscovery';
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
-import {ApiClient} from '../../../api/client';
-import {mapPublicUniversityDto} from '../publicLiveDataSource';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Search,
@@ -20,6 +19,7 @@ import {
 import { University } from '../types';
 
 interface UniversitiesSearchPageProps {
+  dataMode?: 'api' | 'prototype';
   universities?: University[];
   onBack?: () => void;
   onSelectUniversity?: (university: University) => void;
@@ -27,7 +27,7 @@ interface UniversitiesSearchPageProps {
   onToggleFavorite?: (id: string) => void;
 }
 
-export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
+const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
   universities: initialUniversities = [],
   onBack,
   onSelectUniversity,
@@ -36,21 +36,15 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
 }) => {
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
 
-  const[universities,setUniversities]=useState(initialUniversities);const[cursor,setCursor]=useState<string|undefined>();
-  const[nextCursor,setNextCursor]=useState<string|null>(null);const[cursorHistory,setCursorHistory]=useState<Array<string|undefined>>([]);
-  const[serverLoading,setServerLoading]=useState(false);const[serverError,setServerError]=useState('');
+  const[universities]=useState(initialUniversities);const[cursor,setCursor]=useState<string|undefined>();
+  const[nextCursor]=useState<string|null>(null);const[cursorHistory,setCursorHistory]=useState<Array<string|undefined>>([]);
+  const[serverLoading]=useState(false);const[serverError]=useState('');
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContinent, setSelectedContinent] = useState('الكل');
   const [selectedCountry, setSelectedCountry] = useState('الكل');
   const [selectedCity, setSelectedCity] = useState('الكل');
 
-  useEffect(()=>{let active=true;setServerLoading(true);setServerError('');
-    const timer=window.setTimeout(()=>{void ApiClient.getUniversities({search:searchQuery.trim()||undefined,cursor,limit:25}).then(result=>{
-      if(active){setUniversities(result.data.map(mapPublicUniversityDto));setNextCursor(result.nextCursor??null);}
-    }).catch(()=>{if(active){setUniversities([]);setServerError('تعذر تحميل صفحة الجامعات من المالك؛ جرّب لاحقًا.');}}).finally(()=>{if(active)setServerLoading(false);});},300);
-    return()=>{active=false;window.clearTimeout(timer);};
-  },[searchQuery,cursor]);
   useEffect(()=>{setCursor(undefined);setCursorHistory([]);},[searchQuery]);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [localSavedUniversities, setLocalSavedUniversities] = useState<string[]>([]);
@@ -471,3 +465,7 @@ export const UniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = ({
     </div>
   );
 };
+
+export function UniversitiesSearchPage(props: UniversitiesSearchPageProps) {
+  return props.dataMode === 'prototype' ? <PrototypeUniversitiesSearchPage {...props} /> : <PublishedCatalogDiscovery favoriteIds={props.favoriteIds} onToggleFavorite={props.onToggleFavorite} kind="universities" onBack={props.onBack} onUniversity={props.onSelectUniversity} />;
+}

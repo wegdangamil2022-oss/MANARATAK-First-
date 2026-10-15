@@ -10,7 +10,7 @@ import {
 import { SCHOLARSHIPS_FAQ_ITEMS } from "../data/scholarshipsFaqData";
 
 export function ScholarshipFaqSection() {
-  const { t: publicT } = usePublicTemplateTranslation();
+  const { t: publicT, language } = usePublicTemplateTranslation();
 
   const [openIds, setOpenIds] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,6 +42,7 @@ export function ScholarshipFaqSection() {
 
   return (
     <div className="relative w-full bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[var(--mn-border)] shadow-xs space-y-3 text-start font-['Cairo',sans-serif]">
+      <p className="text-xs text-[var(--mn-text-muted)]">{language === 'en' ? 'General guidance and examples. Check the provider’s current published conditions and deadlines.' : 'إرشادات وأمثلة عامة؛ راجع الشروط والمواعيد الحالية المنشورة لدى الجهة المانحة.'}</p>
       {/* Top Accent Line */}
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
 

@@ -559,34 +559,12 @@ export function mapCareer(dto: PublicCareerJobDto): CareerOpportunityPreview {
   };
 }
 
-async function collectCursorPages<T>(
-  fetchPage: (
-    cursor?: string,
-  ) => Promise<{ data: T[]; hasMore?: boolean; nextCursor?: string | null }>,
-): Promise<T[]> {
-  const items: T[] = [];
-  let cursor: string | undefined;
-  for (let guard = 0; guard < 10000; guard += 1) {
-    const page = await fetchPage(cursor);
-    items.push(...page.data);
-    if (!page.hasMore || !page.nextCursor) break;
-    if (page.nextCursor === cursor) throw new Error('PUBLIC_CURSOR_DID_NOT_ADVANCE');
-    cursor = page.nextCursor;
-  }
-  return items;
+// The home snapshot is a preview. Discovery pages own continuation and exact filters.
+async function previewCursorPage<T>(fetchPage: (cursor?: string) => Promise<{ data: T[] }>): Promise<T[]> {
+  return (await fetchPage()).data;
 }
-
-async function collectOffsetPages<T>(
-  fetchPage: (page: number) => Promise<{ data: T[]; totalPages?: number; page?: number }>,
-): Promise<T[]> {
-  const items: T[] = [];
-  for (let pageNumber = 1; pageNumber <= 10000; pageNumber += 1) {
-    const page = await fetchPage(pageNumber);
-    items.push(...page.data);
-    const totalPages = Math.max(1, page.totalPages ?? pageNumber);
-    if (pageNumber >= totalPages) break;
-  }
-  return items;
+async function previewOffsetPage<T>(fetchPage: (page: number) => Promise<{ data: T[] }>): Promise<T[]> {
+  return (await fetchPage(1)).data;
 }
 
 export async function loadPublishedUniversities(
@@ -606,16 +584,17 @@ export async function searchPublishedMajors(
     academicFieldOrDiscipline?: string;
     cursor?: string;
   },
-  locale: PublicLiveLocale = 'ar',
+  locale: PublicLiveLocale = 'ar', signal?: AbortSignal,
 ) {
-  const page = await ApiClient.getMajors({ ...filters, locale, limit: 20 });
+  const page = await ApiClient.getMajors({ ...filters, locale, limit: 20 }, signal);
   return { data: page.data.map(mapPublicMajorDto), total: page.total, nextCursor: page.nextCursor };
 }
 export async function loadPublishedCountries(
   locale: PublicLiveLocale = 'ar',
 ): Promise<CountryDestination[]> {
-  const { data: rows } = await ApiClient.getStudyDestinations({ page: 1, pageSize: 20 });
-  return rows.map((item) => mapCountry(item, locale));
+  const [preview, featured] = await Promise.all([ApiClient.getStudyDestinations({ page: 1, pageSize: 20 }), ApiClient.getStudyDestinations({ page: 1, pageSize: 8, isFeatured: true })]);
+  const rows = [...new Map([...preview.data, ...featured.data].map(item => [item.country.id, item])).values()];
+  return rows.map(item => mapCountry(item, locale));
 }
 export async function searchPublishedCountries(
   filters: { q?: string; region?: string; countryReferenceId?: string; page?: number },
@@ -625,15 +604,15 @@ export async function searchPublishedCountries(
   return { ...result, data: result.data.map((dto) => mapCountry(dto, locale)) };
 }
 export async function loadPublishedExams(locale: PublicLiveLocale = 'ar'): Promise<Exam[]> {
-  const result = await ApiClient.getInternationalTests({ locale, page: 1, pageSize: 50 });
+  const result = await ApiClient.getInternationalTests({ locale, page: 1, pageSize: 20 });
   return result.data.map(mapExam);
 }
-export async function loadPublishedCourses(): Promise<{
+export async function loadPublishedCourses(locale: PublicLiveLocale = 'ar'): Promise<{
   courses: Course[];
   paidCourses: Course[];
   importedCourses: ImportedCourse[];
 }> {
-  const rows = await collectCursorPages((cursor) => ApiClient.getCourses({ cursor, limit: 100 }));
+  const rows = await previewCursorPage((cursor) => ApiClient.getCourses({ cursor, limit: 20 }, locale));
   const mapped = rows.map(mapCourse);
   return {
     courses: mapped.filter((item) => item.track === 'native').map((item) => item.course),
@@ -654,8 +633,8 @@ export async function loadPublishedArticles(
   ];
   const pages = await Promise.all(
     editorialTypes.map((contentType) =>
-      collectOffsetPages((page) =>
-        ApiClient.getCmsContent({ locale, contentType, page, pageSize: 50 }),
+      previewOffsetPage((page) =>
+        ApiClient.getCmsContent({ locale, contentType, page, pageSize: 20 }),
       ),
     ),
   );
@@ -665,8 +644,8 @@ export async function loadPublishedServices(locale: PublicLiveLocale = 'ar'): Pr
   const page = await ApiClient.getServices({ limit: 20, locale });
   return page.data.map((row) => mapService(row, locale));
 }
-export async function loadPublishedCareers(): Promise<CareerOpportunityPreview[]> {
-  const page = await ApiClient.getCareerJobs({ limit: 20 });
+export async function loadPublishedCareers(locale: PublicLiveLocale = 'ar'): Promise<CareerOpportunityPreview[]> {
+  const page = await ApiClient.getCareerJobs({ limit: 20, locale });
   return page.data.map(mapCareer);
 }
 export async function loadPublishedTools(
@@ -679,6 +658,7 @@ export async function loadPublishedTools(
 }
 
 const snapshotCache = new Map<string, { result: PublicLiveLoadResult; timestamp: number }>();
+const snapshotEpochs = new Map<string, number>();
 const inFlightSnapshots = new Map<string, Promise<PublicLiveLoadResult>>();
 const SNAPSHOT_CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes cache
 
@@ -706,14 +686,14 @@ export async function refreshPublishedArticles(locale: PublicLiveLocale): Promis
 }
 
 export async function refreshPublishedServices(locale: PublicLiveLocale): Promise<Service[]> {
-  const services = await loadPublishedServices();
+  const services = await loadPublishedServices(locale);
   const cached = snapshotCache.get(`snapshot_${locale}`);
   if (cached) cached.result = { ...cached.result, data: { ...cached.result.data, services }, statuses: { ...cached.result.statuses, services: services.length ? 'ready' : 'empty' } };
   return services;
 }
 
 export async function refreshPublishedCourses(locale: PublicLiveLocale) {
-  const courses = await loadPublishedCourses();
+  const courses = await loadPublishedCourses(locale);
   const cached = snapshotCache.get(`snapshot_${locale}`);
   const status = courses.courses.length || courses.importedCourses.length || courses.paidCourses.length ? 'ready' as const : 'empty' as const;
   if (cached) cached.result = {...cached.result, data:{...cached.result.data,...courses},statuses:{...cached.result.statuses,courses:status}};
@@ -728,7 +708,7 @@ export async function refreshPublishedUniversities(locale: PublicLiveLocale): Pr
 }
 
 export async function refreshPublishedScholarships(locale: PublicLiveLocale): Promise<Scholarship[]> {
-  const rows = await collectCursorPages(cursor => ApiClient.getScholarships({ cursor, limit: 100 }, locale));
+  const rows = await previewCursorPage(cursor => ApiClient.getScholarships({ cursor, limit: 20 }, locale));
   const scholarships = rows.map(dto => mapPublicScholarshipDto(dto));
   const cached = snapshotCache.get(`snapshot_${locale}`);
   if (cached) cached.result = { ...cached.result, data: { ...cached.result.data, scholarships },
@@ -768,15 +748,17 @@ export async function loadPublicLiveSnapshot(locale: PublicLiveLocale = 'ar', fo
     }
   }
 
+  const epoch = (snapshotEpochs.get(cacheKey) ?? 0) + 1;
+  snapshotEpochs.set(cacheKey, epoch);
   const fetchPromise = (async () => {
     const data = emptyData();
     const statuses = emptyStatuses();
     const errors: Partial<Record<PublicLiveDomain, string>> = {};
     const loaders: Array<[PublicLiveDomain, () => Promise<unknown>]> = [
-      ['scholarships', () => collectCursorPages((cursor) => ApiClient.getScholarships({ cursor, limit: 100 })).then((rows) => rows.map((dto) => mapPublicScholarshipDto(dto)))],
+      ['scholarships', () => previewCursorPage((cursor) => ApiClient.getScholarships({ cursor, limit: 20 }, locale)).then((rows) => rows.map((dto) => mapPublicScholarshipDto(dto)))],
       ['universities', () => loadPublishedUniversities(locale)], ['majors', () => loadPublishedMajors(locale)], ['countries', () => loadPublishedCountries(locale)],
-      ['exams', () => loadPublishedExams(locale)], ['courses', loadPublishedCourses], ['articles', () => loadPublishedArticles(locale)],
-      ['services', ()=>loadPublishedServices(locale)], ['careers', loadPublishedCareers], ['tools', () => loadPublishedTools(locale)],
+      ['exams', () => loadPublishedExams(locale)], ['courses', () => loadPublishedCourses(locale)], ['articles', () => loadPublishedArticles(locale)],
+      ['services', ()=>loadPublishedServices(locale)], ['careers', () => loadPublishedCareers(locale)], ['tools', () => loadPublishedTools(locale)],
     ];
     await Promise.all(loaders.map(async ([domain, loader]) => {
       try {
@@ -796,10 +778,10 @@ export async function loadPublicLiveSnapshot(locale: PublicLiveLocale = 'ar', fo
       }
     }));
     const finalResult = { data, statuses, errors };
-    snapshotCache.set(cacheKey, { result: finalResult, timestamp: Date.now() });
+    if (snapshotEpochs.get(cacheKey) === epoch) snapshotCache.set(cacheKey, { result: finalResult, timestamp: Date.now() });
     return finalResult;
   })().finally(() => {
-    inFlightSnapshots.delete(cacheKey);
+    if (snapshotEpochs.get(cacheKey) === epoch) inFlightSnapshots.delete(cacheKey);
   });
 
   inFlightSnapshots.set(cacheKey, fetchPromise);

@@ -1,6 +1,7 @@
+import { useBoundedCatalog } from '../useBoundedCatalog';
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import { searchPublishedMajors } from '../publicLiveDataSource';
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Search,
   X,
@@ -54,28 +55,10 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
 
   const degreeLevels=['الكل',...Object.keys(DEGREE_CODES)];
 
-  const [filteredMajors,setResults]=useState<Major[]>(majors);
-  const [total,setTotal]=useState(majors.length);
-  const [cursor,setCursor]=useState<string|undefined>();
-  const [nextCursor,setNextCursor]=useState<string|undefined>();
-  const [retry,setRetry]=useState(0);
-  const [loading,setLoading]=useState(false);const [error,setError]=useState('');
-  useEffect(()=>{
-    let active=true;setCursor(undefined);setNextCursor(undefined);setLoading(true);setError('');
-    const timer=window.setTimeout(()=>{void searchPublishedMajors({search:searchQuery.trim()||undefined,degreeLevel:DEGREE_CODES[selectedDegree],academicFieldOrDiscipline:selectedFaculty==='الكل'?undefined:selectedFaculty},locale)
-      .then(result=>{if(active){setResults(result.data);setTotal(result.total);setNextCursor(result.nextCursor??undefined);}})
-      .catch(()=>{if(active){setResults([]);setError('تعذر تحميل التخصصات. حاول مجددًا.');}}).finally(()=>{if(active)setLoading(false);});},250);
-    return ()=>{active=false;window.clearTimeout(timer);};
-  },[searchQuery,selectedFaculty,selectedDegree,locale,retry]);
-  useEffect(()=>{
-    if(!cursor)return;
-    let active=true;setLoading(true);setError('');
-    void searchPublishedMajors({search:searchQuery.trim()||undefined,degreeLevel:DEGREE_CODES[selectedDegree],academicFieldOrDiscipline:selectedFaculty==='الكل'?undefined:selectedFaculty,cursor},locale)
-      .then(result=>{if(active){setResults(old=>[...old,...result.data.filter(row=>!old.some(previous=>previous.id===row.id))]);setTotal(result.total);setNextCursor(result.nextCursor??undefined);}})
-      .catch(()=>{if(active)setError('تعذر تحميل الصفحة التالية.');}).finally(()=>{if(active)setLoading(false);});
-    return ()=>{active=false;};
-  },[cursor,searchQuery,selectedFaculty,selectedDegree,locale]);
-
+  const catalog = useBoundedCatalog<Major>(JSON.stringify([searchQuery, selectedFaculty, selectedDegree, locale]), async (cursor, signal) => {
+    return searchPublishedMajors({ search: searchQuery.trim() || undefined, degreeLevel: DEGREE_CODES[selectedDegree], academicFieldOrDiscipline: selectedFaculty === 'الكل' ? undefined : selectedFaculty, cursor }, locale, signal);
+  });
+  const { rows: filteredMajors, total, cursor: nextCursor, busy: loading, error } = catalog;
 
   const handleResetFilters = () => {
     setSearchQuery('');
@@ -93,6 +76,7 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
       dir={publicDir}
     >
+      <label>{locale === 'ar' ? 'المجال الأكاديمي' : 'Academic field'}<input aria-label="Academic field" value={selectedFaculty === 'الكل' ? '' : selectedFaculty} onChange={event => setSelectedFaculty(event.target.value || 'الكل')} /></label>
       {/* ========================================================================= */}
       {/* HERO EMERALD CURVED BANNER */}
       {/* ========================================================================= */}
@@ -266,8 +250,8 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
         {/* Cards Stack */}
         <div className="flex flex-col gap-2.5 sm:gap-3 w-full">
           {loading&&<p role="status">{publicT('public_loading_majors')}</p>}
-          {error&&<div><p role="alert">{error}</p><button type="button" onClick={()=>setRetry(value=>value+1)}>{locale==='ar'?publicT('public_try_again'):'Retry'}</button></div>}
-          {nextCursor&&<button type="button" disabled={loading} onClick={()=>setCursor(nextCursor)}>{publicT('public_show_more')}</button>}
+          {error&&<div><p role="alert">{error}</p><button type="button" onClick={()=>catalog.retry()}>{locale==='ar'?publicT('public_try_again'):'Retry'}</button></div>}
+          {nextCursor&&<button type="button" disabled={loading} onClick={()=>catalog.more()}>{publicT('public_show_more')}</button>}
           {filteredMajors.length === 0 && (loading || error) ? null : filteredMajors.length === 0 ? (
             <div className="bg-[var(--mn-surface)] border border-[var(--mn-border)] rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-2 shadow-2xs mn-panel ">
               <div className="w-12 h-12 rounded-full bg-[var(--mn-surface-muted)] flex items-center justify-center text-[var(--mn-text-muted)] mn-panel ">

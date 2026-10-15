@@ -182,7 +182,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContinent, setSelectedContinent] = useState('الكل');
-  const [selectedCountryName, setSelectedCountryName] = useState('الكل');
+  const [selectedCountryId, setSelectedCountryId] = useState('الكل');
   const [localDetail, setLocalDetail] = useState<CountryDestination | null>(null);
   const [serverPage, setServerPage] = useState(1);
   const [serverResult, setServerResult] = useState<{
@@ -208,18 +208,21 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
 
   useEffect(() => {
     if (detailId || !initialCountryIdentity) return;
-    const target = countries.find(
+    const target = availableCountries.find(
       (country) =>
         country.id === initialCountryIdentity ||
         country.publicId === initialCountryIdentity ||
         country.slug === initialCountryIdentity ||
         country.iso2Code === initialCountryIdentity.toUpperCase(),
     );
-    if (!target) return;
-    setSelectedCountryName(target.name);
-    setSearchQuery(target.name);
+    if (!target) {
+      if (/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(initialCountryIdentity)) setSelectedCountryId(initialCountryIdentity);
+      return;
+    }
+    setSelectedCountryId(target.ownerId || target.id);
+    setSearchQuery('');
     setActiveCountryModal(target);
-  }, [countries, detailId, initialCountryIdentity]);
+  }, [countries, serverResult?.data, detailId, initialCountryIdentity]);
 
   const [refreshTick, setRefreshTick] = useState(0);
   useEffect(() => {
@@ -231,7 +234,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
     return () => window.clearInterval(timer);
   }, [dataMode]);
 
-  const filterIdentity = `${searchQuery}|${selectedContinent}|${selectedCountryName}|${publicLanguage}`;
+  const filterIdentity = `${searchQuery}|${selectedContinent}|${selectedCountryId}|${publicLanguage}`;
   const previousFilter = useRef(filterIdentity);
   useEffect(() => {
     if (dataMode !== 'api') return;
@@ -247,14 +250,12 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
       setServerLoading(true);
       setServerError(false);
       setServerResult(null);
-      const country = countries.find((item) => item.name === selectedCountryName);
       void searchPublishedCountries(
         {
           q:
-            searchQuery.trim() ||
-            (!country && selectedCountryName !== 'الكل' ? selectedCountryName : undefined),
+            searchQuery.trim() || undefined,
           region: selectedContinent === 'الكل' ? undefined : selectedContinent,
-          countryReferenceId: country?.ownerId,
+          countryReferenceId: selectedCountryId === 'الكل' ? undefined : selectedCountryId,
           page: serverPage,
         },
         publicLanguage === 'en' ? 'en' : 'ar',
@@ -285,7 +286,7 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
     countries,
     searchQuery,
     selectedContinent,
-    selectedCountryName,
+    selectedCountryId,
     publicLanguage,
   ]);
   // Extract unique continents and countries
@@ -297,9 +298,8 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
   const regionLabel=(region:string)=>publicLanguage === 'ar' ? ({Asia:'آسيا',Africa:'أفريقيا',Europe:'أوروبا',Americas:'الأمريكتان',Oceania:'أوقيانوسيا'} as Record<string,string>)[region] ?? region : region;
 
   const countryNames = useMemo(() => {
-    const list = Array.from(new Set(countries.map((c) => c.name)));
-    return ['الكل', ...list];
-  }, [countries]);
+    return [{ id: 'الكل', label: '' }, ...new Map([...countries, ...(serverResult?.data ?? [])].map(c => [c.ownerId || c.id, { id: c.ownerId || c.id, label: c.name }])).values()];
+  }, [countries, serverResult?.data]);
 
   // Filtering
   const filteredCountries = useMemo(() => {
@@ -314,21 +314,21 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
         c.popularCities.some((city) => city.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesContinent = selectedContinent === 'الكل' || c.continent === selectedContinent;
-      const matchesCountry = selectedCountryName === 'الكل' || c.name === selectedCountryName;
+      const matchesCountry = selectedCountryId === 'الكل' || (c.ownerId || c.id) === selectedCountryId;
 
       return matchesSearch && matchesContinent && matchesCountry;
     });
-  }, [countries, searchQuery, selectedContinent, selectedCountryName, dataMode, serverResult]);
+  }, [countries, searchQuery, selectedContinent, selectedCountryId, dataMode, serverResult]);
 
   const activeFiltersCount =
     (selectedContinent !== 'الكل' ? 1 : 0) +
-    (selectedCountryName !== 'الكل' ? 1 : 0) +
+    (selectedCountryId !== 'الكل' ? 1 : 0) +
     (searchQuery ? 1 : 0);
 
   const handleResetFilters = () => {
     setSearchQuery('');
     setSelectedContinent('الكل');
-    setSelectedCountryName('الكل');
+    setSelectedCountryId('الكل');
   };
 
   const graphMatchesActiveCountry = Boolean(
@@ -589,19 +589,19 @@ export const CountriesSearchPage: React.FC<CountriesSearchPageProps> = ({
               <div className="flex items-center justify-center gap-1.5 text-[var(--mn-heading)] font-semibold text-xs sm:text-[13px] font-['Cairo',sans-serif] w-full">
                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent-text)] shrink-0" />
                 <span className="truncate">
-                  {selectedCountryName === 'الكل' ? publicT('public_country') : selectedCountryName}
+                  {selectedCountryId === 'الكل' ? publicT('public_country') : countryNames.find(country => country.id === selectedCountryId)?.label || selectedCountryId}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
               <select
-                value={selectedCountryName}
-                onChange={(e) => setSelectedCountryName(e.target.value)}
+                value={selectedCountryId}
+                onChange={(e) => setSelectedCountryId(e.target.value)}
                 className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                 title={publicLanguage === 'ar' ? 'اختيار من الدول المعروضة؛ ابحث بالاسم للوصول إلى بقية الدول' : 'Choose a displayed country; search by name to find other countries'}
               >
                 {countryNames.map((cnt) => (
-                  <option key={cnt} value={cnt}>
-                    {cnt === 'الكل' ? publicT('public_all_countries_2') : cnt}
+                  <option key={cnt.id} value={cnt.id}>
+                    {cnt.id === 'الكل' ? publicT('public_all_countries_2') : cnt.label}
                   </option>
                 ))}
               </select>

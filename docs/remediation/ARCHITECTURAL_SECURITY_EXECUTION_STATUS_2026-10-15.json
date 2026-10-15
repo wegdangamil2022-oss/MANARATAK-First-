@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B08",
+  "next": "B09",
   "remaining": [
-    "B08",
     "B09",
     "B10a",
     "B10b",
@@ -85,9 +84,10 @@
       "Internal course CTA uses canonical ownerId/localized learner route; prototype room is prototype-only",
       "Unverified major totals and operational tool cards hidden in api; empty featured collections do not invent cards"
     ],
-    "deferredToB08": [
-      "Owner-backed featured scholarship selection (current live mapper exposes featured=false)",
-      "Authoritative global major counts and operational discovery contracts"
+    "deferredToB08": [],
+    "B08Resolution": [
+      "Published owner preview supplies home scholarship placement without inventing an owner featured flag",
+      "Unknown global degree counts remain hidden; owner paged catalogs replace sample discovery"
     ]
   },
   "B04": {
@@ -116,9 +116,7 @@
     "historicalSqlChanged": false,
     "report": "docs/reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md",
     "migrationInventory": "docs/reviews/evidence/b04-migration-inventory-2026-10-15.json",
-    "remainingKnownGuards": [
-      "NEW-01 name-based country relationship: B08"
-    ],
+    "remainingKnownGuards": [],
     "runtimePrerequisites": [
       "Actual database migration/checksum inventory and isolated FK/concurrent link-purge rehearsal: B05"
     ]
@@ -227,6 +225,58 @@
     "runtimePrerequisites": [
       "Browser smoke with deployed basename and representative permission roles",
       "Existing B01/B02/B05 database/deployment prerequisites remain pending"
+    ]
+  },
+  "B08": {
+    "status": "SOURCE_VERIFIED",
+    "baselineCommit": "d2bf0c3",
+    "runtimeStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "findings": [
+      "SYNC-02",
+      "SYNC-03",
+      "SYNC-05",
+      "SYNC-08",
+      "SYNC-09",
+      "NEW-01"
+    ],
+    "protectedFindings": [
+      "SYNC-04",
+      "SYNC-06",
+      "SYNC-07 (live prototype fallback blocked; product contract remains B10a)"
+    ],
+    "lightTestsPassed": 56,
+    "lightTestsFailed": 0,
+    "testBreakdown": {
+      "targetedVitest": 35,
+      "architectureGuardContracts": 12,
+      "academicProgramExplorerRegression": 9
+    },
+    "report": "docs/reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md",
+    "sourceChecks": {
+      "webTypes": "PASS",
+      "sourceArchitecture": "PASS (name-based relation = 0)",
+      "persistence": "281/281 PASS",
+      "assetReferences": "32 direct / 4 JSON PASS",
+      "diReachability": "424/424 PASS",
+      "sourceQuality": "PASS",
+      "P3": "57/57 PASS",
+      "P9": "97/97 PASS",
+      "WP12.9": "PASS",
+      "eslintErrors": 0,
+      "sourceEslintWarnings": 165,
+      "secretScan": "PASS"
+    },
+    "contracts": [
+      "Preview loads one bounded owner page; featured destinations add a separate bounded owner query",
+      "Public search remains GET /api/v1/search/public; no parallel AI service or local live sample ranking",
+      "Program-scoped degree/major/language choices use existing public explorer facets and canonical IDs",
+      "Shared locale snapshot cache TTL and visible refresh: 180 seconds, plus focus/visibility/manual reload; paged requests abort or ignore obsolete results"
+    ],
+    "migrationAppliedByThisChange": false,
+    "runtimePrerequisites": [
+      "Non-production browser smoke for each catalog, filters, locale switch, saved-item interaction and publication withdrawal",
+      "Existing B01/B02/B05 deployment and database prerequisites remain pending"
     ]
   }
 }

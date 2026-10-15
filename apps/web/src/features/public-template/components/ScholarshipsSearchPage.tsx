@@ -1,3 +1,4 @@
+import { PublishedCatalogDiscovery } from './PublishedCatalogDiscovery';
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
@@ -14,8 +15,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Scholarship, DegreeLevel } from '../types';
-import { mapPublicScholarshipDto, type PublicScholarshipDataStatus } from '../publicScholarshipDataSource';
-import { ApiClient } from '../../../api/client';
+import { type PublicScholarshipDataStatus } from '../publicScholarshipDataSource';
 
 interface ScholarshipsSearchPageProps {
   scholarships?: Scholarship[];
@@ -154,7 +154,7 @@ const ScholarshipCountryFlag: React.FC<{
   return <Globe2 className="w-5 h-5 text-[var(--mn-heading)]" />;
 };
 
-export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
+const PrototypeScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
   scholarships = [],
   onBack,
   onSelectScholarship,
@@ -170,7 +170,7 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
   const [selectedFilter, setSelectedFilter] = useState('الكل');
   const [selectedDegree, setSelectedDegree] = useState('الكل');
   const [selectedFunding, setSelectedFunding] = useState('الكل');
-  const [countryScopedScholarships, setCountryScopedScholarships] = useState<Scholarship[] | null>(null);
+  const [countryScopedScholarships] = useState<Scholarship[] | null>(null);
 
   // Custom filter popup accordion states
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -183,38 +183,6 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
     setSelectedFilter(`country:${initialCountryReferenceId}`);
     setSearchQuery('');
   }, [initialCountryReferenceId]);
-
-  useEffect(() => {
-    let active = true;
-    if (dataStatus === 'prototype' || !initialCountryReferenceId) {
-      setCountryScopedScholarships(null);
-      return () => { active = false; };
-    }
-
-    const loadCountryScholarships = async () => {
-      try {
-        const all = [];
-        let cursor: string | undefined;
-        for (let guard = 0; guard < 10000; guard += 1) {
-          const next = await ApiClient.getScholarships({
-            countryReferenceId: initialCountryReferenceId,
-            cursor,
-            limit: 100,
-          });
-          all.push(...next.data);
-          if (!next.hasMore || !next.nextCursor) break;
-          if (next.nextCursor === cursor) throw new Error('SCHOLARSHIP_CURSOR_DID_NOT_ADVANCE');
-          cursor = next.nextCursor;
-        }
-        if (active) setCountryScopedScholarships(all.map((item) => mapPublicScholarshipDto(item)));
-      } catch {
-        if (active) setCountryScopedScholarships(null);
-      }
-    };
-
-    void loadCountryScholarships();
-    return () => { active = false; };
-  }, [dataStatus, initialCountryReferenceId]);
 
   const scholarshipSource = dataStatus === 'prototype'
     ? scholarships.filter((s) => s.id === 'csc-china')
@@ -906,3 +874,7 @@ export const ScholarshipsSearchPage: React.FC<ScholarshipsSearchPageProps> = ({
     </div>
   );
 };
+
+export function ScholarshipsSearchPage(props: ScholarshipsSearchPageProps) {
+  return props.dataStatus === 'prototype' ? <PrototypeScholarshipsSearchPage {...props} /> : <PublishedCatalogDiscovery favoriteIds={props.favoriteIds} onToggleFavorite={props.onToggleFavorite} kind="scholarships" onBack={props.onBack} countryId={props.initialCountryReferenceId} onScholarship={props.onSelectScholarship} />;
+}

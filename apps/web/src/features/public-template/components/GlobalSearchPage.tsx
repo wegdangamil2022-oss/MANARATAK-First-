@@ -1,5 +1,5 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight, BookOpen, BriefcaseBusiness, Building2, ChevronLeft, FileText, GraduationCap,
   Landmark, Loader2, Search, Sparkles, Stethoscope, Wrench,
@@ -80,6 +80,8 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
 }) => {
   const { t: publicT } = usePublicTemplateTranslation();
 
+  const generation = useRef(0);
+  const abort = useRef<AbortController | null>(null);
   const [selectedKind, setSelectedKind] = useState<'all' | GlobalResultKind>('all');
   const [serverItems, setServerItems] = useState<PublicGlobalSearchItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -96,30 +98,38 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
 
   const executeServerSearch = async (cursor?: string, append = false) => {
     if (!query.trim() || searchMode !== 'api') return;
+    const current = generation.current;
+    const signal = abort.current?.signal;
     append ? setLoadingMore(true) : setLoading(true);
     setSearchError('');
     try {
       const page = await ApiClient.searchPublicCatalog({
-        q: query.trim(), locale, limit: 20, cursor,
+        q: query.trim(), locale, limit: 20, cursor, signal,
         kinds: selectedKind === 'all' ? undefined : [selectedKind as PublicGlobalSearchKind],
       });
+      if (current !== generation.current || signal?.aborted) return;
       setServerItems((current) => append ? [...current, ...page.items.filter((item) => !current.some((known) => known.kind === item.kind && known.id === item.id))] : page.items);
       setNextCursor(page.nextCursor);
       setHasMore(page.hasMore);
     } catch (error) {
+      if (current !== generation.current || signal?.aborted) return;
       if (!append) setServerItems([]);
       setSearchError(error instanceof Error ? error.message : 'تعذر تنفيذ البحث العام');
     } finally {
-      setLoading(false); setLoadingMore(false);
+      if (current === generation.current) { setLoading(false); setLoadingMore(false); }
     }
   };
 
   useEffect(() => {
+    const current = ++generation.current;
+    abort.current?.abort();
+    const controller = new AbortController(); abort.current = controller;
     if (searchMode !== 'api') return;
+    setLoading(false); setLoadingMore(false);
     setServerItems([]); setNextCursor(null); setHasMore(false); setSearchError('');
     if (!query.trim()) return;
     const timer = window.setTimeout(() => { void executeServerSearch(); }, 220);
-    return () => window.clearTimeout(timer);
+    return () => { window.clearTimeout(timer); generation.current = current + 1; controller.abort(); };
     // query/kind/mode/locale define a new result set; executeServerSearch intentionally not a dependency.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, selectedKind, searchMode, locale]);
@@ -289,17 +299,17 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
                 <Sparkles className="h-4 w-4 animate-pulse text-[var(--mn-accent-text)]" />
                 <span>{publicT('public_try_smart_search')}</span>
               </div>
-              <div className="mt-1 text-[10px] sm:text-[11px] text-white/95 font-medium">{publicT('public_for_more_complex_exploration_using_ai_and_natural')}</div>
+              <div className="mt-1 text-[10px] sm:text-[11px] text-white/95 font-medium">{searchMode === 'prototype' ? publicT('public_for_more_complex_exploration_using_ai_and_natural') : locale === 'en' ? 'Search published opportunities, then refine your results in each catalog.' : 'ابحث في الفرص المنشورة ثم استخدم فلاتر القسم لتحديد النتائج.'}</div>
             </div>
             <ChevronLeft className="h-5 w-5 shrink-0 text-white transition-transform group-hover:-translate-x-1" />
           </div>
         </button>
 
         <div className="flex gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
-          <button type="button" onClick={() => setSelectedKind('all')} aria-pressed={selectedKind === 'all'} className={`mn-filter-chip whitespace-nowrap ${selectedKind === 'all' ? 'is-selected' : ''}`}>{publicT('public_all')}{totalVisible ? ` · ${totalVisible}${hasMore && searchMode === 'api' ? '+' : ''}` : ''}</button>
+          <button type="button" onClick={() => setSelectedKind('all')} aria-pressed={selectedKind === 'all'} className={`mn-filter-chip whitespace-nowrap ${selectedKind === 'all' ? 'is-selected' : ''}`}>{publicT('public_all')}{searchMode === 'prototype' && totalVisible ? ` · ${totalVisible}` : ''}</button>
           {(Object.keys(CATEGORY_META) as GlobalResultKind[]).map((kind) => (
             <button type="button" key={kind} onClick={() => setSelectedKind(kind)} aria-pressed={selectedKind === kind} className={`mn-filter-chip flex items-center gap-1.5 whitespace-nowrap ${selectedKind === kind ? 'is-selected' : ''}`}>
-              {CATEGORY_META[kind].icon}{publicT(CATEGORY_META[kind].label)}{counts[kind] ? ` · ${counts[kind]}${hasMore && selectedKind === kind ? '+' : ''}` : ''}
+              {CATEGORY_META[kind].icon}{publicT(CATEGORY_META[kind].label)}{searchMode === 'prototype' && counts[kind] ? ` · ${counts[kind]}` : ''}
             </button>
           ))}
         </div>

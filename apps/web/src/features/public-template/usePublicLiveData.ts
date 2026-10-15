@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { refreshPublishedTools, refreshPublishedCountries, refreshPublishedArticles, refreshPublishedServices, refreshPublishedCourses, refreshPublishedUniversities, refreshPublishedScholarships, refreshPublishedMajors, refreshPublishedExams, loadPublicLiveSnapshot, type PublicLiveLoadResult, type PublicLiveLocale } from './publicLiveDataSource';
+import { loadPublicLiveSnapshot, type PublicLiveLoadResult, type PublicLiveLocale } from './publicLiveDataSource';
 import { resolvePublicTemplateDataMode, type PublicTemplateDataMode } from './publicScholarshipDataSource';
 
 declare const __MANARATAK_PROTOTYPE_DATA_ENABLED__: boolean;
@@ -34,69 +34,30 @@ export function usePublicLiveData(value: unknown, locale: PublicLiveLocale = 'ar
       });
       return () => { active = false; };
     }
-    const isManualReload = reloadVersion > 0;
-    const request = isManualReload ? loadPublicLiveSnapshot(locale, true) : loadPublicLiveSnapshot(locale);
-    request.then((next) => { if (active) setResult(next); });
-    return () => { active = false; };
-  }, [mode, locale, reloadVersion]);
-
-  // Renew only destination image grants while this live view stays open.
-  useEffect(() => {
-    if (mode !== 'api') return;
-    let active = true;
-    const timer = window.setInterval(() => {
-      if (document.visibilityState === 'hidden') return;
-      void refreshPublishedCountries(locale)
-        .then((countries) => {
-          if (active)
-            setResult((old) => ({
-              ...old,
-              data: { ...old.data, countries },
-              statuses: { ...old.statuses, countries: countries.length ? 'ready' : 'empty' },
-            }));
-        })
-        .catch(() => {});
-    }, 180000);
-    return () => {
-      active = false;
-      window.clearInterval(timer);
-    };
-  }, [mode, locale]);
-
-  // Recheck publication on return from admin, without reloading every other section.
-  useEffect(() => {
-    if (mode !== 'api') return;
-    let active = true;
-    let requestId = 0;
-    const refreshTests = async () => {
-      if (document.visibilityState === 'hidden') return;
-      const current = ++requestId;
+    let generation = 0;
+    const load = async (force = false) => {
+      const request = ++generation;
       try {
-        const [examResult, majorResult, scholarshipResult, universityResult, courseResult, serviceResult, articleResult, countryResult, toolResult] = await Promise.allSettled([refreshPublishedExams(locale), refreshPublishedMajors(locale), refreshPublishedScholarships(locale), refreshPublishedUniversities(locale),refreshPublishedCourses(locale), refreshPublishedServices(locale), refreshPublishedArticles(locale), refreshPublishedCountries(locale), refreshPublishedTools(locale)]);
-        if (!active || current !== requestId) return;
-        const tools = toolResult.status === 'fulfilled' ? toolResult.value : undefined;
-        const countries = countryResult.status === 'fulfilled' ? countryResult.value : undefined;
-        const articles = articleResult.status === 'fulfilled' ? articleResult.value : undefined;
-        const services = serviceResult.status === 'fulfilled' ? serviceResult.value : undefined;
-        const courseData = courseResult.status === 'fulfilled' ? courseResult.value : undefined;
-        const exams = examResult.status === 'fulfilled' ? examResult.value : undefined;
-        const scholarships = scholarshipResult.status === 'fulfilled' ? scholarshipResult.value : undefined;
-        const universities = universityResult.status === 'fulfilled' ? universityResult.value : undefined;
-        const majors = majorResult.status === 'fulfilled' ? majorResult.value : undefined;
-        if (active && current === requestId) setResult(previous => ({
-          ...previous, data: { ...previous.data, ...(tools ? {tools} : {}), ...(countries ? {countries} : {}), ...(articles ? { articles } : {}), ...(services ? {services} : {}), ...(courseData ?? {}), ...(universities ? { universities } : {}), ...(exams ? { exams } : {}), ...(majors ? { majors } : {}), ...(scholarships ? { scholarships } : {}) },
-          statuses: { ...previous.statuses, ...(tools ? {tools: tools.length ? 'ready' as const : 'empty' as const} : {}), ...(countries ? {countries: countries.length ? 'ready' as const : 'empty' as const} : {}), ...(articles ? {articles: articles.length ? 'ready' as const : 'empty' as const} : {}), ...(services ? {services: services.length ? 'ready' as const : 'empty' as const} : {}), ...(courseData ? {courses: courseData.courses.length || courseData.importedCourses.length || courseData.paidCourses.length ? "ready" as const : "empty" as const} : {}), ...(universities ? { universities: universities.length ? 'ready' as const : 'empty' as const } : {}), ...(exams ? { exams: exams.length ? 'ready' as const : 'empty' as const } : {}), ...(majors ? { majors: majors.length ? 'ready' as const : 'empty' as const } : {}), ...(scholarships ? { scholarships: scholarships.length ? 'ready' as const : 'empty' as const } : {}) },
-        }));
-      } catch { /* Retain the last loaded view; do not substitute preview data. */ }
+        const next = await (force ? loadPublicLiveSnapshot(locale, true) : loadPublicLiveSnapshot(locale));
+        if (active && request === generation) setResult(next);
+      } catch {
+        if (active && request === generation) setResult({ ...initial,
+          statuses: Object.fromEntries(Object.keys(initial.statuses).map(key => [key, 'unavailable'])) as PublicLiveLoadResult['statuses'],
+        });
+      }
     };
-    window.addEventListener('focus', refreshTests);
-    document.addEventListener('visibilitychange', refreshTests);
+    void load(reloadVersion > 0);
+    const refresh = () => { if (document.visibilityState !== 'hidden') void load(true); };
+    // Three-minute preview/image-grant renewal; focus/visibility explicitly rechecks publication.
+    const timer = window.setInterval(refresh, 180000);
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
     return () => {
-      active = false;
-      window.removeEventListener('focus', refreshTests);
-      document.removeEventListener('visibilitychange', refreshTests);
+      active = false; generation++;
+      window.clearInterval(timer); window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
     };
-  }, [mode, locale]);
+  }, [mode, locale, reloadVersion]);
 
   return { mode, ...result, reload };
 }

@@ -1,0 +1,25 @@
+import React from 'react';
+import { act, create } from 'react-test-renderer';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+const state = vi.hoisted(() => ({ search: vi.fn() }));
+vi.mock('../../src/api/client', () => ({ ApiClient: { searchPublicCatalog: state.search } }));
+vi.mock('../../src/i18n/I18nProvider', () => ({ useTranslation: () => ({ language: 'en', dir: 'ltr', t: (key: string) => key }) }));
+import { GlobalSearchPage } from '../../src/features/public-template/components/GlobalSearchPage';
+let tree: ReturnType<typeof create>;
+const noop = () => {};
+const props = { query: 'Scholarships', searchMode: 'api' as const, scholarships: [], universities: [], majors: [], countries: [], importedCourses: [], exams: [], articles: [], services: [], tools: [], careers: [], onBack: noop, onOpenSmartSearch: noop, onOpenScholarship: noop, onOpenUniversity: noop, onOpenMajor: noop, onOpenExam: noop, onOpenCourse: noop, onOpenArticle: noop, onOpenService: noop, onOpenCountry: noop, onNavigateCategory: noop };
+beforeEach(() => { (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true; vi.useFakeTimers(); vi.stubGlobal('window', { setTimeout, clearTimeout }); state.search.mockReset(); });
+afterEach(async () => { if (tree) await act(async () => tree.unmount()); vi.useRealTimers(); vi.unstubAllGlobals(); });
+it('cancels an old public catalog search and rejects its late locale response', async () => {
+  let resolve!: (page: unknown) => void;
+  state.search.mockImplementationOnce(() => new Promise(done => { resolve = done; })).mockResolvedValue({ items: [{ kind: 'universities', id: 'en', title: 'CURRENT-EN', snippet: '', url: '/universities/en' }], nextCursor: null, hasMore: false });
+  await act(async () => { tree = create(<GlobalSearchPage {...props} locale="ar" />); });
+  await act(async () => vi.advanceTimersByTimeAsync(250));
+  const oldSignal = state.search.mock.calls[0][0].signal;
+  await act(async () => tree.update(<GlobalSearchPage {...props} locale="en" />));
+  await act(async () => vi.advanceTimersByTimeAsync(250));
+  expect(oldSignal.aborted).toBe(true);
+  await act(async () => resolve({ items: [{ kind: 'universities', id: 'ar', title: 'STALE-AR', snippet: '', url: '/universities/ar' }], hasMore: false, nextCursor: null }));
+  expect(JSON.stringify(tree.toJSON())).toContain('CURRENT-EN');
+  expect(JSON.stringify(tree.toJSON())).not.toContain('STALE-AR');
+});

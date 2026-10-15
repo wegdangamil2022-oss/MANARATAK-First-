@@ -4,18 +4,26 @@ import {useTranslation} from '../../../i18n/I18nProvider';
 import {isPublicTemplateLocaleEnabled} from '@manaratak/shared';
 import { ArrowRight, Globe, HelpCircle, Mail, ShieldCheck } from 'lucide-react';
 
-const questions = [
-  ['كيف أجد فرصة تناسبني؟', 'ابدأ بالبحث العام أو اختر قسم المنح أو الجامعات أو التخصصات. استخدم الفلاتر ثم راجع متطلبات الفرصة ورابطها الرسمي.'],
-  ['هل حفظ الفرصة يعني أنني قدمت عليها؟', 'لا. المفضلة تحفظ الفرصة للرجوع إليها فقط؛ التقديم يتم عبر الجهة الرسمية وفق تعليماتها.'],
-  ['هل القبول أو الحصول على منحة مضمون؟', 'لا. القرار لدى الجامعة أو الجهة المانحة، ويجب التأكد من الشروط والمواعيد من المصدر الرسمي.'],
-  ['هل البحث الذكي وتسجيل الدخول يعملان فعليًا؟', 'هذه نسخة معاينة للواجهة. البحث الذكي محاكاة محلية، وتسجيل الدخول والطلبات بانتظار الربط بالخادم.'],
-  ['أين تحفظ المفضلة في هذه النسخة؟', 'تُحفظ محليًا في هذا المتصفح. حذف بيانات المتصفح قد يحذفها، ولا تتم مزامنتها مع جهاز آخر قبل ربط الحساب.'],
-];
-export function PublicInfoPage({page, onBack, onServices}: {page: 'faq' | 'contact' | 'language'; onBack: () => void; onServices: () => void}) {
+export function PublicInfoPage({page, onBack, onServices, dataMode = 'api'}: {dataMode?: 'api' | 'prototype'; page: 'faq' | 'contact' | 'language'; onBack: () => void; onServices: () => void}) {
   const { t: publicT } = usePublicTemplateTranslation();
 
   const {language,setLanguage,dir}=useTranslation();
-  const title = page === 'faq' ? 'الأسئلة الشائعة' : page === 'contact' ? 'الاتصال والدعم' : 'لغة الواجهة';
+  const ar = language === 'ar';
+  const questions = ar ? [
+    ['كيف أجد فرصة تناسبني؟', 'استخدم البحث العام أو فلاتر القسم ثم راجع المتطلبات والمواعيد والرابط الرسمي للفرصة.'],
+    ['هل حفظ الفرصة يعني أنني قدمت عليها؟', 'المحفوظات للرجوع إلى الفرصة؛ التقديم يتم عبر المسار المحدد في تفاصيلها ووفق تعليمات الجهة.'],
+    ['هل القبول أو الحصول على منحة مضمون؟', 'القرار لدى الجامعة أو الجهة المانحة. تحقق من شروطها الحالية ومواعيدها من المصدر الرسمي.'],
+    ['كيف يعمل البحث والدخول؟', dataMode === 'prototype' ? 'هذه معاينة تجريبية للواجهة والنتائج.' : 'البحث يستعلم عن العناصر المنشورة. الإجراءات التي تتطلب حسابًا تطلب تسجيل الدخول؛ عرض الفرصة لا يعني إرسال طلب.'],
+    ['أين أجد محفوظاتي؟', dataMode === 'prototype' ? 'في المعاينة، تحفظ في هذا المتصفح وقد تزول عند حذف بياناته.' : 'تجد العناصر المحفوظة في مساحة حساب الطالب بعد تسجيل الدخول.'],
+  ] : [
+    ['How do I find an opportunity?', 'Use public search or catalog filters, then check the requirements, deadlines and official source.'],
+    ['Does saving mean I have applied?', 'Saved items help you return to opportunities. Apply through the route specified in the details and follow the provider instructions.'],
+    ['Is admission or funding guaranteed?', 'The university or funding provider makes the decision. Check their current conditions and deadlines.'],
+    ['How do search and sign-in work?', dataMode === 'prototype' ? 'This is an interface preview with demonstration results.' : 'Search queries published items. Account actions require sign-in; viewing an opportunity does not submit an application.'],
+    ['Where are my saved items?', dataMode === 'prototype' ? 'Preview items are stored in this browser and may disappear when browser data is cleared.' : 'Sign in to find saved items in your student account workspace.'],
+  ];
+
+  const title = page === 'faq' ? (ar ? 'الأسئلة الشائعة' : 'Frequently asked questions') : page === 'contact' ? (ar ? 'الاتصال والدعم' : 'Contact and support') : (ar ? 'لغة الواجهة' : 'Interface language');
   const Icon = page === 'faq' ? HelpCircle : page === 'contact' ? Mail : Globe;
   return <div className="min-h-screen bg-[var(--mn-page)] pb-24" dir={dir}>
     <div className="mn-search-hero mn-inverse p-4 text-white">

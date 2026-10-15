@@ -42,6 +42,7 @@ import type { MajorPublicRelationshipGraph } from '../usePublicRelationshipGraph
 import { DetailBackButton, DetailSectionHeader, useDetailSearchTarget } from './DetailUi';
 
 interface MajorDetailModalProps {
+  dataMode?: 'api' | 'prototype';
   major: Major;
   relationshipGraph?: MajorPublicRelationshipGraph;
   relationshipGraphStatus?: 'loading' | 'ready' | 'unavailable';
@@ -58,7 +59,7 @@ interface MajorDetailModalProps {
 }
 
 export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
-  major,
+  major, dataMode = 'api',
   relationshipGraph,
   relationshipGraphStatus = 'ready',
   onClose,
@@ -241,6 +242,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
   // Program degree tag label
   const getDegreeTag = () => {
+    if (dataMode === 'api') return major.degreeLevelName || '';
     if (isFellowship) return 'برنامج تدريب سريري متقدم • زمالة';
     if (isDoctorate) return 'برنامج دراسات عليا • دكتوراه';
     if (isMaster) return 'برنامج دراسات عليا • ماجستير';
@@ -317,8 +319,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             {/* Right Side: Glowing Gold Graduation Badge + Arrow + Title & Tag */}
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-[var(--mn-accent)] flex items-center justify-center p-1.5 shadow-[0_0_12px_rgba(214,164,59,0.5)] bg-gradient-to-br from-[var(--mn-primary)] to-[var(--mn-primary)] shrink-0">
-                {major.contentSections ? (
-        <PublishedMajorSections sections={major.contentSections} level={major.degreeLevelName} />
+                {(dataMode === 'api' || major.contentSections) ? (
+        <PublishedMajorSections sections={major.contentSections ?? []} level={major.degreeLevelName} />
       ) : isFellowship ? (
                   <HeartPulse className="w-6 h-6 text-[var(--mn-danger-text)] drop-shadow-[0_0_4px_rgba(214,164,59,0.7)]" />
                 ) : isDoctorate || isMaster ? (
@@ -379,8 +381,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
       </div>
 
       {/* If Fellowship, render dedicated 17-section FellowshipDetailView */}
-      {major.contentSections ? (
-        <PublishedMajorSections sections={major.contentSections} level={major.degreeLevelName} />
+      {(dataMode === 'api' || major.contentSections) ? (
+        <PublishedMajorSections sections={major.contentSections ?? []} level={major.degreeLevelName} />
       ) : isFellowship ? (
         <FellowshipDetailView major={major} onOpenMajor={onOpenMajor} />
       ) : (

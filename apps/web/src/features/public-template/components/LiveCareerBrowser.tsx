@@ -18,7 +18,7 @@ export function LiveCareerBrowser({ detailId, onDetailChange, onBack, favoriteId
     return()=>{clearTimeout(timer);++sequence.current;};
   },[search,country,type,employment,remote,language,reload]);
   useEffect(()=>{
-    let active=true;const timer=setTimeout(()=>void ApiClient.getReferenceCountries({q:countrySearch||undefined,activeOnly:true}).then(rows=>{if(active)setCountries(rows);}).catch(()=>{if(active)setNotice(language==='ar'?'تعذر تحميل الدول':'Could not load countries');}),250);
+    let active=true;const timer=setTimeout(()=>void ApiClient.getReferenceCountries({q:countrySearch||undefined,locale:language,page:1,pageSize:50}).then(rows=>{if(active)setCountries(rows);}).catch(()=>{if(active)setNotice(language==='ar'?'تعذر تحميل الدول':'Could not load countries');}),250);
     return()=>{active=false;clearTimeout(timer);};
   },[countrySearch,language]);
   useEffect(()=>{

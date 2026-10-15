@@ -1,0 +1,21 @@
+import React from 'react';
+import { act, create } from 'react-test-renderer';
+import { afterEach, expect, it, vi } from 'vitest';
+const state = vi.hoisted(() => ({ search: vi.fn() }));
+vi.mock('../../src/i18n/I18nProvider', () => ({ useTranslation: () => ({ language: 'en', dir: 'ltr', t: (key: string) => key }) }));
+vi.mock('../../src/features/public-template/publicLiveDataSource', () => ({ searchPublishedCountries: state.search }));
+vi.mock('../../src/features/public-template/components/CountryDetailModal', () => ({ CountryDetailModal: () => null }));
+import { CountriesSearchPage } from '../../src/features/public-template/components/CountriesSearchPage';
+let tree: ReturnType<typeof create>;
+afterEach(async () => { if (tree) await act(async () => tree.unmount()); vi.useRealTimers(); vi.unstubAllGlobals(); });
+it('passes the selected canonical country ID directly even when labels collide', async () => {
+  (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true; vi.useFakeTimers();
+  vi.stubGlobal('window', { setTimeout, clearTimeout, setInterval, clearInterval }); vi.stubGlobal('document', { visibilityState: 'visible' });
+  state.search.mockResolvedValue({ data: [], total: 0, totalPages: 0 });
+  const countries = [{ id: 'id-one', ownerId: 'id-one', name: 'Same country label', continent: 'Europe' }, { id: 'id-two', ownerId: 'id-two', name: 'Same country label', continent: 'Europe' }] as any;
+  await act(async () => { tree = create(<CountriesSearchPage dataMode="api" countries={countries} onBack={() => {}} />); });
+  const select = tree.root.findAllByType('select').find(node => node.props.title?.includes('Choose a displayed country'))!;
+  await act(async () => select.props.onChange({ target: { value: 'id-two' } }));
+  await act(async () => vi.advanceTimersByTimeAsync(350));
+  expect(state.search).toHaveBeenLastCalledWith(expect.objectContaining({ countryReferenceId: 'id-two', q: undefined, page: 1 }), 'en');
+});

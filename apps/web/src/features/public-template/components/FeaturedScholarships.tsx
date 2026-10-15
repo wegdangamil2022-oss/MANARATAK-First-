@@ -4,6 +4,7 @@ import { ChevronLeft, GraduationCap, Heart } from 'lucide-react';
 import { Scholarship } from '../types';
 
 interface FeaturedScholarshipsProps {
+  selection?: 'featured' | 'published-preview';
   scholarships?: Scholarship[];
   onSelectScholarship?: (scholarship: Scholarship) => void;
   onToggleFavorite?: (id: string) => void;
@@ -12,7 +13,7 @@ interface FeaturedScholarshipsProps {
 }
 
 export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
-  scholarships,
+  scholarships, selection = 'featured',
   onSelectScholarship,
   onToggleFavorite,
   favoriteIds = [],
@@ -21,7 +22,7 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
   const { t: publicT } = usePublicTemplateTranslation();
 
   // Only published owner projections supplied by the live/prototype data source.
-  const cards = (scholarships ?? []).filter((scholarship) => scholarship.featured).slice(0, 2);
+  const cards = (selection === 'featured' ? (scholarships ?? []).filter(scholarship => scholarship.featured) : scholarships ?? []).slice(0, 2);
   if (!cards.length) return null;
 
   const handleCardClick = (scholarship: Scholarship) => {

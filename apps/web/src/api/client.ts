@@ -100,6 +100,7 @@ export interface ReferenceCityDto {
 }
 
 export interface ReferenceCountryFilters {
+  page?: number; pageSize?: number; locale?: 'ar' | 'en';
   region?: string;
   q?: string;
   activeOnly?: boolean;
@@ -158,6 +159,7 @@ export interface AcademicStandardMappingDto {
 }
 
 export interface ScholarshipFilters {
+  search?: string;
   countryReferenceId?: string;
   studyLanguageReferenceId?: string;
   currencyReferenceId?: string;
@@ -1722,17 +1724,27 @@ export class ApiClient {
     if(!response.ok)throw new Error('UNIVERSITY_PROGRAM_DISCOVERY_UNAVAILABLE');return response.json();
   }
 
+  static async getPublicProgramFacetChoices(input: { locale: 'ar' | 'en'; facet: 'DEGREE' | 'MAJOR' | 'LANGUAGE'; query?: string; cursor?: string; signal?: AbortSignal }): Promise<{ items: Array<{ id: string; label: string }>; total: number; nextCursor: string | null }> {
+    const params = new URLSearchParams({ locale: input.locale, facet: input.facet, limit: '25' });
+    if (input.query) params.set('facetSearch', input.query);
+    if (input.cursor) params.set('facetCursor', input.cursor);
+    const response = await apiFetch(`${API_BASE_URL}/public/academic-program-explorer?${params}`, { signal: input.signal, cache: 'no-store' });
+    if (!response.ok) throw new Error('PUBLIC_DEGREE_CHOICES_UNAVAILABLE');
+    return response.json();
+  }
+
   static async searchPublicCatalog(input: {
     q: string;
     locale?: 'ar' | 'en';
     limit?: number;
     cursor?: string;
     kinds?: PublicGlobalSearchKind[];
+    signal?: AbortSignal;
   }): Promise<PublicGlobalSearchPage> {
     const params = new URLSearchParams({ q: input.q, locale: input.locale ?? currentPublicLocale(), limit: String(input.limit ?? 20) });
     if (input.cursor) params.set('cursor', input.cursor);
     if (input.kinds?.length) params.set('kinds', input.kinds.join(','));
-    const res = await apiFetch(`${API_BASE_URL}/search/public?${params.toString()}`);
+    const res = await apiFetch(`${API_BASE_URL}/search/public?${params.toString()}`, { signal: input.signal });
     if (!res.ok) throw new Error(await parseErrorMessage(res, 'تعذر تنفيذ البحث العام'));
     return res.json();
   }
@@ -1777,6 +1789,7 @@ export class ApiClient {
 
   static async getReferenceCountries(
     filters: ReferenceCountryFilters = {},
+    signal?: AbortSignal,
   ): Promise<ReferenceCountryDto[]> {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -1785,7 +1798,7 @@ export class ApiClient {
       }
     });
 
-    const res = await apiFetch(`${API_BASE_URL}/reference-data/countries?${params.toString()}`);
+    const res = await apiFetch(`${API_BASE_URL}/reference-data/countries?${params.toString()}`, { signal });
     if (!res.ok) {
       const msg = await parseErrorMessage(res, 'Failed to fetch countries');
       throw new Error(msg);
@@ -1989,6 +2002,7 @@ export class ApiClient {
   static async getScholarships(
     filters: ScholarshipFilters,
     locale: 'ar' | 'en' = currentPublicLocale(),
+    signal?: AbortSignal,
   ): Promise<PaginatedResult<PublicScholarshipDto>> {
     const params = new URLSearchParams();
 
@@ -1999,7 +2013,7 @@ export class ApiClient {
     });
 
     params.set('locale', locale);
-    const res = await apiFetch(`${API_BASE_URL}/public/scholarships?${params.toString()}`);
+    const res = await apiFetch(`${API_BASE_URL}/public/scholarships?${params.toString()}`, { signal });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(
@@ -2027,6 +2041,7 @@ export class ApiClient {
 
   static async getUniversities(
     filters: UniversityFilters,
+    signal?: AbortSignal,
   ): Promise<PaginatedResult<PublicUniversityDto>> {
     const params = new URLSearchParams();
 
@@ -2037,7 +2052,7 @@ export class ApiClient {
     });
 
     params.set('locale', filters.locale ?? currentPublicLocale());
-    const res = await apiFetch(`${API_BASE_URL}/public/universities?${params.toString()}`);
+    const res = await apiFetch(`${API_BASE_URL}/public/universities?${params.toString()}`, { signal });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(
@@ -2066,7 +2081,7 @@ export class ApiClient {
     return res.json();
   }
 
-  static async getMajors(filters: MajorFilters): Promise<PaginatedResult<PublicMajorDto>> {
+  static async getMajors(filters: MajorFilters, signal?: AbortSignal): Promise<PaginatedResult<PublicMajorDto>> {
     const params = new URLSearchParams();
 
     Object.entries(filters).forEach(([key, value]) => {
@@ -2076,7 +2091,7 @@ export class ApiClient {
     });
 
     params.set('locale', filters.locale ?? currentPublicLocale());
-    const res = await apiFetch(`${API_BASE_URL}/public/majors?${params.toString()}`);
+    const res = await apiFetch(`${API_BASE_URL}/public/majors?${params.toString()}`, { signal });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(
@@ -2109,6 +2124,7 @@ export class ApiClient {
   static async getCourses(
     filters: CourseFilters,
     locale: 'ar' | 'en' = currentPublicLocale(),
+    signal?: AbortSignal,
   ): Promise<PaginatedResult<PublicCourseDto>> {
     const params = new URLSearchParams();
 
@@ -2119,7 +2135,7 @@ export class ApiClient {
     });
 
     params.set('locale', locale);
-    const res = await apiFetch(`${API_BASE_URL}/public/courses?${params.toString()}`);
+    const res = await apiFetch(`${API_BASE_URL}/public/courses?${params.toString()}`, { signal });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(
@@ -2373,7 +2389,7 @@ export class ApiClient {
     return payload.data;
   }
 
-  static async getCmsContent(filters: CmsFilters): Promise<PaginatedResult<PublicCmsContentDto>> {
+  static async getCmsContent(filters: CmsFilters, signal?: AbortSignal): Promise<PaginatedResult<PublicCmsContentDto>> {
     const params = new URLSearchParams();
 
     Object.entries(filters).forEach(([key, value]) => {
@@ -2383,7 +2399,7 @@ export class ApiClient {
     });
 
     const res = await apiFetch(`${API_BASE_URL}/public/cms/content?${params.toString()}`, {
-      cache: 'no-cache',
+      cache: 'no-cache', signal,
     });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));

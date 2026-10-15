@@ -1,3 +1,4 @@
+import { PublishedCatalogDiscovery } from './components/PublishedCatalogDiscovery';
 import {OwnerReferenceNotice} from '../students/OwnerReferenceNotice';
 import type {PublicScholarshipReferenceState} from '../../api/client';
 import {PublicRelationshipPager} from './components/PublicRelationshipPager';
@@ -419,13 +420,15 @@ export default function App() {
   const [selectedScholarship, setSelectedScholarship] = navigation.field('selectedScholarship');
   const [selectedMajor, setSelectedMajorState] = navigation.field('selectedMajor');
   const majorDetailRequest = useRef(0);
+  const majorDetailLocale = useRef(language); majorDetailLocale.current = language;
   const setSelectedMajor = (item: Major | null) => {
     const request = ++majorDetailRequest.current;
+    const requestLocale = language;
     setSelectedMajorState(item);
     if (item?.slug && publicDataMode === 'api' && !item.contentSections?.length) {
-      void ApiClient.getMajorBySlug(item.slug, undefined, item.degreeLevelName).then((dto) => {
-        if (request === majorDetailRequest.current) setSelectedMajorState(mapPublicMajorDto(dto));
-      }).catch(() => { if (request === majorDetailRequest.current) setSelectedMajorState(null); });
+      void ApiClient.getMajorBySlug(item.slug, language, item.degreeLevelName).then((dto) => {
+        if (request === majorDetailRequest.current && requestLocale === majorDetailLocale.current) setSelectedMajorState(mapPublicMajorDto(dto));
+      }).catch(() => { if (request === majorDetailRequest.current && requestLocale === majorDetailLocale.current) setSelectedMajorState(null); });
     }
   };
   const [selectedUniversity, setSelectedUniversity] = navigation.field('selectedUniversity');
@@ -454,14 +457,24 @@ export default function App() {
   }, [publicDataMode, selectedArticle?.slug, language]);
   const [selectedService, setSelectedService] = navigation.field('selectedService');
   useEffect(() => {
-    if (publicDataMode !== 'api' || !selectedService || !['ready', 'empty'].includes(publicLive.statuses.services)) return;
-    const current = services.find(
-      (service) => service.id === selectedService.id || service.publicId === selectedService.publicId);
-    if (!current) {
-      setSelectedService(null);
-      setAccessDeniedMessage(t('public_template_service_unpublished'));
-    } else if (JSON.stringify(current) !== JSON.stringify(selectedService)) setSelectedService(current);
-  }, [publicDataMode, services, publicLive.statuses.services, selectedService?.id]);
+    if (publicDataMode !== 'api' || !selectedService?.slug) return;
+    let active = true, generation = 0;
+    const refresh = async () => {
+      if (document.visibilityState === 'hidden') return;
+      const current = ++generation;
+      try {
+        const value = mapService(await ApiClient.getServiceBySlug(selectedService.slug!, language), language);
+        if (active && current === generation) setSelectedService(value);
+      } catch (error) {
+        if (active && current === generation && error instanceof Error && error.message === 'Service not found') {
+          setSelectedService(null); setAccessDeniedMessage(t('public_template_service_unpublished'));
+        }
+      }
+    };
+    void refresh();
+    window.addEventListener('focus', refresh); document.addEventListener('visibilitychange', refresh);
+    return () => { active = false; window.removeEventListener('focus', refresh); document.removeEventListener('visibilitychange', refresh); };
+  }, [publicDataMode, selectedService?.slug, language]);
   const [serviceReturnTab, setServiceReturnTab] = navigation.field('serviceReturnTab');
   const [favoriteLaunch, setFavoriteLaunch] = navigation.field('favoriteLaunch');
   const [countryNavigationName, setCountryNavigationName] = navigation.field('countryNavigationName');
@@ -1076,9 +1089,9 @@ export default function App() {
         {isCompareRoute ? (
           <ComparePage locale={language} onBack={goBack} />
         ) : navigation.state.auxiliaryPage ? (
-          <PublicInfoPage page={navigation.state.auxiliaryPage} onBack={goBack} onServices={() => openSection('services')} />
+          <PublicInfoPage dataMode={publicDataMode} page={navigation.state.auxiliaryPage} onBack={goBack} onServices={() => openSection('services')} />
         ) : isSmartSearchOpen ? (
-          <SmartSearchPage
+          <SmartSearchPage dataMode={publicDataMode}
             initialQuery={globalSearchQuery}
             onQueryChange={setGlobalSearchQuery}
             scholarships={scholarships}
@@ -1340,7 +1353,7 @@ export default function App() {
             }}
           />
         ) : selectedMajor ? (
-          <MajorDetailModal
+          <MajorDetailModal dataMode={publicDataMode}
             major={selectedMajor}
             searchAnchor={detailSearchAnchor}
             searchTerm={detailSearchTerm}
@@ -1562,7 +1575,7 @@ export default function App() {
                   <div className="space-y-5 relative z-10 w-full">
                     {/* 1. Featured Scholarships */}
                     <div className="relative w-full">
-                      <FeaturedScholarships
+                      <FeaturedScholarships selection={publicDataMode === 'api' ? 'published-preview' : 'featured'}
                         scholarships={scholarships}
                         onSelectScholarship={setSelectedScholarship}
                         onToggleFavorite={(id) => handleToggleFavorite('scholarship', id)}
@@ -1846,7 +1859,7 @@ export default function App() {
               />
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'universities' ? (
-              <UniversitiesSearchPage
+              <UniversitiesSearchPage dataMode={publicDataMode}
                 universities={universities}
                 favoriteIds={favoriteIdsFor('university')}
                 onToggleFavorite={(id) => handleToggleFavorite('university', id)}
@@ -1871,6 +1884,7 @@ export default function App() {
               />
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'articles' ? (
+              publicDataMode === 'api' ? <PublishedCatalogDiscovery kind="articles" favoriteIds={favoriteIdsFor('article')} onToggleFavorite={id => handleToggleFavorite('article', id)} onBack={goBack} onArticle={setSelectedArticle} /> : (
               <ArticlesSearchPage
                 articles={articles}
                 onBack={goBack}
@@ -1881,6 +1895,7 @@ export default function App() {
                 favoriteIds={favoriteIdsFor('article')}
                 onToggleFavorite={(id) => handleToggleFavorite('article', id)}
               />
+              )
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'jobs' ? (
               <CareersSearchPage live={publicDataMode === 'api'} opportunities={careersForView} detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)} searchAnchor={detailSearchAnchor} searchTerm={detailSearchTerm}
@@ -1936,7 +1951,10 @@ export default function App() {
               )
             ) : (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) &&
               selectedCategory === 'courses' ? (
-              selectedCourseTrack === 'imported' ? (
+              publicDataMode === 'api' ? <PublishedCatalogDiscovery kind="courses" courseTrack={selectedCourseTrack} initialQuery={courseNavigationField} favoriteIds={favoriteIdsFor('course')} onToggleFavorite={id => handleToggleFavorite('course', id)} onBack={goBack} onCourse={mapped => {
+                if (mapped.imported) { setSelectedImportedCourse(mapped.imported); setSelectedCourseTrack('imported'); }
+                else { setSelectedCourse(mapped.course); setSelectedCourseTrack(mapped.track); }
+              }} /> : selectedCourseTrack === 'imported' ? (
                 <CoursesSearchPage
                   importedCourses={importedCourses}
                   initialQuery={searchQuery}
@@ -1965,7 +1983,7 @@ export default function App() {
               ) : selectedCourseTrack === 'native' ? (
                 <CourseTrackPreview
                   track="native"
-                  courses={courses.filter((course) => publicDataMode === 'api' || course.provider.includes('منارتك'))}
+                  courses={courses.filter((course) => course.provider.includes('منارتك'))}
                   favoriteIds={favoriteKeys.filter((k) => k.startsWith('course:')).map((k) => k.replace(/^course:/, ''))}
                   onToggleFavorite={(id) => handleToggleFavorite('course', id)}
                   onBack={goBack}

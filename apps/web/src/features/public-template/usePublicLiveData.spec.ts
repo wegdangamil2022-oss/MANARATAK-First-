@@ -15,6 +15,8 @@ vi.mock('./publicPrototypeDataSource', () => {
 });
 
 beforeEach(() => {
+  vi.stubGlobal('window', { setInterval: vi.fn(() => 1), clearInterval: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn() });
+  vi.stubGlobal('document', { visibilityState: 'visible', addEventListener: vi.fn(), removeEventListener: vi.fn() });
   vi.resetModules(); vi.clearAllMocks(); harness.effects.length = 0; harness.updates.length = 0;
   harness.live.mockResolvedValue({ data: { scholarships: ['published'] } });
   harness.prototype.mockReturnValue({ data: { scholarships: ['prototype'] } });

@@ -12,6 +12,7 @@ import {
 import { CategoryType, Scholarship, University } from '../types';
 
 interface SmartSearchPageProps {
+  dataMode?: 'api' | 'prototype';
   initialQuery: string;
   onQueryChange?: (query: string) => void;
   scholarships: Scholarship[];
@@ -29,7 +30,7 @@ const STOP_WORDS = new Set([
 
 const normalize = (value: unknown) => String(value ?? '').toLocaleLowerCase('ar').replace(/[،,.!?؟]/g, ' ').trim();
 
-export const SmartSearchPage: React.FC<SmartSearchPageProps> = ({
+const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
   initialQuery,
   onQueryChange,
   scholarships,
@@ -238,3 +239,19 @@ export const SmartSearchPage: React.FC<SmartSearchPageProps> = ({
     </div>
   );
 };
+
+function LiveSmartSearchPage({ initialQuery, onQueryChange, onBack, onOpenNormalSearch }: SmartSearchPageProps) {
+  const { language } = usePublicTemplateTranslation(); const ar = language !== 'en';
+  const [query, setQuery] = useState(initialQuery);
+  return <section className="mn-page-shell space-y-4 pb-24" dir={ar ? 'rtl' : 'ltr'}>
+    <button type="button" onClick={onBack}>{ar ? 'رجوع' : 'Back'}</button>
+    <h1>{ar ? 'ابحث في الفرص المنشورة' : 'Search published opportunities'}</h1>
+    <form onSubmit={event => { event.preventDefault(); if (query.trim()) onOpenNormalSearch(query.trim()); }}>
+      <label>{ar ? 'ما الذي تبحث عنه؟' : 'What are you looking for?'}<input type="search" value={query} maxLength={200} onChange={event => { setQuery(event.target.value); onQueryChange?.(event.target.value); }} /></label>
+      <button type="submit" disabled={!query.trim()}>{ar ? 'بحث' : 'Search'}</button>
+    </form>
+  </section>;
+}
+export function SmartSearchPage(props: SmartSearchPageProps) {
+  return props.dataMode === 'prototype' ? <PrototypeSmartSearchPage {...props} /> : <LiveSmartSearchPage {...props} />;
+}
