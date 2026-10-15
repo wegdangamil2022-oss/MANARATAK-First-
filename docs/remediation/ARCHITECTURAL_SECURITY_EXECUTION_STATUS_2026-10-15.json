@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B12",
+  "next": "B13",
   "remaining": [
-    "B12",
     "B13",
     "B14"
   ],
@@ -462,8 +461,8 @@
     ]
   },
   "B12": {
-    "status": "AWAITING_PRODUCT_SCOPE_DECISION",
-    "packageClosed": false,
+    "status": "SOURCE_VERIFIED",
+    "packageClosed": true,
     "baselineCommit": "6f197e77f1eba0c4350560992beeb0872c86f21a",
     "findings": [
       "ADM-06"
@@ -475,7 +474,7 @@
     "deploymentStatus": "NOT_PERFORMED",
     "schemaChanged": false,
     "historicalSqlChanged": false,
-    "productScopeDecision": "PENDING_EXPLICIT_BOOKING_POLICY_OR_RELEASE_EXCLUSION",
+    "productScopeDecision": "BOOKING_DEFERRED_OUT_OF_CURRENT_RELEASE",
     "sourceChecks": {
       "consentAndDirectoryTests": "PASS_13_OF_13",
       "persistence": "PASS_281_OF_281",
@@ -493,6 +492,12 @@
     ],
     "lightTestsPassed": 16,
     "lightTestsFailed": 0,
-    "lightTestFiles": 3
+    "lightTestFiles": 3,
+    "closureLevel": "SOURCE_WITH_EXPLICIT_RELEASE_SCOPE",
+    "sourceImplementationCommit": "be003a35901beb3c5d658d2378e6dca9bcdc2967",
+    "scopeDecisionAuthority": "User delegated the proposed booking deferral decision after explanation; assistant explicitly scoped booking out, preserving mentorship opportunities and alumni consent.",
+    "deferredCapabilities": [
+      "Mentorship session booking, cancellation and retention policy; no session model or API introduced"
+    ]
   }
 }
