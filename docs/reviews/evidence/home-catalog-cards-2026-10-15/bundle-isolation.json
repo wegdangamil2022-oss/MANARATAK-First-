@@ -1,0 +1,12 @@
+{
+  "productionBundle": "PASS",
+  "javascriptChunks": 5,
+  "prototypeRecordMarkersAbsent": [
+    "INITIAL_SCHOLARSHIPS",
+    "MOCK_UNIVERSITIES",
+    "MOCK_COURSES",
+    "GOLDEN_IMPORTED_COURSES",
+    "MANARATAK_NATIVE_COURSES",
+    "loadPublicPrototypeSnapshot"
+  ]
+}

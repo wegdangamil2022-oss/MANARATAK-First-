@@ -6,7 +6,7 @@ import { UniversityPublicRouter } from '../../../../src/presentation/api/router/
 const university = {
   id: 'u1', publicId: 'INS-QA-1', slug: 'qatar-university', canonicalName: 'Qatar University', canonicalDedupKey: 'qu',
   displayName: 'Qatar University', status: 'PUBLISHED', completenessStatus: 'COMPLETE',
-  translations: [{ locale: 'ar', displayName: 'جامعة قطر', reviewStatus: 'PUBLISHED' }],
+  translations: [{ locale: 'ar', displayName: 'جامعة قطر', reviewStatus: 'PUBLISHED', publicationSourceStatus: 'CURRENT' }],
 };
 
 describe('UniversityPublicRouter locale contract', () => {
@@ -14,9 +14,9 @@ describe('UniversityPublicRouter locale contract', () => {
   const createApp = (repository: ReturnType<typeof createRepository>, referenceDataRepository = {
     getCountry: vi.fn().mockResolvedValue({ id: 'country-qa', iso2Code: 'QA' }),
     listCountries: vi.fn().mockResolvedValue([{ id: 'country-qa', iso2Code: 'QA', name: 'Qatar', isActive: true }, { id: 'country-ye', iso2Code: 'YE', name: 'Yemen', isActive: true }]),
-  }) => {
+  }, imageServices = {}) => {
     const app = express();
-    app.use('/public/universities', UniversityPublicRouter.create({ universityRepository: repository as any, referenceDataRepository: referenceDataRepository as any }));
+    app.use('/public/universities', UniversityPublicRouter.create({ universityRepository: repository as any, referenceDataRepository: referenceDataRepository as any, ...imageServices }));
     return app;
   };
 
@@ -67,6 +67,17 @@ describe('UniversityPublicRouter locale contract', () => {
     const res = await request(createApp(repository)).get('/public/universities?majorId=major-1&page=abc');
     expect(res.status).toBe(400);
     expect(repository.listPublished).not.toHaveBeenCalled();
+  });
+
+  it('adds only an eligible image to the published university projection', async () => {
+    const repository = createRepository(); repository.listPublished.mockResolvedValue({ data: [{ ...university, logoAssetId: 'logo-fixture' }] });
+    const imageServices = { assetReferencePolicy: { assertUsable: vi.fn().mockResolvedValue({}) }, processAssetLifecycleUseCase: { requestDeliveryGrant: vi.fn().mockResolvedValue({ url: 'https://media.example.test/logo', expiresAt: new Date(Date.now() + 240000).toISOString(), headers: {} }) } };
+    const app = createApp(repository, undefined, imageServices);
+    const success = await request(app).get('/public/universities');
+    expect(success.status).toBe(200); expect(success.headers['cache-control']).toBe('no-store'); expect(success.body.data[0].image.url).toBe('https://media.example.test/logo');
+    imageServices.assetReferencePolicy.assertUsable.mockRejectedValue(new Error('PRIVATE'));
+    const denied = await request(app).get('/public/universities');
+    expect(denied.status).toBe(200); expect(denied.body.data[0].image).toBeNull();
   });
 
   it('rejects unsupported locale', async () => {

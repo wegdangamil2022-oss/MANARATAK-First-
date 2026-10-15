@@ -1,3 +1,4 @@
+import type { HomeCatalogStatus, HomeCoursePreviews } from './homeCatalogState';
 import { mapInternationalTestToExam } from '@manaratak/ui';
 import {
   ApiClient,
@@ -11,7 +12,7 @@ import {
   type PublicUniversityDto,
   type PublicStudyDestinationDto,
 } from '../../api/client';
-import { mapPublicScholarshipDto, type PublicScholarshipDataStatus } from './publicScholarshipDataSource';
+import { mapPublicScholarshipDto } from './publicScholarshipDataSource';
 import type {
   CareerExperienceLevel,
   CareerOpportunityKind,
@@ -46,7 +47,7 @@ export type PublicLiveDomain =
   | 'careers'
   | 'tools';
 
-export type PublicLiveDomainStatus = Exclude<PublicScholarshipDataStatus, 'prototype'> | 'empty';
+export type PublicLiveDomainStatus = HomeCatalogStatus;
 
 export interface PublicLiveDataSnapshot {
   scholarships: ReturnType<typeof mapPublicScholarshipDto>[];
@@ -57,6 +58,7 @@ export interface PublicLiveDataSnapshot {
   courses: Course[];
   paidCourses: Course[];
   importedCourses: ImportedCourse[];
+  homeCoursePreviews?: HomeCoursePreviews;
   articles: PublicArticle[];
   services: Service[];
   careers: CareerOpportunityPreview[];
@@ -136,7 +138,7 @@ export function mapPublicUniversityDto(dto: PublicUniversityDto): University {
     countryReferenceId: dto.countryReferenceId,
     regionReferenceId: dto.regionReferenceId,
     cityReferenceId: dto.cityReferenceId,
-    name: dto.localizedNames?.ar || dto.displayName,
+    name: dto.displayName,
     nameEn: dto.localizedNames?.en || dto.canonicalName,
     type: dto.institutionType,
     ownership: dto.institutionalOwnership ?? undefined,
@@ -147,7 +149,7 @@ export function mapPublicUniversityDto(dto: PublicUniversityDto): University {
     globalRank: rankFromUniversity(dto),
     scholarshipCount: null,
     acceptanceRate: null,
-    imageUrl: '',
+    imageUrl: dto.image?.url ?? '',
     description: dto.description ?? '',
     topMajors: majorLinks.map((item) => item.label).slice(0, 8),
     websiteUrl: dto.officialWebsite ?? dto.officialSourceUrl ?? dto.sourceUrl ?? '',
@@ -250,7 +252,7 @@ export function mapCourse(dto: PublicCourseDto): {
         : ['FREE_STUDY', 'FREE_STUDY_AND_CERTIFICATE'].includes(dto.accessType),
     rating: null,
     studentsCount: null,
-    imageUrl: '',
+    imageUrl: dto.image?.url ?? '',
     category: dto.category ?? 'تعلم',
     directCourseUrl: dto.directCourseUrl,
     courseContent: dto.courseContent,
@@ -607,18 +609,37 @@ export async function loadPublishedExams(locale: PublicLiveLocale = 'ar'): Promi
   const result = await ApiClient.getInternationalTests({ locale, page: 1, pageSize: 20 });
   return result.data.map(mapExam);
 }
+/** Each home track has its own bounded published-owner query, independent of other tracks. */
 export async function loadPublishedCourses(locale: PublicLiveLocale = 'ar'): Promise<{
   courses: Course[];
   paidCourses: Course[];
   importedCourses: ImportedCourse[];
+  homeCoursePreviews: HomeCoursePreviews;
 }> {
-  const rows = await previewCursorPage((cursor) => ApiClient.getCourses({ cursor, limit: 20 }, locale));
-  const mapped = rows.map(mapCourse);
+  const origins = ['EXTERNAL_LINKED_COURSE', 'NATIVE_MANARATAK_COURSE', 'PAID_COURSE'] as const;
+  const results = await Promise.allSettled(origins.map(async originType => {
+    const page = await ApiClient.getCourses({ originType, limit: 3 }, locale);
+    return page.data.filter(dto => dto.originType === originType).map(mapCourse);
+  }));
+  const values = results.map(result => result.status === 'fulfilled' ? result.value : []);
+  const [global, native, paid] = values;
+  const globalFailed = results[0].status === 'rejected';
+  const nativeFailed = results[1].status === 'rejected' || results[2].status === 'rejected';
+  const nativeCards = [...native, ...paid].map(item => item.course);
   return {
-    courses: mapped.filter((item) => item.track === 'native').map((item) => item.course),
-    paidCourses: mapped.filter((item) => item.track === 'paid').map((item) => item.course),
-    importedCourses: mapped.flatMap((item) => (item.imported ? [item.imported] : [])),
+    courses: [...native, ...paid].filter(item => item.track === 'native').map(item => item.course),
+    paidCourses: [...native, ...paid].filter(item => item.track === 'paid').map(item => item.course),
+    importedCourses: global.flatMap(item => item.imported ? [item.imported] : []),
+    homeCoursePreviews: {
+      global: { courses: global.map(item => item.course), status: globalFailed ? 'unavailable' : global.length ? 'ready' : 'empty' },
+      native: { courses: nativeCards, status: nativeFailed ? 'unavailable' : nativeCards.length ? 'ready' : 'empty' },
+    },
   };
+}
+
+function coursePreviewStatus(previews: HomeCoursePreviews): PublicLiveDomainStatus {
+  if (Object.values(previews).some(preview => preview.status === 'unavailable')) return 'unavailable';
+  return Object.values(previews).some(preview => preview.courses.length > 0) ? 'ready' : 'empty';
 }
 export async function loadPublishedArticles(
   locale: PublicLiveLocale = 'ar',
@@ -695,7 +716,7 @@ export async function refreshPublishedServices(locale: PublicLiveLocale): Promis
 export async function refreshPublishedCourses(locale: PublicLiveLocale) {
   const courses = await loadPublishedCourses(locale);
   const cached = snapshotCache.get(`snapshot_${locale}`);
-  const status = courses.courses.length || courses.importedCourses.length || courses.paidCourses.length ? 'ready' as const : 'empty' as const;
+  const status = coursePreviewStatus(courses.homeCoursePreviews);
   if (cached) cached.result = {...cached.result, data:{...cached.result.data,...courses},statuses:{...cached.result.statuses,courses:status}};
   return courses;
 }
@@ -766,7 +787,8 @@ export async function loadPublicLiveSnapshot(locale: PublicLiveLocale = 'ar', fo
         if (domain === 'courses') {
           const value = result as Awaited<ReturnType<typeof loadPublishedCourses>>;
           data.courses = value.courses; data.paidCourses = value.paidCourses; data.importedCourses = value.importedCourses;
-          statuses.courses = (value.courses.length || value.paidCourses.length || value.importedCourses.length) ? 'ready' : 'empty';
+          data.homeCoursePreviews = value.homeCoursePreviews;
+          statuses.courses = coursePreviewStatus(value.homeCoursePreviews);
           return;
         }
         (data as unknown as Record<string, unknown>)[domain] = result;

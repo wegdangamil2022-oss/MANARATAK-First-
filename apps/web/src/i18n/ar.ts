@@ -1,4 +1,13 @@
 export const ar = {
+  public_home_catalog_partial: 'تعذر تحميل بعض الدورات. نعرض المحتوى الذي تم تحميله فقط.',
+  public_home_catalog_loading: "جارٍ تحميل المحتوى المنشور…",
+  public_home_catalog_unavailable: "تعذر تحميل البيانات",
+  public_home_universities_empty: "لم تُنشر جامعات بعد",
+  public_home_courses_empty: "لم تُنشر دورات في هذا القسم بعد",
+  public_home_catalog_published_only: "ستظهر هنا البطاقات عند توفر محتوى منشور.",
+  public_home_catalog_retry_hint: "يمكنك إعادة المحاولة لتحميل المحتوى المنشور.",
+  public_home_catalog_retry: "إعادة المحاولة",
+
   public_duration_depends_on_program: 'حسب البرنامج',
   public_year_singular: 'سنة',
   public_year_plural: 'سنوات',

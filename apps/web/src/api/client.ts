@@ -552,6 +552,7 @@ export interface PublicScholarshipDto {
 }
 
 export interface PublicUniversityDto {
+  image?: { url: string; expiresAt: string } | null;
   localization?: {requestedLocale?:string;resolvedLocale?:string|null;availability?:string;fullyLocalized?:boolean;indexable?:boolean};
   institutionalOwnership?: string | null;
   organizationUnits?: Record<string, unknown>[];
@@ -657,6 +658,7 @@ export interface PublicMajorDto {
 }
 
 export interface PublicCourseDto {
+  image?: { url: string; expiresAt: string } | null;
   /** Required canonical P13 owner identity. Keep synchronized with the owner DTO. */
   ownerId: string;
   publicId: string;

@@ -1598,6 +1598,8 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedUniversities
                         universities={universities}
+                        status={publicLive.statuses.universities}
+                        onRetry={publicLive.reload}
                         onSelectUniversity={setSelectedUniversity}
                         onViewAllClick={() => openSection('universities')}
                       />
@@ -1653,6 +1655,9 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedCourses
                         courses={courses}
+                        status={publicLive.statuses.courses}
+                        previews={publicLive.data.homeCoursePreviews}
+                        onRetry={publicLive.reload}
                         dataMode={publicDataMode}
                         onSelectCourse={(course) => {
                           const isImported = course.originType === 'EXTERNAL_LINKED_COURSE' || publicDataMode === 'prototype' && (course.provider?.includes('Stanford') || course.provider?.includes('Harvard') || course.provider?.includes('Google') || course.provider?.includes('عالمية'));

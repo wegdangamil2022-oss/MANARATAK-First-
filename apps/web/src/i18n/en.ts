@@ -1,4 +1,13 @@
 export const en = {
+  public_home_catalog_partial: 'Some courses could not be loaded. Only successfully loaded content is shown.',
+  public_home_catalog_loading: "Loading published content…",
+  public_home_catalog_unavailable: "Unable to load content",
+  public_home_universities_empty: "No universities have been published yet",
+  public_home_courses_empty: "No courses have been published in this section yet",
+  public_home_catalog_published_only: "Cards will appear here when published content is available.",
+  public_home_catalog_retry_hint: "Try again to load published content.",
+  public_home_catalog_retry: "Try again",
+
   public_duration_depends_on_program: 'Depends on the program',
   public_year_singular: 'year',
   public_year_plural: 'years',
