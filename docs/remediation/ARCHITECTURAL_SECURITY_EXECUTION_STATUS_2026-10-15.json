@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B03",
+  "next": "B04",
   "remaining": [
-    "B03",
     "B04",
     "B05",
     "B06",
@@ -71,5 +70,28 @@
   "verifiedFindings": "docs/reviews/ARCHITECTURAL_SECURITY_VERIFIED_FINDINGS_2026-10-15.md",
   "workBranch": "fix/b02-auth-session-boundary-20261015",
   "mainPushRequiresExplicitUserInstruction": true,
-  "lastIntegratedMainCommit": "a7a282d1925d708dba4c5ca076c9c5a4434245ac"
+  "lastIntegratedMainCommit": "a7a282d1925d708dba4c5ca076c9c5a4434245ac",
+  "B03": {
+    "status": "SOURCE_VERIFIED",
+    "baselineCommit": "5cf33d33d1cd2988ceb583eed6a0bb86066672f7",
+    "runtimeStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "findings": [
+      "SYNC-01",
+      "SYNC-03",
+      "SYNC-05",
+      "SYNC-09 (operational cards only)"
+    ],
+    "lightTestsPassed": 43,
+    "lightTestsFailed": 0,
+    "report": "docs/reviews/B03_PUBLIC_LEARNING_CONTAINMENT_2026-10-15.md",
+    "contractChanges": [
+      "Internal course CTA uses canonical ownerId/localized learner route; prototype room is prototype-only",
+      "Unverified major totals and operational tool cards hidden in api; empty featured collections do not invent cards"
+    ],
+    "deferredToB08": [
+      "Owner-backed featured scholarship selection (current live mapper exposes featured=false)",
+      "Authoritative global major counts and operational discovery contracts"
+    ]
+  }
 }

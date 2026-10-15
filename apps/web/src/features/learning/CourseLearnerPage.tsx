@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Award, BookOpen, CheckCircle2, Loader2, LockKeyhole, PlayCircle } from 'lucide-react';
 import {
@@ -22,6 +22,8 @@ export function CourseLearnerPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [authRequired, setAuthRequired] = useState(false);
+  const [enrollmentRequired, setEnrollmentRequired] = useState(false);
+  const workspaceRequest = useRef(0);
   const [error, setError] = useState<string | null>(null);
   const [activeAttempt, setActiveAttempt] = useState<StudentCourseQuizAttemptDto | null>(null);
   const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
@@ -48,30 +50,42 @@ export function CourseLearnerPage() {
   const loginPath = `/${locale}/login`;
   const returnPath = `${location.pathname}${location.search}`;
 
-  async function load() {
+  const load = useCallback(async () => {
+    const request = ++workspaceRequest.current;
     setLoading(true);
+    setWorkspace(null);
+    setAuthRequired(false);
+    setEnrollmentRequired(false);
     setError(null);
     try {
-      setWorkspace(await ApiClient.getStudentCourseWorkspace(courseId));
-      setAuthRequired(false);
+      const result = await ApiClient.getStudentCourseWorkspace(courseId);
+      if (request !== workspaceRequest.current) return;
+      setWorkspace(result);
     } catch (cause) {
+      if (request !== workspaceRequest.current) return;
       const message = cause instanceof Error ? cause.message : 'LEARNER_WORKSPACE_UNAVAILABLE';
-      if (message.includes('STUDENT_AUTHENTICATION_REQUIRED')) {
+      if (message === 'STUDENT_AUTHENTICATION_REQUIRED') {
         preservePostLoginReturn(returnPath);
         setAuthRequired(true);
-      } else if (message.includes('ENROLLMENT') || message.includes('NOT_ENROLLED')) {
-        setWorkspace(null);
+      } else if (message === 'COURSE_ENROLLMENT_REQUIRED') {
+        setEnrollmentRequired(true);
       } else {
         setError(message);
       }
     } finally {
-      setLoading(false);
+      if (request === workspaceRequest.current) setLoading(false);
     }
-  }
+  }, [courseId, returnPath]);
 
   useEffect(() => {
+    setBusy(false);
+    setActiveAttempt(null);
+    setActiveQuizId(null);
+    setAnswers({});
     void load();
-  }, [courseId]);
+    const requestCounter = workspaceRequest;
+    return () => { ++requestCounter.current; };
+  }, [load]);
 
   const questionsByQuiz = useMemo(() => {
     const grouped = new Map<string, CourseLearnerQuestionDto[]>();
@@ -83,19 +97,23 @@ export function CourseLearnerPage() {
   }, [workspace]);
 
   async function enroll() {
+    const request = workspaceRequest.current;
     setBusy(true);
     setError(null);
     try {
       await ApiClient.enrollStudentCourse(courseId);
+      if (request !== workspaceRequest.current) return;
+      setBusy(false);
       await load();
     } catch (cause) {
+      if (request !== workspaceRequest.current) return;
       const message = cause instanceof Error ? cause.message : 'COURSE_ENROLLMENT_FAILED';
       if (message.includes('STUDENT_AUTHENTICATION_REQUIRED')) {
         preservePostLoginReturn(returnPath);
         setAuthRequired(true);
       } else setError(message);
     } finally {
-      setBusy(false);
+      if (request === workspaceRequest.current) setBusy(false);
     }
   }
 
@@ -225,7 +243,7 @@ export function CourseLearnerPage() {
     return (
       <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
         <BookOpen className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
-        <h1 className="mt-4 text-xl font-bold">ابدأ هذه الدورة على منارتك</h1>
+        <h1 className="mt-4 text-xl font-bold">{enrollmentRequired ? 'ابدأ هذه الدورة على منارتك' : 'تعذر فتح مساحة التعلم'}</h1>
         <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
           التسجيل والتقدم والاختبارات تُدار من نظام التعلم الداخلي.
         </p>
@@ -236,10 +254,10 @@ export function CourseLearnerPage() {
         )}
         <button
           disabled={busy}
-          onClick={() => void enroll()}
+          onClick={() => enrollmentRequired ? void enroll() : void load()}
           className="mt-6 rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white disabled:opacity-60"
         >
-          {busy ? 'جارٍ التسجيل...' : 'التسجيل في الدورة'}
+          {busy ? 'جارٍ التسجيل...' : enrollmentRequired ? 'التسجيل في الدورة' : 'إعادة المحاولة'}
         </button>
       </main>
     );

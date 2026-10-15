@@ -5,6 +5,7 @@ import { Sparkles, ChevronLeft, GraduationCap } from 'lucide-react';
 
 interface FeaturedMajorsProps {
   majors: Major[];
+  dataMode?: 'api' | 'prototype';
   onSelectMajor: (major: Major) => void;
   onViewAllClick: () => void;
 }
@@ -16,7 +17,7 @@ interface DegreeCategory {
   imageUrl: string;
 }
 
-export const FeaturedMajors: React.FC<FeaturedMajorsProps> = ({ onViewAllClick }) => {
+export const FeaturedMajors: React.FC<FeaturedMajorsProps> = ({ onViewAllClick, dataMode = 'api' }) => {
   const { t: publicT } = usePublicTemplateTranslation();
 
   const DEGREE_CATEGORIES: DegreeCategory[] = [
@@ -109,8 +110,8 @@ export const FeaturedMajors: React.FC<FeaturedMajorsProps> = ({ onViewAllClick }
                     <h4 className="font-bold text-[10.5px] sm:text-xs leading-tight text-white line-clamp-1 drop-shadow-xs mb-0.2 font-['Cairo',sans-serif]">
                       {category.title}
                     </h4>
-                    <p className="text-[8.5px] sm:text-[9.5px] font-bold text-[var(--mn-accent-text)] line-clamp-1 font-['Cairo',sans-serif]">
-                      {category.count}{' '}{publicT('public_major')}</p>
+                    {dataMode === 'prototype' && <p className="text-[8.5px] sm:text-[9.5px] font-bold text-[var(--mn-accent-text)] line-clamp-1 font-['Cairo',sans-serif]">
+                      {category.count}{' '}{publicT('public_major')}</p>}
                   </div>
                 </div>
               </div>

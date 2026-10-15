@@ -20,38 +20,13 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
 }) => {
   const { t: publicT } = usePublicTemplateTranslation();
 
-  // Featured scholarship cards
-  const mockCards = [
-    {
-      id: 'csc-china',
-      title: publicT('public_chinese_government_scholarship_csc'),
-      country: 'الصين 🇨🇳',
-      imageUrl:
-        'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      id: 'chevening-uk',
-      title: publicT('public_uk_chevening_scholarship'),
-      country: 'بريطانيا 🇬🇧',
-      imageUrl:
-        'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80',
-    },
-  ];
+  // Only published owner projections supplied by the live/prototype data source.
+  const cards = (scholarships ?? []).filter((scholarship) => scholarship.featured).slice(0, 2);
+  if (!cards.length) return null;
 
-  const handleCardClick = (cardId: string) => {
-    if (onSelectScholarship && scholarships && scholarships.length > 0) {
-      const match = scholarships.find(
-        (s) =>
-          s.id === cardId ||
-          (cardId.includes('csc') && s.id.includes('csc')) ||
-          (cardId.includes('chevening') && s.id.includes('chevening')),
-      );
-      if (match) {
-        onSelectScholarship(match);
-        return;
-      }
-    }
-    onViewAllClick();
+  const handleCardClick = (scholarship: Scholarship) => {
+    if (onSelectScholarship) onSelectScholarship(scholarship);
+    else onViewAllClick();
   };
 
   return (
@@ -79,7 +54,7 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
 
           {/* 2 Featured Cards: Edge-to-edge layout with Square Proportions */}
           <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full">
-            {mockCards.map((scholarship) => {
+            {cards.map((scholarship) => {
               const isFav = favoriteIds.includes(scholarship.id);
               return (
                 <div
@@ -89,10 +64,10 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
                   onKeyDown={function (event) {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
-                      handleCardClick(scholarship.id);
+                      handleCardClick(scholarship);
                     }
                   }}
-                  onClick={() => handleCardClick(scholarship.id)}
+                  onClick={() => handleCardClick(scholarship)}
                   className="group relative flex flex-col rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-[var(--mn-border)] bg-[var(--mn-primary)] cursor-pointer transition-all active:scale-97 hover:border-[var(--mn-accent)] mn-inverse "
                 >
                   {/* Image Container with Square (1:1) Proportions */}
@@ -104,10 +79,6 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
                       decoding="async"
                       className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 filter brightness-95"
                       referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src =
-                          'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=800&q=80';
-                      }}
                     />
 
                     {/* Favorite Heart Button */}

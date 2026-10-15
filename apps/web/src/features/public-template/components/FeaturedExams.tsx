@@ -5,6 +5,7 @@ import { FileSignature, ChevronLeft } from 'lucide-react';
 
 interface FeaturedExamsProps {
   exams?: Exam[];
+  dataMode?: 'api' | 'prototype';
   onSelectExam?: (exam: Exam) => void;
   onViewAllClick: () => void;
 }
@@ -173,26 +174,21 @@ const ExamVectorLogo: React.FC<{ name: string; className?: string }> = ({ name, 
 
 export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
   exams,
+  dataMode = 'api',
   onSelectExam,
   onViewAllClick,
 }) => {
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
 
-  const handleExamClick = (examItem: { name: string; code: string }) => {
-    if (exams && exams.length > 0 && onSelectExam) {
-      const matched = exams.find(
-        (e) =>
-          e.id?.toLowerCase() === examItem.code.toLowerCase() ||
-          e.nameEn?.toLowerCase().includes(examItem.name.toLowerCase()) ||
-          e.testCode?.toLowerCase() === examItem.name.toLowerCase() ||
-          e.name?.toLowerCase().includes(examItem.name.toLowerCase())
-      );
-      if (matched) {
-        onSelectExam(matched);
-        return;
-      }
-    }
-    onViewAllClick();
+  const cards = dataMode === 'prototype' ? EXAMS_LIST.map((item) => ({ ...item, owner: undefined as Exam | undefined }))
+    : (exams ?? []).filter((exam) => exam.ownerId).slice(0, 10).map((exam) => ({
+      name: exam.name, code: exam.id, owner: exam,
+    }));
+  if (!cards.length) return null;
+
+  const handleExamClick = (examItem: (typeof cards)[number]) => {
+    if (examItem.owner && onSelectExam) onSelectExam(examItem.owner);
+    else onViewAllClick();
   };
 
   return (
@@ -229,7 +225,7 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
             <div className="animate-scroll-rtl gap-2.5 sm:gap-3 cursor-default">
               {/* First Set of Badges */}
               <div className="flex gap-4 sm:gap-5 items-start">
-                {EXAMS_LIST.map((exam, idx) => (
+                {cards.map((exam, idx) => (
                   <div
                     key={`set1-${idx}`}
                     role="button"
@@ -257,7 +253,7 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
 
               {/* Second Identical Set for Seamless Loop */}
               <div className="flex gap-4 sm:gap-5 items-start">
-                {EXAMS_LIST.map((exam, idx) => (
+                {cards.map((exam, idx) => (
                   <div
                     key={`set2-${idx}`}
                     role="button"

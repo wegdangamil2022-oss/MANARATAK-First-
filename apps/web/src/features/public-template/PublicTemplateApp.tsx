@@ -15,10 +15,9 @@ import {
 import { PublicInfoPage } from './components/PublicInfoPage';
 import { AcademicReportsPage } from './components/AcademicReportsPage';
 import { CourseTrackPreview } from './components/CourseTrackPreview';
-import { OwnerCourseDetail } from './components/OwnerCourseDetail';
+import { PublicCourseEntry } from './components/PublicCourseEntry';
 
 // Statically imported heavy route views & modals for instant tab switching and transitions
-import { CourseStudyRoomView } from './components/CourseStudyRoomView';
 import { GlobalSearchPage } from './components/GlobalSearchPage';
 import { ComparePage } from './components/ComparePage';
 import { FavoritesPage } from './components/FavoritesPage';
@@ -467,17 +466,17 @@ export default function App() {
   const [detailSearchAnchor, setDetailSearchAnchor] = navigation.field('detailSearchAnchor');
   const [detailSearchTerm, setDetailSearchTerm] = navigation.field('detailSearchTerm');
   const [isStudyingCourse, setIsStudyingCourse] = useState<boolean>(() => {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (publicDataMode === 'prototype' && typeof window !== 'undefined' && window.localStorage) {
       return window.localStorage.getItem('mn_is_studying_course') === 'true';
     }
     return false;
   });
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (publicDataMode === 'prototype' && typeof window !== 'undefined' && window.localStorage) {
       window.localStorage.setItem('mn_is_studying_course', isStudyingCourse ? 'true' : 'false');
     }
-  }, [isStudyingCourse]);
+  }, [isStudyingCourse, publicDataMode]);
   const [activeToast, setActiveToast] = useState<PushNotificationItem | null>(null);
 
   const activeCountryIdentity = navigation.state.nestedDetailId || countryNavigationName || '';
@@ -1400,28 +1399,23 @@ export default function App() {
             }}
           />
         ) : selectedCourse ? (
-          isStudyingCourse ? (
-            <CourseStudyRoomView
-              course={selectedCourse}
-              onBack={() => {
-                setIsStudyingCourse(false);
-                if (typeof window !== 'undefined' && window.localStorage) {
-                  window.localStorage.removeItem('mn_is_studying_course');
-                }
-              }}
-              onRestrictedAction={(msg) => triggerAccessDenied(msg || t('public_template_access_denied'))}
-            />
-          ) : (
-            <OwnerCourseDetail
-              course={selectedCourse}
-              track={selectedCourse.accessType === 'PAID' ? 'paid' : 'native'}
-              onBack={goBack}
-              onStartStudy={() => {
-                setIsStudyingCourse(true);
-                window.scrollTo({ top: 0, behavior: 'instant' });
-              }}
-            />
-          )
+          <PublicCourseEntry
+            course={selectedCourse}
+            dataMode={publicDataMode}
+            isStudying={isStudyingCourse}
+            onBack={goBack}
+            onStartStudy={() => {
+              setIsStudyingCourse(true);
+              window.scrollTo({ top: 0, behavior: 'instant' });
+            }}
+            onStopStudy={() => {
+              setIsStudyingCourse(false);
+              if (typeof window !== 'undefined' && window.localStorage) {
+                window.localStorage.removeItem('mn_is_studying_course');
+              }
+            }}
+            onRestrictedAction={(msg) => triggerAccessDenied(msg || t('public_template_access_denied'))}
+          />
         ) : selectedImportedCourse ? (
           <ImportedCourseDetail
             course={selectedImportedCourse}
@@ -1572,6 +1566,7 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedMajors
                         majors={majors}
+                        dataMode={publicDataMode}
                         onSelectMajor={setSelectedMajor}
                         onViewAllClick={() => openSection('majors')}
                       />
@@ -1602,7 +1597,7 @@ export default function App() {
 
                     {/* 5. AI Tools Section */}
                     <div className="relative w-full">
-                      <AIToolsBanner onOpenAiTools={() => openSection('ai-tools')} />
+                      <AIToolsBanner dataMode={publicDataMode} onOpenAiTools={() => openSection('ai-tools')} />
                     </div>
 
                     {/* 6. Roadmap Preview */}
@@ -1623,6 +1618,7 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedExams
                         exams={exams}
+                        dataMode={publicDataMode}
                         onSelectExam={(exam) => {
                           setSelectedExam(exam);
                           window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1635,10 +1631,11 @@ export default function App() {
                     <div className="relative w-full">
                       <FeaturedCourses
                         courses={courses}
+                        dataMode={publicDataMode}
                         onSelectCourse={(course) => {
-                          const isImported = course.provider?.includes('Stanford') || course.provider?.includes('Harvard') || course.provider?.includes('Google') || course.provider?.includes('عالمية');
+                          const isImported = course.originType === 'EXTERNAL_LINKED_COURSE' || publicDataMode === 'prototype' && (course.provider?.includes('Stanford') || course.provider?.includes('Harvard') || course.provider?.includes('Google') || course.provider?.includes('عالمية'));
                           if (isImported) {
-                            const matching = importedCourses.find((ic) => ic.id === course.id || ic.slug === course.id) ||
+                            const matching = importedCourses.find((ic) => ic.id === course.id || ic.slug === course.id) || (publicDataMode === 'prototype' ?
                                 ({
                               id: course.id,
                               slug: course.id,
@@ -1655,8 +1652,9 @@ export default function App() {
                               url: 'https://www.coursera.org',
                               platform: 'Coursera / edX',
                               description: course.courseContent || course.title,
-                            } as any);
-                              setSelectedCourse(null);
+                            } as any) : null);
+                            if (!matching) { openSection('courses'); return; }
+                            setSelectedCourse(null);
                             setSelectedImportedCourse(matching);
                             navigate({
                               activeTab: 'search',
@@ -2043,6 +2041,7 @@ export default function App() {
                     <div className="pt-2">
                       <FeaturedExams
                         exams={exams}
+                        dataMode={publicDataMode}
                         onViewAllClick={() => setSelectedCategory('exams')}
                       />
                     </div>
@@ -2052,7 +2051,7 @@ export default function App() {
                     </div>
                   ) : selectedCategory === 'tools' ? (
                     <div className="pt-2">
-                      <AIToolsBanner onOpenAiTools={openStudentTools} />
+                      <AIToolsBanner dataMode={publicDataMode} onOpenAiTools={openStudentTools} />
                     </div>
                   ) : (
                     /* Scholarships Cards List */

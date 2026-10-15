@@ -83,6 +83,29 @@ describe('CourseProgressUseCases W9 integrity', () => {
     expect(progressRepo.enrollWithCapacity).toHaveBeenCalledWith({ courseId: 'course-1', studentReferenceId: 'student-1', metadata: {courseVersion: 3} }, null, false);
   });
 
+  it('requires server financial clearance for a paid course before any enrollment mutation', async () => {
+    vi.mocked(courseRepo.findById).mockResolvedValue({...nativeCourse, originType: CourseOriginType.PAID_COURSE, accessType: CourseAccessType.PAID});
+    vi.mocked(progressRepo.findEnrollment).mockResolvedValue(null);
+    const finance = {hasCourseFinancialClearance: vi.fn().mockResolvedValue(false)};
+    const paid = new CourseProgressUseCases(courseRepo, curriculumRepo, progressRepo, undefined, finance, atomic);
+    await expect(paid.enroll('course-1', 'student-1')).rejects.toThrow('COURSE_FINANCIAL_CLEARANCE_REQUIRED');
+    expect(finance.hasCourseFinancialClearance).toHaveBeenCalledWith('course-1','student-1');
+    expect(progressRepo.enrollWithCapacity).not.toHaveBeenCalled();
+    expect(atomic.execute).not.toHaveBeenCalled();
+    finance.hasCourseFinancialClearance.mockResolvedValue(true);
+    await paid.enroll('course-1','student-1');
+    expect(progressRepo.enrollWithCapacity).toHaveBeenCalledTimes(1);
+  });
+
+  it('fails closed without a configured financial gateway and does not disclose an unenrolled workspace', async () => {
+    vi.mocked(courseRepo.findById).mockResolvedValue({...nativeCourse, originType: CourseOriginType.PAID_COURSE, accessType: CourseAccessType.PAID});
+    vi.mocked(progressRepo.findEnrollment).mockResolvedValue(null);
+    await expect(useCases.enroll('course-1','student-1')).rejects.toThrow('COURSE_FINANCIAL_CLEARANCE_NOT_CONFIGURED');
+    await expect(useCases.getLearningWorkspace('course-1','student-1')).rejects.toThrow('COURSE_ENROLLMENT_REQUIRED');
+    expect(progressRepo.enrollWithCapacity).not.toHaveBeenCalled();
+    expect(curriculumRepo.getLearningVersion).not.toHaveBeenCalled();
+  });
+
   it('rejects foreign lesson progress', async () => {
     await expect(useCases.markLessonProgress({ courseId: 'course-1', lessonId: 'foreign', studentReferenceId: 'student-1', status: CourseProgressStatus.IN_PROGRESS, progressPercentage: 100 }))
       .rejects.toThrow('COURSE_LESSON_SCOPE_MISMATCH');

@@ -19,24 +19,26 @@ import {
   Users,
 } from 'lucide-react';
 import type { Course } from '../types';
+import { courseLearnerPath } from '../courseLearningNavigation';
 import { DetailBackButton, DetailSectionHeader } from './DetailUi';
 
 export function OwnerCourseDetail({
   course,
-  track,
   onBack,
   onStartStudy,
+  dataMode = 'api',
 }: {
   course: Course;
+  dataMode?: 'api' | 'prototype';
   track: 'native' | 'paid';
   onBack: () => void;
   onStartStudy?: () => void;
 }) {
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
 
-  const isNative = track === 'native';
   const { locale = 'ar' } = useParams<{ locale?: string }>();
 
+  const learnerPath = courseLearnerPath(course, locale);
   const handleStartStudy = () => {
     if (onStartStudy) {
       onStartStudy();
@@ -313,7 +315,7 @@ export function OwnerCourseDetail({
         {course.acquiredSkills && course.acquiredSkills.length > 0 && <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4" dir={publicDir}><DetailSectionHeader id="course-skills-header" icon={BookOpen} title={publicT('public_skills_gained')} level={3} titleClassName="mn-imported-detail-title"/><ul className="mt-3 space-y-2 text-xs">{course.acquiredSkills.map((skill,index)=><li key={index}>{skill}</li>)}</ul></section>}
         {/* 7. ACTION CTA BUTTON */}
         <div className="pt-2">
-          {onStartStudy ? (
+          {dataMode === 'prototype' && onStartStudy ? (
             <button
               type="button"
               onClick={handleStartStudy}
@@ -322,15 +324,15 @@ export function OwnerCourseDetail({
               <PlayCircle className="w-4 h-4 text-[#E5B54F]" />
               <span>{publicT('public_study_the_course_now')}</span>
             </button>
-          ) : isNative && course.ownerId ? (
+          ) : learnerPath ? (
             <Link
-              to={`/${locale}/student/courses/${encodeURIComponent(course.ownerId)}`}
+              to={learnerPath}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white text-xs font-bold mn-inverse shadow-sm transition-transform active:scale-[0.98]"
             >
               <PlayCircle className="w-4 h-4 text-[#E5B54F]" />
               <span>{publicT('public_study_the_course_now')}</span>
             </Link>
-          ) : !isNative && course.directCourseUrl ? (
+          ) : course.originType === 'EXTERNAL_LINKED_COURSE' && course.directCourseUrl ? (
             <a
               href={course.directCourseUrl}
               target="_blank"

@@ -5,6 +5,7 @@ import { PlayCircle, ChevronLeft, BookOpen, Award, Globe2 } from 'lucide-react';
 
 interface FeaturedCoursesProps {
   courses: Course[];
+  dataMode?: 'api' | 'prototype';
   onSelectCourse?: (course: Course) => void;
   onViewAllClick: () => void;
   onRestrictedCourse?: () => void;
@@ -12,6 +13,7 @@ interface FeaturedCoursesProps {
 
 export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
   courses,
+  dataMode = 'api',
   onSelectCourse,
   onViewAllClick,
   onRestrictedCourse,
@@ -20,8 +22,8 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
 
   const [activeCourseTab, setActiveCourseTab] = useState<'global' | 'native'>('global');
 
-  const globalCourses = courses.filter((course) => !course.provider.includes('منارتك'));
-  const nativeCourses = courses.filter((course) => course.provider.includes('منارتك'));
+  const globalCourses = courses.filter((course) => dataMode === 'prototype' ? !course.provider.includes('منارتك') : course.originType === 'EXTERNAL_LINKED_COURSE');
+  const nativeCourses = courses.filter((course) => dataMode === 'prototype' ? course.provider.includes('منارتك') : ['NATIVE_MANARATAK_COURSE', 'PAID_COURSE'].includes(course.originType ?? ''));
   const currentCourses = activeCourseTab === 'global' ? globalCourses : nativeCourses;
 
   const handleCourseClick = (course: Course) => {

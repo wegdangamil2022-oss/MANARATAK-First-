@@ -3,6 +3,7 @@ import React from 'react';
 import { ArrowUpLeft, Award, Calculator, ChevronLeft, Database, FileText, Sparkles, Target } from 'lucide-react';
 
 interface AIToolsBannerProps {
+  dataMode?: 'api' | 'prototype';
   onOpenAiTools: (toolKey?: string) => void;
 }
 
@@ -57,7 +58,7 @@ const TOOL_PAIRS = [
   ],
 ];
 
-export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools }) => {
+export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dataMode = 'api' }) => {
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
 
   return (
@@ -81,7 +82,7 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools }) =
           </div>
 
           {/* Horizontal Scrollable Container with 2-by-2 Stacked Tools */}
-          <div className="relative w-full">
+          {dataMode === 'prototype' && <div className="relative w-full">
             <div className="flex overflow-x-auto gap-2 sm:gap-2.5 pb-2 pt-1 no-scrollbar snap-x snap-mandatory scroll-smooth" dir={publicDir}>
               {TOOL_PAIRS.map((pair, colIdx) => (
                 <div key={colIdx} className="flex-none w-[230px] sm:w-[260px] space-y-2 snap-start">
@@ -120,7 +121,7 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools }) =
                 </div>
               ))}
             </div>
-          </div>
+          </div>}
 
           <div className="mt-3 flex justify-center">
             <button
