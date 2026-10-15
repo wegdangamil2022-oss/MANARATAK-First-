@@ -1,0 +1,81 @@
+{
+  "mode": "BUILT_UI_WITH_INTERCEPTED_API_NO_DATABASE",
+  "results": [
+    {
+      "locale": "ar",
+      "width": 390,
+      "loading": true,
+      "empty": true,
+      "unavailable": true,
+      "retryToPublished": true,
+      "independentTabs": true,
+      "noHorizontalOverflow": true,
+      "javascriptErrors": []
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "loading": true,
+      "empty": true,
+      "unavailable": true,
+      "retryToPublished": true,
+      "independentTabs": true,
+      "noHorizontalOverflow": true,
+      "javascriptErrors": []
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "loading": true,
+      "empty": true,
+      "unavailable": true,
+      "retryToPublished": true,
+      "independentTabs": true,
+      "noHorizontalOverflow": true,
+      "javascriptErrors": []
+    },
+    {
+      "englishPublicReleasePolicy": "REDIRECT_TO_AR_PRESERVED"
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "mode": "ISOLATED_BILINGUAL_COMPONENT_SSR_WITH_PRODUCTION_CSS",
+      "outcome": "PASS"
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "mode": "ISOLATED_BILINGUAL_COMPONENT_SSR_WITH_PRODUCTION_CSS",
+      "outcome": "PASS"
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "mode": "ISOLATED_BILINGUAL_COMPONENT_SSR_WITH_PRODUCTION_CSS",
+      "outcome": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "mode": "ISOLATED_BILINGUAL_COMPONENT_SSR_WITH_PRODUCTION_CSS",
+      "outcome": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "mode": "ISOLATED_BILINGUAL_COMPONENT_SSR_WITH_PRODUCTION_CSS",
+      "outcome": "PASS"
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "mode": "ISOLATED_BILINGUAL_COMPONENT_SSR_WITH_PRODUCTION_CSS",
+      "outcome": "PASS"
+    },
+    {
+      "ownerDetailNavigation": "PASS",
+      "browseNavigation": "PASS"
+    }
+  ]
+}

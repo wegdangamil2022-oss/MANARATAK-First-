@@ -582,7 +582,9 @@
     {
       "name": "assetReferencePolicy",
       "classification": "RUNTIME_REACHABLE",
-      "directRuntimeConsumers": [],
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/media/PublishedCatalogImage.ts"
+      ],
       "reachableThroughRegistrations": [
         "adminCmsUseCases",
         "adminCourseUseCases",
@@ -3763,7 +3765,8 @@
         "apps/api/src/presentation/api/router/CareerAdminRouter.ts",
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
         "apps/api/src/presentation/api/router/CourseLearnerRouter.ts",
-        "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts"
+        "apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts",
+        "apps/api/src/presentation/media/PublishedCatalogImage.ts"
       ],
       "reachableThroughRegistrations": [
         "assetRetentionGateway",

@@ -10,9 +10,10 @@ describe('B08 bounded locale snapshots', () => {
   it('loads a bounded preview for each owner, including locale, without following any continuation', async () => {
     const { loadPublicLiveSnapshot } = await import('../../src/features/public-template/publicLiveDataSource');
     const result = await loadPublicLiveSnapshot('en');
-    for (const name of ['getScholarships','getCourses','getUniversities','getMajors','getServices','getCareerJobs']) expect(api[name]).toHaveBeenCalledOnce();
+    for (const name of ['getScholarships','getUniversities','getMajors','getServices','getCareerJobs']) expect(api[name]).toHaveBeenCalledOnce();
     expect(api.getScholarships).toHaveBeenCalledWith({ cursor: undefined, limit: 20 }, 'en');
-    expect(api.getCourses).toHaveBeenCalledWith({ cursor: undefined, limit: 20 }, 'en');
+    expect(api.getCourses).toHaveBeenCalledTimes(3);
+    for (const originType of ['EXTERNAL_LINKED_COURSE', 'NATIVE_MANARATAK_COURSE', 'PAID_COURSE']) expect(api.getCourses).toHaveBeenCalledWith({ originType, limit: 3 }, 'en');
     expect(api.getServices).toHaveBeenCalledWith({ limit: 20, locale: 'en' });
     expect(api.getCareerJobs).toHaveBeenCalledWith({ limit: 20, locale: 'en' });
     expect(api.getStudyDestinations).toHaveBeenCalledTimes(2);

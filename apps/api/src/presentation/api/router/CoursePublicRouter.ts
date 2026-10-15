@@ -1,3 +1,4 @@
+import { publishedCatalogImage, type PublishedCatalogImageServices } from '../../media/PublishedCatalogImage.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { CourseAccessType, CourseOriginType } from '@manaratak/domain';
@@ -5,7 +6,7 @@ import { CourseRelationshipQueryService, PublicCourseUseCases } from '@manaratak
 import { parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
 
 export class CoursePublicRouter {
-  public static create(cradle: { publicCourseUseCases: PublicCourseUseCases; courseRelationshipQueryService: CourseRelationshipQueryService }): Router {
+  public static create(cradle: PublishedCatalogImageServices & { publicCourseUseCases: PublicCourseUseCases; courseRelationshipQueryService: CourseRelationshipQueryService }): Router {
     const router = Router();
     const { publicCourseUseCases, courseRelationshipQueryService } = cradle;
 
@@ -44,14 +45,17 @@ export class CoursePublicRouter {
             internationalTestId,
           })
         : await publicCourseUseCases.listCourses(baseFilters, locale);
-      res.json(hasRelationshipFilter ? publicCourseUseCases.localizeRelationshipPage(result, locale) : result);
+      const published = hasRelationshipFilter ? publicCourseUseCases.localizeRelationshipPage(result, locale) : result;
+      res.setHeader('Cache-Control', 'no-store');
+      res.json({ ...published, data: await Promise.all(published.data.map(async dto => ({ ...dto, image: await publishedCatalogImage('thumbnailAssetId' in dto && typeof dto.thumbnailAssetId === 'string' ? dto.thumbnailAssetId : null, 'COURSE_THUMBNAIL', cradle) }))) });
     }));
 
     router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
       try {
         const locale = parseRequestLocale(req.query);
         const course = await publicCourseUseCases.getCourse(req.params.slug, locale);
-        res.json(course);
+        res.setHeader('Cache-Control', 'no-store');
+        res.json({ ...course, image: await publishedCatalogImage(course.thumbnailAssetId, 'COURSE_THUMBNAIL', cradle) });
       } catch (err: any) {
         if (err.message === 'Course not found') {
           return res.status(404).json({ error: 'Not found' });

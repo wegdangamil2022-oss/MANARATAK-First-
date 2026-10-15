@@ -3,8 +3,13 @@ import React from 'react';
 import { Globe, ChevronLeft } from 'lucide-react';
 
 import type { CountryDestination } from '../types';
+import { HomeSectionEmptyCards } from './HomeSectionEmptyCards';
+import { homeCatalogStatus } from '../homeCatalogState';
+import type { PublicLiveDomainStatus } from '../publicLiveDataSource';
 interface FeaturedCountriesProps {
   countries: CountryDestination[];
+  status?: PublicLiveDomainStatus;
+  onRetry?: () => void;
   dataMode?: 'api' | 'prototype';
   onSelectCountry: (countryName: string) => void;
   onViewAllClick: () => void;
@@ -14,9 +19,15 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
   onSelectCountry,
   onViewAllClick,
   countries,
+  status,
+  onRetry,
   dataMode = 'api',
 }) => {
   const { t: publicT } = usePublicTemplateTranslation();
+  const featuredCountries = countries.filter(item => dataMode === 'prototype' || item.isFeatured);
+  // Prefer owner-featured countries; otherwise use actual owner-published countries.
+  const visibleCountries = (featuredCountries.length ? featuredCountries : countries).slice(0, 8);
+  const displayStatus = homeCatalogStatus(status, visibleCountries.length);
 
   return (
     <section id="featured-countries-section" className="px-0 py-3 w-full font-['Cairo',sans-serif]">
@@ -45,10 +56,9 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
 
           {/* Fixed 4x2 Grid with Larger Bubbles & High Contrast Typography */}
           <div className="grid grid-cols-4 gap-y-3.5 gap-x-2 sm:gap-x-3.5 w-full">
-            {countries
-              .filter((item) => dataMode === 'prototype' || item.isFeatured)
-              .slice(0, 8)
-              .map((item) => (
+            {visibleCountries.length === 0 ? (
+              <div className="col-span-4"><HomeSectionEmptyCards kind="countries" status={displayStatus === 'ready' ? 'empty' : displayStatus} onRetry={onRetry} /></div>
+            ) : visibleCountries.map((item) => (
                 <div
                   key={item.id}
                   role="button"
@@ -71,6 +81,7 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
                           <img
                             src={item.imageUrl}
                             alt={item.name}
+                            onError={(event) => { const image = event.currentTarget; image.onerror = null; image.src = '/preview-art/countries.svg'; }}
                             className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-500"
                             referrerPolicy="no-referrer"
                             loading="lazy"

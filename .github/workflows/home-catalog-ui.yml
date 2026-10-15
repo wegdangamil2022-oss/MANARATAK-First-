@@ -1,0 +1,37 @@
+name: Public home cards regression
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/home-catalog-ui.yml'
+      - '.home-catalog-vitest.config.ts'
+      - 'apps/web/src/features/public-template/**'
+      - 'apps/web/src/i18n/**'
+      - 'apps/web/tests/remediation/HomeCatalog*.spec.tsx'
+  push:
+    branches:
+      - fix/home-catalog-empty-states-20261015
+    paths:
+      - '.github/workflows/home-catalog-ui.yml'
+      - '.home-catalog-vitest.config.ts'
+      - 'apps/web/src/features/public-template/**'
+      - 'apps/web/src/i18n/**'
+      - 'apps/web/tests/remediation/HomeCatalog*.spec.tsx'
+
+permissions:
+  contents: read
+
+jobs:
+  homepage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Targeted homepage React and API contract regression
+        run: npx --no-install vitest run --config .home-catalog-vitest.config.ts
+      - name: TypeScript web
+        run: npx --no-install tsc -b apps/web

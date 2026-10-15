@@ -13,10 +13,10 @@ describe('CoursePublicRouter', () => {
 
   const createRelationshipQueryService = () => ({ listPublishedRelatedCourses: vi.fn() });
 
-  const createApp = (useCases: ReturnType<typeof createMockUseCases>, relationshipQueryService = createRelationshipQueryService()) => {
+  const createApp = (useCases: ReturnType<typeof createMockUseCases>, relationshipQueryService = createRelationshipQueryService(), imageServices = {}) => {
     const app = express();
     app.use(express.json());
-    app.use('/public/courses', CoursePublicRouter.create({ publicCourseUseCases: useCases as any, courseRelationshipQueryService: relationshipQueryService as any }));
+    app.use('/public/courses', CoursePublicRouter.create({ publicCourseUseCases: useCases as any, courseRelationshipQueryService: relationshipQueryService as any, ...imageServices }));
     return app;
   };
 
@@ -63,8 +63,22 @@ describe('CoursePublicRouter', () => {
     const res = await request(app).get('/public/courses/intro-data-science');
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ slug: 'intro-data-science', displayName: 'Introduction to Data Science' });
+    expect(res.body).toEqual({ slug: 'intro-data-science', displayName: 'Introduction to Data Science', image: null });
     expect(useCases.getCourse).toHaveBeenCalledWith('intro-data-science', 'ar');
+  });
+
+  it('adds a safe published thumbnail and never grants a missing/unpublished course', async () => {
+    const useCases = createMockUseCases();
+    const grant = { url: 'https://media.example.test/course', expiresAt: new Date(Date.now() + 240000).toISOString(), headers: {} };
+    const imageServices = { assetReferencePolicy: { assertUsable: vi.fn().mockResolvedValue({}) }, processAssetLifecycleUseCase: { requestDeliveryGrant: vi.fn().mockResolvedValue(grant) } };
+    useCases.getCourse.mockResolvedValue({ slug: 'published', thumbnailAssetId: 'thumb-fixture' });
+    const app = createApp(useCases, createRelationshipQueryService(), imageServices);
+    const success = await request(app).get('/public/courses/published');
+    expect(success.status).toBe(200); expect(success.headers['cache-control']).toBe('no-store'); expect(success.body.image).toEqual({ url: grant.url, expiresAt: grant.expiresAt });
+    imageServices.processAssetLifecycleUseCase.requestDeliveryGrant.mockClear();
+    useCases.getCourse.mockRejectedValue(new Error('Course not found'));
+    expect((await request(app).get('/public/courses/private')).status).toBe(404);
+    expect(imageServices.processAssetLifecycleUseCase.requestDeliveryGrant).not.toHaveBeenCalled();
   });
 
   it('GET /public/courses/:slug returns 404 when hidden or missing', async () => {

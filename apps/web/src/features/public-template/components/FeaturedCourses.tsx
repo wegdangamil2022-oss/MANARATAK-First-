@@ -1,11 +1,18 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React, { useState } from 'react';
+import { FeaturedCatalogImage } from './FeaturedCatalogImage';
+import { FeaturedCatalogStateCards } from './FeaturedCatalogStateCards';
+import { homeCatalogStatus, type HomeCoursePreviews } from '../homeCatalogState';
+import type { PublicLiveDomainStatus } from '../publicLiveDataSource';
 import { Course } from '../types';
 import { PlayCircle, ChevronLeft, BookOpen, Award, Globe2 } from 'lucide-react';
 
 interface FeaturedCoursesProps {
   courses: Course[];
   dataMode?: 'api' | 'prototype';
+  status?: PublicLiveDomainStatus;
+  previews?: HomeCoursePreviews;
+  onRetry?: () => void;
   onSelectCourse?: (course: Course) => void;
   onViewAllClick: () => void;
   onRestrictedCourse?: () => void;
@@ -14,9 +21,11 @@ interface FeaturedCoursesProps {
 export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
   courses,
   dataMode = 'api',
+  status,
+  previews,
+  onRetry,
   onSelectCourse,
   onViewAllClick,
-  onRestrictedCourse,
 }) => {
   const { t: publicT } = usePublicTemplateTranslation();
 
@@ -24,7 +33,9 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
 
   const globalCourses = courses.filter((course) => dataMode === 'prototype' ? !course.provider.includes('منارتك') : course.originType === 'EXTERNAL_LINKED_COURSE');
   const nativeCourses = courses.filter((course) => dataMode === 'prototype' ? course.provider.includes('منارتك') : ['NATIVE_MANARATAK_COURSE', 'PAID_COURSE'].includes(course.originType ?? ''));
-  const currentCourses = activeCourseTab === 'global' ? globalCourses : nativeCourses;
+  const preview = dataMode === 'api' ? previews?.[activeCourseTab] : undefined;
+  const currentCourses = (preview?.courses ?? (activeCourseTab === 'global' ? globalCourses : nativeCourses)).slice(0, 3);
+  const displayStatus = homeCatalogStatus(preview?.status ?? status, currentCourses.length);
 
   const handleCourseClick = (course: Course) => {
     onSelectCourse?.(course);
@@ -60,6 +71,8 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
           <div className="flex items-center justify-center p-1 mb-3.5 max-w-xs mx-auto rounded-2xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)] shadow-2xs">
             <button
               type="button"
+              aria-pressed={activeCourseTab === 'global'}
+              aria-controls="home-course-cards"
               onClick={() => setActiveCourseTab('global')}
               className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-['Cairo',sans-serif] ${
                 activeCourseTab === 'global'
@@ -72,6 +85,8 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
             </button>
             <button
               type="button"
+              aria-pressed={activeCourseTab === 'native'}
+              aria-controls="home-course-cards"
               onClick={() => setActiveCourseTab('native')}
               className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer font-['Cairo',sans-serif] ${
                 activeCourseTab === 'native'
@@ -85,8 +100,16 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
           </div>
 
           {/* Courses List Wrapper */}
-          <div className="space-y-2 w-full">
-            {currentCourses.map((course) => (
+          <div id="home-course-cards" className="space-y-2 w-full">
+            {displayStatus === 'unavailable' && currentCourses.length > 0 && (
+              <div role="status" className="text-xs text-[var(--mn-text-muted)]">
+                {publicT('public_home_catalog_partial')}
+                {onRetry && <button type="button" onClick={onRetry} className="ms-2 underline">{publicT('public_home_catalog_retry')}</button>}
+              </div>
+            )}
+            {displayStatus === 'loading' || currentCourses.length === 0 ? (
+              <FeaturedCatalogStateCards key={activeCourseTab} kind="courses" status={displayStatus === 'ready' ? 'empty' : displayStatus} onRetry={onRetry} />
+            ) : currentCourses.map((course) => (
               <div
                 key={course.id}
                 role="button"
@@ -103,18 +126,7 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   {/* Course Thumbnail */}
                   <div className="relative w-14 h-12 sm:w-16 sm:h-14 rounded-lg overflow-hidden shrink-0 bg-[#142B5F] border border-[var(--mn-border)]/40 mn-inverse">
-                    <img
-                      src={course.imageUrl}
-                      alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      referrerPolicy="no-referrer"
-                      loading="lazy"
-                      onError={(e) => {
-                        // Reliable high-tech fallback
-                        (e.target as HTMLImageElement).src =
-                          'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80';
-                      }}
-                    />
+                    <FeaturedCatalogImage src={course.imageUrl} alt={course.title} kind="courses" />
                     {/* Play Icon Overlay */}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
                       <PlayCircle className="w-4 h-4 text-white drop-shadow-md" />
@@ -139,15 +151,13 @@ export const FeaturedCourses: React.FC<FeaturedCoursesProps> = ({
               </div>
             ))}
 
-            {currentCourses.length === 0 && (
-              <div className="text-center py-6 text-sm text-[var(--mn-text-muted)]">{publicT('public_there_are_currently_no_courses_in_this_section')}</div>
-            )}
           </div>
 
           {/* View All Button */}
           <div className="mt-4 flex justify-center">
             <button
               id="btn-view-all-courses"
+              type="button"
               onClick={onViewAllClick}
               className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
             >

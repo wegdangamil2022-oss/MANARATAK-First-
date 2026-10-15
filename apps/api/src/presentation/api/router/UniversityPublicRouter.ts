@@ -1,3 +1,4 @@
+import { publishedCatalogImage, type PublishedCatalogImageServices } from '../../media/PublishedCatalogImage.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { LocalizedPublicUniversityUseCases } from '@manaratak/application';
@@ -5,7 +6,7 @@ import { IReferenceDataRepository, IUniversityRepository, PublicUniversityFilter
 import { localeQuerySchema, parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
 
 export class UniversityPublicRouter {
-  public static create(cradle: { universityRepository: IUniversityRepository; referenceDataRepository: IReferenceDataRepository }): Router {
+  public static create(cradle: PublishedCatalogImageServices & { universityRepository: IUniversityRepository; referenceDataRepository: IReferenceDataRepository }): Router {
     const router = Router();
     const localized = new LocalizedPublicUniversityUseCases(cradle.universityRepository);
 
@@ -37,12 +38,16 @@ export class UniversityPublicRouter {
         const { countryIso2Code: _countryIso2Code, ...rest } = filters;
         resolvedFilters = { ...rest, countryReferenceId: country.id };
       }
-      res.json(await localized.listUniversities(resolvedFilters, locale));
+      const result = await localized.listUniversities(resolvedFilters, locale);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json({ ...result, data: await Promise.all(result.data.map(async dto => ({ ...dto, image: await publishedCatalogImage(dto.logoAssetId, 'UNIVERSITY_LOGO', cradle) }))) });
     }));
 
     router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
       try {
-        res.json(await localized.getUniversity(req.params.slug, parseRequestLocale(req.query)));
+        const dto = await localized.getUniversity(req.params.slug, parseRequestLocale(req.query));
+        res.setHeader('Cache-Control', 'no-store');
+        res.json({ ...dto, image: await publishedCatalogImage(dto.logoAssetId, 'UNIVERSITY_LOGO', cradle) });
       } catch (err: any) {
         if (err.message === 'University not found') return res.status(404).json({ error: 'Not found' });
         throw err;

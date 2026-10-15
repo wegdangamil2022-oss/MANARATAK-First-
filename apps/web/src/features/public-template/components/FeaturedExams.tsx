@@ -1,10 +1,15 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
 import { Exam } from '../types';
+import { HomeSectionEmptyCards } from './HomeSectionEmptyCards';
+import { homeCatalogStatus } from '../homeCatalogState';
+import type { PublicLiveDomainStatus } from '../publicLiveDataSource';
 import { FileSignature, ChevronLeft } from 'lucide-react';
 
 interface FeaturedExamsProps {
   exams?: Exam[];
+  status?: PublicLiveDomainStatus;
+  onRetry?: () => void;
   dataMode?: 'api' | 'prototype';
   onSelectExam?: (exam: Exam) => void;
   onViewAllClick: () => void;
@@ -174,6 +179,8 @@ const ExamVectorLogo: React.FC<{ name: string; className?: string }> = ({ name, 
 
 export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
   exams,
+  status,
+  onRetry,
   dataMode = 'api',
   onSelectExam,
   onViewAllClick,
@@ -184,7 +191,7 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
     : (exams ?? []).filter((exam) => exam.ownerId).slice(0, 10).map((exam) => ({
       name: exam.name, code: exam.id, owner: exam,
     }));
-  if (!cards.length) return null;
+  const displayStatus = homeCatalogStatus(status, cards.length);
 
   const handleExamClick = (examItem: (typeof cards)[number]) => {
     if (examItem.owner && onSelectExam) onSelectExam(examItem.owner);
@@ -217,7 +224,8 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
             <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_explore_language_academic_and_professional_admission_requirements')}</p>
           </div>
 
-          {/* Marquee Scrolling Badges Area */}
+          {cards.length === 0 && <HomeSectionEmptyCards kind="exams" status={displayStatus === 'ready' ? 'empty' : displayStatus} onRetry={onRetry} />}
+          {/* Marquee Scrolling Badges Area — published data only */}
           <div
             className="relative w-full overflow-hidden flex items-center py-2.5 mb-3 mask-edges"
             dir={publicDir}

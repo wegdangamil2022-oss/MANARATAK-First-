@@ -14,9 +14,14 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { Service } from '../types';
+import { HomeSectionEmptyCards } from './HomeSectionEmptyCards';
+import { homeCatalogStatus } from '../homeCatalogState';
+import type { PublicLiveDomainStatus } from '../publicLiveDataSource';
 
 interface FeaturedServicesProps {
   services: Service[];
+  status?: PublicLiveDomainStatus;
+  onRetry?: () => void;
   onViewAllClick?: () => void;
   onSelectService?: (service: Service) => void;
 }
@@ -56,6 +61,8 @@ const getServiceIcon = (service: Service, index: number) => {
 
 export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
   services: sourceServices,
+  status,
+  onRetry,
   onViewAllClick,
   onSelectService,
 }) => {
@@ -64,6 +71,7 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
   const [activeTab, setActiveTab] = useState<'student' | 'general'>('student');
   const allServicesList = sourceServices;
   const services = allServicesList.filter((service) => service.audience === activeTab);
+  const displayStatus = homeCatalogStatus(status, services.length);
 
   return (
     <section className="px-0 py-3 w-full font-['Cairo',sans-serif]">
@@ -119,7 +127,9 @@ export const FeaturedServices: React.FC<FeaturedServicesProps> = ({
         </div>
 
         <div key={activeTab} className="mt-4 flex flex-col gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          {services.map((service, index) => (
+          {services.length === 0 ? (
+            <HomeSectionEmptyCards kind="services" status={displayStatus === 'ready' ? 'empty' : displayStatus} onRetry={onRetry} />
+          ) : services.map((service, index) => (
             <button
               type="button"
               key={service.id}

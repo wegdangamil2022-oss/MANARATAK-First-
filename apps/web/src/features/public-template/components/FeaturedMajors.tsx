@@ -98,6 +98,7 @@ export const FeaturedMajors: React.FC<FeaturedMajorsProps> = ({ onViewAllClick, 
                   <img
                     src={category.imageUrl}
                     alt={category.title}
+                    onError={(event) => { const image = event.currentTarget; image.onerror = null; image.src = '/preview-art/universities.svg'; }}
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 filter brightness-90"
                     referrerPolicy="no-referrer"
                   />
