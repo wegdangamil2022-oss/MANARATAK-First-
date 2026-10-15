@@ -66,5 +66,10 @@
       "register: generic 202 registrationPending response for new/existing accounts",
       "refresh: session-bound CSRF header required"
     ]
-  }
+  },
+  "approvedPlan": "docs/remediation/ARCHITECTURAL_SECURITY_APPROVED_PLAN_2026-10-15.md",
+  "verifiedFindings": "docs/reviews/ARCHITECTURAL_SECURITY_VERIFIED_FINDINGS_2026-10-15.md",
+  "workBranch": "fix/b02-auth-session-boundary-20261015",
+  "mainPushRequiresExplicitUserInstruction": true,
+  "lastIntegratedMainCommit": "a7a282d1925d708dba4c5ca076c9c5a4434245ac"
 }
