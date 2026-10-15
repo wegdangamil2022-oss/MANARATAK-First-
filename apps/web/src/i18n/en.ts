@@ -1,4 +1,10 @@
 export const en = {
+  public_home_scholarships_empty: "No scholarships have been published yet",
+  public_home_countries_empty: "No study destinations have been published yet",
+  public_home_exams_empty: "No international tests have been published yet",
+  public_home_articles_empty: "No articles have been published yet",
+  public_home_services_empty: "No services have been published in this section yet",
+  public_home_tools_preview_notice: "Tool design preview only; these tools are not yet available to the public.",
   public_home_catalog_partial: 'Some courses could not be loaded. Only successfully loaded content is shown.',
   public_home_catalog_loading: "Loading published content…",
   public_home_catalog_unavailable: "Unable to load content",
