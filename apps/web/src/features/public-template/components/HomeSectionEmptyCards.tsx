@@ -1,4 +1,4 @@
-import { BookOpen, FileSignature, Globe2, GraduationCap, Newspaper, RefreshCw, BriefcaseBusiness } from 'lucide-react';
+import { FileSignature, Globe2, GraduationCap, Newspaper, RefreshCw, BriefcaseBusiness } from 'lucide-react';
 import { useTranslation } from '../../../i18n/I18nProvider';
 import type { PublicLiveDomainStatus } from '../publicLiveDataSource';
 
