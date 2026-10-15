@@ -1,5 +1,7 @@
 # Cross-Phase Relationship Closure Matrix
 
+> **Current checkpoint (2026-10-15 / B14):** [P01–P24 source/verification/runtime/production](ARCHITECTURAL_SECURITY_PHASE_STATUS_2026-10-15.md) and [approved finding dispositions](ARCHITECTURAL_SECURITY_CLOSURE_REGISTER_2026-10-15.json) supersede old progress summaries for their scope. The relationship rows below retain their scoped evidence and deferred limits; this reconciliation does not promote them to runtime or production acceptance. Section27/28 remain explicitly open.
+
 **Status:** ACTIVE — SOURCE_REBASELINED / RUNTIME_EVIDENCE_PENDING  
 **Version:** 3.0.0-source-rebaselined  
 **Status date:** 2026-09-07  

@@ -796,5 +796,19 @@
       "Credit V8 fixture binding correction not rerun; unsuccessful/unverified cases remain recorded",
       "PostgreSQL isolation, rollback, browser and providers remain runtime pending"
     ]
+  },
+  "B14": {
+    "status": "IN_PROGRESS",
+    "packageClosed": false,
+    "findings": [
+      "ARCH-08",
+      "ADM-08"
+    ],
+    "baselineCommit": "e8f67b7d8ee30c2daef2a65eb5512bb40929e3b2",
+    "report": "docs/reviews/B14_FINAL_SOURCE_RECONCILIATION_2026-10-15.md",
+    "closureRegister": "docs/remediation/ARCHITECTURAL_SECURITY_CLOSURE_REGISTER_2026-10-15.json",
+    "phaseRegister": "docs/remediation/ARCHITECTURAL_SECURITY_PHASE_STATUS_2026-10-15.json",
+    "runtimeStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED"
   }
 }

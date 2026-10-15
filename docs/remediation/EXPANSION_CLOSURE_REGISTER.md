@@ -1,5 +1,7 @@
 # Post-96 Expansion Closure Register
 
+> **Historical checkpoint:** The counts and pending-source labels below describe the 2026-08-13 expansion snapshot, not the current source state. Use the [2026-10-15 phase checkpoint](ARCHITECTURAL_SECURITY_PHASE_STATUS_2026-10-15.md) and [current execution register](ARCHITECTURAL_SECURITY_EXECUTION_STATUS_2026-10-15.json). No import counts or operational data were queried or inferred by B14.
+
 > **Operational supersession notice (2026-09-06):** Recovery-era database instructions in this historical artifact are superseded by [`docs/operations/GREENFIELD_DATABASE_PROVISIONING.md`](../operations/GREENFIELD_DATABASE_PROVISIONING.md). This file remains evidence/history and is not current database-operation authority.
 
 Status date: 2026-08-13

@@ -4,13 +4,15 @@
 
 - **Title:** MANARATAK 2.0 Official Enterprise Roadmap
 - **Version:** 6.0
-- **Status:** Approved & Finalized
+- **Status:** Approved & Finalized architecture; implementation evidence is scoped separately
 - **Approval Status:** Formal Baseline
 - **Authors:** Chief Enterprise Software Architect
-- **Last Updated:** 2026-08-25
+- **Last Updated:** 2026-10-15
 - **Baseline:** Enterprise Foundation Baseline, Enterprise Domain Architecture Baseline, ADR-024 (Enterprise Asset Platform Adoption)
 
 ## 2. Revision History
+
+- **2026-10-15 / B14:** Reconcile phase source checkpoints with current owner/API/Admin/Public implementations and their scoped review reports. Preserve the 24-phase authority, historical findings and unexecuted runtime/production gates. [Current P01–P24 status](../../remediation/ARCHITECTURAL_SECURITY_PHASE_STATUS_2026-10-15.md); [finding disposition register](../../remediation/ARCHITECTURAL_SECURITY_CLOSURE_REGISTER_2026-10-15.json). B13 includes two status corrections not rerun at the user’s request; no all-green CI claim.
 
 - **v6.0:** Supersedes Roadmap v5.0. Formally finalizes the 24-phase architecture, assigns Phase 18 to Enterprise Student Tools, and strictly aligns with ADR-027 to exclude the Organizations & Employers Platform. Enterprise Certificates Platform introduced. Learning / Certificates ownership separated. Phase numbering synchronized. Enterprise roadmap synchronized. Cross-phase conflicts resolved. Updated to integrate the Enterprise Asset Platform (EAP) per ADR-024 (Cross-Cutting Shared Platform) and synchronize all references, dependencies, and terminology across the baseline.
 - **v5.0:** Foundation completion formally recognized; Academic Taxonomy Platform introduced; Phase renumbering updated; Dependency updates verified; Architecture governance updates (Phases 1.30, 1.31, 1.32) finalized and integrated.
@@ -19,7 +21,9 @@
 
 ## 3. Executive Summary
 
-This document serves as the official Enterprise Roadmap for the MANARATAK 2.0 platform. The approved architecture remains a 24-phase Enterprise Modular Monolith roadmap. Source implementation is present through **Phase 19 — Enterprise Finance & Payments Platform**. A deep Phase 2–19 source audit completed on baseline `e57aad8c52a3ee6d686671870e0bf0392ba7417f`; dependency-aware source remediation is now in progress. Database migration execution, live provider verification, distributed-runtime evidence, and final operational closure remain runtime-pending; database mutations are governed by the Greenfield Database Provisioning and Mutation Safety runbook.
+This document serves as the official Enterprise Roadmap for the MANARATAK 2.0 platform. The frozen architecture has **24 phases**. Current source evidence covers the foundation, domain implementations through P21, P22 experience contracts, and P23/P24 Admin/Public consumer surfaces. Each claim is limited by its owner contracts and linked reports; this does not certify all historical feature requirements. Source presence, isolated checks, database/runtime proof and production acceptance are tracked separately in the [P01–P24 checkpoint](../../remediation/ARCHITECTURAL_SECURITY_PHASE_STATUS_2026-10-15.md).
+
+B01–B13 remediation is implemented within the approved scope. B13 retains two corrected-but-unrechecked native test outcomes and a documented V8 fixture limitation. Session booking is explicitly outside the current release; existing mentorship opportunities and alumni consent remain. Translation content authoring stays `INFRASTRUCTURE_ONLY`. Migration execution, browser/provider/distributed-runtime proof and operational approval remain pending under the Greenfield Database Provisioning and Mutation Safety runbook. Section 27 and section 28 retain their open operational/source-verification gates.
 
 ## 4. Current Project Status
 
@@ -27,16 +31,16 @@ This roadmap documents both the approved phase model and the current source-stat
 
 - **Architecture / Contract Status:**
   - Phase numbering and ownership remain frozen at **24 phases**.
-  - Active architecture/contracts exist through the implemented Phase 19 boundary, subject to remediation findings where source and historical documentation drifted.
+  - Architecture numbering and ownership remain controlled by P01–P24; source checkpoints and contract documents are reconciled individually without inventing business-data owners for P22/P23/P24.
 - **Source Implementation Status:**
-  - Source implementation is present through **Phases 1–19**.
+  - Source evidence is recorded for **P01–P24**, with scoped implementation, verification and deferral status per phase; this does not mean all phase requirements are globally complete.
   - **Phase 2–19 deep source audit:** complete.
-  - **Dependency-aware remediation:** in progress, beginning with W0 authority/quality-gate stabilization.
+  - **Dependency-aware remediation:** the current B01–B14 execution register supersedes old progress summaries for these findings; historical W0–W16 and section reviews remain provenance, with their explicit limits.
 - **Runtime / Database Status:**
   - PostgreSQL-backed migration, backfill, recovery, provider, concurrency, and end-to-end runtime proofs are **not closed by source presence alone**.
   - These remain runtime-pending and must follow the Greenfield database mutation gate plus backup/rollback evidence appropriate to the operation before any data mutation.
 - **Future Roadmap Status:**
-  - **Phases 20–24:** not yet treated as completed implementation.
+  - **Phases 20–24:** Services/Careers owner code and Admin/Public consumers now have linked source evidence. Full product, runtime and production completion is not inferred.
 
 ## 5. Complete Roadmap
 
@@ -83,19 +87,19 @@ This section tracks the progress of the enterprise across two distinct dimension
 
 Architecture milestones represent the completion and formal approval of architecture specifications and domain contracts.
 
-- **Phases 1–19:** Architecture/contracts are present in the repository and are the active implementation boundary under remediation.
+- **P01–P24:** Architecture/owner contracts and consumer experience specifications are present; the per-phase checkpoint controls current source claims.
 - **Phase 1:** Constitution / governing architecture authority.
 - **Phases 2–19:** Deep source audit complete; remediation findings take precedence over historical “fully certified” claims until closed.
-- **Phases 20–24:** Future roadmap scope; implementation completion is not claimed here.
+- **Phases 20–24:** Existing source/specification evidence is reconciled with explicit limits; these phases are not globally certified merely because files exist.
 
 ### 7.2 Implementation Milestones
 
 Implementation milestones represent actual software development progress against the baselined architecture.
 
-- **Phases 1–19:** Source implementation present.
+- **P01–P24:** Scoped source evidence is indexed in the current phase register; implementation and isolated proof vary by phase.
 - **Phases 2–19:** Source audit discovery complete; remediation is active and therefore these phases are **not yet globally closed for production/runtime**.
 - **Database/runtime closure:** Deferred to Google Studio after source remediation and backup/recovery proof.
-- **Phases 20–24:** Future implementation scope.
+- **Phases 20–24:** Source/contracts and consumer surfaces are present within reported scope; runtime/production and deferred product decisions remain open.
 
 ## 8. Architecture Freeze Status
 
@@ -166,3 +170,9 @@ This document becomes the Single Source of Truth for:
 - Enterprise sequencing
 - Dependency ordering
 - Cross-phase references
+
+## 12. Current evidence and retained limits — 2026-10-15
+
+The [phase register](../../remediation/ARCHITECTURAL_SECURITY_PHASE_STATUS_2026-10-15.json) records source, isolated verification, runtime and production separately for every P01–P24 entry. [The current remediation status](../../remediation/ARCHITECTURAL_SECURITY_EXECUTION_STATUS_2026-10-15.json) records B package execution, including corrected-but-unrechecked outcomes. B packages, review sections and P phases use different numbering. The approved B plan ends at **B14**; no B15 package is defined. This does not remove or renumber the existing **P15 Student Workspace**.
+
+This checkpoint certifies no deployment, provider, database migration, live browser chain or production environment. Current section27/section28 statuses remain authoritative for their open integration/release gates. No older “fully closed” heading overrides them.
