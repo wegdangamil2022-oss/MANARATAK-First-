@@ -1,5 +1,7 @@
 import { Prisma } from '@prisma/client';
-import { CmsDomainTargetType } from '@manaratak/domain';
+import { CmsDomainTargetType, isPublicUniversityProgram } from '@manaratak/domain';
+import { StudyDestinationUseCases } from '@manaratak/application';
+import { PrismaStudyDestinationRepository } from '../study-destinations/PrismaStudyDestinationRepository';
 
 /**
  * P16 only reads canonical P7/P9/P10/P12/P13 records. No CMS mirror, owner
@@ -70,15 +72,24 @@ export class PrismaCmsDomainOwnerReadGateway {
         where: {
           countryReferenceId: targetId,
           status: 'PUBLISHED',
-          countryReference: { isActive: true },
+          countryReference: { isActive: true, lifecycleState: 'ACTIVE' },
         },
-        select: { slug: true },
+        include: { studyLanguages: true },
       });
       if (
         !profile ||
         typeof profile.slug !== 'string' ||
         !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(profile.slug)
       ) {
+        throw new Error('CMS_NAVIGATION_TARGET_NOT_PUBLISHED');
+      }
+      // Reuse the destination owner's exact fingerprint, independent-review,
+      // freshness and authority rules. A PUBLISHED marker alone is insufficient.
+      try {
+        StudyDestinationUseCases.assertApprovedProfile(
+          PrismaStudyDestinationRepository.toProfile(profile),
+        );
+      } catch {
         throw new Error('CMS_NAVIGATION_TARGET_NOT_PUBLISHED');
       }
       return `/${locale}/countries/${profile.slug}`;
@@ -103,8 +114,8 @@ export class PrismaCmsDomainOwnerReadGateway {
           select: { id: true },
         });
         break;
-      case CmsDomainTargetType.ACADEMIC_PROGRAM:
-        found = await this.db.universityAcademicProgram.findFirst({
+      case CmsDomainTargetType.ACADEMIC_PROGRAM: {
+        const program = await this.db.universityAcademicProgram.findFirst({
           where: {
             id: targetId,
             status: 'ACTIVE',
@@ -114,9 +125,29 @@ export class PrismaCmsDomainOwnerReadGateway {
             major: { is: { status: 'PUBLISHED' } },
             university: { is: { status: 'PUBLISHED' } },
           },
-          select: { id: true },
+          select: {
+            id: true,
+            status: true,
+            majorMappingState: true,
+            majorId: true,
+            degreeLevelId: true,
+            major: {
+              select: {
+                status: true,
+                levelProfiles: {
+                  select: {
+                    degreeLevelId: true,
+                    status: true,
+                    currentPublishedVersionId: true,
+                  },
+                },
+              },
+            },
+          },
         });
+        found = program && isPublicUniversityProgram(program) ? program : null;
         break;
+      }
       case CmsDomainTargetType.MAJOR:
         found = await this.db.major.findFirst({
           where: { id: targetId, status: 'PUBLISHED' },

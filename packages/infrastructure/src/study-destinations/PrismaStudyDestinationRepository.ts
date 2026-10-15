@@ -433,6 +433,10 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
     };
   }
   private map(row: ProfileRow): StudyDestinationProfileDto {
+    return PrismaStudyDestinationRepository.toProfile(row);
+  }
+  /** Canonical persistence mapping shared with transaction-bound owner readers. */
+  public static toProfile(row: ProfileRow): StudyDestinationProfileDto {
     return {
       revision: row.revision,
       governance: (row.governance ?? {}) as unknown as StudyDestinationGovernance,

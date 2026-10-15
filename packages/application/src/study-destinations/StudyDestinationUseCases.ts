@@ -658,18 +658,34 @@ export class StudyDestinationUseCases {
       throw new Error('STUDY_DESTINATION_STALE_REVIEW');
   }
   private assertProof(profile: StudyDestinationProfileDto): void {
+    StudyDestinationUseCases.assertApprovedProfile(profile, this.publishingPolicy);
+  }
+  /** Shared owner decision for public readers; callers must also enforce publication and country lifecycle. */
+  public static assertApprovedProfile(
+    profile: StudyDestinationProfileDto,
+    publishingPolicy = new StudyDestinationPublishingPolicy(),
+  ): void {
     const proof = profile.governance?.proof;
     if (
       !proof ||
       proof.fingerprint !== studyDestinationFingerprint(profile) ||
-      !this.publishingPolicy.evaluate(profile).readyForPublish
+      !publishingPolicy.evaluate(profile).readyForPublish
     )
       throw new Error('STUDY_DESTINATION_APPROVED_REVISION_REQUIRED');
-    this.assertFreshDate(proof.reviewedAt);
-    this.assertFreshDate(profile.sourceAuditDate);
+    if (
+      !publishingPolicy.isAuditDateFresh(proof.reviewedAt) ||
+      !publishingPolicy.isAuditDateFresh(profile.sourceAuditDate)
+    )
+      throw new Error('STUDY_DESTINATION_STALE_REVIEW');
     this.validateAuthorities(profile, proof.authorities);
   }
   private validateAuthorities(
+    profile: StudyDestinationProfileDto,
+    authorities: StudyDestinationAuthorityDecision[],
+  ): void {
+    StudyDestinationUseCases.validateAuthorities(profile, authorities);
+  }
+  private static validateAuthorities(
     profile: StudyDestinationProfileDto,
     authorities: StudyDestinationAuthorityDecision[],
   ): void {
@@ -918,6 +934,9 @@ export class StudyDestinationUseCases {
   }
 
   private assertUrl(value: string, code: string): void {
+    StudyDestinationUseCases.assertUrl(value, code);
+  }
+  private static assertUrl(value: string, code: string): void {
     try {
       const url = new URL(value);
       if (
