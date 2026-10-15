@@ -43,7 +43,7 @@ export async function performAdminRefresh(): Promise<boolean> {
           csrfManager.clearToken();
           return true;
         }
-      } else if (res.status === 401 || res.status === 403) {
+      } else if (res.status === 401) {
         // Only mark permanently failed if the server explicitly rejected the refresh token
         refreshFailedPermanently = true;
       }

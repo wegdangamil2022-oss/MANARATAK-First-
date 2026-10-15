@@ -1564,10 +1564,11 @@ export async function apiFetch(
                 window.localStorage?.removeItem('manaratak_refresh_token');
                 window.sessionStorage?.removeItem('manaratak_refresh_token');
               } catch {}
+              csrfManager.clearToken();
               webRefreshFailedPermanently = false;
               return true;
             }
-          } else if (refreshRes.status === 401 || refreshRes.status === 403) {
+          } else if (refreshRes.status === 401) {
             webRefreshFailedPermanently = true;
           }
         } catch {
@@ -2726,7 +2727,7 @@ export class ApiClient {
     } catch {}
   }
 
-  static async register(displayName: string, email: string, password: string): Promise<{ identityId: string; email: string }> {
+  static async register(displayName: string, email: string, password: string): Promise<{ registrationPending: boolean; message: string }> {
     const res = await apiFetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: getStudentHeaders({ 'Content-Type': 'application/json' }),

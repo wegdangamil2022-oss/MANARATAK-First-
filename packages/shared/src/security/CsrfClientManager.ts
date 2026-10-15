@@ -10,6 +10,7 @@ export interface CsrfFetchOptions {
  */
 export class CsrfClientManager {
   private static instance: CsrfClientManager | null = null;
+  private tokenGeneration = 0;
   private cachedToken: string | null = null;
   private tokenFetchPromise: Promise<string | null> | null = null;
   private apiBaseUrl: string = '/api/v1';
@@ -49,39 +50,25 @@ export class CsrfClientManager {
       return this.tokenFetchPromise;
     }
 
-    this.tokenFetchPromise = (async () => {
+    const generation = this.tokenGeneration;
+    const pending = (async () => {
       try {
         const fetchFn = typeof window !== 'undefined' && window.fetch ? window.fetch.bind(window) : fetch;
-        const endpoint = `${this.apiBaseUrl.replace(/\/+$/, '')}/auth/csrf-token`;
-        const res = await fetchFn(endpoint, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-          },
-          credentials: 'include',
+        const res = await fetchFn(`${this.apiBaseUrl.replace(/\/+$/, '')}/auth/csrf-token`, {
+          method: 'GET', headers: { Accept: 'application/json' }, credentials: 'include',
         });
-
-        if (!res.ok) {
-          console.warn('[CsrfClientManager] Failed to fetch CSRF token:', res.status, res.statusText);
-          return null;
-        }
-
+        if (!res.ok) return null;
         const data = await res.json().catch(() => ({}));
         const token = data?.data?.csrfToken || data?.csrfToken || res.headers?.get('X-CSRF-Token');
-        if (token && typeof token === 'string') {
-          this.cachedToken = token;
-          return token;
-        }
-        return null;
-      } catch (err) {
-        console.warn('[CsrfClientManager] Error fetching CSRF token:', err);
-        return null;
-      } finally {
-        this.tokenFetchPromise = null;
-      }
+        // An old in-flight bootstrap must not repopulate the cache after rotation/logout.
+        if (generation !== this.tokenGeneration || typeof token !== 'string' || !token) return null;
+        this.cachedToken = token;
+        return token;
+      } catch { return null; }
     })();
-
-    return this.tokenFetchPromise;
+    this.tokenFetchPromise = pending;
+    try { return await pending; }
+    finally { if (this.tokenFetchPromise === pending) this.tokenFetchPromise = null; }
   }
 
   /**
@@ -95,6 +82,7 @@ export class CsrfClientManager {
    * Clears the cached CSRF token in memory (e.g. on 403 CSRF error or logout).
    */
   public clearToken(): void {
+    this.tokenGeneration++;
     this.cachedToken = null;
     this.tokenFetchPromise = null;
   }
@@ -160,7 +148,7 @@ export class CsrfClientManager {
       try {
         const cloned = response.clone();
         const body = await cloned.json();
-        if (body?.error?.code === 'CSRF_TOKEN_INVALID' || body?.error?.message?.toLowerCase().includes('csrf')) {
+        if (body?.error?.code === 'CSRF_TOKEN_INVALID') {
           isCsrfError = true;
         }
       } catch {
@@ -171,7 +159,11 @@ export class CsrfClientManager {
         this.clearToken();
         const freshToken = await this.getCsrfToken(true);
         if (freshToken) {
-          const retryHeaders = { ...initialHeaders, 'X-CSRF-Token': freshToken };
+          const retryHeaders = { ...initialHeaders };
+          for (const key of Object.keys(retryHeaders)) {
+            if (key.toLowerCase() === 'x-csrf-token' || key.toLowerCase() === 'csrf-token') delete retryHeaders[key];
+          }
+          retryHeaders['X-CSRF-Token'] = freshToken;
           return fetchFn(input, {
             ...init,
             headers: retryHeaders,

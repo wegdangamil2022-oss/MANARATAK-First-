@@ -1,5 +1,6 @@
 import { launchDependencyManifest } from './LaunchDependencyManifest';
 import { loadAppConfig } from './AppConfig';
+import { isStrongRuntimeSecret } from './RuntimeSecretPolicy';
 
 export type ProductionReadinessSeverity = 'BLOCKER' | 'WARNING' | 'INFO';
 
@@ -215,10 +216,7 @@ export class ProductionReadinessValidator {
   }
 
   private static isStrongSecret(value: unknown): boolean {
-    const stringValue = this.asString(value);
-    if (!stringValue || stringValue.length < 32) return false;
-    const lowerValue = stringValue.toLowerCase();
-    return !['change-me', 'placeholder', 'password', 'local-env', 'demo-token'].some(token => lowerValue.includes(token));
+    return isStrongRuntimeSecret(value);
   }
 
   private static isHttpsUrl(value: unknown): boolean {

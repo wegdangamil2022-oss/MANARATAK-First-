@@ -7,3 +7,5 @@ export * from './AppConfig';
 export * from './ProductionReadinessValidator';
 
 export * from './LaunchDependencyManifest';
+
+export * from './RuntimeSecretPolicy';

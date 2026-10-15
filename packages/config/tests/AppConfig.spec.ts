@@ -122,3 +122,9 @@ describe('asset activation recovery opt-in', () => {
     expect(AppConfigSchema.safeParse({ NODE_ENV: 'test', ASSET_ACTIVATION_RECOVERY_ENABLED: 'true', BACKGROUND_WORKER_ENABLED: 'true', ASSET_ACTIVATION_RECOVERY_CRON: '*/5 * * * *' }).success).toBe(true);
   });
 });
+
+describe('B02 production secret policy', () => {
+  it.each(['production','staging'])('rejects the known development CSRF secret in %s', NODE_ENV => {
+    expect(() => loadAppConfig({...productionBase,NODE_ENV,CSRF_SECRET:'dev-csrf-secret-at-least-32-chars-long'})).toThrow(/CSRF_SECRET/);
+  });
+});

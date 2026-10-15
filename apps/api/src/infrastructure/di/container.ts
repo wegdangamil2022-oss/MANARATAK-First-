@@ -1,3 +1,5 @@
+import { createHmac } from 'node:crypto';
+import { DEVELOPMENT_CSRF_SECRET, isStrongRuntimeSecret } from '@manaratak/config';
 import { CrossModuleIntegrityUseCase } from '@manaratak/application';
 import { CrossModuleIntegrityRouter } from '../../presentation/api/router/CrossModuleIntegrityRouter.js';
 import { CertificateVerificationPolicy, VaultTransitCertificateSignatureService, HttpCertificateAuthorityResolver, CertificateArtifactReadinessProbe, CertificateArtifactRecovery, PrismaCertificateAuthorityDirectory } from '@manaratak/infrastructure';
@@ -482,6 +484,7 @@ export function registerDependencies(
   }
 
   const productionLike = effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging';
+  const authProductionLike = productionLike || ['production', 'staging'].includes(effectiveEnvironment.MANARATAK_RUNTIME_PROFILE ?? '');
   const readConfig = <T = string>(key: string): T | undefined =>
     runtimeConfiguration?.getOptional?.<T>(key) ?? (effectiveEnvironment[key] as T | undefined);
   const databaseUrl = readConfig<string>('DATABASE_URL')?.trim();
@@ -1390,14 +1393,15 @@ export function registerDependencies(
     authService: asFunction(({ tokenProvider, sessionManager, credentialVerifier, principalAccessValidator, mfaUseCases }) => new AuthService(tokenProvider, sessionManager, principalAccessValidator, credentialVerifier, mfaUseCases)).singleton(),
     credentialVerifier: asFunction(({ prisma }) => new PrismaCredentialVerifier(prisma)).singleton(),
     emailVerificationTokenRepository: asFunction(({ prisma }) => {
+      if (!prisma && authProductionLike) throw new Error('AUTH_PERSISTENCE_REQUIRED');
       return prisma ? new PrismaEmailVerificationTokenRepository(prisma) : new InMemoryEmailVerificationTokenRepository();
     }).singleton(),
     emailDeliveryGateway: asFunction(() => {
-      const provider = readConfig<string>('EMAIL_DELIVERY_PROVIDER') || (effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging' ? '' : 'captured');
-      if (provider === 'captured' && effectiveEnvironment.NODE_ENV !== 'production' && effectiveEnvironment.NODE_ENV !== 'staging') {
+      const provider = readConfig<string>('EMAIL_DELIVERY_PROVIDER') || (authProductionLike ? '' : 'captured');
+      if (provider === 'captured' && !authProductionLike) {
         return new CapturedEmailDeliveryGateway();
       }
-      if (provider !== 'smtp' || effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging') throw new Error('Test email delivery provider is not configured for this runtime');
+      if (provider !== 'smtp' || authProductionLike) throw new Error('Test email delivery provider is not configured for this runtime');
       return new SmtpEmailDeliveryGateway({
         host: readConfig<string>('SMTP_HOST') || '',
         port: Number(readConfig<string | number>('SMTP_PORT') || 0),
@@ -1426,9 +1430,15 @@ export function registerDependencies(
     resendVerificationUseCase: asFunction(({ identityRepository, emailVerificationTokenRepository, emailDeliveryGateway }) => {
       return new ResendVerificationUseCase(identityRepository, emailVerificationTokenRepository, emailDeliveryGateway);
     }).singleton(),
-    passwordResetTokenRepository: asFunction(({ prisma }) => prisma
-      ? new PrismaPasswordResetTokenRepository(prisma)
-      : new InMemoryPasswordResetTokenRepository()).singleton(),
+    authRateLimitKey: asFunction(() => {
+      const secret = readConfig<string>('CSRF_SECRET') || (!authProductionLike ? DEVELOPMENT_CSRF_SECRET : '');
+      if (!secret || (authProductionLike && !isStrongRuntimeSecret(secret))) throw new Error('AUTH_RATE_LIMIT_SECRET_REQUIRED');
+      return (value: string) => createHmac('sha256', secret).update('auth-rate:v1\0').update(value).digest('hex');
+    }).singleton(),
+    passwordResetTokenRepository: asFunction(({ prisma }) => {
+      if (!prisma && authProductionLike) throw new Error('AUTH_PERSISTENCE_REQUIRED');
+      return prisma ? new PrismaPasswordResetTokenRepository(prisma) : new InMemoryPasswordResetTokenRepository();
+    }).singleton(),
     forgotPasswordUseCase: asFunction(({ identityRepository, passwordResetTokenRepository, emailDeliveryGateway }) => new ForgotPasswordUseCase({
       identityRepository, tokenRepository: passwordResetTokenRepository, emailDeliveryGateway,
     })).singleton(),

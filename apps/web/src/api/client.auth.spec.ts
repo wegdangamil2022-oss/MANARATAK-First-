@@ -26,3 +26,13 @@ describe('public account session refresh', () => {
     expect(refreshCalls.every(([, options]) => options?.body === undefined)).toBe(true);
   });
 });
+
+it('clears the session-bound CSRF token after a successful rotation',async()=>{
+ const clear=vi.spyOn(CsrfClientManager.prototype,'clearToken');
+ let calls=0;
+ vi.spyOn(CsrfClientManager.prototype,'fetchWithCsrf').mockImplementation(async input=>{
+  if(String(input).endsWith('/auth/refresh'))return Response.json({data:{authenticated:true}});
+  return new Response('{}',{status:++calls===1?401:200});
+ });
+ expect((await apiFetch('/api/v1/student/workspace')).status).toBe(200);expect(clear).toHaveBeenCalled();
+});

@@ -213,7 +213,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
 
     app.use(SecurityMiddlewareFactory.createRateLimiter(securityService, { limit: rateLimitMax, windowMs: rateLimitWindow }));
       app.use(express.json({ limit: '256kb', strict: true }));
-      app.use(SecurityMiddlewareFactory.createCsrfGuard(securityService));
+      app.use(SecurityMiddlewareFactory.createCsrfGuard(securityService, { allowedOrigins: corsOrigins }));
 
     // Monitoring Middleware
     const monitoringMiddleware = new MonitoringMiddleware(monitoringService);

@@ -131,7 +131,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
         await ApiClient.register(displayName, email, password);
         setResendEmail(email);
         setPassword('');
-        setSuccess('تم إنشاء الحساب بنجاح! يرجى تأكيد بريدك الإلكتروني لإكمال التفعيل قبل تسجيل الدخول. تم إرسال رسالة التأكيد إلى صندوق البريد في Mailpit.');
+        setSuccess('إذا أمكن إكمال التسجيل فستصلك رسالة بالخطوة التالية. راجع بريدك الإلكتروني، أو سجّل الدخول إن كان لديك حساب بالفعل.');
         return;
       }
 

@@ -6,11 +6,11 @@ const productionEnv = {
   HEALTH_DEPLOYMENT_REVISION: 'synthetic-release',
   FINANCE_PROVIDER_BASE_URL: 'https://finance.test',
   FINANCE_PROVIDER_API_KEY: 'synthetic-finance',
-  FINANCE_PROVIDER_SIGNING_SECRET: 'synthetic-finance-signing-material-123456789',
+  FINANCE_PROVIDER_SIGNING_SECRET: 'synthetic-finance-signing-material-e7c4b0a2d6f8e1c3b5a7d9f0e2c4a6b8',
   FINANCE_PAYMENT_PROVIDER_KEY: 'PRIMARY_PAYMENT',
   NOTIFICATION_PROVIDER_BASE_URL: 'https://notification.test',
   NOTIFICATION_PROVIDER_API_KEY: 'synthetic-notification',
-  NOTIFICATION_PROVIDER_SIGNING_SECRET: 'synthetic-notification-signing-material-123456789',
+  NOTIFICATION_PROVIDER_SIGNING_SECRET: 'synthetic-notification-signing-material-e7c4b0a2d6f8e1c3b5a7d9f0e2c4a6b8',
   NOTIFICATION_PAYLOAD_KEY: 'synthetic-payload-key-for-configuration-only',
   BACKGROUND_NOTIFICATION_CRON: '* * * * *',
   DATABASE_URL: 'postgresql://manaratak:strong-db-secret@db.manaratak.internal:5432/manaratak?schema=public',
@@ -21,7 +21,7 @@ const productionEnv = {
   ACCESS_TOKEN_TTL_SECONDS: '900',
   JWT_ISSUER: 'manaratak-production-api',
   JWT_AUDIENCE: 'manaratak-production-browser',
-  CSRF_SECRET: 'production-csrf-secret-with-safe-entropy-123456789',
+  CSRF_SECRET: 'production-csrf-material-e7c4b0a2d6f8e1c3b5a7d9f0e2c4a6b8',
   OTEL_SERVICE_NAME: 'manaratak-api',
   OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.manaratak.internal/v1/traces',
   CORS_ORIGIN: 'https://www.manaratak.com',
@@ -38,7 +38,7 @@ const productionEnv = {
   BACKGROUND_RETENTION_CRON: '15 2 * * *',
   MANARATAK_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.manaratak.internal/api/',
   MANARATAK_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
-  MANARATAK_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
+  MANARATAK_ASSET_PROVIDER_SIGNING_SECRET: 'e7c4b0a2d6f8e1c3b5a7d9f0e2c4a6b8',
   MANARATAK_IMPORT_RAW_RETENTION_DAYS: '365',
   ADMIN_AUTH_MODE: 'strict',
   SECURE_COOKIE: 'true',
@@ -101,4 +101,10 @@ describe('ProductionReadinessValidator', () => {
     const report = ProductionReadinessValidator.validate({ NODE_ENV: 'development', DATABASE_URL: 'postgresql://localhost/dev', REDIS_URL: 'redis://localhost:6379' });
     expect(report.ready).toBe(true);
   });
+});
+
+it.each(['production','staging'])('blocks the development CSRF default in %s readiness', NODE_ENV=>{
+  const report=ProductionReadinessValidator.validate({...productionEnv,NODE_ENV,CSRF_SECRET:'dev-csrf-secret-at-least-32-chars-long'});
+  expect(report.ready).toBe(false);
+  expect(report.findings.some(finding=>finding.id.toLowerCase().includes('csrf')&&finding.severity==='BLOCKER')).toBe(true);
 });

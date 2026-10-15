@@ -127,3 +127,22 @@ describe('CsrfClientManager', () => {
     expect((manager as any).cachedToken).toBeNull();
   });
 });
+
+it('discards an old bootstrap completing after rotation or logout',async()=>{
+ const manager=CsrfClientManager.getInstance('/api/v1');manager.clearToken();
+ let finish!:(response:Response)=>void;
+ vi.spyOn(globalThis,'fetch').mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve;})).mockResolvedValueOnce(Response.json({data:{csrfToken:'new-session-token'}}));
+ const old=manager.getCsrfToken();manager.clearToken();
+ expect(await manager.getCsrfToken()).toBe('new-session-token');
+ finish(Response.json({data:{csrfToken:'old-session-token'}}));expect(await old).toBeNull();
+ expect(await manager.getCsrfToken()).toBe('new-session-token');
+ vi.restoreAllMocks();manager.clearToken();
+});
+it('replaces a lowercase stale header on the one permitted CSRF retry without duplicating it',async()=>{
+ const manager=CsrfClientManager.getInstance('/api/v1');manager.clearToken();
+ const fetch=vi.spyOn(globalThis,'fetch').mockResolvedValueOnce(Response.json({error:{code:'CSRF_TOKEN_INVALID'}},{status:403})).mockResolvedValueOnce(Response.json({data:{csrfToken:'fresh'}})).mockResolvedValueOnce(Response.json({saved:true}));
+ const response=await manager.fetchWithCsrf('/api/v1/action',{method:'POST',headers:{'x-csrf-token':'stale','Idempotency-Key':'same-command'},body:'{}'});
+ expect(response.status).toBe(200);const headers=fetch.mock.calls[2][1]?.headers as Record<string,string>;
+ expect(Object.keys(headers).filter(key=>key.toLowerCase()==='x-csrf-token')).toHaveLength(1);expect(headers['X-CSRF-Token']).toBe('fresh');expect(headers['Idempotency-Key']).toBe('same-command');
+ vi.restoreAllMocks();manager.clearToken();
+});

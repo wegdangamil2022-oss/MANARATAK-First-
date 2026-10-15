@@ -25,6 +25,7 @@ export interface CsrfGuardOptions {
   headerName?: string;
   exemptPaths?: string[];
   exemptBearerAuth?: boolean;
+  allowedOrigins?: readonly string[];
 }
 
 export interface AdminGuardOptions {
@@ -117,64 +118,51 @@ export class SecurityMiddlewareFactory {
 
   public static createCsrfGuard(securityService: ISecurityService, options: CsrfGuardOptions = {}) {
     const headerName = options.headerName || 'x-csrf-token';
-    const defaultExemptPaths = [
-      '/auth/login',
-      '/auth/register',
-      '/auth/verify-email',
-      '/auth/resend-verification',
-      '/auth/forgot-password',
-      '/auth/reset-password',
-      '/auth/refresh'
-    ];
-    const exemptPaths = [...defaultExemptPaths, ...(options.exemptPaths || [])];
+    const publicAuthPaths = ['login', 'register', 'verify-email', 'resend-verification', 'forgot-password', 'reset-password'];
+    const normalizePath = (path: string) => path.replace(/\/+$/, '').toLowerCase() || '/';
+    const exemptPaths = new Set([
+      ...publicAuthPaths.flatMap(action => [`/auth/${action}`, `/api/v1/auth/${action}`]),
+      ...(options.exemptPaths ?? []),
+    ].map(normalizePath));
     const exemptBearerAuth = options.exemptBearerAuth ?? true;
+    const allowedOrigins = options.allowedOrigins && new Set(options.allowedOrigins.map(value => {
+      try { return new URL(value).origin; } catch { return ''; }
+    }).filter(value => value && value !== 'null'));
 
     return (req: Request, res: Response, next: NextFunction) => {
-      const method = req.method.toUpperCase();
-
-      // Safe HTTP methods (GET, HEAD, OPTIONS) do not mutate state and are allowed without CSRF token
-      if (['GET', 'HEAD', 'OPTIONS'].includes(method)) {
-        next();
-        return;
+      if (['GET', 'HEAD', 'OPTIONS'].includes(req.method.toUpperCase())) return next();
+      const reject = (code: string, message: string) => {
+        res.status(403).json({ error: { code, message }, meta: { timestamp: new Date().toISOString() } });
+      };
+      // CORS alone does not prevent a cross-origin request from mutating state.
+      // This app-level policy also covers sessionless login/registration requests.
+      if (allowedOrigins) {
+        const origin = req.get('origin');
+        const sameOrigin = `${req.protocol}://${req.get('host')}`;
+        if ((origin && origin !== sameOrigin && !allowedOrigins.has(origin)) ||
+            (!origin && req.get('sec-fetch-site') === 'cross-site')) {
+          reject('CSRF_ORIGIN_DENIED', 'Request origin is not allowed.'); return;
+        }
       }
-
-      // Check for exempted path prefixes or inclusions
-      if (exemptPaths.some((p) => req.path.startsWith(p) || req.path.includes(p))) {
-        next();
-        return;
-      }
-
-      // Requests carrying a Bearer token in the Authorization header are protected against ambient browser CSRF
-      if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-        next();
-        return;
-      }
+      const path = normalizePath(`${req.baseUrl ?? ''}${req.path}`);
+      if (exemptPaths.has(path)) return next();
 
       const sessionSecret = readRefreshCookie(req);
-      // Cookie-authenticated writes must provide a header token. Request bodies and query strings
-      // are intentionally not accepted: they are easier to leak through logs and redirects.
-      const token = req.get(headerName) || req.get('x-csrf-token');
-
-      // Requests authenticated with an Authorization bearer token remain supported for API clients.
-      // CSRF is a browser-cookie concern; no cookie means no ambient browser credential to protect.
+      const accessCookie = readAccessCookie(req);
+      const hasBearer = /^Bearer\s+\S+$/i.test(req.headers.authorization ?? '');
+      // Cookie credentials take precedence in our authenticators. A forged or
+      // valid Authorization header must never exempt an ambient cookie session.
       if (!sessionSecret) {
-        next();
-        return;
+        if (accessCookie || (hasBearer && !exemptBearerAuth)) {
+          reject('CSRF_SESSION_REQUIRED', 'A cookie session is required for CSRF protection.'); return;
+        }
+        // No ambient credential: authentication is still enforced by the route.
+        return next();
       }
-
+      const token = req.get(headerName);
       if (!token || !securityService.validateCsrfToken(token, sessionSecret)) {
-        res.status(403).json({
-          error: {
-            code: 'CSRF_TOKEN_INVALID',
-            message: 'Invalid or missing CSRF token.',
-          },
-          meta: {
-            timestamp: new Date().toISOString(),
-          },
-        });
-        return;
+        reject('CSRF_TOKEN_INVALID', 'Invalid or missing CSRF token.'); return;
       }
-
       next();
     };
   }

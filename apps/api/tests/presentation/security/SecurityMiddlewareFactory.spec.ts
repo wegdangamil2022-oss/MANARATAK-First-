@@ -459,7 +459,7 @@ describe('SecurityMiddlewareFactory CSRF guard middleware', () => {
       signingSecret: 'test-csrf-signing-secret-with-at-least-32-characters',
     });
     const middleware = SecurityMiddlewareFactory.createCsrfGuard(securityService, {
-      exemptPaths: ['/api/v1/public/webhook'],
+      exemptPaths: ['/api/v1/public/webhook/stripe'],
     });
 
     const req = {

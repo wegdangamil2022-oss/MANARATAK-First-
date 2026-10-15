@@ -142,3 +142,9 @@ describe('Course owner version boundaries', () => {
     expect(security.fetchWithCsrf).toHaveBeenCalledOnce();
   });
 });
+
+it('does not permanently disable refresh after a CSRF/permission 403',async()=>{
+ const {performAdminRefresh}=await import('./client');
+ security.fetchWithCsrf.mockResolvedValueOnce(Response.json({error:{code:'CSRF_TOKEN_INVALID'}},{status:403})).mockResolvedValueOnce(refreshed());
+ expect(await performAdminRefresh()).toBe(false);expect(await performAdminRefresh()).toBe(true);
+});

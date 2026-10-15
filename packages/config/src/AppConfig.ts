@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DEVELOPMENT_CSRF_SECRET, isStrongRuntimeSecret } from './RuntimeSecretPolicy';
 
 const envBoolean = z.preprocess((value) => {
   if (typeof value === 'boolean') return value;
@@ -77,29 +78,11 @@ export const PRODUCTION_REQUIRED_CONFIG_KEYS = Object.freeze([
   'OTEL_EXPORTER_OTLP_ENDPOINT',
 ] as const);
 
-const WEAK_SECRET_PATTERNS = [
-  'dev-secret',
-  'manaratak-local-development',
-  'manaratak-session-secret',
-  'manaratak-default-csrf-secret',
-  'manaratak-admin-bearer-token',
-  'change-me',
-  'placeholder',
-  '12345678',
-  'default-secret',
-  'short-secret',
-];
-
 function isLoopbackPostgres(value: string): boolean {
   try {
     const url = new URL(value);
     return ['postgresql:', 'postgres:'].includes(url.protocol) && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname.toLowerCase());
   } catch { return false; }
-}
-
-function isWeakSecret(secret: string): boolean {
-  const lower = secret.toLowerCase();
-  return WEAK_SECRET_PATTERNS.some(pattern => lower.includes(pattern));
 }
 
 export const AppConfigSchema = z.preprocess((input) => {
@@ -120,7 +103,7 @@ export const AppConfigSchema = z.preprocess((input) => {
       ACCESS_TOKEN_TTL_SECONDS: env.ACCESS_TOKEN_TTL_SECONDS || 900,
       SESSION_TTL_SECONDS: env.SESSION_TTL_SECONDS || 604800,
       SECURE_COOKIE: env.SECURE_COOKIE ?? false,
-      CSRF_SECRET: env.CSRF_SECRET || 'dev-csrf-secret-at-least-32-chars-long',
+      CSRF_SECRET: env.CSRF_SECRET || DEVELOPMENT_CSRF_SECRET,
       ADMIN_AUTH_MODE: env.ADMIN_AUTH_MODE || 'strict',
       JWT_ISSUER: env.JWT_ISSUER || 'manaratak-local',
       JWT_AUDIENCE: env.JWT_AUDIENCE || 'manaratak-local-clients',
@@ -369,7 +352,7 @@ export const AppConfigSchema = z.preprocess((input) => {
         message: 'CSRF_SECRET must be at least 32 characters long in production/staging',
         path: ['CSRF_SECRET'],
       });
-    } else if (isWeakSecret(data.CSRF_SECRET)) {
+    } else if (!isStrongRuntimeSecret(data.CSRF_SECRET)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'CSRF_SECRET uses a known insecure default or weak pattern in production/staging',

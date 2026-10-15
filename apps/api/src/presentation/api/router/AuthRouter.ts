@@ -2,12 +2,10 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { IAuthService, IPrincipalAccessValidator, ISecurityService, ISessionManager, ITokenProvider } from '@manaratak/core';
 import type { MfaUseCases, ICredentialVerifier, RegisterUserUseCase, VerifyEmailUseCase, ResendVerificationUseCase } from '@manaratak/application';
-import { ForgotPasswordUseCase, ResetPasswordUseCase } from '@manaratak/application';
-import { CapturedEmailDeliveryGateway, InMemoryPasswordResetTokenRepository, PasswordHasher } from '@manaratak/infrastructure';
-import { AuthorizationEvaluatorService, IEmailDeliveryGateway, IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@manaratak/domain';
+import type { ForgotPasswordUseCase, ResetPasswordUseCase } from '@manaratak/application';
+import { AuthorizationEvaluatorService, IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@manaratak/domain';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { clearAuthCookies, readAccessCookie, readRefreshCookie, setAuthCookies, readRememberMeCookie } from '../../security/HttpOnlyAuthCookies.js';
-import { createHash } from 'node:crypto';
 import type { ChangePasswordUseCase, DisablePasswordCredentialUseCase } from '@manaratak/application';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
 import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
@@ -26,8 +24,9 @@ export class AuthRouter {
     sessionManager?: ISessionManager;
     principalAccessValidator: IPrincipalAccessValidator;
     credentialVerifier?: ICredentialVerifier;
-    emailDeliveryGateway?: IEmailDeliveryGateway;
-    forgotPasswordUseCase?: ForgotPasswordUseCase;
+    forgotPasswordUseCase: ForgotPasswordUseCase;
+    resetPasswordUseCase: ResetPasswordUseCase;
+    authRateLimitKey: (value: string) => string;
     registerUserUseCase?: RegisterUserUseCase;
     verifyEmailUseCase?: VerifyEmailUseCase;
     resendVerificationUseCase?: ResendVerificationUseCase;
@@ -45,27 +44,33 @@ export class AuthRouter {
       return SecurityMiddlewareFactory.createCsrfGuard(securityService)(req, res, next);
     };
 
-    const productionLike = process.env.NODE_ENV === 'production' ||
-      process.env.NODE_ENV === 'staging' ||
-      process.env.MANARATAK_RUNTIME_PROFILE === 'staging' ||
-      process.env.MANARATAK_RUNTIME_PROFILE === 'production';
-    const emailGateway = cradle.emailDeliveryGateway;
-    if (!cradle.forgotPasswordUseCase && !emailGateway && productionLike) throw new Error('Email delivery gateway is required for production auth routes');
-    const passwordResetTokenRepo = (cradle as any).passwordResetTokenRepository || (cradle as any).prismaPasswordResetTokenRepository || new InMemoryPasswordResetTokenRepository();
-    const forgotPasswordUseCase = (cradle as any).forgotPasswordUseCase || new ForgotPasswordUseCase({
-      identityRepository,
-      tokenRepository: passwordResetTokenRepo,
-      emailDeliveryGateway: emailGateway || new CapturedEmailDeliveryGateway(),
-    });
-    const resetPasswordUseCase = (cradle as any).resetPasswordUseCase || new ResetPasswordUseCase({
-      identityRepository,
-      tokenRepository: passwordResetTokenRepo,
-      sessionManager,
-      passwordHasher: {
-        hash: (pw: string) => PasswordHasher.hash(pw),
-      },
-      prismaClient: (cradle as any).prisma,
-    });
+    const { forgotPasswordUseCase, resetPasswordUseCase, authRateLimitKey } = cradle;
+    if (!forgotPasswordUseCase || !resetPasswordUseCase || !authRateLimitKey) {
+      throw new Error('AUTH_DEPENDENCIES_REQUIRED');
+    }
+    const authBudget = (action: string, budget: number, windowMs: number, identifier: (req: Request) => string | undefined) =>
+      async (req: Request, res: Response, next: NextFunction) => {
+        try {
+          const ip = req.ip || req.socket.remoteAddress || 'unknown';
+          const account = identifier(req);
+          const limits = await Promise.all([
+            securityService.getRateLimiter().consume(`auth:${action}:ip:${ip}`, Math.max(10, budget * 4), windowMs),
+            ...(account ? [securityService.getRateLimiter().consume(`auth:${action}:account:${authRateLimitKey(account)}`, budget, windowMs)] : []),
+          ]);
+          if (limits.some(limit => !limit.allowed)) {
+            const retryAfter = Math.max(1, Math.ceil((Math.max(...limits.map(limit => limit.resetTime)) - Date.now()) / 1000));
+            res.setHeader('Retry-After', String(retryAfter));
+            res.status(429).json(responseFormatter.error({ code: 'AUTH_RATE_LIMITED', message: 'Too many authentication attempts. Please try again later.' }));
+            return;
+          }
+          next();
+        } catch {
+          res.status(503).json(responseFormatter.error({ code: 'AUTH_UNAVAILABLE', message: 'Authentication is temporarily unavailable.' }));
+        }
+      };
+    const emailKey = (field: string) => (req: Request) => typeof req.body?.[field] === 'string'
+      ? req.body[field].trim().toLowerCase().slice(0, 255) : undefined;
+    const tokenKey = (req: Request) => typeof req.body?.token === 'string' ? req.body.token.trim().slice(0, 512) : undefined;
 
     router.post('/change-password',
       (req, res, next) => {
@@ -186,7 +191,7 @@ export class AuthRouter {
       try {
         await tokenProvider.validateRefreshToken(refreshToken);
         const refreshSession = await sessionManager.findRefreshSession(refreshToken);
-        if (!refreshSession || !await principalAccessValidator.isAuthenticationAllowed(refreshSession.userId)) {
+        if (!refreshSession || !await sessionManager.isSessionActive(refreshSession.userId, refreshSession.sessionId) || !await principalAccessValidator.isAuthenticationAllowed(refreshSession.userId)) {
           if (refreshSession) await sessionManager.revokeAllSessions(refreshSession.userId);
           throw new Error('Inactive session');
         }
@@ -327,7 +332,7 @@ export class AuthRouter {
         }
 
         const { email, password, rememberMe, mfaCode } = parseResult.data;
-        const accountKey = createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
+        const accountKey = authRateLimitKey(email.trim().toLowerCase());
         const remoteAddress = req.ip || req.socket.remoteAddress || 'unknown';
         const [accountLimit, accountIpLimit] = await Promise.all([
           securityService.getRateLimiter().consume(`auth:account:${accountKey}`, 20, 15 * 60 * 1000),
@@ -379,7 +384,7 @@ export class AuthRouter {
     });
 
     // 2. POST /refresh
-    router.post('/refresh', async (req: Request, res: Response) => {
+    router.post('/refresh', credentialCsrfGuard, async (req: Request, res: Response) => {
       try {
         const refreshToken = readRefreshCookie(req);
         if (!refreshToken) {
@@ -402,7 +407,7 @@ export class AuthRouter {
     });
 
     // 3. POST /logout
-    router.post('/logout', async (req: Request, res: Response) => {
+    router.post('/logout', credentialCsrfGuard, async (req: Request, res: Response) => {
       let failed = false;
       try {
         const refreshToken = readRefreshCookie(req);
@@ -423,23 +428,10 @@ export class AuthRouter {
       }
     });
 
-    if (!productionLike) {
-      router.get('/diagnostic/captured-emails', (_req: Request, res: Response) => {
-        if (emailGateway instanceof CapturedEmailDeliveryGateway) {
-          res.json(responseFormatter.success({
-            verificationEmails: emailGateway.getDispatchedEmails(),
-            resetEmails: emailGateway.getDispatchedResetEmails(),
-          }));
-        } else {
-          res.json(responseFormatter.success({ verificationEmails: [], resetEmails: [] }));
-        }
-      });
-    }
-
-    router.post('/register', async (req: Request, res: Response) => {
+    router.post('/register', authBudget('register', 5, 60 * 60_000, emailKey('primaryEmail')), async (req: Request, res: Response) => {
       const parsed = z.object({
         displayName: z.string().trim().min(1),
-        primaryEmail: z.string().trim().email(),
+        primaryEmail: z.string().trim().email().max(255),
         password: z.string().min(8).max(128),
         preferredLanguage: z.string().optional(),
       }).strict().safeParse(req.body);
@@ -452,16 +444,22 @@ export class AuthRouter {
         return;
       }
       try {
-        res.status(201).json(responseFormatter.success(await cradle.registerUserUseCase.execute(parsed.data)));
+        await cradle.registerUserUseCase.execute(parsed.data);
+        res.status(202).json(responseFormatter.success({ registrationPending: true, message: 'If registration can proceed, check your email for the next step.' }));
       } catch (error: any) {
-        res.status(error.code === 'EMAIL_ALREADY_EXISTS' ? 409 : 500).json(responseFormatter.error({
+        if (error.code === 'EMAIL_ALREADY_EXISTS') {
+          await credentialVerifier?.verifyDummy?.(parsed.data.password);
+          res.status(202).json(responseFormatter.success({ registrationPending: true, message: 'If registration can proceed, check your email for the next step.' }));
+          return;
+        }
+        res.status(500).json(responseFormatter.error({
           code: error.code || 'REGISTRATION_FAILED', message: 'Registration failed',
         }));
       }
     });
 
-    router.post('/verify-email', async (req: Request, res: Response) => {
-      const parsed = z.object({ token: z.string().trim().min(1) }).strict().safeParse(req.body);
+    router.post('/verify-email', authBudget('verify-email', 10, 15 * 60_000, tokenKey), async (req: Request, res: Response) => {
+      const parsed = z.object({ token: z.string().trim().min(1).max(512) }).strict().safeParse(req.body);
       if (!parsed.success) {
         res.status(400).json(responseFormatter.error({ code: 'VALIDATION_ERROR', message: 'Verification token is required' }));
         return;
@@ -480,7 +478,7 @@ export class AuthRouter {
       }
     });
 
-    router.post('/resend-verification', async (req: Request, res: Response) => {
+    router.post('/resend-verification', authBudget('resend-verification', 1, 60_000, emailKey('email')), async (req: Request, res: Response) => {
       const parsed = z.object({ email: z.string().trim().email() }).strict().safeParse(req.body);
       if (!parsed.success) {
         res.status(400).json(responseFormatter.error({ code: 'VALIDATION_ERROR', message: 'Invalid email address' }));
@@ -542,10 +540,10 @@ export class AuthRouter {
     });
 
     // 8. POST /reset-password
-    router.post('/reset-password', async (req: Request, res: Response) => {
+    router.post('/reset-password', authBudget('reset-password', 5, 15 * 60_000, tokenKey), async (req: Request, res: Response) => {
       try {
         const schema = z.object({
-          token: z.string().trim().min(1, 'Reset token is required'),
+          token: z.string().trim().min(1, 'Reset token is required').max(512),
           newPassword: z.string().min(8, 'Password must be at least 8 characters long').max(128),
         }).strict();
         const parseResult = schema.safeParse(req.body);
