@@ -330,6 +330,14 @@ export class FinanceAdminRouter {
           .json(await financePlatformUseCases.createAdjustmentCase(body, identity(req)));
       }),
     );
+    router.get(
+      '/ledger/transactions/:id',
+      asyncHandler(async (req: Request, res: Response) => {
+        res.setHeader('Cache-Control', 'no-store');
+        await requireFinancePermission(req, 'admin:finance:manage');
+        res.json(await financeAdminUseCases.getLedgerTransaction(req.params.id));
+      }),
+    );
     router.post(
       '/ledger/transactions',
       asyncHandler(async (req: Request, res: Response) => {
@@ -361,14 +369,17 @@ export class FinanceAdminRouter {
       '/ledger/transactions/:id/reverse',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:ledger:reverse');
-        const body = z.object({ approvalId: z.string().trim().min(1).max(160) }).parse(req.body);
+        const body = z.object({
+          approvalId: z.string().trim().min(1).max(160),
+          reason: z.string().trim().min(3).max(500),
+        }).strict().parse(req.body);
         res
           .status(201)
           .json(
             await financePlatformUseCases.reverseLedger(
               req.params.id,
               body.approvalId,
-              identity(req),
+              identity(req, body.reason),
             ),
           );
       }),
@@ -605,7 +616,7 @@ export class FinanceAdminRouter {
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:approval:decide');
         const body = z
-          .object({ decision: z.enum(['APPROVE', 'REJECT']), reason: z.string().optional() })
+          .object({ expectedVersion: z.number().int().positive(), decision: z.enum(['APPROVE', 'REJECT']), reason: z.string().trim().max(500).optional() }).strict()
           .parse(req.body);
         const approval = await financePlatformUseCases.getRecord('approvals', req.params.id);
         if (!approval) throw new Error('FINANCE_RECORD_NOT_FOUND');

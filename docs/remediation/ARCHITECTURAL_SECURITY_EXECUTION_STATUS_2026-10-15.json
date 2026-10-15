@@ -501,21 +501,22 @@
     ]
   },
   "B13": {
-    "status": "IN_PROGRESS",
+    "status": "SOURCE_IMPLEMENTED_VERIFICATION_INCOMPLETE",
     "packageClosed": false,
     "baselineCommit": "44467b3a",
     "findings": [
       "ADM-07"
     ],
-    "currentStep": "APPEND_ONLY_LEDGER_REVERSAL",
+    "currentStep": "SOURCE_RECONCILIATION_AND_UNEXECUTED_CHECKS",
     "completedSteps": [
       "FINANCIAL_ACCOUNT_READ_SOURCE_VERIFIED",
       "INVOICE_INSTALLMENTS_SOURCE_REVIEWED_LIGHT_CHECKED",
       "CREDIT_NOTE_SOURCE_REVIEWED_CHECKS_INCOMPLETE",
-      "WALLET_OPERATIONS_SOURCE_REVIEWED_LIGHT_CHECKED"
+      "WALLET_OPERATIONS_SOURCE_REVIEWED_LIGHT_CHECKED",
+      "LEDGER_REVERSAL_SOURCE_REVIEWED_LIGHT_CHECKED"
     ],
     "specification": "docs/remediation/specs/B13_FINANCE_OWNER_CONTRACT_2026-10-15.md",
-    "report": "docs/reviews/B13d_WALLET_OPERATIONS_2026-10-15.md",
+    "report": "docs/reviews/B13e_LEDGER_REVERSAL_2026-10-15.md",
     "runtimeDatabaseStatus": "PENDING",
     "deploymentStatus": "NOT_PERFORMED",
     "schemaChanged": false,
@@ -536,9 +537,7 @@
         "diffCheck": "PASS"
       }
     },
-    "remainingSteps": [
-      "Append-only ledger reversal operator contract and UI"
-    ],
+    "remainingSteps": [],
     "runtimePrerequisites": [
       "Isolated PostgreSQL account snapshot/read and role/browser rehearsal",
       "Per-operation idempotency/version/approval and financial append-only database rehearsal before enabling effects",
@@ -694,6 +693,61 @@
           },
           {
             "name": "same key cannot change release to capture",
+            "result": "PASS"
+          }
+        ],
+        "limitations": [
+          "Not Vitest, TypeScript typecheck, Prisma SQL or PostgreSQL execution",
+          "No provider, operational database, build or broad suite",
+          "Original transaction body executed after removing TypeScript-only annotations; dependencies are explicit doubles"
+        ]
+      },
+      "typesNoEmit": "NOT_RUN_EXEC_ENVIRONMENT_DISCONNECTED",
+      "uiHttpTests": "NOT_RUN_EXEC_ENVIRONMENT_DISCONNECTED",
+      "runtimeDatabaseStatus": "PENDING"
+    },
+    "reversalAcceptance": {
+      "status": "SOURCE_REVIEWED_LIGHT_CHECKED",
+      "report": "docs/reviews/B13e_LEDGER_REVERSAL_2026-10-15.md",
+      "checks": {
+        "kind": "V8_EXTRACTED_REVERSAL_AND_APPROVAL_CONSUMPTION_WITH_IN_MEMORY_DOUBLES",
+        "passed": 9,
+        "failed": 0,
+        "cases": [
+          {
+            "name": "append-only opposing postings, replay consumes and posts once",
+            "result": "PASS"
+          },
+          {
+            "name": "changing approval on same key rejects",
+            "result": "PASS"
+          },
+          {
+            "name": "second reversal with a new key rejects",
+            "result": "PASS"
+          },
+          {
+            "name": "owner-managed transaction cannot be manually reversed",
+            "result": "PASS"
+          },
+          {
+            "name": "existing server policy accepts distinct eligible checkers",
+            "result": "PASS"
+          },
+          {
+            "name": "maker cannot count as checker",
+            "result": "PASS"
+          },
+          {
+            "name": "same checker cannot count twice",
+            "result": "PASS"
+          },
+          {
+            "name": "expired approval rejected",
+            "result": "PASS"
+          },
+          {
+            "name": "consumed approval rejected",
             "result": "PASS"
           }
         ],

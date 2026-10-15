@@ -1035,6 +1035,13 @@ export class PrismaFinanceRepository implements IFinanceRepository {
       return row;
     });
   }
+  async getLedgerTransaction(id: string) {
+    const row = await this.db.financialTransactionRecord.findFirst({
+      where: {OR: [{id}, {publicId: id}]},
+      include: {entries: {orderBy: {sequence: 'asc'}}, reversal: {select: {id: true}}},
+    });
+    return row ? this.transaction(row) : null;
+  }
   async postLedgerTransaction(data: PostLedgerTransactionInput) {
     validateBalancedPostings(data.postings);
     return this.tx(async (tx) => {
@@ -1075,7 +1082,10 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     ctx: FinanceMutationContext,
     approval: FinanceApprovalBinding,
   ) {
+    const payload = {approvalId: approval.approvalId, reason: ctx.reason ?? null};
     return this.tx(async (tx) => {
+      const receipt = await this.commandReplay(tx, ctx, 'MANUAL_LEDGER_REVERSE', transactionId, payload);
+      if (receipt) return receipt;
       const original = await tx.financialTransactionRecord.findFirst({
         where: { OR: [{ id: transactionId }, { publicId: transactionId }] },
         include: { entries: true, reversal: true },
@@ -1112,7 +1122,9 @@ export class PrismaFinanceRepository implements IFinanceRepository {
         originalTransactionId: original.id,
         approvalId: approval.approvalId,
       });
-      return this.transaction(row);
+      const response = this.transaction(row);
+      await this.storeCommand(tx, ctx, 'MANUAL_LEDGER_REVERSE', transactionId, payload, response);
+      return response;
     });
   }
 
@@ -1798,7 +1810,12 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     return rows.map((row: any) => this.transfer(row));
   }
   async createApproval(data: any, ctx: FinanceMutationContext) {
+    const payload = {actionType: data.actionType, targetReferenceId: data.targetReferenceId,
+      amount: data.amount ?? null, makerId: data.makerId, payloadHash: data.payloadHash,
+      requiredApprovals: data.requiredApprovals, policyReference: data.policyReference};
     return this.tx(async (tx) => {
+      const replay = await this.commandReplay(tx, ctx, 'FINANCIAL_APPROVAL_CREATE', data.targetReferenceId, payload);
+      if (replay) return replay;
       if (!data.payloadHash || !data.policyReference)
         throw new Error('Approval payload and policy binding are required');
       const policy = financeApprovalPolicy(data.actionType);
@@ -1831,7 +1848,9 @@ export class PrismaFinanceRepository implements IFinanceRepository {
         policyReference: row.policyReference,
         payloadHash: row.payloadHash,
       });
-      return this.approval(row);
+      const response = this.approval(row);
+      await this.storeCommand(tx, ctx, 'FINANCIAL_APPROVAL_CREATE', data.targetReferenceId, payload, response);
+      return response;
     });
   }
   async getApproval(id: string) {
@@ -1848,7 +1867,13 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     reason: string | undefined,
     ctx: FinanceMutationContext,
   ) {
+    if (checkerId !== ctx.actorId) throw new Error('FINANCE_CHECKER_IDENTITY_MISMATCH');
+    const payload = {decision, reason: reason ?? null, expectedVersion: ctx.expectedVersion};
     return this.tx(async (tx) => {
+      const replay = await this.commandReplay(tx, ctx, 'FINANCIAL_APPROVAL_DECIDE', id, payload);
+      if (replay) return replay;
+      if (!Number.isSafeInteger(ctx.expectedVersion) || ctx.expectedVersion! < 1)
+        throw new Error('FINANCE_EXPECTED_VERSION_REQUIRED');
       const current = await tx.financeApprovalRecord.findFirst({
         where: { OR: [{ id }, { publicId: id }] },
         include: { decisions: true },
@@ -1872,7 +1897,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
           ? 'APPROVED'
           : 'PENDING';
       const updated = await tx.financeApprovalRecord.updateMany({
-        where: { id: current.id, status: 'PENDING', expiresAt: { gt: new Date() } },
+        where: { id: current.id, version: current.version, status: 'PENDING', expiresAt: { gt: new Date() } },
         data: { status, version: { increment: 1 } },
       });
       if (updated.count !== 1) throw new Error('Approval decision lost a concurrent state race');
@@ -1882,7 +1907,9 @@ export class PrismaFinanceRepository implements IFinanceRepository {
       });
       if (!row) throw new Error('Approval disappeared during decision');
       await this.govern(tx, ctx, `FINANCE_APPROVAL_${decision}D`, current.id, { checkerId });
-      return this.approval(row);
+      const response = this.approval(row);
+      await this.storeCommand(tx, ctx, 'FINANCIAL_APPROVAL_DECIDE', id, payload, response);
+      return response;
     });
   }
   async listApprovals(status?: string) {
@@ -3540,6 +3567,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
       currencyCode: row.currencyCode,
       scale: row.scale,
       reversalOfId: row.reversalOfId,
+      reversalId: row.reversal?.id ?? null,
       createdBy: row.createdBy,
       createdAt: row.createdAt,
       entries: row.entries.map((entry: any) => ({

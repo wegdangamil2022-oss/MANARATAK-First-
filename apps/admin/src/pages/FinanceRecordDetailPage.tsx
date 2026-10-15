@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
+import type { FinancialApprovalDto } from '@manaratak/domain';
+import { FinanceApprovalDecisionPanel } from './FinanceApprovalDecisionPanel';
 import { financeMoney } from './financePresentation';
 const kinds = ['payments', 'refunds', 'transfers', 'approvals', 'commissions'];
 export function FinanceRecordDetailPage() {
@@ -11,6 +13,7 @@ export function FinanceRecordDetailPage() {
     [error, setError] = useState(''),
     [loading, setLoading] = useState(true);
   const sequence = useRef(0);
+  const [refresh, setRefresh] = useState(0);
   useEffect(() => {
     const request = ++sequence.current;
     let cancelled = false;
@@ -37,7 +40,7 @@ export function FinanceRecordDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [kind, id, t]);
+  }, [kind, id, t, refresh]);
   const paymentId = data?.paymentId || data?.sourcePaymentId;
   const targetKind =
     data?.actionType === 'TRANSFER_APPROVE'
@@ -64,7 +67,9 @@ export function FinanceRecordDetailPage() {
           {(data.amount || data.sourceAmount) && (
             <p dir="ltr">{financeMoney(data.amount || data.sourceAmount)}</p>
           )}
-          <p>{t('finance_read_only')}</p>
+          {kind === 'approvals' ? <FinanceApprovalDecisionPanel
+            approval={data as unknown as FinancialApprovalDto} refresh={() => setRefresh(value => value + 1)} />
+            : <p>{t('finance_read_only')}</p>}
           {data.invoiceId && (
             <Link
               className="block underline"

@@ -18,6 +18,11 @@ export class FinanceAdminUseCases {
   getWalletOperations(walletId: string, page: number, pageSize: number) {
     return this.repository.getWalletOperations(walletId, page, pageSize);
   }
+  async getLedgerTransaction(id: string) {
+    const record = await this.repository.getLedgerTransaction(id);
+    if (!record) throw new Error('Financial transaction not found');
+    return record;
+  }
   listInvoices(filters: FinanceInvoiceFilters): Promise<PaginatedFinanceResult<FinanceInvoiceDto>> {
     return this.repository.listInvoices(filters);
   }

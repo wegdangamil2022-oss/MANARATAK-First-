@@ -817,7 +817,13 @@ export class FinancePlatformUseCases {
       if (!adjustment || adjustment.makerId !== identity.actorId || adjustment.status !== 'OPEN')
         throw new Error('FINANCE_ADJUSTMENT_EVIDENCE_REQUIRED');
     } else if (input.actionType === 'MANUAL_LEDGER_REVERSE') {
-      effectivePayload = { transactionId: input.targetReferenceId };
+      const transaction = await this.repository.getLedgerTransaction(input.targetReferenceId);
+      if (!transaction || transaction.businessReferenceType !== 'MANUAL_ADJUSTMENT' ||
+          transaction.reversalOfId || transaction.reversalId)
+        throw new Error('FINANCE_OWNER_MANAGED_REVERSAL_FORBIDDEN');
+      input.targetReferenceId = transaction.id;
+      effectivePayload = {transactionId: transaction.id};
+      effectiveAmount = undefined;
     }
     if (effectivePayload === undefined) throw new Error('Approval command payload is required');
     if (effectiveAmount) await this.assertCanonicalMoney(effectiveAmount);
@@ -1016,7 +1022,8 @@ export class FinancePlatformUseCases {
   ) {
     const approval = await this.repository.getApproval(id);
     if (!approval) throw new Error('Approval not found');
-    assertCheckerEligible(approval.makerId, checkerId, approval.decisions);
+    if (checkerId !== identity.actorId) throw new Error('FINANCE_CHECKER_IDENTITY_MISMATCH');
+    // Eligibility and replay must be checked atomically by the owner.
     if (decision === 'REJECT' && !reason?.trim()) throw new Error('Reject reason is required');
     return this.repository.decideApproval(id, decision, checkerId, reason, context(identity));
   }

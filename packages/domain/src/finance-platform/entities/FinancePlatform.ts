@@ -105,6 +105,7 @@ export interface FinancialTransactionDto {
   currencyCode: string;
   scale: number;
   reversalOfId?: string | null;
+  reversalId?: string | null;
   createdBy: string;
   createdAt: Date | string;
   entries: LedgerEntryDto[];

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { financeMoney } from './financePresentation';
+import { FinanceLedgerPanel } from './FinanceLedgerPanel';
 import { FinanceWalletPanel } from './FinanceWalletPanel';
 import { FinanceAccountsPanel } from './FinanceAccountsPanel';
 
@@ -12,6 +13,7 @@ const tabs = [
   'overview',
   'accounts',
   'wallets',
+  'ledger',
   'invoices',
   'payments',
   'refunds',
@@ -37,6 +39,7 @@ const endpoints: Record<Tab, string> = {
   overview: 'overview',
   accounts: 'accounts',
   wallets: 'wallets',
+  ledger: 'ledger/transactions',
   invoices: 'invoices',
   payments: 'payments',
   refunds: 'refunds',
@@ -104,7 +107,7 @@ export function FinanceAdminPage() {
     setLoading(true);
     setError('');
     setData(null);
-    if (tab === 'accounts' || tab === 'wallets') {
+    if (tab === 'accounts' || tab === 'wallets' || tab === 'ledger') {
       setLoading(false);
       return;
     }
@@ -263,6 +266,7 @@ export function FinanceAdminPage() {
               </button>
             </div>
           )}
+          {tab === 'ledger' && <FinanceLedgerPanel refreshToken={refresh} />}
           {tab === 'wallets' && <FinanceWalletPanel refreshToken={refresh} />}
           {tab === 'accounts' && <FinanceAccountsPanel refreshToken={refresh} />}
           {error && (

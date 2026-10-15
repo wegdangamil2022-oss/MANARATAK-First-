@@ -191,6 +191,7 @@ export interface IFinanceRepository {
     data: Omit<FinancialAccountDto, 'id' | 'createdAt' | 'version'>,
     context: FinanceMutationContext,
   ): Promise<FinancialAccountDto>;
+  getLedgerTransaction(id: string): Promise<FinancialTransactionDto | null>;
   postLedgerTransaction(data: PostLedgerTransactionInput): Promise<FinancialTransactionDto>;
   reverseLedgerTransaction(
     transactionId: string,
