@@ -1843,4 +1843,12 @@ export const en = {
   finance_account_management: "Account management",
   finance_account_system: "System managed",
   finance_account_manual: "Administratively managed",
+  finance_installments: "Invoice installments",
+  finance_installment_owner_validation: "Finance validates the installment total against the outstanding amount and the due date order.",
+  finance_installment_amount: "Installment amount",
+  finance_installment_due: "Due date and time (local)",
+  finance_add_installment: "Add installment",
+  finance_create_installments: "Create installment plan",
+  finance_confirm_installments: "Create this installment plan for the invoice?",
+  finance_invalid_installments: "Check installment amounts and due dates.",
 };

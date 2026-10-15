@@ -1841,4 +1841,12 @@ export const ar = {
   finance_account_management: "إدارة الحساب",
   finance_account_system: "يديره النظام",
   finance_account_manual: "يدار إداريًا",
+  finance_installments: "تقسيط الفاتورة",
+  finance_installment_owner_validation: "تتحقق المالية من تطابق مجموع الأقساط مع المستحق ومن ترتيب مواعيدها.",
+  finance_installment_amount: "مبلغ القسط",
+  finance_installment_due: "تاريخ ووقت الاستحقاق المحلي",
+  finance_add_installment: "إضافة قسط",
+  finance_create_installments: "إنشاء خطة تقسيط",
+  finance_confirm_installments: "تأكيد إنشاء خطة التقسيط لهذه الفاتورة؟",
+  finance_invalid_installments: "تحقق من مبالغ الأقساط ومواعيد الاستحقاق.",
 };

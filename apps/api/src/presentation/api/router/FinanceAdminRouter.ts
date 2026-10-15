@@ -186,9 +186,10 @@ export class FinanceAdminRouter {
         await requireFinancePermission(req, 'admin:finance:invoice:manage');
         const body = z
           .object({
+            expectedVersion: z.number().int().positive(),
             installments: z
-              .array(z.object({ amount: moneySchema, dueDate: z.coerce.date() }))
-              .min(1),
+              .array(z.object({ amount: moneySchema, dueDate: z.coerce.date() }).strict())
+              .min(1).max(100),
           })
           .parse(req.body);
         res

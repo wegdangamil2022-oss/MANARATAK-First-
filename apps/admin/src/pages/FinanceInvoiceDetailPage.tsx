@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
+import { FinanceInstallmentsForm } from './FinanceInstallmentsForm';
 import { financeMoney, financeParseAmount, type FinanceMoney } from './financePresentation';
 type Line = {
   description: string;
@@ -34,7 +35,7 @@ type Draft = {
   scale: number;
   metadata?: Record<string, unknown> | null;
 };
-type Intent = { action: 'items' | 'issue' | 'void'; body: string; key: string; invoiceId: string };
+type Intent = { action: 'items' | 'issue' | 'void' | 'installment-plans'; body: string; key: string; invoiceId: string };
 const invoiceLines = (invoice: Invoice): Draft[] =>
   invoice.lineItems.map((line) => ({
     description: line.description,
@@ -136,7 +137,13 @@ export function FinanceInvoiceDetailPage() {
       if (alive.current) setBusy(false);
     }
   };
-  const mutate = (action: Intent['action']) => {
+  const advanced = (action: Intent['action'], fields: Record<string, unknown>) => {
+    if (!invoice || busy || intent || mutationBusy.current || editing) return;
+    const command: Intent = {action, invoiceId: invoice.id, key: createAdminIdempotencyKey(),
+      body: JSON.stringify({...fields, expectedVersion: invoice.version})};
+    setIntent(command); void send(command);
+  };
+  const mutate = (action: 'items' | 'issue' | 'void') => {
     if (!invoice || busy || intent) return;
     try {
       if (action !== 'items' && dirty) throw new Error(t('finance_save_draft_first'));
@@ -394,6 +401,11 @@ export function FinanceInvoiceDetailPage() {
                 </tbody>
               </table>
             </div>
+          )}
+          {['ISSUED', 'PARTIALLY_PAID', 'OVERDUE'].includes(invoice.status) && (
+            <FinanceInstallmentsForm key={`${invoice.id}:${invoice.version}`}
+              amount={invoice.amountDue} disabled={busy || Boolean(intent) || editing}
+              submit={fields => advanced('installment-plans', fields)} />
           )}
           <h2 className="text-xl font-bold">{t('finance_tab_payments')}</h2>
           {payments.length ? (

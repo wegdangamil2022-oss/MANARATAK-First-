@@ -507,12 +507,13 @@
     "findings": [
       "ADM-07"
     ],
-    "currentStep": "INVOICE_INSTALLMENTS",
+    "currentStep": "CREDIT_NOTES",
     "completedSteps": [
-      "FINANCIAL_ACCOUNT_READ_SOURCE_VERIFIED"
+      "FINANCIAL_ACCOUNT_READ_SOURCE_VERIFIED",
+      "INVOICE_INSTALLMENTS_SOURCE_REVIEWED_LIGHT_CHECKED"
     ],
     "specification": "docs/remediation/specs/B13_FINANCE_OWNER_CONTRACT_2026-10-15.md",
-    "report": "docs/reviews/B13a_FINANCIAL_ACCOUNT_READ_2026-10-15.md",
+    "report": "docs/reviews/B13b_INVOICE_INSTALLMENTS_2026-10-15.md",
     "runtimeDatabaseStatus": "PENDING",
     "deploymentStatus": "NOT_PERFORMED",
     "schemaChanged": false,
@@ -534,7 +535,6 @@
       }
     },
     "remainingSteps": [
-      "Invoice installment operator contract and UI",
       "Credit note operator contract and UI",
       "Wallet hold/release/capture operator contracts and UI",
       "Append-only ledger reversal operator contract and UI"
@@ -543,6 +543,62 @@
       "Isolated PostgreSQL account snapshot/read and role/browser rehearsal",
       "Per-operation idempotency/version/approval and financial append-only database rehearsal before enabling effects",
       "Existing section 20 financial runtime approval remains pending; no provider invoked"
-    ]
+    ],
+    "installmentAcceptance": {
+      "status": "SOURCE_REVIEWED_LIGHT_CHECKED",
+      "report": "docs/reviews/B13b_INVOICE_INSTALLMENTS_2026-10-15.md",
+      "checks": {
+        "kind": "V8_EXTRACTED_TRANSACTION_BODY_WITH_IN_MEMORY_DOUBLES",
+        "passed": 9,
+        "failed": 0,
+        "cases": [
+          {
+            "name": "same request replay creates one schedule",
+            "result": "PASS"
+          },
+          {
+            "name": "changed payload with same request rejects",
+            "result": "PASS"
+          },
+          {
+            "name": "missing expected version",
+            "result": "PASS"
+          },
+          {
+            "name": "stale expected version",
+            "result": "PASS"
+          },
+          {
+            "name": "over invoice amount",
+            "result": "PASS"
+          },
+          {
+            "name": "different currency",
+            "result": "PASS"
+          },
+          {
+            "name": "reversed due dates",
+            "result": "PASS"
+          },
+          {
+            "name": "negative installment",
+            "result": "PASS"
+          },
+          {
+            "name": "invalid due date",
+            "result": "PASS"
+          }
+        ],
+        "limitations": [
+          "Not Vitest, TypeScript typecheck, Prisma SQL or PostgreSQL execution",
+          "No provider, operational database, build or broad suite",
+          "Original transaction body executed after removing TypeScript-only annotations; dependencies are explicit doubles"
+        ]
+      },
+      "typesNoEmit": "NOT_RUN_EXEC_ENVIRONMENT_DISCONNECTED",
+      "uiHttpTests": "NOT_RUN_EXEC_ENVIRONMENT_DISCONNECTED",
+      "runtimeDatabaseStatus": "PENDING"
+    },
+    "sourceMilestone": "INSTALLMENT_OWNER_AND_OPERATOR_IMPLEMENTED"
   }
 }

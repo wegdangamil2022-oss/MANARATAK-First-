@@ -1117,29 +1117,22 @@ export class FinancePlatformUseCases {
     installments: Array<{ amount: MoneyAmount; dueDate: Date | string }>,
     identity: FinanceCommandIdentity,
   ) {
-    const invoice = await this.requireInvoice(invoiceId);
-    if (
-      ![InvoiceStatus.ISSUED, InvoiceStatus.PARTIALLY_PAID, InvoiceStatus.OVERDUE].includes(
-        invoice.status,
-      )
-    )
-      throw new Error('Installment plan requires an issued invoice with outstanding value');
-    if (BigInt(invoice.amountDue.amountMinorUnits) <= 0n)
-      throw new Error('Invoice has no outstanding amount');
+    if (!installments.length || installments.length > 100)
+      throw new Error('FINANCE_INSTALLMENT_COUNT_INVALID');
     await Promise.all(installments.map((item) => this.assertCanonicalMoney(item.amount)));
-    validateInstallmentPlan(invoice.amountDue, installments);
-    if (new Date(installments[0].dueDate).getTime() <= Date.now())
-      throw new Error('First installment due date must be in the future');
+    const totalAmount = {
+      ...installments[0].amount,
+      amountMinorUnits: installments.reduce((sum, item) => sum + BigInt(item.amount.amountMinorUnits), 0n).toString(),
+    };
+    validateInstallmentPlan(totalAmount, installments);
     return this.repository.createInstallmentPlan(
       invoiceId,
       {
         invoiceId,
-        totalAmount: invoice.amountDue,
+        totalAmount,
         status: 'ACTIVE',
         installments: installments.map((item) => ({
-          id: randomUUID(),
-          ...item,
-          status: 'PENDING',
+          id: randomUUID(), ...item, status: 'PENDING',
         })),
       },
       context(identity),

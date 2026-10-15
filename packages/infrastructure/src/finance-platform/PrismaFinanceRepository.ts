@@ -25,6 +25,7 @@ import {
   PostLedgerTransactionInput,
   TransferStatus,
   validateBalancedPostings,
+  validateInstallmentPlan,
   FinancialAccountFilters,
   FinancialAccountDto,
   normalizeFinancialAccountFilters,
@@ -951,28 +952,48 @@ export class PrismaFinanceRepository implements IFinanceRepository {
     });
   }
   async createInstallmentPlan(invoiceId: string, plan: any, ctx: FinanceMutationContext) {
+    const payload = {
+      expectedVersion: ctx.expectedVersion,
+      installments: plan.installments.map((item: any) => ({
+        amount: item.amount, dueDate: new Date(item.dueDate).toISOString(),
+      })),
+    };
     return this.tx(async (tx) => {
+      const replay = await this.commandReplay(tx, ctx, 'INVOICE_INSTALLMENTS', invoiceId, payload);
+      if (replay) return replay;
+      if (!Number.isSafeInteger(ctx.expectedVersion) || ctx.expectedVersion! < 1)
+        throw new Error('FINANCE_EXPECTED_VERSION_REQUIRED');
+      const invoice = await tx.financeInvoiceRecord.findUnique({where: {id: invoiceId}});
+      if (!invoice || !['ISSUED', 'PARTIALLY_PAID', 'OVERDUE'].includes(invoice.status))
+        throw new Error('Installment plan requires an issued invoice with outstanding value');
+      this.checkVersion(invoice.version, ctx);
+      await this.assertNoPendingPayments(tx, invoiceId);
+      const total = money(invoice.dueMinorUnits, invoice.currencyCode, invoice.scale);
+      if (BigInt(total.amountMinorUnits) <= 0n || !payload.installments.length || payload.installments.length > 100)
+        throw new Error('FINANCE_INSTALLMENT_COUNT_INVALID');
+      validateInstallmentPlan(total, payload.installments);
+      if (new Date(payload.installments[0].dueDate).getTime() <= Date.now())
+        throw new Error('First installment due date must be in the future');
+      if (await tx.financeInstallmentPlanRecord.findFirst({where: {invoiceId, status: 'ACTIVE'}}))
+        throw new Error('FINANCE_INSTALLMENT_PLAN_ALREADY_ACTIVE');
+      await tx.financeInvoiceRecord.update({
+        where: {id: invoiceId, version: invoice.version}, data: {version: {increment: 1}},
+      });
       const row = await tx.financeInstallmentPlanRecord.create({
         data: {
-          publicId: `fin_plan_${randomUUID()}`,
-          invoiceId,
-          totalMinorUnits: plan.totalAmount.amountMinorUnits,
-          currencyCode: plan.totalAmount.currencyCode,
-          scale: plan.totalAmount.scale,
-          status: plan.status,
-          schedule: plan.installments,
+          publicId: `fin_plan_${randomUUID()}`, invoiceId,
+          totalMinorUnits: total.amountMinorUnits, currencyCode: total.currencyCode,
+          scale: total.scale, status: 'ACTIVE',
+          schedule: payload.installments.map((item: any) => ({...item, id: randomUUID(), status: 'PENDING'})),
         },
       });
-      await this.govern(tx, ctx, 'FINANCE_INSTALLMENT_PLAN_CREATED', row.id, {});
-      return {
-        id: row.id,
-        publicId: row.publicId,
-        invoiceId,
-        totalAmount: money(row.totalMinorUnits, row.currencyCode, row.scale),
-        status: row.status,
-        installments: row.schedule,
-        createdAt: row.createdAt,
+      const response = {
+        id: row.id, publicId: row.publicId, invoiceId, totalAmount: total,
+        status: row.status, installments: row.schedule, createdAt: row.createdAt,
       };
+      await this.govern(tx, ctx, 'FINANCE_INSTALLMENT_PLAN_CREATED', row.id, {invoiceId});
+      await this.storeCommand(tx, ctx, 'INVOICE_INSTALLMENTS', invoiceId, payload, response);
+      return response;
     });
   }
 

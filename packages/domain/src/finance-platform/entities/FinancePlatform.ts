@@ -356,6 +356,11 @@ export function validateInstallmentPlan(
   installments: readonly Pick<InstallmentDto, 'amount' | 'dueDate'>[],
 ): void {
   if (!installments.length) throw new Error('Installment plan requires installments');
+  for (const item of installments) {
+    assertValidMoneyAmount(item.amount);
+    if (BigInt(item.amount.amountMinorUnits) <= 0n || !Number.isFinite(new Date(item.dueDate).getTime()))
+      throw new Error('FINANCE_INSTALLMENT_INVALID');
+  }
   const sum = addMoneyAmounts(installments.map((item) => item.amount));
   assertSameCurrency(total, sum);
   if (sum.amountMinorUnits !== total.amountMinorUnits)
