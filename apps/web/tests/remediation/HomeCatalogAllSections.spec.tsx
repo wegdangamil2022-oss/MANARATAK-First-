@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FeaturedScholarships } from '../../src/features/public-template/components/FeaturedScholarships';
 import { FeaturedCountries } from '../../src/features/public-template/components/FeaturedCountries';
 import { FeaturedExams } from '../../src/features/public-template/components/FeaturedExams';
@@ -20,6 +20,7 @@ const noop = () => {};
 const render = (element: React.ReactElement) => renderToStaticMarkup(element);
 
 describe('public home sections retain inert card layouts without owner data', () => {
+  beforeEach(() => { locale.value = 'ar'; });
   const emptySections = [
     { kind: 'scholarships', count: 2, render: () => <FeaturedScholarships scholarships={[]} status="empty" onViewAllClick={noop} /> },
     { kind: 'countries', count: 8, render: () => <FeaturedCountries countries={[]} status="empty" onSelectCountry={noop} onViewAllClick={noop} /> },
