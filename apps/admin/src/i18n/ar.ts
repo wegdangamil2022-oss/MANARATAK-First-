@@ -800,6 +800,7 @@ export const ar = {
   "admin_nav_imports": "الاستيراد",
   "admin_nav_universities": "الجامعات",
   "admin_nav_majors": "التخصصات",
+  "admin_nav_reference_data": "البيانات المرجعية",
   "admin_nav_settings": "الإعدادات",
   "admin_nav_study_destinations": "دول الدراسة",
   "study_destination_filter": "تصفية حسب وجهة الدراسة",

@@ -37,6 +37,7 @@ const labels: Record<string, [string, string]> = {
   services: ['الخدمات', 'Services'],
   cms: ['المحتوى', 'CMS'],
   careers: ['الوظائف', 'Careers'],
+  'study-destinations': ['وجهات الدراسة', 'Study destinations'],
   workflow_review: ['انتظار المراجعة', 'Workflow review'],
   incomplete: ['بيانات ناقصة', 'Incomplete'],
   ready_to_publish: ['جاهز لدى المالك', 'Owner ready to publish'],

@@ -1,3 +1,5 @@
+import { adminPaths } from '../navigation/AdminRoutes';
+import { AdminLink } from '../components/AdminLink';
 import {
   useCallback,
   useEffect,
@@ -7,7 +9,6 @@ import {
   type DragEvent,
   type ReactNode,
 } from 'react';
-import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
   ArchiveRestore,
@@ -254,7 +255,7 @@ type DomainConfig = {
 };
 
 const DOMAIN_CONFIG: DomainConfig[] = [
-  { key: 'REFERENCE_DATA', ar: 'البيانات المرجعية', en: 'Reference Data', workspace: '/reference-data', importPath: '/imports/reference-data', icon: Sparkles, template: 'iso2Code,iso3Code,name,nameAr' },
+  { key: 'REFERENCE_DATA', ar: 'البيانات المرجعية', en: 'Reference Data', workspace: adminPaths.referenceData, importPath: '/imports/reference-data', icon: Sparkles, template: 'iso2Code,iso3Code,name,nameAr' },
   {
     key: 'ACADEMIC_TAXONOMY',
     ar: 'التصنيف الأكاديمي',
@@ -1180,7 +1181,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
           <div className="flex flex-wrap items-center gap-2">
             {fixedDomainConfig ? (
               <>
-                <Link
+                <AdminLink
                   to="/imports"
                   className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-black text-white transition hover:bg-white/15"
                 >
@@ -1190,7 +1191,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                     <ArrowLeft className="h-4 w-4" />
                   )}
                   {txt('مركز الاستيراد العام', 'Import Overview')}
-                </Link>
+                </AdminLink>
                 <button
                   type="button"
                   onClick={() => openImport(fixedDomain)}
@@ -1592,14 +1593,14 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                     <MiniStat label={txt('رُحّل', 'Moved')} value={stat.transferredRecords} />
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <Link
+                    <AdminLink
                       to={domain.importPath}
                       className="inline-flex items-center gap-1.5 rounded-lg bg-[#0E7C86] px-3 py-2 text-[11px] font-black text-white"
                     >
                       <UploadCloud className="h-3.5 w-3.5" />
                       {txt('فتح مركز المجال', 'Open Domain Center')}
-                    </Link>
-                    <Link
+                    </AdminLink>
+                    <AdminLink
                       to={domain.workspace}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-[#DDEFF2] px-3 py-2 text-[11px] font-black text-[#142B5F]"
                     >
@@ -1609,14 +1610,14 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                       ) : (
                         <ArrowRight className="h-3.5 w-3.5" />
                       )}
-                    </Link>
+                    </AdminLink>
                     {domain.advancedWorkspace && (
-                      <Link
+                      <AdminLink
                         to={domain.advancedWorkspace}
                         className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-black text-[#D6A43B]"
                       >
                         {txt('مركز المنح المتقدم', 'Advanced scholarship center')}
-                      </Link>
+                      </AdminLink>
                     )}
                   </div>
                 </article>
@@ -2142,7 +2143,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                               {txt('تفاصيل', 'Details')}
                             </button>
                             {config && (
-                              <Link
+                              <AdminLink
                                 to={config.workspace}
                                 className="inline-flex items-center gap-1 rounded-lg bg-[#142B5F] px-2.5 py-1.5 text-[10px] font-black text-white"
                               >
@@ -2152,7 +2153,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                                 ) : (
                                   <ArrowRight className="h-3 w-3" />
                                 )}
-                              </Link>
+                              </AdminLink>
                             )}
                           </div>
                         </td>
@@ -2768,7 +2769,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                   (item) => item.key === normalizeDomain(selectedRecord.batch?.dataType),
                 );
                 return config ? (
-                  <Link
+                  <AdminLink
                     to={config.workspace}
                     className="inline-flex items-center gap-2 rounded-xl bg-[#142B5F] px-4 py-2.5 text-xs font-black text-white"
                   >
@@ -2778,7 +2779,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
                     ) : (
                       <ArrowRight className="h-4 w-4" />
                     )}
-                  </Link>
+                  </AdminLink>
                 ) : null;
               })()}
             </div>
@@ -3666,7 +3667,7 @@ function ImportGovernancePanel({ records, batches, sources, isArabic }: { record
       <button type="button" disabled={!record?.updatedAt || reason.trim().length < 3} onClick={() => void perform(async () => {
         await adminApiClient.request(`/admin/imports/records/${encodeURIComponent(recordId)}/reconcile-receipt`, { method: 'POST', body: JSON.stringify({ expectedUpdatedAt: record?.updatedAt, reason }) });
       })}>{isArabic ? 'تسوية التسليم من الإيصال المحفوظ' : 'Reconcile delivery from saved receipt'}</button>
-      <ul>{queue.map(item => <li key={item.recordId}><button type="button" onClick={() => setRecordId(item.recordId)}>{item.recordId}</button> · {item.assigneeId} · {new Date(item.dueAt).toLocaleString()} · {item.state} · <a href={`/imports/${item.ownerDomain.toLowerCase()}?recordId=${encodeURIComponent(item.recordId)}`}>{isArabic ? 'فتح مساحة القسم' : 'Open owner workspace'}</a></li>)}</ul>
+      <ul>{queue.map(item => <li key={item.recordId}><button type="button" onClick={() => setRecordId(item.recordId)}>{item.recordId}</button> · {item.assigneeId} · {new Date(item.dueAt).toLocaleString()} · {item.state} · <AdminLink to={`/imports/${item.ownerDomain.toLowerCase()}?recordId=${encodeURIComponent(item.recordId)}`}>{isArabic ? 'فتح مساحة القسم' : 'Open owner workspace'}</AdminLink></li>)}</ul>
       <label>{isArabic ? 'الدفعة' : 'Batch'} <select value={batchId} onChange={event => { setBatchId(event.target.value); setCounts(null); }}><option value="">—</option>{batches.map(item => <option key={item.id} value={item.id}>{item.id}</option>)}</select></label>
       <button type="button" disabled={!batchId} onClick={() => void perform(async () => { const result = await adminApiClient.request<Record<string, unknown>>(`/admin/imports/batches/${encodeURIComponent(batchId)}/timeline`); if (mounted.current) setCounts(result); })}>{isArabic ? 'عرض سجل التشغيل' : 'Show execution history'}</button>
       <button type="button" disabled={!batchId} onClick={() => void perform(async () => { const result = await adminApiClient.request<Record<string, unknown>>(`/admin/imports/batches/${encodeURIComponent(batchId)}/counters`); if (mounted.current) setCounts(result); })}>{isArabic ? 'عرض العدادات' : 'Show counters'}</button>

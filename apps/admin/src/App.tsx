@@ -281,9 +281,6 @@ function AdminLayout() {
                   <Route path="/scholarships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipListPage /></RequireAdminPermission>} />
                   <Route path="/scholarships/:id" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipDetailPage /></RequireAdminPermission>} />
                   <Route path="/scholarships/:id/relationships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipRelationshipEditorPage /></RequireAdminPermission>} />
-                  <Route path="/admin/scholarships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipListPage /></RequireAdminPermission>} />
-                  <Route path="/admin/scholarships/:id" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipDetailPage /></RequireAdminPermission>} />
-                  <Route path="/admin/scholarships/:id/relationships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipRelationshipEditorPage /></RequireAdminPermission>} />
                   <Route path="/universities" element={<RequireAdminPermission permission="admin:universities:manage"><UniversityAdminPage /></RequireAdminPermission>} />
                   <Route path="/universities/:id" element={<RequireAdminPermission permission="admin:universities:manage"><UniversityRelationshipEditorPage /></RequireAdminPermission>} />
                   <Route path="/majors" element={<RequireAdminPermission permission="admin:majors:manage"><MajorAdminPage /></RequireAdminPermission>} />
@@ -302,8 +299,6 @@ function AdminLayout() {
                   <Route path="/careers" element={<RequireAdminPermission permission="admin:careers:manage"><CareerAdminPage /></RequireAdminPermission>} />
                   <Route path="/international-tests" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestsAdminPage /></RequireAdminPermission>} />
                   <Route path="/international-tests/:id" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestDetailPage /></RequireAdminPermission>} />
-                  <Route path="/admin/international-tests" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestsAdminPage /></RequireAdminPermission>} />
-                  <Route path="/admin/international-tests/:id" element={<RequireAdminPermission permission="admin:international-tests:manage"><InternationalTestDetailPage /></RequireAdminPermission>} />
                   <Route path="/ai" element={<RequireAdminPermission permission="admin:ai:view"><AIGovernancePage /></RequireAdminPermission>} />
                   <Route path="/ai/:section" element={<RequireAdminPermission permission="admin:ai:view"><AIGovernancePage /></RequireAdminPermission>} />
                   <Route path="/ai-governance" element={<Navigate to="/ai" replace />} />

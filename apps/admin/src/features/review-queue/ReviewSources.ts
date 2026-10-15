@@ -1,5 +1,5 @@
 export type ReviewDomain =
-  'scholarships' | 'universities' | 'majors' | 'courses' | 'tests' | 'services' | 'cms' | 'careers';
+  'scholarships' | 'universities' | 'majors' | 'courses' | 'tests' | 'services' | 'cms' | 'careers' | 'study-destinations';
 export type ReviewReason =
   | 'workflow_review'
   | 'incomplete'
@@ -78,7 +78,7 @@ export const reviewSources: ReviewSource[] = owners.flatMap(
       targetType: domain === 'services' ? undefined : domain === 'cms' ? 'CmsContent' : targetType,
       permissions: [permission],
       params: domain === 'majors' ? { catalog: 'false', ...params } : params,
-      detail: !['universities', 'services', 'cms'].includes(domain),
+      detail: !['services', 'cms'].includes(domain),
       maxPage: domain === 'cms' ? 500 : domain === 'majors' ? 1000 : 10000,
     }));
   },
@@ -131,6 +131,22 @@ for (const status of ['READY_TO_REVIEW', 'READY_TO_PUBLISH'])
     detail: false,
   });
 
+// Destination workflow uses IN_REVIEW and a separate completeness state, not READY_TO_REVIEW.
+for (const [reason, params] of [
+  ['workflow_review', { status: 'IN_REVIEW' }],
+  ['workflow_review', { status: 'DRAFT', completenessStatus: 'READY_FOR_REVIEW' }],
+  ['ready_to_publish', { status: 'DRAFT', completenessStatus: 'READY_TO_PUBLISH' }],
+  ['ready_to_publish', { status: 'IN_REVIEW', completenessStatus: 'READY_TO_PUBLISH' }],
+  ['incomplete', { status: 'DRAFT', completenessStatus: 'INCOMPLETE' }],
+  ['incomplete', { status: 'NO_PROFILE' }],
+] as Array<[ReviewReason, Record<string, string>]>) {
+  reviewSources.push({ key: `study-destinations:${reason}:${JSON.stringify(params)}`,
+    domain: 'study-destinations', reason, endpoint: '/admin/study-destinations',
+    permissions: ['admin:study-destinations:read'], params,
+    path: '/study-destinations', targetType: 'COUNTRY_STUDY_PROFILE', detail: true,
+  });
+}
+
 // No private application, student, financial, actor or recruiter projection is admitted.
 export const unsupportedCoverage = [
   'certificates',
@@ -138,7 +154,6 @@ export const unsupportedCoverage = [
   'finance',
   'student-applications',
   'cms-translations',
-  'study-countries',
   'ai-governance',
 ] as const;
 export const domains = [...new Set(reviewSources.map((source) => source.domain))];

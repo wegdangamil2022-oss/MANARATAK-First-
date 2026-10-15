@@ -1,3 +1,5 @@
+import { adminPaths } from '../navigation/AdminRoutes';
+import { AdminLink } from '../components/AdminLink';
 import { ScholarshipRelationshipEditorPage } from './ScholarshipRelationshipEditorPage';
 import {ScholarshipReferenceLifecycleEditor} from '../features/integration/ScholarshipReferenceLifecycleEditor';
 import type {
@@ -33,7 +35,7 @@ Sparkles,
 Trash2
 } from 'lucide-react';
 import { useEffect,useMemo,useRef,useState,type ReactNode } from 'react';
-import { Link,useNavigate,useParams } from 'react-router-dom';
+import { useNavigate,useParams } from 'react-router-dom';
 import {
 scholarshipCatalogApi,
 type ScholarshipCatalogDetailResponse,
@@ -333,7 +335,7 @@ export function ScholarshipDetailPage() {
           <h2 className="text-base font-bold">{error ?? 'لم يتم العثور على المنحة الدراسية المطلوبة.'}</h2>
         </div>
         <button
-          onClick={() => navigate('/admin/scholarships')}
+          onClick={() => navigate(adminPaths.scholarships)}
           className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-xs border border-slate-200"
         >
           <ArrowIcon className="h-4 w-4" />
@@ -411,7 +413,7 @@ export function ScholarshipDetailPage() {
       <div className="flex items-center justify-between">
         <button
           type="button"
-          onClick={() => navigate('/admin/scholarships')}
+          onClick={() => navigate(adminPaths.scholarships)}
           className="inline-flex items-center gap-2 text-xs font-black text-[#0E7C86] hover:text-[#142B5F] transition-colors cursor-pointer bg-teal-50 hover:bg-teal-100 border border-teal-200 px-3.5 py-2 rounded-xl"
         >
           <ArrowIcon className="h-4 w-4" />
@@ -496,13 +498,13 @@ export function ScholarshipDetailPage() {
               <span>حفظ التعديلات</span>
             </button>
 
-            <Link
+            <AdminLink
               to={`/scholarships/${id}/relationships`}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 cursor-pointer"
             >
               <Network className="h-4 w-4 text-cyan-200" />
               <span>الروابط والجامعات</span>
-            </Link>
+            </AdminLink>
 
             {scholarship.status !== 'PUBLISHED' && (
               <button
@@ -1288,7 +1290,7 @@ export function ScholarshipDetailPage() {
                 icon={<History className="h-5 w-5" />}
               >
                 {detail.historyLimit && <p className="mb-3 text-xs text-slate-500">{t('audit_history_bounded').replace('{0}', String(detail.historyLimit))}</p>}
-                {detail.historyHasMore && hasPermission('admin:audit:manage') && <Link className="mb-3 block text-xs underline" to={`/audit?${new URLSearchParams({ targetId: scholarship.id, category: 'SCHOLARSHIPS_MUTATION' })}`}>{t('audit_open_full_history')}</Link>}
+                {detail.historyHasMore && hasPermission('admin:audit:manage') && <AdminLink className="mb-3 block text-xs underline" to={`/audit?${new URLSearchParams({ targetId: scholarship.id, category: 'SCHOLARSHIPS_MUTATION' })}`}>{t('audit_open_full_history')}</AdminLink>}
                 <div className="space-y-2.5">
                   {!detail.historyAvailable && <p className="text-xs text-amber-800">سجل التدقيق غير متاح؛ لا يمكن إثبات التاريخ من هذه الشاشة.</p>}
                   {detail.historyAvailable && !detail.history.length && <p className="text-xs text-slate-500">لا توجد أحداث ضمن نافذة السجل المتاحة.</p>}
@@ -1320,7 +1322,7 @@ export function ScholarshipDetailPage() {
         <div className="flex items-center gap-2.5">
           <button
             type="button"
-            onClick={() => navigate('/admin/scholarships')}
+            onClick={() => navigate(adminPaths.scholarships)}
             className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
           >
             إلغاء والعودة

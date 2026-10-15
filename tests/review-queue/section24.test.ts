@@ -311,11 +311,11 @@ test('typed owner targets block collision and permission-free audit queries', ()
     row(),
     capturedAt,
   )!;
-  assert.equal(university.detail, false);
-  assert.equal(new URL(university.href, 'https://fixture.invalid').pathname, '/universities');
+  assert.equal(university.detail, true);
+  assert.equal(new URL(university.href, 'https://fixture.invalid').pathname, '/universities/one');
   assert.equal(
     new URL(university.href, 'https://fixture.invalid').searchParams.get('reviewSearch'),
-    'one',
+    null,
   );
   const cms = projectReviewItem(
     reviewSources.find((entry) => entry.domain === 'cms')!,
@@ -435,6 +435,7 @@ for (const [owner, file, name] of [
   ['tests', 'InternationalTestAdminRouter', 'querySchema'],
   ['services', 'ServiceAdminRouter', 'listQuerySchema'],
   ['cms', 'CmsAdminRouter', 'querySchema'],
+  ['study-destinations', 'StudyDestinationAdminRouter', 'listSchema'],
 ])
   test(`actual owner ${owner} source schema accepts every registered filter and rejects invalid workflow state`, () => {
     const schema = ownerSchema(file, name);

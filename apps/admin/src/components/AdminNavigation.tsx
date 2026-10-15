@@ -1,5 +1,6 @@
 import {
   Activity,
+  Database,
   Award,
   BookOpen,
   Bot,
@@ -104,6 +105,7 @@ const groups: NavigationGroup[] = [
       { to: '/audit', labelKey: 'admin_nav_audit', icon: ScrollText, requiredPermission: 'admin:audit:manage' },
       { to: '/assets', labelKey: 'admin_nav_assets', icon: Images, requiredPermission: 'admin:assets:manage' },
       { to: '/students', labelKey: 'admin_nav_students', icon: Users, requiredPermission: 'admin:students:support' },
+      { to: '/settings/reference-data', labelKey: 'admin_nav_reference_data', icon: Database, requiredPermission: 'admin:reference-data:manage' },
       { to: '/settings', labelKey: 'admin_nav_settings', icon: Settings, requiredPermission: 'admin:settings:manage' },
     ],
   },

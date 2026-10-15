@@ -802,6 +802,7 @@ export const en = {
   "admin_nav_imports": "Imports",
   "admin_nav_universities": "Universities",
   "admin_nav_majors": "Majors",
+  "admin_nav_reference_data": "Reference data",
   "admin_nav_settings": "Settings",
   "admin_nav_study_destinations": "Study Destinations",
   "study_destination_filter": "Study destination filter",

@@ -1,3 +1,5 @@
+import { adminTargetLink } from '../navigation/AdminRoutes';
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { AssetRightsRenditionsPanel } from './AssetRightsRenditionsPanel';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useState } from 'react';
@@ -30,6 +32,7 @@ export interface AssetGovernanceSnapshot extends AssetActionSnapshot {
 
 
 export function AssetGovernancePanel({ asset }: { asset: AssetGovernanceSnapshot }) {
+  const { hasPermission } = useAdminAuthorization();
   const { t, language } = useTranslation();
   function readableDate(value?: string | null): string {
   if (!value) return t('asset_text_077');
@@ -47,8 +50,7 @@ export function AssetGovernancePanel({ asset }: { asset: AssetGovernanceSnapshot
     }
   };
   // Only actual Admin owner routes are supported; unknown owner types stay explicit text.
-  const ownerPath = asset.ownerType === 'COURSE' ? `/courses/${encodeURIComponent(asset.ownerId)}`
-    : asset.ownerType === 'UNIVERSITY' ? `/universities/${encodeURIComponent(asset.ownerId)}` : null;
+  const ownerPath = adminTargetLink(asset.ownerType, asset.ownerId, hasPermission);
   const timeline = [
     [t('asset_text_103'), asset.governance?.createdAt],
     [t('asset_text_104'), asset.securityEvidence?.uploadVerifiedAt],

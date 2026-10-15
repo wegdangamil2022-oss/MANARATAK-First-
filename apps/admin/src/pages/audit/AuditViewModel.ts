@@ -1,3 +1,4 @@
+import { adminTargetLink } from '../../navigation/AdminRoutes';
 export type AuditTimeZone = 'UTC' | 'LOCAL';
 
 /** Date inputs are interpreted in the explicitly selected zone, never a fixed country offset. */
@@ -49,21 +50,7 @@ export function auditTargetLink(
   id: string,
   can: (permission: string) => boolean,
 ): string | null {
-  const targets: Record<string, [string, string]> = {
-    UNIVERSITY: ['admin:universities:manage', '/universities/'],
-    SCHOLARSHIP: ['admin:scholarships:manage', '/scholarships/'],
-    MAJOR: ['admin:majors:manage', '/majors/'],
-    INTERNATIONAL_TEST: ['admin:international-tests:manage', '/international-tests/'],
-    COURSE: ['admin:courses:manage', '/courses/'],
-    CERTIFICATE: ['admin:certificates:view', '/certificates/'],
-    INVOICE: ['admin:finance:manage', '/finance/invoices/'],
-    STUDY_DESTINATION: ['admin:study-destinations:read', '/study-destinations/'],
-  };
-  if(type === 'COUNTRY_STUDY_PROFILE') return can('admin:study-destinations:read') ? '/study-destinations' : null;
-  if (type === 'IDENTITY' && can('admin:identities:manage'))
-    return `/identities?search=${encodeURIComponent(id)}`;
-  const target = targets[type];
-  return target && can(target[0]) ? target[1] + encodeURIComponent(id) : null;
+  return adminTargetLink(type, id, can);
 }
 
 export function auditFormat(template: string, ...values: unknown[]): string {

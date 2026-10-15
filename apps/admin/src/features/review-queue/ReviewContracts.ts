@@ -115,6 +115,27 @@ export function projectReviewItem(
   record: Record<string, unknown>,
   capturedAt: string,
 ): ReviewItem | null {
+  const destination = source.domain === 'study-destinations';
+  let countryIso2: string | null = null;
+  let destinationProfileId: string | null = null;
+  if (destination) {
+    const country = record.country as Record<string, unknown> | undefined;
+    const profile = record.profile as Record<string, unknown> | null;
+    if (!country || !text(country.id) || !/^[A-Z]{2}$/.test(String(country.iso2Code)))
+      throw new Error('SOURCE_COUNTRY_ID_INVALID');
+    if (record.profile !== null && (!profile || typeof profile !== 'object' || Array.isArray(profile)))
+      throw new Error('SOURCE_PROFILE_INVALID');
+    if (profile && (!text(profile.id) || !['DRAFT', 'IN_REVIEW', 'PUBLISHED', 'ARCHIVED'].includes(String(profile.status))))
+      throw new Error('SOURCE_PROFILE_INVALID');
+    countryIso2 = String(country.iso2Code);
+    destinationProfileId = profile ? text(profile.id) : null;
+    if ((source.params.status === 'NO_PROFILE' && profile) ||
+      (source.params.status !== 'NO_PROFILE' && (!profile || profile.status !== source.params.status)) ||
+      (source.params.completenessStatus && profile?.completenessStatus !== source.params.completenessStatus))
+      throw new Error('SOURCE_DESTINATION_STATUS_INVALID');
+    record = { ...profile, id: country.id, profileId: destinationProfileId,
+      displayName: country.nameAr || country.name || countryIso2 };
+  }
   const id = text(record.id);
   if (!id) throw new Error('SOURCE_RECORD_ID_MISSING');
   const verificationState =
@@ -132,6 +153,7 @@ export function projectReviewItem(
   const owner = ['critical', 'high', 'medium', 'low'].includes(ownerPriority ?? '');
   const importRecordId = kind === 'import_record' ? id : text(record.sourceImportRecordId);
   let href = source.detail ? `${source.path}/${encodeURIComponent(id)}` : source.path;
+  if (destination) href = `${source.path}/${countryIso2}`;
   if (source.domain === 'majors' && profileId)
     href += `?profileId=${encodeURIComponent(profileId)}`;
   const sourceKind = ['manual', 'imported', 'cms'].includes(String(record.sourceKind))
@@ -189,7 +211,10 @@ export function projectReviewItem(
       ? Number(record.sourceRowNumber)
       : null,
     sourceSystem: text(record.sourceSystem),
-    auditTarget: source.targetType ? { domain: source.domain, type: source.targetType, id } : null,
+    // The owner audits COUNTRY_STUDY_PROFILE against country.id, not profile.id.
+    auditTarget: destination
+      ? (destinationProfileId ? { domain: source.domain, type: 'COUNTRY_STUDY_PROFILE', id } : null)
+      : source.targetType ? { domain: source.domain, type: source.targetType, id } : null,
     diff:
       source.domain === 'scholarships' && importRecordId
         ? 'supported'

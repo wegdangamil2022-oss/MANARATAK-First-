@@ -1,3 +1,5 @@
+import { adminPaths } from '../navigation/AdminRoutes';
+import { AdminLink } from '../components/AdminLink';
 import {ScholarshipCanonicalFilters,emptyScholarshipCanonicalFilters,type ScholarshipCanonicalFilterState} from '../components/ScholarshipCanonicalFilters';
 import {
 AlertTriangle,
@@ -23,7 +25,6 @@ Sparkles,
 Table as TableIcon
 } from 'lucide-react';
 import { useEffect,useMemo,useRef,useState } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
@@ -90,7 +91,6 @@ function getCountryEmojiFlag(countryName?: string): string {
 
 export function ScholarshipListPage() {
   const { language, dir } = useTranslation();
-  const navigate = useNavigate();
   const isArabic = language === 'ar';
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
   const tr = (ar: string, en: string) => (isArabic ? ar : en);
@@ -270,21 +270,21 @@ export function ScholarshipListPage() {
               <span>{tr('تحديث البيانات', 'Refresh')}</span>
             </button>
 
-            <button
-              onClick={() => navigate('/admin/imports?dataType=SCHOLARSHIPS')}
+            <AdminLink
+              to={adminPaths.scholarshipImport}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 cursor-pointer"
             >
               <Database className="h-4 w-4 text-cyan-200" />
               <span>{tr('مركز الاستيراد', 'Import Center')}</span>
-            </button>
+            </AdminLink>
 
-            <Link
-              to="/admin/review-queue"
+            <AdminLink
+              to={adminPaths.reviewQueue}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#21A7B4] hover:bg-[#1A8D99] px-4 text-xs font-bold text-white shadow-md transition-all active:scale-95"
             >
               <span>{tr('قائمة المراجعة', 'Review Queue')}</span>
               <ArrowIcon className="h-4 w-4" />
-            </Link>
+            </AdminLink>
           </div>
         </div>
       </section>
@@ -562,12 +562,12 @@ export function ScholarshipListPage() {
                 <span>إعادة ضبط الفلاتر</span>
               </button>
             )}
-            <button
-              onClick={() => navigate('/admin/imports?dataType=SCHOLARSHIPS')}
+            <AdminLink
+              to={adminPaths.scholarshipImport}
               className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-[#142B5F] hover:bg-[#0E7C86] px-4 text-xs font-bold text-white transition shadow-xs cursor-pointer"
             >
               <span>مركز الاستيراد</span>
-            </button>
+            </AdminLink>
           </div>
         </div>
       ) : viewMode === 'cards' ? (
@@ -611,12 +611,12 @@ export function ScholarshipListPage() {
 
                     <div className="flex flex-col items-start text-right min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Link
-                          to={`/admin/scholarships/${item.id}`}
+                        <AdminLink
+                          to={`/scholarships/${item.id}`}
                           className="text-base sm:text-lg font-black text-[#142B5F] group-hover:text-[#0E7C86] font-['Cairo',sans-serif] leading-snug transition-colors line-clamp-1"
                         >
                           {item.localizedNames?.ar || item.displayName}
-                        </Link>
+                        </AdminLink>
                       </div>
 
                       <p dir="ltr" className="text-xs text-slate-500 text-right">{item.localizedNames?.en || item.canonicalName}</p>
@@ -645,13 +645,13 @@ export function ScholarshipListPage() {
                       {formatStatusLabel(item.status, isArabic)}
                     </span>
 
-                    <Link
-                      to={`/admin/scholarships/${item.id}/relationships`}
+                    <AdminLink
+                      to={`/scholarships/${item.id}/relationships`}
                       className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition cursor-pointer"
                       title="الروابط والجامعات الشريكة"
                     >
                       <Network className="w-4 h-4 text-[#0E7C86]" />
-                    </Link>
+                    </AdminLink>
                   </div>
                 </div>
 
@@ -676,13 +676,13 @@ export function ScholarshipListPage() {
                   </div>
 
                   {/* 4. زر عرض التفاصيل (بلون المنارة مع النص الذهبي) */}
-                  <Link
-                    to={`/admin/scholarships/${item.id}`}
+                  <AdminLink
+                    to={`/scholarships/${item.id}`}
                     className="bg-[#142B5F] hover:bg-[#0E7C86] text-white rounded-xl px-4 py-2 flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xs group/btn cursor-pointer"
                   >
                     <span className="text-xs font-black text-[#F2CD78]">عرض التفاصيل</span>
                     <ChevronLeft className="w-4 h-4 rotate-180 text-[#F2CD78] group-hover/btn:-translate-x-1 transition-transform" />
-                  </Link>
+                  </AdminLink>
                 </div>
               </article>
             );
@@ -747,13 +747,13 @@ export function ScholarshipListPage() {
                         : 'مفتوحة طوال العام'}
                     </td>
                     <td className="px-6 py-4 text-end">
-                      <Link
-                        to={`/admin/scholarships/${item.id}`}
+                      <AdminLink
+                        to={`/scholarships/${item.id}`}
                         className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 px-3.5 py-1.5 text-xs font-black text-[#0E7C86] transition-all hover:bg-[#0E7C86] hover:text-white cursor-pointer"
                       >
                         <Eye className="h-3.5 w-3.5" />
                         <span>{tr('التفاصيل', 'Details')}</span>
-                      </Link>
+                      </AdminLink>
                     </td>
                   </tr>
                 ))}

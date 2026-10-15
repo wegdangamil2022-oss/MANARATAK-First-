@@ -1,8 +1,10 @@
+import { adminPaths } from '../navigation/AdminRoutes';
+import { AdminLink } from '../components/AdminLink';
 import {UniversityLocationFilters} from '../components/UniversityLocationFilters';
 import { UniversityProgramWorkspace } from '../components/UniversityProgramWorkspace';
 import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { 
   School, 
@@ -55,7 +57,6 @@ interface UniversityStats {
 
 export function UniversityAdminPage() {
   const { language, dir } = useTranslation();
-  const navigate = useNavigate();
   const isArabic = language === 'ar';
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
   const tr = (ar: string, en: string) => (isArabic ? ar : en);
@@ -218,21 +219,21 @@ export function UniversityAdminPage() {
               <span>{tr('تحديث البيانات', 'Refresh')}</span>
             </button>
 
-            <button
-              onClick={() => navigate('/admin/imports?dataType=UNIVERSITIES')}
+            <AdminLink
+              to={adminPaths.universityImport}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-cyan-300/30 bg-white/15 px-4 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/25 active:scale-95"
             >
               <Database className="h-4 w-4 text-[#F2CD78]" />
               <span>{tr('مركز استيراد الجامعات', 'Import Center')}</span>
-            </button>
+            </AdminLink>
 
-            <Link
-              to="/admin/destinations"
+            <AdminLink
+              to={adminPaths.destinations}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-gradient-to-r from-[#21A7B4] to-[#0E7C86] px-5 text-xs font-black text-white shadow-md transition-all hover:brightness-110 active:scale-95"
             >
               <span>{tr('وجهات الدراسة', 'Study Destinations')}</span>
               <ArrowIcon className="h-4 w-4" />
-            </Link>
+            </AdminLink>
           </div>
         </div>
       </section>
@@ -535,12 +536,12 @@ export function UniversityAdminPage() {
                                 <School className="h-4 w-4" />
                               </div>
                               <div>
-                                <Link
+                                <AdminLink
                                   to={`/universities/${uni.id}`}
                                   className="font-black text-[#142B5F] text-sm hover:text-[#0E7C86] hover:underline"
                                 >
                                   {uni.displayName}
-                                </Link>
+                                </AdminLink>
                               </div>
                             </div>
                           </td>

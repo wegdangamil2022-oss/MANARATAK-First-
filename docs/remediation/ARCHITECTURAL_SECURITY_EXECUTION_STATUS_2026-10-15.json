@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B07",
+  "next": "B08",
   "remaining": [
-    "B07",
     "B08",
     "B09",
     "B10a",
@@ -118,8 +117,7 @@
     "report": "docs/reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md",
     "migrationInventory": "docs/reviews/evidence/b04-migration-inventory-2026-10-15.json",
     "remainingKnownGuards": [
-      "NEW-01 name-based country relationship: B08",
-      "P3 country and degree filters: B06"
+      "NEW-01 name-based country relationship: B08"
     ],
     "runtimePrerequisites": [
       "Actual database migration/checksum inventory and isolated FK/concurrent link-purge rehearsal: B05"
@@ -185,6 +183,50 @@
     "runtimePrerequisites": [
       "Browser smoke test with authorized owner/reference permissions and a non-production dataset",
       "B01/B02/B05 database prerequisites remain pending; B06 adds no SQL or data rewrites"
+    ]
+  },
+  "B07": {
+    "status": "SOURCE_VERIFIED",
+    "baselineCommit": "64f5d2e",
+    "runtimeStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "findings": [
+      "A2A-02",
+      "A2A-03",
+      "A2A-04",
+      "A2A-05",
+      "A2A-07",
+      "A2A-08",
+      "ADM-04"
+    ],
+    "regressionFinding": "A2A-01: existing two career review sources retained without duplication",
+    "lightTestsPassed": 104,
+    "lightTestsFailed": 0,
+    "testBreakdown": {
+      "targetedVitestIncludingB06UIAndAssetReuseAPI": 72,
+      "reviewQueueNodeRegression": 32
+    },
+    "report": "docs/reviews/B07_ADMIN_NAVIGATION_REVIEW_ASSETS_2026-10-15.md",
+    "sourceChecks": {
+      "adminTypes": "PASS",
+      "P3": "57/57 PASS",
+      "P9": "97/97 PASS",
+      "WP12.9": "PASS",
+      "sourceQuality": "PASS",
+      "APIRequestEndpointsUnchanged": true,
+      "eslintErrors": 0,
+      "existingEslintWarnings": 19,
+      "secretScan": "PASS"
+    },
+    "identityContracts": [
+      "Destination detail uses country.iso2Code, never country/profile UUID",
+      "COUNTRY_STUDY_PROFILE audit uses country.id per the existing owner aggregate; profile.id distinguishes profile instances in queue identity",
+      "Unknown detail routes stay unsupported; known owners without details use permission-gated list routes"
+    ],
+    "migrationAppliedByThisChange": false,
+    "runtimePrerequisites": [
+      "Browser smoke with deployed basename and representative permission roles",
+      "Existing B01/B02/B05 database/deployment prerequisites remain pending"
     ]
   }
 }

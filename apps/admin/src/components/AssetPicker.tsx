@@ -1,3 +1,4 @@
+import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
@@ -32,7 +33,17 @@ interface DeliveryGrant {
 }
 const BASE = '/admin/asset-reuse';
 
-export function AssetPicker({
+export function AssetPicker(props: Parameters<typeof AssetPickerContent>[0]) {
+  const { hasPermission } = useAdminAuthorization();
+  const { language } = useTranslation();
+  if (!hasPermission('admin:assets:reuse')) return <p role="status">
+    {language === 'ar' ? 'اختيار الأصول يتطلب صلاحية إعادة الاستخدام.' : 'Asset selection requires reuse permission.'}
+    {props.value ? <span className="block break-all">ID: {props.value}</span> : null}
+  </p>;
+  return <AssetPickerContent {...props} />;
+}
+
+function AssetPickerContent({
   value,
   onChange,
   mimeTypePrefix,
