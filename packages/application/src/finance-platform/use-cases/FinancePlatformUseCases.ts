@@ -1,7 +1,6 @@
 import { AssetReferencePolicy } from '../../asset-platform/AssetReferencePolicy';
 import { createHash, randomUUID } from 'node:crypto';
 import {
-  assertCheckerEligible,
   assertPositiveFinanceMoney,
   assertBankTransferEvidence,
   assertFinanceAttestation,

@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B13",
+  "next": "B14",
   "remaining": [
-    "B13",
     "B14"
   ],
   "B02": {
@@ -501,13 +500,13 @@
     ]
   },
   "B13": {
-    "status": "SOURCE_IMPLEMENTED_VERIFICATION_INCOMPLETE",
-    "packageClosed": false,
+    "status": "SOURCE_IMPLEMENTED_CORRECTED_WITHOUT_RERUN",
+    "packageClosed": true,
     "baselineCommit": "44467b3a",
     "findings": [
       "ADM-07"
     ],
-    "currentStep": "SOURCE_RECONCILIATION_AND_UNEXECUTED_CHECKS",
+    "currentStep": null,
     "completedSteps": [
       "FINANCIAL_ACCOUNT_READ_SOURCE_VERIFIED",
       "INVOICE_INSTALLMENTS_SOURCE_REVIEWED_LIGHT_CHECKED",
@@ -516,7 +515,7 @@
       "LEDGER_REVERSAL_SOURCE_REVIEWED_LIGHT_CHECKED"
     ],
     "specification": "docs/remediation/specs/B13_FINANCE_OWNER_CONTRACT_2026-10-15.md",
-    "report": "docs/reviews/B13e_LEDGER_REVERSAL_2026-10-15.md",
+    "report": "docs/reviews/B13_FINANCE_SOURCE_CLOSURE_2026-10-15.md",
     "runtimeDatabaseStatus": "PENDING",
     "deploymentStatus": "NOT_PERFORMED",
     "schemaChanged": false,
@@ -760,6 +759,42 @@
       "typesNoEmit": "NOT_RUN_EXEC_ENVIRONMENT_DISCONNECTED",
       "uiHttpTests": "NOT_RUN_EXEC_ENVIRONMENT_DISCONNECTED",
       "runtimeDatabaseStatus": "PENDING"
-    }
+    },
+    "closureLevel": "SOURCE_IMPLEMENTATION_WITH_EXPLICIT_UNRECHECKED_CORRECTIONS",
+    "sourceImplementationCommits": {
+      "accountRead": "205c12a6532f15c42a5c5f539b3a12d5febb75b4",
+      "installments": "3b610595cf71e8c56fd1b6c18d4bf8d3ebc19038",
+      "creditNotes": "92e71c316091e18bc3a22c53d8385962d0c0789c",
+      "wallet": "0c84a622a25deb020c99c60753ae830e54cb4fe8",
+      "reversalAndApprovals": "c0af4c298d28bf44a1340d324a1ea3c3cd5f03d9"
+    },
+    "nativeCommandChecks": {
+      "runCount": 1,
+      "files": 2,
+      "passed": 22,
+      "failed": 2,
+      "durationSeconds": 2.58,
+      "failures": "Missing capture expectedVersion and missing request key rejected with 409 instead of expected 400; explicit body validation and key-error mapping corrected; no rerun per user.",
+      "correctionsRerun": false,
+      "evidence": "docs/reviews/evidence/b13-final-2026-10-15/native-command-checks.txt"
+    },
+    "sourceChecks": {
+      "typesNoEmit": "PASS_BEFORE_FINAL_TWO_SMALL_CORRECTIONS",
+      "typesNoEmitRuns": 1,
+      "targetedEslintErrors": 0,
+      "targetedEslintWarnings": 103,
+      "diffCheck": "PASS"
+    },
+    "unverifiedCorrections": [
+      "capture body now explicitly validates expectedVersion with HTTP 400",
+      "IDEMPOTENCY_KEY_REQUIRED/TOO_LONG now classified HTTP 400 before generic conflict"
+    ],
+    "remainingImplementationSteps": [],
+    "verificationStatus": "INITIAL_FAILURE_CORRECTED_NOT_RERUN_USER_REQUEST",
+    "deferredVerification": [
+      "No second run of native command suite after two status corrections",
+      "Credit V8 fixture binding correction not rerun; unsuccessful/unverified cases remain recorded",
+      "PostgreSQL isolation, rollback, browser and providers remain runtime pending"
+    ]
   }
 }

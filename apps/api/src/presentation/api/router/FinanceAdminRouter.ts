@@ -442,6 +442,7 @@ export class FinanceAdminRouter {
       '/wallet-holds/:id/capture',
       asyncHandler(async (req: Request, res: Response) => {
         await requireFinancePermission(req, 'admin:finance:wallet:manage');
+        z.object({expectedVersion: z.number().int().positive()}).strict().parse(req.body);
         return res.json(
           await financePlatformUseCases.resolveWalletHold(req.params.id, 'CAPTURE', identity(req)),
         );
@@ -770,6 +771,9 @@ export class FinanceAdminRouter {
       let code = 'FINANCE_INTERNAL_ERROR',
         status = 500;
       if (err instanceof z.ZodError) {
+        code = 'FINANCE_VALIDATION_ERROR';
+        status = 400;
+      } else if (/^IDEMPOTENCY_KEY_(?:REQUIRED|TOO_LONG)$/.test(message)) {
         code = 'FINANCE_VALIDATION_ERROR';
         status = 400;
       } else if (err instanceof ForbiddenException) {
