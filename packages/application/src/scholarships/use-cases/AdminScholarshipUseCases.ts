@@ -295,10 +295,14 @@ export class AdminScholarshipUseCases {
     const universityLinks = input.universityLinks === undefined ? undefined : await Promise.all(input.universityLinks.map(async (item) => {
       const university = await this.assertCanonicalReference('UNIVERSITY', item.universityId);
       const program = await this.assertCanonicalReference('ACADEMIC_PROGRAM', item.academicProgramId);
-              const impliedUniversityId = assertUniversityProgramParent(
-                university?.id ?? item.universityId,
-                program,
-              );
+              let impliedUniversityId: string | null | undefined;
+              try {
+                impliedUniversityId = assertUniversityProgramParent(university?.id ?? item.universityId, program);
+              } catch (error) {
+                if (error instanceof Error && error.message === 'SCHOLARSHIP_ACADEMIC_PROGRAM_UNIVERSITY_MISMATCH')
+                  throw new Error(`${error.message}:${item.linkKey}`);
+                throw error;
+              }
               if (impliedUniversityId && !university)
                 await this.assertCanonicalReference('UNIVERSITY', impliedUniversityId);
               return { ...item,

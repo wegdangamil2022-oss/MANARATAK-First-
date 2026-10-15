@@ -3,7 +3,6 @@ import {
 AlertTriangle,
 ArrowLeft,
 ArrowRight,
-BookOpen,
 Building2,
 Calendar,
 CheckCircle2,
@@ -12,7 +11,6 @@ Clock,
 Coins,
 Database,
 Eye,
-Globe2,
 GraduationCap,
 LayoutGrid,
 Loader2,
@@ -26,7 +24,6 @@ Table as TableIcon
 } from 'lucide-react';
 import { useEffect,useMemo,useRef,useState } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
-import { canonicalPickerApi, type CanonicalPickerOption } from '../api/canonicalPickers';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 
@@ -109,14 +106,7 @@ export function ScholarshipListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [completenessFilter, setCompletenessFilter] = useState('');
-  const [countryOptions, setCountryOptions] = useState<CanonicalPickerOption[]>([]);
-  const [countryFilter, setCountryFilter] = useState(
-    () => new URLSearchParams(window.location.search).get('countryReferenceId') ?? '',
-  );
   const [fundingFilter, setFundingFilter] = useState('');
-  const [degreeFilter, setDegreeFilter] = useState('');
-  const [majorFilter, setMajorFilter] = useState('');
-  const [languageFilter, setLanguageFilter] = useState('');
   const [deadlineFilter, setDeadlineFilter] = useState('');
   const [page, setPage] = useState(1);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
@@ -148,9 +138,7 @@ export function ScholarshipListPage() {
       if (statusFilter) params.append('status', statusFilter);
       if (completenessFilter) params.append('completenessStatus', completenessFilter);
       if (searchTerm.trim()) params.append('query', searchTerm.trim());
-      const selectedCountry = countryOptions.find(item => item.id === countryFilter);
-      if (selectedCountry || /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(countryFilter)) params.set('countryReferenceId', selectedCountry?.id ?? countryFilter);
-      for (const [key, value] of Object.entries({ fundingType: fundingFilter, degreeLabel: degreeFilter, majorLabel: majorFilter, languageLabel: languageFilter, deadlineStatus: deadlineFilter })) if (value) params.set(key, value);
+      for (const [key, value] of Object.entries({ fundingType: fundingFilter, deadlineStatus: deadlineFilter })) if (value) params.set(key, value);
 
       const res = await adminApiClient.request<PaginatedResponse>(`/admin/scholarships?${params.toString()}`,
       );
@@ -170,16 +158,6 @@ export function ScholarshipListPage() {
 
   useEffect(() => {
     fetchSummary();
-    let active = true;
-    void canonicalPickerApi
-      .countries()
-      .then((options) => {
-        if (active) setCountryOptions(options);
-      })
-      .catch(() => undefined);
-    return () => {
-      active = false;
-    };
   }, []);
 
   useEffect(() => {
@@ -192,11 +170,7 @@ export function ScholarshipListPage() {
     statusFilter,
     completenessFilter,
     searchTerm,
-    countryFilter,
     fundingFilter,
-    degreeFilter,
-    majorFilter,
-    languageFilter,
     deadlineFilter,
     canonical,
   ]);
@@ -207,14 +181,12 @@ export function ScholarshipListPage() {
       if (value) params.set(key, value);
       else params.delete(key);
     }
-    if (countryFilter) params.set('countryReferenceId', countryFilter);
-    else params.delete('countryReferenceId');
     window.history.replaceState(
       null,
       '',
       `${window.location.pathname}${params.size?'?'+params:''}`,
     );
-  }, [canonical, countryFilter]);
+  }, [canonical]);
   const handleRefresh = () => {
     fetchSummary();
     fetchScholarships();
@@ -236,24 +208,16 @@ export function ScholarshipListPage() {
     searchTerm ||
     statusFilter ||
     completenessFilter ||
-    countryFilter ||
     fundingFilter ||
-    degreeFilter ||
-    majorFilter ||
-    languageFilter ||
-    deadlineFilter,
+    deadlineFilter || Object.entries(canonical).some(([key, value]) => value !== emptyScholarshipCanonicalFilters[key as keyof ScholarshipCanonicalFilterState]),
   );
 
   const handleResetFilters = () => {
     setSearchTerm('');
     setStatusFilter('');
     setCompletenessFilter('');
-    setCountryFilter('');
     setFundingFilter('');
     setCanonical({ ...emptyScholarshipCanonicalFilters });
-    setDegreeFilter('');
-    setMajorFilter('');
-    setLanguageFilter('');
     setDeadlineFilter('');
     setPage(1);
   };
@@ -507,20 +471,7 @@ export function ScholarshipListPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 pt-1">
-            <div>
-              <label className="mb-1 block text-[11px] font-bold text-slate-500">
-                <Globe2 className="inline w-3 h-3 ml-1 text-[#0E7C86]" />
-                الدولة / الوجهة
-              </label>
-              <select
-                value={countryFilter}
-                onChange={(e) => { setCountryFilter(e.target.value); setPage(1); }}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
-              >
-                <option value="">جميع الدول والوجهات</option>
-                {countryOptions.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
-              </select>
-            </div>
+
 
             <div>
               <label className="mb-1 block text-[11px] font-bold text-slate-500">
@@ -538,63 +489,11 @@ export function ScholarshipListPage() {
               </select>
             </div>
 
-            <div>
-              <label className="mb-1 block text-[11px] font-bold text-slate-500">
-                <BookOpen className="inline w-3 h-3 ml-1 text-[#21A7B4]" />
-                التخصص / المجال
-              </label>
-              <select
-                value={majorFilter}
-                onChange={(e) => { setMajorFilter(e.target.value); setPage(1); }}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
-              >
-                <option value="">جميع التخصصات</option>
-                <option value="الهندسة">الهندسة والذكاء الاصطناعي</option>
-                <option value="الحاسب">علوم الحاسب والبرمجة</option>
-                <option value="الطب">الطب والعلوم الصحية</option>
-                <option value="الأعمال">إدارة الأعمال والاقتصاد</option>
-                <option value="السياسات">العلوم السياسية والقانون</option>
-                <option value="البيئة">العلوم الطبيعية والبيئة</option>
-                <option value="الإنسانية">العلوم الإنسانية والاجتماعية</option>
-                <option value="الفنون">الفنون والتصميم</option>
-              </select>
-            </div>
 
-            <div>
-              <label className="mb-1 block text-[11px] font-bold text-slate-500">
-                <GraduationCap className="inline w-3 h-3 ml-1 text-[#142B5F]" />
-                الدرجة العلمية
-              </label>
-              <select
-                value={degreeFilter}
-                onChange={(e) => { setDegreeFilter(e.target.value); setPage(1); }}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
-              >
-                <option value="">جميع الدرجات العلمية</option>
-                <option value="بكالوريوس">بكالوريوس (Undergraduate)</option>
-                <option value="ماجستير">ماجستير (Master's)</option>
-                <option value="دكتوراه">دكتوراه (PhD / Doctorate)</option>
-                <option value="زمالة">أبحاث وزمالة (Fellowship)</option>
-              </select>
-            </div>
 
-            <div>
-              <label className="mb-1 block text-[11px] font-bold text-slate-500">
-                لغة الدراسة
-              </label>
-              <select
-                value={languageFilter}
-                onChange={(e) => { setLanguageFilter(e.target.value); setPage(1); }}
-                className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[#0E7C86] focus:ring-2 focus:ring-[#0E7C86]/15 cursor-pointer font-['Cairo']"
-              >
-                <option value="">جميع لغات الدراسة</option>
-                <option value="الإنجليزية">الإنجليزية (English)</option>
-                <option value="العربية">العربية (Arabic)</option>
-                <option value="التركية">التركية (Turkish)</option>
-                <option value="الألمانية">الألمانية (German)</option>
-                <option value="الفرنسية">الفرنسية (French)</option>
-              </select>
-            </div>
+
+
+
 
             <div>
               <label className="mb-1 block text-[11px] font-bold text-slate-500">

@@ -122,6 +122,27 @@ describe('P9 Scholarship canonical relationship authoring', () => {
     expect(repo.update).not.toHaveBeenCalled();
   });
 
+  it.each([
+    [ScholarshipCompletenessState.INCOMPLETE, 'SCHOLARSHIP_NOT_COMPLETE'],
+    [ScholarshipCompletenessState.COMPLETE, 'SCHOLARSHIP_CANONICAL_LINKS_UNRESOLVED'],
+  ] as const)('still rejects publication with %s or unresolved degree evidence', async (completenessStatus, message) => {
+    const repo = repository(scholarship({ status: ScholarshipStatus.READY_TO_PUBLISH, completenessStatus,
+      degreeTargets: [{ targetKey: 'unresolved-degree', sourceLabel: 'Bachelor', degreeLevelId: null, resolutionStatus: 'UNRESOLVED' }],
+    }));
+    const service = new AdminScholarshipUseCases(repo, atomic, lookup());
+    await expect(service.publish('sch-1', mutationContext)).rejects.toThrow(message);
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+
+  it('preserves the unverified program-parent error rather than replacing it with a mismatch', async () => {
+    const repo = repository(scholarship());
+    const service = new AdminScholarshipUseCases(repo, atomic, lookup());
+    await expect(service.replaceCanonicalRelationships('sch-1', {
+      universityLinks: [{ linkKey: 'unknown-parent', relationshipTypeCode: 'TARGET_PROGRAM', universityId: 'university-1', academicProgramId: 'program-1' }],
+    }, mutationContext)).rejects.toThrow('SCHOLARSHIP_PROGRAM_PARENT_UNVERIFIED');
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+
   it('rejects an AcademicProgram that does not belong to the selected University', async () => {
     const repo = repository(scholarship());
     const service = new AdminScholarshipUseCases(repo, atomic, lookup({

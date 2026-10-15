@@ -179,6 +179,18 @@ describe('PrismaScholarshipRepository', () => {
   });
 
 
+  it('uses exact canonical relation IDs without label alternatives in the admin list', async () => {
+    mockPrisma.scholarship.findMany.mockResolvedValue([]);
+    mockPrisma.scholarship.count.mockResolvedValue(0);
+    await repository.list({ countryReferenceId: 'country-exact', degreeLevelId: 'degree-exact', majorId: 'major-exact', studyLanguageReferenceId: 'language-exact' });
+    const where = mockPrisma.scholarship.findMany.mock.calls[0][0].where;
+    expect(where).toMatchObject({ countryReferenceId: 'country-exact', studyLanguageReferenceId: 'language-exact', AND: expect.arrayContaining([
+      { degreeTargets: { some: { degreeLevelId: 'degree-exact' } } },
+      { OR: [{ majorTargets: { some: { majorId: 'major-exact' } } }, { eligibilityItems: { some: { majorId: 'major-exact' } } }] },
+    ]) });
+    expect(JSON.stringify(where)).not.toMatch(/sourceLabel|countrySourceLabel|contains|nameAr|nameEn/);
+  });
+
   it('applies public relationship filters only through canonical ids', async () => {
     mockPrisma.scholarship.findMany.mockResolvedValue([]);
     mockPrisma.scholarship.count.mockResolvedValue(0);

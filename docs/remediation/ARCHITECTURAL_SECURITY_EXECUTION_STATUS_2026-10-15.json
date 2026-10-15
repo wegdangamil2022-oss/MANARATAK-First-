@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B06",
+  "next": "B07",
   "remaining": [
-    "B06",
     "B07",
     "B08",
     "B09",
@@ -154,6 +153,38 @@
       "Apply new asset-boundary migration before new readiness; validate existing rows separately after owner review",
       "Isolated PostgreSQL transaction-ordering, manual-FK/Prisma compatibility and restore rehearsal",
       "ISO defaults/provider-country constraints remain proposed until data/lifecycle review"
+    ]
+  },
+  "B06": {
+    "status": "SOURCE_VERIFIED",
+    "baselineCommit": "2c2d4f7",
+    "runtimeStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "findings": [
+      "REL-01",
+      "REL-02",
+      "REL-04",
+      "REL-05"
+    ],
+    "lightTestsPassed": 40,
+    "lightTestsFailed": 0,
+    "report": "docs/reviews/B06_SCHOLARSHIP_CANONICAL_AUTHORING_2026-10-15.md",
+    "sourceChecks": {
+      "P3": "57/57 PASS",
+      "WP12.9": "PASS",
+      "P9": "97/97 PASS",
+      "adminTypes": "PASS",
+      "applicationTypes": "PASS",
+      "sourceQuality": "PASS",
+      "secretScan": "PASS",
+      "eslintErrors": 0,
+      "existingEslintWarnings": 6
+    },
+    "compatibility": "Admin *Label search parameters retained for legacy API clients; current UI emits canonical ID filters only. General query text search remains.",
+    "migrationAppliedByThisChange": false,
+    "runtimePrerequisites": [
+      "Browser smoke test with authorized owner/reference permissions and a non-production dataset",
+      "B01/B02/B05 database prerequisites remain pending; B06 adds no SQL or data rewrites"
     ]
   }
 }

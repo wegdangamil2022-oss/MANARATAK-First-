@@ -1,8 +1,7 @@
+import { ScholarshipRelationshipEditorPage } from './ScholarshipRelationshipEditorPage';
 import {ScholarshipReferenceLifecycleEditor} from '../features/integration/ScholarshipReferenceLifecycleEditor';
 import type {
-ScholarshipDegreeTargetDto,
-ScholarshipDto,
-ScholarshipMajorTargetDto
+ScholarshipDto
 } from '@manaratak/domain';
 import {
 AlertCircle,
@@ -10,7 +9,6 @@ AlertTriangle,
 Archive,
 ArrowLeft,
 ArrowRight,
-BookOpen,
 Building2,
 Calendar,
 Check,
@@ -32,8 +30,7 @@ Plus,
 Save,
 ShieldCheck,
 Sparkles,
-Trash2,
-X
+Trash2
 } from 'lucide-react';
 import { useEffect,useMemo,useRef,useState,type ReactNode } from 'react';
 import { Link,useNavigate,useParams } from 'react-router-dom';
@@ -64,38 +61,6 @@ interface ConfirmationModalState {
   confirmText: string;
   variant: 'emerald' | 'amber' | 'rose' | 'teal';
 }
-
-// Hierarchical Degree & Majors structure for the UI
-interface DegreeWithMajors {
-  id: string;
-  degreeLevel: string; // e.g. 'بكالوريوس' | 'ماجستير' | 'دكتوراه'
-  customLabel?: string;
-  majors: Array<{ targetKey: string; label: string }>;
-}
-
-const PRESET_DEGREE_OPTIONS = [
-  { value: 'بكالوريوس', label: 'بكالوريوس (Undergraduate / Bachelor)', icon: '🎓' },
-  { value: 'ماجستير', label: 'ماجستير (Master\'s Degree)', icon: '🎓' },
-  { value: 'دكتوراه', label: 'دكتوراه (PhD / Doctorate)', icon: '🎓' },
-  { value: 'دبلوم', label: 'دبلوم عالي / دبلوم متوسط (Diploma)', icon: '📜' },
-  { value: 'زمالة', label: 'أبحاث وزمالة ما بعد الدكتوراه (Fellowship)', icon: '🔬' },
-  { value: 'دورات مهنية', label: 'شهادات وتدريب مهني (Certificate)', icon: '💼' },
-];
-
-const POPULAR_MAJOR_SUGGESTIONS = [
-  'علوم الحاسب وهندسة البرمجيات',
-  'الذكاء الاصطناعي وتعلم الآلة',
-  'الأمن السيبراني والشبكات',
-  'الطب البشري والجراحة',
-  'الصيدلة والعلوم الدوائية',
-  'الهندسة المدنية والمعمارية',
-  'إدارة الأعمال والتمويل',
-  'الاقتصاد والعلوم المالية',
-  'القانون الدولي والعام',
-  'العلوم السياسية والعلاقات الدولية',
-  'الطاقة المتجددة والبيئة',
-  'اللغات والترجمة',
-];
 
 function asText(value: unknown): string {
   return value === null || value === undefined ? '' : String(value);
@@ -245,10 +210,6 @@ export function ScholarshipDetailPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [reviewReason, setReviewReason] = useState('');
 
-  // Hierarchical Degree & Majors State
-  const [degreeGroups, setDegreeGroups] = useState<DegreeWithMajors[]>([]);
-  const [majorInputs, setMajorInputs] = useState<Record<string, string>>({});
-
   // Confirmation modal
   const [confirmModal, setConfirmModal] = useState<ConfirmationModalState>({
     isOpen: false,
@@ -258,36 +219,6 @@ export function ScholarshipDetailPage() {
     confirmText: '',
     variant: 'emerald',
   });
-
-  // Convert flat degrees & majors to hierarchical degreeGroups
-  const initDegreeGroups = (s: ScholarshipDto) => {
-    const rawDegrees = s.degreeTargets ?? [];
-    const rawMajors = s.majorTargets ?? [];
-
-    if (rawDegrees.length === 0) { setDegreeGroups([]); return; }
-
-    const groups: DegreeWithMajors[] = rawDegrees.map((d, index) => {
-      const dLabel = d.sourceLabel || d.degreeLevel?.nameAr || d.degreeLevel?.nameEn || d.degreeLevelId || `درجة ${index + 1}`;
-      let matchedDegree = dLabel;
-      if (/بكالوريوس|bachelor|undergraduate/i.test(dLabel)) matchedDegree = 'بكالوريوس';
-      if (dLabel.includes('ماجستير') || dLabel.toLowerCase().includes('master')) matchedDegree = 'ماجستير';
-      else if (dLabel.includes('دكتوراه') || dLabel.toLowerCase().includes('phd') || dLabel.toLowerCase().includes('doctor')) matchedDegree = 'دكتوراه';
-      else if (dLabel.includes('دبلوم') || dLabel.toLowerCase().includes('diploma')) matchedDegree = 'دبلوم';
-      else if (dLabel.includes('زمالة') || dLabel.toLowerCase().includes('fellow')) matchedDegree = 'زمالة';
-
-      // If majors exist, distribute or list them
-      const majorsList = rawMajors.filter(m => m.metadata?.degreeTargetKey === d.targetKey).map(m => ({ targetKey: m.targetKey, label: m.sourceLabel || '' }));
-
-      return {
-        id: d.targetKey || `deg-${index + 1}`,
-        degreeLevel: matchedDegree,
-        customLabel: dLabel,
-        majors: majorsList,
-      };
-    });
-
-    setDegreeGroups(groups);
-  };
 
   const savedForm = useRef('');
   const loadRequest = useRef(0);
@@ -304,7 +235,6 @@ export function ScholarshipDetailPage() {
         const nextForm = toUpdate(response.scholarship);
         savedForm.current = JSON.stringify(nextForm);
         setForm(nextForm);
-        initDegreeGroups(response.scholarship);
       } else {
         setError('تعذر العثور على بيانات المنحة المطلوبة.');
       }
@@ -330,88 +260,6 @@ export function ScholarshipDetailPage() {
     () => [...(form.requiredDocumentItems ?? [])].sort((a, b) => Number(a.displayOrder ?? 0) - Number(b.displayOrder ?? 0)),
     [form.requiredDocumentItems],
   );
-
-  // Sync degreeGroups to form payload
-  const syncDegreeGroupsToForm = (groups: DegreeWithMajors[]) => {
-    const existingDegrees = form.degreeTargets ?? [];
-    const existingMajors = form.majorTargets ?? [];
-    const degreeTargets: ScholarshipDegreeTargetDto[] = groups.map(g => {
-      const existing = existingDegrees.find(item => item.targetKey === g.id);
-      return { ...existing, targetKey: g.id, sourceLabel: g.customLabel || g.degreeLevel,
-        degreeLevelId: existing?.degreeLevelId ?? null,
-        resolutionStatus: existing?.degreeLevelId ? existing.resolutionStatus : 'UNRESOLVED',
-      };
-    });
-    // Keep ungrouped canonical targets intact; a label is never a canonical identifier.
-    const allMajors: ScholarshipMajorTargetDto[] = existingMajors.filter(item => !item.metadata?.degreeTargetKey);
-    groups.forEach(g => g.majors.forEach(major => {
-      const existing = existingMajors.find(item => item.targetKey === major.targetKey);
-      allMajors.push({ ...existing, targetKey: major.targetKey,
-        sourceLabel: major.label, majorId: existing?.majorId ?? null,
-        resolutionStatus: existing?.majorId ? existing.resolutionStatus : 'UNRESOLVED',
-        metadata: { ...existing?.metadata, degreeTargetKey: g.id },
-      });
-    }));
-    setForm(x => ({ ...x, degreeTargets, majorTargets: allMajors }));
-  };
-
-  // Add new degree level group
-  const handleAddDegreeLevel = (degreeLevel: string) => {
-    if (!degreeLevel) return;
-    const newGroup: DegreeWithMajors = {
-      id: `deg-${Date.now()}`,
-      degreeLevel,
-      customLabel: `${degreeLevel} (${degreeLevel === 'بكالوريوس' ? 'Bachelor' : degreeLevel === 'ماجستير' ? 'Master' : degreeLevel === 'دكتوراه' ? 'PhD' : 'Program'})`,
-      majors: [],
-    };
-    const updated = [...degreeGroups, newGroup];
-    setDegreeGroups(updated);
-    syncDegreeGroupsToForm(updated);
-  };
-
-  // Remove entire degree level group
-  const handleRemoveDegreeLevel = (groupId: string) => {
-    const updated = degreeGroups.filter((g) => g.id !== groupId);
-    setDegreeGroups(updated);
-    syncDegreeGroupsToForm(updated);
-  };
-
-  // Add major to a specific degree level
-  const handleAddMajorToDegree = (groupId: string, majorName?: string) => {
-    const nameToAdd = (majorName || majorInputs[groupId] || '').trim();
-    if (!nameToAdd) return;
-
-    const updated = degreeGroups.map((g) => {
-      if (g.id === groupId) {
-        if (new Set(g.majors.map(major => major.label)).has(nameToAdd)) return g;
-        return {
-          ...g,
-          majors: [...g.majors, { targetKey: `major-${crypto.randomUUID()}`, label: nameToAdd }],
-        };
-      }
-      return g;
-    });
-
-    setDegreeGroups(updated);
-    syncDegreeGroupsToForm(updated);
-    setMajorInputs((prev) => ({ ...prev, [groupId]: '' }));
-  };
-
-  // Remove a major from a specific degree level
-  const handleRemoveMajorFromDegree = (groupId: string, majorIndex: number) => {
-    const updated = degreeGroups.map((g) => {
-      if (g.id === groupId) {
-        return {
-          ...g,
-          majors: g.majors.filter((_, idx) => idx !== majorIndex),
-        };
-      }
-      return g;
-    });
-
-    setDegreeGroups(updated);
-    syncDegreeGroupsToForm(updated);
-  };
 
   const save = async () => {
     if (!id) return;
@@ -522,7 +370,7 @@ export function ScholarshipDetailPage() {
       title: 'الدرجات والتخصصات المشمولة',
       subtitle: 'الدرجات العلمية والتخصصات التابعة لكل درجة',
       icon: <GraduationCap className="h-4 w-4" />,
-      badge: `${degreeGroups.length} درجات`,
+      badge: `${form.degreeTargets?.length ?? 0} درجات`,
     },
     {
       key: 'eligibility' as TabKey,
@@ -639,7 +487,7 @@ export function ScholarshipDetailPage() {
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <input aria-label="سبب تعديل المنحة أو قرار النشر" title="سبب التعديل (إلزامي للتدقيق)" placeholder="سبب التعديل / النشر" value={reviewReason} onChange={event => setReviewReason(event.target.value)} className="min-h-11 w-48 rounded-xl border border-white/30 bg-white px-3 text-xs text-[#142B5F]" />
             <button
-              disabled={saving}
+              disabled={saving || (activeTab === 'degrees_majors' && JSON.stringify(form) === savedForm.current)}
               type="button"
               onClick={() => void save()}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#F2CD78] hover:bg-[#E5BE60] px-5 text-xs font-black text-[#142B5F] shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
@@ -649,7 +497,7 @@ export function ScholarshipDetailPage() {
             </button>
 
             <Link
-              to={`/admin/scholarships/${id}/relationships`}
+              to={`/scholarships/${id}/relationships`}
               className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-xs font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 cursor-pointer"
             >
               <Network className="h-4 w-4 text-cyan-200" />
@@ -1075,213 +923,11 @@ export function ScholarshipDetailPage() {
             </div>
           )}
 
-          {/* Tab 4: Degrees & Target Majors - Hierarchical by Degree Level */}
+          {/* One canonical editor serves the catalog and the existing relationship route. */}
           {activeTab === 'degrees_majors' && (
-            <div className="space-y-6">
-              {/* Header Box with Quick Add Degree Buttons */}
-              <div className="rounded-3xl border border-[#DDEFF2] bg-gradient-to-r from-teal-50/70 via-white to-blue-50/50 p-6 shadow-xs space-y-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-base font-black text-[#142B5F] flex items-center gap-2">
-                      <GraduationCap className="h-5 w-5 text-[#0E7C86]" />
-                      <span>إدارة الدرجات العلمية والتخصصات المتاحة</span>
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      اختر الدرجة العلمية (بكالوريوس، ماجستير، دكتوراه...) لتظهر خانة إضافة التخصصات التابعة لها مباشرة ومصنفة تحتها.
-                    </p>
-                  </div>
-
-                  {/* Direct Save Button */}
-                  <button
-                    type="button"
-                    onClick={save}
-                    disabled={saving}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-[#0E7C86] hover:bg-[#142B5F] text-white px-5 py-2.5 text-xs font-black shadow-xs transition cursor-pointer shrink-0"
-                  >
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    <span>حفظ الدرجات والتخصصات</span>
-                  </button>
-                </div>
-
-                {/* Quick Add Degree Buttons */}
-                <div className="pt-2 border-t border-slate-200/60">
-                  <span className="block text-[11px] font-black text-slate-500 mb-2">اضغط لإضافة درجة علمية جديدة إلى المنحة:</span>
-                  <div className="flex flex-wrap gap-2">
-                    {PRESET_DEGREE_OPTIONS.map((opt) => {
-                      const alreadyAdded = degreeGroups.some((g) => g.degreeLevel === opt.value);
-                      return (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => handleAddDegreeLevel(opt.value)}
-                          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer ${
-                            alreadyAdded
-                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 ring-1 ring-emerald-400/30'
-                              : 'bg-white hover:bg-teal-50 text-[#142B5F] hover:text-[#0E7C86] border border-slate-200 hover:border-teal-300'
-                          }`}
-                        >
-                          <span>{opt.icon}</span>
-                          <span>{opt.label}</span>
-                          {alreadyAdded && <span className="text-[10px] bg-emerald-200/80 text-emerald-900 rounded-full px-1.5 font-bold">مضافة</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* List of Degree Groups */}
-              {degreeGroups.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center space-y-3">
-                  <div className="h-12 w-12 rounded-2xl bg-teal-50 text-[#0E7C86] grid place-items-center mx-auto">
-                    <GraduationCap className="h-6 w-6" />
-                  </div>
-                  <h4 className="text-sm font-bold text-slate-700">لم يتم تحديد أي درجات علمية للمنحة بعد</h4>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    اضغط على أي من أزرار الدرجات العلمية بالأعلى (مثل بكالوريوس أو ماجستير) لإضافة قسم الدرجة ثم كتابة التخصصات التابعة لها.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-5">
-                  {degreeGroups.map((group, groupIndex) => {
-                    const currentInputValue = majorInputs[group.id] || '';
-
-                    return (
-                      <section
-                        key={group.id}
-                        className="rounded-3xl border border-[#142B5F]/20 bg-white shadow-xs overflow-hidden transition hover:border-[#0E7C86]"
-                      >
-                        {/* Degree Header Banner */}
-                        <div className="bg-[#FAF7F0] border-b border-slate-200/80 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                          <div className="flex items-center gap-3 flex-1">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#142B5F] text-[#F2CD78] font-black text-lg shrink-0 shadow-xs">
-                              🎓
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h4 className="text-sm sm:text-base font-black text-[#142B5F]">
-                                  الدرجة العلمية {groupIndex + 1}: {group.customLabel || group.degreeLevel}
-                                </h4>
-                                <span className="rounded-full bg-teal-50 border border-teal-200 px-2.5 py-0.5 text-[10px] font-black text-[#0E7C86]">
-                                  {group.majors.length} تخصصات مضافة
-                                </span>
-                              </div>
-                              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                                التخصصات المتاحة حصراً لمرحلة ({group.degreeLevel}) في هذه المنحة
-                              </p>
-                            </div>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveDegreeLevel(group.id)}
-                            className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 text-xs font-bold transition cursor-pointer self-end sm:self-center"
-                            title="حذف هذه الدرجة العلمية بكامل تخصصاتها"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                            <span>حذف الدرجة</span>
-                          </button>
-                        </div>
-
-                        {/* Degree Body: Majors Under This Degree */}
-                        <div className="p-6 space-y-4">
-                          {/* Add Major Input for this Degree */}
-                          <div className="flex flex-col sm:flex-row gap-2">
-                            <div className="relative flex-1">
-                              <input
-                                type="text"
-                                value={currentInputValue}
-                                onChange={(e) =>
-                                  setMajorInputs((prev) => ({ ...prev, [group.id]: e.target.value }))
-                                }
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleAddMajorToDegree(group.id);
-                                  }
-                                }}
-                                placeholder={`اكتب اسم التخصص المتاح لمرحلة (${group.degreeLevel}) واضغط إضافة...`}
-                                className="h-11 w-full rounded-2xl border border-slate-200 bg-[#FAF7F0]/40 px-4 text-xs sm:text-sm font-medium text-slate-900 outline-none transition focus:border-[#0E7C86] focus:bg-white focus:ring-2 focus:ring-[#0E7C86]/15 font-['Cairo']"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleAddMajorToDegree(group.id)}
-                              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl bg-[#0E7C86] hover:bg-[#142B5F] px-5 text-xs font-black text-white shadow-xs transition-all active:scale-95 cursor-pointer shrink-0"
-                            >
-                              <Plus className="h-4 w-4" />
-                              <span>إضافة تخصص لـ ({group.degreeLevel})</span>
-                            </button>
-                          </div>
-
-                          {/* Quick Suggestions Tags */}
-                          <div className="space-y-1.5">
-                            <span className="text-[11px] font-bold text-slate-400">💡 تخصصات شائعة (انقر للإضافة السريعة):</span>
-                            <div className="flex flex-wrap gap-1.5">
-                              {POPULAR_MAJOR_SUGGESTIONS.map((sug) => {
-                                const isAdded = new Set(group.majors.map(major => major.label)).has(sug);
-                                return (
-                                  <button
-                                    key={sug}
-                                    type="button"
-                                    disabled={isAdded}
-                                    onClick={() => handleAddMajorToDegree(group.id, sug)}
-                                    className={`rounded-xl px-2.5 py-1 text-[11px] font-bold transition cursor-pointer ${
-                                      isAdded
-                                        ? 'bg-slate-100 text-slate-400 opacity-60 cursor-not-allowed'
-                                        : 'bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-700 hover:text-[#0E7C86]'
-                                    }`}
-                                  >
-                                    + {sug}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          {/* List of Active Majors in this Degree */}
-                          <div className="pt-3 border-t border-slate-100">
-                            <h5 className="text-xs font-bold text-[#142B5F] mb-2.5">
-                              التخصصات المعتمدة لمرحلة ({group.degreeLevel}):
-                            </h5>
-
-                            {group.majors.length === 0 ? (
-                              <p className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">
-                                ⚠️ لم يتم إضافة أي تخصص لهذه الدرجة بعد. يمكنك كتابة اسم التخصص في الحقل أعلاه أو اختياره من الاقتراحات.
-                              </p>
-                            ) : (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                                {group.majors.map((major, mIdx) => (
-                                  <div
-                                    key={major.targetKey}
-                                    className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xs hover:border-[#0E7C86] transition group/item"
-                                  >
-                                    <div className="flex items-center gap-2 min-w-0">
-                                      <BookOpen className="h-4 w-4 text-[#21A7B4] shrink-0" />
-                                      <span className="text-xs font-bold text-slate-800 truncate">
-                                        {major.label}
-                                      </span>
-                                    </div>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemoveMajorFromDegree(group.id, mIdx)}
-                                      className="text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 transition cursor-pointer"
-                                      title="حذف هذا التخصص"
-                                    >
-                                      <X className="h-3.5 w-3.5" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </section>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <ScholarshipRelationshipEditorPage embedded
+              disabled={saving || JSON.stringify(form) !== savedForm.current}
+              onSaved={load} />
           )}
 
           {/* Tab 5: Eligibility Criteria */}

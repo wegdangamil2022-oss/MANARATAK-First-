@@ -17,6 +17,8 @@ export interface CanonicalPickerOption {
   metadata?: Record<string, string | null | undefined>;
 }
 
+export interface CanonicalPickerPage { options: CanonicalPickerOption[]; nextCursor: string | null; }
+
 function selectableLifecycle(value: unknown, isActive?: boolean): string {
   if (isActive === false) return 'INACTIVE';
   const raw = typeof value === 'string' && value.trim() ? value.trim().toUpperCase() : 'ACTIVE';
@@ -41,7 +43,7 @@ function option(item: Record<string, unknown>, extras: Partial<CanonicalPickerOp
 
 export function canonicalOptionIsSelectable(value: CanonicalPickerOption | undefined): boolean {
   if (!value) return true;
-  return !/(?:DEPRECATED|ARCHIVED|SUPERSEDED|MERGED|REJECTED|INACTIVE)/u.test(value.lifecycle.toUpperCase());
+  return !/(?:DEPRECATED|ARCHIVED|SUPERSEDED|MERGED|REJECTED|INACTIVE|SUSPENDED)/u.test(value.lifecycle.toUpperCase());
 }
 
 type DataEnvelope<T> = { data: T[] };
@@ -79,12 +81,12 @@ export const canonicalPickerApi = {
     const { data: records } = await getReferenceDataPage<Record<string, unknown>>('currencies', { activeOnly: false, q: query.trim() || undefined, page, pageSize: 50 });
     return records.map((item) => option(item));
   },
-  async degreeLevels(): Promise<CanonicalPickerOption[]> {
+  async degreeLevels(query = ""): Promise<CanonicalPickerOption[]> {
     const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>('/admin/academic-taxonomy/degree-levels');
-    return response.data.map((item) => option(item));
+    return response.data.filter(item => !query.trim() || [item.nameAr, item.nameEn, item.canonicalCode].some(value => String(value ?? '').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))).map((item) => option(item));
   },
-  async taxonomyNodes(nodeType?: 'ACADEMIC_FIELD' | 'DISCIPLINE', query = ''): Promise<CanonicalPickerOption[]> {
-    const params = new URLSearchParams({ page: '1', pageSize: '100' });
+  async taxonomyNodes(nodeType?: 'ACADEMIC_FIELD' | 'DISCIPLINE', query = '', page = 1): Promise<CanonicalPickerOption[]> {
+    const params = new URLSearchParams({ page: String(page), pageSize: '50' });
     if (nodeType) params.set('nodeType', nodeType);
     if (query.trim()) params.set('q', query.trim());
     const response = await adminApiClient.request<DataEnvelope<Record<string, unknown>>>(`/admin/academic-taxonomy/nodes?${params}`);
@@ -96,20 +98,25 @@ export const canonicalPickerApi = {
     const response = await adminApiClient.request<PageEnvelope<Record<string, unknown>>>(`/admin/majors?${params}`);
     return response.data.map((item) => option(item));
   },
-  async tests(): Promise<CanonicalPickerOption[]> {
-    const response = await adminApiClient.request<PageEnvelope<Record<string, unknown>>>('/admin/international-tests?page=1&pageSize=100');
+  async tests(query = '', page = 1): Promise<CanonicalPickerOption[]> {
+    const params = new URLSearchParams({ page: String(page), pageSize: '50' });
+    if (query.trim()) params.set('search', query.trim().slice(0, 200));
+    const response = await adminApiClient.request<PageEnvelope<Record<string, unknown>>>(`/admin/international-tests?${params}`);
     return response.data.map((item) => option(item));
   },
-  async universities(query = ''): Promise<CanonicalPickerOption[]> {
-    const params = new URLSearchParams({ page: '1', pageSize: '100' });
+  async universities(query = '', page = 1): Promise<CanonicalPickerOption[]> {
+    const params = new URLSearchParams({ page: String(page), pageSize: '50' });
     if (query.trim()) params.set('search', query.trim());
     const response = await adminApiClient.request<PageEnvelope<Record<string, unknown>>>(`/admin/universities?${params}`);
     return response.data.map((item) => option(item));
   },
-  async programs(universityId: string): Promise<CanonicalPickerOption[]> {
-    if (!universityId) return [];
-    const university = await adminApiClient.request<Record<string, unknown>>(`/admin/universities/${encodeURIComponent(universityId)}`);
-    const programs = Array.isArray(university.academicPrograms) ? university.academicPrograms as Record<string, unknown>[] : [];
-    return programs.map((item) => option(item, { ownerId: universityId }));
+  async programs(universityId: string, query = '', _page = 1, cursor?: string): Promise<CanonicalPickerPage> {
+    if (!universityId) return { options: [], nextCursor: null };
+    const params = new URLSearchParams({ universityId, limit: '50' });
+    if (query.trim()) params.set('search', query.trim().slice(0, 200));
+    if (cursor) params.set('cursor', cursor);
+    // The public owner read enforces the published university/degree/major proof.
+    const result = await adminApiClient.request<{ items: Record<string, unknown>[]; nextCursor: string | null }>(`/public/university-programs?${params}`, { cache: 'no-store' });
+    return { options: result.items.map(item => option(item, { ownerId: universityId })), nextCursor: result.nextCursor };
   },
 };

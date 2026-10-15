@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
-import { canonicalPickerApi, type CanonicalPickerOption } from '../api/canonicalPickers';
+import { canonicalPickerApi } from '../api/canonicalPickers';
+import { CanonicalPicker } from './CanonicalPicker';
 export interface ScholarshipCanonicalFilterState {
+  countryReferenceId: string;
+  studyLanguageReferenceId: string;
+  currencyReferenceId: string;
   universityId: string;
   academicProgramId: string;
   internationalTestId: string;
@@ -15,6 +19,9 @@ export interface ScholarshipCanonicalFilterState {
   sort: string;
 }
 export const emptyScholarshipCanonicalFilters: ScholarshipCanonicalFilterState = {
+  countryReferenceId: '',
+  studyLanguageReferenceId: '',
+  currencyReferenceId: '',
   universityId: '',
   academicProgramId: '',
   internationalTestId: '',
@@ -36,43 +43,19 @@ export function ScholarshipCanonicalFilters({
   onChange: (value: ScholarshipCanonicalFilterState) => void;
   ar: boolean;
 }) {
-  const [options, setOptions] = useState<Record<string, CanonicalPickerOption[]>>({});
-  const [search, setSearch] = useState('');
   const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
   const [programs, setPrograms] = useState<Array<{ id: string; sourceProgramName: string }>>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const generation = useRef(0);
-  const load = async () => {
-    setBusy(true);
-    setError('');
-    const results = await Promise.allSettled([
-      canonicalPickerApi.universities(search),
-      canonicalPickerApi.majors(search),
-      canonicalPickerApi.degreeLevels(),
-      canonicalPickerApi.tests(),
-    ]);
-    const keys = ['universityId', 'majorId', 'degreeLevelId', 'internationalTestId'];
-    const data: Record<string, CanonicalPickerOption[]> = {};
-    results.forEach((result, i) => {
-      data[keys[i]] = result.status === 'fulfilled' ? result.value : [];
-    });
-    setOptions(data);
-    setBusy(false);
-    if (results.some((result) => result.status === 'rejected'))
-      setError(
-        ar
-          ? 'بعض خيارات المالك غير متاحة بصلاحيتك؛ لا تمنح صلاحية إدارة إضافية لمجرد الاختيار.'
-          : 'Some owner options are unavailable under your permissions; do not grant management access just for selection.',
-      );
-  };
-  const loadPrograms = async (next = false) => {
+  const [programsBusy, setProgramsBusy] = useState(false);
+  const loadPrograms = useCallback(async (after?: string) => {
     const current = generation.current;
+    setProgramsBusy(true);
     const params = new URLSearchParams({ limit: '25' });
     if (value.universityId) params.set('universityId', value.universityId);
     if (value.majorId) params.set('majorId', value.majorId);
     if (value.degreeLevelId) params.set('degreeLevelId', value.degreeLevelId);
-    if (next && cursor) params.set('cursor', cursor);
+    if (after) params.set('cursor', after);
     try {
       const result = await adminApiClient.request<{
         items: Array<{ id: string; sourceProgramName: string }>;
@@ -80,7 +63,7 @@ export function ScholarshipCanonicalFilters({
       }>(`/public/university-programs?${params}`, { cache: 'no-store' });
       if (current !== generation.current) return;
       setPrograms((old) =>
-        next
+        after
           ? [
               ...old,
               ...result.items.filter((row) => !old.some((previous) => previous.id === row.id)),
@@ -93,22 +76,24 @@ export function ScholarshipCanonicalFilters({
         setError(
           ar ? 'تعذر تحميل البرامج المنشورة المطابقة.' : 'Matching published programs unavailable.',
         );
+    } finally {
+      if (current === generation.current) setProgramsBusy(false);
     }
-  };
+  }, [value.universityId, value.majorId, value.degreeLevelId, ar]);
   useEffect(() => {
-    generation.current++;
+    const request = ++generation.current;
     setPrograms([]);
     setCursor(null);
     void loadPrograms();
     return () => {
-      generation.current++;
+      generation.current = request + 1;
     };
-  }, [value.universityId, value.majorId, value.degreeLevelId]);
+  }, [loadPrograms]);
   const update = (key: keyof ScholarshipCanonicalFilterState, next: string) =>
     onChange({
       ...value,
       [key]: next,
-      ...(['universityId', 'majorId', 'degreeLevelId'].includes(key)
+      ...(['universityId', 'majorId', 'degreeLevelId'].includes(key) && value[key] !== next
         ? { academicProgramId: '' }
         : {}),
     });
@@ -117,40 +102,19 @@ export function ScholarshipCanonicalFilters({
       <h3 className="font-bold">
         {ar ? 'العلاقات ومراجعة المصدر' : 'Canonical links and source review'}
       </h3>
-      <label>
-        {ar ? 'بحث خيارات المالك' : 'Owner option search'}
-        <input value={search} maxLength={200} onChange={(e) => setSearch(e.target.value)} />
-      </label>
-      <button type="button" disabled={busy} onClick={() => void load()}>
-        {ar ? 'تحميل الخيارات' : 'Load options'}
-      </button>
       {error && <p role="status">{error}</p>}
-      {Object.entries({
-        universityId: ar ? 'الجامعة' : 'University',
-        majorId: ar ? 'التخصص الرسمي' : 'Canonical major',
-        degreeLevelId: ar ? 'الدرجة الرسمية' : 'Canonical degree',
-        internationalTestId: ar ? 'الاختبار' : 'Test',
-      }).map(([key, label]) => (
-        <label key={key}>
-          {label}
-          <select
-            value={value[key as keyof typeof value]}
-            onChange={(e) => update(key as keyof typeof value, e.target.value)}
-          >
-            <option value="">—</option>
-            {value[key as keyof typeof value] &&
-              !options[key]?.some((item) => item.id === value[key as keyof typeof value]) && (
-                <option value={value[key as keyof typeof value]}>
-                  {value[key as keyof typeof value]} ({ar ? 'خيار غير محمل' : 'unloaded option'})
-                </option>
-              )}
-            {options[key]?.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </label>
+      {([
+        ['countryReferenceId', ar ? 'الدولة' : 'Country', canonicalPickerApi.countries],
+        ['studyLanguageReferenceId', ar ? 'لغة الدراسة' : 'Study language', canonicalPickerApi.languages],
+        ['currencyReferenceId', ar ? 'العملة' : 'Currency', canonicalPickerApi.currencies],
+        ['universityId', ar ? 'الجامعة' : 'University', canonicalPickerApi.universities],
+        ['majorId', ar ? 'التخصص الرسمي' : 'Canonical major', canonicalPickerApi.majors],
+        ['degreeLevelId', ar ? 'الدرجة الرسمية' : 'Canonical degree', canonicalPickerApi.degreeLevels],
+        ['internationalTestId', ar ? 'الاختبار' : 'Test', canonicalPickerApi.tests],
+      ] as const).map(([key, label, loader]) => (
+        <CanonicalPicker key={key} label={label} value={value[key]}
+          onChange={id => update(key, id ?? '')} load={loader}
+          reloadKey={`scholarship-filter:${key}`} optional paged={key !== 'degreeLevelId'} allowInactive />
       ))}
       <label>
         {ar ? 'البرنامج التابع' : 'Dependent academic program'}
@@ -173,7 +137,7 @@ export function ScholarshipCanonicalFilters({
         </select>
       </label>
       {cursor && (
-        <button type="button" onClick={() => void loadPrograms(true)}>
+        <button type="button" disabled={programsBusy} onClick={() => void loadPrograms(cursor ?? undefined)}>
           {ar ? 'تحميل برامج أخرى' : 'Load more programs'}
         </button>
       )}

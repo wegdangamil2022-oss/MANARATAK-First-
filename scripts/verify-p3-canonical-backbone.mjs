@@ -66,8 +66,10 @@ assert('Admin Scholarship list is canonical-id filtered',
 
 const adminList = scholarshipRepo.slice(scholarshipRepo.indexOf('async list(filters:'), scholarshipRepo.indexOf('async getAdminSummary'));
 const publicList = scholarshipRepo.slice(scholarshipRepo.indexOf('async listPublished('), scholarshipRepo.indexOf('private mapToDto'));
-assert('Admin Scholarship relation filters do not match Country names', !/primaryCountry|countrySourceLabel/.test(adminList));
-assert('Admin Scholarship degree filter does not match sourceLabel', !/sourceLabel/.test(adminList));
+const canonicalAdminFilters = adminList.slice(0, adminList.indexOf('if (filters.fundingCoverage)'));
+// Explicit legacy *Label filters and free-text query remain compatibility searches.
+assert('Admin Scholarship relation filters do not match Country names', /where.countryReferenceId = filters.countryReferenceId/.test(canonicalAdminFilters) && !/primaryCountry|countrySourceLabel|contains:/.test(canonicalAdminFilters));
+assert('Admin Scholarship degree filter does not match sourceLabel', /degreeLevelId: filters.degreeLevelId/.test(canonicalAdminFilters) && !/sourceLabel/.test(canonicalAdminFilters));
 assert('Public Scholarship relation filters do not match source labels', !/countrySourceLabel|sourceLabel/.test(publicList));
 for (const field of ['countryReferenceId','studyLanguageReferenceId','currencyReferenceId','degreeLevelId','majorId','internationalTestId','universityId','academicProgramId']) {
   assert(`Repository public filter uses ${field}`, publicList.includes(`filters.${field}`));

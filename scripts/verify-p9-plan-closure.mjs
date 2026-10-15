@@ -48,7 +48,7 @@ check('P9-PICKER-001 canonical option carries id', has(pickerApi, 'id: string;')
 check('P9-PICKER-001 canonical option carries label', has(pickerApi, 'label: string;'));
 check('P9-PICKER-001 canonical option carries lifecycle', has(pickerApi, 'lifecycle: CanonicalPickerLifecycle;'));
 check('P9-PICKER-002 inactive lifecycle states are blocked', has(pickerApi, 'DEPRECATED|ARCHIVED|SUPERSEDED|MERGED|REJECTED|INACTIVE'));
-check('P9-PICKER-002 picker disables blocked options', has(picker, 'disabled={!canonicalOptionIsSelectable(item)}'));
+check('P9-PICKER-002 picker disables blocked options', has(picker, 'allowInactive = false') && has(picker, 'disabled={!allowInactive && !canonicalOptionIsSelectable(item)}'));
 check('P9-PICKER-003 existing missing canonical IDs are explicit', has(picker, 'Current ID is not in this bounded page'));
 check('P9-PICKER-003 blocked existing relation is explicit', has(picker, 'Existing relation is'));
 check('P9-PICKER-004 country owner loader exists', has(pickerApi, 'async countries('));
