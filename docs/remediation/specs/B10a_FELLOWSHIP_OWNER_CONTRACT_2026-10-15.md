@@ -1,0 +1,15 @@
+# B10a — Fellowship authoring contract
+
+Owner: MAJORS. Canonical authoring uses an existing Major aggregate and a FELLOWSHIP MajorLevelProfile, MajorVersion, MajorContentSection, MajorSource and immutable MajorPublicationSnapshot. FellowshipDefinition remains import evidence; it is neither a second publication store nor automatically linked by name. No schema/migration or data conversion.
+
+Entry: authenticated majors manager selects a real canonical parent Major and active canonical FELLOWSHIP DegreeLevel. Parent must be editable, have canonical taxonomy, and have no fellowship profile. Server allocates FEL code above source-catalog floor. API POST /admin/majors/:id/fellowship-profiles requires If-Match, reason, displayName, degreeLevelId, HTTPS sourceUri and SHA256 sourceHash supplied from reviewed evidence. The server records actor/source and creates NEEDS_REVIEW version and empty sections atomically with audit/revision. It never approves or publishes on create.
+
+Sections: identity, overview, requirements, benefits, academic_notice, sources. They describe the profile, entry/completion requirements, documented benefits, professional limitations and evidence. No assumed clinical rights, admission guarantees, funding promises or invented defaults. Empty sections block review. Existing version-scoped content API edits them; translation remains the translation owner's workflow. Existing review permission and explicit coverage apply; approvalHash/digest freshness is mandatory. This package adds no new approval role or independence rule; existing review/publish permissions remain authoritative.
+
+Lifecycle: READY_TO_REVIEW → reviewed working version → READY_TO_PUBLISH → PUBLISHED; working-copy preserves the published snapshot; unpublish removes the publication pointer without deleting history. Published/archived structure is immutable. Graph/reference changes invalidate approval through digest comparison. No delete command.
+
+RBAC: admin:majors:manage for creation/content, admin:majors:review for review/graph, admin:majors:publish for publication/withdrawal; reference picker requires its existing academic taxonomy read permission. Public GET majors with degreeLevel=FELLOWSHIP and selected profile uses existing owner projection, pagination and locale. Only approved published sections are public; no demo links or private import JSON. Consumers refresh using existing bounded cache policy (up to 180 seconds), not an immediate-update promise.
+
+Acceptance: missing/stale revision, inactive/wrong degree, wrong parent identity, duplicate profile and immutable parent reject before writes; creation stays private; section edits and graph changes require fresh approval; publish/unpublish use existing snapshot tests plus fellowship review coverage tests. Database locks/triggers and browser/API/DB publication cycle remain runtime-pending until an isolated rehearsal.
+
+Rollback: hide new editor; preserve profiles, versions and snapshots. No historical SQL edits, cascades, production queries or provider calls.

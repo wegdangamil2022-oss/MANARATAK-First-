@@ -1,0 +1,16 @@
+import {describe,it,expect,vi} from 'vitest';
+import {PrismaMajorRepository} from '../../src/majors/PrismaMajorRepository';
+function setup() {
+  const profile:any={id:'profile',majorId:'major',level:'FELLOWSHIP',code:'FEL-330',status:'READY_TO_PUBLISH',currentPublishedVersionId:null};
+  const owner:any={id:'major',slug:'fellowship',publicId:'MJR-1',profiles:[profile]};
+  let snapshot:any;
+  const db:any={major:{update:vi.fn(),findUnique:async()=>owner},majorLevelProfile:{findMany:async()=>[profile],update:vi.fn(async({data})=>Object.assign(profile,data)),findFirst:async()=>profile.currentPublishedVersionId?profile:null},majorVersion:{findFirst:async()=>({id:'version',status:'APPROVED',approvedBy:'reviewer',metadata:{reviewApproval:{actorId:'reviewer',digest:'approved'}}}),update:vi.fn()},majorContentSection:{count:vi.fn().mockResolvedValueOnce(6).mockResolvedValueOnce(0),findMany:async()=>[{id:'section',sectionKey:'requirements',locale:'ar',content:'Verified requirements',reviewStatus:'APPROVED'}]},$executeRaw:vi.fn(async(_sql,...args)=>{snapshot=JSON.parse(args[3]);})};
+  const repo:any=new PrismaMajorRepository(db,false,true);
+  vi.spyOn(repo,'resolveMajorId').mockResolvedValue('major');vi.spyOn(repo,'acquireVersionAllocationLock').mockResolvedValue(undefined);vi.spyOn(repo,'workingVersionDigest').mockResolvedValue('approved');vi.spyOn(repo,'lockActivePublicationReferences').mockResolvedValue(undefined);vi.spyOn(repo,'mapToDto').mockReturnValue(owner);
+  return {repo,db,profile,get snapshot(){return snapshot;}};
+}
+describe('B10a fellowship publication boundaries',()=>{
+ it('publishes approved localized sections into immutable snapshot then withdraws only the pointer',async()=>{const h=setup();await h.repo.updateStatus('profile','PUBLISHED');expect(h.snapshot.contentSections).toEqual([expect.objectContaining({content:'Verified requirements',reviewStatus:'PUBLISHED'})]);expect(h.snapshot.profiles[0].level).toBe('FELLOWSHIP');expect(h.profile.currentPublishedVersionId).toBe('version');await h.repo.unpublishProfile('profile');expect(h.profile.currentPublishedVersionId).toBeNull();expect(h.snapshot.contentSections[0].content).toBe('Verified requirements');expect(h.db.$executeRaw).toHaveBeenCalledTimes(1);});
+ it('rejects stale graph approval without publishing a snapshot',async()=>{const h=setup();h.repo.workingVersionDigest.mockResolvedValue('changed-relationships');await expect(h.repo.updateStatus('profile','PUBLISHED')).rejects.toThrow('STALE_APPROVAL');expect(h.db.$executeRaw).not.toHaveBeenCalled();});
+ it('includes relationship identities in review digest',async()=>{let relationships:any[]=[];const db:any={major:{findUnique:async()=>({id:'major'})},majorLevelProfile:{findFirst:async()=>({id:'profile'})},majorVersion:{findFirst:async()=>({id:'v'})},majorContentSection:{findMany:async()=>[]},majorClassificationMapping:{findMany:async()=>[]},majorSource:{findMany:async()=>[]},majorRelationship:{findMany:async()=>relationships}};const repo:any=new PrismaMajorRepository(db);const before=await repo.workingVersionDigest('major','profile','v');relationships=[{sourceMajorId:'major',targetMajorId:'other',relationshipType:'SIMILAR'}];expect(await repo.workingVersionDigest('major','profile','v')).not.toBe(before);});
+});

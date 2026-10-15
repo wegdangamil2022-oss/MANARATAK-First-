@@ -138,16 +138,17 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   }
 
   private async workingVersionDigest(majorId:string,profileId:string,versionId:string):Promise<string> {
-    const [major,profile,version,sections,mappings,sources]=await Promise.all([
+    const [major,profile,version,sections,mappings,sources,relationships]=await Promise.all([
       this.prisma.major.findUnique({where:{id:majorId},select:{canonicalName:true,canonicalDedupKey:true,displayName:true,academicFieldId:true,disciplineId:true}}),
       this.prisma.majorLevelProfile.findFirst({where:{id:profileId,majorId},select:{id:true,majorId:true,degreeLevelId:true,academicFieldId:true,disciplineId:true,level:true,displayName:true,code:true}}),
       this.prisma.majorVersion.findFirst({where:{id:versionId,majorId,profileId},select:{id:true,sourceHash:true,sourceUri:true,sourceImportRecordId:true}}),
       this.prisma.majorContentSection.findMany({where:{profileId,versionId},orderBy:[{sectionKey:'asc'},{id:'asc'}],select:{id:true,sectionKey:true,title:true,content:true,locale:true}}),
       this.prisma.majorClassificationMapping.findMany({where:{OR:[{majorId,profileId:null},{profileId}]},orderBy:{id:'asc'},select:{taxonomyNodeId:true,relationshipType:true,profileId:true}}),
       this.prisma.majorSource.findMany({where:{OR:[{majorId,profileId:null},{profileId}]},orderBy:{id:'asc'},select:{id:true,sourceHash:true,sourceUri:true,sourceType:true}}),
+      this.prisma.majorRelationship.findMany({where:{OR:[{sourceMajorId:majorId},{targetMajorId:majorId},{sourceProfileId:profileId},{targetProfileId:profileId}]},orderBy:{id:'asc'},select:{id:true,sourceMajorId:true,targetMajorId:true,sourceProfileId:true,targetProfileId:true,relationshipType:true}}),
     ]);
     if(!major || !profile || !version) throw new Error('MAJOR_REVIEW_FOREIGN_VERSION');
-    return createHash('sha256').update(JSON.stringify({major,profile,version,sections,mappings,sources})).digest('hex');
+    return createHash('sha256').update(JSON.stringify({major,profile,version,sections,mappings,sources,relationships})).digest('hex');
   }
 
   async findById(id: string): Promise<MajorDto | null> {
@@ -320,7 +321,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
           displayName:profile.displayName || major.displayName,localizedNameAr:profile.localizedNameAr || major.localizedNameAr,
           localizedNameEn:profile.localizedNameEn || major.localizedNameEn,currentPublishedVersionId:version.id,
           profiles:[{...selected,status:MajorStatus.PUBLISHED,currentPublishedVersionId:version.id}]};
-        const payload=publicMajorProjection(scoped,sections.map(section=>this.mapContentSectionToDto(section)));
+        const payload=publicMajorProjection(scoped,sections.map(section=>({...this.mapContentSectionToDto(section),reviewStatus:'PUBLISHED' as const})));
         await this.prisma.$executeRaw`INSERT INTO "MajorPublicationSnapshot" ("versionId","majorId","profileId","payload","reviewerId") VALUES (${version.id},${majorId},${profile.id},${JSON.stringify(payload)}::jsonb,${version.approvedBy})`;
 
       }

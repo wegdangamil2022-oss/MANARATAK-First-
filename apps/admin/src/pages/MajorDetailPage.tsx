@@ -1,3 +1,4 @@
+import {FellowshipAuthoringPanel} from '../components/FellowshipAuthoringPanel';
 import {MajorConsumerUsagePanel} from '../components/MajorConsumerUsagePanel';
 import {MajorGovernanceWorkspace} from '../components/MajorGovernanceWorkspace';
 /// <reference types="vite/client" />
@@ -1513,6 +1514,7 @@ export function MajorDetailPage() {
         </section>
       )}
 
+      <FellowshipAuthoringPanel major={major} onSaved={loadMajorAndProfiles}/>
       {activeTab === 'versions' && <MajorGovernanceWorkspace majorId={major.id} profileId={activeProfile?.id} onSaved={loadMajorAndProfiles}/> }
 
       {/* Tab 5: Versions and Sources */}

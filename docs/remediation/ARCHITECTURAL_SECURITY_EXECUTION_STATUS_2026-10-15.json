@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B10a",
+  "next": "B10b",
   "remaining": [
-    "B10a",
     "B10b",
     "B10c",
     "B10d",
@@ -64,7 +63,7 @@
   "verifiedFindings": "docs/reviews/ARCHITECTURAL_SECURITY_VERIFIED_FINDINGS_2026-10-15.md",
   "workBranch": "fix/b02-auth-session-boundary-20261015",
   "mainPushRequiresExplicitUserInstruction": true,
-  "lastIntegratedMainCommit": "2524ae885e89d492a897b6c828a87cbb651080bc",
+  "lastIntegratedMainCommit": "93a1c4d1946db9480bd94ca2a3291be34b742c68",
   "B03": {
     "status": "SOURCE_VERIFIED",
     "baselineCommit": "5cf33d33d1cd2988ceb583eed6a0bb86066672f7",
@@ -309,5 +308,26 @@
       "Provider/owner idempotency and abort handling; no real effects tested"
     ],
     "hostDecision": "Existing persistent Node server is the source host; no external deployment certified. Serverless HTTP must not start polling per request."
+  },
+  "B10a": {
+    "status": "SOURCE_VERIFIED",
+    "baselineCommit": "93a1c4d1946db9480bd94ca2a3291be34b742c68",
+    "runtimeDatabaseStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "findings": [
+      "ADM-01",
+      "SYNC-07"
+    ],
+    "report": "docs/reviews/B10a_FELLOWSHIP_AUTHORING_2026-10-15.md",
+    "specification": "docs/remediation/specs/B10a_FELLOWSHIP_OWNER_CONTRACT_2026-10-15.md",
+    "lightTestsPassed": 38,
+    "lightTestsFailed": 0,
+    "schemaChanged": false,
+    "historicalSqlChanged": false,
+    "runtimePrerequisites": [
+      "Isolated PostgreSQL locking and browser/API/DB review-publication-withdrawal rehearsal",
+      "Existing B01/B02/B05/B09 runtime prerequisites",
+      "Runtime acceptance on supported Node 22"
+    ]
   }
 }

@@ -70,6 +70,34 @@ export class AdminMajorUseCases {
     private readonly newMajorCandidates?: INewMajorCandidateRepository,
   ) {}
 
+  public async createFellowshipProfile(id: string, input: {displayName: string; degreeLevelId: string; sourceUri: string; sourceHash: string}, context?: MajorMutationContext): Promise<MajorLevelProfileDto> {
+    this.assertMutableCanonicalMajorId(id);
+    if (!input.displayName.trim() || !/^[a-f0-9]{64}$/i.test(input.sourceHash)) throw new Error('FELLOWSHIP_SOURCE_EVIDENCE_REQUIRED');
+    const source = new URL(input.sourceUri);
+    if (source.protocol !== 'https:' || source.username || source.password) throw new Error('FELLOWSHIP_HTTPS_SOURCE_REQUIRED');
+    if (!this.canonicalReferences) throw new Error('MAJOR_CANONICAL_REFERENCE_SERVICE_REQUIRED');
+    await this.canonicalReferences.assertDegreeMatches(input.degreeLevelId, 'FELLOWSHIP');
+    return this.mutate('MAJOR_FELLOWSHIP_PROFILE_CREATED', id, context, async repository => {
+      const major = await repository.findById(id);
+      if (!major || major.id !== id) throw new Error('FELLOWSHIP_CANONICAL_PARENT_REQUIRED');
+      if ([MajorStatus.PUBLISHED, MajorStatus.ARCHIVED, MajorStatus.REJECTED].includes(major.status)) throw new Error('MAJOR_PUBLISHED_STRUCTURE_IMMUTABLE');
+      if (!major.academicFieldId && !major.disciplineId) throw new Error('MAJOR_CANONICAL_TAXONOMY_REQUIRED');
+      if ((await repository.listLevelProfiles?.(id) ?? major.profiles ?? []).some(profile => profile.level === 'FELLOWSHIP')) throw new Error('FELLOWSHIP_PROFILE_ALREADY_EXISTS');
+      if (!repository.allocateNextProfileCode || !repository.createLevelProfile || !repository.createVersion || !repository.createSource || !repository.createContentSections) throw new Error('FELLOWSHIP_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+      const code = await repository.allocateNextProfileCode('FEL', this.catalogRepository?.maxCodeNumber?.('FEL') ?? 0);
+      const profile = await repository.createLevelProfile({majorId:id, level:'FELLOWSHIP', degreeLevelId:input.degreeLevelId, code,
+        displayName:input.displayName.trim(), academicFieldId:major.academicFieldId ?? undefined, disciplineId:major.disciplineId ?? undefined,
+        profileType:'PROFESSIONAL', status:MajorStatus.READY_TO_REVIEW, completenessStatus:MajorImportCompletenessState.NEEDS_REVIEW,
+        metadata:{sourceImportMode:'ADMIN_ENTRY',actorId:context!.actorId}});
+      if (!profile.id) throw new Error('FELLOWSHIP_PROFILE_ID_REQUIRED');
+      await repository.createSource({majorId:id,profileId:profile.id,sourceType:'ADMIN_ENTRY',sourceName:'ADMIN_FELLOWSHIP_AUTHORING',sourceUri:input.sourceUri,sourceHash:input.sourceHash});
+      const version = await repository.createVersion({majorId:id,profileId:profile.id,versionNumber:1,status:'NEEDS_REVIEW',sourceUri:input.sourceUri,sourceHash:input.sourceHash,metadata:{source:'ADMIN_FELLOWSHIP_AUTHORING',actorId:context!.actorId}});
+      if (!version.id) throw new Error('FELLOWSHIP_VERSION_ID_REQUIRED');
+      await repository.createContentSections(['identity','overview','requirements','benefits','academic_notice','sources'].map(sectionKey => ({profileId:profile.id,versionId:version.id,sectionKey,content:'',locale:'ar',reviewStatus:'NEEDS_REVIEW' as const})));
+      return profile;
+    });
+  }
+
   public async listMajors(filters: MajorFilters & { catalog?: string }): Promise<PaginatedMajorResult<any>> {
     if (this.catalogRepository && filters.catalog === 'true' && !filters.taxonomyNodeId) {
       return this.catalogRepository.listCatalog(filters);

@@ -1,4 +1,5 @@
 export const MAJOR_REVIEW_TEMPLATE:Record<string,readonly string[]>={
+  FELLOWSHIP:['identity','overview','requirements','benefits','academic_notice','sources'],
   BACHELOR:['identity','overview','study_content','foundation_courses','core_courses','practical_training','skills','tracks','career_links','postgraduate_paths','related_majors','academic_notice','sources'],
   MASTER:['identity','overview','entry_backgrounds','curriculum','tracks','completion_requirements','advanced_skills','career_links','doctoral_paths','bachelor_links','academic_notice','sources'],
   DOCTORATE:['identity','overview','entry_paths','program_stages','research_fields','research_methods','milestones','dissertation','research_skills','career_links','related_majors','academic_notice','sources'],

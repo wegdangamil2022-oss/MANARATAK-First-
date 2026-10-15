@@ -1,0 +1,37 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@manaratak/core": [
+        "packages/core/src/index.ts"
+      ],
+      "@manaratak/shared": [
+        "packages/shared/src/index.ts"
+      ],
+      "@manaratak/domain": [
+        "packages/domain/src/index.ts"
+      ],
+      "@manaratak/application": [
+        "packages/application/src/index.ts"
+      ],
+      "@manaratak/infrastructure": [
+        "packages/infrastructure/src/index.ts"
+      ],
+      "@manaratak/config": [
+        "packages/config/src/index.ts"
+      ]
+    },
+    "noEmit": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "types": [
+      "node",
+      "vite/client"
+    ]
+  },
+  "include": [
+    "apps/admin/src",
+    "apps/api/src"
+  ]
+}
