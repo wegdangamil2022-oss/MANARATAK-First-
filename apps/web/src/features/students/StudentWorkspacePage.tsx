@@ -1,3 +1,4 @@
+import { StudentApplicationDocuments } from './StudentApplicationDocuments';
 import { StudentCareerWorkspace } from './StudentCareerWorkspace';
 import { StudentServiceBookingPanel } from './StudentServiceBookingPanel';
 import { StudentToolResultView } from '../student-tools/StudentToolResultView';
@@ -838,6 +839,7 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
             onNotesUpdate={updateApplicationNotes}
             onArchive={archiveApplicationTracker}
             onRemove={removeApplicationTracker}
+            onDocumentsChanged={() => { void ApiClient.listMyStudentApplicationTrackers().then(setApplicationTrackers).catch(() => setError('تعذر تحديث ملفات التقديم')); }}
           />
         )}
         {tab === 'LEARNING' && (
@@ -1317,6 +1319,7 @@ function OpportunitiesView({
   onNotesUpdate,
   onArchive,
   onRemove,
+  onDocumentsChanged,
 }: {
   dashboard: StudentDashboardSummaryDto;
   trackers: StudentApplicationTrackerDto[];
@@ -1326,6 +1329,7 @@ function OpportunitiesView({
   onNotesUpdate: (tracker: StudentApplicationTrackerDto, notes: string) => void;
   onArchive: (tracker: StudentApplicationTrackerDto) => void;
   onRemove: (tracker: StudentApplicationTrackerDto) => void;
+  onDocumentsChanged: () => void;
 }) {
   const [filter, setFilter] = useState<'ACTIVE' | 'ARCHIVED' | 'ALL'>('ACTIVE');
 
@@ -1471,6 +1475,7 @@ function OpportunitiesView({
               onNotesUpdate={onNotesUpdate}
               onArchive={onArchive}
               onRemove={onRemove}
+              onDocumentsChanged={onDocumentsChanged}
             />
           </div>
 
@@ -1558,6 +1563,7 @@ function ApplicationTrackersPanel({
   onNotesUpdate,
   onArchive,
   onRemove,
+  onDocumentsChanged,
 }: {
   trackers: StudentApplicationTrackerDto[];
   filter: 'ACTIVE' | 'ARCHIVED' | 'ALL';
@@ -1567,6 +1573,7 @@ function ApplicationTrackersPanel({
   onNotesUpdate: (tracker: StudentApplicationTrackerDto, notes: string) => void;
   onArchive: (tracker: StudentApplicationTrackerDto) => void;
   onRemove: (tracker: StudentApplicationTrackerDto) => void;
+  onDocumentsChanged: () => void;
 }) {
   if (!trackers.length) {
     if (filter === 'ARCHIVED') {
@@ -1603,6 +1610,7 @@ function ApplicationTrackersPanel({
           onNotesUpdate={onNotesUpdate}
           onArchive={onArchive}
           onRemove={onRemove}
+          onDocumentsChanged={onDocumentsChanged}
         />
       ))}
     </div>
@@ -1617,6 +1625,7 @@ function ApplicationTrackerCard({
   onNotesUpdate,
   onArchive,
   onRemove,
+  onDocumentsChanged,
 }: {
   tracker: StudentApplicationTrackerDto;
   saving: boolean;
@@ -1625,6 +1634,7 @@ function ApplicationTrackerCard({
   onNotesUpdate: (tracker: StudentApplicationTrackerDto, notes: string) => void;
   onArchive: (tracker: StudentApplicationTrackerDto) => void;
   onRemove: (tracker: StudentApplicationTrackerDto) => void;
+  onDocumentsChanged: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
@@ -1645,6 +1655,7 @@ function ApplicationTrackerCard({
 
   return (
     <article className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel transition-all hover:border-[#D6A43B]/40">
+      <StudentApplicationDocuments tracker={tracker} onChanged={onDocumentsChanged} />
       {/* Top Header Row */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">

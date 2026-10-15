@@ -2970,6 +2970,8 @@ model StudentSavedItem {
 }
 
 model StudentApplicationTracker {
+  cycleReferenceId String @default("LEGACY")
+  ownerSnapshot Json?
   id                 String   @id @default(uuid())
   studentReferenceId String
   scholarshipId      String
@@ -2985,8 +2987,9 @@ model StudentApplicationTracker {
 
   workspace StudentWorkspace @relation(fields: [studentReferenceId], references: [studentReferenceId], onDelete: Cascade)
   checklist StudentApplicationChecklistItem[]
+  documentBindings StudentApplicationDocumentBinding[]
 
-  @@unique([studentReferenceId, scholarshipId])
+  @@unique([studentReferenceId, scholarshipId, cycleReferenceId], map: "StudentTracker_student_scholarship_cycle_key")
   @@index([studentReferenceId, status, updatedAt], map: "StudentApplicationTracker_studentReferenceId_status_updatedAt_i")
   @@index([deadlineAt, status])
 }
@@ -6041,4 +6044,22 @@ model OwnerTranslationTransferReceipt {
   createdAt DateTime @default(now())
   @@unique([ownerDomain, targetId, handoffId])
   @@index([approvalId])
+}
+
+
+/// P15-private requirement/cycle/asset references; no file content or shared document authority.
+model StudentApplicationDocumentBinding {
+  id String @id @default(uuid())
+  trackerId String
+  requirementId String
+  assetId String
+  ownerVersionId String
+  requirementSnapshot Json
+  consentGrantedAt DateTime
+  expiresAt DateTime?
+  retentionUntil DateTime
+  updatedAt DateTime @updatedAt
+  tracker StudentApplicationTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+  @@unique([trackerId, requirementId])
+  @@index([retentionUntil])
 }

@@ -9,7 +9,7 @@ function fixture(){
     remove:vi.fn().mockResolvedValue(undefined),
     setChecklistItem:vi.fn(),list:vi.fn(),listSupportPage:vi.fn(),
   };
-  const scholarships={resolve:vi.fn().mockResolvedValue({id:'sch-1',available:true,deadlineAt:new Date('2027-01-10')})};
+  const scholarships={resolve:vi.fn().mockResolvedValue({id:'sch-1',available:true,cycleId:'cycle-1',cycleKey:'2027|first',ownerVersionId:'version-1',deadlineAt:new Date('2027-01-10')})};
   return {repository,scholarships,service:new StudentApplicationTrackerUseCases(repository as any,scholarships as any)};
 }
 describe('StudentApplicationTrackerUseCases transactional notification boundary',()=>{

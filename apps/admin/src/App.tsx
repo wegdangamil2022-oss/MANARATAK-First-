@@ -1,3 +1,4 @@
+import { CrossModuleIntegrityPage } from './pages/CrossModuleIntegrityPage';
 import {MfaRequirementBanner} from './components/MfaRequirementBanner';
 import { AccountSecurityPage } from './pages/AccountSecurityPage';
 import { CourseProviderRegistryPage } from './pages/CourseProviderRegistryPage';
@@ -273,6 +274,7 @@ function AdminLayout() {
                   <Route path="/imports" element={<RequireAdminPermission permission="admin:imports:manage"><ImportAdminPage /></RequireAdminPermission>} />
                   <Route path="/imports/scholarships" element={<RequireAdminPermission permission="admin:imports:manage"><ScholarshipImportCenterPage /></RequireAdminPermission>} />
                   <Route path="/imports/:domainKey" element={<RequireAdminPermission permission="admin:imports:manage"><DomainImportCenterPage /></RequireAdminPermission>} />
+                  <Route path="/cross-module-integrity" element={<RequireAdminPermission permission="admin:platform:manage"><CrossModuleIntegrityPage /></RequireAdminPermission>} />
                   <Route path="/health-readiness" element={<RequireAdminPermission permission="admin:platform:manage"><AdminHealthReadinessPage /></RequireAdminPermission>} />
                   <Route path="/notifications" element={<RequireAdminPermission permission="admin:platform:manage"><NotificationOperationsPage /></RequireAdminPermission>} />
                   <Route path="/scholarships" element={<RequireAdminPermission permission="admin:scholarships:manage"><ScholarshipListPage /></RequireAdminPermission>} />

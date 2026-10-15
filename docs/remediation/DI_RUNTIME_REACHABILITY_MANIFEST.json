@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 402,
-  "reachableCount": 402,
+  "registrationCount": 411,
+  "reachableCount": 411,
   "unreachable": [],
   "registrations": [
     {
@@ -530,7 +530,9 @@
       ],
       "reachableThroughRegistrations": [
         "assetReferencePolicy",
+        "certificateArtifactReadinessProbe",
         "certificateArtifactStore",
+        "certificateAuthorityDirectory",
         "certificateRenderingService",
         "certificateUseCases",
         "cmsRepository",
@@ -563,6 +565,7 @@
         "internationalTestAdminUseCases",
         "referenceDataUseCases",
         "serviceOperationsUseCases",
+        "studentApplicationTrackerUseCases",
         "studentServiceRequestUseCases",
         "studentToolRegistryUseCases",
         "studentWorkspaceUseCases",
@@ -691,6 +694,7 @@
         "recoverAssetLifecycleUseCase",
         "referenceOwnerReviewUseCases",
         "settingsGovernanceUseCases",
+        "studyDestinationUseCases",
         "universityProgramWorkspaceUseCases"
       ],
       "dependencies": [
@@ -828,6 +832,7 @@
       "name": "authEvaluatorService",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [
+        "apps/api/src/app.ts",
         "apps/api/src/presentation/api/router/AIAdminRouter.ts",
         "apps/api/src/presentation/api/router/AuditRouter.ts",
         "apps/api/src/presentation/api/router/AuditWorkspaceRouter.ts",
@@ -836,6 +841,7 @@
         "apps/api/src/presentation/api/router/CareerAdminRouter.ts",
         "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
         "apps/api/src/presentation/api/router/CmsAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CrossModuleIntegrityRouter.ts",
         "apps/api/src/presentation/api/router/FinanceAdminRouter.ts",
         "apps/api/src/presentation/api/router/NotificationRouter.ts",
         "apps/api/src/presentation/api/router/ServiceAdminRouter.ts",
@@ -1214,6 +1220,31 @@
       ]
     },
     {
+      "name": "certificateArtifactReadinessProbe",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "certificateUseCases"
+      ],
+      "dependencies": [
+        "assetRecordRepository",
+        "pollingWorkerRuntimeRegistry",
+        "processAssetLifecycleUseCase"
+      ]
+    },
+    {
+      "name": "certificateArtifactRecovery",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "certificateCompletionOutboxWorker"
+      ],
+      "dependencies": [
+        "certificateArtifactStore",
+        "certificateRepository"
+      ]
+    },
+    {
       "name": "certificateArtifactRenderUseCase",
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
@@ -1233,12 +1264,40 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
+        "certificateArtifactRecovery",
         "certificateArtifactRenderUseCase"
       ],
       "dependencies": [
         "assetRecordRepository",
         "ingestAssetUseCase",
         "processAssetLifecycleUseCase"
+      ]
+    },
+    {
+      "name": "certificateAuthorityDirectory",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CertificateAdminRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "certificateAuthorityResolver"
+      ],
+      "dependencies": [
+        "assetRecordRepository",
+        "prisma",
+        "universityRepository"
+      ]
+    },
+    {
+      "name": "certificateAuthorityResolver",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "certificateUseCases"
+      ],
+      "dependencies": [
+        "certificateAuthorityDirectory",
+        "universityRepository"
       ]
     },
     {
@@ -1300,6 +1359,7 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "certificateArtifactOutboxDispatcher",
+        "certificateArtifactRecovery",
         "certificateCompletionOutboxDispatcher",
         "certificateUseCases"
       ]
@@ -1345,11 +1405,13 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
+        "certificateArtifactRecovery",
         "certificateArtifactRenderUseCase",
         "certificateReadModelService",
         "certificateUseCases"
       ],
       "dependencies": [
+        "certificateVerificationPolicy",
         "prisma"
       ]
     },
@@ -1388,6 +1450,8 @@
       ],
       "dependencies": [
         "assetRecordRepository",
+        "certificateArtifactReadinessProbe",
+        "certificateAuthorityResolver",
         "certificateRepository",
         "certificateSignatureService",
         "courseCurriculumRepository",
@@ -1396,6 +1460,40 @@
         "learningPathRepository",
         "pollingWorkerRuntimeRegistry",
         "universityRepository"
+      ]
+    },
+    {
+      "name": "certificateVerificationDistributedRequired",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CertificatePublicRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "certificateVerificationPolicy",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CertificateAdminRouter.ts",
+        "apps/api/src/presentation/api/router/CertificatePublicRouter.ts"
+      ],
+      "reachableThroughRegistrations": [
+        "certificateRepository"
+      ],
+      "dependencies": [
+        "configurationResolutionService"
+      ]
+    },
+    {
+      "name": "certificateVerificationRateLimiter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CertificatePublicRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "redisClient"
       ]
     },
     {
@@ -1483,6 +1581,7 @@
       "classification": "RUNTIME_REACHABLE",
       "directRuntimeConsumers": [],
       "reachableThroughRegistrations": [
+        "certificateVerificationPolicy",
         "resolveConfigurationUseCase"
       ],
       "dependencies": [
@@ -1910,6 +2009,29 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": []
+    },
+    {
+      "name": "crossModuleIntegrityRouter",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/app.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": []
+    },
+    {
+      "name": "crossModuleIntegrityUseCase",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [
+        "apps/api/src/presentation/api/router/CrossModuleIntegrityRouter.ts"
+      ],
+      "reachableThroughRegistrations": [],
+      "dependencies": [
+        "internationalTestRepository",
+        "majorRepository",
+        "scholarshipRepository",
+        "universityRepository"
+      ]
     },
     {
       "name": "degreeLevelRepository",
@@ -2726,6 +2848,7 @@
       ],
       "reachableThroughRegistrations": [
         "crossDomainGraphReadService",
+        "crossModuleIntegrityUseCase",
         "internationalTestAdminUseCases",
         "internationalTestImportHandoffConsumer",
         "internationalTestStudentSavedItemHydrationGateway"
@@ -2874,6 +2997,7 @@
       "reachableThroughRegistrations": [
         "adminMajorUseCases",
         "crossDomainGraphReadService",
+        "crossModuleIntegrityUseCase",
         "majorStudentSavedItemHydrationGateway"
       ],
       "dependencies": [
@@ -3403,6 +3527,7 @@
         "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts"
       ],
       "reachableThroughRegistrations": [
+        "certificateArtifactReadinessProbe",
         "certificateUseCases"
       ],
       "dependencies": [
@@ -3467,6 +3592,7 @@
         "canonicalAcademicUsageGateway",
         "careerEngagementRepository",
         "careerRepository",
+        "certificateAuthorityDirectory",
         "certificateRepository",
         "cmsRepository",
         "courseCurriculumRepository",
@@ -3561,10 +3687,12 @@
       ],
       "reachableThroughRegistrations": [
         "assetRetentionGateway",
+        "certificateArtifactReadinessProbe",
         "certificateArtifactStore",
         "certificateRenderingService",
         "recoverAssetActivationsUseCase",
-        "serviceDeliveryGateway"
+        "serviceDeliveryGateway",
+        "studyDestinationUseCases"
       ],
       "dependencies": [
         "assetMalwareScannerGateway",
@@ -3679,6 +3807,7 @@
         "apps/api/src/infrastructure/runtime/RuntimeResourceRegistry.ts"
       ],
       "reachableThroughRegistrations": [
+        "certificateVerificationRateLimiter",
         "cmsDeliveryCache",
         "studentToolRateLimiter",
         "studentWorkspaceDeliveryCache",
@@ -4121,6 +4250,7 @@
       "reachableThroughRegistrations": [
         "adminScholarshipUseCases",
         "crossDomainGraphReadService",
+        "crossModuleIntegrityUseCase",
         "publicScholarshipUseCases",
         "scholarshipDuplicateLookup",
         "scholarshipRecommendationGateway",
@@ -4619,6 +4749,7 @@
         "studentWorkspaceOutboxWorker"
       ],
       "dependencies": [
+        "assetReferencePolicy",
         "studentApplicationScholarshipGateway",
         "studentApplicationTrackerRepository"
       ]
@@ -5060,6 +5191,8 @@
       "reachableThroughRegistrations": [],
       "dependencies": [
         "assetReferencePolicy",
+        "atomicDomainMutationCoordinator",
+        "processAssetLifecycleUseCase",
         "referenceDataRepository",
         "studyDestinationRepository"
       ]
@@ -5202,8 +5335,11 @@
       ],
       "reachableThroughRegistrations": [
         "adminUniversityUseCases",
+        "certificateAuthorityDirectory",
+        "certificateAuthorityResolver",
         "certificateUseCases",
         "crossDomainGraphReadService",
+        "crossModuleIntegrityUseCase",
         "studentToolDependencyHealthGateway",
         "universityComparisonGateway",
         "universityImportHandoffConsumer",

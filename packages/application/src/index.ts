@@ -240,3 +240,5 @@ export * from './settings/use-cases/SettingsGovernanceUseCases';
 export * from './universities/use-cases/UniversityProgramWorkspaceUseCases';
 
 export * from './localization/TranslationWorkspaceRead';
+
+export * from './integration/CrossModuleIntegrityUseCase';

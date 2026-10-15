@@ -179,6 +179,7 @@ export function AdminHealthReadinessPage() {
           {t('title')}
         </h1>
         <p className="mt-3">{t('description')}</p>
+        <Link to="/cross-module-integrity">{language==='en'?'Cross-module link integrity':'سلامة الروابط بين الأقسام'}</Link>
         <div className="mt-4 flex flex-wrap gap-3">
           <button
             disabled={loading}

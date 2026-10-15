@@ -20,7 +20,7 @@ describe('PrismaStudentApplicationTrackerRepository atomic notification outbox',
     };
     const db=mockTransaction(tx);
     const repo=new PrismaStudentApplicationTrackerRepository(db as any);
-    await repo.create({studentReferenceId:'s-1',scholarshipId:'sch-1'});
+    await repo.create({studentReferenceId:'s-1',scholarshipId:'sch-1',cycleReferenceId:'cycle-1',ownerSnapshot:{cycleId:'cycle-1'}});
     expect(db.$transaction).toHaveBeenCalledOnce();
     expect(tx.studentApplicationTracker.create).toHaveBeenCalledOnce();
     expect(tx.auditRecord.create).toHaveBeenCalledWith(expect.objectContaining({
@@ -45,7 +45,7 @@ describe('PrismaStudentApplicationTrackerRepository atomic notification outbox',
       transactionalOutboxRecord:{create:vi.fn().mockRejectedValue(new Error('OUTBOX_DB_FAILED'))},
     };
     const repo=new PrismaStudentApplicationTrackerRepository(mockTransaction(tx) as any);
-    await expect(repo.create({studentReferenceId:'s-1',scholarshipId:'sch-1'}))
+    await expect(repo.create({studentReferenceId:'s-1',scholarshipId:'sch-1',cycleReferenceId:'cycle-1',ownerSnapshot:{cycleId:'cycle-1'}}))
       .rejects.toThrow('OUTBOX_DB_FAILED');
   });
   it('does not emit reminders for a failed CAS version update',async()=>{

@@ -1,3 +1,5 @@
+import { CrossModuleIntegrityUseCase } from '@manaratak/application';
+import { CrossModuleIntegrityRouter } from '../../presentation/api/router/CrossModuleIntegrityRouter.js';
 import { CertificateVerificationPolicy, VaultTransitCertificateSignatureService, HttpCertificateAuthorityResolver, CertificateArtifactReadinessProbe, CertificateArtifactRecovery, PrismaCertificateAuthorityDirectory } from '@manaratak/infrastructure';
 import { UniversityProgramWorkspaceUseCases } from '@manaratak/application';
 import { PrismaUniversityProgramWorkspaceGateway } from '@manaratak/infrastructure';
@@ -921,6 +923,8 @@ export function registerDependencies(
     publicCourseUseCases: asFunction(({ courseRepository, courseCurriculumRepository }) => new PublicCourseUseCases(courseRepository, courseCurriculumRepository)).scoped(),
     courseRelationshipQueryService: asFunction(({ courseRelationshipRepository }) => new CourseRelationshipQueryService(courseRelationshipRepository)).scoped(),
     courseRelationshipResolutionService: asFunction(({ courseRelationshipRepository }) => new CourseRelationshipResolutionService(courseRelationshipRepository)).scoped(),
+    crossModuleIntegrityUseCase: asFunction(({majorRepository,universityRepository,scholarshipRepository,internationalTestRepository})=>new CrossModuleIntegrityUseCase(majorRepository,universityRepository,scholarshipRepository,internationalTestRepository)).scoped(),
+    crossModuleIntegrityRouter: asFunction((cradle)=>CrossModuleIntegrityRouter.create(cradle)).scoped(),
     crossDomainGraphReadService: asFunction(({ majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository }) =>
       new CrossDomainGraphReadService(majorRepository, universityRepository, scholarshipRepository, internationalTestRepository, courseRelationshipRepository, referenceDataRepository, cmsRepository, serviceCatalogRepository, careerRepository)).scoped(),
     courseAdminCommandUseCases: asFunction(
@@ -1051,7 +1055,7 @@ export function registerDependencies(
     studentApplicationReminderGateway: asFunction(({ intentsUseCase, templatesUseCase }) => new StudentApplicationReminderNotificationGateway(intentsUseCase, templatesUseCase)).scoped(),
     studentApplicationReminderOutboxDeliveryGateway: asFunction(({ studentApplicationReminderGateway, studentApplicationTrackerRepository }) => new StudentApplicationReminderOutboxDeliveryGateway(studentApplicationReminderGateway, studentApplicationTrackerRepository)).scoped(),
     studentApplicationReminderOutboxDispatcher: asFunction(({ transactionalOutboxStore, studentApplicationReminderOutboxDeliveryGateway }) => new TransactionalOutboxDispatcher(transactionalOutboxStore, studentApplicationReminderOutboxDeliveryGateway)).scoped(),
-    studentApplicationTrackerUseCases: asFunction(({ studentApplicationTrackerRepository, studentApplicationScholarshipGateway }) => new StudentApplicationTrackerUseCases(studentApplicationTrackerRepository, studentApplicationScholarshipGateway)).scoped(),
+    studentApplicationTrackerUseCases: asFunction(({ studentApplicationTrackerRepository, studentApplicationScholarshipGateway, assetReferencePolicy }) => new StudentApplicationTrackerUseCases(studentApplicationTrackerRepository, studentApplicationScholarshipGateway, assetReferencePolicy)).scoped(),
     studentOwnerCatchupContinuationQueue: asFunction(({prisma}) => new PrismaStudentOwnerCatchupContinuationQueue(prisma)).scoped(),
     studentWorkspaceOutboxDeliveryGateway: asFunction(({ studentWorkspaceUseCases, roleAssignmentRepository, identityRepository, courseStudentDashboardReadGateway, certificateStudentDashboardReadGateway, studentOwnerCatchupContinuationQueue }) => new StudentWorkspaceOutboxDeliveryGateway(studentWorkspaceUseCases, roleAssignmentRepository, identityRepository, courseStudentDashboardReadGateway, certificateStudentDashboardReadGateway, studentOwnerCatchupContinuationQueue)).scoped(),
     studentWorkspaceFanoutOutboxDeliveryGateway: asFunction(({ studentWorkspaceOutboxDeliveryGateway, enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway }) => new FanoutOutboxDeliveryGateway([studentWorkspaceOutboxDeliveryGateway, enterpriseEventOutboxProjectionGateway, notificationOutboxDeliveryGateway])).scoped(),

@@ -1,3 +1,4 @@
+import { applicationCycleLabel } from '../students/ApplicationCycleLabel';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate as useRouterNavigate } from 'react-router-dom';
 import './template.css';
@@ -398,6 +399,21 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [liveUnreadNotifications, setLiveUnreadNotifications] = useState(0);
+  const [cycleIntent,setCycleIntent]=useState<{input:Parameters<typeof ApiClient.createMyStudentApplicationTracker>[0];cycles:Array<{id:string;cycleKey:string}>}|null>(null);
+  const [cycleBusy,setCycleBusy]=useState(false);
+  const finishCycleTracking=()=>{
+    setCycleIntent(null);setSelectedScholarship(null);
+    window.history.replaceState({...window.history.state}, '', '/student?tab=journey');
+    setActiveTab('account');
+  };
+  const requestCycleTracking=async(input:Parameters<typeof ApiClient.createMyStudentApplicationTracker>[0])=>{
+    const owner=await ApiClient.getScholarshipApplicationCycles(input.scholarshipId);
+    if(!owner.cycles.length) throw new Error(language==='en'?'No published application cycle is available.':'لا توجد دورة تقديم منشورة متاحة.');
+    if(owner.cycles.length>1){setCycleIntent({input:{...input,scholarshipId:owner.scholarshipId},cycles:owner.cycles});return;}
+    await ApiClient.createMyStudentApplicationTracker({...input,scholarshipId:owner.scholarshipId,cycleId:owner.cycles[0].id});
+    finishCycleTracking();
+  };
+
   const [selectedScholarship, setSelectedScholarship] = navigation.field('selectedScholarship');
   const [selectedMajor, setSelectedMajorState] = navigation.field('selectedMajor');
   const majorDetailRequest = useRef(0);
@@ -709,12 +725,7 @@ export default function App() {
           const kind = favoriteKindFromSavedType(pending.entityType);
           if (kind && !cancelled) setFavoriteKeys((prev) => [...new Set([...prev, makeFavoriteKey(kind, pending.entityId)])]);
         } else if (pending?.kind === 'TRACK_APPLICATION') {
-          const existing = (await ApiClient.listMyStudentApplicationTrackers()).find((item) => item.scholarshipId === pending.scholarshipId && item.status === 'ACTIVE');
-          if (!existing) await ApiClient.createMyStudentApplicationTracker({ scholarshipId: pending.scholarshipId, scholarshipSlug: pending.scholarshipSlug, notes: pending.notes ?? t('public_template_follow_after_login'), checklistLabels: [t('public_template_documents'), t('public_template_cv'), t('public_template_motivation'), t('public_template_references'), t('public_template_official_application')] });
-          if (!cancelled) {
-            window.history.replaceState({...window.history.state}, '', '/student?tab=journey');
-            setActiveTab('account');
-          }
+          if (!cancelled) await requestCycleTracking({ scholarshipId: pending.scholarshipId, scholarshipSlug: pending.scholarshipSlug, notes: pending.notes ?? t('public_template_follow_after_login'), checklistLabels: [t('public_template_documents'), t('public_template_cv'), t('public_template_motivation'), t('public_template_references'), t('public_template_official_application')] }).catch(error=>{preservePostLoginAction(pending);triggerInstantPush({title:t('public_template_tracker_error'),body:error instanceof Error?error.message:t('public_template_retry'),type:'system'});});
         } else if (pending?.kind === 'REQUEST_SERVICE') {
           const created = await ApiClient.createMyStudentServiceRequest({ serviceId: pending.serviceId, requestParameters: pending.requestParameters, idempotencyKey: pending.idempotencyKey, consent: pending.consent });
           if (!cancelled) {
@@ -934,12 +945,7 @@ export default function App() {
       setSelectedScholarship(null); setActiveTab('auth'); return;
     }
     try {
-      const trackers = await ApiClient.listMyStudentApplicationTrackers();
-      const existing = trackers.find((item) => item.scholarshipId === sch.id && item.status === 'ACTIVE');
-      if (!existing) await ApiClient.createMyStudentApplicationTracker({ scholarshipId: sch.id, scholarshipSlug: sch.slug ?? sch.id, notes: t('public_template_application_notes').replace('{title}',sch.title), checklistLabels: [t('public_template_certified_transcript'), t('public_template_academic_cv'), t('public_template_motivation'), t('public_template_academic_references'), t('public_template_portal_application')] });
-      setSelectedScholarship(null);
-      window.history.replaceState({...window.history.state}, '', '/student?tab=journey');
-      setActiveTab('account');
+      await requestCycleTracking({scholarshipId:sch.id,scholarshipSlug:sch.slug,notes:t('public_template_application_notes').replace('{title}',sch.title),checklistLabels:[t('public_template_certified_transcript'),t('public_template_academic_cv'),t('public_template_motivation'),t('public_template_academic_references'),t('public_template_portal_application')]});
     } catch (error) {
       triggerInstantPush({ title: t('public_template_tracker_error'), body: error instanceof Error ? error.message : t('public_template_retry'), type: 'system' });
     }
@@ -993,6 +999,11 @@ export default function App() {
 
   return (
     <div className="manaratak-public flex flex-col min-h-screen w-full bg-[var(--mn-page)] text-[var(--mn-text)] selection:bg-[var(--mn-accent)]/30 selection:text-[var(--mn-heading)] font-['Cairo',sans-serif] pb-24 sm:pb-28 transition-colors mn-panel ">
+      {cycleIntent&&<div role="dialog" aria-modal="true" aria-label={language==='en'?'Choose application cycle':'اختيار دورة التقديم'} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"><div className="rounded-xl bg-[var(--mn-page)] p-6 space-y-3">
+        <p>{language==='en'?'Choose the published application cycle. Each cycle keeps its own progress and history.':'اختر دورة التقديم المنشورة. لكل دورة تقدمها وسجلها المستقل.'}</p>
+        {cycleIntent.cycles.map(c=><button type="button" className="block border rounded p-2" key={c.id} disabled={cycleBusy} onClick={()=>{setCycleBusy(true);void ApiClient.createMyStudentApplicationTracker({...cycleIntent.input,cycleId:c.id}).then(finishCycleTracking).catch(error=>triggerInstantPush({title:t('public_template_tracker_error'),body:error instanceof Error?error.message:t('public_template_retry'),type:'system'})).finally(()=>setCycleBusy(false));}}>{applicationCycleLabel(c.cycleKey,language==='en'?'en':'ar')}</button>)}
+        <button type="button" disabled={cycleBusy} onClick={()=>setCycleIntent(null)}>{language==='en'?'Cancel':'إلغاء'}</button>
+      </div></div>}
       {(publicGraph.error ||
         publicGraph.stale ||
         publicGraph.partial ||

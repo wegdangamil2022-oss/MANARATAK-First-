@@ -105,6 +105,7 @@ export class StudentWorkspaceRouter {
     });
 
     const applicationTrackerCreateSchema = z.object({
+      cycleId: z.string().trim().min(1).max(160).optional(),
       scholarshipId: z.string().trim().min(1), scholarshipSlug: z.string().trim().min(1).nullable().optional(),
       stage: z.string().trim().min(1).max(80).optional(), notes: z.string().trim().max(2000).nullable().optional(),
       deadlineAt: z.coerce.date().nullable().optional(), checklistLabels: z.array(z.string().trim().min(1).max(240)).max(25).optional(),
@@ -429,6 +430,25 @@ export class StudentWorkspaceRouter {
           );
       }),
     );
+    router.get('/scholarships/:scholarshipId/application-cycles', asyncHandler(async (req: Request, res: Response) => {
+      res.setHeader('Cache-Control', 'no-store');
+      res.json({ data: await studentApplicationTrackerUseCases.cycles(req.params.scholarshipId) });
+    }));
+    router.get('/application-trackers/:trackerId/documents', asyncHandler(async (req: Request, res: Response) => {
+      res.setHeader('Cache-Control', 'no-store');
+      res.json({ data: await studentApplicationTrackerUseCases.documentReadiness(ownStudent(req), req.params.trackerId) });
+    }));
+    router.delete('/application-trackers/:trackerId/documents/:requirementId', asyncHandler(async (req:Request,res:Response)=>{
+      const body=z.object({expectedVersion:z.number().int().positive()}).strict().parse(req.body);
+      await studentApplicationTrackerUseCases.unbindDocument(ownStudent(req),req.params.trackerId,req.params.requirementId,body.expectedVersion);
+      res.setHeader('Cache-Control','no-store');
+      res.status(204).end();
+    }));
+    router.post('/application-trackers/:trackerId/documents', asyncHandler(async (req: Request, res: Response) => {
+      const body = z.object({ requirementId: z.string().trim().min(1).max(160), assetId: z.string().trim().min(1).max(160), expectedVersion: z.number().int().positive(), consent: z.literal(true), expiresAt: z.coerce.date().nullable().optional() }).strict().parse(req.body);
+      res.setHeader('Cache-Control', 'no-store');
+      res.status(201).json({ data: await studentApplicationTrackerUseCases.bindDocument(ownStudent(req), req.params.trackerId, body) });
+    }));
     router.patch(
       '/application-trackers/:trackerId',
       asyncHandler(async (req: Request, res: Response) => {

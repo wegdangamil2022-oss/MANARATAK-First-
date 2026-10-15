@@ -949,6 +949,7 @@ export interface StudentServiceRequestDto {
 }
 
 export interface StudentApplicationTrackerDto {
+  cycleReferenceId?: string; ownerSnapshot?: Record<string,unknown>|null;
   id: string; studentReferenceId: string; scholarshipId: string; scholarshipSlug?: string | null; stage: string; notes?: string | null;
   deadlineAt?: string | null; status: 'ACTIVE' | 'ARCHIVED'; version: number; createdAt: string; updatedAt: string; archivedAt?: string | null;
   checklist: Array<{ id: string; trackerId: string; label: string; completed: boolean; position: number; completedAt?: string | null; createdAt: string; updatedAt: string }>;
@@ -2864,13 +2865,31 @@ export class ApiClient {
     if (!res.ok) { throw new Error(await parseErrorMessage(res, 'تعذر إزالة العنصر المحفوظ')); }
   }
 
+  static async getScholarshipApplicationCycles(id: string): Promise<{ scholarshipId: string; displayName: string; cycles: Array<{id:string;cycleKey:string;closesAt:string|null}> }> {
+    const res = await apiFetch(`${API_BASE_URL}/student/scholarships/${encodeURIComponent(id)}/application-cycles`, { headers: getStudentHeaders() });
+    if (!res.ok) throw new Error(await parseErrorMessage(res, 'تعذر قراءة دورات المنحة'));
+    return (await res.json()).data;
+  }
+  static async getMyApplicationDocuments(id: string): Promise<{ownerState:string; entries:Array<{requirementId:string;displayName:string;required:boolean;state:string;linked:boolean;bindable:boolean}>}> {
+    const res = await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(id)}/documents`, { headers: getStudentHeaders() });
+    if (!res.ok) throw new Error(await parseErrorMessage(res, 'تعذر قراءة متطلبات المستندات'));
+    return (await res.json()).data;
+  }
+  static async unbindMyApplicationDocument(id:string,requirementId:string,expectedVersion:number):Promise<void> {
+    const res=await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(id)}/documents/${encodeURIComponent(requirementId)}`,{method:'DELETE',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify({expectedVersion})});
+    if(!res.ok) throw new Error('STUDENT_DOCUMENT_UNLINK_FAILED');
+  }
+  static async bindMyApplicationDocument(id:string,input:{requirementId:string;assetId:string;expectedVersion:number;consent:true;expiresAt?:string|null}): Promise<void> {
+    const res=await apiFetch(`${API_BASE_URL}/student/application-trackers/${encodeURIComponent(id)}/documents`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify(input)});
+    if(!res.ok)throw new Error(await parseErrorMessage(res,'تعذر ربط المستند'));
+  }
   static async listMyStudentApplicationTrackers(): Promise<StudentApplicationTrackerDto[]> {
     const res = await apiFetch(`${API_BASE_URL}/student/application-trackers`, {
       headers: getStudentHeaders(),
     }); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر تحميل ملفات التقديم');}
     return (await res.json()).data ?? [];
   }
-  static async createMyStudentApplicationTracker(input:{scholarshipId:string;scholarshipSlug?:string|null;stage?:string;notes?:string|null;deadlineAt?:string|null;checklistLabels?:string[]}): Promise<StudentApplicationTrackerDto> {
+  static async createMyStudentApplicationTracker(input:{scholarshipId:string;cycleId?:string;scholarshipSlug?:string|null;stage?:string;notes?:string|null;deadlineAt?:string|null;checklistLabels?:string[]}): Promise<StudentApplicationTrackerDto> {
     const res=await apiFetch(`${API_BASE_URL}/student/application-trackers`,{method:'POST',headers:getStudentHeaders({'Content-Type':'application/json'}),body:JSON.stringify(input)}); if(!res.ok){const b=await res.json().catch(()=>({}));throw new Error(b?.error?.message||b?.error||'تعذر إنشاء ملف التقديم');}
     return res.json();
   }

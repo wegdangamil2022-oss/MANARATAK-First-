@@ -307,6 +307,7 @@ const owner = {
   id: 's',
   slug: 'canonical',
   displayName: 'Scholarship',
+  cycleId: 'cycle-1', cycleKey: '2027|first', ownerVersionId: 'version-1',
   available: true,
   deadlineAt: new Date('2099-01-01'),
 };
@@ -679,4 +680,130 @@ test('API fixture: unsupported graph page rejected before owner invocation', asy
   );
   assert.equal(invoked, false);
   assert.equal(error?.name, 'ZodError');
+});
+
+// Follow-up source checks: canonical cycles, private fulfillment and permissioned owner reads.
+import { ScholarshipStudentApplicationTrackerGateway } from '../../../packages/infrastructure/src/students/ScholarshipStudentApplicationTrackerGateway';
+import { CrossModuleIntegrityUseCase } from '../../../packages/application/src/integration/CrossModuleIntegrityUseCase';
+import { CrossModuleIntegrityRouter } from '../../../apps/api/src/presentation/api/router/CrossModuleIntegrityRouter';
+
+function cycleGateway(cycles:any[]){
+  return new ScholarshipStudentApplicationTrackerGateway({findById:async()=>({...scholarship,versions:[{id:'v',status:'PUBLISHED'}],applicationCycles:cycles}),findPublishedBySlug:async()=>({...scholarship,requiredDocumentItems:[{id:'requirement',displayName:'Transcript',isRequired:true}]})} as any);
+}
+const publishedCycle={id:'cycle',cycleKey:'2027|fall',versionId:'v',status:'PUBLISHED',closesAt:new Date('2099-01-01')};
+test('cycle: only canonical published owner-version cycles are offered',async()=>{
+  const gateway=cycleGateway([publishedCycle,{...publishedCycle,id:'draft',status:'DRAFT'},{...publishedCycle,id:'old',versionId:'old'},{...publishedCycle,id:'expired',closesAt:new Date('2000-01-01')},{...publishedCycle,id:'future',opensAt:new Date('2098-01-01')},{...publishedCycle,id:'malformed',opensAt:new Date('invalid')}]);
+  const owner=await gateway.resolve('s');assert.equal(owner?.available,true);assert.equal(owner?.cycleId,'cycle');assert.deepEqual(owner?.cycles?.map(c=>c.id),['cycle']);assert.equal(owner?.requirements?.[0].id,'requirement');
+  assert.equal((await gateway.resolve('s','draft'))?.available,false);
+});
+test('cycle: ambiguous owners require explicit selection instead of reusing an old tracker',async()=>{
+  const gateway=cycleGateway([publishedCycle,{...publishedCycle,id:'other'}]);
+  assert.equal((await gateway.resolve('s'))?.cycleId,null);
+  let persisted=false;
+  const useCase=new StudentApplicationTrackerUseCases({create:async()=>{persisted=true;}} as any,gateway);
+  await assert.rejects(()=>useCase.create({studentReferenceId:'student',scholarshipId:'s'}),/CANONICAL_CYCLE_REQUIRED/);assert.equal(persisted,false);
+  assert.equal((await gateway.resolve('s','other'))?.cycleId,'other');
+});
+test('cycle: create overrides forged owner snapshot and cycle references',async()=>{
+  let data:any;
+  const useCase=new StudentApplicationTrackerUseCases({create:async(value:any)=>{data=value;return value;}} as any,{resolve:async()=>owner});
+  await useCase.create({studentReferenceId:'student',scholarshipId:'s',cycleReferenceId:'forged',ownerSnapshot:{ownerVersionId:'forged'}} as any);
+  assert.equal(data.cycleReferenceId,'cycle-1');assert.equal(data.ownerSnapshot.ownerVersionId,'version-1');assert.equal(data.ownerSnapshot.ownerId,'s');
+});
+test('cycle: archived tracker replay retains history and does not reactivate it',async()=>{
+  const archived={id:'old',studentReferenceId:'student',scholarshipId:'s',cycleReferenceId:'cycle',status:'ARCHIVED',version:8,notes:'history',checklist:[]};
+  const tx={studentApplicationTracker:{findUnique:async()=>archived,create:async()=>{throw new Error('MUST_NOT_CREATE');},updateMany:async()=>{throw new Error('MUST_NOT_RESET');}}};
+  const repo=new PrismaStudentApplicationTrackerRepository({$transaction:async(fn:any)=>fn(tx)} as any);
+  const result=await repo.create({studentReferenceId:'student',scholarshipId:'s',cycleReferenceId:'cycle',ownerSnapshot:{cycleId:'cycle'}});
+  assert.equal(result.status,'ARCHIVED');assert.equal(result.notes,'history');assert.equal(result.version,8);
+});
+test('cycle: concurrent unique collision replays only the exact owned cycle',async()=>{
+  const current={id:'t',status:'ACTIVE',cycleReferenceId:'cycle',checklist:[]};let key:any;
+  const repo=new PrismaStudentApplicationTrackerRepository({$transaction:async()=>{throw Object.assign(new Error('collision'),{code:'P2002'});},studentApplicationTracker:{findUnique:async(query:any)=>{key=query.where;return current;}}} as any);
+  assert.equal((await repo.create({studentReferenceId:'student',scholarshipId:'s',cycleReferenceId:'cycle',ownerSnapshot:{cycleId:'cycle'}})).id,'t');
+  assert.deepEqual(key.studentReferenceId_scholarshipId_cycleReferenceId,{studentReferenceId:'student',scholarshipId:'s',cycleReferenceId:'cycle'});
+});
+function documentFixture(options:{assetUnavailable?:boolean;owner?:any;binding?:any;tracker?:any}={}){
+  const tracker={id:'t',studentReferenceId:'student',scholarshipId:'s',cycleReferenceId:'cycle-1',status:'ACTIVE',version:3,...options.tracker};
+  const requirementOwner={...owner,requirements:[{id:'requirement',displayName:'Transcript',required:true}]};
+  const bindings=options.binding?[options.binding]:[];let saved:any;let assetOptions:any;
+  const repo={findById:async(student:string)=>student==='student'?tracker:null,listDocumentBindings:async()=>bindings,saveDocumentBinding:async(...args:any[])=>{saved=args;return args[3];}};
+  const policy={assertUsable:async(_id:string,input:any)=>{assetOptions=input;if(options.assetUnavailable)throw new Error('OWNER_OR_TRUST_DENIED');return {id:'asset'};}};
+  const useCase=new StudentApplicationTrackerUseCases(repo as any,{resolve:async()=>options.owner===undefined?requirementOwner:options.owner},policy as any);
+  return {useCase,saved:()=>saved,assetOptions:()=>assetOptions};
+}
+const binding={id:'b',trackerId:'t',requirementId:'requirement',assetId:'asset',ownerVersionId:'version-1',requirementSnapshot:{displayName:'Transcript',required:true},consentGrantedAt:new Date(),expiresAt:null,retentionUntil:new Date('2099-01-01')};
+test('documents: consent and exact current cycle requirement precede persistence',async()=>{
+  const f=documentFixture();
+  await assert.rejects(()=>f.useCase.bindDocument('student','t',{requirementId:'requirement',assetId:'asset',expectedVersion:3,consent:false}),/CONSENT_REQUIRED/);
+  await assert.rejects(()=>f.useCase.bindDocument('student','t',{requirementId:'forged',assetId:'asset',expectedVersion:3,consent:true}),/REQUIREMENT_UNAVAILABLE/);
+  assert.equal(f.saved(),undefined);
+  await f.useCase.bindDocument('student','t',{requirementId:'requirement',assetId:'asset',expectedVersion:3,consent:true});
+  assert.equal(f.saved()[3].ownerVersionId,'version-1');assert.equal(f.assetOptions().expectedOwnerId,'student');assert.deepEqual(f.assetOptions().allowedOwnerTypes,['STUDENT']);
+  assert.ok(f.saved()[3].retentionUntil.getTime()-Date.now()<=180*86400000);
+});
+test('documents: foreign tracker, legacy cycle and foreign owner identity are denied',async()=>{
+  for(const [student,options] of [['other',{}],['student',{tracker:{cycleReferenceId:'LEGACY'}}],['student',{owner:{...owner,id:'different',requirements:[{id:'requirement'}]}}]] as any[]){
+    const f=documentFixture(options);await assert.rejects(()=>f.useCase.bindDocument(student,'t',{requirementId:'requirement',assetId:'asset',expectedVersion:3,consent:true}));assert.equal(f.saved(),undefined);
+  }
+});
+test('documents: unavailable asset is denied on write and rechecked on read',async()=>{
+  const f=documentFixture({binding,assetUnavailable:true});
+  await assert.rejects(()=>f.useCase.bindDocument('student','t',{requirementId:'requirement',assetId:'asset',expectedVersion:3,consent:true}),/OWNER_OR_TRUST_DENIED/);
+  assert.equal((await f.useCase.documentReadiness('student','t')).entries[0].state,'ASSET_UNAVAILABLE');assert.equal(f.saved(),undefined);
+});
+test('documents: revision changes, expiry and malformed consent cannot claim readiness',async()=>{
+  for(const [change,state] of [[{ownerVersionId:'old'},'REVISION_CHANGED'],[{expiresAt:new Date('2000-01-01')},'EXPIRED'],[{retentionUntil:new Date('invalid')},'EXPIRED'],[{consentGrantedAt:new Date('2099-01-01')},'EXPIRED']] as const){
+    const f=documentFixture({binding:{...binding,...change}});assert.equal((await f.useCase.documentReadiness('student','t')).entries[0].state,state);
+  }
+  const f=documentFixture({binding});const result=await f.useCase.documentReadiness('student','t');assert.equal(result.entries[0].state,'ASSET_AVAILABLE_UNVERIFIED');assert.equal(result.entries[0].verification,'NOT_ATTESTED');assert.equal(result.applicationSubmission,'MANUAL_ONLY');assert.equal(JSON.stringify(result).includes('assetId'),false);
+});
+test('documents: unavailable owner preserves private requirement history without readiness claim',async()=>{
+  const f=documentFixture({binding,owner:null});const report=await f.useCase.documentReadiness('student','t');assert.equal(report.ownerState,'UNAVAILABLE');assert.equal(report.entries[0].state,'OWNER_UNAVAILABLE');assert.equal(report.entries[0].displayName,'Transcript');
+});
+test('documents: archived tracker can withdraw consent with versioned transaction',async()=>{
+  let deleted:any;let version:any;let outbox:any;
+  const row={id:'t',studentReferenceId:'student',scholarshipId:'s',status:'ARCHIVED',version:3};
+  const tx={studentApplicationTracker:{findFirst:async()=>row,updateMany:async(q:any)=>{version=q;return {count:1};},findUnique:async()=>({...row,version:4})},studentApplicationDocumentBinding:{deleteMany:async(q:any)=>{deleted=q;}},auditRecord:{create:async()=>({})},studentTimelineEntry:{create:async()=>({})},transactionalOutboxRecord:{create:async(q:any)=>{outbox=q;}}};
+  const repo=new PrismaStudentApplicationTrackerRepository({$transaction:async(fn:any)=>fn(tx)} as any);await repo.removeDocumentBinding('student','t','requirement',3);
+  assert.deepEqual(deleted.where,{trackerId:'t',requirementId:'requirement'});assert.equal(version.where.status,'ARCHIVED');assert.equal(version.where.version,3);assert.equal(JSON.stringify(outbox).includes('assetId'),false);
+});
+test('documents: retention purge remains bounded and rechecks expiry before deletion',async()=>{
+  let query:any,deleted:any;const repo=new PrismaStudentApplicationTrackerRepository({studentApplicationDocumentBinding:{findMany:async(q:any)=>{query=q;return [{id:'expired'}];},deleteMany:async(q:any)=>{deleted=q;return {count:1};}}} as any);
+  assert.equal(await repo.purgeExpiredDocumentBindings(1000),1);assert.equal(query.take,100);assert.deepEqual(deleted.where.id.in,['expired']);assert.ok(deleted.where.retentionUntil.lte instanceof Date);
+});
+test('integrity live owner sample: unauthorized targets are neither read nor returned',async()=>{
+  let targetRead=false;const service=new CrossModuleIntegrityUseCase({} as any,{findById:async()=>{targetRead=true;}} as any,{list:async()=>page([{...scholarship,universityLinks:[{universityId:'private-target'}]}])} as any,{} as any);
+  const report=await service.execute('SCHOLARSHIPS',new Set(['SCHOLARSHIPS']));assert.equal(targetRead,false);assert.equal(report.findings.length,0);assert.equal(report.coverage,'PARTIAL_OWNER_SAMPLE');assert.equal(report.targetReferencesChecked,0);
+  await assert.rejects(()=>service.execute('UNIVERSITIES',new Set(['SCHOLARSHIPS'])),/SCOPE_INVALID/);
+});
+test('integrity live owner sample: explicit missing target is reported without pretending full catalog coverage',async()=>{
+  const service=new CrossModuleIntegrityUseCase({} as any,{findById:async()=>null} as any,{list:async()=>page([{...scholarship,universityLinks:[{universityId:'gone'}]}])} as any,{} as any);
+  const report=await service.execute('SCHOLARSHIPS',new Set(['SCHOLARSHIPS','UNIVERSITIES']));assert.equal(report.findings.some(f=>f.code==='MISSING_OWNER_REFERENCE'),true);assert.equal(report.productionIntegrity,'UNVERIFIED');assert.equal(report.coverage,'PARTIAL_OWNER_SAMPLE');
+});
+test('integrity API: absent identity and denied owner stop before owner reads',async()=>{
+  let called=false;
+  const router=CrossModuleIntegrityRouter.create({authEvaluatorService:{evaluatePermission:async()=>({isGranted:false})} as any,crossModuleIntegrityUseCase:{execute:async()=>{called=true;}} as any});
+  const layer=(router as any).stack.find((entry:any)=>entry.route?.path==='/');
+  for(const identity of [undefined,'admin']){let status=0;const res={setHeader:()=>{},status:(n:number)=>{status=n;return res;},json:()=>{}};await layer.route.stack[0].handle({authUserId:identity,query:{owner:'SCHOLARSHIPS'},ip:'127.0.0.1'},res,(error:any)=>{throw error;});assert.equal(status,identity?403:401);}
+  assert.equal(called,false);
+});
+test('integrity live owner sample: canonical program parent mismatch is detected',async()=>{
+  const service=new CrossModuleIntegrityUseCase({} as any,{findById:async()=>({id:'u',status:'PUBLISHED'}),findPublishedAcademicProgramsByIds:async()=>[{ownerId:'program',universityOwnerId:'other'}]} as any,{list:async()=>page([{...scholarship,universityLinks:[{universityId:'u',academicProgramId:'program'}]}])} as any,{} as any);
+  const report=await service.execute('SCHOLARSHIPS',new Set(['SCHOLARSHIPS','UNIVERSITIES']));assert.equal(report.findings.some(f=>f.code==='OWNER_PARENT_MISMATCH'),true);
+});
+test('cycle: separate canonical cycle creates a clean checklist and cycle-specific reminder aggregate',async()=>{
+  const rows=new Map<string,any>();const intents:any[]=[];
+  const tx={studentApplicationTracker:{findUnique:async(query:any)=>rows.get(query.where.studentReferenceId_scholarshipId_cycleReferenceId?.cycleReferenceId)??null,create:async({data}:any)=>{const row={...data,checklist:data.checklist.create,id:`tracker-${data.cycleReferenceId}`,version:1,status:'ACTIVE'};rows.set(data.cycleReferenceId,row);return row;}},auditRecord:{create:async()=>({})},studentTimelineEntry:{create:async()=>({})},transactionalOutboxRecord:{create:async({data}:any)=>{intents.push(data);}}};
+  const repo=new PrismaStudentApplicationTrackerRepository({$transaction:async(fn:any)=>fn(tx)} as any);
+  for(const cycle of ['year-a','year-b'])await repo.create({studentReferenceId:'student',scholarshipId:'s',cycleReferenceId:cycle,ownerSnapshot:{cycleId:cycle},checklistLabels:['New transcript']});
+  assert.equal(rows.size,2);assert.equal(rows.get('year-b').checklist[0].label,'New transcript');assert.equal(rows.get('year-b').stage,'PREPARING_DOCUMENTS');assert.deepEqual(intents.map(i=>i.aggregateId),['tracker-year-a','tracker-year-b']);
+});
+test('documents: removed requirement stays visible for consent withdrawal without claiming current readiness',async()=>{
+  const f=documentFixture({binding,owner:{...owner,requirements:[]}});const result=await f.useCase.documentReadiness('student','t');assert.equal(result.entries[0].state,'REQUIREMENT_REMOVED');assert.equal(result.entries[0].linked,true);assert.equal(result.entries[0].bindable,false);
+});
+test('documents: concurrent tracker CAS failure prevents binding write and outbox',async()=>{
+  let written=false;let emitted=false;
+  const tx={studentApplicationTracker:{findFirst:async()=>({id:'t',studentReferenceId:'student',cycleReferenceId:'cycle',status:'ACTIVE',version:3}),updateMany:async()=>({count:0})},studentApplicationDocumentBinding:{findUnique:async()=>null,count:async()=>0,upsert:async()=>{written=true;}},transactionalOutboxRecord:{create:async()=>{emitted=true;}}};
+  const repo=new PrismaStudentApplicationTrackerRepository({$transaction:async(fn:any)=>fn(tx)} as any);await assert.rejects(()=>repo.saveDocumentBinding('student','t',3,binding),/VERSION_CONFLICT/);assert.equal(written,false);assert.equal(emitted,false);
 });

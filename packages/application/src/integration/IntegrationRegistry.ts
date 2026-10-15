@@ -207,8 +207,8 @@ export const integrationEdges = [
   {
     from: 'STUDENTS',
     to: 'SCHOLARSHIPS',
-    canonicalKey: 'studentReferenceId+scholarshipId',
-    publicPolicy: 'PUBLIC_OWNER_NEW_WRITE_HISTORY_ONLY_OLD',
+    canonicalKey: 'studentReferenceId+scholarshipId+cycleReferenceId',
+    publicPolicy: 'PUBLIC_CANONICAL_CYCLE_NEW_WRITE_LEGACY_HISTORY_ONLY',
     consumerRoutes: ['/student'],
     test: 'section27:student-owner',
   },

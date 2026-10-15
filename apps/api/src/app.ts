@@ -1028,6 +1028,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     // Public monitoring exposes only liveness/readiness health contracts. The richer
     // diagnostic and production-readiness payload is control-plane data and stays
     // behind the authenticated admin + RBAC boundary.
+    v1Router.use('/admin/cross-module-integrity', requireAdminPermission('admin:platform:manage'), lazyRouter('crossModuleIntegrityRouter'));
     v1Router.use('/admin/monitoring', requireAdminPermission('admin:platform:manage'), MonitoringRouter.create({
       monitoringService,
       productionReadinessReport,

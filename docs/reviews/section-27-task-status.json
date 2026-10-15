@@ -3,46 +3,46 @@
   "sectionClosed": false,
   "sourceStatus": "PARTIAL_SOURCE_IMPLEMENTATION",
   "taskCount": 38,
-  "meaning": "SOURCE_ALIGNED is a source checkpoint disposition, not acceptance closure or production evidence. All final refinements remain unrechecked.",
+  "meaning": "Current follow-up preserves historical findings. Source checks were rerun, but remaining capabilities are genuine code gaps, not only runtime deferrals.",
   "tasks": [
     {
       "id": "XMI-001",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "PublicOwnerPolicy; PrismaUniversityRepository; Country graph",
       "disposition": "Shared program policy; country owner program query. SQL runtime unverified.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-002",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "PrismaUniversityRepository.listPublishedAcademicUniversityPage",
       "disposition": "Major reverse university page/count uses active mapped matching published degree profile.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-003",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "PrismaScholarshipRepository.listPublished",
       "disposition": "Program-only inverse plus current parent/public profile proof. >500 candidate scope explicitly unavailable.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-004",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "AdminScholarshipUseCases.replaceCanonicalRelationships",
       "disposition": "Program-only parent resolved; mismatch rejected.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-005",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "ScholarshipPublicProjection; publicScholarshipDataSource",
       "disposition": "Program-only relation projects canonical university; positive projection fixture.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-006",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "PrismaScholarshipRepository.normalizeProgramParents",
       "disposition": "Transaction-bound import/manual persistence checks parent before write. Actual import API rollback matrix remains unrun.",
       "runtimeVerified": false
@@ -56,16 +56,16 @@
     },
     {
       "id": "XMI-008",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "PrismaUniversityRepository.listPublishedProgramGraph; Country graph",
       "disposition": "Independent program query/count/distinct-major total; majors explicitly program-page sample.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-009",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "GraphReadPolicy; CrossDomainGraphReadService",
-      "disposition": "Country owner isolation; optional CMS isolated in other graphs; final five-second response budget not retested.",
+      "disposition": "Country owner isolation; optional CMS isolated in other graphs; Source fixture rechecked; live five-second response budget unverified.",
       "runtimeVerified": false
     },
     {
@@ -77,14 +77,14 @@
     },
     {
       "id": "XMI-011",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "PublicOwnerPolicy; UniversityPublicProjection; University graph",
       "disposition": "Common active/mapped/degree-specific published-profile boundary.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-012",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "UniversityCanonicalRelationshipValidator; UniversityPublicationReadinessPolicy",
       "disposition": "Draft internal requirements permitted; ACTIVE/publication requires published owner/version/variant proof.",
       "runtimeVerified": false
@@ -98,21 +98,21 @@
     },
     {
       "id": "XMI-014",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "PrismaScholarshipRepository.listPublished; ScholarshipPublicProjection",
       "disposition": "Retired test public filter/projection rejected.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-015",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "publicScholarshipDataSource; ScholarshipPublicProjection",
       "disposition": "Required-document-associated tests included/deduplicated. Test-document fulfillment still separate open029.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-016",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "ScholarshipStudentApplicationTrackerGateway",
       "disposition": "Owner public version plus publication/trust gate, no private draft label.",
       "runtimeVerified": false
@@ -133,16 +133,16 @@
     },
     {
       "id": "XMI-019",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "StudentApplicationTrackerUseCases.create/update",
       "disposition": "Owner canonical ID/slug/deadline overrides spoofed input; official-deadline update rejected.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-020",
-      "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "StudentApplicationTrackerUseCases.list; owner reconciliation private history",
-      "disposition": "Orphan private history retained and links/deadlines fail closed; historical fact trace. Governed alias/merge identity and revision snapshots incomplete.",
+      "status": "PARTIAL_SOURCE_IMPLEMENTED",
+      "paths": "StudentApplicationTrackerUseCases; tracker cycle migration and snapshots",
+      "disposition": "Canonical-cycle and legacy owner snapshots preserve private history while current owner links fail closed. Governed alias/merge reconciliation still unimplemented.",
       "runtimeVerified": false
     },
     {
@@ -168,9 +168,9 @@
     },
     {
       "id": "XMI-024",
-      "status": "OPEN_GOVERNED_MODEL",
-      "paths": "Student tracker cycle model",
-      "disposition": "No canonical per-cycle identity/snapshot migration implemented; current single-owner cycle capability explicitly marked pending.",
+      "status": "SOURCE_IMPLEMENTED_RUNTIME_DEFERRED",
+      "paths": "StudentApplicationTrackerUseCases; PrismaStudentApplicationTrackerRepository; ScholarshipStudentApplicationTrackerGateway; StudentApplicationDocuments; source migration",
+      "disposition": "Canonical published owner cycle identity, immutable snapshots, independent cycle progress, exact-cycle reminders, legacy history, concurrent idempotency and explicit UI cycle selection. Migration prepared, not applied.",
       "runtimeVerified": false
     },
     {
@@ -189,23 +189,23 @@
     },
     {
       "id": "XMI-027",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "AssignRoleUseCase; StudentWorkspaceOutboxDeliveryGateway/Worker; StudentIntegrationEventPolicy",
-      "disposition": "Revocation source contract, current role/identity recheck and regrant; fixture tests final/multiple/reordered/suspended cases.",
+      "disposition": "Revocation source contract, current role/identity recheck and regrant; Source fixtures rechecked for final/multiple/reordered/suspended cases.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-028",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "usePublicRelationshipGraph; PublicGraphNavigationPolicy",
       "disposition": "All selected graph types refocus with30s freshness, request abort/generation fence, stale state and selection reset; browser behavior unrun.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-029",
-      "status": "OPEN_GOVERNED_MODEL",
-      "paths": "Private document readiness workflow",
-      "disposition": "No canonical cycle/requirement/asset fulfillment workflow; private asset ownership and personal checklist remain unchanged.",
+      "status": "PARTIAL_SOURCE_IMPLEMENTED",
+      "paths": "StudentApplicationDocumentBinding; StudentApplicationTrackerUseCases; StudentWorkspaceRouter; StudentApplicationDocuments",
+      "disposition": "Private requirement/cycle/asset binding with EAP trust/owner checks, explicit revocable consent, CAS transactions, expiry/revision readiness and bounded retention cleanup. Academic document attestation and in-panel upload/image selection remain unimplemented.",
       "runtimeVerified": false
     },
     {
@@ -217,35 +217,35 @@
     },
     {
       "id": "XMI-031",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "StudentApplicationTrackerUseCases.list",
       "disposition": "MANUAL_PLANNING and UNKNOWN eligibility; no eligibility evaluator or application submission claimed.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-032",
-      "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "CrossModuleIntegrityReport; IntegrationRegistry",
-      "disposition": "Separate bounded permissioned public-owner CI helper; runtime private owner scope rejected. Live API/UI/owner-audit sampling not wired.",
+      "status": "PARTIAL_SOURCE_IMPLEMENTED",
+      "paths": "CrossModuleIntegrityUseCase; CrossModuleIntegrityRouter; CrossModuleIntegrityPage",
+      "disposition": "Permissioned real four-owner sample API/UI with pagination, missing-target/current-publication/parent checks and explicit partial coverage. CMS/all-owner relationship and audit coverage remain open.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-033",
       "status": "PARTIAL_SOURCE_OPEN",
-      "paths": "tests/integration/section27; scripts/verify-cross-module-source-closure.mjs",
-      "disposition": "50 isolated checkpoint fixtures; no exhaustive all-owner/API rollback matrix or live PostgreSQL/E2E; final refinements unrechecked.",
+      "paths": "tests/integration/section27; .section27-vitest.config.ts; scripts/verify-cross-module-source-closure.mjs",
+      "disposition": "Final source refinements rechecked: 69 source contracts and 19 targeted unit/UI checks; targeted TypeScript and Prisma schema checks. No exhaustive all-owner/API rollback matrix or live runtime proof.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-034",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "PublicGraphNavigationPolicy; usePublicRelationshipGraph; CountriesSearchPage",
-      "disposition": "Major/country graph relationship navigation uses slug-only; no fabricated owner/publicId URL. Final country consumer refinement unrechecked.",
+      "disposition": "Major/country graph relationship navigation uses slug-only; no fabricated owner/publicId URL. Country consumer source fixture rechecked.",
       "runtimeVerified": false
     },
     {
       "id": "XMI-035",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "PrismaUniversityRepository.listPublishedProgramGraph/listPublishedAcademicUniversityPage; public program predicate",
       "disposition": "Country program query independent and same exact degree profile policy; native country-major UI cursor remaining007.",
       "runtimeVerified": false
@@ -259,7 +259,7 @@
     },
     {
       "id": "XMI-037",
-      "status": "SOURCE_ALIGNED_CHECKPOINT_FIXTURES_FINAL_RECHECK_PENDING",
+      "status": "SOURCE_CHECKED_WITH_EXISTING_SCOPE_LIMITS",
       "paths": "IntegrationRegistry; fixture registry validation",
       "disposition": "26 section owner/key/write/read states and sparse documented edge contracts; unsupported edges explicit, no synthetic full mesh.",
       "runtimeVerified": false
@@ -271,5 +271,8 @@
       "disposition": "Admin relational degree/major/test/program exploration and canonical teaching language require prerequisite source closures/governed owner model. Not implemented.",
       "runtimeVerified": false
     }
-  ]
+  ],
+  "date": "2026-10-15",
+  "latestReport": "SECTION_27_PROGRESS_2026-10-15.md",
+  "latestValidation": "section-27-followup-validation-2026-10-15.json"
 }

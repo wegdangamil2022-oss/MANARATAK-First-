@@ -18,11 +18,11 @@ export class StudentApplicationReminderDeliveryPolicy implements INotificationDe
       String(version)!==trackerVersion||candidate.id!==`student-application-deadline-${trackerId}-v${version}`)
       return false;
     const tracker=await this.trackers.findById(candidate.recipientReference,trackerId);
-    if(!tracker||!tracker.deadlineAt||!deadlineAt||tracker.studentReferenceId!==candidate.recipientReference||tracker.status!=='ACTIVE'||
+    if(!tracker||tracker.cycleReferenceId === 'LEGACY'||!tracker.deadlineAt||!deadlineAt||tracker.studentReferenceId!==candidate.recipientReference||tracker.status!=='ACTIVE'||
       tracker.version!==version||tracker.scholarshipId!==scholarshipId||
       tracker.deadlineAt?.toISOString()!==deadlineAt||tracker.deadlineAt.getTime()<=Date.now())return false;
     if (!this.scholarships) throw new Error('STUDENT_REMINDER_SCHOLARSHIP_READER_REQUIRED');
-    const owner = await this.scholarships.resolve(tracker.scholarshipId);
+    const owner = await this.scholarships.resolve(tracker.scholarshipId, tracker.cycleReferenceId && tracker.cycleReferenceId !== 'LEGACY' ? tracker.cycleReferenceId : undefined);
     if (
       !owner?.available ||
       owner.id !== tracker.scholarshipId ||

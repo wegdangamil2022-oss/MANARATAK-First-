@@ -347,12 +347,14 @@ export interface StudentApplicationChecklistItemDto {
 }
 
 export interface StudentApplicationTrackerDto {
+  cycleReferenceId?: string; ownerSnapshot?: Record<string, unknown> | null;
   id: string; studentReferenceId: string; scholarshipId: string; scholarshipSlug?: string | null;
   stage: string; notes?: string | null; deadlineAt?: Date | null; status: StudentApplicationTrackerStatus; version: number;
   checklist: StudentApplicationChecklistItemDto[]; createdAt: Date; updatedAt: Date; archivedAt?: Date | null;
 }
 
 export interface CreateStudentApplicationTrackerDto {
+  cycleId?: string; cycleReferenceId?: string; ownerSnapshot?: Record<string, unknown> | null;
   studentReferenceId: string; scholarshipId: string; scholarshipSlug?: string | null; stage?: string; notes?: string | null; deadlineAt?: Date | null; checklistLabels?: string[];
 }
 export interface UpdateStudentApplicationTrackerDto {
@@ -379,14 +381,23 @@ export interface StudentSupportTrackerHistoryPage {
   nextCursor:string|null;
 }
 
+export interface StudentApplicationDocumentBindingDto {
+ id: string; trackerId: string; requirementId: string; assetId: string; ownerVersionId: string;
+ requirementSnapshot: Record<string, unknown>; consentGrantedAt: Date; expiresAt: Date | null; retentionUntil: Date;
+}
 export interface IStudentApplicationTrackerRepository {
+ removeDocumentBinding?(studentReferenceId: string, trackerId: string, requirementId: string, expectedVersion: number): Promise<void>;
+ purgeExpiredDocumentBindings?(limit: number): Promise<number>;
+ listDocumentBindings?(studentReferenceId: string, trackerId: string): Promise<StudentApplicationDocumentBindingDto[]>;
+ saveDocumentBinding?(studentReferenceId: string, trackerId: string, expectedVersion: number, binding: Omit<StudentApplicationDocumentBindingDto, 'id' | 'trackerId'>): Promise<StudentApplicationDocumentBindingDto>;
+
   /** Internal bounded P15 pull reconciliation; never exposed as a public/student list. */
   listOwnerReconciliationPage?(
     cursor?: string,
     limit?: number,
   ): Promise<{
     items: Array<
-      Pick<StudentApplicationTrackerDto, 'id' | 'studentReferenceId' | 'scholarshipId' | 'version'>
+      Pick<StudentApplicationTrackerDto, 'id' | 'studentReferenceId' | 'scholarshipId' | 'version' | 'cycleReferenceId'>
     >;
     nextCursor: string | null;
   }>;
@@ -408,9 +419,11 @@ export interface IStudentApplicationTrackerRepository {
 }
 
 export interface StudentApplicationScholarshipOwnerDto {
+  requirements?: Array<{ id: string; displayName: string; required: boolean }>;
+  cycleId?: string | null; cycleKey?: string | null; ownerVersionId?: string | null; cycles?: Array<{id: string; cycleKey: string; closesAt: Date | null}>;
   id: string; slug?: string | null; displayName: string; country?: string | null; deadlineAt?: Date | null; lifecycleStatus?: string | null; available: boolean;
 }
-export interface IStudentApplicationScholarshipGateway { resolve(scholarshipId: string): Promise<StudentApplicationScholarshipOwnerDto | null>; }
+export interface IStudentApplicationScholarshipGateway { resolve(scholarshipId: string, cycleId?: string): Promise<StudentApplicationScholarshipOwnerDto | null>; }
 export interface IStudentApplicationReminderGateway {
   schedule(input: { trackerId: string; trackerVersion: number; studentReferenceId: string; scholarshipId: string; deadlineAt: Date }): Promise<void>;
   cancel(trackerId: string, trackerVersion: number): Promise<void>;
