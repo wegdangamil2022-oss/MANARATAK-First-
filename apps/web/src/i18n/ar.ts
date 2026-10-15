@@ -1,4 +1,10 @@
 export const ar = {
+  public_home_scholarships_empty: "لم تُنشر منح دراسية بعد",
+  public_home_countries_empty: "لم تُنشر وجهات دراسية بعد",
+  public_home_exams_empty: "لم تُنشر اختبارات دولية بعد",
+  public_home_articles_empty: "لم تُنشر مقالات بعد",
+  public_home_services_empty: "لم تُنشر خدمات في هذا القسم بعد",
+  public_home_tools_preview_notice: "هذه معاينة لتصميم الأدوات فقط؛ الأدوات ليست مفعّلة للعامة بعد.",
   public_home_catalog_partial: 'تعذر تحميل بعض الدورات. نعرض المحتوى الذي تم تحميله فقط.',
   public_home_catalog_loading: "جارٍ تحميل المحتوى المنشور…",
   public_home_catalog_unavailable: "تعذر تحميل البيانات",
