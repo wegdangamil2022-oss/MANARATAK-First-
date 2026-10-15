@@ -2,10 +2,15 @@ import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I1
 import React from 'react';
 import { ChevronLeft, GraduationCap, Heart } from 'lucide-react';
 import { Scholarship } from '../types';
+import { HomeSectionEmptyCards } from './HomeSectionEmptyCards';
+import { homeCatalogStatus } from '../homeCatalogState';
+import type { PublicLiveDomainStatus } from '../publicLiveDataSource';
 
 interface FeaturedScholarshipsProps {
   selection?: 'featured' | 'published-preview';
   scholarships?: Scholarship[];
+  status?: PublicLiveDomainStatus;
+  onRetry?: () => void;
   onSelectScholarship?: (scholarship: Scholarship) => void;
   onToggleFavorite?: (id: string) => void;
   favoriteIds?: string[];
@@ -14,6 +19,8 @@ interface FeaturedScholarshipsProps {
 
 export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
   scholarships, selection = 'featured',
+  status,
+  onRetry,
   onSelectScholarship,
   onToggleFavorite,
   favoriteIds = [],
@@ -23,7 +30,7 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
 
   // Only published owner projections supplied by the live/prototype data source.
   const cards = (selection === 'featured' ? (scholarships ?? []).filter(scholarship => scholarship.featured) : scholarships ?? []).slice(0, 2);
-  if (!cards.length) return null;
+  const displayStatus = homeCatalogStatus(status, cards.length);
 
   const handleCardClick = (scholarship: Scholarship) => {
     if (onSelectScholarship) onSelectScholarship(scholarship);
@@ -55,7 +62,9 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
 
           {/* 2 Featured Cards: Edge-to-edge layout with Square Proportions */}
           <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full">
-            {cards.map((scholarship) => {
+            {cards.length === 0 ? (
+              <div className="col-span-2"><HomeSectionEmptyCards kind="scholarships" status={displayStatus === 'ready' ? 'empty' : displayStatus} onRetry={onRetry} /></div>
+            ) : cards.map((scholarship) => {
               const isFav = favoriteIds.includes(scholarship.id);
               return (
                 <div
