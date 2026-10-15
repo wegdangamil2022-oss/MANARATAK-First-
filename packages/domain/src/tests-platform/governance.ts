@@ -17,6 +17,9 @@ export function assertInternationalTestTransition(from: InternationalTestStatus,
 export function publicInternationalTest(test: InternationalTestDto): InternationalTestDto {
   const pick = (source: object, keys: string[]) => Object.fromEntries(keys.filter(k => (source as Record<string, unknown>)[k] !== undefined).map(k => [k, (source as Record<string, unknown>)[k]]));
   const result = pick(test, ['id','publicId','slug','canonicalName','displayName','localizedNameAr','localizedNameEn','abbreviation','testCode','testCategory','providerName','providerId','status','currentPublishedVersionId','registrationRequirements','identificationRequirements','retakePolicy','cancellationReschedulingNotes','accessibilityNotes']) as unknown as InternationalTestDto;
+  if(typeof test.description==='string') result.description=test.description;
+  const translations=test.localizedDescriptions as Record<string,{displayName?:unknown;description?:unknown}>|undefined;
+  if(translations && typeof translations==='object' && !Array.isArray(translations)) result.localizedDescriptions=Object.fromEntries(['ar','en'].flatMap(locale=>{const pair=translations[locale];return typeof pair?.displayName==='string' && pair.displayName.trim() && typeof pair.description==='string' && pair.description.trim() ? [[locale,{displayName:pair.displayName,description:pair.description}]] : [];}));
   result.isPubliclyVisible = true; result.isSourceVerified = true;
   const arrays: Record<string,string[]> = {
     variants: ['id','variantName','deliveryMode','isActive','specificOfficialUrl'], sections: ['id','sectionName','sectionType','durationMinutes','order','questionTypes','scoreMinimum','scoreMaximum'],

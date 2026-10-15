@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B11",
+  "next": "B12",
   "remaining": [
-    "B11",
     "B12",
     "B13",
     "B14"
@@ -403,36 +402,34 @@
     ]
   },
   "B11": {
-    "status": "IN_PROGRESS",
-    "verifiedMilestone": "UNIVERSITY_PUBLICATION_SOURCE_VERIFIED",
-    "packageClosed": false,
+    "status": "SOURCE_VERIFIED",
+    "verifiedMilestone": "OWNER_TRANSLATION_CONTRACTS_SOURCE_VERIFIED",
+    "packageClosed": true,
     "baselineCommit": "8d890cbb91eca66434fd55bc1a75c8cf5024b43c",
     "runtimeDatabaseStatus": "PENDING",
     "deploymentStatus": "NOT_PERFORMED",
     "findings": [
       "A2A-06"
     ],
-    "report": "docs/reviews/B11_TRANSLATION_OWNER_PROGRESS_2026-10-15.md",
+    "report": "docs/reviews/B11_OWNER_TRANSLATION_CLOSURE_2026-10-15.md",
     "specification": "docs/remediation/specs/B11_TRANSLATION_OWNER_CONTRACT_2026-10-15.md",
     "dryRun": "docs/reviews/evidence/b11-translation-capability-dry-run-2026-10-15.json",
-    "lightTestsPassed": 83,
+    "lightTestsPassed": 149,
     "lightTestsFailed": 0,
     "schemaChanged": false,
     "historicalSqlChanged": false,
     "contentAuthoringMode": "INFRASTRUCTURE_ONLY",
-    "remainingSourceContracts": [
-      "Major translated name/sections delivered through one immutable owner publication version",
-      "Tests/scholarships/courses owner-approved description contracts and ports",
-      "Native destinations/services/careers central import acceptance and receipt contracts"
-    ],
+    "remainingSourceContracts": [],
     "sourceChecks": {
       "typesNoEmit": "PASS",
       "targetedEslintErrors": 0,
-      "targetedEslintWarnings": 23,
+      "targetedEslintWarnings": 192,
       "persistence": "PASS_281_OF_281",
       "assets": "PASS_32_DIRECT_4_JSON",
       "architecture": "PASS",
-      "sourceQuality": "PASS"
+      "sourceQuality": "PASS",
+      "diffCheck": "PASS",
+      "targetedEslintFiles": 44
     },
     "runtimePrerequisites": [
       "Isolated source lock / approval / receipt atomicity rehearsal",
@@ -440,13 +437,28 @@
       "Prior runtime prerequisites and supported Node 22 remain pending"
     ],
     "latestSourceIteration": {
-      "baselineCommit": "54131481e94b2c73db5e64d9acc3573dbc506874",
-      "report": "docs/reviews/B11_UNIVERSITY_PUBLICATION_EVIDENCE_2026-10-15.md",
-      "scope": "University grouped publication proof, public source freshness, authoring reset and honest workspace readiness",
-      "lightTestFiles": 14,
-      "lightTestsPassed": 83,
+      "baselineCommit": "ea0999e578e39608c757afe1a835800c67fbebdc",
+      "report": "docs/reviews/B11_OWNER_TRANSLATION_CLOSURE_2026-10-15.md",
+      "scope": "Native owner descriptions, immutable major handover, grouped public projection and source closure",
+      "lightTestFiles": 22,
+      "lightTestsPassed": 149,
       "runtimeStatus": "PENDING",
       "schemaChanged": false
-    }
+    },
+    "closureLevel": "SOURCE",
+    "closureBaselineCommit": "ea0999e578e39608c757afe1a835800c67fbebdc",
+    "lightTestFiles": 22,
+    "centralImportOwners": [
+      "UNIVERSITY",
+      "MAJOR"
+    ],
+    "nativeDescriptionOwners": [
+      "INTERNATIONAL_TEST",
+      "SCHOLARSHIP",
+      "COURSE",
+      "STUDY_DESTINATION",
+      "SERVICE",
+      "CAREER_JOB"
+    ]
   }
 }

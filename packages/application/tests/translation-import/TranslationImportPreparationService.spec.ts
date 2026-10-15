@@ -133,6 +133,7 @@ describe('TranslationImportPreparationService', () => {
 
     await expect(service.accept(handoff({
       entityPublicId: 'DOC-9999',
+      sectionOwner:{profileId:'profile',versionId:'version'},
       locale: 'ar',
       fieldKey: 'displayName',
       translatedValue: 'اسم مترجم',

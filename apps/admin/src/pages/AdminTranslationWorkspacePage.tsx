@@ -159,7 +159,7 @@ const domainConfigs: DomainConfig[] = [
     detailHref: (entity) => `/scholarships/${entity.id}`,
     storage: 'COMPATIBILITY_OVERLAY',
     icon: Sparkles,
-    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.SCHOLARSHIP.supportsDescriptions,
+    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.SCHOLARSHIP.centralDescriptionEditor,
     searchParam: 'query',
   },
   {
@@ -169,7 +169,7 @@ const domainConfigs: DomainConfig[] = [
     detailHref: (entity) => `/universities/${entity.id}`,
     storage: 'NORMALIZED',
     icon: Building2,
-    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.UNIVERSITY.supportsDescriptions,
+    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.UNIVERSITY.centralDescriptionEditor,
     searchParam: 'search',
   },
   {
@@ -180,7 +180,7 @@ const domainConfigs: DomainConfig[] = [
       `/majors/${entity.id}${entity.profileId ? `?profileId=${encodeURIComponent(entity.profileId)}` : ''}`,
     storage: 'EXPLICIT_FIELDS',
     icon: GraduationCap,
-    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.MAJOR.supportsDescriptions,
+    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.MAJOR.centralDescriptionEditor,
     searchParam: 'search',
   },
   {
@@ -190,7 +190,7 @@ const domainConfigs: DomainConfig[] = [
     detailHref: (entity) => `/international-tests/${entity.id}`,
     storage: 'EXPLICIT_FIELDS',
     icon: FileText,
-    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.INTERNATIONAL_TEST.supportsDescriptions,
+    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.INTERNATIONAL_TEST.centralDescriptionEditor,
     searchParam: 'search',
   },
   {
@@ -200,7 +200,7 @@ const domainConfigs: DomainConfig[] = [
     detailHref: (entity) => `/courses/${entity.id}`,
     storage: 'COMPATIBILITY_OVERLAY',
     icon: BookOpen,
-    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.COURSE.supportsDescriptions,
+    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.COURSE.centralDescriptionEditor,
     searchParam: 'search',
   },
 ];

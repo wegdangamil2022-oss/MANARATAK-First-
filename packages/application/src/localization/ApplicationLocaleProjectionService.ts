@@ -233,7 +233,8 @@ export class ApplicationLocaleProjectionService {
         en: this.nonEmptyText(test.localizedNameEn),
       },
     });
-    const displayName=resolvedName.value??sourceDisplayName;
+    const pair=(test.localizedDescriptions as Partial<Record<SupportedLocale,{displayName:string;description:string}>>|undefined)?.[locale];
+    const displayName=pair?.displayName??resolvedName.value??sourceDisplayName;
 
     const {
       localizedNameAr: _localizedNameAr,
@@ -244,6 +245,8 @@ export class ApplicationLocaleProjectionService {
     return {
       ...publicData,
       displayName,
+      description:pair?.description??test.description,
+      localizedDescriptions:undefined,
       localizedNameAr: test.localizedNameAr,
       localizedNameEn: test.localizedNameEn,
       locale,

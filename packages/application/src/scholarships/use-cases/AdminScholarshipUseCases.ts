@@ -1,3 +1,4 @@
+import {prepareOwnerDescription, assertNoForgedOwnerDescriptions, assertOwnerDescriptionsCurrent, type OwnerDescriptionInput} from '../../localization/OwnerLocalizedDescription';
 import { assertUniversityProgramParent } from '@manaratak/domain';
 import { 
   IScholarshipRepository, 
@@ -204,7 +205,16 @@ export class AdminScholarshipUseCases {
     });
   }
 
+  public async saveLocalizedDescription(id:string,input:OwnerDescriptionInput,context?:ScholarshipMutationContext):Promise<ScholarshipDto> {
+    return this.mutate('SCHOLARSHIP_DESCRIPTION_TRANSLATED',id,context,async repository=>{
+      const current=await repository.findById(id);
+      if(!current || current.publicationStatus!==ScholarshipPublicationStatus.DRAFT || ['ARCHIVED','REJECTED'].includes(current.status)) throw new Error('SCHOLARSHIP_NON_EDITABLE_STATUS');
+      return repository.update(id,{optionalFields:prepareOwnerDescription('SCHOLARSHIP',current,input),status:current.status===ScholarshipStatus.READY_TO_PUBLISH ? ScholarshipStatus.READY_TO_REVIEW : undefined});
+    });
+  }
+
   public async updateScholarship(id: string, updates: UpdateScholarshipDto, context?: ScholarshipMutationContext): Promise<ScholarshipDto> {
+    assertNoForgedOwnerDescriptions(updates.optionalFields);
     assertNoTranslationPayloadFields('SCHOLARSHIP', updates as unknown as Record<string, unknown>, ['localizedNames']);
     assertNoTranslationPayloadFields('SCHOLARSHIP', updates.optionalFields, ['localizedNames']);
     const existing = await this.getScholarship(id);
@@ -418,6 +428,7 @@ export class AdminScholarshipUseCases {
   }
 
   private async assertPublicationReady(existing: ScholarshipDto): Promise<void> {
+    assertOwnerDescriptionsCurrent('SCHOLARSHIP',existing);
     if (existing.completenessStatus !== ScholarshipCompletenessState.COMPLETE) throw new Error('SCHOLARSHIP_NOT_COMPLETE');
     if (existing.verificationStatus !== 'VERIFIED') throw new Error('SCHOLARSHIP_SOURCE_NOT_VERIFIED');
     if (this.unresolvedLinks(existing).length > 0) throw new Error('SCHOLARSHIP_CANONICAL_LINKS_UNRESOLVED');

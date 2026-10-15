@@ -1,0 +1,10 @@
+import React from 'react';import {act,create} from 'react-test-renderer';import {describe,it,expect,vi,afterEach} from 'vitest';
+const api=vi.hoisted(()=>({request:vi.fn()}));vi.mock('../../src/api/client',()=>({adminApiClient:api}));
+import {OwnerDescriptionTranslationPanel} from '../../src/components/OwnerDescriptionTranslationPanel';
+import {MajorTranslationPublicationPanel} from '../../src/components/MajorTranslationPublicationPanel';
+let tree:ReturnType<typeof create>;(globalThis as any).IS_REACT_ACT_ENVIRONMENT=true;
+afterEach(async()=>{if(tree)await act(async()=>tree.unmount());api.request.mockReset();});
+describe('B11 owner description authoring stays frozen',()=>{
+ it.each(['COURSE','SCHOLARSHIP','INTERNATIONAL_TEST'] as const)('shows saved %s translations without authoring or publication effects',async domain=>{await act(async()=>{tree=create(<OwnerDescriptionTranslationPanel domain={domain} ownerId="owner" endpoint="/admin/owner" status="DRAFT" optionalFields={{ownerLocalizedDescriptions:{ar:{displayName:'اسم محفوظ',description:'وصف محفوظ'}}}} onSaved={vi.fn()}/>);});expect(tree.root.findAllByType('button').every(button=>button.props.disabled)).toBe(true);expect(tree.root.findByType('textarea').props.value).toBe('وصف محفوظ');expect(api.request).not.toHaveBeenCalled();});
+ it('previews only the exact major profile/version and never submits a frozen handover',async()=>{api.request.mockResolvedValue({proposedFields:{en:'Reviewed English'}});await act(async()=>{tree=create(<MajorTranslationPublicationPanel publicId="MJR-0001" profileId="profile" versionId="version" sectionKeys={['requirements']} onSaved={vi.fn()}/>);});const preview=tree.root.findAllByType('button')[0];await act(async()=>{await preview.props.onClick();});expect(api.request).toHaveBeenCalledWith('/admin/translations/owners/MAJOR/MJR-0001/en/publication-target?fieldKey=displayName&profileId=profile&versionId=version');expect(tree.root.findAllByType('button').at(-1)?.props.disabled).toBe(true);});
+});

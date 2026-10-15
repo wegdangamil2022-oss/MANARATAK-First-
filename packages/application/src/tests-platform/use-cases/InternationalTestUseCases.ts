@@ -1,3 +1,4 @@
+import {prepareOwnerDescription, assertNoForgedOwnerDescriptions, type OwnerDescriptionInput} from '../../localization/OwnerLocalizedDescription';
 import {assertAdmissionScoreProfiles} from '@manaratak/domain';
 import { randomUUID } from 'node:crypto';
 import { assertInternationalTestTransition, publicInternationalTest, assertOfficialTestUrl } from '@manaratak/domain';
@@ -81,6 +82,7 @@ export class InternationalTestAdminUseCases {
   }
 
   public async createTest(data: UpsertInternationalTestDto, context?: TestMutationContext): Promise<InternationalTestDto> {
+    assertNoForgedOwnerDescriptions(data.optionalFields);
     if (['isPubliclyVisible','isSourceVerified','currentPublishedVersionId'].some(key => data[key] !== undefined)) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_FIELDS_FORBIDDEN');
     if (data.status && !['IMPORTED','READY_TO_REVIEW','NEEDS_REVIEW'].includes(data.status)) throw new Error('INTERNATIONAL_TEST_CREATE_STATUS_INVALID');
     assertNoTranslationPayloadFields('INTERNATIONAL_TEST', data as unknown as Record<string, unknown>, ['localizedNameAr', 'localizedNameEn']);
@@ -97,9 +99,18 @@ export class InternationalTestAdminUseCases {
     return this.mutate('INTERNATIONAL_TEST_CREATED',id,context,repository=>repository.create(prepared));
   }
 
+  public async saveLocalizedDescription(id:string,input:OwnerDescriptionInput,context?:TestMutationContext):Promise<InternationalTestDto> {
+    return this.mutate('INTERNATIONAL_TEST_DESCRIPTION_TRANSLATED',id,context,async repository=>{
+      const current=await repository.findById(id);
+      if(!current || ['ARCHIVED','REJECTED'].includes(current.status)) throw new Error('INTERNATIONAL_TEST_NON_EDITABLE_STATUS');
+      return repository.update(id,{optionalFields:prepareOwnerDescription('INTERNATIONAL_TEST',current,input)});
+    });
+  }
+
   public async updateTest(id: string, data: Partial<UpsertInternationalTestDto>, context?: TestMutationContext): Promise<InternationalTestDto> {
     if (['isPubliclyVisible','isSourceVerified','currentPublishedVersionId'].some(key => data[key] !== undefined)) throw new Error('INTERNATIONAL_TEST_GOVERNANCE_FIELDS_FORBIDDEN');
     assertNoTranslationPayloadFields('INTERNATIONAL_TEST', data as unknown as Record<string, unknown>, ['localizedNameAr', 'localizedNameEn']);
+    assertNoForgedOwnerDescriptions(data.optionalFields);
     const canonicalData = { ...data, ...(await this.canonicalRelationshipService.canonicalize(data)), ...(await this.canonicalizeProvider(data)) };
     const existing = await this.get(id);
     const merged = { ...existing, ...canonicalData };

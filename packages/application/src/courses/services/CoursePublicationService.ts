@@ -1,3 +1,4 @@
+import {assertOwnerDescriptionsCurrent} from '../../localization/OwnerLocalizedDescription';
 import {
   COURSE_PUBLISHED_EVENT_TYPE,
   CourseAccessType,
@@ -25,6 +26,7 @@ export class CoursePublicationService {
   ) {}
 
   public async assertPublicationReady(course: CourseDto): Promise<void> {
+    assertOwnerDescriptionsCurrent('COURSE',course);
     if (course.completenessStatus !== CourseImportCompletenessState.COMPLETE) {
       throw new Error('COURSE_PUBLICATION_REQUIRES_COMPLETE_RECORD');
     }

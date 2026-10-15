@@ -1,3 +1,5 @@
+import {PrismaMajorTranslationOwnerPort} from '../majors/PrismaMajorTranslationOwnerPort';
+import { majorTranslationSource, assertMajorTranslationWorkingVersion, translationRecord } from '../majors/MajorTranslationEvidence';
 import { universityTranslationSourceSelect, universityTranslationSourceDigest, universityTranslationValueDigest } from '../universities/UniversityTranslationSourceEvidence';
 import { createHash, randomUUID } from 'node:crypto';
 import { assertTranslationContentAuthoringEnabled } from '@manaratak/shared';
@@ -134,6 +136,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           latest.sourceDigest !== candidate.target.sourceDigest
         )
           throw new Error('TRANSLATION_STALE_DIFF_REVIEW_REQUIRED');
+        if(latest.locator.entityKind==='MAJOR') await assertMajorTranslationWorkingVersion(tx,latest.internalEntityId,latest.locator.sectionOwner!.profileId!,latest.locator.sectionOwner!.versionId!);
         if (latest.currentValue === candidate.translatedValue) {
           return this.finishTransfer(
             tx,
@@ -159,6 +162,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           throw new Error(`TRANSLATION_FIELD_UNSUPPORTED:MAJOR:${latest.locator.fieldKey}`);
         }
 
+        if(latest.locator.entityKind==='MAJOR') await new PrismaMajorTranslationOwnerPort(tx,true).advanceOwnerRevision(latest.internalEntityId);
         return this.finishTransfer(tx, receiptId, digest, latest, candidate, approval, 'APPLIED');
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
@@ -233,23 +237,22 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
       },
     });
     if (!major) return null;
-    const optional=(major.optionalFields && typeof major.optionalFields==='object' && !Array.isArray(major.optionalFields)) ? major.optionalFields : {};
-    const sourceOptional=Object.fromEntries(Object.entries(optional).filter(([key])=>!['translationNameCandidates','translationDescriptionCandidates','localizedNames'].includes(key)));
-    const rootSource={id:major.id,canonicalName:major.canonicalName,displayName:major.displayName,currentPublishedVersionId:major.currentPublishedVersionId,academicFieldId:major.academicFieldId,disciplineId:major.disciplineId,optionalFields:sourceOptional};
-
+    await this.assertMajorSectionOwner(client, major.id, locator);
+    const profileId=locator.sectionOwner!.profileId!;
+    const versionId=locator.sectionOwner!.versionId!;
     if (locator.fieldKind === 'DISPLAY_NAME') {
+      const version=await client.majorVersion.findUniqueOrThrow({where:{id:versionId}});
+      const metadata=translationRecord(version.metadata);
+      const names=translationRecord(metadata.translationNames);
+      const current=translationRecord(names[locator.locale]);
+      const ownerSourceDigest=await majorTranslationSource(client,major.id,profileId,versionId,locator.locale);
       return {
-        locator,
-        internalEntityId: major.id,
-        publicId: major.publicId,
-        entityStatus: major.status,
-        currentValue: locator.locale === 'ar' ? major.localizedNameAr : major.localizedNameEn,
-        currentReviewStatus: null,
-        storageRecordId: null,
-        ownerRevision: major.updatedAt.toISOString(),
-        sourceDigest: this.digest({source:rootSource,translation:major.optionalFields}),
-        ownerSourceDigest:this.digest(rootSource),
-        proposedFields: this.pendingValues(major.optionalFields, 'translationNameCandidates'),
+        locator,internalEntityId:major.id,publicId:major.publicId,entityStatus:major.status,
+        currentValue: typeof current.value==='string' ? current.value : null,
+        currentReviewStatus: current.value ? 'COMPLETE' : null,storageRecordId:version.id,
+        ownerRevision:version.updatedAt.toISOString(),
+        sourceDigest:this.digest({ownerSourceDigest,metadata}),ownerSourceDigest,
+        proposedFields:this.pendingValues(metadata,'translationNameCandidates'),
       };
     }
 
@@ -273,12 +276,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
       throw new Error('TRANSLATION_SECTION_TARGET_AMBIGUOUS');
     }
     const section = sections[0];
-    const [sourceSections,sourceVersion,sourceProfile]=await Promise.all([
-      client.majorContentSection.findMany({where:{profileId:locator.sectionOwner.profileId,versionId:locator.sectionOwner.versionId,sectionKey:locator.sectionKey,locale:{not:locator.locale}},orderBy:{id:'asc'},select:{id:true,content:true,title:true,locale:true}}),
-      client.majorVersion.findUnique({where:{id:locator.sectionOwner.versionId!},select:{id:true,majorId:true,profileId:true,sourceHash:true}}),
-      client.majorLevelProfile.findUnique({where:{id:locator.sectionOwner.profileId!},select:{id:true,majorId:true,degreeLevelId:true,academicFieldId:true,disciplineId:true,level:true,code:true,displayName:true}}),
-    ]);
-    const sectionSource={root:rootSource,profile:sourceProfile,version:sourceVersion,sectionKey:locator.sectionKey,sections:sourceSections};
+    const ownerSourceDigest=await majorTranslationSource(client,major.id,profileId,versionId,locator.locale,locator.sectionKey);
     return {
       locator,
       internalEntityId: major.id,
@@ -288,8 +286,8 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
       currentReviewStatus: section?.reviewStatus ?? null,
       storageRecordId: section?.id ?? null,
       ownerRevision: section?.updatedAt.toISOString() ?? 'ABSENT',
-      sourceDigest: this.digest({source:sectionSource,translation:section?.metadata ?? null}),
-      ownerSourceDigest:this.digest(sectionSource),
+      sourceDigest: this.digest({ownerSourceDigest,translation:section?.metadata ?? null}),
+      ownerSourceDigest,
       proposedFields: this.pendingValues(
         {
           content: (section?.metadata as Prisma.JsonObject | undefined)?.pendingTranslationContent,
@@ -399,35 +397,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
     candidate: TranslationStagedCandidate,
     approval: TranslationTransferApproval,
   ): Promise<void> {
-    const existing = await tx.major.findUniqueOrThrow({
-      where: { id: latest.internalEntityId },
-      select: { optionalFields: true },
-    });
-    const optional =
-      existing.optionalFields &&
-      typeof existing.optionalFields === 'object' &&
-      !Array.isArray(existing.optionalFields)
-        ? (existing.optionalFields as Prisma.JsonObject)
-        : {};
-    await tx.major.update({
-      where: { id: latest.internalEntityId },
-      data: {
-        optionalFields: {
-          ...optional,
-          translationNameCandidates: {
-            ...(optional.translationNameCandidates &&
-            typeof optional.translationNameCandidates === 'object'
-              ? (optional.translationNameCandidates as Prisma.JsonObject)
-              : {}),
-            [latest.locator.locale]: {
-              value: candidate.translatedValue,
-              reviewStatus: 'APPROVED',
-              evidence: this.withEvidence(null, candidate, approval),
-            },
-          },
-        },
-      },
-    });
+    await new PrismaMajorTranslationOwnerPort(tx,true).stageName({majorId:latest.internalEntityId,profileId:latest.locator.sectionOwner!.profileId!,versionId:latest.locator.sectionOwner!.versionId!},latest.locator.locale,candidate.translatedValue,this.withEvidence(null,candidate,approval));
   }
 
   private async applyMajorContentSection(
@@ -568,6 +538,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           latest.currentValue !== target.currentValue
         )
           throw new Error('TRANSLATION_STALE_DIFF_REVIEW_REQUIRED');
+        if(latest.locator.entityKind==='MAJOR') await assertMajorTranslationWorkingVersion(tx,latest.internalEntityId,latest.locator.sectionOwner!.profileId!,latest.locator.sectionOwner!.versionId!);
         await new PrismaGovernanceApprovalGateway(this.prisma).consume(
           approval.approvalId!,
           'TRANSLATION_PUBLICATION',
@@ -654,41 +625,15 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           });
           if (changed.count !== 1) throw new Error('TRANSLATION_STALE_DIFF_REVIEW_REQUIRED');
         } else if (target.locator.fieldKind === 'DISPLAY_NAME') {
-          const row = await tx.major.findUniqueOrThrow({ where: { id: latest.internalEntityId } });
-          const optional = (row.optionalFields ?? {}) as Prisma.JsonObject;
-          const names = (optional.translationNameCandidates ?? {}) as Prisma.JsonObject;
-          const candidate = names[target.locator.locale] as Prisma.JsonObject | undefined;
-          const evidence = (candidate?.evidence as Prisma.JsonObject | undefined)
-            ?.translationImport as Prisma.JsonObject | undefined;
-          if (
-            candidate?.reviewStatus !== 'APPROVED' ||
-            typeof candidate.value !== 'string' ||
-            !candidate.value.trim() ||
-            evidence?.actorId === approval.reviewedBy
-          )
-            throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
-          if(evidence?.ownerSourceDigest !== latest.ownerSourceDigest) throw new Error('TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED');
-          value = candidate.value;
-          await tx.major.update({
-            where: { id: row.id },
-            data: {
-              ...(target.locator.locale === 'ar'
-                ? { localizedNameAr: value }
-                : { localizedNameEn: value }),
-              optionalFields: {
-                ...optional,
-                translationNameCandidates: {
-                  ...names,
-                  [target.locator.locale]: {
-                    ...candidate,
-                    reviewStatus: 'PUBLISHED',
-                    publishedBy: approval.actorId,
-                    publishedAt: new Date().toISOString(),
-                  },
-                },
-              },
-            },
-          });
+          const row=await tx.majorVersion.findUniqueOrThrow({where:{id:latest.locator.sectionOwner!.versionId!}});
+          const metadata=translationRecord(row.metadata);
+          const candidates=translationRecord(metadata.translationNameCandidates);
+          const candidate=translationRecord(candidates[target.locator.locale]);
+          const evidence=translationRecord(translationRecord(candidate.evidence).translationImport);
+          if(candidate.reviewStatus!=='APPROVED' || typeof candidate.value!=='string' || !candidate.value.trim() || evidence.actorId===approval.reviewedBy) throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
+          if(evidence.ownerSourceDigest!==latest.ownerSourceDigest) throw new Error('TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED');
+          value=candidate.value;
+          await new PrismaMajorTranslationOwnerPort(tx,true).acceptName({majorId:latest.internalEntityId,profileId:latest.locator.sectionOwner!.profileId!,versionId:latest.locator.sectionOwner!.versionId!},target.locator.locale,value,latest.ownerSourceDigest!,approval.approvalId!);
         } else {
           if (!latest.storageRecordId) throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
           const row = await tx.majorContentSection.findUniqueOrThrow({
@@ -706,19 +651,9 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           const evidence=metadata.translationImport as Prisma.JsonObject | undefined;
           if(evidence?.ownerSourceDigest !== latest.ownerSourceDigest) throw new Error('TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED');
           value = staged.value;
-          const { pendingTranslationContent: _pending, ...publishedMetadata } = metadata;
-          await tx.majorContentSection.update({
-            where: { id: row.id },
-            data: {
-              content: value,
-              reviewStatus: 'PUBLISHED',
-              metadata: {
-                ...publishedMetadata,
-                publishedTranslationApprovalId: approval.approvalId!,
-              },
-            },
-          });
+          await new PrismaMajorTranslationOwnerPort(tx,true).acceptSection({majorId:latest.internalEntityId,profileId:latest.locator.sectionOwner!.profileId!,versionId:latest.locator.sectionOwner!.versionId!},row.id,target.locator.locale,value,latest.ownerSourceDigest!,approval.approvalId!,metadata);
         }
+        const ownerReviewRequired=target.locator.entityKind==='MAJOR';
         const id = randomUUID();
         const facts = {
           approvalId: approval.approvalId,
@@ -730,7 +665,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           data: {
             id,
             reference: 'translation-publish:' + id,
-            action: 'OWNER_TRANSLATION_PUBLISHED',
+            action: ownerReviewRequired ? 'OWNER_TRANSLATION_READY_FOR_REVIEW' : 'OWNER_TRANSLATION_PUBLISHED',
             category: target.locator.entityKind,
             severity: 'INFO',
             actorId: approval.actorId!,
@@ -745,7 +680,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         await tx.transactionalOutboxRecord.create({
           data: {
             id: randomUUID(),
-            eventType: 'OwnerTranslationPublished',
+            eventType: ownerReviewRequired ? 'OwnerTranslationReadyForReview' : 'OwnerTranslationPublished',
             domain: target.locator.entityKind === 'UNIVERSITY' ? 'UNIVERSITIES' : 'MAJORS',
             aggregateType: target.locator.entityKind,
             aggregateId: target.internalEntityId,
@@ -756,8 +691,9 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         return {
           ...this.result('APPLIED', latest, value),
           approved: true,
-          published: true,
-          publicEligible: latest.entityStatus === 'PUBLISHED',
+          published: !ownerReviewRequired,
+          publicEligible: !ownerReviewRequired && latest.entityStatus === 'PUBLISHED',
+          publicationStage: ownerReviewRequired ? 'OWNER_REVIEW_REQUIRED' : 'PUBLIC_OWNER_FIELDS',
         };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },

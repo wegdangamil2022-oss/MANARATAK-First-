@@ -1,3 +1,4 @@
+import {OwnerDescriptionTranslationPanel} from '../components/OwnerDescriptionTranslationPanel';
 import {CourseDraftStructurePanel} from '../components/CourseDraftStructurePanel';
 import {CourseQuestionBanksPanel} from '../components/CourseQuestionBanksPanel';
 import { useEffect, useMemo, useState } from 'react';
@@ -576,6 +577,8 @@ export function CourseDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
+      <OwnerDescriptionTranslationPanel domain="COURSE" ownerId={course!.id} endpoint="/admin/courses" optionalFields={course!.optionalFields} status={course!.status} onSaved={()=>fetchCourse()}/>
+
       <label className="block text-sm font-semibold">سبب التعديل أو المراجعة
         <input value={reviewReason} onChange={event=>setReviewReason(event.target.value)} maxLength={2000}
           placeholder="اكتب سببًا واضحًا قبل حفظ التعديلات" className="mt-2 w-full rounded-lg border p-3" />

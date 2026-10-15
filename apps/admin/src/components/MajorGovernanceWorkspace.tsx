@@ -1,3 +1,4 @@
+import {MajorTranslationPublicationPanel} from './MajorTranslationPublicationPanel';
 import {useEffect,useRef,useState} from 'react';
 import {MAJOR_REVIEW_TEMPLATE,type MajorDto,type MajorContentSectionDto,type MajorVersionDto} from '@manaratak/domain';
 import {adminApiClient} from '../api/client';
@@ -54,6 +55,7 @@ export function MajorGovernanceWorkspace({majorId,profileId,onSaved}:{majorId:st
   return <section aria-label="مراجعة واعتماد التخصص" className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
     <h2 className="font-black text-[#142B5F]">مراجعة النسخة قبل النشر</h2>
     <p className="text-sm">المحتوى المنشور يبقى ثابتًا أثناء تحرير نسخة العمل. الاعتماد يحتاج اكتمال الأقسام ومصدرًا محفوظًا، وأي تعديل لاحق يستلزم مراجعة جديدة.</p>
+    {major?.publicId && profileId && versions[0]?.id && <MajorTranslationPublicationPanel key={`${profileId}:${versions[0].id}`} publicId={major.publicId} profileId={profileId} versionId={versions[0].id} sectionKeys={[...new Set(sections.map(section=>section.sectionKey))]} onSaved={async()=>{setRefresh(value=>value+1);await onSaved();}}/>}
     {error && <p role="alert" className="text-red-700">{error}</p>}{notice && <p role="status" className="text-emerald-700">{notice}</p>}
     <label className="block">سبب القرار<textarea className="block w-full rounded border p-2" value={reason} onChange={event=>setReason(event.target.value)} maxLength={2000}/></label>
     {profile && <div className="grid gap-3 sm:grid-cols-2">{required.map(key=><label key={key}>{labels[key] ?? key}<select className="block w-full rounded border p-2" value={coverage[key] ?? ''} onChange={event=>setCoverage(values=>({...values,[key]:event.target.value}))}><option value="">اختر قسمًا من النسخة يغطّي هذا البند</option>{sections.map(section=><option key={section.id} value={section.id}>{section.title || section.sectionKey}</option>)}</select></label>)}</div>}

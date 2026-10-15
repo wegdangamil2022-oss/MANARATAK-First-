@@ -99,6 +99,7 @@ export class TranslationImportPreparationService
 
     if (fieldKey === 'displayName') {
       fieldKind = 'DISPLAY_NAME';
+      if(entityKind==='MAJOR') sectionOwner=this.parseSectionOwner(rawSectionOwner);
     } else if (fieldKey === 'description' && entityKind === 'UNIVERSITY') {
       fieldKind = 'DESCRIPTION';
     } else if (fieldKey.startsWith('section:') && entityKind === 'MAJOR') {

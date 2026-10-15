@@ -1,3 +1,4 @@
+import {prepareOwnerDescription, assertNoForgedOwnerDescriptions, type OwnerDescriptionInput} from '../../localization/OwnerLocalizedDescription';
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
 import {
   CourseCompletenessClassifier,
@@ -39,9 +40,18 @@ export class AdminCourseUseCases {
     return course;
   }
 
+  public async saveLocalizedDescription(id:string,input:OwnerDescriptionInput):Promise<CourseDto> {
+    const existing=await this.getCourse(id);
+    if(['PUBLISHED','ARCHIVED','REJECTED'].includes(existing.status)) throw new Error('COURSE_PUBLISHED_STRUCTURE_IMMUTABLE_UNPUBLISH_FIRST');
+    const optionalFields=prepareOwnerDescription('COURSE',existing,input);
+    if(existing.status===CourseStatus.READY_TO_PUBLISH) await this.repository.updateStatus(id,CourseStatus.READY_TO_REVIEW);
+    return this.repository.update(id,{optionalFields});
+  }
+
   public async updateCourse(id: string, updates: UpdateCourseDto): Promise<CourseDto> {
     await assertAssetReferenceUsable(this.assetReferences, updates.thumbnailAssetId, { purpose: 'COURSE_THUMBNAIL' });
     assertNoTranslationPayloadFields('COURSE', updates.optionalFields, ['localizedNames', 'titleEn']);
+    assertNoForgedOwnerDescriptions(updates.optionalFields);
     const existing = await this.getCourse(id);
     if ([CourseStatus.ARCHIVED, CourseStatus.REJECTED].includes(existing.status)) throw new Error('COURSE_INACTIVE_IMMUTABLE');
     if (updates.originType && updates.originType !== existing.originType) {

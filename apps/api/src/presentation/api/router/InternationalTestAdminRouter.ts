@@ -391,6 +391,10 @@ export class InternationalTestAdminRouter {
       const test=await internationalTestAdminUseCases.get(req.params.id); res.setHeader('ETag',`"${test.revision??0}"`); res.json(test);
     }));
 
+    router.post('/:id/localized-description',asyncHandler(async(req,res)=>{
+      res.json(await internationalTestAdminUseCases.saveLocalizedDescription(req.params.id,z.object({locale:z.enum(['ar','en']),displayName:z.string().trim().min(1).max(500).optional(),description:z.string().trim().min(1).max(100000).optional(),remove:z.boolean().optional()}).strict().parse(req.body),mutationContext(req)));
+    }));
+
     router.patch('/:id', asyncHandler(async (req: Request, res: Response) => {
       const parsed = rootUpdateSchema.parse(req.body);
       res.json(await internationalTestAdminUseCases.updateTest(req.params.id, parsed as unknown as Partial<UpsertInternationalTestDto>, mutationContext(req)));
@@ -508,6 +512,10 @@ export class InternationalTestAdminRouter {
     }));
 
     router.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+      const translationCode=err instanceof Error?err.message:'';
+      if(translationCode.startsWith('TRANSLATION_CONTENT_AUTHORING_DISABLED')) return res.status(403).json({error:'TRANSLATION_CONTENT_AUTHORING_DISABLED'});
+      if(translationCode==='TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED') return res.status(409).json({error:translationCode});
+      if(translationCode.startsWith('TRANSLATION_')) return res.status(422).json({error:translationCode});
       if (err instanceof z.ZodError) return res.status(400).json({ error: 'Validation Error', details: err.issues });
       const persistenceCode=err&&typeof err==='object'&&'code' in err?String(err.code):'';
       let message = persistenceCode==='P2025'?'INTERNATIONAL_TEST_CHILD_OWNER_NOT_FOUND':persistenceCode==='P2002'?'INTERNATIONAL_TEST_IDENTITY_CONFLICT':err instanceof Error ? err.message : '';

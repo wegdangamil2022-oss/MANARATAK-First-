@@ -1,9 +1,25 @@
 {
   "package": "B11",
   "mode": "SOURCE_CONTRACT_DRY_RUN",
+  "closureLevel": "SOURCE_VERIFIED",
+  "packageClosed": true,
   "databaseContacted": false,
   "contentAuthoringActivated": false,
-  "packageClosed": false,
+  "runtimeStatus": "PENDING",
+  "centralImportOwners": [
+    "UNIVERSITY",
+    "MAJOR"
+  ],
+  "nativeOwnerDescriptionCommands": [
+    "INTERNATIONAL_TEST",
+    "SCHOLARSHIP",
+    "COURSE"
+  ],
+  "existingNativeOwnerWorkflows": [
+    "STUDY_DESTINATION",
+    "SERVICE",
+    "CAREER_JOB"
+  ],
   "capabilities": [
     {
       "key": "UNIVERSITY",
@@ -22,7 +38,12 @@
       ],
       "activation": "INFRASTRUCTURE_ONLY",
       "runtimeProof": "PENDING",
-      "supportsDescriptions": true
+      "supportsDescriptions": true,
+      "centralDescriptionEditor": true,
+      "sourceProofs": [
+        "packages/infrastructure/tests/universities/B11UniversityPublishedSource.spec.ts",
+        "packages/infrastructure/tests/translation-import/TranslationGovernance.spec.ts"
+      ]
     },
     {
       "key": "MAJOR",
@@ -41,14 +62,22 @@
       ],
       "activation": "INFRASTRUCTURE_ONLY",
       "runtimeProof": "PENDING",
-      "supportsDescriptions": false
+      "supportsDescriptions": true,
+      "centralDescriptionEditor": false,
+      "sourceProofs": [
+        "packages/infrastructure/tests/translation-import/B11MajorHandover.spec.ts",
+        "packages/infrastructure/tests/majors/B11TranslationSnapshot.spec.ts"
+      ]
     },
     {
       "key": "INTERNATIONAL_TEST",
       "permission": "admin:international-tests:manage",
       "ownerPath": "/international-tests",
-      "descriptionFields": [],
-      "descriptionWorkflow": "OWNER_CONTRACT_REQUIRED",
+      "descriptionFields": [
+        "optionalFields.ownerLocalizedDescriptions.ar.description",
+        "optionalFields.ownerLocalizedDescriptions.en.description"
+      ],
+      "descriptionWorkflow": "NATIVE_OWNER_WORKSPACE",
       "importSupported": false,
       "sourceVersion": "InternationalTestVersion",
       "publicReader": "ApplicationLocaleProjectionService.projectInternationalTest",
@@ -58,14 +87,22 @@
       ],
       "activation": "INFRASTRUCTURE_ONLY",
       "runtimeProof": "PENDING",
-      "supportsDescriptions": false
+      "supportsDescriptions": true,
+      "centralDescriptionEditor": false,
+      "sourceProofs": [
+        "packages/application/tests/localization/B11OwnerDescriptions.spec.ts",
+        "packages/infrastructure/tests/international-tests/InternationalTestGovernanceCloseout.spec.ts"
+      ]
     },
     {
       "key": "SCHOLARSHIP",
       "permission": "admin:scholarships:manage",
       "ownerPath": "/scholarships",
-      "descriptionFields": [],
-      "descriptionWorkflow": "OWNER_CONTRACT_REQUIRED",
+      "descriptionFields": [
+        "optionalFields.ownerLocalizedDescriptions.ar.description",
+        "optionalFields.ownerLocalizedDescriptions.en.description"
+      ],
+      "descriptionWorkflow": "NATIVE_OWNER_WORKSPACE",
       "importSupported": false,
       "sourceVersion": "ScholarshipVersion",
       "publicReader": "Scholarship owner published projection",
@@ -75,14 +112,22 @@
       ],
       "activation": "INFRASTRUCTURE_ONLY",
       "runtimeProof": "PENDING",
-      "supportsDescriptions": false
+      "supportsDescriptions": true,
+      "centralDescriptionEditor": false,
+      "sourceProofs": [
+        "packages/application/tests/localization/B11OwnerDescriptions.spec.ts",
+        "packages/infrastructure/tests/scholarships/B11DescriptionVersion.spec.ts"
+      ]
     },
     {
       "key": "COURSE",
       "permission": "admin:courses:manage",
       "ownerPath": "/courses",
-      "descriptionFields": [],
-      "descriptionWorkflow": "OWNER_CONTRACT_REQUIRED",
+      "descriptionFields": [
+        "optionalFields.ownerLocalizedDescriptions.ar.description",
+        "optionalFields.ownerLocalizedDescriptions.en.description"
+      ],
+      "descriptionWorkflow": "NATIVE_OWNER_WORKSPACE",
       "importSupported": false,
       "sourceVersion": "CourseVersion",
       "publicReader": "Course owner published / enrollment-pinned projection",
@@ -92,7 +137,11 @@
       ],
       "activation": "INFRASTRUCTURE_ONLY",
       "runtimeProof": "PENDING",
-      "supportsDescriptions": false
+      "supportsDescriptions": true,
+      "centralDescriptionEditor": false,
+      "sourceProofs": [
+        "packages/application/tests/localization/B11OwnerDescriptions.spec.ts"
+      ]
     },
     {
       "key": "STUDY_DESTINATION",
@@ -116,7 +165,11 @@
       ],
       "activation": "INFRASTRUCTURE_ONLY",
       "runtimeProof": "PENDING",
-      "supportsDescriptions": false
+      "supportsDescriptions": true,
+      "centralDescriptionEditor": false,
+      "sourceProofs": [
+        "packages/application/tests/study-destinations/StudyDestinationGovernance.spec.ts"
+      ]
     },
     {
       "key": "SERVICE",
@@ -136,7 +189,11 @@
       ],
       "activation": "INFRASTRUCTURE_ONLY",
       "runtimeProof": "PENDING",
-      "supportsDescriptions": false
+      "supportsDescriptions": true,
+      "centralDescriptionEditor": false,
+      "sourceProofs": [
+        "packages/application/tests/localization/B11NativePublicPairs.spec.ts"
+      ]
     },
     {
       "key": "CAREER_JOB",
@@ -156,14 +213,17 @@
       ],
       "activation": "INFRASTRUCTURE_ONLY",
       "runtimeProof": "PENDING",
-      "supportsDescriptions": false
+      "supportsDescriptions": true,
+      "centralDescriptionEditor": false,
+      "sourceProofs": [
+        "packages/application/tests/localization/B11NativePublicPairs.spec.ts"
+      ]
     }
   ],
-  "remainingSourceContracts": [
-    "University published-reader source freshness and grouped required-field publication proof",
-    "Major name and section translations bound to one immutable publication snapshot/version",
-    "Tests/scholarships/courses owner-approved description candidate contracts and owner ports",
-    "Central import adapters for native destinations/services/careers only after owner acceptance"
-  ],
-  "runtimeStatus": "PENDING"
+  "remainingSourceContracts": [],
+  "runtimePrerequisites": [
+    "Isolated source lock, approval consumption, receipt replay and rollback rehearsal",
+    "Browser/API/DB publication, withdrawal and locale/version isolation including legacy data",
+    "Supported Node 22 and prior runtime prerequisites"
+  ]
 }

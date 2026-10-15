@@ -334,6 +334,10 @@ export class ScholarshipAdminRouter {
       })).optional(),
     }).strict();
 
+    router.post('/:id/localized-description',asyncHandler(async(req:Request,res:Response)=>{
+      const saved=await adminScholarshipUseCases.saveLocalizedDescription(req.params.id,z.object({locale:z.enum(['ar','en']),displayName:z.string().trim().min(1).max(500).optional(),description:z.string().trim().min(1).max(100000).optional(),remove:z.boolean().optional()}).strict().parse(req.body),ownerContext(req));sendRevision(res,saved);res.json(saved);
+    }));
+
     const updateBodySchema = z.object({
       displayName: z.string().min(1).optional(),
       providerName: nullableText,
@@ -903,6 +907,10 @@ export class ScholarshipAdminRouter {
       if (err instanceof Error && err.message === 'SCHOLARSHIP_INVALID_REVISION_PRECONDITION') return res.status(400).json({ error: err.message, code: err.message });
       if (err instanceof Error && err.message === 'IMPORT_REVIEW_LEASE_REQUIRED')
         return res.status(409).json({ error: err.message, code: err.message });
+      const translationCode=err instanceof Error?err.message:'';
+      if(translationCode.startsWith('TRANSLATION_CONTENT_AUTHORING_DISABLED')) return res.status(403).json({error:'TRANSLATION_CONTENT_AUTHORING_DISABLED'});
+      if(translationCode==='TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED') return res.status(409).json({error:translationCode});
+      if(translationCode.startsWith('TRANSLATION_')) return res.status(422).json({error:translationCode});
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }

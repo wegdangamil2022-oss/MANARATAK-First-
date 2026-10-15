@@ -100,6 +100,10 @@ export class CourseAdminRouter {
       pageSize: z.coerce.number().int().min(1).max(100).default(20),
     });
 
+    router.post('/:id/localized-description',asyncHandler(async(req,res,{adminCourseUseCases})=>{
+      res.json(await adminCourseUseCases.saveLocalizedDescription(req.params.id,z.object({locale:z.enum(['ar','en']),displayName:z.string().trim().min(1).max(500).optional(),description:z.string().trim().min(1).max(100000).optional(),remove:z.boolean().optional()}).strict().parse(req.body)));
+    }));
+
     const updateBodySchema = z.object({
       displayName: z.string().optional(),
       accessType: z.nativeEnum(CourseAccessType).optional(),
@@ -681,6 +685,10 @@ export class CourseAdminRouter {
     router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       if (['COURSE_STALE_VERSION','LEARNING_PATH_STALE_VERSION','COURSE_PUBLICATION_STATE_CHANGED','COURSE_ASSESSMENT_REVIEW_CONFLICT','COURSE_ASSESSMENT_NOT_PENDING'].includes(err.message)) return res.status(409).json({error:err.message});
       if (err.message === 'COURSE_VERSION_PRECONDITION_REQUIRED') return res.status(428).json({error:err.message});
+      const translationCode=err instanceof Error?err.message:'';
+      if(translationCode.startsWith('TRANSLATION_CONTENT_AUTHORING_DISABLED')) return res.status(403).json({error:'TRANSLATION_CONTENT_AUTHORING_DISABLED'});
+      if(translationCode==='TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED') return res.status(409).json({error:translationCode});
+      if(translationCode.startsWith('TRANSLATION_')) return res.status(422).json({error:translationCode});
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }

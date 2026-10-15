@@ -1,3 +1,4 @@
+import { validateMajorVersionTranslations } from './MajorTranslationEvidence';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {createHash} from 'crypto';
 import {
@@ -131,6 +132,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     const source=await this.prisma.majorSource.findFirst({where:{sourceHash:version.sourceHash,OR:[{majorId,profileId:null},{majorId,profileId:profile.id}]}});
     if(!source) throw new Error('MAJOR_REVIEW_OWNER_SOURCE_REQUIRED');
     if(!profile.degreeLevelId || (!profile.academicFieldId && !profile.disciplineId)) throw new Error('MAJOR_REVIEW_CANONICAL_REFERENCES_REQUIRED');
+    await validateMajorVersionTranslations(this.prisma,majorId,profile.id,versionId,version.metadata,sections);
     const digest=await this.workingVersionDigest(majorId,profile.id,versionId);
     await this.prisma.majorContentSection.updateMany({where:{profileId:profile.id,versionId},data:{reviewStatus:'APPROVED'}});
     await this.prisma.majorVersion.update({where:{id:versionId},data:{status:'APPROVED',approvedBy:actorId,metadata:{...this.asRecord(version.metadata),reviewApproval:{digest,actorId,reason,coverage,reviewedAt:new Date().toISOString()}}}});
@@ -141,14 +143,18 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
     const [major,profile,version,sections,mappings,sources,relationships]=await Promise.all([
       this.prisma.major.findUnique({where:{id:majorId},select:{canonicalName:true,canonicalDedupKey:true,displayName:true,academicFieldId:true,disciplineId:true}}),
       this.prisma.majorLevelProfile.findFirst({where:{id:profileId,majorId},select:{id:true,majorId:true,degreeLevelId:true,academicFieldId:true,disciplineId:true,level:true,displayName:true,code:true}}),
-      this.prisma.majorVersion.findFirst({where:{id:versionId,majorId,profileId},select:{id:true,sourceHash:true,sourceUri:true,sourceImportRecordId:true}}),
+      this.prisma.majorVersion.findFirst({where:{id:versionId,majorId,profileId},select:{id:true,sourceHash:true,sourceUri:true,sourceImportRecordId:true,metadata:true}}),
       this.prisma.majorContentSection.findMany({where:{profileId,versionId},orderBy:[{sectionKey:'asc'},{id:'asc'}],select:{id:true,sectionKey:true,title:true,content:true,locale:true}}),
       this.prisma.majorClassificationMapping.findMany({where:{OR:[{majorId,profileId:null},{profileId}]},orderBy:{id:'asc'},select:{taxonomyNodeId:true,relationshipType:true,profileId:true}}),
       this.prisma.majorSource.findMany({where:{OR:[{majorId,profileId:null},{profileId}]},orderBy:{id:'asc'},select:{id:true,sourceHash:true,sourceUri:true,sourceType:true}}),
       this.prisma.majorRelationship.findMany({where:{OR:[{sourceMajorId:majorId},{targetMajorId:majorId},{sourceProfileId:profileId},{targetProfileId:profileId}]},orderBy:{id:'asc'},select:{id:true,sourceMajorId:true,targetMajorId:true,sourceProfileId:true,targetProfileId:true,relationshipType:true}}),
     ]);
     if(!major || !profile || !version) throw new Error('MAJOR_REVIEW_FOREIGN_VERSION');
-    return createHash('sha256').update(JSON.stringify({major,profile,version,sections,mappings,sources,relationships})).digest('hex');
+    const {metadata,...sourceVersion}=version;
+    const rawTranslationNames=this.asRecord(metadata).translationNames;
+    const translationNames=rawTranslationNames && typeof rawTranslationNames==='object' && !Array.isArray(rawTranslationNames) ? rawTranslationNames as Record<string,unknown> : {};
+    const digestVersion=Object.keys(translationNames).length ? {...sourceVersion,translationNames} : sourceVersion;
+    return createHash('sha256').update(JSON.stringify({major,profile,version:digestVersion,sections,mappings,sources,relationships})).digest('hex');
   }
 
   async findById(id: string): Promise<MajorDto | null> {
@@ -317,10 +323,11 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
         const selected=major.profiles?.find(item=>item.id===profile.id);
         if(!selected) throw new Error('TARGET_MAJOR_PROFILE_REQUIRED');
         const sections=await this.prisma.majorContentSection.findMany({where:{profileId:profile.id,versionId:version.id},orderBy:[{sectionKey:'asc'},{id:'asc'}]});
+        const translatedNames=await validateMajorVersionTranslations(this.prisma,majorId,profile.id,version.id,version.metadata,sections);
         const scoped={...major,publicId:profile.code || major.publicId,degreeLevel:profile.level,classificationCode:profile.code ?? undefined,
           displayName:profile.displayName || major.displayName,localizedNameAr:profile.localizedNameAr || major.localizedNameAr,
           localizedNameEn:profile.localizedNameEn || major.localizedNameEn,currentPublishedVersionId:version.id,
-          profiles:[{...selected,status:MajorStatus.PUBLISHED,currentPublishedVersionId:version.id}]};
+          profiles:[{...selected,...translatedNames,status:MajorStatus.PUBLISHED,currentPublishedVersionId:version.id}],...translatedNames};
         const payload=publicMajorProjection(scoped,sections.map(section=>({...this.mapContentSectionToDto(section),reviewStatus:'PUBLISHED' as const})));
         await this.prisma.$executeRaw`INSERT INTO "MajorPublicationSnapshot" ("versionId","majorId","profileId","payload","reviewerId") VALUES (${version.id},${majorId},${profile.id},${JSON.stringify(payload)}::jsonb,${version.approvedBy})`;
 
@@ -433,6 +440,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   async createVersion(data: Omit<MajorVersionDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<MajorVersionDto> {
     if(!this.transactionBound) throw new Error('MAJOR_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     if(!data.majorId) throw new Error('MAJOR_VERSION_OWNER_REQUIRED');
+    if(['translationNames','translationNameCandidates'].some(key=>this.asRecord(data.metadata)[key]!==undefined)) throw new Error('TRANSLATION_OWNER_COMMAND_REQUIRED');
     await this.acquireVersionAllocationLock(data.majorId);
     const record = await this.prisma.majorVersion.create({
       data: {
@@ -586,6 +594,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
   }
 
   async createContentSections(data: Array<Omit<MajorContentSectionDto, 'id'>>): Promise<{ count: number }> {
+    if(data.some(section=>this.asRecord(section.metadata).ownerTranslation!==undefined)) throw new Error('TRANSLATION_OWNER_COMMAND_REQUIRED');
     if (data.length === 0) {
       return { count: 0 };
     }

@@ -242,6 +242,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       this.asOptionalRecord(existing.optionalFields),
       updates,
     );
+    if(updates.optionalFields?.ownerLocalizedDescriptions!==undefined) legacyCompatibility.ownerLocalizedDescriptions=updates.optionalFields.ownerLocalizedDescriptions;
     const updateData = {
       revision: { increment: 1 },
       canonicalDedupKey: updates.canonicalDedupKey,
@@ -695,6 +696,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   private hasStructuralChanges(updates: ScholarshipRepositoryUpdateDto): boolean {
+    if(updates.optionalFields?.ownerLocalizedDescriptions!==undefined) return true;
     const structuralKeys = new Set([
       'sponsorUniversityId', 'displayName', 'sourceEvidence', 'providerName', 'amountMinorUnits', 'amountCurrencyCode', 'isFullyFunded', 'applicationDeadline',
       'academicYear', 'cycleName', 'countryReferenceId', 'countrySourceLabel', 'countryScope',
@@ -726,6 +728,8 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
 
   private versionSnapshot(source: any): Prisma.InputJsonObject {
     const copy = { ...(source as Record<string, unknown>) };
+    const descriptions=this.asOptionalRecord(source.optionalFields).ownerLocalizedDescriptions;
+    if(descriptions!==undefined) copy.ownerLocalizedDescriptions=descriptions;
     delete copy.versions; delete copy.sponsorContext; delete copy.applicationCycles; delete copy.optionalFields;
     return this.jsonSafe(copy) as Prisma.InputJsonObject;
   }

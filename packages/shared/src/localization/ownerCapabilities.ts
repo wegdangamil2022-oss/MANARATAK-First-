@@ -20,6 +20,7 @@ export interface TranslationOwnerCapability {
     | 'NATIVE_OWNER_WORKSPACE'
     | 'OWNER_CONTRACT_REQUIRED';
   supportsDescriptions: boolean;
+  centralDescriptionEditor: boolean;
   importSupported: boolean;
   sourceVersion: string;
   publicReader: string;
@@ -29,14 +30,15 @@ export interface TranslationOwnerCapability {
 const capability = (
   input: Omit<
     TranslationOwnerCapability,
-    'locales' | 'activation' | 'runtimeProof' | 'supportsDescriptions'
+    'locales' | 'activation' | 'runtimeProof' | 'supportsDescriptions' | 'centralDescriptionEditor'
   >,
 ): TranslationOwnerCapability => ({
   ...input,
   locales: ['ar', 'en'],
   activation: 'INFRASTRUCTURE_ONLY',
   runtimeProof: 'PENDING',
-  supportsDescriptions: input.descriptionWorkflow === 'NORMALIZED_OWNER',
+  supportsDescriptions: input.descriptionWorkflow !== 'OWNER_CONTRACT_REQUIRED',
+  centralDescriptionEditor:input.descriptionWorkflow === 'NORMALIZED_OWNER',
 });
 export const TRANSLATION_OWNER_CAPABILITIES: Readonly<
   Record<TranslationCapabilityKey, TranslationOwnerCapability>
@@ -65,8 +67,8 @@ export const TRANSLATION_OWNER_CAPABILITIES: Readonly<
     key: 'INTERNATIONAL_TEST',
     permission: 'admin:international-tests:manage',
     ownerPath: '/international-tests',
-    descriptionFields: [],
-    descriptionWorkflow: 'OWNER_CONTRACT_REQUIRED',
+    descriptionFields: ['optionalFields.ownerLocalizedDescriptions.ar.description','optionalFields.ownerLocalizedDescriptions.en.description'],
+    descriptionWorkflow: 'NATIVE_OWNER_WORKSPACE',
     importSupported: false,
     sourceVersion: 'InternationalTestVersion',
     publicReader: 'ApplicationLocaleProjectionService.projectInternationalTest',
@@ -75,8 +77,8 @@ export const TRANSLATION_OWNER_CAPABILITIES: Readonly<
     key: 'SCHOLARSHIP',
     permission: 'admin:scholarships:manage',
     ownerPath: '/scholarships',
-    descriptionFields: [],
-    descriptionWorkflow: 'OWNER_CONTRACT_REQUIRED',
+    descriptionFields: ['optionalFields.ownerLocalizedDescriptions.ar.description','optionalFields.ownerLocalizedDescriptions.en.description'],
+    descriptionWorkflow: 'NATIVE_OWNER_WORKSPACE',
     importSupported: false,
     sourceVersion: 'ScholarshipVersion',
     publicReader: 'Scholarship owner published projection',
@@ -85,8 +87,8 @@ export const TRANSLATION_OWNER_CAPABILITIES: Readonly<
     key: 'COURSE',
     permission: 'admin:courses:manage',
     ownerPath: '/courses',
-    descriptionFields: [],
-    descriptionWorkflow: 'OWNER_CONTRACT_REQUIRED',
+    descriptionFields: ['optionalFields.ownerLocalizedDescriptions.ar.description','optionalFields.ownerLocalizedDescriptions.en.description'],
+    descriptionWorkflow: 'NATIVE_OWNER_WORKSPACE',
     importSupported: false,
     sourceVersion: 'CourseVersion',
     publicReader: 'Course owner published / enrollment-pinned projection',

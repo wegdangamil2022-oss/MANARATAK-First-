@@ -40,9 +40,12 @@ export class PublicServiceCatalogUseCases {
     service: ServiceCatalogItemDto,
     locale?: 'ar' | 'en',
   ): PublicServiceCatalogItemDto {
-    if (service.publishedSnapshot)
-      service = { ...service, ...service.publishedSnapshot } as ServiceCatalogItemDto;
-    const localized = locale ? service.localizedContent?.[locale] : undefined;
+    if (service.publishedSnapshot) {
+      if(service.publishedSnapshot.id!==service.id || service.publishedSnapshot.status!==ServiceStatus.PUBLISHED) throw new Error('Service not found');
+      service = { ...service.publishedSnapshot } as unknown as ServiceCatalogItemDto;
+    }
+    const localizedContent=Object.fromEntries((['ar','en'] as const).flatMap(key=>{const pair=service.localizedContent?.[key];return pair?.displayName?.trim() && pair.serviceDescription?.trim() ? [[key,{displayName:pair.displayName,serviceDescription:pair.serviceDescription}]] : [];}));
+    const localized = locale ? localizedContent[locale] : undefined;
     return {
       approvedPrice:
         service.approvedPrice &&
@@ -53,7 +56,7 @@ export class PublicServiceCatalogUseCases {
       cancellationPolicyCode: service.cancellationPolicyCode ?? 'FINANCE_REVIEW_REQUIRED',
       fulfillmentPolicy: service.fulfillmentPolicy ?? 'QUOTE_REQUIRED',
       inputSchema: service.inputSchema,
-      localizedContent: service.localizedContent,
+      localizedContent,
       publicId: service.publicId,
       slug: service.slug,
       displayName: localized?.displayName ?? service.displayName,

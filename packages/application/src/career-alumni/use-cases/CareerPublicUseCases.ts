@@ -18,7 +18,8 @@ export class CareerPublicUseCases {
   }
   private async project(raw: CareerJobPostingDto, locale: 'ar' | 'en' = 'ar'): Promise<PublicCareerJobPostingDto> {
     const job = publishedCareerJob(raw), employer = raw.employer;
-    const localized = careerRecord(careerRecord(job.metadata?.localizedContent)[locale]);
+    const candidate = careerRecord(careerRecord(job.metadata?.localizedContent)[locale]);
+    const localized = typeof candidate.title==='string' && candidate.title.trim() && typeof candidate.description==='string' && candidate.description.trim() ? candidate : {};
     const geography = await this.references.displayGeography?.(job.countryReferenceId, job.cityReferenceId, locale);
     return {
       id: job.id, publicId: job.publicId, slug: job.slug, title: localized.title || job.title,

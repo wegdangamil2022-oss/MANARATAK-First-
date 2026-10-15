@@ -1,5 +1,7 @@
 # B11 — تقدم عقود ترجمة المالك والمصدر
 
+> تقرير مرحلة تاريخية؛ أُغلقت B11 لاحقًا على مستوى المصدر في [تقرير الإغلاق](B11_OWNER_TRANSLATION_CLOSURE_2026-10-15.md). بوابة التشغيل ما زالت منفصلة.
+
 الحالة: **IN_PROGRESS — SOURCE FOUNDATION VERIFIED؛ PACKAGE NOT CLOSED**. خط الأساس `8d890cbb91eca66434fd55bc1a75c8cf5024b43c` على فرع `fix/b02-auth-session-boundary-20261015`. main جُلب وتحقق بقاؤه عند `93a1c4d1946db9480bd94ca2a3291be34b742c68`. لا إعادة تنفيذ B01–B10؛ ولا بدء B12.
 
 آخر استكمال: [دليل نشر الجامعة والقراءة العامة](B11_UNIVERSITY_PUBLICATION_EVIDENCE_2026-10-15.md) — 83 فحصًا خفيفًا، مع استمرار IN_PROGRESS والمتبقي أدناه.

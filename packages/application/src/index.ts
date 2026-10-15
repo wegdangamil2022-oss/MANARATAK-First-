@@ -253,3 +253,5 @@ export * from './students/use-cases/StudentDocumentUploadUseCases';
 export * from './students/use-cases/StudentDocumentReviewUseCases';
 
 export * from './integration/CatalogLifecycleReadPolicy';
+
+export * from './localization/OwnerLocalizedDescription';

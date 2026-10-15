@@ -1,3 +1,4 @@
+import {approvedOwnerDescriptions} from '../../localization/OwnerLocalizedDescription';
 import {
   IScholarshipRepository,
   PublicScholarshipFilters,
@@ -45,7 +46,8 @@ export class PublicScholarshipUseCases {
       localizedValues: localizedNames,
     }).value ?? scholarship.displayName;
 
-    return projectPublishedScholarship(scholarship, displayName);
+    const pair=approvedOwnerDescriptions('SCHOLARSHIP',scholarship)[locale];
+    return {...projectPublishedScholarship(scholarship,pair?.displayName??displayName),description:pair?.description??scholarship.description};
   }
 
   private localeValues(value: unknown): Partial<Record<SupportedLocale, string>> {

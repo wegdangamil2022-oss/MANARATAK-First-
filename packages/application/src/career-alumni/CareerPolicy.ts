@@ -4,7 +4,8 @@ export const careerRecord = (value: unknown): Record<string, any> =>
 export const careerGovernance = (value: { metadata?: Record<string, unknown> | null }) => careerRecord(value.metadata?._career);
 export function publishedCareerJob(job: CareerJobPostingDto): CareerJobPostingDto {
   const snapshot = careerGovernance(job).publishedSnapshot;
-  return snapshot && typeof snapshot === 'object' ? { ...job, ...snapshot, employer: job.employer } : job;
+  // Snapshot content must not inherit missing fields from a later private draft.
+  return snapshot && typeof snapshot === 'object' ? { ...snapshot, employer: job.employer, ...(snapshot.id!==job.id ? {status:'DRAFT'} : {}) } as CareerJobPostingDto : job;
 }
 export function safeCareerUrl(value: string): string {
   let url: URL;
@@ -53,7 +54,7 @@ export function careerPublicMetadata(metadata?: Record<string, unknown> | null):
   const localized = careerRecord(source.localizedContent), languages: Record<string, unknown> = {};
   for (const locale of ['ar','en']) {
     const content = careerRecord(localized[locale]);
-    if (typeof content.title === 'string' && typeof content.description === 'string')
+    if (typeof content.title === 'string' && content.title.trim() && typeof content.description === 'string' && content.description.trim())
       languages[locale] = { title: content.title, description: content.description };
   }
   if (Object.keys(languages).length) result.localizedContent = languages;

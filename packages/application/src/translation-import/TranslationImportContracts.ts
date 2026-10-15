@@ -75,6 +75,7 @@ export interface TranslationTransferResult {
   currentValue: string;
   approved?: boolean;
   published?: boolean;
+  publicationStage?: 'OWNER_REVIEW_REQUIRED' | 'PUBLIC_OWNER_FIELDS';
   publicEligible?: boolean;
 }
 

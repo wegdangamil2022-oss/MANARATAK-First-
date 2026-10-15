@@ -1,3 +1,4 @@
+import {approvedOwnerDescriptions, assertOwnerDescriptionsCurrent, ownerDescriptionSource} from '@manaratak/application';
 import {admissionPublicationScales,assertAdmissionScoreProfiles} from '@manaratak/domain';
 import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
@@ -28,7 +29,13 @@ export class InternationalTestGovernancePersistence {
     const provider = test.providerId ? await this.prisma.internationalTestProvider.findUnique({where:{id:test.providerId}}) : null;
     const scoreProfiles=assertAdmissionScoreProfiles(test.optionalFields?.admissionScoreProfiles,test);
     for(const profile of scoreProfiles)assertOfficialTestUrl(profile.sourceUrl,provider?.officialWebsite??undefined);
-    const payload = publicInternationalTest(test); delete payload.currentPublishedVersionId; payload.status = 'PUBLISHED' as InternationalTestDto['status'];
+    const payload = publicInternationalTest(test);
+    payload.description=ownerDescriptionSource('INTERNATIONAL_TEST',test).description;
+    const descriptions=approvedOwnerDescriptions('INTERNATIONAL_TEST',test);
+    payload.localizedDescriptions=descriptions;
+    if(descriptions.ar)payload.localizedNameAr=descriptions.ar.displayName;
+    if(descriptions.en)payload.localizedNameEn=descriptions.en.displayName;
+    delete payload.currentPublishedVersionId; payload.status = 'PUBLISHED' as InternationalTestDto['status'];
     const countryIds=test.availability?.availableCountryIds??[];const cityIds=test.availability?.availableCityIds??[];
     if(countryIds.length>500||cityIds.length>5000)throw new Error('INTERNATIONAL_TEST_AVAILABILITY_LIMIT_EXCEEDED');
     const [countries,cities]=await Promise.all([countryIds.length?this.prisma.referenceCountry.findMany({where:{id:{in:countryIds}},select:{id:true,name:true,nameAr:true,iso2Code:true,isActive:true,lifecycleState:true}}):[],cityIds.length?this.prisma.referenceCity.findMany({where:{id:{in:cityIds}},select:{id:true,name:true,nameAr:true,countryIso2Code:true,isActive:true,lifecycleState:true}}):[]]);
@@ -112,6 +119,7 @@ export class InternationalTestGovernancePersistence {
     }
     const candidate = await this.candidate(test);
     if (action === 'VERIFY' || action === 'APPROVE' || action === 'PUBLISH') {
+      assertOwnerDescriptionsCurrent('INTERNATIONAL_TEST',test);
       const ev = candidate.evidence;
       if (!ev?.contentHash || !/^[a-f0-9]{64}$/i.test(ev.contentHash) || !ev.sourceUrl || !ev.retrievedAt || !['HIGH','AUTHORITATIVE'].includes(ev.sourceTrustLevel??'')) throw new Error('INTERNATIONAL_TEST_SOURCE_ATTESTATION_REQUIRED');
       assertOfficialTestUrl(ev.sourceUrl,candidate.provider?.officialWebsite??undefined);

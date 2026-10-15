@@ -1,3 +1,4 @@
+import {OwnerDescriptionTranslationPanel} from '../components/OwnerDescriptionTranslationPanel';
 import {TestAdmissionScoreEditor} from '../features/integration/TestAdmissionScoreEditor';
 import { InternationalTestGovernanceWorkspace } from '../components/InternationalTestGovernanceWorkspace';
 import { CanonicalPicker } from '../components/CanonicalPicker';
@@ -495,6 +496,8 @@ export function InternationalTestDetailPage() {
   return (
     <TestEditorSaveContext.Provider value={saveRegistry}>
     <div className="max-w-7xl mx-auto space-y-6">
+      <OwnerDescriptionTranslationPanel domain="INTERNATIONAL_TEST" ownerId={test!.id} endpoint="/admin/international-tests" optionalFields={test!.optionalFields} status={test!.status} onSaved={()=>fetchDetail()}/>
+
       {/* Top Breadcrumb */}
       <div>
         <Link

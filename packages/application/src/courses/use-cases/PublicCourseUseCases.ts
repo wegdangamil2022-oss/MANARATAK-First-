@@ -1,3 +1,4 @@
+import {approvedOwnerDescriptions} from '../../localization/OwnerLocalizedDescription';
 import {
   CourseAccessType,
   CourseImportCompletenessState,
@@ -77,13 +78,15 @@ export class PublicCourseUseCases {
       ? course.optionalFields as Record<string, unknown>
       : {};
     const optionalPublic = this.pickOptionalPublicFields(optional);
+    const descriptions=approvedOwnerDescriptions('COURSE',course);
+    const pair=descriptions[locale];
     return {
       ownerId: course.id,
       publicId: course.publicId,
       slug: course.slug,
       displayName: this.resolveDisplayName(course.displayName, optional.localizedNames, locale),
       canonicalName: course.canonicalName,
-      titleEn: typeof optional.titleEn === "string" ? optional.titleEn : undefined,
+      titleEn: descriptions.en?.displayName ?? (typeof optional.titleEn === "string" ? optional.titleEn : undefined),
       relatedMajors: course.relatedMajors ?? [],
       accessType: course.accessType,
       originType: course.originType,
@@ -108,6 +111,7 @@ export class PublicCourseUseCases {
       studyDurationRaw: course.studyDurationRaw ?? null,
       learningLanguageRaw: course.learningLanguageRaw ?? null,
       ...optionalPublic,
+      ...(pair ? {displayName:pair.displayName,description:pair.description} : {}),
       updatedAt: course.updatedAt,
     };
   }

@@ -1,3 +1,4 @@
+import {assertOwnerDescriptionsCurrent} from '../../localization/OwnerLocalizedDescription';
 import { randomUUID } from 'node:crypto';
 import { AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { CoursePublicationService } from '../services/CoursePublicationService';
@@ -317,6 +318,7 @@ export class NativeCourseUseCases {
 
   public async markReadyToPublish(courseId: string): Promise<void> {
     const course = await this.requireNative(courseId);
+    assertOwnerDescriptionsCurrent('COURSE',course);
     if (course.status !== CourseStatus.READY_TO_REVIEW)
       throw new Error('NATIVE_COURSE_REVIEW_REQUIRED');
     const readiness = await this.getReadiness(courseId);

@@ -1,3 +1,4 @@
+import {OwnerDescriptionTranslationPanel} from '../components/OwnerDescriptionTranslationPanel';
 import { adminPaths } from '../navigation/AdminRoutes';
 import { AdminLink } from '../components/AdminLink';
 import { ScholarshipRelationshipEditorPage } from './ScholarshipRelationshipEditorPage';
@@ -409,6 +410,8 @@ export function ScholarshipDetailPage() {
 
   return (
     <div dir="rtl" className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+      <OwnerDescriptionTranslationPanel domain="SCHOLARSHIP" ownerId={scholarship!.id} endpoint="/admin/scholarships" optionalFields={scholarship!.optionalFields} status={scholarship!.status} onSaved={()=>load()}/>
+
       {/* Top Breadcrumb */}
       <div className="flex items-center justify-between">
         <button
