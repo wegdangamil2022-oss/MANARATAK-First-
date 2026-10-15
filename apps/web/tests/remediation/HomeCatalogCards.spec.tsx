@@ -29,7 +29,7 @@ describe('home catalog design survives owner states', () => {
     expect(html).toContain('featured-universities-section'); expect(html).toContain('btn-view-all-universities');
     expect(html.match(/data-catalog-slot="universities"/g)).toHaveLength(3);
     expect(html).toContain(language === 'ar' ? ar.public_home_universities_empty : en.public_home_universities_empty);
-    expect(html).not.toContain('role="button"'); expect(html).not.toContain('tabindex'); expect(html).not.toMatch(/<(?:img)\b/); expect(html).not.toContain('>#1<');
+    expect(html).not.toContain('role="button"'); expect(html).not.toContain('tabindex'); expect(html).toContain('/preview-art/universities.svg'); expect(html).not.toContain('>#1<');
   });
   it('displays skeletons on loading and retry on failure, without calling failure empty', async () => {
     const retry = vi.fn();
@@ -59,7 +59,7 @@ describe('home catalog design survives owner states', () => {
     const html = render(<FeaturedCourses courses={[]} status="empty" onViewAllClick={noop} />);
     expect(html).toContain('featured-courses-section'); expect(html).toContain('btn-view-all-courses');
     expect(html).toContain(dict.public_global_platforms); expect(html).toContain(dict.public_manaratak_courses);
-    expect(html.match(/data-catalog-slot="courses"/g)).toHaveLength(3); expect(html).not.toMatch(/<(?:img)\b/);
+    expect(html.match(/data-catalog-slot="courses"/g)).toHaveLength(3); expect(html).toContain('/preview-art/courses.svg');
   });
   it('keeps global failure independent of native published records and native empty independent of global records', async () => {
     const select = vi.fn(); const native = course('NATIVE_MANARATAK_COURSE'); const global = course();

@@ -99,7 +99,7 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
                     >
                       <div className="w-8 h-8 rounded-full overflow-hidden p-[1px] bg-[#142B5F] dark:bg-[var(--mn-accent)] border border-[#D6A43B]/60 shrink-0 shadow-2xs flex items-center justify-center">
                         <img
-                          src={tool.imageUrl}
+                          src={dataMode === 'prototype' ? tool.imageUrl : '/preview-art/tools.svg'}
                           alt={publicT(tool.title)}
                           className="w-full h-full rounded-full object-cover"
                           referrerPolicy="no-referrer"

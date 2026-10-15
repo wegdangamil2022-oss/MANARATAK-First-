@@ -1,4 +1,4 @@
-import { BookOpen, Landmark, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { useTranslation } from '../../../i18n/I18nProvider';
 import type { PublicLiveDomainStatus } from '../publicLiveDataSource';
 
@@ -12,7 +12,7 @@ interface Props {
 export function FeaturedCatalogStateCards({ kind, status, onRetry }: Props) {
   const { t } = useTranslation();
   const loading = status === 'loading';
-  const Icon = kind === 'universities' ? Landmark : BookOpen;
+  const imageUrl = `/preview-art/${kind}.svg`;
   const message = loading ? t('public_home_catalog_loading')
     : status === 'unavailable' ? t('public_home_catalog_unavailable')
     : t(kind === 'universities' ? 'public_home_universities_empty' : 'public_home_courses_empty');
@@ -24,8 +24,8 @@ export function FeaturedCatalogStateCards({ kind, status, onRetry }: Props) {
         {[0, 1, 2].map(slot => (
           <div key={slot} data-catalog-slot={kind} aria-hidden="true"
             className="flex min-h-[76px] min-w-0 items-center gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 sm:p-2.5 mn-panel">
-            <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--mn-surface-muted)] text-[var(--mn-text-muted)] ${loading ? 'animate-pulse motion-reduce:animate-none' : ''}`}>
-              <Icon className="h-5 w-5" />
+            <div className={`relative h-12 w-14 sm:h-14 sm:w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--mn-primary)] ${loading ? 'animate-pulse motion-reduce:animate-none' : ''}`}>
+              <img src={imageUrl} alt="" loading="lazy" decoding="async" aria-hidden="true" className="h-full w-full object-cover" />
             </div>
             {loading ? (
               <div className="min-w-0 flex-1 space-y-2 animate-pulse motion-reduce:animate-none">

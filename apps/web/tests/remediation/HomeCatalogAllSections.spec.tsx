@@ -37,6 +37,7 @@ describe('public home sections retain inert card layouts without owner data', ()
       expect(html.match(new RegExp('data-home-empty-slot="' + section.kind + '"', 'g'))).toHaveLength(section.count);
       expect(html, section.kind).not.toContain('role="button"');
       expect(html, section.kind).not.toContain('https://images.unsplash.com/');
+      expect(html).toContain('/preview-art/' + section.kind + '.svg');
     }
   });
 
