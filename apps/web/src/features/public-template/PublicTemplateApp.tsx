@@ -86,6 +86,8 @@ import { FeaturedExams } from './components/FeaturedExams';
 import { FeaturedJobs } from './components/FeaturedJobs';
 import { FeaturedArticles } from './components/FeaturedArticles';
 import { FeaturedServices } from './components/FeaturedServices';
+import { HomeShowcaseFrame } from './components/HomeShowcaseFrame';
+import { HOME_DESIGN_SCHOLARSHIPS, HOME_DESIGN_UNIVERSITIES, HOME_DESIGN_COUNTRIES, HOME_DESIGN_COURSES, HOME_DESIGN_SERVICES } from './homeDesignPreviewData';
 import { RoadmapPreview } from './components/RoadmapPreview';
 import { FaqPreview } from './components/FaqPreview';
 import { ContactSection } from './components/ContactSection';
@@ -126,6 +128,19 @@ export default function App() {
   const scholarshipDataStatus = publicDataMode === 'prototype' ? 'prototype' : publicLive.statuses.scholarships;
   const unavailableDomains = Object.entries(publicLive.statuses).filter(([, status]) => status === 'unavailable').map(([domain]) => domain);
   const loadingDomains = Object.entries(publicLive.statuses).filter(([, status]) => status === 'loading').map(([domain]) => domain);
+  // Homepage preview is visual-only. Real published results remain the only search/detail data.
+  const showHomeDesign = (count: number, status: string) => publicDataMode === 'api' && count === 0 && status !== 'loading';
+  const homeDesignScholarships = showHomeDesign(scholarships.length, publicLive.statuses.scholarships);
+  const homeDesignUniversities = showHomeDesign(universities.length, publicLive.statuses.universities);
+  const homeDesignCountries = showHomeDesign(countries.length, publicLive.statuses.countries);
+  const homeDesignExams = showHomeDesign(exams.length, publicLive.statuses.exams);
+  const homeCourseCount = courses.length + (publicLive.data.homeCoursePreviews?.global?.courses.length ?? 0)
+    + (publicLive.data.homeCoursePreviews?.native?.courses.length ?? 0);
+  const homeDesignCourses = showHomeDesign(homeCourseCount, publicLive.statuses.courses);
+  const homeDesignArticles = showHomeDesign(articles.length, publicLive.statuses.articles);
+  const homeDesignServices = showHomeDesign(services.length, publicLive.statuses.services);
+  const homeDesignTools = publicDataMode === 'api' && tools.length === 0;
+  const homeDesignMajors = showHomeDesign(majors.length, publicLive.statuses.majors);
   const navigation = usePublicNavigation();
   const { back: goBack, navigate, replace: replaceNavigation } = navigation;
   function openStudentAccount(tab: string, requestId?: string) {
@@ -1070,7 +1085,7 @@ export default function App() {
             </div>
           }
         >
-        {publicDataMode === 'api' && unavailableDomains.length > 0 && (
+        {publicDataMode === 'api' && !(activeTab === 'home' && selectedCategory === 'all') && unavailableDomains.length > 0 && (
           <div className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-5xl items-center justify-between gap-3 rounded-2xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-3 py-2 text-[11px] text-[var(--mn-danger-text)]">
             <div className="flex min-w-0 items-center gap-2">
               <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -1081,7 +1096,7 @@ export default function App() {
             </button>
           </div>
         )}
-        {publicDataMode === 'api' && unavailableDomains.length === 0 && loadingDomains.length > 0 && (
+        {publicDataMode === 'api' && !(activeTab === 'home' && selectedCategory === 'all') && unavailableDomains.length === 0 && loadingDomains.length > 0 && (
           <div className="mx-auto mt-3 w-[calc(100%-1rem)] max-w-5xl rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-text-muted)]">
             {t('public_template_loading_sources')}
           </div>
@@ -1575,44 +1590,51 @@ export default function App() {
                   <div className="space-y-5 relative z-10 w-full">
                     {/* 1. Featured Scholarships */}
                     <div className="relative w-full">
-                      <FeaturedScholarships selection={publicDataMode === 'api' ? 'published-preview' : 'featured'}
-                        scholarships={scholarships}
-                        status={publicLive.statuses.scholarships}
+                      <HomeShowcaseFrame active={homeDesignScholarships}>
+                      <FeaturedScholarships selection={homeDesignScholarships ? 'featured' : publicDataMode === 'api' ? 'published-preview' : 'featured'}
+                        scholarships={homeDesignScholarships ? HOME_DESIGN_SCHOLARSHIPS : scholarships}
+                        status={homeDesignScholarships ? 'ready' : publicLive.statuses.scholarships}
                         onRetry={publicLive.reload}
                         onSelectScholarship={setSelectedScholarship}
                         onToggleFavorite={(id) => handleToggleFavorite('scholarship', id)}
                         favoriteIds={favoriteIdsFor('scholarship')}
                         onViewAllClick={() => openSection('scholarships')}
                       />
+                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 2. Featured Majors */}
                     <div className="relative w-full">
+                      <HomeShowcaseFrame active={homeDesignMajors}>
                       <FeaturedMajors
                         majors={majors}
-                        dataMode={publicDataMode}
+                        dataMode={homeDesignMajors ? 'prototype' : publicDataMode}
                         onSelectMajor={setSelectedMajor}
                         onViewAllClick={() => openSection('majors')}
                       />
+                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 3. Featured Universities */}
                     <div className="relative w-full">
+                      <HomeShowcaseFrame active={homeDesignUniversities}>
                       <FeaturedUniversities
-                        universities={universities}
-                        status={publicLive.statuses.universities}
+                        universities={homeDesignUniversities ? HOME_DESIGN_UNIVERSITIES : universities}
+                        status={homeDesignUniversities ? 'ready' : publicLive.statuses.universities}
                         onRetry={publicLive.reload}
                         onSelectUniversity={setSelectedUniversity}
                         onViewAllClick={() => openSection('universities')}
                       />
+                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 4. Featured Countries */}
                     <div className="relative w-full">
+                      <HomeShowcaseFrame active={homeDesignCountries}>
                       <FeaturedCountries
-                        countries={countries}
-                        dataMode={publicDataMode}
-                        status={publicLive.statuses.countries}
+                        countries={homeDesignCountries ? HOME_DESIGN_COUNTRIES : countries}
+                        dataMode={homeDesignCountries ? 'prototype' : publicDataMode}
+                        status={homeDesignCountries ? 'ready' : publicLive.statuses.countries}
                         onRetry={publicLive.reload}
                         onSelectCountry={(country) => {
                           setCountryNavigationName(country);
@@ -1621,11 +1643,14 @@ export default function App() {
                         }}
                         onViewAllClick={() => openSection('countries')}
                       />
+                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 5. AI Tools Section */}
                     <div className="relative w-full">
-                      <AIToolsBanner dataMode={publicDataMode} onOpenAiTools={() => openSection('ai-tools')} />
+                      <HomeShowcaseFrame active={homeDesignTools}>
+                        <AIToolsBanner dataMode={homeDesignTools ? 'prototype' : publicDataMode} onOpenAiTools={() => openSection('ai-tools')} />
+                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 6. Roadmap Preview */}
@@ -1644,10 +1669,11 @@ export default function App() {
 
                     {/* 7. Featured Exams */}
                     <div className="relative w-full">
+                      <HomeShowcaseFrame active={homeDesignExams}>
                       <FeaturedExams
                         exams={exams}
-                        dataMode={publicDataMode}
-                        status={publicLive.statuses.exams}
+                        dataMode={homeDesignExams ? 'prototype' : publicDataMode}
+                        status={homeDesignExams ? 'ready' : publicLive.statuses.exams}
                         onRetry={publicLive.reload}
                         onSelectExam={(exam) => {
                           setSelectedExam(exam);
@@ -1655,16 +1681,18 @@ export default function App() {
                         }}
                         onViewAllClick={() => openSection('exams')}
                       />
+                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 8. Featured Courses */}
                     <div className="relative w-full">
+                      <HomeShowcaseFrame active={homeDesignCourses}>
                       <FeaturedCourses
-                        courses={courses}
-                        status={publicLive.statuses.courses}
-                        previews={publicLive.data.homeCoursePreviews}
+                        courses={homeDesignCourses ? HOME_DESIGN_COURSES : courses}
+                        status={homeDesignCourses ? 'ready' : publicLive.statuses.courses}
+                        previews={homeDesignCourses ? undefined : publicLive.data.homeCoursePreviews}
                         onRetry={publicLive.reload}
-                        dataMode={publicDataMode}
+                        dataMode={homeDesignCourses ? 'prototype' : publicDataMode}
                         onSelectCourse={(course) => {
                           const isImported = course.originType === 'EXTERNAL_LINKED_COURSE' || publicDataMode === 'prototype' && (course.provider?.includes('Stanford') || course.provider?.includes('Harvard') || course.provider?.includes('Google') || course.provider?.includes('عالمية'));
                           if (isImported) {
@@ -1712,14 +1740,16 @@ export default function App() {
                           setSelectedCourseTrack(null);
                         }}
                       />
+                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 10. Featured Articles (Magazine Style) */}
                     <div className="relative w-full">
+                      <HomeShowcaseFrame active={homeDesignArticles}>
                       <FeaturedArticles
                         articles={articles}
-                        dataMode={publicDataMode}
-                        status={publicLive.statuses.articles}
+                        dataMode={homeDesignArticles ? 'prototype' : publicDataMode}
+                        status={homeDesignArticles ? 'ready' : publicLive.statuses.articles}
                         onRetry={publicLive.reload}
                         onSelectArticle={(articleId) => {
                           const article = articles.find((item) => item.id === articleId);
@@ -1729,13 +1759,15 @@ export default function App() {
                         }}
                         onViewAllClick={() => openSection('articles')}
                       />
+                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 11. Featured Services (Students & General Support) */}
                     <div className="relative w-full">
+                      <HomeShowcaseFrame active={homeDesignServices}>
                       <FeaturedServices
-                        services={services}
-                        status={publicLive.statuses.services}
+                        services={homeDesignServices ? HOME_DESIGN_SERVICES : services}
+                        status={homeDesignServices ? 'ready' : publicLive.statuses.services}
                         onRetry={publicLive.reload}
                         onViewAllClick={() => openSection('services')}
                         onSelectService={(service) => {
@@ -1744,6 +1776,7 @@ export default function App() {
                           window.scrollTo({ top: 0, behavior: 'instant' });
                         }}
                       />
+                      </HomeShowcaseFrame>
                     </div>
 
                     {/* 12. Featured Jobs & Internships (Placed after Services) */}
