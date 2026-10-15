@@ -83,8 +83,9 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
                   {/* Image Container with Square (1:1) Proportions */}
                   <div className="relative aspect-square w-full overflow-hidden bg-[var(--mn-primary)] mn-inverse ">
                     <img
-                      src={scholarship.imageUrl}
+                      src={scholarship.imageUrl || '/preview-art/scholarships.svg'}
                       alt={scholarship.title}
+                      onError={(event) => { const image = event.currentTarget; image.onerror = null; image.src = '/preview-art/scholarships.svg'; }}
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 filter brightness-95"
