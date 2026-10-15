@@ -81,6 +81,7 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
                           <img
                             src={item.imageUrl}
                             alt={item.name}
+                            onError={(event) => { const image = event.currentTarget; image.onerror = null; image.src = '/preview-art/countries.svg'; }}
                             className="w-full h-full object-cover group-hover:scale-115 transition-transform duration-500"
                             referrerPolicy="no-referrer"
                             loading="lazy"
