@@ -2,13 +2,15 @@
 
 تاريخ الإصدار: 15 أكتوبر 2026. هذه الخطة المعتمدة للتنفيذ المتسلسل، ومراجعتها الأصلية مثبتة على `5c0f72c`.
 
-> **حالة الاستئناف:** اكتملت B00 وB01–B09 على مستوى المصدر؛ جُلب main وفرع العمل وتأكد تطابقهما عند `93a1c4d1946db9480bd94ca2a3291be34b742c68`. اكتملت B10a وB10b وB10c وB10d على مستوى المصدر بالتسلسل في فرع العمل فقط؛ التالية **B11** (لم تبدأ في هذه الجولة). التشغيل وقاعدة البيانات والنشر ما زالت منفصلة ومعلقة وفق التقارير. المرجع الجاري هو [سجل التنفيذ](ARCHITECTURAL_SECURITY_EXECUTION_STATUS_2026-10-15.json).
+> **حالة الاستئناف:** اكتملت B00 وB01–B09 على مستوى المصدر؛ جُلب main وفرع العمل وتأكد تطابقهما عند `93a1c4d1946db9480bd94ca2a3291be34b742c68`. اكتملت B10a وB10b وB10c وB10d على مستوى المصدر بالتسلسل في فرع العمل فقط؛ الجارية **B11**: نُفذت أساسات القدرات وربط المصدر وعزل اللغة بفحوص خفيفة؛ **لم تُغلق الحزمة**، وعقود الأوصاف/تسليم النسخة المنشورة المتبقية مفصلة في تقريرها. التشغيل وقاعدة البيانات والنشر ما زالت منفصلة ومعلقة وفق التقارير. المرجع الجاري هو [سجل التنفيذ](ARCHITECTURAL_SECURITY_EXECUTION_STATUS_2026-10-15.json).
 >
 > **فرع العمل الحالي:** `fix/b02-auth-session-boundary-20261015`. هذه النسخة من الخطة مرفوعة إلى فرع العمل فقط. استكمل عليه، ولا تدفع أو تدمج إلى main إلا بطلب صريح جديد من المستخدم.
 
 اقرأ أيضًا [أحكام البنود الـ49 وأدلتها](../reviews/ARCHITECTURAL_SECURITY_VERIFIED_FINDINGS_2026-10-15.md)، و[تقرير B01](../reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md)، و[تقرير B02](../reviews/B02_AUTH_SESSION_BOUNDARY_2026-10-15.md)، و[تقرير B03](../reviews/B03_PUBLIC_LEARNING_CONTAINMENT_2026-10-15.md)، و[تقرير B04](../reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md)، و[تقرير B05](../reviews/B05_OWNER_CONTRACTS_DATABASE_PLAN_2026-10-15.md)، و[تقرير B06](../reviews/B06_SCHOLARSHIP_CANONICAL_AUTHORING_2026-10-15.md)، و[تقرير B07](../reviews/B07_ADMIN_NAVIGATION_REVIEW_ASSETS_2026-10-15.md)، و[تقرير B08](../reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md)، و[تقرير B09](../reviews/B09_UNIFIED_WORKER_RUNTIME_2026-10-15.md). الجداول والأعداد التالية تحفظ نتائج المراجعة الأصلية؛ أي تغيير لاحق يُحسم من الكود الحالي وسجل التنفيذ.
 
 تقارير الاستكمال: [B10a](../reviews/B10a_FELLOWSHIP_AUTHORING_2026-10-15.md)، [B10b](../reviews/B10b_UNIVERSITY_STRUCTURE_2026-10-15.md)، [B10c](../reviews/B10c_OWNER_DRAFT_CREATION_2026-10-15.md)، [B10d](../reviews/B10d_COURSE_AUTHORING_2026-10-15.md).
+
+تقدم B11: [التنفيذ والفحوص والمتبقي](../reviews/B11_TRANSLATION_OWNER_PROGRESS_2026-10-15.md). لا يبدأ B12 قبل إغلاق B11.
 
 ## 1. قراري بشأن التقرير
 
@@ -203,6 +205,8 @@ flowchart TD
 أي schema جديد يعيد فتح B04 لملكيته ومراجع أصوله وmetadata، ثم B05 لتوافقه؛ هذا checkpoint معروف وليس مفاجأة في مرحلة لاحقة. لا ننشئ Fellowship store موازيًا ولا شاشات CRUD عامة تتجاوز UseCases.
 
 ### B11 — ترجمة مالك لا مجرد تبديل supportsDescriptions
+
+**حالة التنفيذ:** IN_PROGRESS؛ أساسات مصدر مثبتة، والقبول الكامل لم يتحقق بعد. راجع تقرير B11 وسجل التنفيذ؛ وضع الكتابة INFRASTRUCTURE_ONLY مستمر.
 
 - **يغطي:** A2A-06. **الملفات:** capabilities/DTO، owner translation UseCases/gateways/receipt، TranslationWorkspace، public locale projection.
 - **التنفيذ:** لكل نطاق ندقق حقول المصدر واللغات وحالة المراجعة والصلاحية وsnapshot linkage؛ نضيف الأوصاف والوجهات/الخدمات/الوظائف تباعًا فقط بعد قبول المالك لها. reuse receipt وعقود الترجمة الحالية.

@@ -268,7 +268,7 @@ export type PublicMajorDto = Omit<
   MajorDto,
   'id' | 'canonicalDedupKey' | 'sourceImportRecordId' | 'status' | 'completenessStatus' | 'optionalFields' | 'createdAt'
 > & {
-  contentSections?: Array<Pick<MajorContentSectionDto, 'sectionKey' | 'title' | 'content' | 'reviewStatus' | 'metadata'>>;
+  contentSections?: Array<Pick<MajorContentSectionDto, 'sectionKey' | 'locale' | 'title' | 'content' | 'reviewStatus' | 'metadata'>>;
   phaseLinks?: MajorPhaseLinkDto[];
   localization?: Record<string,unknown>;
 };

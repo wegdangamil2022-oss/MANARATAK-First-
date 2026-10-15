@@ -1,3 +1,5 @@
+import {TranslationOwnerCapabilitiesPanel} from '../components/TranslationOwnerCapabilitiesPanel';
+import {TRANSLATION_OWNER_CAPABILITIES} from '@manaratak/shared';
 import { resolveSourceLocaleEvidence } from '@manaratak/shared';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -156,7 +158,7 @@ const domainConfigs: DomainConfig[] = [
     detailHref: (entity) => `/scholarships/${entity.id}`,
     storage: 'COMPATIBILITY_OVERLAY',
     icon: Sparkles,
-    supportsDescriptions: false,
+    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.SCHOLARSHIP.supportsDescriptions,
     searchParam: 'query',
   },
   {
@@ -166,7 +168,7 @@ const domainConfigs: DomainConfig[] = [
     detailHref: (entity) => `/universities/${entity.id}`,
     storage: 'NORMALIZED',
     icon: Building2,
-    supportsDescriptions: true,
+    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.UNIVERSITY.supportsDescriptions,
     searchParam: 'search',
   },
   {
@@ -177,7 +179,7 @@ const domainConfigs: DomainConfig[] = [
       `/majors/${entity.id}${entity.profileId ? `?profileId=${encodeURIComponent(entity.profileId)}` : ''}`,
     storage: 'EXPLICIT_FIELDS',
     icon: GraduationCap,
-    supportsDescriptions: false,
+    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.MAJOR.supportsDescriptions,
     searchParam: 'search',
   },
   {
@@ -187,7 +189,7 @@ const domainConfigs: DomainConfig[] = [
     detailHref: (entity) => `/international-tests/${entity.id}`,
     storage: 'EXPLICIT_FIELDS',
     icon: FileText,
-    supportsDescriptions: false,
+    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.INTERNATIONAL_TEST.supportsDescriptions,
     searchParam: 'search',
   },
   {
@@ -197,7 +199,7 @@ const domainConfigs: DomainConfig[] = [
     detailHref: (entity) => `/courses/${entity.id}`,
     storage: 'COMPATIBILITY_OVERLAY',
     icon: BookOpen,
-    supportsDescriptions: false,
+    supportsDescriptions: TRANSLATION_OWNER_CAPABILITIES.COURSE.supportsDescriptions,
     searchParam: 'search',
   },
 ];
@@ -668,6 +670,7 @@ export function AdminTranslationWorkspacePage() {
         </code>
       </section>
 
+      <TranslationOwnerCapabilitiesPanel/>
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
         {domainConfigs.map((item) => {
           const Icon = item.icon;

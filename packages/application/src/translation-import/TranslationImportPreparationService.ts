@@ -12,7 +12,7 @@ import {
 
 const ALLOWED_OWNER_DOMAINS = new Set(['TRANSLATION', 'TRANSLATIONS']);
 const MAJOR_PUBLIC_ID = /^(MJR|MAS|DOC|FEL)-\d+$/;
-const UNIVERSITY_PUBLIC_ID = /^INS-[A-Z0-9]+(?:-[A-Z0-9]+)+$/;
+const UNIVERSITY_PUBLIC_ID = /^(?:INS-[A-Z0-9]+(?:-[A-Z0-9]+)+|uni-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/;
 
 export class TranslationImportPreparationService
   implements IImportHandoffConsumer<TranslationStagedCandidate>
@@ -130,7 +130,7 @@ export class TranslationImportPreparationService
     const record = value as Record<string, unknown>;
     const profileId = this.optionalExactString(record.profileId, 'sectionOwner.profileId');
     const versionId = this.optionalExactString(record.versionId, 'sectionOwner.versionId');
-    if (!profileId && !versionId) {
+    if (!profileId || !versionId) {
       throw new Error('TRANSLATION_SECTION_OWNER_REQUIRED');
     }
     return { profileId, versionId };

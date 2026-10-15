@@ -93,6 +93,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
             publicEligible: false,
           };
         }
+        if(!candidate.target.ownerSourceDigest || !/^[a-f0-9]{64}$/.test(candidate.target.ownerSourceDigest)) throw new Error('TRANSLATION_SOURCE_EVIDENCE_REQUIRED');
         // Lock the canonical owner; every effect, approval consumption and receipt
         // commits with the owner audit/outbox, including no-op transfers.
         const table =
@@ -170,7 +171,9 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
     if (locator.entityKind === 'UNIVERSITY') {
       const university = await client.university.findUnique({
         where: { publicId: locator.entityPublicId },
-        select: { id: true, publicId: true, status: true },
+        select: { id: true, publicId: true, status: true, displayName:true, canonicalName:true,
+          officialWebsite:true, sourceUrl:true, officialSourceUrl:true, optionalFields:true,
+          sourceRecords:{orderBy:{id:'asc'},select:{id:true,sourceHash:true,sourceUri:true,sourceLocale:true}} },
       });
       if (!university) return null;
 
@@ -211,7 +214,8 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         currentReviewStatus: translation?.reviewStatus ?? null,
         storageRecordId: translation?.id ?? null,
         ownerRevision: translation?.updatedAt.toISOString() ?? 'ABSENT',
-        sourceDigest: this.digest(translation?.metadata),
+        sourceDigest: this.digest({source:university,translation:translation?.metadata ?? null}),
+        ownerSourceDigest:this.digest(university),
         proposedFields: this.pendingValues(translation?.metadata, 'pendingTranslationFields'),
       };
     }
@@ -224,11 +228,15 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         status: true,
         localizedNameAr: true,
         localizedNameEn: true,
+        canonicalName:true,displayName:true,academicFieldId:true,disciplineId:true,currentPublishedVersionId:true,
         updatedAt: true,
         optionalFields: true,
       },
     });
     if (!major) return null;
+    const optional=(major.optionalFields && typeof major.optionalFields==='object' && !Array.isArray(major.optionalFields)) ? major.optionalFields : {};
+    const sourceOptional=Object.fromEntries(Object.entries(optional).filter(([key])=>!['translationNameCandidates','translationDescriptionCandidates','localizedNames'].includes(key)));
+    const rootSource={id:major.id,canonicalName:major.canonicalName,displayName:major.displayName,currentPublishedVersionId:major.currentPublishedVersionId,academicFieldId:major.academicFieldId,disciplineId:major.disciplineId,optionalFields:sourceOptional};
 
     if (locator.fieldKind === 'DISPLAY_NAME') {
       return {
@@ -240,7 +248,8 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
         currentReviewStatus: null,
         storageRecordId: null,
         ownerRevision: major.updatedAt.toISOString(),
-        sourceDigest: this.digest(major.optionalFields),
+        sourceDigest: this.digest({source:rootSource,translation:major.optionalFields}),
+        ownerSourceDigest:this.digest(rootSource),
         proposedFields: this.pendingValues(major.optionalFields, 'translationNameCandidates'),
       };
     }
@@ -265,6 +274,12 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
       throw new Error('TRANSLATION_SECTION_TARGET_AMBIGUOUS');
     }
     const section = sections[0];
+    const [sourceSections,sourceVersion,sourceProfile]=await Promise.all([
+      client.majorContentSection.findMany({where:{profileId:locator.sectionOwner.profileId,versionId:locator.sectionOwner.versionId,sectionKey:locator.sectionKey,locale:{not:locator.locale}},orderBy:{id:'asc'},select:{id:true,content:true,title:true,locale:true}}),
+      client.majorVersion.findUnique({where:{id:locator.sectionOwner.versionId!},select:{id:true,majorId:true,profileId:true,sourceHash:true}}),
+      client.majorLevelProfile.findUnique({where:{id:locator.sectionOwner.profileId!},select:{id:true,majorId:true,degreeLevelId:true,academicFieldId:true,disciplineId:true,level:true,code:true,displayName:true}}),
+    ]);
+    const sectionSource={root:rootSource,profile:sourceProfile,version:sourceVersion,sectionKey:locator.sectionKey,sections:sourceSections};
     return {
       locator,
       internalEntityId: major.id,
@@ -274,7 +289,8 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
       currentReviewStatus: section?.reviewStatus ?? null,
       storageRecordId: section?.id ?? null,
       ownerRevision: section?.updatedAt.toISOString() ?? 'ABSENT',
-      sourceDigest: this.digest(section?.metadata),
+      sourceDigest: this.digest({source:sectionSource,translation:section?.metadata ?? null}),
+      ownerSourceDigest:this.digest(sectionSource),
       proposedFields: this.pendingValues(
         {
           content: (section?.metadata as Prisma.JsonObject | undefined)?.pendingTranslationContent,
@@ -290,7 +306,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
     locator: TranslationTargetLocator,
   ): Promise<void> {
     const owner = locator.sectionOwner;
-    if (!owner || (!owner.profileId && !owner.versionId)) {
+    if (!owner?.profileId || !owner.versionId) {
       throw new Error('TRANSLATION_SECTION_OWNER_REQUIRED');
     }
 
@@ -314,7 +330,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
       if (!version || version.majorId !== majorId) {
         throw new Error('TRANSLATION_SECTION_VERSION_OWNER_MISMATCH');
       }
-      if (owner.profileId && version.profileId && version.profileId !== owner.profileId) {
+      if (owner.profileId && version.profileId !== owner.profileId) {
         throw new Error('TRANSLATION_SECTION_PROFILE_VERSION_MISMATCH');
       }
       if (profileMajorId && version.majorId !== profileMajorId) {
@@ -485,6 +501,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
     return {
       ...current,
       translationImport: {
+        ownerSourceDigest:candidate.target.ownerSourceDigest ?? null,
         handoffId: evidence.handoffId,
         stagingKey: candidate.stagingKey,
         sourceSystem: evidence.provenance.sourceSystem,
@@ -574,6 +591,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
             },
           });
           const metadata = (row.metadata ?? {}) as Prisma.JsonObject;
+          const evidence=(metadata.translationFieldEvidence ?? {}) as Prisma.JsonObject;
           const pending = (metadata.pendingTranslationFields ?? {}) as Prisma.JsonObject;
           const field = target.locator.fieldKind === 'DISPLAY_NAME' ? 'displayName' : 'description';
           const staged = pending[field] as Prisma.JsonObject | undefined;
@@ -587,12 +605,15 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
           value = staged.value;
           const pendingName = pending.displayName as Prisma.JsonObject | undefined;
           const pendingDescription = pending.description as Prisma.JsonObject | undefined;
-          for (const entry of [pendingName, pendingDescription])
+          for (const entry of [pendingName,pendingDescription])
             if (
               entry &&
               (entry.reviewStatus !== 'APPROVED' || entry.actorId === approval.reviewedBy)
             )
               throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
+          for (const key of ['displayName','description']) {
+            if(pending[key] && (evidence[key] as Prisma.JsonObject | undefined)?.ownerSourceDigest !== latest.ownerSourceDigest) throw new Error('TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED');
+          }
           const nextName =
             typeof pendingName?.value === 'string' ? pendingName.value : row.displayName;
           const nextDescription =
@@ -632,6 +653,7 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
             evidence?.actorId === approval.reviewedBy
           )
             throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
+          if(evidence?.ownerSourceDigest !== latest.ownerSourceDigest) throw new Error('TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED');
           value = candidate.value;
           await tx.major.update({
             where: { id: row.id },
@@ -667,6 +689,8 @@ export class PrismaTranslationImportGateway implements ITranslationImportGateway
             staged.actorId === approval.reviewedBy
           )
             throw new Error('TRANSLATION_OWNER_PUBLICATION_NOT_READY');
+          const evidence=metadata.translationImport as Prisma.JsonObject | undefined;
+          if(evidence?.ownerSourceDigest !== latest.ownerSourceDigest) throw new Error('TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED');
           value = staged.value;
           const { pendingTranslationContent: _pending, ...publishedMetadata } = metadata;
           await tx.majorContentSection.update({

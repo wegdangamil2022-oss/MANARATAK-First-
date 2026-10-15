@@ -401,5 +401,44 @@
       "Browser/API/DB bank/path authoring and pinned enrollment progress rehearsal, including legacy snapshots",
       "Existing runtime prerequisites and supported Node 22 acceptance remain pending"
     ]
+  },
+  "B11": {
+    "status": "IN_PROGRESS",
+    "verifiedMilestone": "SOURCE_FOUNDATION_VERIFIED",
+    "packageClosed": false,
+    "baselineCommit": "8d890cbb91eca66434fd55bc1a75c8cf5024b43c",
+    "runtimeDatabaseStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "findings": [
+      "A2A-06"
+    ],
+    "report": "docs/reviews/B11_TRANSLATION_OWNER_PROGRESS_2026-10-15.md",
+    "specification": "docs/remediation/specs/B11_TRANSLATION_OWNER_CONTRACT_2026-10-15.md",
+    "dryRun": "docs/reviews/evidence/b11-translation-capability-dry-run-2026-10-15.json",
+    "lightTestsPassed": 42,
+    "lightTestsFailed": 0,
+    "schemaChanged": false,
+    "historicalSqlChanged": false,
+    "contentAuthoringMode": "INFRASTRUCTURE_ONLY",
+    "remainingSourceContracts": [
+      "University published-reader canonical source freshness and grouped required-field proof",
+      "Major translated name/sections delivered through one immutable owner publication version",
+      "Tests/scholarships/courses owner-approved description contracts and ports",
+      "Native destinations/services/careers central import acceptance and receipt contracts"
+    ],
+    "sourceChecks": {
+      "typesNoEmit": "PASS",
+      "targetedEslintErrors": 0,
+      "targetedEslintWarnings": 2,
+      "persistence": "PASS_281_OF_281",
+      "assets": "PASS_32_DIRECT_4_JSON",
+      "architecture": "PASS",
+      "sourceQuality": "PASS"
+    },
+    "runtimePrerequisites": [
+      "Isolated source lock / approval / receipt atomicity rehearsal",
+      "Browser/API/DB publication, withdrawal and language isolation including legacy data",
+      "Prior runtime prerequisites and supported Node 22 remain pending"
+    ]
   }
 }

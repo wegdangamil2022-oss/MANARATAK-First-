@@ -32,6 +32,8 @@ export interface TranslationTargetSnapshot {
   storageRecordId?: string | null;
   ownerRevision?: string;
   sourceDigest?: string | null;
+  /** Canonical source only; excludes candidate/publication metadata. */
+  ownerSourceDigest?: string;
   proposedFields?: Readonly<Record<string,string>>;
 }
 

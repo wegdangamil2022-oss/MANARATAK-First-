@@ -1,0 +1,13 @@
+import {defineConfig} from 'vitest/config';
+import base from './.section16-vitest.config';
+export default defineConfig({...base,test:{...base.test,maxWorkers:1,include:[
+'packages/application/tests/translation-import/TranslationImportPreparationService.spec.ts',
+'packages/application/tests/translation-import/TranslationImportTransferService.spec.ts',
+'packages/infrastructure/tests/translation-import/TranslationGovernance.spec.ts',
+'packages/infrastructure/tests/translation-import/B11*.spec.ts',
+'apps/api/tests/presentation/api/router/B11*.spec.ts',
+'apps/api/tests/presentation/api/router/TranslationWorkspaceRouter.spec.ts',
+'packages/application/tests/localization/B11*.spec.ts',
+'packages/shared/tests/localization/policy.spec.ts',
+'apps/admin/tests/remediation/B11*.spec.tsx',
+]}});

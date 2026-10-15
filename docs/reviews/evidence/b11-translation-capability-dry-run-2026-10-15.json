@@ -1,0 +1,169 @@
+{
+  "package": "B11",
+  "mode": "SOURCE_CONTRACT_DRY_RUN",
+  "databaseContacted": false,
+  "contentAuthoringActivated": false,
+  "packageClosed": false,
+  "capabilities": [
+    {
+      "key": "UNIVERSITY",
+      "permission": "admin:universities:manage",
+      "ownerPath": "/universities",
+      "descriptionFields": [
+        "description"
+      ],
+      "descriptionWorkflow": "NORMALIZED_OWNER",
+      "importSupported": true,
+      "sourceVersion": "University source evidence + UniversityTranslation revision",
+      "publicReader": "ApplicationLocaleProjectionService.projectUniversity",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "activation": "INFRASTRUCTURE_ONLY",
+      "runtimeProof": "PENDING",
+      "supportsDescriptions": true
+    },
+    {
+      "key": "MAJOR",
+      "permission": "admin:majors:manage",
+      "ownerPath": "/majors",
+      "descriptionFields": [
+        "section:*"
+      ],
+      "descriptionWorkflow": "VERSIONED_SECTIONS",
+      "importSupported": true,
+      "sourceVersion": "Major + exact profile/version/section source",
+      "publicReader": "MajorPublicationSnapshot + ApplicationLocaleProjectionService.projectMajor",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "activation": "INFRASTRUCTURE_ONLY",
+      "runtimeProof": "PENDING",
+      "supportsDescriptions": false
+    },
+    {
+      "key": "INTERNATIONAL_TEST",
+      "permission": "admin:international-tests:manage",
+      "ownerPath": "/international-tests",
+      "descriptionFields": [],
+      "descriptionWorkflow": "OWNER_CONTRACT_REQUIRED",
+      "importSupported": false,
+      "sourceVersion": "InternationalTestVersion",
+      "publicReader": "ApplicationLocaleProjectionService.projectInternationalTest",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "activation": "INFRASTRUCTURE_ONLY",
+      "runtimeProof": "PENDING",
+      "supportsDescriptions": false
+    },
+    {
+      "key": "SCHOLARSHIP",
+      "permission": "admin:scholarships:manage",
+      "ownerPath": "/scholarships",
+      "descriptionFields": [],
+      "descriptionWorkflow": "OWNER_CONTRACT_REQUIRED",
+      "importSupported": false,
+      "sourceVersion": "ScholarshipVersion",
+      "publicReader": "Scholarship owner published projection",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "activation": "INFRASTRUCTURE_ONLY",
+      "runtimeProof": "PENDING",
+      "supportsDescriptions": false
+    },
+    {
+      "key": "COURSE",
+      "permission": "admin:courses:manage",
+      "ownerPath": "/courses",
+      "descriptionFields": [],
+      "descriptionWorkflow": "OWNER_CONTRACT_REQUIRED",
+      "importSupported": false,
+      "sourceVersion": "CourseVersion",
+      "publicReader": "Course owner published / enrollment-pinned projection",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "activation": "INFRASTRUCTURE_ONLY",
+      "runtimeProof": "PENDING",
+      "supportsDescriptions": false
+    },
+    {
+      "key": "STUDY_DESTINATION",
+      "permission": "admin:study-destinations:read",
+      "ownerPath": "/study-destinations",
+      "descriptionFields": [
+        "overviewAr",
+        "overviewEn",
+        "studySystemSummaryAr",
+        "studySystemSummaryEn",
+        "visaSummaryAr",
+        "visaSummaryEn"
+      ],
+      "descriptionWorkflow": "NATIVE_OWNER_WORKSPACE",
+      "importSupported": false,
+      "sourceVersion": "StudyDestinationProfile revision/governance",
+      "publicReader": "StudyDestinationUseCases published owner projection",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "activation": "INFRASTRUCTURE_ONLY",
+      "runtimeProof": "PENDING",
+      "supportsDescriptions": false
+    },
+    {
+      "key": "SERVICE",
+      "permission": "admin:services:manage",
+      "ownerPath": "/services",
+      "descriptionFields": [
+        "localizedContent.ar.serviceDescription",
+        "localizedContent.en.serviceDescription"
+      ],
+      "descriptionWorkflow": "NATIVE_OWNER_WORKSPACE",
+      "importSupported": false,
+      "sourceVersion": "Service version/reviewedVersion/publishedSnapshot",
+      "publicReader": "PublicServiceCatalogUseCases",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "activation": "INFRASTRUCTURE_ONLY",
+      "runtimeProof": "PENDING",
+      "supportsDescriptions": false
+    },
+    {
+      "key": "CAREER_JOB",
+      "permission": "admin:careers:manage",
+      "ownerPath": "/careers",
+      "descriptionFields": [
+        "metadata.localizedContent.ar.description",
+        "metadata.localizedContent.en.description"
+      ],
+      "descriptionWorkflow": "NATIVE_OWNER_WORKSPACE",
+      "importSupported": false,
+      "sourceVersion": "Career job version/publishedSnapshot",
+      "publicReader": "CareerPublicUseCases",
+      "locales": [
+        "ar",
+        "en"
+      ],
+      "activation": "INFRASTRUCTURE_ONLY",
+      "runtimeProof": "PENDING",
+      "supportsDescriptions": false
+    }
+  ],
+  "remainingSourceContracts": [
+    "University published-reader source freshness and grouped required-field publication proof",
+    "Major name and section translations bound to one immutable publication snapshot/version",
+    "Tests/scholarships/courses owner-approved description candidate contracts and owner ports",
+    "Central import adapters for native destinations/services/careers only after owner acceptance"
+  ],
+  "runtimeStatus": "PENDING"
+}

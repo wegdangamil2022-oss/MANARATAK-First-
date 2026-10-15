@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { AuthorizationEvaluatorService } from '@manaratak/domain';
 import {
   assertTranslationContentAuthoringEnabled,
+  TRANSLATION_OWNER_CAPABILITIES,
   TranslationContentMutationDisabledError,
 } from '@manaratak/shared';
 import type {
@@ -22,6 +23,15 @@ export function createTranslationWorkspaceRouter(
   writer?: TranslationOwnerPublisher,
 ): Router {
   const router = Router();
+  router.get('/capabilities',async(req,res,next)=>{
+    try {
+      if(!req.authUserId){res.status(401).json({error:{code:'ADMIN_AUTH_REQUIRED'}});return;}
+      const actor=req.authUserId;
+      const capabilities=await Promise.all(Object.values(TRANSLATION_OWNER_CAPABILITIES).map(async capability=>
+        (await authorization.evaluatePermission(actor,capability.permission,{ip:req.ip,requestTime:new Date()})).isGranted?capability:null));
+      res.json({data:capabilities.filter(item=>item!==null)});
+    } catch(error){next(error);}
+  });
   router.get('/workspace', async (req, res, next) => {
     try {
       if (!req.authUserId) {
@@ -189,6 +199,7 @@ export function createTranslationWorkspaceRouter(
       TRANSLATION_OWNER_PUBLISHER_UNAVAILABLE: 503,
       TRANSLATION_CANONICAL_TARGET_NOT_FOUND: 404,
       TRANSLATION_STALE_DIFF_REVIEW_REQUIRED: 409,
+      TRANSLATION_SOURCE_CHANGED_REVIEW_REQUIRED:409,
       TRANSLATION_OWNER_PERMISSION_DENIED: 403,
       TRANSLATION_TRUSTED_INDEPENDENT_APPROVAL_REQUIRED: 403,
       GOVERNANCE_APPROVAL_REQUIRED: 403,

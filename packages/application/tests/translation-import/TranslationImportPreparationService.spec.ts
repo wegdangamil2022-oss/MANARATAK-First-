@@ -156,3 +156,9 @@ describe('TranslationImportPreparationService', () => {
     expect(candidate.expectedCurrentValue).toBe('جامعة فلورنسا');
   });
 });
+
+describe('B11 exact source locators',()=>{
+ it.each([{profileId:'profile'},{versionId:'version'}])('rejects an underspecified section owner',async sectionOwner=>{const persistence=gateway(null);await expect(new TranslationImportPreparationService(persistence).accept(handoff({entityPublicId:'FEL-0330',locale:'en',fieldKey:'section:requirements',translatedValue:'Requirements',reviewStatus:'APPROVED',sectionOwner}))).rejects.toThrow('SECTION_OWNER_REQUIRED');expect(persistence.resolveExact).not.toHaveBeenCalled();});
+ it('accepts exact server-generated university public IDs from B10c without inferring a name',async()=>{const id='uni-11111111-1111-4111-8111-111111111111';const target=snapshot({publicId:id,locator:{entityKind:'UNIVERSITY',entityPublicId:id,locale:'en',fieldKind:'DESCRIPTION',fieldKey:'description'}});const persistence=gateway(target);await new TranslationImportPreparationService(persistence).accept(handoff({entityPublicId:id,locale:'en',fieldKey:'description',translatedValue:'Reviewed description',reviewStatus:'APPROVED'}));expect(persistence.resolveExact).toHaveBeenCalledWith(expect.objectContaining({entityKind:'UNIVERSITY',entityPublicId:id}));});
+ it('does not copy a source or a placeholder for empty translation text',async()=>{const persistence=gateway(snapshot());await expect(new TranslationImportPreparationService(persistence).accept(handoff({entityPublicId:'INS-ITA-0010',locale:'en',fieldKey:'description',translatedValue:'   ',reviewStatus:'APPROVED'}))).rejects.toThrow('FIELD_INVALID');expect(persistence.resolveExact).not.toHaveBeenCalled();});
+});

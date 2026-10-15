@@ -33,7 +33,8 @@ function fixture() {
       currentValue: 'Name',
       currentReviewStatus: 'PUBLISHED',
       ownerRevision: '2026-10-14T00:00:00.000Z',
-      sourceDigest: digest(null),
+      sourceDigest: digest({source:{id:'owner',publicId:'INS-TEST-001',status:'PUBLISHED'},translation:null}),
+      ownerSourceDigest:digest({id:'owner',publicId:'INS-TEST-001',status:'PUBLISHED'}),
     },
     translatedValue: 'Name',
     expectedCurrentValue: 'Name',
@@ -103,7 +104,7 @@ function fixture() {
     auditRecord: { create: vi.fn() },
     transactionalOutboxRecord: { create: vi.fn() },
   };
-  const db = { $transaction: vi.fn((task: any) => task(tx)) };
+  const db = { $transaction: vi.fn((task: any) => task(tx)),university:tx.university,universityTranslation:tx.universityTranslation };
   const auth = { evaluatePermission: vi.fn().mockResolvedValue({ isGranted: true }) };
   return {
     candidate,
@@ -186,4 +187,23 @@ describe('Translation transfer frozen mode and atomic ownership', () => {
     );
     expect(f.tx.ownerTranslationTransferReceipt.create).not.toHaveBeenCalled();
   });
+});
+
+describe('B11 canonical source freshness and durable replay',()=>{
+ it('rejects a source change even when the translated text and target timestamp are unchanged',async()=>{policy.enable=true;const f=fixture();f.tx.university.findUnique.mockResolvedValue({id:'owner',publicId:'INS-TEST-001',status:'PUBLISHED',displayName:'Changed canonical name'});await expect(f.gateway.applyApproved(f.candidate,f.approval)).rejects.toThrow('STALE_DIFF_REVIEW_REQUIRED');expect(f.tx.universityTranslation.upsert).not.toHaveBeenCalled();expect(f.tx.ownerTranslationTransferReceipt.create).not.toHaveBeenCalled();});
+ it('requires fresh canonical source evidence for a new transfer',async()=>{policy.enable=true;const f=fixture();delete f.candidate.target.ownerSourceDigest;await expect(f.gateway.applyApproved(f.candidate,f.approval)).rejects.toThrow('SOURCE_EVIDENCE_REQUIRED');expect(f.tx.policyRecord.update).not.toHaveBeenCalled();});
+ it('replays the durable receipt without applying or consuming approval twice',async()=>{policy.enable=true;const f=fixture();let receipt:any=null;f.tx.ownerTranslationTransferReceipt.findUnique.mockImplementation(async()=>receipt);f.tx.ownerTranslationTransferReceipt.create.mockImplementation(async({data}:any)=>{receipt=data;});await f.gateway.applyApproved(f.candidate,f.approval);await f.gateway.applyApproved(f.candidate,f.approval);expect(f.tx.ownerTranslationTransferReceipt.create).toHaveBeenCalledOnce();expect(f.tx.auditRecord.create).toHaveBeenCalledOnce();expect(f.tx.policyRecord.update).toHaveBeenCalledOnce();});
+ it('stores source proof on pending text and refuses publication after the source changes despite a fresh publication approval',async()=>{
+  policy.enable=true;const f=fixture();f.candidate.translatedValue='New translated name';
+  f.tx.policyRecord.findUnique.mockResolvedValue({id:'approval',ruleType:'GOVERNANCE_APPROVAL',ruleConfiguration:JSON.stringify({scope:'TRANSLATION_TRANSFER',requestedBy:'maker',approverId:'checker',digest:governanceApprovalDigest('TRANSLATION_TRANSFER',{target:f.candidate.target,translatedValue:f.candidate.translatedValue,handoffId:'handoff'}),expiresAt:new Date(Date.now()+60000).toISOString(),approvedAt:new Date().toISOString(),usedAt:null})});
+  await f.gateway.applyApproved(f.candidate,f.approval);
+  const metadata=f.tx.universityTranslation.upsert.mock.calls[0][0].update.metadata;
+  expect(metadata.translationFieldEvidence.displayName.ownerSourceDigest).toBe(f.candidate.target.ownerSourceDigest);
+  f.tx.universityTranslation.findUnique.mockResolvedValue({id:'translation',displayName:'Name',description:'Description',reviewStatus:'PUBLISHED',updatedAt:new Date('2026-10-14'),metadata});
+  f.tx.university.findUnique.mockResolvedValue({id:'owner',publicId:'INS-TEST-001',status:'PUBLISHED',displayName:'Changed source'});
+  f.tx.universityTranslation.findUniqueOrThrow=vi.fn(async()=>f.tx.universityTranslation.findUnique());
+  const target=await f.gateway.resolveExact(f.candidate.target.locator);
+  f.tx.policyRecord.findUnique.mockResolvedValue({id:'publish',ruleType:'GOVERNANCE_APPROVAL',ruleConfiguration:JSON.stringify({scope:'TRANSLATION_PUBLICATION',requestedBy:'publisher',approverId:'checker',digest:governanceApprovalDigest('TRANSLATION_PUBLICATION',{target}),expiresAt:new Date(Date.now()+60000).toISOString(),approvedAt:new Date().toISOString(),usedAt:null})});
+  await expect(f.gateway.publishApproved(target!,{decision:'APPLY',actorId:'publisher',reviewedBy:'checker',approvalId:'publish'})).rejects.toThrow('SOURCE_CHANGED_REVIEW_REQUIRED');
+ });
 });

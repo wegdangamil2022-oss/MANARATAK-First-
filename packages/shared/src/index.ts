@@ -13,3 +13,5 @@ export * from './localization/certificateCopy';
 export * from './certificates/approvedCertificateDesign';
 
 export * from './localization/readiness';
+
+export * from './localization/ownerCapabilities';
