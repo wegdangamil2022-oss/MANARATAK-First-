@@ -3,8 +3,8 @@
   "finding": "MNT-AUD-0109",
   "generatedFor": "Current registered production source reconciliation",
   "container": "apps/api/src/infrastructure/di/container.ts",
-  "registrationCount": 423,
-  "reachableCount": 423,
+  "registrationCount": 424,
+  "reachableCount": 424,
   "unreachable": [],
   "registrations": [
     {
@@ -3748,6 +3748,7 @@
         "studentWorkspaceRepository",
         "studyDestinationRepository",
         "transactionalOutboxStore",
+        "universityProgramReadPort",
         "universityProgramWorkspaceUseCases",
         "universityRepository",
         "workflowExecutionGateway",
@@ -4201,7 +4202,8 @@
         "scholarshipCanonicalResolutionService"
       ],
       "dependencies": [
-        "prisma"
+        "prisma",
+        "universityProgramReadPort"
       ]
     },
     {
@@ -4345,7 +4347,8 @@
         "studentToolDependencyHealthGateway"
       ],
       "dependencies": [
-        "prisma"
+        "prisma",
+        "universityProgramReadPort"
       ]
     },
     {
@@ -5486,6 +5489,18 @@
       ],
       "reachableThroughRegistrations": [],
       "dependencies": []
+    },
+    {
+      "name": "universityProgramReadPort",
+      "classification": "RUNTIME_REACHABLE",
+      "directRuntimeConsumers": [],
+      "reachableThroughRegistrations": [
+        "scholarshipCanonicalLookupGateway",
+        "scholarshipRepository"
+      ],
+      "dependencies": [
+        "prisma"
+      ]
     },
     {
       "name": "universityProgramWorkspaceUseCases",

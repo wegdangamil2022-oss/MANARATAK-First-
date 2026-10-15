@@ -15,7 +15,8 @@ describe('PrismaScholarshipRepository', () => {
         count: vi.fn(),
       },
     };
-    repository = new PrismaScholarshipRepository(mockPrisma as any);
+    const programReads = {findByIds: vi.fn(async (ids: string[]) => ids.map(id => ({contractVersion:1 as const,id,universityId:'university-1',degreeLevelId:'degree-bachelor',majorId:'major-cs',status:'ACTIVE',publiclyEligible:true,canonicalName:id,displayName:id}))),findPublished:vi.fn(async (query: {academicProgramId?:string;universityId?:string;degreeLevelId?:string})=>[{contractVersion:1 as const,id:query.academicProgramId??'program-1',universityId:query.universityId??'university-1',degreeLevelId:query.degreeLevelId??'degree-bachelor',majorId:'major-cs',status:'ACTIVE',publiclyEligible:true,canonicalName:'program',displayName:'Program'}]),withTransaction:vi.fn()};
+    repository = new PrismaScholarshipRepository(mockPrisma as any, false, programReads);
   });
 
   it('writes normalized root fields and child relations while retaining legacy evidence', async () => {
@@ -92,7 +93,7 @@ describe('PrismaScholarshipRepository', () => {
         degreeTargets: {include: {degreeLevel: {select: {canonicalCode: true, nameEn: true, nameAr: true}}}},
         majorTargets: {include: {major: {select: {status: true}}}},
         sourceEvidence: true,
-        universityLinks: {include: {university: {select: {status: true}},academicProgram: {select: {status: true,majorMappingState: true}}}},
+        universityLinks: {include: {university: {select: {id:true,status:true,displayName:true}}}},
       }),
     });
     expect(result.fundingCoverage).toBe('Tuition and Fees');
@@ -144,8 +145,8 @@ describe('PrismaScholarshipRepository', () => {
         where: expect.objectContaining({ publicationStatus: 'PUBLISHED' }),
         include: expect.objectContaining({
           benefits: {include: {currency: {select: {isoCode: true, nameAr: true, name: true}}}},
-          requiredDocuments: true,
-          universityLinks: {include: {university: {select: {status: true}},academicProgram: {select: {status: true,majorMappingState: true}}}},
+          requiredDocuments: expect.objectContaining({include:{internationalTest:{select:{status:true}}}}),
+          universityLinks: {include: {university: {select: {id:true,status:true,displayName:true}}}},
         }),
       }),
     );

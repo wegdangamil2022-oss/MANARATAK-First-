@@ -1,3 +1,4 @@
+import { PrismaUniversityProgramReadPort } from '@manaratak/infrastructure';
 import { createHmac } from 'node:crypto';
 import { DEVELOPMENT_CSRF_SECRET, isStrongRuntimeSecret } from '@manaratak/config';
 import {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases} from '@manaratak/application';
@@ -558,8 +559,9 @@ export function registerDependencies(
     }).singleton(),
     redisClient: asFunction(() => runtimeResources.getRedisClient()).singleton(),
     // --- Repositories ---
-    scholarshipRepository: asFunction(({ prisma }) => new PrismaScholarshipRepository(prisma)).singleton(),
-    scholarshipCanonicalLookupGateway: asFunction(({ prisma }) => new PrismaScholarshipCanonicalLookupGateway(prisma)).singleton(),
+    universityProgramReadPort: asFunction(({ prisma }) => new PrismaUniversityProgramReadPort(prisma)).singleton(),
+    scholarshipRepository: asFunction(({ prisma, universityProgramReadPort }) => new PrismaScholarshipRepository(prisma, false, universityProgramReadPort)).singleton(),
+    scholarshipCanonicalLookupGateway: asFunction(({ prisma, universityProgramReadPort }) => new PrismaScholarshipCanonicalLookupGateway(prisma, universityProgramReadPort)).singleton(),
     universityRepository: asFunction(({ prisma }) => new PrismaUniversityRepository(prisma, readConfig<string>('MANARATAK_UNIVERSITY_LEGACY_COUNTRY_FILTERS') === 'true')).singleton(),
     majorRepository: asFunction(({ prisma }) => new PrismaMajorRepository(prisma, readConfig<string>('MANARATAK_MAJOR_LEGACY_OPTIONAL_FILTERS') === 'true')).singleton(),
     newMajorCandidateRepository: asFunction(({ prisma }) => new PrismaNewMajorCandidateRepository(prisma)).singleton(),

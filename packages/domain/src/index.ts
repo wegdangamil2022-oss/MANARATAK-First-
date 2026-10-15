@@ -411,3 +411,5 @@ export * from './certificates/contracts/ICertificateAffiliationReadGateway';
 export * from './tests-platform/AdmissionScoreInterpretation';
 
 export * from './students/StudentDocumentAttestationPolicy';
+
+export * from './universities/UniversityProgramReadPort';

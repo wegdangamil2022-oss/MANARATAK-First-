@@ -196,7 +196,7 @@ test('academic explorer: one owner batch supplies exact per-program scholarship 
 });
 test('scholarship owner batch: count and continuation stay independent per canonical program', async () => {
   let query: any;
-  const repo = new PrismaScholarshipRepository({
+  const client = {
     $queryRaw: async (q: any) => {
       query = q;
       return [
@@ -226,7 +226,14 @@ test('scholarship owner batch: count and continuation stay independent per canon
         },
       ];
     },
-  } as any);
+  } as any;
+  let snapshotIsolation: string | undefined;
+  client.$transaction = async (work: (tx: unknown) => unknown, options: {isolationLevel: string}) => {snapshotIsolation=options.isolationLevel;return work(client);};
+  const owner = {
+    findByIds: async (ids: string[]) => ids.map(id => ({contractVersion:1,id,universityId:'u',degreeLevelId:'degree',majorId:'major',publiclyEligible:true})),
+    withTransaction(context: {transactionClient: unknown}) {assert.equal(context.transactionClient,client);return this;},
+  } as any;
+  const repo = new PrismaScholarshipRepository(client,false,owner);
   const page = await repo.listPublishedProgramRelationshipsPage(['a', 'b'], 1);
   assert.equal(page.a.total, 2);
   assert.equal(page.a.hasMore, true);
@@ -235,7 +242,10 @@ test('scholarship owner batch: count and continuation stay independent per canon
   assert.equal(page.b.data[0].id, 'other');
   assert.ok(query.sql.includes('PARTITION BY "programId"'));
   assert.ok(query.sql.includes('sl."universityId"=p."universityId"'));
-  assert.ok(query.sql.includes('"MajorLevelProfile"'));
+  assert.equal(snapshotIsolation,'RepeatableRead');
+  assert.ok(query.sql.includes('JOIN owner_programs'));
+  assert.ok(!query.sql.includes('"UniversityAcademicProgram"'));
+  assert.ok(!query.sql.includes('"MajorLevelProfile"'));
   assert.ok(query.values.includes('a'));
   await assert.rejects(
     () =>

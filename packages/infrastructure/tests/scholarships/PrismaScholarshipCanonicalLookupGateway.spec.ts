@@ -4,7 +4,7 @@ import { PrismaScholarshipCanonicalLookupGateway } from '../../src/scholarships/
 function createPrismaMock() {
   return {
     university: { findFirst: vi.fn() },
-    universityAcademicProgram: { findUnique: vi.fn() },
+    universityAcademicProgram: { findUnique: vi.fn(), findMany: vi.fn() },
     referenceCountry: { findUnique: vi.fn(), findMany: vi.fn() },
     referenceLanguage: { findUnique: vi.fn(), findMany: vi.fn() },
     referenceCurrency: { findUnique: vi.fn(), findMany: vi.fn() },
@@ -34,9 +34,9 @@ describe('PrismaScholarshipCanonicalLookupGateway', () => {
 
   it('looks up AcademicProgram by exact canonical id only', async () => {
     const prisma = createPrismaMock();
-    prisma.universityAcademicProgram.findUnique.mockResolvedValue({ id: 'program-1', sourceProgramName: 'Computer Science PhD', normalizedName: 'computer science phd' });
+    prisma.universityAcademicProgram.findMany.mockResolvedValue([{ id: 'program-1', universityId:'university-1', degreeLevelId:'phd', majorId:'major-1', status:'ACTIVE', majorMappingState:'CANONICALLY_MAPPED', university:{status:'PUBLISHED'}, major:{status:'PUBLISHED',levelProfiles:[{degreeLevelId:'phd',status:'PUBLISHED',currentPublishedVersionId:'version-1'}]}, sourceProgramName: 'Computer Science PhD', normalizedName: 'computer science phd' }]);
     const results = await new PrismaScholarshipCanonicalLookupGateway(prisma as any).findCandidates('ACADEMIC_PROGRAM', { target: 'ACADEMIC_PROGRAM', canonicalId: 'program-1' });
-    expect(prisma.universityAcademicProgram.findUnique).toHaveBeenCalledWith({ where: { id: 'program-1' }, select: expect.any(Object) });
+    expect(prisma.universityAcademicProgram.findMany).toHaveBeenCalledWith(expect.objectContaining({where:expect.objectContaining({id:'program-1',university:{is:{status:'PUBLISHED'}}}),take:501}));
     expect(results[0]).toMatchObject({ id: 'program-1', method: 'EXACT_CANONICAL_ID' });
   });
 

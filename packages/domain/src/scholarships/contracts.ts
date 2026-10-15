@@ -160,6 +160,7 @@ export interface CreateScholarshipDto {
   /** Link scholarship sponsor to an existing P11 University, never copy its identity. */
   sponsorUniversityId?: string | null;
   amountMinorUnits?: string | null;
+  /** Legacy source/compatibility code; canonical monetary benefits use currencyReferenceId. */
   amountCurrencyCode?: string | null;
   isFullyFunded?: boolean;
   applicationDeadline?: Date | null;

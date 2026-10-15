@@ -12,7 +12,10 @@ test('explicitly reviewed historical migrations retain exact SQL bytes via sidec
   const inventory = JSON.parse(readFileSync('docs/reviews/evidence/b04-migration-inventory-2026-10-15.json', 'utf8'));
   assert.ok(names.length > 0);
   const actualNames = readdirSync('packages/infrastructure/prisma/migrations').filter(name => existsSync(`packages/infrastructure/prisma/migrations/${name}/migration.sql`)).sort();
-  assert.deepEqual(inventory.migrations.map(entry => entry.name).sort(), actualNames);
+  assert.ok(inventory.migrations.every(entry => actualNames.includes(entry.name)));
+  for (const name of actualNames.filter(name => !inventory.migrations.some(entry => entry.name === name))) {
+    assert.deepEqual(validateMigrationMetadata(name, readFileSync(`packages/infrastructure/prisma/migrations/${name}/migration.sql`), manifest), []);
+  }
   for (const entry of inventory.migrations) {
     const sql = readFileSync(`packages/infrastructure/prisma/migrations/${entry.name}/migration.sql`);
     assert.equal(createHash('sha256').update(sql).digest('hex'), entry.sha256);

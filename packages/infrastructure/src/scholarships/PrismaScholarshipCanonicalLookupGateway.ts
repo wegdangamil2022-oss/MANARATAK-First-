@@ -1,3 +1,5 @@
+import { PrismaUniversityProgramReadPort } from '../universities/PrismaUniversityProgramReadPort';
+import type { IUniversityProgramReadPort } from '@manaratak/domain';
 import type { PrismaClient } from '@prisma/client';
 import type {
   IScholarshipCanonicalLookupGateway,
@@ -9,7 +11,7 @@ import type {
 export class PrismaScholarshipCanonicalLookupGateway
   implements IScholarshipCanonicalLookupGateway
 {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient, private readonly programReads: IUniversityProgramReadPort = new PrismaUniversityProgramReadPort(prisma)) {}
 
   public async findCandidates(
     target: ScholarshipCanonicalLookupTarget,
@@ -47,15 +49,17 @@ export class PrismaScholarshipCanonicalLookupGateway
     request: ScholarshipCanonicalResolutionRequest,
   ): Promise<ScholarshipCanonicalCandidate[]> {
     if (!request.canonicalId) return [];
-    const record = await this.prisma.universityAcademicProgram.findUnique({
-      where: { id: request.canonicalId },
-      select: { id: true, universityId: true, sourceProgramName: true, normalizedName: true, status: true },
+    const records = await this.programReads.findPublished({
+      academicProgramId: request.canonicalId,
+      universityId: request.universityId ?? undefined,
+      degreeLevelId: request.degreeLevelId ?? undefined,
     });
+    const record = records.find(row => row.id === request.canonicalId);
     return record ? [{
       target: 'ACADEMIC_PROGRAM',
       id: record.id,
-      canonicalName: record.normalizedName || record.sourceProgramName,
-      displayName: record.sourceProgramName, ownerId: record.universityId, lifecycle: record.status,
+      canonicalName: record.canonicalName,
+      displayName: record.displayName, ownerId: record.universityId, lifecycle: record.status,
       method: 'EXACT_CANONICAL_ID',
     }] : [];
   }

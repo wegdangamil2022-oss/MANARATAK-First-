@@ -20,6 +20,7 @@ const scholarshipImportAdminPage = read('apps/admin/src/pages/ScholarshipImportC
 const scholarshipCatalogAdminApi = read('apps/admin/src/api/scholarshipCatalog.ts');
 const closureMatrix = read('docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md');
 const resolution = read('packages/application/src/scholarships/resolution/ScholarshipCanonicalResolutionService.ts');
+const programOwnerRead = read('packages/infrastructure/src/universities/PrismaUniversityProgramReadPort.ts');
 const lookup = read('packages/infrastructure/src/scholarships/PrismaScholarshipCanonicalLookupGateway.ts');
 const transfer = read('packages/application/src/scholarships/import-center/ScholarshipImportAtomicTransferUseCase.ts');
 const screeningReader = read('packages/application/src/scholarships/import-center/ScholarshipImportScreeningReader.ts');
@@ -74,7 +75,7 @@ for (const field of ['countryReferenceId','studyLanguageReferenceId','currencyRe
 
 // AcademicProgram can only resolve from explicit canonical id, never name lookup.
 assert('AcademicProgram resolver requires explicit canonical id', /target === 'ACADEMIC_PROGRAM' && !normalized\.canonicalId/.test(resolution));
-assert('AcademicProgram lookup uses findUnique(id)', /findAcademicProgram[\s\S]*universityAcademicProgram\.findUnique[\s\S]*where: \{ id: request\.canonicalId \}/.test(lookup));
+assert('AcademicProgram lookup uses the owner V1 exact-id scope', /this\.programReads\.findPublished\(\{\s*academicProgramId:\s*request\.canonicalId/.test(lookup) && /\{\s*id:\s*query\.academicProgramId\s*\}/.test(programOwnerRead) && !/this\.prisma\.universityAcademicProgram/.test(lookup));
 assert('Atomic transfer persists canonical AcademicProgram ids', /academicProgramId: resolved\?\.canonicalReferenceId/.test(transfer));
 assert('Publication guard distinguishes AcademicProgram targets', /ACADEMIC_PROGRAM/.test(adminUseCases) && /academicProgramId/.test(adminUseCases));
 assert('Publication guard checks monetary Currency canonical id', /area: 'CURRENCY'/.test(adminUseCases) && /currencyReferenceId/.test(adminUseCases));

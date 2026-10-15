@@ -36,6 +36,9 @@ export interface ScholarshipCanonicalResolutionRequest {
    */
   canonicalId?: string | null;
   standardCode?: string | null;
+  /** Optional owner scope for the V1 academic-program read contract. */
+  universityId?: string | null;
+  degreeLevelId?: string | null;
   optional?: boolean;
   providerKind?: ScholarshipProviderKind;
 }

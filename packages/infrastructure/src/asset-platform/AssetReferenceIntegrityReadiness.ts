@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 
 // Mirrors the schema-backed consumer inventory; source and PostgreSQL tests verify completeness.
 export const ASSET_REFERENCE_OWNER_GUARDS = [
+  { table: 'StudentApplicationDocumentBinding', fields: ['assetId'], attachments: false, seo: false },
   { table: 'AssetRenditionRecord', fields: ['assetId','generatedAssetId'], attachments: false, seo: false },
   { table: 'Course', fields: ['thumbnailAssetId'], attachments: false, seo: false },
   { table: 'CourseLessonAsset', fields: ['assetId'], attachments: false, seo: false },
@@ -41,13 +42,15 @@ export async function assertAssetReferenceIntegrityInstalled(prisma: Pick<Prisma
     FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid
       JOIN pg_namespace n ON n.oid = c.relnamespace JOIN pg_proc p ON p.oid = t.tgfoid
     WHERE n.nspname = current_schema() AND NOT t.tgisinternal
-      AND t.tgname IN ('eap_asset_reference_owner', 'eap_asset_reference_lifecycle', 'eap_asset_restore_barrier', 'eap_asset_archive_barrier', 'eap_asset_lifecycle_certificate_delegation')
+      AND t.tgname IN ('eap_asset_reference_owner', 'eap_asset_reference_lifecycle', 'eap_asset_restore_barrier', 'eap_asset_archive_barrier', 'eap_asset_lifecycle_certificate_delegation', 'eap_asset_lifecycle_student_document')
   `;
   const available = (table: string, name: string, type: number, fn: string, args: string, columns: readonly string[]) =>
     guards.some(guard => guard.tableName === table && guard.triggerName === name &&
       ['O', 'A'].includes(guard.enabled) && guard.replicationRole === 'origin' && guard.type === type &&
       guard.functionName === fn && guard.argumentsHex === args &&
       JSON.stringify(guard.columns) === JSON.stringify([...columns].sort()));
+  if (!available('AssetRecord', 'eap_asset_lifecycle_student_document', 27,
+    'manaratak_guard_student_document_asset_lifecycle', '', ['id','lifecycleState'])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   if (!available('AssetRecord', 'eap_asset_lifecycle_certificate_delegation', 27,
     'manaratak_guard_certificate_delegation_evidence_lifecycle', '', ['lifecycleState'])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   if (!available('AssetRecord', 'eap_asset_reference_lifecycle', 27,
@@ -62,4 +65,20 @@ export async function assertAssetReferenceIntegrityInstalled(prisma: Pick<Prisma
     if (!available(owner.table, 'eap_asset_reference_owner', 23,
       'manaratak_require_active_asset_reference', args, columns)) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   }
+  const foreignKeys = await prisma.$queryRaw<Array<{ installed: boolean }>>`
+    SELECT EXISTS (
+      SELECT 1 FROM pg_constraint fk
+      JOIN pg_class child ON child.oid=fk.conrelid JOIN pg_namespace ns ON ns.oid=child.relnamespace
+      JOIN pg_class parent ON parent.oid=fk.confrelid
+      JOIN pg_attribute child_field ON child_field.attrelid=child.oid AND child_field.attname='assetId'
+      JOIN pg_attribute parent_field ON parent_field.attrelid=parent.oid AND parent_field.attname='id'
+      WHERE fk.contype='f' AND ns.nspname=current_schema() AND parent.relnamespace=child.relnamespace
+        AND child.relname='StudentApplicationDocumentBinding' AND parent.relname='AssetRecord'
+        AND fk.conkey=ARRAY[child_field.attnum]::smallint[] AND fk.confkey=ARRAY[parent_field.attnum]::smallint[]
+        AND fk.confdeltype='r' AND fk.confupdtype='r'
+    ) AS installed
+  `;
+  // NOT VALID protects new writes; old-row validation remains a separate reviewed data gate.
+  if (foreignKeys[0]?.installed !== true) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
+
 }

@@ -1691,6 +1691,7 @@ model Scholarship {
   verificationStatus   String    @default("PENDING")
   publicationStatus    String    @default("DRAFT")
   amountMinorUnits     String?
+  /// Legacy source evidence. ScholarshipBenefit.currencyReferenceId owns canonical benefit currency.
   amountCurrencyCode   String?
   isFullyFunded        Boolean   @default(false)
   applicationDeadline  DateTime?
@@ -2859,6 +2860,7 @@ model InternationalTestContentBlock {
 // --- Student Workspace ---
 
 model AssetRecord {
+  studentApplicationDocuments StudentApplicationDocumentBinding[]
   id                       String    @id
   reference                String    @unique
   ownerId                  String
@@ -6066,6 +6068,8 @@ model StudentApplicationDocumentBinding {
   retentionUntil DateTime
   updatedAt DateTime @updatedAt
   tracker StudentApplicationTracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+  asset AssetRecord @relation(fields: [assetId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  @@index([assetId])
   @@unique([trackerId, requirementId])
   @@index([retentionUntil])
   @@index([reviewConsentUntil, id])

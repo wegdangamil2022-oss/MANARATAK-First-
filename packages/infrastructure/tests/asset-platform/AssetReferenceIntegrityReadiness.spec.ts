@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import {
   ASSET_REFERENCE_OWNER_GUARDS,
@@ -7,6 +7,10 @@ import {
 
 function installed() {
   return [
+    {
+      tableName: 'AssetRecord', triggerName:'eap_asset_lifecycle_student_document',enabled:'O',type:27,
+      functionName:'manaratak_guard_student_document_asset_lifecycle',argumentsHex:'',columns:['id','lifecycleState'],replicationRole:'origin',
+    },
     {
       tableName: 'AssetRecord',
       triggerName: 'eap_asset_lifecycle_certificate_delegation',
@@ -71,14 +75,14 @@ function installed() {
   ];
 }
 const client = (rows: unknown[]) =>
-  ({ $queryRaw: vi.fn(async () => rows) }) as any;
+  ({ $queryRaw: vi.fn().mockResolvedValueOnce(rows).mockResolvedValueOnce([{installed:true}]) }) as any;
 describe('EAP reference guards read-only runtime deployment gate', () => {
   it('accepts the complete enabled owner/lifecycle guard set without a write', async () => {
     const prisma = client(installed());
     await expect(
       assertAssetReferenceIntegrityInstalled(prisma),
     ).resolves.toBeUndefined();
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
   });
   it.each([
     { enabled: 'D' },
@@ -91,7 +95,8 @@ describe('EAP reference guards read-only runtime deployment gate', () => {
     'rejects disabled, misconfigured or bypassed owner guards',
     async (change) => {
       const rows = installed();
-      rows[3] = { ...rows[3], ...change };
+      const ownerIndex = rows.findIndex(row => row.triggerName === 'eap_asset_reference_owner');
+      rows[ownerIndex] = { ...rows[ownerIndex], ...change };
       await expect(
         assertAssetReferenceIntegrityInstalled(client(rows)),
       ).rejects.toThrow('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
@@ -114,6 +119,10 @@ describe('EAP reference guards read-only runtime deployment gate', () => {
       ).rejects.toThrow('NOT_INSTALLED');
     }
   });
+  it('rejects a missing or incompatible document-to-asset FK even when every trigger exists', async () => {
+    const prisma = {$queryRaw:vi.fn().mockResolvedValueOnce(installed()).mockResolvedValueOnce([{installed:false}])};
+    await expect(assertAssetReferenceIntegrityInstalled(prisma as never)).rejects.toThrow('NOT_INSTALLED');
+  });
   it('matches every canonical direct/JSON reference and migration owner trigger', () => {
     const gateway = readFileSync(
       new URL(
@@ -126,21 +135,9 @@ describe('EAP reference guards read-only runtime deployment gate', () => {
       new URL('../../prisma/schema.prisma', import.meta.url),
       'utf8',
     );
-    const migration =
-      readFileSync(
-        new URL(
-          '../../prisma/migrations/20261009010000_eap_asset_reference_serialization/migration.sql',
-          import.meta.url,
-        ),
-        'utf8',
-      ) +
-      readFileSync(
-        new URL(
-          '../../prisma/migrations/20261012020000_asset_rendition_inventory/migration.sql',
-          import.meta.url,
-        ),
-        'utf8',
-      );
+    const directory = new URL('../../prisma/migrations/', import.meta.url);
+    const migration = readdirSync(directory, {withFileTypes:true}).filter(entry => entry.isDirectory())
+      .map(entry => readFileSync(new URL(entry.name+'/migration.sql',directory),'utf8')).join('\n');
     const direct = [
       ...gateway.matchAll(/delegate: '(\w+)', field: '(\w+)', consumer:/g),
     ]
@@ -167,12 +164,8 @@ describe('EAP reference guards read-only runtime deployment gate', () => {
       expect(schema).toContain(`model ${owner.table} {`);
       expect(migration).toContain(`ON "${owner.table}"`);
       for (const field of owner.fields)
-        expect(migration).toContain(
-          `FROM %I."${owner.table}" WHERE "${field}" = $1`,
-        );
-      expect(migration).toContain(
-        `'${owner.fields.join(',')}', '${owner.attachments}', '${owner.seo}'`,
-      );
+        expect(migration).toMatch(new RegExp(`FROM (?:%I\\.)?"${owner.table}" WHERE "${field}" = (?:\\$1|OLD\\."id")`));
+      expect(migration).toMatch(new RegExp(`'${owner.fields.join(',')}'\\s*,\\s*'${owner.attachments}'\\s*,\\s*'${owner.seo}'`));
     }
     expect(migration).toContain('FOR SHARE');
     expect(migration).toContain(

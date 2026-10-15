@@ -1,3 +1,4 @@
+import type { UniversityProgramReferenceV1 } from '../universities/UniversityProgramReadPort';
 import {evaluateAdmissionScores,type AdmissionVersionScale} from '../tests-platform/AdmissionScoreInterpretation';
 /** Shared owner-publication decisions. Presence of a foreign key is never publication proof. */
 export function isPublicScholarshipOwner(value: {
@@ -128,9 +129,13 @@ export function isPublicAdmissionRequirement(value: {
 export function isPublicScholarshipUniversityLink(value: {
   universityId?: string | null; academicProgramId?: string | null; resolutionStatus?: string;
   university?: { id?: string; status?: string } | null;
-  academicProgram?: Parameters<typeof isPublicUniversityProgram>[0] & { universityId?: string; university?: { status?: string } | null } | null;
+  academicProgram?: Parameters<typeof isPublicUniversityProgram>[0] & { universityId?: string; university?: { status?: string } | null; ownerProof?: UniversityProgramReferenceV1 } | null;
 }): boolean {
   if (value.resolutionStatus !== 'RESOLVED') return false;
+  const proof = value.academicProgram?.ownerProof;
+  if (proof) return proof.contractVersion === 1 && proof.publiclyEligible === true &&
+    proof.id === value.academicProgramId && Boolean(proof.degreeLevelId && proof.majorId) &&
+    (!value.universityId || value.universityId === proof.universityId);
   if (value.academicProgramId && (!value.academicProgram || !isPublicUniversityProgram(value.academicProgram))) return false;
   if (value.universityId && value.academicProgram && value.universityId !== value.academicProgram.universityId) return false;
   return (value.university ?? value.academicProgram?.university)?.status === 'PUBLISHED';

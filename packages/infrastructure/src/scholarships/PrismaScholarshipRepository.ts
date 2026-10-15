@@ -1,3 +1,5 @@
+import { PrismaUniversityProgramReadPort } from '../universities/PrismaUniversityProgramReadPort';
+import type { IUniversityProgramReadPort, UniversityProgramReferenceV1 } from '@manaratak/domain';
 import {ScholarshipReferenceLifecycle} from './ScholarshipReferenceLifecycle';
 import {encodeStableCursor} from '../api-foundation/StableCursor';
 import type {PublishedProgramScholarshipPage} from '@manaratak/domain';
@@ -19,7 +21,6 @@ import {
   MajorStatus,
   UniversityStatus,
   assertUniversityProgramParent,
-  isPublicUniversityProgram,
 } from '@manaratak/domain';
 
 interface ScholarshipTransactionContext extends AtomicPersistenceContext {
@@ -65,7 +66,7 @@ const RESERVED_OPTIONAL_KEYS = new Set([
 ]);
 
 export class PrismaScholarshipRepository implements ITransactionalScholarshipRepository {
-  constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
+  constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false, private readonly programReads: IUniversityProgramReadPort = new PrismaUniversityProgramReadPort(prisma)) {}
 
   listReferenceTransitions(id:string){return new ScholarshipReferenceLifecycle(this.prisma).list(id);}
   readReferenceState(id:string){return new ScholarshipReferenceLifecycle(this.prisma).state(id);}
@@ -87,14 +88,12 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       ),
     ];
     if (!ids.length) return links;
-    const rows = await this.prisma.universityAcademicProgram.findMany({
-      where: { id: { in: ids } },
-      select: { id: true, universityId: true },
-    });
+    const rows = await this.programReads.findByIds(ids);
     return links.map((link) => {
       if (!link.academicProgramId) return link;
       const program = rows.find((row) => row.id === link.academicProgramId);
       if (!program) throw new Error('SCHOLARSHIP_ACADEMIC_PROGRAM_NOT_FOUND');
+      if (program.contractVersion !== 1 || !program.publiclyEligible) throw new Error('SCHOLARSHIP_ACADEMIC_PROGRAM_NOT_PUBLISHED');
       const universityId = assertUniversityProgramParent(link.universityId, {
         id: program.id,
         ownerId: program.universityId,
@@ -112,16 +111,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       } },
     requiredDocuments: { include: { internationalTest: { select: { status: true } } } },
     sourceEvidence: true,
-    universityLinks: { include: { university: { select: { id: true, status: true, displayName: true } }, academicProgram: {
-          include: {
-            university: { select: { id: true, status: true, displayName: true } },
-            major: { select: { status: true,
-                levelProfiles: {
-                  select: { degreeLevelId: true, status: true, currentPublishedVersionId: true },
-                },
-              },
-            },
-          } } } },
+    universityLinks: { include: { university: { select: { id: true, status: true, displayName: true } } } },
     versions: { orderBy: { versionNumber: 'asc' as const } },
     sponsorContext: true,
     applicationCycles: { orderBy: { createdAt: 'asc' as const } },
@@ -132,7 +122,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     if (!context.boundaryId || !transactionClient) {
       throw new Error('SCHOLARSHIP_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
     }
-    return new PrismaScholarshipRepository(transactionClient as unknown as PrismaClient, true);
+    return new PrismaScholarshipRepository(transactionClient as unknown as PrismaClient, true, this.programReads.withTransaction(context));
   }
 
   async findById(id: string): Promise<ScholarshipDto | null> {
@@ -140,7 +130,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       where: { id },
       include: this.normalizedInclude,
     });
-    return record ? this.mapToDto(record) : null;
+    return record ? (await this.hydrateProgramOwners([this.mapToDto(record)]))[0] : null;
   }
 
   async findBySlug(slug: string): Promise<ScholarshipDto | null> {
@@ -148,7 +138,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       where: { slug },
       include: this.normalizedInclude,
     });
-    return record ? this.mapToDto(record) : null;
+    return record ? (await this.hydrateProgramOwners([this.mapToDto(record)]))[0] : null;
   }
 
   async findPublishedBySlug(slug: string): Promise<ScholarshipDto | null> {
@@ -156,7 +146,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       where: { slug, status: ScholarshipStatus.PUBLISHED, publicationStatus: ScholarshipPublicationStatus.PUBLISHED, verificationStatus: ScholarshipVerificationStatus.VERIFIED, versions: { some: { status: 'PUBLISHED' } } },
       include: this.normalizedInclude,
     });
-    return record ? this.mapToDto(record) : null;
+    return record ? (await this.hydrateProgramOwners([this.mapToDto(record)]))[0] : null;
   }
 
   async findByDedupKey(key: string): Promise<ScholarshipDto | null> {
@@ -164,7 +154,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       where: { canonicalDedupKey: key },
       include: this.normalizedInclude,
     });
-    return record ? this.mapToDto(record) : null;
+    return record ? (await this.hydrateProgramOwners([this.mapToDto(record)]))[0] : null;
   }
 
   async create(data: CreateScholarshipDto): Promise<ScholarshipDto> {
@@ -222,7 +212,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       include: this.normalizedInclude,
     });
 
-    return this.mapToDto(record);
+    return (await this.hydrateProgramOwners([this.mapToDto(record)]))[0];
   }
 
   async assertCurrentRevision(id: string, expectedRevision: number): Promise<void> {
@@ -314,7 +304,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       });
       record = await this.prisma.scholarship.findUniqueOrThrow({ where: { id }, include: this.normalizedInclude });
     }
-    return this.mapToDto(record);
+    return (await this.hydrateProgramOwners([this.mapToDto(record)]))[0];
   }
 
   async updateStatus(id: string, status: ScholarshipStatus): Promise<void> {
@@ -412,8 +402,11 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
                 internationalTest: { is: { status: 'PUBLISHED' } },
               } } },
     ] });
-    if (filters.academicProgramId) constraints.push({universityLinks:{some:{academicProgramId:filters.academicProgramId,
-      ...(filters.universityId?{OR:[{universityId:filters.universityId},{universityId:null,academicProgram:{is:{universityId:filters.universityId}}}]}:{})}}});
+    if (filters.academicProgramId) {
+      const refs = await this.programReads.findByIds([filters.academicProgramId]);
+      const program = refs.find(row => row.id === filters.academicProgramId && (!filters.universityId || row.universityId === filters.universityId) && (!filters.degreeLevelId || row.degreeLevelId === filters.degreeLevelId));
+      constraints.push({universityLinks:{some: program ? {academicProgramId:program.id, OR:[{universityId:program.universityId},{universityId:null}]} : {id:{in:[]}}}});
+    }
     else if(filters.universityId) constraints.push({universityLinks:{some:{universityId:filters.universityId}}});
     if (filters.fundingCoverage) constraints.push({ OR: [
       { fundingTypeCode: { equals: filters.fundingCoverage, mode: 'insensitive' } },
@@ -513,7 +506,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     }
 
     return {
-      data: data.map((record) => this.mapToDto(record)),
+      data: await this.hydrateProgramOwners(data.map((record) => this.mapToDto(record))),
       total,
       page,
       pageSize,
@@ -540,16 +533,24 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     if(ids.length>50||!Number.isSafeInteger(limit)||limit<1||limit>12)throw new Error('SCHOLARSHIP_PROGRAM_PAGE_INVALID');
     const result:Record<string,PublishedProgramScholarshipPage>=Object.fromEntries(ids.map(id=>[id,{data:[],total:0,hasMore:false,nextCursor:null}]));
     if(!ids.length)return result;
+    if (!this.transactionBound) {
+      return this.prisma.$transaction(async tx => {
+        const context = {boundaryId:'scholarship-program-owner-read-v1',transactionClient:tx};
+        return new PrismaScholarshipRepository(tx as PrismaClient, true, this.programReads.withTransaction(context)).listPublishedProgramRelationshipsPage(ids, limit);
+      }, {isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead});
+    }
+    const programs = (await this.programReads.findByIds(ids)).filter(row => row.contractVersion === 1 && row.publiclyEligible && ids.includes(row.id));
+    if (!programs.length) return result;
     const rows=await this.prisma.$queryRaw<Array<{programId:string;id:string;publicId:string;slug:string;displayName:string;localizedNames:Record<string,string>|null;total:bigint}>>(Prisma.sql`
-      WITH eligible AS (
+      WITH owner_programs AS (
+        SELECT * FROM (VALUES ${Prisma.join(programs.map(program => Prisma.sql`(${program.id}::text,${program.universityId}::text)`))}) AS owner_programs(id,"universityId")
+      ), eligible AS (
         SELECT DISTINCT sl."academicProgramId" AS "programId",sh.id,sh."publicId",sh.slug,sh."displayName",sh."optionalFields"->'localizedNames' AS "localizedNames"
         FROM "ScholarshipUniversityLink" sl JOIN "Scholarship" sh ON sh.id=sl."scholarshipId"
-        JOIN "UniversityAcademicProgram" p ON p.id=sl."academicProgramId" JOIN "University" u ON u.id=p."universityId" JOIN "Major" m ON m.id=p."majorId"
+        JOIN owner_programs p ON p.id=sl."academicProgramId"
         WHERE sl."academicProgramId" IN (${Prisma.join(ids)}) AND sl."resolutionStatus"='RESOLVED' AND (sl."universityId" IS NULL OR sl."universityId"=p."universityId")
           AND sh.status='PUBLISHED' AND sh."publicationStatus"='PUBLISHED' AND sh."verificationStatus"='VERIFIED' AND sh."completenessStatus"='COMPLETE'
           AND EXISTS(SELECT 1 FROM "ScholarshipVersion" sv WHERE sv."scholarshipId"=sh.id AND sv.status='PUBLISHED')
-          AND p.status='ACTIVE' AND p."majorMappingState"='CANONICALLY_MAPPED' AND u.status='PUBLISHED' AND m.status='PUBLISHED'
-          AND EXISTS(SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)
       ), ranked AS (SELECT *,row_number() OVER(PARTITION BY "programId" ORDER BY id) AS rn,count(*) OVER(PARTITION BY "programId") AS total FROM eligible)
       SELECT "programId",id,"publicId",slug,"displayName","localizedNames",total FROM ranked WHERE rn<=${limit+1} ORDER BY "programId",id`);
     for(const id of ids){const selected=rows.filter(row=>row.programId===id),page=result[id];page.total=Number(selected[0]?.total??0);if(!Number.isSafeInteger(page.total)||page.total<0)throw new Error('SCHOLARSHIP_PUBLIC_COUNT_INVALID');page.data=selected.slice(0,limit).map(({programId:_programId,total:_total,...row})=>({...row,localizedNames:row.localizedNames??undefined}));page.hasMore=selected.length>limit;page.nextCursor=page.hasMore?encodeStableCursor(page.data.at(-1)!.id):null;}
@@ -585,13 +586,10 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     ] });
     if (filters.universityId || filters.academicProgramId) {
       // Filter exact owner/profile proof before both page and count. Oversized owner scope fails explicitly.
-      const candidates = await this.prisma.universityAcademicProgram.findMany({
-        where: { ...(filters.universityId ? { universityId: filters.universityId } : {}), ...(filters.academicProgramId ? { id: filters.academicProgramId } : {}), status: 'ACTIVE', majorMappingState: 'CANONICALLY_MAPPED', university: { is: { status: UniversityStatus.PUBLISHED } }, major: { is: { status: MajorStatus.PUBLISHED } } },
-        select: { id: true, universityId: true, status: true, majorId: true, degreeLevelId: true, majorMappingState: true, major: { select: { status: true, levelProfiles: { select: { degreeLevelId: true, status: true, currentPublishedVersionId: true } } } } },
-        orderBy: { id: 'asc' }, take: 501,
+      const eligible = await this.programReads.findPublished({
+        universityId: filters.universityId, academicProgramId: filters.academicProgramId,
+        degreeLevelId: filters.degreeLevelId,
       });
-      if (candidates.length > 500) throw new Error('SCHOLARSHIP_PROGRAM_OWNER_SCOPE_REQUIRES_PAGED_QUERY');
-      const eligible = candidates.filter(isPublicUniversityProgram);
       const edges: Prisma.ScholarshipUniversityLinkWhereInput[] = eligible.map(program => ({ academicProgramId: program.id, resolutionStatus: 'RESOLVED', OR: [{ universityId: null }, { universityId: program.universityId }] }));
       if (filters.universityId && !filters.academicProgramId) edges.push({ universityId: filters.universityId, academicProgramId: null, resolutionStatus: 'RESOLVED', university: { is: { status: UniversityStatus.PUBLISHED } } });
       constraints.push({ universityLinks: { some: edges.length ? { OR: edges } : { id: { in: [] } } } });
@@ -621,10 +619,25 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
         lte: filters.applicationDeadlineTo,
       };
     if (constraints.length) where.AND = constraints;
-    return queryStableCursorPage({
+    const page = await queryStableCursorPage({
       delegate: this.prisma.scholarship as any, where, include: this.normalizedInclude,
       cursor: filters.cursor, limit: filters.limit, map: (record: any) => this.mapToDto(record),
     });
+    return {...page, data: await this.hydrateProgramOwners(page.data)};
+  }
+
+  private async hydrateProgramOwners(records: ScholarshipDto[]): Promise<ScholarshipDto[]> {
+    const ids = [...new Set(records.flatMap(record => (record.universityLinks ?? []).map(link => link.academicProgramId).filter((id): id is string => Boolean(id))))];
+    if (!ids.length) return records;
+    const refs: UniversityProgramReferenceV1[] = [];
+    for (let offset = 0; offset < ids.length; offset += 500) {
+      refs.push(...await this.programReads.findByIds(ids.slice(offset, offset + 500)));
+    }
+    return records.map(record => ({...record, universityLinks: (record.universityLinks ?? []).map(link => {
+      if (!link.academicProgramId) return link;
+      const ref = refs.find(row => row.id === link.academicProgramId);
+      return {...link, academicProgram: ref ? {universityId:ref.universityId, ownerProof:ref} : null};
+    })}));
   }
 
   private mapToDto(record: unknown): ScholarshipDto {

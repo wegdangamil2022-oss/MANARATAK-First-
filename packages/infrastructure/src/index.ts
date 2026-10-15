@@ -264,3 +264,5 @@ export * from './students/PrivateStudentSavedItemHydrationGateways';
 
 export * from './student-tools/PrismaStudentToolTestDiscoveryLinkRepository';
 export * from './services-platform/PrismaServiceTestDiscoveryLinkRepository';
+
+export * from './universities/PrismaUniversityProgramReadPort';

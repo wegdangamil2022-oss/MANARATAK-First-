@@ -23,9 +23,8 @@
     "report": "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md",
     "contractExpansion": "Nullable authenticated actor reference on existing search history; legacy ownership is not inferred. Include in B05 SQL inventory."
   },
-  "next": "B05",
+  "next": "B06",
   "remaining": [
-    "B05",
     "B06",
     "B07",
     "B08",
@@ -125,6 +124,36 @@
     ],
     "runtimePrerequisites": [
       "Actual database migration/checksum inventory and isolated FK/concurrent link-purge rehearsal: B05"
+    ]
+  },
+  "B05": {
+    "status": "SOURCE_VERIFIED",
+    "baselineCommit": "f80e3b0",
+    "runtimeDatabaseStatus": "PENDING",
+    "deploymentStatus": "NOT_PERFORMED",
+    "findings": [
+      "ARCH-03",
+      "FK-01",
+      "FK-02",
+      "FK-03",
+      "FK-04"
+    ],
+    "lightTestsPassed": 83,
+    "lightTestsFailed": 0,
+    "B04AssetRegressionTestsPassed": 7,
+    "report": "docs/reviews/B05_OWNER_CONTRACTS_DATABASE_PLAN_2026-10-15.md",
+    "databaseExpansionPlan": "docs/remediation/B05_DATABASE_EXPANSION_AND_REHEARSAL_2026-10-15.md",
+    "sourceConstraintInventory": "docs/reviews/evidence/b05-owner-constraint-inventory-2026-10-15.json",
+    "ownerReadContract": "IUniversityProgramReadPort / UniversityProgramReferenceV1",
+    "migration": "20261015100000_student_document_asset_boundary",
+    "migrationAppliedByThisChange": false,
+    "historicalSqlChanged": false,
+    "sourceMigrationSqlCount": 109,
+    "runtimePrerequisites": [
+      "Intended DB migration/checksum/catalog and orphan inventory: not queried",
+      "Apply new asset-boundary migration before new readiness; validate existing rows separately after owner review",
+      "Isolated PostgreSQL transaction-ordering, manual-FK/Prisma compatibility and restore rehearsal",
+      "ISO defaults/provider-country constraints remain proposed until data/lifecycle review"
     ]
   }
 }

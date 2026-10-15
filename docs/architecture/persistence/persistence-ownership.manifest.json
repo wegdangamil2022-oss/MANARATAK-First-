@@ -397,9 +397,6 @@
       "assets",
       "reference",
       "academic_taxonomy"
-    ],
-    "packages/infrastructure/src/scholarships/PrismaScholarshipRepository.ts": [
-      "universities"
     ]
   },
   "historicalMigrationBaseline": [
