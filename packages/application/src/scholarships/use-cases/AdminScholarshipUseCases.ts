@@ -150,7 +150,7 @@ export class AdminScholarshipUseCases {
     const classification = ScholarshipCompletenessClassifier.classify(payloadForClassification);
 
     const publicId = `sch_${generateOpaqueIdentifier()}`;
-    const slug = displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || `scholarship-${Date.now()}`;
+    const slug = publicId + '-' + displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || `scholarship-${Date.now()}`;
     const canonicalName = displayName;
     const canonicalDedupKey = ScholarshipDeduplicationService.buildKey({
       cleanedScholarshipName: ScholarshipNamingService.clean(displayName).cleanedScholarshipName,
@@ -189,6 +189,7 @@ export class AdminScholarshipUseCases {
       status: initialStatus,
       completenessStatus: classification.state,
       publicationStatus: ScholarshipPublicationStatus.DRAFT,
+      optionalFields: { creationSource: 'ADMIN_ENTRY', createdBy: context?.actorId },
     };
 
     return this.mutate('SCHOLARSHIP_CREATED', publicId, context, async (repository) => {

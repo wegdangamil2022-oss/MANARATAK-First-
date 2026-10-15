@@ -185,6 +185,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
 
     const record = await this.prisma.university.create({
       data: {
+        id: data.id,
         publicId,
         slug,
         canonicalName,

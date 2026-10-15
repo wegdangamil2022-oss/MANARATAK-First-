@@ -1,3 +1,4 @@
+import {randomUUID} from 'crypto';
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
 import {
   IUniversityRepository,
@@ -5,6 +6,7 @@ import {
   PaginatedUniversityResult,
   PaginatedUniversityOrganizationUnitResult,
   UniversityCompletenessClassifier,
+  UniversityDeduplicationService,
   UniversityDto,
   UniversityFilters,
   UniversityOrganizationUnitFilters,
@@ -37,6 +39,21 @@ export class AdminUniversityUseCases {
     private readonly publicationPolicy = new UniversityPublicationReadinessPolicy(),
     private readonly assetReferences?: AssetReferencePolicy,
   ) {}
+
+  public async createDraft(input:{displayName:string;officialWebsite:string;sourceUri:string;sourceHash:string;country?:string;countryReferenceId?:string},context?:UniversityMutationContext):Promise<UniversityDto> {
+    if(!this.atomicMutations || !context?.actorId || !context.reason?.trim()) throw new Error('UNIVERSITY_AUDITED_REVIEW_CONTEXT_REQUIRED');
+    if(!input.displayName.trim() || !/^[a-f0-9]{64}$/i.test(input.sourceHash)) throw new Error('UNIVERSITY_SOURCE_EVIDENCE_REQUIRED');
+    for(const value of [input.officialWebsite,input.sourceUri]) {const url=new URL(value);if(url.protocol!=='https:' || url.username || url.password) throw new Error('UNIVERSITY_HTTPS_SOURCE_REQUIRED');}
+    const repository=this.repository as Partial<ITransactionalUniversityRepository>;
+    if(!repository.withTransaction) throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const id=randomUUID(); const name=input.displayName.trim();
+    const key=UniversityDeduplicationService.generateKey({universityName:name,officialWebsite:input.officialWebsite,country:input.country});
+    return this.atomicMutations.execute({domain:'UNIVERSITIES',aggregateType:'UNIVERSITY',aggregateId:id,action:'UNIVERSITY_DRAFT_CREATED',context,auditMetadata:{reason:context.reason,source:'ADMIN_ENTRY'}},async transaction=>{
+      const tx=repository.withTransaction!(transaction);
+      if(await tx.findByDedupKey(key)) throw new Error('UNIVERSITY_DUPLICATE_IDENTITY');
+      return tx.create({id,publicId:`uni-${id}`,slug:`university-${id}`,canonicalName:name,canonicalDedupKey:key,displayName:name,officialWebsite:input.officialWebsite,officialSourceUrl:input.sourceUri,country:input.country,countryReferenceId:input.countryReferenceId,status:UniversityStatus.READY_TO_REVIEW,completenessStatus:UniversityImportCompletenessState.NEEDS_REVIEW,optionalFields:{creationSource:'ADMIN_ENTRY',createdBy:context.actorId,sourceHash:input.sourceHash}});
+    });
+  }
 
   public async listUniversities(
     filters: UniversityFilters,

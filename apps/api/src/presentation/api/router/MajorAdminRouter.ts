@@ -118,6 +118,11 @@ export class MajorAdminRouter {
       res.status(201).json(await adminMajorUseCases.createFellowshipProfile(id,body,mutationContext(req)));
     }));
 
+    router.post('/', SecurityMiddlewareFactory.createAdminPermissionGuard('admin:majors:manage'), asyncHandler(async(req,res)=>{
+      const input=z.object({displayName:z.string().trim().min(1).max(300),level:z.enum(['BACHELOR','MASTER','DOCTORATE','FELLOWSHIP']),degreeLevelId:z.string().uuid(),academicFieldId:z.string().uuid().optional(),disciplineId:z.string().uuid().optional(),sourceUri:sourceUrlSchema,sourceHash:z.string().regex(/^[a-f0-9]{64}$/i),reason:reasonSchema}).strict().parse(req.body);
+      res.status(201).json(await adminMajorUseCases.createDraft(input,mutationContext(req)));
+    }));
+
     const updateBodySchema = z.object({
       displayName: z.string().optional(),
       reason:reasonSchema,
@@ -468,7 +473,7 @@ export class MajorAdminRouter {
       if(persistenceCode==='P2002') return res.status(409).json({error:'MAJOR_DUPLICATE_IDENTITY'});
       const code=err instanceof Error ? err.message : '';
       const known=/^(MAJOR_|NEW_MAJOR_|FELLOWSHIP_|TARGET_MAJOR_|CONTENT_SECTION_|NO_WORKING_VERSION_)[A-Z0-9_]+$/.test(code);
-      const status=/STALE|CONFLICT|ALREADY_EXISTS/.test(code)?409:code.includes('UNAVAILABLE')?503:code.includes('NOT_FOUND')?404:code.includes('ACTOR')?401:known?422:500;
+      const status=/STALE|CONFLICT|ALREADY_EXISTS|DUPLICATE/.test(code)?409:code.includes('UNAVAILABLE')?503:code.includes('NOT_FOUND')?404:code.includes('ACTOR')?401:known?422:500;
       res.status(status).json({error:known?code:'INTERNAL_SERVER_ERROR'});
     });
 

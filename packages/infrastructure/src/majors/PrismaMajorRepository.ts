@@ -233,7 +233,7 @@ export class PrismaMajorRepository implements ITransactionalMajorRepository {
 
     const record = await this.prisma.major.create({
       data: {
-        publicId, slug, canonicalName, canonicalDedupKey, displayName, localizedNameAr, localizedNameEn, status,
+        id: _id, publicId, slug, canonicalName, canonicalDedupKey, displayName, localizedNameAr, localizedNameEn, status,
         completenessStatus, facultyName,
         academicFieldId,
         disciplineId,

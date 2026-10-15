@@ -1,3 +1,4 @@
+import {OwnerDraftCreateForm} from '../components/OwnerDraftCreateForm';
 import { adminPaths } from '../navigation/AdminRoutes';
 import { AdminLink } from '../components/AdminLink';
 import {ScholarshipCanonicalFilters,emptyScholarshipCanonicalFilters,type ScholarshipCanonicalFilterState} from '../components/ScholarshipCanonicalFilters';
@@ -224,6 +225,7 @@ export function ScholarshipListPage() {
 
   return (
     <div dir={dir} className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+      <OwnerDraftCreateForm owner="scholarships"/>
       <ScholarshipCanonicalFilters
         value={canonical}
         onChange={(value) => {

@@ -5,6 +5,7 @@ import {
   INewMajorCandidateRepository,
   ITransactionalNewMajorCandidateRepository,
   MajorAliasDto,
+  MAJOR_REVIEW_TEMPLATE,
   MajorClassificationMappingDto,
   ReviewedMajorClassificationInput,
   MajorContentSectionDto,
@@ -69,6 +70,34 @@ export class AdminMajorUseCases {
     private readonly canonicalReferences?: CanonicalMajorReferenceService,
     private readonly newMajorCandidates?: INewMajorCandidateRepository,
   ) {}
+
+  public async createDraft(input: {displayName:string; level:MajorLevel; degreeLevelId:string; academicFieldId?:string; disciplineId?:string; sourceUri:string; sourceHash:string}, context?:MajorMutationContext):Promise<MajorDto> {
+    if (!this.atomicMutations || !context?.actorId || !context.reason?.trim()) throw new Error('MAJOR_AUDITED_REVIEW_CONTEXT_REQUIRED');
+    if (!input.displayName.trim() || !/^[a-f0-9]{64}$/i.test(input.sourceHash)) throw new Error('MAJOR_SOURCE_EVIDENCE_REQUIRED');
+    const source=new URL(input.sourceUri);
+    if(source.protocol!=='https:' || source.username || source.password) throw new Error('MAJOR_HTTPS_SOURCE_REQUIRED');
+    if(!this.canonicalReferences) throw new Error('MAJOR_CANONICAL_REFERENCE_SERVICE_REQUIRED');
+    await this.canonicalReferences.assertDegreeMatches(input.degreeLevelId,input.level);
+    if(!input.academicFieldId && !input.disciplineId) throw new Error('MAJOR_CANONICAL_TAXONOMY_REQUIRED');
+    const payload={canonicalMajorName:input.displayName.trim(),degreeLevel:input.level,degreeLevelId:input.degreeLevelId,academicFieldId:input.academicFieldId,disciplineId:input.disciplineId};
+    await this.canonicalReferences.assertPayloadReferencesActive(payload);
+    const repository=this.repository as Partial<ITransactionalMajorRepository>;
+    if(!repository.withTransaction) throw new Error('MAJOR_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+    const id=randomUUID(); const key=MajorDeduplicationService.generateKey(payload);
+    return this.atomicMutations.execute({domain:'MAJORS',aggregateType:'MAJOR',aggregateId:id,action:'MAJOR_DRAFT_CREATED',context,auditMetadata:{reason:context.reason,source:'ADMIN_ENTRY'}},async transaction=>{
+      const tx=repository.withTransaction!(transaction);
+      if(await tx.findByDedupKey(key)) throw new Error('MAJOR_DUPLICATE_IDENTITY');
+      if(!tx.allocateNextProfileCode || !tx.createLevelProfile || !tx.createVersion || !tx.createSource || !tx.createContentSections) throw new Error('MAJOR_DRAFT_PERSISTENCE_REQUIRED');
+      const prefix=this.levelPrefix(input.level); const code=await tx.allocateNextProfileCode(prefix,this.catalogRepository?.maxCodeNumber?.(prefix) ?? 0);
+      const major=await tx.create({id,publicId:code,slug:`major-${id}`,canonicalName:payload.canonicalMajorName,displayName:payload.canonicalMajorName,canonicalDedupKey:key,status:MajorStatus.READY_TO_REVIEW,completenessStatus:MajorImportCompletenessState.NEEDS_REVIEW,academicFieldId:input.academicFieldId,disciplineId:input.disciplineId,optionalFields:{degreeLevel:input.level,officialSourceUrl:input.sourceUri,creationSource:'ADMIN_ENTRY',createdBy:context.actorId}});
+      const profile=await tx.createLevelProfile({majorId:major.id,code,level:input.level,degreeLevelId:input.degreeLevelId,displayName:major.displayName,academicFieldId:input.academicFieldId,disciplineId:input.disciplineId,status:MajorStatus.READY_TO_REVIEW,completenessStatus:MajorImportCompletenessState.NEEDS_REVIEW});
+      const version=await tx.createVersion({majorId:major.id,profileId:profile.id,versionNumber:1,status:'NEEDS_REVIEW',sourceUri:input.sourceUri,sourceHash:input.sourceHash,metadata:{source:'ADMIN_ENTRY',actorId:context.actorId}});
+      if(!profile.id || !version.id) throw new Error('MAJOR_DRAFT_ID_REQUIRED');
+      await tx.createSource({majorId:major.id,profileId:profile.id,sourceType:'ADMIN_ENTRY',sourceName:'ADMIN_MAJOR_AUTHORING',sourceUri:input.sourceUri,sourceHash:input.sourceHash});
+      await tx.createContentSections(MAJOR_REVIEW_TEMPLATE[input.level].map(sectionKey=>({profileId:profile.id,versionId:version.id,sectionKey,locale:'ar',content:'',reviewStatus:'NEEDS_REVIEW' as const})));
+      return {...major,profiles:[profile]};
+    });
+  }
 
   public async createFellowshipProfile(id: string, input: {displayName: string; degreeLevelId: string; sourceUri: string; sourceHash: string}, context?: MajorMutationContext): Promise<MajorLevelProfileDto> {
     this.assertMutableCanonicalMajorId(id);

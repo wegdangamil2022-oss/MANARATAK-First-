@@ -1,3 +1,4 @@
+import {SecurityMiddlewareFactory} from '../../security/SecurityMiddlewareFactory.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
@@ -21,7 +22,7 @@ export class UniversityAdminRouter {
       const rawRevision = req.get('If-Match');
       const expectedRevision = rawRevision && /^(?:"[0-9]+"|[0-9]+)$/.test(rawRevision)
         ? Number(rawRevision.replace(/"/g, '')) : undefined;
-      if (!Number.isSafeInteger(expectedRevision)) throw new Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
+      if (req.params.id && !Number.isSafeInteger(expectedRevision)) throw new Error('UNIVERSITY_EXPECTED_REVISION_REQUIRED');
       return {
         expectedRevision,
         reason: reasonSchema.parse(req.get('X-Review-Reason') ?? z.object({ reason: z.string().optional() }).strip().parse(req.body ?? {}).reason),
@@ -57,6 +58,12 @@ export class UniversityAdminRouter {
     }).strict();
 
     const webUrl=z.string().url().refine(value=>{const url=new URL(value);return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password;},'HTTP(S) URL required');
+    const httpsSource=z.string().url().refine(value=>{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password;},'HTTPS source required');
+    router.post('/',SecurityMiddlewareFactory.createAdminPermissionGuard('admin:universities:manage'),asyncHandler(async(req:Request,res:Response)=>{
+      const input=z.object({displayName:z.string().trim().min(1).max(300),officialWebsite:httpsSource,sourceUri:httpsSource,sourceHash:z.string().regex(/^[a-f0-9]{64}$/i),country:z.string().trim().max(200).optional(),countryReferenceId:z.string().uuid().optional(),reason:reasonSchema}).strict().parse(req.body);
+      res.status(201).json(await adminUniversityUseCases.createDraft(input,mutationContext(req)));
+    }));
+
     const updateBodySchema = z.object({
       displayName: z.string().optional(),
       officialWebsite: z.union([webUrl, z.literal('')]).optional(),
@@ -467,6 +474,7 @@ export class UniversityAdminRouter {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: 'Validation Error', details: err.issues });
       }
+      if (err?.code === 'P2002' || err?.message === 'UNIVERSITY_DUPLICATE_IDENTITY') return res.status(409).json({error:'UNIVERSITY_DUPLICATE_IDENTITY'});
       if (err?.message === 'UNIVERSITY_STALE_REVISION') return res.status(409).json({ error: err.message });
       if (err?.message === 'UNIVERSITY_EXPECTED_REVISION_REQUIRED') return res.status(428).json({ error: err.message });
       res.status(400).json({ error: err.message || 'An error occurred' });

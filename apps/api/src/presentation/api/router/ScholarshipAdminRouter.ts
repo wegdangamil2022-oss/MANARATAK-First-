@@ -402,7 +402,8 @@ export class ScholarshipAdminRouter {
 
     const createBodySchema = z
       .object({
-        displayName: z.string().optional(),
+        reason: reviewReasonSchema.optional(),
+        displayName: z.string().trim().min(1).max(300).optional(),
         scholarshipName: z.string().optional(),
         fundingCoverage: z.string().min(1, 'Funding coverage is required'),
         coverageDetails: z.string().optional(),
@@ -416,8 +417,8 @@ export class ScholarshipAdminRouter {
           .optional()
           .transform((val) => (val ? new Date(val) : null)),
         studyCountry: z.string().optional(),
-        applicationLink: z.string().optional(),
-        officialSourceUrl: z.string().optional(),
+        applicationLink: z.string().url().refine(value=>new URL(value).protocol==='https:').optional(),
+        officialSourceUrl: z.string().url().refine(value=>new URL(value).protocol==='https:').optional(),
         sponsorName: z.string().optional(),
         fundingAmount: z
           .union([z.string(), z.number()])
@@ -425,7 +426,7 @@ export class ScholarshipAdminRouter {
           .transform((val) => (val ? String(val) : undefined)),
         currency: z.string().optional(),
         duration: z.string().optional(),
-      })
+      }).strict()
       .refine((data) => !!(data.displayName || data.scholarshipName), {
         message: 'Scholarship name is required',
         path: ['displayName'],
@@ -438,6 +439,7 @@ export class ScholarshipAdminRouter {
     // POST /admin/scholarships
     router.post(
       '/',
+      SecurityMiddlewareFactory.createAdminPermissionGuard('admin:scholarships:manage'),
       asyncHandler(async (req: Request, res: Response) => {
         const payload = createBodySchema.parse(req.body);
         const scholarshipName = payload.displayName || payload.scholarshipName || '';

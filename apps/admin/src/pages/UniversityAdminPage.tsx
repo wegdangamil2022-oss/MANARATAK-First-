@@ -1,3 +1,4 @@
+import {OwnerDraftCreateForm} from '../components/OwnerDraftCreateForm';
 import { adminPaths } from '../navigation/AdminRoutes';
 import { AdminLink } from '../components/AdminLink';
 import {UniversityLocationFilters} from '../components/UniversityLocationFilters';
@@ -183,6 +184,7 @@ export function UniversityAdminPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 font-['Cairo',sans-serif] text-[#203442]">
+      <OwnerDraftCreateForm owner="universities"/>
       <UniversityProgramWorkspace />
       <section className="rounded border bg-white p-3"><h2>{tr('فلاتر موقع الجامعة وترتيبها','University location and sort filters')}</h2>
         <UniversityLocationFilters countryId={countryReferenceId} regionId={searchParams.get('regionReferenceId')??''} cityId={searchParams.get('cityReferenceId')??''} ar={isArabic} onChange={(key,value)=>{const next=new URLSearchParams(searchParams);if(value)next.set(key,value);else next.delete(key);if(key==='countryReferenceId'){next.delete('regionReferenceId');next.delete('cityReferenceId');}if(key==='regionReferenceId')next.delete('cityReferenceId');setSearchParams(next);setPage(1);}}/>
