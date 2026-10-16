@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "kind": "POST28_LOCAL_STAGE_DISPOSITION",
+  "branch": "fix/post28-ci-environment-inventory-20261016",
+  "authorization": "USER_RECORD_R05_BLOCKERS_AND_CONTINUE_SCOPED_R06_2026_10_16",
+  "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY",
+  "R05": {
+    "reviewStatus": "REVIEW_COMPLETE_WITH_RECORDED_BLOCKERS",
+    "runtimeStatus": "BLOCKED",
+    "acceptance": false,
+    "evidenceSourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+    "evidence": "docs/reviews/evidence/post28/40f93b655c4835f669c6686d7301817f48f0e5c2/r05-historical/status.json",
+    "remaining": ["Traceable synthetic orphan remediation", "Upgrade109_to110_preservation", "Previous_client_after_upgrade", "Upgrade_interruption_resume_and_lock_budgets"]
+  },
+  "productionAcceptance": false,
+  "cloudMutationAuthorized": false,
+  "deploymentAuthorized": false
+}

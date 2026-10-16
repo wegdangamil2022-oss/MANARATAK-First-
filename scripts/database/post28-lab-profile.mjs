@@ -5,6 +5,7 @@ export function localLabProfile(name='greenfield'){
  if(name==='upgrade')return {name,primary:'DB-U',secondary:'DB-V',roles:['upgrader','verifier'],targets:[
   {label:'DB-U',kind:'upgrade',role:'upgrader',roleKind:'MIGRATION'},
   {label:'DB-V',kind:'upgrade_verify',role:'verifier',roleKind:'MIGRATION'}]};
+ if(name==='transactions')return {name,primary:'DB-T',secondary:null,roles:['tx_migrator'],targets:[{label:'DB-T',kind:'transactions',role:'app',roleKind:'APPLICATION'}]};
  throw new Error('POST28_LOCAL_LAB_PROFILE_INVALID');
 }
 export function preflightDeclarations(argv,env){

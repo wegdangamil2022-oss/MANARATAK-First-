@@ -9,9 +9,11 @@ import {verifyDiscovery,verifySuiteResults} from './post28-suite-policy.mjs';
 import {requireDatabaseMutationGate} from '../lib/database-mutation-gate.mjs';
 import {requirePost28LocalExecution} from './post28-neon-policy.mjs';
 
-// Must be invoked only after R04/R05 parity and before destructive DB-T tests.
+import {requireScopedR06Authorization} from './post28-r06-authorization.mjs';
+// R04 schema must match accepted evidence. R05 remains blocked under the user's explicit local R06 disposition.
 try {
   const name=process.argv[2];databaseSuite(name);
+  const authorization=requireScopedR06Authorization();
   if(process.env.POST28_TARGET_LABEL!=='DB-T') throw new Error('POST28_TRANSACTION_TEST_TARGET_REQUIRED');
   requireDatabaseMutationGate('post28 disposable transaction suite',{allowedPurposes:['maintenance']});
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
@@ -22,13 +24,16 @@ try {
   requirePost28LocalExecution(contract);
   const targets=await preflightTargets(contract,[{label:'DB-T',url:process.env.DATABASE_URL}],process.env,sha,readDatabaseIdentity,{requireValidatedCatalog:true});
   if(targets[0].publicTables<281)throw new Error('POST28_MIGRATED_SCHEMA_REQUIRED');
-  const baseDirectory=path.resolve(process.env.POST28_EVIDENCE_DIR ?? 'test-results/post28');
+  const baseDirectory=path.resolve(process.env.POST28_EVIDENCE_DIR ?? path.join(path.dirname(process.env.POST28_TARGET_CONTRACT_FILE),'R06-suites'));
   fs.mkdirSync(baseDirectory,{recursive:true,mode:0o700});
+  const realBase=fs.realpathSync(baseDirectory),root=fs.realpathSync(process.cwd());
+  if(realBase===root||realBase.startsWith(root+path.sep))throw new Error('POST28_EVIDENCE_OUTSIDE_CHECKOUT_REQUIRED');
   const out=fs.mkdtempSync(path.join(baseDirectory,name+'-'));
   const env={...process.env,POST28_DATABASE_SUITE:name,RUN_DATABASE_INTEGRATION_TESTS:'true',
     DATABASE_MUTATIONS_ALLOWED:'true',MANARATAK_DATABASE_INTEGRATION_ENABLED:'true',
     W3_DATABASE_TEST_DATABASE_URL:process.env.DATABASE_URL,W3_DATABASE_TEST_DATABASE_IS_DISPOSABLE:'true',
     EAP_EPHEMERAL_DB_TESTS:'true',EAP_LOCAL_DISPOSABLE_DB_TESTS:'true',DIRECT_URL:process.env.DATABASE_URL};
+  delete env.POST28_TRANSACTION_SETUP_URL;delete env.POST28_APP_PASSWORD;
   const base=['node_modules/vitest/vitest.mjs'];
   const collected=spawnSync(process.execPath,[...base,'list','--config','config/testing/post28-database-vitest.config.ts','--json'],{encoding:'utf8',maxBuffer:16*1024*1024,env});
   if(collected.status!==0)throw new Error('POST28_RUNTIME_DISCOVERY_FAILED');
@@ -38,7 +43,7 @@ try {
   const result=spawnSync(process.execPath,[...base,'run','--config','config/testing/post28-database-vitest.config.ts','--reporter=json','--outputFile',resultFile],{env,stdio:'inherit'});
   if(result.status!==0)throw new Error('POST28_DATABASE_SUITE_EXECUTION_FAILED');
   const counts=verifySuiteResults(name,rows,JSON.parse(fs.readFileSync(resultFile,'utf8')));
-  const summary={kind:'POST28_DATABASE_SUITE_EXECUTION',sourceSha:sha,suite:name,targets,...counts};
+  const summary={kind:'POST28_DATABASE_SUITE_EXECUTION',sourceSha:sha,suite:name,authorization,targets,...counts};
   fs.writeFileSync(path.join(out,'summary.json'),JSON.stringify(summary,null,2)+'\n');console.log(JSON.stringify(summary));
 } catch(error) {
   console.error(error.message?.match(/^POST28_[A-Z_]+$/)?.[0] ?? 'POST28_DATABASE_RUNNER_INPUT_INVALID');process.exitCode=1;

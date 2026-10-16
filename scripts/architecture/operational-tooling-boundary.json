@@ -253,6 +253,22 @@
         "mutationCommandsExecuted:0"
       ],
       "review": "POST28 local R05 historical fixture validation 2026-10-16; no owner remediation or DEC approval"
+    },
+    "scripts/database/initialize-post28-transactions.mjs": {
+      "purpose": "Initialize newly empty local DB-T with a separately declared limited migrator; grant runtime DML only on explicit application tables",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22 clean SHA/run-bound local DB-T, user-scoped R06 disposition, unchanged accepted R04 schema"
+      ],
+      "gate": "preflightTransactionProvisioning verifies application and setup roles against the same declared DB-T identity; requireEmpty before deploy; no database owner tests; no ledger runtime grants",
+      "requiredSourceMarkers": [
+        "preflightTransactionProvisioning",
+        "requireEmpty:true",
+        "requireScopedR06Authorization",
+        "TRANSACTION_APPLICATION_TABLES",
+        "requireValidatedCatalog:true"
+      ],
+      "review": "POST28 R06 local runtime 2026-10-16; user authorized continuing with recorded R05 blockers, no R05 PASS or deployment authority"
     }
   }
 }

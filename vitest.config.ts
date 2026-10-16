@@ -12,6 +12,7 @@ export default defineConfig({
       '**/dist/**',
       // POST28: real PostgreSQL suites have explicit isolated profiles, not source skips.
       '**/*.database.spec.ts',
+      '**/*.database.spec.mjs',
       'packages/infrastructure/tests/database/WholePlatformPersistence.integration.spec.ts',
       // These use node:test and must run under Node so assertion failures fail CI.
       '**/*.test.mjs',

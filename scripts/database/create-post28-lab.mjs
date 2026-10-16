@@ -81,8 +81,10 @@ try {
   const targets={};
   for(const {label,kind,role,roleKind} of profile.targets) {
     const database=`manaratak_post28_${kind}_test`,nonce=randomBytes(32).toString('hex');
+    const schemaRole=profile.name==='transactions'?'tx_migrator':role;
     sql('postgres',`CREATE DATABASE ${database} OWNER post28_bootstrap TEMPLATE template0 ENCODING 'UTF8' LC_COLLATE 'C.UTF-8' LC_CTYPE 'C.UTF-8';\nREVOKE ALL ON DATABASE ${database} FROM PUBLIC;\nGRANT CONNECT ON DATABASE ${database} TO post28_${role};\nCOMMENT ON DATABASE ${database} IS ${quote(`POST28_DISPOSABLE:${id}:${label}:${nonce}`)};`);
-    sql(database,`CREATE EXTENSION IF NOT EXISTS pg_trgm;\nREVOKE ALL ON SCHEMA public FROM PUBLIC;\nALTER SCHEMA public OWNER TO post28_${role};\nGRANT USAGE,CREATE ON SCHEMA public TO post28_${role};\nGRANT EXECUTE ON FUNCTION pg_control_system() TO post28_${role};`);
+    if(profile.name==='transactions')sql('postgres',`GRANT CONNECT ON DATABASE ${database} TO post28_${schemaRole};`);
+    sql(database,`CREATE EXTENSION IF NOT EXISTS pg_trgm;\nREVOKE ALL ON SCHEMA public FROM PUBLIC;\nALTER SCHEMA public OWNER TO post28_${schemaRole};\nGRANT USAGE,CREATE ON SCHEMA public TO post28_${schemaRole};\nGRANT EXECUTE ON FUNCTION pg_control_system() TO post28_${schemaRole};`);
     // DB-G is migration proof, not an application fixture database. Blanket
     // default DML grants would also let the app rewrite _prisma_migrations.
     // Later DB-T/E grants need an explicit reviewed application-table list.
@@ -90,18 +92,19 @@ try {
     const identity=JSON.parse(sql(database,"SELECT json_build_object('serverIdentity',(SELECT system_identifier::text FROM pg_control_system()),'databaseOid',(SELECT oid::text FROM pg_database WHERE datname=current_database()));"));
     targets[label]={host:'127.0.0.1',port,database,role:'post28_'+role,roleKind,nonce,...identity};
   }
-  const contract={version:1,kind:'POST28_LOCAL_DATABASE_TARGETS',sourceSha:sha,runId:id,postgresMajor:16,targets};
+  const contract={version:1,kind:'POST28_LOCAL_DATABASE_TARGETS',sourceSha:sha,runId:id,postgresMajor:16,targets,...(profile.name==='transactions'?{provisioning:{label:'DB-T',role:'post28_tx_migrator',roleKind:'MIGRATION'}}:{})};
   const contractFile=path.join(directory,'targets.json');fs.writeFileSync(contractFile,JSON.stringify(contract,null,2)+'\n');
   const connection=(label,password)=>{const url=new URL(`postgresql://${targets[label].role}@127.0.0.1:${port}/${targets[label].database}`);url.password=password;url.searchParams.set('schema','public');return url.href;};
-  const g=connection(profile.primary,passwords[profile.targets[0].role]),s=connection(profile.secondary,passwords[profile.targets[1].role]);secrets.push(g,s);
+  const g=connection(profile.primary,passwords[profile.targets[0].role]),s=profile.secondary?connection(profile.secondary,passwords[profile.targets[1].role]):null;secrets.push(g,...(s?[s]:[]));
+  const setup=profile.name==='transactions'?g.replace('post28_app:'+passwords.app,'post28_tx_migrator:'+passwords.tx_migrator):null;if(setup)secrets.push(setup);
   const labEnv={NODE_ENV:'test',POST28_ISOLATED_EXECUTION:'YES',DATABASE_TARGET_CLASS:'DISPOSABLE',POST28_TARGET_CONTRACT_FILE:contractFile,
-    ...(profile.name==='greenfield'?{GREENFIELD_DATABASE_URL:g,GREENFIELD_SHADOW_DATABASE_URL:s}:{UPGRADE_DATABASE_URL:g,UPGRADE_VERIFY_DATABASE_URL:s,POST28_TARGET_LABEL:'DB-U',POST28_UPGRADE_VERIFY_MUTATION_TARGET:`127.0.0.1:${port}/${targets['DB-V'].database}`}),DATABASE_URL:g,DIRECT_URL:g,
+    ...(profile.name==='transactions'?{POST28_TARGET_LABEL:'DB-T',POST28_TRANSACTION_SETUP_URL:setup}:profile.name==='greenfield'?{GREENFIELD_DATABASE_URL:g,GREENFIELD_SHADOW_DATABASE_URL:s}:{UPGRADE_DATABASE_URL:g,UPGRADE_VERIFY_DATABASE_URL:s,POST28_TARGET_LABEL:'DB-U',POST28_UPGRADE_VERIFY_MUTATION_TARGET:`127.0.0.1:${port}/${targets['DB-V'].database}`}),DATABASE_URL:g,DIRECT_URL:g,
     GREENFIELD_DATABASE_IS_DISPOSABLE:'true',GREENFIELD_SHADOW_DATABASE_IS_DISPOSABLE:'true',
     GREENFIELD_VERIFY_OUTPUT_DIR:path.join(directory,'R04-greenfield'),POST28_APP_PASSWORD:passwords.app,
     DATABASE_PROVISIONING_GATE:'APPROVED',ALLOW_DATABASE_MUTATIONS:'YES',DATABASE_MUTATION_ENVIRONMENT:'test',DATABASE_MUTATION_PURPOSE:'migrate',
     DATABASE_MUTATION_TARGET:`127.0.0.1:${port}/${targets[profile.primary].database}`,ALLOW_PRODUCTION_DATABASE_MUTATIONS:'NO'};
   const envFile=path.join(directory,'lab.env');fs.writeFileSync(envFile,Object.entries(labEnv).map(([key,value])=>`${key}=${value}`).join('\n')+'\n',{mode:0o600});
-  const result=spawnSync(process.execPath,['scripts/database/post28-preflight.mjs',profile.name==='upgrade'?'--upgrade-pair':'--pair','--require-empty'],{env:{...process.env,...labEnv},encoding:'utf8'});
+  const result=spawnSync(process.execPath,['scripts/database/post28-preflight.mjs',...(profile.name==='transactions'?[]:[profile.name==='upgrade'?'--upgrade-pair':'--pair']),'--require-empty'],{env:{...process.env,...labEnv},encoding:'utf8'});
   fs.writeFileSync(path.join(directory,'target-preflight.log'),redact(result.stdout)+redact(result.stderr));
   if(result.status!==0)throw new Error('POST28_INITIAL_TARGET_PREFLIGHT_FAILED');
   state.status='EMPTY_TARGETS_VERIFIED';state.contractFile=contractFile;state.envFile=envFile;

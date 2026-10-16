@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'core-transactions': {files: ['tests/database/post28-core-transactions.database.spec.mjs'],minimumCases:8},
   assets: {
     files: ['packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts',
       'packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts'],
