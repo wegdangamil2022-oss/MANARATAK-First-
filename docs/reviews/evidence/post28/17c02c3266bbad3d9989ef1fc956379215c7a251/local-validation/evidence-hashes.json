@@ -1,0 +1,14 @@
+{
+  "R03-role-and-isolation.json": "a97f774b71cb5a612a34efbcc9ddeb80a4f95c54411aa1a75bfeceb5489d8a89",
+  "R04-measured-summary.json": "ae7a8c3fc3026ffa8532c73896c432d8e086560e7e162223a787e94508958f14",
+  "catalog-and-orphan-verification.json": "71f8614bc6498a00342b998b1e19b222e806008e1ee9bc992b1d04ed6339fadc",
+  "checks-private-log-references.json": "81d40b5bebb9c06c70d761988ab4157d3fd0d089aa3e55279f9fb34c083d039b",
+  "initial-environment-failure.json": "81e79ffc3cafa52de1c855539648cc8a558b1d0e477b7fbc0f4898fca2f380d8",
+  "local-identities.json": "253b6dbf67a67826b6729f45a5d660b8de0f83e5535ab364fc51d6f945317b87",
+  "migration-ledger-verification.json": "048d5db892e345dc3ef260b84fea8ab601af844ba1b94734a2c1c80031a95231",
+  "observed-app-ledger-grant-defect.json": "ebf87d6d0f31ca8bbdf6080fe8b404f613ba166159cdc031f08b82afd0b4cb2c",
+  "private-audit-tool-hashes.json": "0df54b3a5c15ffe0db156ed536f3261646a2f0cdf64baad7b0ec2b407774def9",
+  "schema-drift-review.txt": "ee63e510dc63602dee02cdf35078b2bc6320d43f439d89cd3d78e35d25453220",
+  "scope.json": "2d5457896e85159b6578e445616791e8d275b8779cbd2557c656b0a88eabc692",
+  "source-test-counts.json": "4325d9db8ecc4b34ad31ba0d6e0eb3bf6eada02d2fd421358f10e661141e498b"
+}

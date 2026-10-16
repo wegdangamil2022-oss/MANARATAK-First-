@@ -1,0 +1,2889 @@
+{
+  "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+  "modelCoverage": {
+    "expected": 281,
+    "matched": 281,
+    "missing": [],
+    "unexpected": []
+  },
+  "modelTableMap": {
+    "Settings": "Settings",
+    "ImportSourceRegistryEntry": "ImportSourceRegistryEntry",
+    "ScholarshipImportVerificationDecision": "ScholarshipImportVerificationDecision",
+    "ScholarshipImportCanonicalResolutionDecision": "ScholarshipImportCanonicalResolutionDecision",
+    "SettingDefinitionRecord": "SettingDefinitionRecord",
+    "SettingAssignmentRecord": "SettingAssignmentRecord",
+    "SettingVersionRecord": "SettingVersionRecord",
+    "ImportBatch": "ImportBatch",
+    "ImportRecord": "ImportRecord",
+    "ImportScreeningReceipt": "ImportScreeningReceipt",
+    "ImportMappingProfile": "ImportMappingProfile",
+    "ImportReviewAssignment": "ImportReviewAssignment",
+    "ImportSourceObservation": "ImportSourceObservation",
+    "ImportRateBudget": "ImportRateBudget",
+    "Course": "Course",
+    "CourseModule": "CourseModule",
+    "CourseLesson": "CourseLesson",
+    "CourseLessonAsset": "CourseLessonAsset",
+    "CourseQuiz": "CourseQuiz",
+    "CourseQuestionBank": "CourseQuestionBank",
+    "CourseQuestion": "CourseQuestion",
+    "CourseEnrollment": "CourseEnrollment",
+    "CourseLessonProgress": "CourseLessonProgress",
+    "CourseQuizAttempt": "CourseQuizAttempt",
+    "CourseCompletion": "CourseCompletion",
+    "CourseVersion": "CourseVersion",
+    "CourseQuestionVersion": "CourseQuestionVersion",
+    "CourseEnrollmentPolicy": "CourseEnrollmentPolicy",
+    "LearningPath": "LearningPath",
+    "LearningPathVersion": "LearningPathVersion",
+    "LearningPathCourse": "LearningPathCourse",
+    "LearningPathEnrollment": "LearningPathEnrollment",
+    "CertificateIssuer": "CertificateIssuer",
+    "CertificateAuthorityDelegation": "CertificateAuthorityDelegation",
+    "CertificateTemplate": "CertificateTemplate",
+    "CertificateTemplateVersion": "CertificateTemplateVersion",
+    "Certificate": "Certificate",
+    "CertificateIssuanceInbox": "CertificateIssuanceInbox",
+    "CertificateLedgerEntry": "CertificateLedgerEntry",
+    "CertificateVerificationLog": "CertificateVerificationLog",
+    "CourseTaxonomyResolution": "CourseTaxonomyResolution",
+    "CourseAcademicTaxonomyLink": "CourseAcademicTaxonomyLink",
+    "CourseMajorProjection": "CourseMajorProjection",
+    "CourseInternationalTestRelationship": "CourseInternationalTestRelationship",
+    "ExternalCourseProvider": "ExternalCourseProvider",
+    "ExternalCourseProviderAlias": "ExternalCourseProviderAlias",
+    "ExternalCourseProviderDomain": "ExternalCourseProviderDomain",
+    "CourseSourceIdentity": "CourseSourceIdentity",
+    "CourseSourceUrlHistory": "CourseSourceUrlHistory",
+    "CourseImportAnalysis": "CourseImportAnalysis",
+    "CourseFieldProvenance": "CourseFieldProvenance",
+    "EnterpriseEventRecord": "EnterpriseEventRecord",
+    "BackgroundJobRecord": "BackgroundJobRecord",
+    "BackgroundJobExecutionRecord": "BackgroundJobExecutionRecord",
+    "BackgroundJobDeadLetterRecord": "BackgroundJobDeadLetterRecord",
+    "TransactionalOutboxRecord": "TransactionalOutboxRecord",
+    "University": "University",
+    "UniversityCampus": "UniversityCampus",
+    "UniversityOrganizationUnit": "UniversityOrganizationUnit",
+    "UniversityAcademicProgram": "UniversityAcademicProgram",
+    "UniversityProgramCampus": "UniversityProgramCampus",
+    "UniversityProgramAdmissionRequirement": "UniversityProgramAdmissionRequirement",
+    "UniversityTuitionProfile": "UniversityTuitionProfile",
+    "UniversityAccommodationProfile": "UniversityAccommodationProfile",
+    "UniversityRanking": "UniversityRanking",
+    "UniversitySourceRecord": "UniversitySourceRecord",
+    "UniversityTranslation": "UniversityTranslation",
+    "UniversityLocalizedText": "UniversityLocalizedText",
+    "UniversityImportChangeSet": "UniversityImportChangeSet",
+    "UniversityImportChange": "UniversityImportChange",
+    "Scholarship": "Scholarship",
+    "ScholarshipBenefit": "ScholarshipBenefit",
+    "ScholarshipDegreeTarget": "ScholarshipDegreeTarget",
+    "ScholarshipMajorTarget": "ScholarshipMajorTarget",
+    "ScholarshipEligibilityItem": "ScholarshipEligibilityItem",
+    "ScholarshipRequiredDocument": "ScholarshipRequiredDocument",
+    "ScholarshipSourceEvidence": "ScholarshipSourceEvidence",
+    "ScholarshipUniversityLink": "ScholarshipUniversityLink",
+    "ScholarshipVersion": "ScholarshipVersion",
+    "ScholarshipSponsorContext": "ScholarshipSponsorContext",
+    "ScholarshipApplicationCycle": "ScholarshipApplicationCycle",
+    "ScholarshipEligibilityRuleVersion": "ScholarshipEligibilityRuleVersion",
+    "ScholarshipAwardPackageVersion": "ScholarshipAwardPackageVersion",
+    "Major": "Major",
+    "MajorVersion": "MajorVersion",
+    "MajorLevelProfile": "MajorLevelProfile",
+    "MajorContentSection": "MajorContentSection",
+    "MajorAlias": "MajorAlias",
+    "MajorRelationship": "MajorRelationship",
+    "MajorClassificationMapping": "MajorClassificationMapping",
+    "MajorSource": "MajorSource",
+    "FellowshipDefinition": "FellowshipDefinition",
+    "InternationalTest": "InternationalTest",
+    "InternationalTestFamily": "InternationalTestFamily",
+    "InternationalTestProvider": "InternationalTestProvider",
+    "InternationalTestVersion": "InternationalTestVersion",
+    "InternationalTestDeliveryModeProfile": "InternationalTestDeliveryModeProfile",
+    "InternationalTestVariant": "InternationalTestVariant",
+    "InternationalTestSection": "InternationalTestSection",
+    "InternationalTestScoreScale": "InternationalTestScoreScale",
+    "InternationalTestFeeMetadata": "InternationalTestFeeMetadata",
+    "InternationalTestOfficialLink": "InternationalTestOfficialLink",
+    "InternationalTestAvailability": "InternationalTestAvailability",
+    "InternationalTestPreparationMaterial": "InternationalTestPreparationMaterial",
+    "InternationalTestEvidence": "InternationalTestEvidence",
+    "InternationalTestVersionScoreScale": "InternationalTestVersionScoreScale",
+    "InternationalTestSession": "InternationalTestSession",
+    "InternationalTestCenter": "InternationalTestCenter",
+    "InternationalTestRequirement": "InternationalTestRequirement",
+    "InternationalTestPolicy": "InternationalTestPolicy",
+    "InternationalTestCountryRelationship": "InternationalTestCountryRelationship",
+    "InternationalTestLanguageRelationship": "InternationalTestLanguageRelationship",
+    "InternationalTestAcademicTaxonomyRelationship": "InternationalTestAcademicTaxonomyRelationship",
+    "InternationalTestDegreeRelationship": "InternationalTestDegreeRelationship",
+    "InternationalTestEquivalencyMapping": "InternationalTestEquivalencyMapping",
+    "InternationalTestContentBlock": "InternationalTestContentBlock",
+    "AssetRecord": "AssetRecord",
+    "StudentWorkspace": "StudentWorkspace",
+    "StudentSupportOwnerReadObservation": "StudentSupportOwnerReadObservation",
+    "StudentSavedItem": "StudentSavedItem",
+    "StudentApplicationTracker": "StudentApplicationTracker",
+    "StudentApplicationChecklistItem": "StudentApplicationChecklistItem",
+    "StudentSavedCollection": "StudentSavedCollection",
+    "StudentTimelineEntry": "StudentTimelineEntry",
+    "StudentRecentActivity": "StudentRecentActivity",
+    "StudentRecentlyViewed": "StudentRecentlyViewed",
+    "StudentLearningProjection": "StudentLearningProjection",
+    "StudentCertificateReadProjection": "StudentCertificateReadProjection",
+    "StudentSearchHistory": "StudentSearchHistory",
+    "StudentWorkspaceSnapshot": "StudentWorkspaceSnapshot",
+    "StudentNotificationProjection": "StudentNotificationProjection",
+    "StudentPrivacyConsentDecision": "StudentPrivacyConsentDecision",
+    "StudentPersonalStatistics": "StudentPersonalStatistics",
+    "StudentWorkspaceEventInbox": "StudentWorkspaceEventInbox",
+    "CmsContentNode": "CmsContentNode",
+    "CmsContentDomainLink": "CmsContentDomainLink",
+    "CmsLocalizedContent": "CmsLocalizedContent",
+    "CmsCategory": "CmsCategory",
+    "CmsTag": "CmsTag",
+    "CmsContentTag": "CmsContentTag",
+    "CmsContentAttachment": "CmsContentAttachment",
+    "CmsWorkflowReview": "CmsWorkflowReview",
+    "CmsContentRevision": "CmsContentRevision",
+    "CmsPublishedContent": "CmsPublishedContent",
+    "CmsEditorialLedger": "CmsEditorialLedger",
+    "CmsRedirect": "CmsRedirect",
+    "CmsSitePublishedSnapshot": "CmsSitePublishedSnapshot",
+    "CmsNavigationMenu": "CmsNavigationMenu",
+    "CmsNavigationNode": "CmsNavigationNode",
+    "CmsBlockSchema": "CmsBlockSchema",
+    "CmsContentBlock": "CmsContentBlock",
+    "CmsAnnouncement": "CmsAnnouncement",
+    "CmsScheduledJob": "CmsScheduledJob",
+    "IdentityRecord": "IdentityRecord",
+    "CredentialRecord": "CredentialRecord",
+    "EmailVerificationTokenRecord": "EmailVerificationTokenRecord",
+    "PasswordResetTokenRecord": "PasswordResetTokenRecord",
+    "UserRecord": "UserRecord",
+    "AccountRecord": "AccountRecord",
+    "RoleRecord": "RoleRecord",
+    "PolicyRecord": "PolicyRecord",
+    "RoleAssignmentRecord": "RoleAssignmentRecord",
+    "AdminEmergencyAccessRecord": "AdminEmergencyAccessRecord",
+    "AuditRecord": "AuditRecord",
+    "RetentionDecisionRecord": "RetentionDecisionRecord",
+    "ReferenceCountry": "ReferenceCountry",
+    "ReferenceCurrency": "ReferenceCurrency",
+    "ReferenceLanguage": "ReferenceLanguage",
+    "StudyDestinationProfile": "StudyDestinationProfile",
+    "StudyDestinationStudyLanguage": "StudyDestinationStudyLanguage",
+    "ReferenceCity": "ReferenceCity",
+    "ReferenceVersionRecord": "ReferenceVersionRecord",
+    "ReferenceAliasRecord": "ReferenceAliasRecord",
+    "ReferenceProviderMappingRecord": "ReferenceProviderMappingRecord",
+    "ReferenceRelationshipRecord": "ReferenceRelationshipRecord",
+    "AdministrativeRegion": "AdministrativeRegion",
+    "DegreeLevel": "DegreeLevel",
+    "AcademicTaxonomyNode": "AcademicTaxonomyNode",
+    "AcademicTaxonomyEdge": "AcademicTaxonomyEdge",
+    "AcademicTaxonomyAlias": "AcademicTaxonomyAlias",
+    "AcademicStandardMapping": "AcademicStandardMapping",
+    "SessionRecord": "SessionRecord",
+    "AIRegistryRecord": "AIRegistryRecord",
+    "AIPromptVersionRecord": "AIPromptVersionRecord",
+    "AIPromptDeploymentRecord": "AIPromptDeploymentRecord",
+    "AICapabilityPromptBindingRecord": "AICapabilityPromptBindingRecord",
+    "AIQuotaReservationRecord": "AIQuotaReservationRecord",
+    "AIProviderCircuitRecord": "AIProviderCircuitRecord",
+    "AIExecutionRecord": "AIExecutionRecord",
+    "AIAsyncJobRecord": "AIAsyncJobRecord",
+    "AIExecutionSpanRecord": "AIExecutionSpanRecord",
+    "AIUsageRecord": "AIUsageRecord",
+    "AIWorkflowVersionRecord": "AIWorkflowVersionRecord",
+    "AIWorkflowRunRecord": "AIWorkflowRunRecord",
+    "AIWorkflowStepRunRecord": "AIWorkflowStepRunRecord",
+    "AIEvaluationRunRecord": "AIEvaluationRunRecord",
+    "AIKnowledgeSourceRecord": "AIKnowledgeSourceRecord",
+    "AIEmbeddingRecord": "AIEmbeddingRecord",
+    "AIIndexingRunRecord": "AIIndexingRunRecord",
+    "AIIncidentEventRecord": "AIIncidentEventRecord",
+    "StudentToolDefinitionRecord": "StudentToolDefinitionRecord",
+    "StudentToolVersionRecord": "StudentToolVersionRecord",
+    "StudentToolDependencyRecord": "StudentToolDependencyRecord",
+    "StudentToolExecutionRecord": "StudentToolExecutionRecord",
+    "FinanceInvoiceRecord": "FinanceInvoiceRecord",
+    "FinancePaymentRecord": "FinancePaymentRecord",
+    "FinancePaymentAttemptRecord": "FinancePaymentAttemptRecord",
+    "FinancialAccountRecord": "FinancialAccountRecord",
+    "FinancialTransactionRecord": "FinancialTransactionRecord",
+    "FinancialLedgerEntryRecord": "FinancialLedgerEntryRecord",
+    "FinanceWalletRecord": "FinanceWalletRecord",
+    "FinanceWalletHoldRecord": "FinanceWalletHoldRecord",
+    "FinanceExchangeRateRecord": "FinanceExchangeRateRecord",
+    "FinanceTransferRecord": "FinanceTransferRecord",
+    "FinanceApprovalRecord": "FinanceApprovalRecord",
+    "FinanceApprovalDecisionRecord": "FinanceApprovalDecisionRecord",
+    "FinanceRefundRecord": "FinanceRefundRecord",
+    "FinanceDocumentRecord": "FinanceDocumentRecord",
+    "FinanceInstallmentPlanRecord": "FinanceInstallmentPlanRecord",
+    "FinanceCommissionRecord": "FinanceCommissionRecord",
+    "FinanceEstimateRecord": "FinanceEstimateRecord",
+    "ServiceCatalogRecord": "ServiceCatalogRecord",
+    "ServiceCatalogCountryRecord": "ServiceCatalogCountryRecord",
+    "ServiceCatalogLanguageRecord": "ServiceCatalogLanguageRecord",
+    "ServiceRequestRecord": "ServiceRequestRecord",
+    "ServiceProviderRecord": "ServiceProviderRecord",
+    "ServiceProviderServiceRecord": "ServiceProviderServiceRecord",
+    "ServicePackageRecord": "ServicePackageRecord",
+    "ServicePackageItemRecord": "ServicePackageItemRecord",
+    "ServicePricingRecord": "ServicePricingRecord",
+    "ServiceDiscountRecord": "ServiceDiscountRecord",
+    "ServicePromotionRecord": "ServicePromotionRecord",
+    "ServiceAvailabilitySlotRecord": "ServiceAvailabilitySlotRecord",
+    "ServiceBookingRecord": "ServiceBookingRecord",
+    "ServiceBookingItemRecord": "ServiceBookingItemRecord",
+    "ServiceWorkflowDefinitionRecord": "ServiceWorkflowDefinitionRecord",
+    "ServiceWorkflowExecutionRecord": "ServiceWorkflowExecutionRecord",
+    "ServiceDeliveryArtifactRecord": "ServiceDeliveryArtifactRecord",
+    "CareerEmployerRecord": "CareerEmployerRecord",
+    "CareerJobPostingRecord": "CareerJobPostingRecord",
+    "CareerProfileRecord": "CareerProfileRecord",
+    "CareerApplicationRecord": "CareerApplicationRecord",
+    "CareerAlumniProfileRecord": "CareerAlumniProfileRecord",
+    "WorkflowControlRecord": "WorkflowControlRecord",
+    "ApiServiceControlRecord": "ApiServiceControlRecord",
+    "SharedComponentControlRecord": "SharedComponentControlRecord",
+    "WorkflowExecutionProjection": "WorkflowExecutionProjection",
+    "ApiServiceExposureProjection": "ApiServiceExposureProjection",
+    "SharedComponentRenderingProjection": "SharedComponentRenderingProjection",
+    "NotificationTemplateRecord": "NotificationTemplateRecord",
+    "NotificationIntentRecord": "NotificationIntentRecord",
+    "NotificationChannelDelivery": "NotificationChannelDelivery",
+    "NotificationRateReservation": "NotificationRateReservation",
+    "NotificationDeliveryReceipt": "NotificationDeliveryReceipt",
+    "ApiIdempotencyRecord": "ApiIdempotencyRecord",
+    "ApiSearchRequestRecord": "ApiSearchRequestRecord",
+    "ReferenceOwnerImportReview": "ReferenceOwnerImportReview",
+    "ReferenceStandardSnapshot": "ReferenceStandardSnapshot",
+    "AcademicTaxonomyImportReview": "AcademicTaxonomyImportReview",
+    "InternationalTestGovernance": "InternationalTestGovernance",
+    "InternationalTestPublicationSnapshot": "InternationalTestPublicationSnapshot",
+    "InternationalTestEvidenceHistory": "InternationalTestEvidenceHistory",
+    "NewMajorCandidateDecision": "NewMajorCandidateDecision",
+    "MajorPublicationSnapshot": "MajorPublicationSnapshot",
+    "FinanceCommandRecord": "FinanceCommandRecord",
+    "FinanceReconciliationSnapshot": "FinanceReconciliationSnapshot",
+    "FinanceReconciliationIssueRecord": "FinanceReconciliationIssueRecord",
+    "FinanceAdjustmentCaseRecord": "FinanceAdjustmentCaseRecord",
+    "AuditWorkspaceRecord": "AuditWorkspaceRecord",
+    "AuditAlertOccurrenceRecord": "AuditAlertOccurrenceRecord",
+    "AssetRenditionRecord": "AssetRenditionRecord",
+    "SettingsGovernanceRecord": "SettingsGovernanceRecord",
+    "MajorImportOwnerReview": "MajorImportOwnerReview",
+    "UniversityProgramStudyProfile": "UniversityProgramStudyProfile",
+    "UniversityProgramStudyLanguage": "UniversityProgramStudyLanguage",
+    "UniversityProgramIntake": "UniversityProgramIntake",
+    "OwnerTranslationTransferReceipt": "OwnerTranslationTransferReceipt",
+    "StudentApplicationDocumentBinding": "StudentApplicationDocumentBinding",
+    "StudentToolTestDiscoveryLink": "StudentToolTestDiscoveryLink",
+    "ServiceTestDiscoveryLink": "ServiceTestDiscoveryLink",
+    "ScholarshipReferenceTransition": "ScholarshipReferenceTransition"
+  },
+  "tableRowCounts": {
+    "AIAsyncJobRecord": 0,
+    "AICapabilityPromptBindingRecord": 0,
+    "AIEmbeddingRecord": 0,
+    "AIEvaluationRunRecord": 0,
+    "AIExecutionRecord": 0,
+    "AIExecutionSpanRecord": 0,
+    "AIIncidentEventRecord": 0,
+    "AIIndexingRunRecord": 0,
+    "AIKnowledgeSourceRecord": 0,
+    "AIPromptDeploymentRecord": 0,
+    "AIPromptVersionRecord": 0,
+    "AIProviderCircuitRecord": 0,
+    "AIQuotaReservationRecord": 0,
+    "AIRegistryRecord": 0,
+    "AIUsageRecord": 0,
+    "AIWorkflowRunRecord": 0,
+    "AIWorkflowStepRunRecord": 0,
+    "AIWorkflowVersionRecord": 0,
+    "AcademicStandardMapping": 0,
+    "AcademicTaxonomyAlias": 0,
+    "AcademicTaxonomyEdge": 0,
+    "AcademicTaxonomyImportReview": 0,
+    "AcademicTaxonomyNode": 0,
+    "AccountRecord": 0,
+    "AdminEmergencyAccessRecord": 0,
+    "AdministrativeRegion": 0,
+    "ApiIdempotencyRecord": 0,
+    "ApiSearchRequestRecord": 0,
+    "ApiServiceControlRecord": 0,
+    "ApiServiceExposureProjection": 0,
+    "AssetRecord": 0,
+    "AssetRenditionRecord": 0,
+    "AuditAlertOccurrenceRecord": 0,
+    "AuditRecord": 0,
+    "AuditWorkspaceRecord": 0,
+    "BackgroundJobDeadLetterRecord": 0,
+    "BackgroundJobExecutionRecord": 0,
+    "BackgroundJobRecord": 0,
+    "CareerAlumniProfileRecord": 0,
+    "CareerApplicationRecord": 0,
+    "CareerEmployerRecord": 0,
+    "CareerJobPostingRecord": 0,
+    "CareerProfileRecord": 0,
+    "Certificate": 0,
+    "CertificateAuthorityDelegation": 0,
+    "CertificateIssuanceInbox": 0,
+    "CertificateIssuer": 0,
+    "CertificateLedgerEntry": 0,
+    "CertificateTemplate": 0,
+    "CertificateTemplateVersion": 0,
+    "CertificateVerificationLog": 0,
+    "CmsAnnouncement": 0,
+    "CmsBlockSchema": 0,
+    "CmsCategory": 0,
+    "CmsContentAttachment": 0,
+    "CmsContentBlock": 0,
+    "CmsContentDomainLink": 0,
+    "CmsContentNode": 0,
+    "CmsContentRevision": 0,
+    "CmsContentTag": 0,
+    "CmsEditorialLedger": 0,
+    "CmsLocalizedContent": 0,
+    "CmsNavigationMenu": 0,
+    "CmsNavigationNode": 0,
+    "CmsPublishedContent": 0,
+    "CmsRedirect": 0,
+    "CmsScheduledJob": 0,
+    "CmsSitePublishedSnapshot": 0,
+    "CmsTag": 0,
+    "CmsWorkflowReview": 0,
+    "Course": 0,
+    "CourseAcademicTaxonomyLink": 0,
+    "CourseCompletion": 0,
+    "CourseEnrollment": 0,
+    "CourseEnrollmentPolicy": 0,
+    "CourseFieldProvenance": 0,
+    "CourseImportAnalysis": 0,
+    "CourseInternationalTestRelationship": 0,
+    "CourseLesson": 0,
+    "CourseLessonAsset": 0,
+    "CourseLessonProgress": 0,
+    "CourseMajorProjection": 0,
+    "CourseModule": 0,
+    "CourseQuestion": 0,
+    "CourseQuestionBank": 0,
+    "CourseQuestionVersion": 0,
+    "CourseQuiz": 0,
+    "CourseQuizAttempt": 0,
+    "CourseSourceIdentity": 0,
+    "CourseSourceUrlHistory": 0,
+    "CourseTaxonomyResolution": 0,
+    "CourseVersion": 0,
+    "CredentialRecord": 0,
+    "DegreeLevel": 0,
+    "EmailVerificationTokenRecord": 0,
+    "EnterpriseEventRecord": 0,
+    "ExternalCourseProvider": 18,
+    "ExternalCourseProviderAlias": 6,
+    "ExternalCourseProviderDomain": 39,
+    "FellowshipDefinition": 0,
+    "FinanceAdjustmentCaseRecord": 0,
+    "FinanceApprovalDecisionRecord": 0,
+    "FinanceApprovalRecord": 0,
+    "FinanceCommandRecord": 0,
+    "FinanceCommissionRecord": 0,
+    "FinanceDocumentRecord": 0,
+    "FinanceEstimateRecord": 0,
+    "FinanceExchangeRateRecord": 0,
+    "FinanceInstallmentPlanRecord": 0,
+    "FinanceInvoiceRecord": 0,
+    "FinancePaymentAttemptRecord": 0,
+    "FinancePaymentRecord": 0,
+    "FinanceReconciliationIssueRecord": 0,
+    "FinanceReconciliationSnapshot": 0,
+    "FinanceRefundRecord": 0,
+    "FinanceTransferRecord": 0,
+    "FinanceWalletHoldRecord": 0,
+    "FinanceWalletRecord": 0,
+    "FinancialAccountRecord": 0,
+    "FinancialLedgerEntryRecord": 0,
+    "FinancialTransactionRecord": 0,
+    "IdentityRecord": 0,
+    "ImportBatch": 0,
+    "ImportMappingProfile": 0,
+    "ImportRateBudget": 0,
+    "ImportRecord": 0,
+    "ImportReviewAssignment": 0,
+    "ImportScreeningReceipt": 0,
+    "ImportSourceObservation": 0,
+    "ImportSourceRegistryEntry": 0,
+    "InternationalTest": 0,
+    "InternationalTestAcademicTaxonomyRelationship": 0,
+    "InternationalTestAvailability": 0,
+    "InternationalTestCenter": 0,
+    "InternationalTestContentBlock": 0,
+    "InternationalTestCountryRelationship": 0,
+    "InternationalTestDegreeRelationship": 0,
+    "InternationalTestDeliveryModeProfile": 0,
+    "InternationalTestEquivalencyMapping": 0,
+    "InternationalTestEvidence": 0,
+    "InternationalTestEvidenceHistory": 0,
+    "InternationalTestFamily": 0,
+    "InternationalTestFeeMetadata": 0,
+    "InternationalTestGovernance": 0,
+    "InternationalTestLanguageRelationship": 0,
+    "InternationalTestOfficialLink": 0,
+    "InternationalTestPolicy": 0,
+    "InternationalTestPreparationMaterial": 0,
+    "InternationalTestProvider": 0,
+    "InternationalTestPublicationSnapshot": 0,
+    "InternationalTestRequirement": 0,
+    "InternationalTestScoreScale": 0,
+    "InternationalTestSection": 0,
+    "InternationalTestSession": 0,
+    "InternationalTestVariant": 0,
+    "InternationalTestVersion": 0,
+    "InternationalTestVersionScoreScale": 0,
+    "LearningPath": 0,
+    "LearningPathCourse": 0,
+    "LearningPathEnrollment": 0,
+    "LearningPathVersion": 0,
+    "Major": 0,
+    "MajorAlias": 0,
+    "MajorClassificationMapping": 0,
+    "MajorContentSection": 0,
+    "MajorImportOwnerReview": 0,
+    "MajorLevelProfile": 0,
+    "MajorPublicationSnapshot": 0,
+    "MajorRelationship": 0,
+    "MajorSource": 0,
+    "MajorVersion": 0,
+    "NewMajorCandidateDecision": 0,
+    "NotificationChannelDelivery": 0,
+    "NotificationDeliveryReceipt": 0,
+    "NotificationIntentRecord": 0,
+    "NotificationRateReservation": 0,
+    "NotificationTemplateRecord": 0,
+    "OwnerTranslationTransferReceipt": 0,
+    "PasswordResetTokenRecord": 0,
+    "PolicyRecord": 0,
+    "ReferenceAliasRecord": 0,
+    "ReferenceCity": 0,
+    "ReferenceCountry": 0,
+    "ReferenceCurrency": 0,
+    "ReferenceLanguage": 0,
+    "ReferenceOwnerImportReview": 0,
+    "ReferenceProviderMappingRecord": 0,
+    "ReferenceRelationshipRecord": 0,
+    "ReferenceStandardSnapshot": 0,
+    "ReferenceVersionRecord": 0,
+    "RetentionDecisionRecord": 0,
+    "RoleAssignmentRecord": 0,
+    "RoleRecord": 0,
+    "Scholarship": 0,
+    "ScholarshipApplicationCycle": 0,
+    "ScholarshipAwardPackageVersion": 0,
+    "ScholarshipBenefit": 0,
+    "ScholarshipDegreeTarget": 0,
+    "ScholarshipEligibilityItem": 0,
+    "ScholarshipEligibilityRuleVersion": 0,
+    "ScholarshipImportCanonicalResolutionDecision": 0,
+    "ScholarshipImportVerificationDecision": 0,
+    "ScholarshipMajorTarget": 0,
+    "ScholarshipReferenceTransition": 0,
+    "ScholarshipRequiredDocument": 0,
+    "ScholarshipSourceEvidence": 0,
+    "ScholarshipSponsorContext": 0,
+    "ScholarshipUniversityLink": 0,
+    "ScholarshipVersion": 0,
+    "ServiceAvailabilitySlotRecord": 0,
+    "ServiceBookingItemRecord": 0,
+    "ServiceBookingRecord": 0,
+    "ServiceCatalogCountryRecord": 0,
+    "ServiceCatalogLanguageRecord": 0,
+    "ServiceCatalogRecord": 0,
+    "ServiceDeliveryArtifactRecord": 0,
+    "ServiceDiscountRecord": 0,
+    "ServicePackageItemRecord": 0,
+    "ServicePackageRecord": 0,
+    "ServicePricingRecord": 0,
+    "ServicePromotionRecord": 0,
+    "ServiceProviderRecord": 0,
+    "ServiceProviderServiceRecord": 0,
+    "ServiceRequestRecord": 0,
+    "ServiceTestDiscoveryLink": 0,
+    "ServiceWorkflowDefinitionRecord": 0,
+    "ServiceWorkflowExecutionRecord": 0,
+    "SessionRecord": 0,
+    "SettingAssignmentRecord": 0,
+    "SettingDefinitionRecord": 0,
+    "SettingVersionRecord": 0,
+    "Settings": 0,
+    "SettingsGovernanceRecord": 0,
+    "SharedComponentControlRecord": 0,
+    "SharedComponentRenderingProjection": 0,
+    "StudentApplicationChecklistItem": 0,
+    "StudentApplicationDocumentBinding": 0,
+    "StudentApplicationTracker": 0,
+    "StudentCertificateReadProjection": 0,
+    "StudentLearningProjection": 0,
+    "StudentNotificationProjection": 0,
+    "StudentPersonalStatistics": 0,
+    "StudentPrivacyConsentDecision": 0,
+    "StudentRecentActivity": 0,
+    "StudentRecentlyViewed": 0,
+    "StudentSavedCollection": 0,
+    "StudentSavedItem": 0,
+    "StudentSearchHistory": 0,
+    "StudentSupportOwnerReadObservation": 0,
+    "StudentTimelineEntry": 0,
+    "StudentToolDefinitionRecord": 0,
+    "StudentToolDependencyRecord": 0,
+    "StudentToolExecutionRecord": 0,
+    "StudentToolTestDiscoveryLink": 0,
+    "StudentToolVersionRecord": 0,
+    "StudentWorkspace": 0,
+    "StudentWorkspaceEventInbox": 0,
+    "StudentWorkspaceSnapshot": 0,
+    "StudyDestinationProfile": 0,
+    "StudyDestinationStudyLanguage": 0,
+    "TransactionalOutboxRecord": 0,
+    "University": 0,
+    "UniversityAcademicProgram": 0,
+    "UniversityAccommodationProfile": 0,
+    "UniversityCampus": 0,
+    "UniversityImportChange": 0,
+    "UniversityImportChangeSet": 0,
+    "UniversityLocalizedText": 0,
+    "UniversityOrganizationUnit": 0,
+    "UniversityProgramAdmissionRequirement": 0,
+    "UniversityProgramCampus": 0,
+    "UniversityProgramIntake": 0,
+    "UniversityProgramStudyLanguage": 0,
+    "UniversityProgramStudyProfile": 0,
+    "UniversityRanking": 0,
+    "UniversitySourceRecord": 0,
+    "UniversityTranslation": 0,
+    "UniversityTuitionProfile": 0,
+    "UserRecord": 0,
+    "WorkflowControlRecord": 0,
+    "WorkflowExecutionProjection": 0,
+    "_prisma_migrations": 109
+  },
+  "nonemptyApplicationTables": [
+    {
+      "name": "ExternalCourseProvider",
+      "rows": 18
+    },
+    {
+      "name": "ExternalCourseProviderAlias",
+      "rows": 6
+    },
+    {
+      "name": "ExternalCourseProviderDomain",
+      "rows": 39
+    }
+  ],
+  "foreignKeys": 313,
+  "checkConstraints": 102,
+  "uniqueConstraints": 35,
+  "primaryKeys": 282,
+  "indexes": 1191,
+  "invalidIndexes": 0,
+  "userTriggers": 40,
+  "unvalidatedConstraints": [
+    {
+      "table": "FinancePaymentRecord",
+      "name": "FinancePayment_positive_units",
+      "type": "c"
+    },
+    {
+      "table": "FinanceRefundRecord",
+      "name": "FinanceRefund_positive_units",
+      "type": "c"
+    },
+    {
+      "table": "FinanceTransferRecord",
+      "name": "FinanceTransfer_positive_units",
+      "type": "c"
+    },
+    {
+      "table": "FinanceWalletHoldRecord",
+      "name": "FinanceWalletHold_positive_units",
+      "type": "c"
+    },
+    {
+      "table": "FinancialLedgerEntryRecord",
+      "name": "FinanceLedger_positive_units",
+      "type": "c"
+    },
+    {
+      "table": "ServiceCatalogRecord",
+      "name": "ServiceCatalogRecord_fulfillment_policy",
+      "type": "c"
+    },
+    {
+      "table": "ServicePricingRecord",
+      "name": "ServicePricingRecord_bounded_money",
+      "type": "c"
+    },
+    {
+      "table": "SettingAssignmentRecord",
+      "name": "SettingAssignmentRecord_id_currentVersionId_fkey",
+      "type": "f"
+    },
+    {
+      "table": "StudentApplicationDocumentBinding",
+      "name": "StudentApplicationDocumentBinding_assetId_fkey",
+      "type": "f"
+    }
+  ],
+  "orphanAndCheckAudits": [
+    {
+      "table": "AIAsyncJobRecord",
+      "constraint": "AIAsyncJobRecord_executionPublicId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AICapabilityPromptBindingRecord",
+      "constraint": "AICapabilityPromptBindingRecord_promptKey_promptVersion_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AIExecutionSpanRecord",
+      "constraint": "AIExecutionSpanRecord_executionPublicId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AIPromptDeploymentRecord",
+      "constraint": "AIPromptDeploymentRecord_promptKey_version_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AIUsageRecord",
+      "constraint": "AIUsageRecord_executionPublicId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AIWorkflowStepRunRecord",
+      "constraint": "AIWorkflowStepRunRecord_runPublicId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AcademicStandardMapping",
+      "constraint": "AcademicStandardMapping_sourceNodeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AcademicStandardMapping",
+      "constraint": "AcademicStandardMapping_targetNodeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AcademicTaxonomyAlias",
+      "constraint": "AcademicTaxonomyAlias_nodeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AcademicTaxonomyEdge",
+      "constraint": "AcademicTaxonomyEdge_childNodeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AcademicTaxonomyEdge",
+      "constraint": "AcademicTaxonomyEdge_parentNodeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AccountRecord",
+      "constraint": "AccountRecord_identityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "AdministrativeRegion",
+      "constraint": "AdministrativeRegion_countryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "BackgroundJobDeadLetterRecord",
+      "constraint": "BackgroundJobDeadLetterRecord_jobReference_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "BackgroundJobExecutionRecord",
+      "constraint": "BackgroundJobExecutionRecord_jobReference_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CareerApplicationRecord",
+      "constraint": "CareerApplicationRecord_jobId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CareerEmployerRecord",
+      "constraint": "CareerEmployerRecord_cityReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CareerEmployerRecord",
+      "constraint": "CareerEmployerRecord_countryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CareerJobPostingRecord",
+      "constraint": "CareerJobPostingRecord_cityReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CareerJobPostingRecord",
+      "constraint": "CareerJobPostingRecord_countryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CareerJobPostingRecord",
+      "constraint": "CareerJobPostingRecord_employerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Certificate",
+      "constraint": "Certificate_issuerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Certificate",
+      "constraint": "Certificate_replacedByCertificateId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Certificate",
+      "constraint": "Certificate_replacesCertificateId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Certificate",
+      "constraint": "Certificate_templateId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Certificate",
+      "constraint": "Certificate_templateVersionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CertificateAuthorityDelegation",
+      "constraint": "CertificateAuthorityDelegation_issuerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CertificateIssuanceInbox",
+      "constraint": "CertificateIssuanceInbox_certificateId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CertificateLedgerEntry",
+      "constraint": "CertificateLedgerEntry_certificateId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CertificateTemplate",
+      "constraint": "CertificateTemplate_currentVersionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CertificateTemplate",
+      "constraint": "CertificateTemplate_issuerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CertificateTemplateVersion",
+      "constraint": "CertificateTemplateVersion_issuerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CertificateTemplateVersion",
+      "constraint": "CertificateTemplateVersion_templateId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CertificateVerificationLog",
+      "constraint": "CertificateVerificationLog_certificateId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsCategory",
+      "constraint": "CmsCategory_parentCategoryId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsContentAttachment",
+      "constraint": "CmsContentAttachment_localizedContentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsContentBlock",
+      "constraint": "CmsContentBlock_schemaId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsContentDomainLink",
+      "constraint": "CmsContentDomainLink_contentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsContentNode",
+      "constraint": "CmsContentNode_categoryId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsContentRevision",
+      "constraint": "CmsContentRevision_localizedContentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsContentTag",
+      "constraint": "CmsContentTag_localizedContentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsContentTag",
+      "constraint": "CmsContentTag_tagId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsEditorialLedger",
+      "constraint": "CmsEditorialLedger_contentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsLocalizedContent",
+      "constraint": "CmsLocalizedContent_contentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsNavigationNode",
+      "constraint": "CmsNavigationNode_menuId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsPublishedContent",
+      "constraint": "CmsPublishedContent_contentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CmsWorkflowReview",
+      "constraint": "CmsWorkflowReview_localizedContentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Course",
+      "constraint": "Course_externalProviderId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Course",
+      "constraint": "Course_learningLanguageReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseAcademicTaxonomyLink",
+      "constraint": "CourseAcademicTaxonomyLink_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseAcademicTaxonomyLink",
+      "constraint": "CourseAcademicTaxonomyLink_sourceResolutionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseAcademicTaxonomyLink",
+      "constraint": "CourseAcademicTaxonomyLink_taxonomyNodeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseCompletion",
+      "constraint": "CourseCompletion_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseEnrollment",
+      "constraint": "CourseEnrollment_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseEnrollmentPolicy",
+      "constraint": "CourseEnrollmentPolicy_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseFieldProvenance",
+      "constraint": "CourseFieldProvenance_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseFieldProvenance",
+      "constraint": "CourseFieldProvenance_providerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseImportAnalysis",
+      "constraint": "CourseImportAnalysis_matchedCourseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseImportAnalysis",
+      "constraint": "CourseImportAnalysis_providerCandidateId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseImportAnalysis",
+      "constraint": "CourseImportAnalysis_resolvedProviderId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseInternationalTestRelationship",
+      "constraint": "CourseInternationalTestRelationship_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseInternationalTestRelationship",
+      "constraint": "CourseInternationalTestRelationship_internationalTestId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseLesson",
+      "constraint": "CourseLesson_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseLesson",
+      "constraint": "CourseLesson_moduleId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseLessonAsset",
+      "constraint": "CourseLessonAsset_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseLessonAsset",
+      "constraint": "CourseLessonAsset_lessonId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseLessonProgress",
+      "constraint": "CourseLessonProgress_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseLessonProgress",
+      "constraint": "CourseLessonProgress_lessonId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseMajorProjection",
+      "constraint": "CourseMajorProjection_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseMajorProjection",
+      "constraint": "CourseMajorProjection_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseMajorProjection",
+      "constraint": "CourseMajorProjection_profileId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseMajorProjection",
+      "constraint": "CourseMajorProjection_sourceCourseTaxonomyLinkId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseMajorProjection",
+      "constraint": "CourseMajorProjection_sourceMajorClassificationMappingId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseMajorProjection",
+      "constraint": "CourseMajorProjection_taxonomyNodeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseModule",
+      "constraint": "CourseModule_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseQuestion",
+      "constraint": "CourseQuestion_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseQuestion",
+      "constraint": "CourseQuestion_questionBankId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseQuestion",
+      "constraint": "CourseQuestion_quizId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseQuestionBank",
+      "constraint": "CourseQuestionBank_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseQuestionVersion",
+      "constraint": "CourseQuestionVersion_questionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseQuiz",
+      "constraint": "CourseQuiz_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseQuiz",
+      "constraint": "CourseQuiz_lessonId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseQuiz",
+      "constraint": "CourseQuiz_moduleId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseQuizAttempt",
+      "constraint": "CourseQuizAttempt_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseQuizAttempt",
+      "constraint": "CourseQuizAttempt_quizId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseSourceIdentity",
+      "constraint": "CourseSourceIdentity_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseSourceIdentity",
+      "constraint": "CourseSourceIdentity_providerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseSourceUrlHistory",
+      "constraint": "CourseSourceUrlHistory_courseSourceIdentityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseTaxonomyResolution",
+      "constraint": "CourseTaxonomyResolution_chosenTaxonomyNodeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseTaxonomyResolution",
+      "constraint": "CourseTaxonomyResolution_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CourseVersion",
+      "constraint": "CourseVersion_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "CredentialRecord",
+      "constraint": "CredentialRecord_identityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "EmailVerificationTokenRecord",
+      "constraint": "EmailVerificationTokenRecord_identityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ExternalCourseProvider",
+      "constraint": "ExternalCourseProvider_headquartersCountryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ExternalCourseProviderAlias",
+      "constraint": "ExternalCourseProviderAlias_providerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ExternalCourseProviderDomain",
+      "constraint": "ExternalCourseProviderDomain_providerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "FellowshipDefinition",
+      "constraint": "FellowshipDefinition_linkedMajorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "FellowshipDefinition",
+      "constraint": "FellowshipDefinition_linkedProfileId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "FinanceApprovalDecisionRecord",
+      "constraint": "FinanceApprovalDecisionRecord_approvalId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "FinancePaymentAttemptRecord",
+      "constraint": "FinancePaymentAttemptRecord_paymentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "FinancePaymentRecord",
+      "constraint": "FinancePaymentRecord_invoiceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "FinancePaymentRecord",
+      "constraint": "FinancePayment_positive_units",
+      "type": "c",
+      "validated": false,
+      "violations": 0
+    },
+    {
+      "table": "FinanceRefundRecord",
+      "constraint": "FinanceRefund_positive_units",
+      "type": "c",
+      "validated": false,
+      "violations": 0
+    },
+    {
+      "table": "FinanceTransferRecord",
+      "constraint": "FinanceTransfer_positive_units",
+      "type": "c",
+      "validated": false,
+      "violations": 0
+    },
+    {
+      "table": "FinanceWalletHoldRecord",
+      "constraint": "FinanceWalletHoldRecord_walletId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "FinanceWalletHoldRecord",
+      "constraint": "FinanceWalletHold_positive_units",
+      "type": "c",
+      "validated": false,
+      "violations": 0
+    },
+    {
+      "table": "FinanceWalletRecord",
+      "constraint": "FinanceWalletRecord_accountId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "FinancialLedgerEntryRecord",
+      "constraint": "FinanceLedger_positive_units",
+      "type": "c",
+      "validated": false,
+      "violations": 0
+    },
+    {
+      "table": "FinancialLedgerEntryRecord",
+      "constraint": "FinancialLedgerEntryRecord_accountId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "FinancialLedgerEntryRecord",
+      "constraint": "FinancialLedgerEntryRecord_transactionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "FinancialTransactionRecord",
+      "constraint": "FinancialTransactionRecord_reversalOfId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ImportRecord",
+      "constraint": "ImportRecord_batchId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTest",
+      "constraint": "InternationalTest_currentPublishedVersionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTest",
+      "constraint": "InternationalTest_familyId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTest",
+      "constraint": "InternationalTest_providerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestAcademicTaxonomyRelationship",
+      "constraint": "InternationalTestAcademicTaxonomyRelationship_taxonomyNode_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestAcademicTaxonomyRelationship",
+      "constraint": "InternationalTestAcademicTaxonomyRelationship_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestAvailability",
+      "constraint": "InternationalTestAvailability_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestCenter",
+      "constraint": "InternationalTestCenter_deliveryModeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestCenter",
+      "constraint": "InternationalTestCenter_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestContentBlock",
+      "constraint": "InternationalTestContentBlock_versionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestCountryRelationship",
+      "constraint": "InternationalTestCountryRelationship_canonicalReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestCountryRelationship",
+      "constraint": "InternationalTestCountryRelationship_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestDegreeRelationship",
+      "constraint": "InternationalTestDegreeRelationship_degreeLevelId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestDegreeRelationship",
+      "constraint": "InternationalTestDegreeRelationship_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestDeliveryModeProfile",
+      "constraint": "InternationalTestDeliveryModeProfile_versionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestEquivalencyMapping",
+      "constraint": "InternationalTestEquivalencyMapping_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestEvidence",
+      "constraint": "InternationalTestEvidence_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestEvidenceHistory",
+      "constraint": "InternationalTestEvidenceHistory_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestFeeMetadata",
+      "constraint": "InternationalTestFeeMetadata_currencyReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestFeeMetadata",
+      "constraint": "InternationalTestFeeMetadata_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestGovernance",
+      "constraint": "InternationalTestGovernance_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestLanguageRelationship",
+      "constraint": "InternationalTestLanguageRelationship_canonicalReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestLanguageRelationship",
+      "constraint": "InternationalTestLanguageRelationship_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestOfficialLink",
+      "constraint": "InternationalTestOfficialLink_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestPolicy",
+      "constraint": "InternationalTestPolicy_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestPolicy",
+      "constraint": "InternationalTestPolicy_versionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestPreparationMaterial",
+      "constraint": "InternationalTestPreparationMaterial_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestPublicationSnapshot",
+      "constraint": "InternationalTestPublicationSnapshot_id_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestPublicationSnapshot",
+      "constraint": "InternationalTestPublicationSnapshot_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestRequirement",
+      "constraint": "InternationalTestRequirement_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestRequirement",
+      "constraint": "InternationalTestRequirement_versionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestScoreScale",
+      "constraint": "InternationalTestScoreScale_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestSection",
+      "constraint": "InternationalTestSection_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestSession",
+      "constraint": "InternationalTestSession_deliveryModeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestSession",
+      "constraint": "InternationalTestSession_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestSession",
+      "constraint": "InternationalTestSession_versionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestVariant",
+      "constraint": "InternationalTestVariant_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestVersion",
+      "constraint": "InternationalTestVersion_testId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "InternationalTestVersionScoreScale",
+      "constraint": "InternationalTestVersionScoreScale_versionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "LearningPathCourse",
+      "constraint": "LearningPathCourse_courseId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "LearningPathCourse",
+      "constraint": "LearningPathCourse_learningPathVersionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "LearningPathEnrollment",
+      "constraint": "LearningPathEnrollment_learningPathId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "LearningPathVersion",
+      "constraint": "LearningPathVersion_learningPathId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Major",
+      "constraint": "Major_academicFieldId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Major",
+      "constraint": "Major_currentPublishedVersionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Major",
+      "constraint": "Major_disciplineId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorAlias",
+      "constraint": "MajorAlias_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorClassificationMapping",
+      "constraint": "MajorClassificationMapping_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorClassificationMapping",
+      "constraint": "MajorClassificationMapping_profileId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorClassificationMapping",
+      "constraint": "MajorClassificationMapping_taxonomyNodeId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorContentSection",
+      "constraint": "MajorContentSection_profileId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorContentSection",
+      "constraint": "MajorContentSection_versionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorLevelProfile",
+      "constraint": "MajorLevelProfile_academicFieldId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorLevelProfile",
+      "constraint": "MajorLevelProfile_currentPublishedVersionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorLevelProfile",
+      "constraint": "MajorLevelProfile_degreeLevelId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorLevelProfile",
+      "constraint": "MajorLevelProfile_disciplineId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorLevelProfile",
+      "constraint": "MajorLevelProfile_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorPublicationSnapshot",
+      "constraint": "MajorPublicationSnapshot_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorPublicationSnapshot",
+      "constraint": "MajorPublicationSnapshot_profileId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorPublicationSnapshot",
+      "constraint": "MajorPublicationSnapshot_versionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorRelationship",
+      "constraint": "MajorRelationship_sourceMajorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorRelationship",
+      "constraint": "MajorRelationship_sourceProfileId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorRelationship",
+      "constraint": "MajorRelationship_targetMajorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorRelationship",
+      "constraint": "MajorRelationship_targetProfileId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorSource",
+      "constraint": "MajorSource_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorSource",
+      "constraint": "MajorSource_profileId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorVersion",
+      "constraint": "MajorVersion_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "MajorVersion",
+      "constraint": "MajorVersion_profileId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "NewMajorCandidateDecision",
+      "constraint": "NewMajorCandidateDecision_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "NotificationChannelDelivery",
+      "constraint": "NotificationChannelDelivery_intentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "NotificationDeliveryReceipt",
+      "constraint": "NotificationDeliveryReceipt_intentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "NotificationIntentRecord",
+      "constraint": "NotificationIntentRecord_templateId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "NotificationRateReservation",
+      "constraint": "NotificationRateReservation_intentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "PasswordResetTokenRecord",
+      "constraint": "PasswordResetTokenRecord_identityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ReferenceCity",
+      "constraint": "ReferenceCity_administrativeRegionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ReferenceCity",
+      "constraint": "ReferenceCity_countryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "RoleAssignmentRecord",
+      "constraint": "RoleAssignmentRecord_identityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "RoleAssignmentRecord",
+      "constraint": "RoleAssignmentRecord_roleId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Scholarship",
+      "constraint": "Scholarship_countryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "Scholarship",
+      "constraint": "Scholarship_studyLanguageReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipApplicationCycle",
+      "constraint": "ScholarshipApplicationCycle_scholarshipId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipApplicationCycle",
+      "constraint": "ScholarshipApplicationCycle_versionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipAwardPackageVersion",
+      "constraint": "ScholarshipAwardPackageVersion_scholarshipVersionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipBenefit",
+      "constraint": "ScholarshipBenefit_currencyReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipBenefit",
+      "constraint": "ScholarshipBenefit_scholarshipId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipDegreeTarget",
+      "constraint": "ScholarshipDegreeTarget_degreeLevelId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipDegreeTarget",
+      "constraint": "ScholarshipDegreeTarget_scholarshipId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipEligibilityItem",
+      "constraint": "ScholarshipEligibilityItem_countryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipEligibilityItem",
+      "constraint": "ScholarshipEligibilityItem_degreeLevelId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipEligibilityItem",
+      "constraint": "ScholarshipEligibilityItem_internationalTestId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipEligibilityItem",
+      "constraint": "ScholarshipEligibilityItem_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipEligibilityItem",
+      "constraint": "ScholarshipEligibilityItem_scholarshipId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipEligibilityRuleVersion",
+      "constraint": "ScholarshipEligibilityRuleVersion_scholarshipVersionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipImportCanonicalResolutionDecision",
+      "constraint": "ScholarshipImportCanonicalResolutionDecision_recordId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipImportVerificationDecision",
+      "constraint": "ScholarshipImportVerificationDecision_recordId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipMajorTarget",
+      "constraint": "ScholarshipMajorTarget_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipMajorTarget",
+      "constraint": "ScholarshipMajorTarget_scholarshipId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipRequiredDocument",
+      "constraint": "ScholarshipRequiredDocument_internationalTestId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipRequiredDocument",
+      "constraint": "ScholarshipRequiredDocument_scholarshipId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipSourceEvidence",
+      "constraint": "ScholarshipSourceEvidence_scholarshipId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipSponsorContext",
+      "constraint": "ScholarshipSponsorContext_scholarshipId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipSponsorContext",
+      "constraint": "ScholarshipSponsorContext_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipUniversityLink",
+      "constraint": "ScholarshipUniversityLink_academicProgramId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipUniversityLink",
+      "constraint": "ScholarshipUniversityLink_scholarshipId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipUniversityLink",
+      "constraint": "ScholarshipUniversityLink_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ScholarshipVersion",
+      "constraint": "ScholarshipVersion_scholarshipId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceAvailabilitySlotRecord",
+      "constraint": "ServiceAvailabilitySlotRecord_providerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceAvailabilitySlotRecord",
+      "constraint": "ServiceAvailabilitySlotRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceBookingItemRecord",
+      "constraint": "ServiceBookingItemRecord_bookingId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceBookingItemRecord",
+      "constraint": "ServiceBookingItemRecord_packageItemId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceBookingItemRecord",
+      "constraint": "ServiceBookingItemRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceBookingRecord",
+      "constraint": "ServiceBookingRecord_packageId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceBookingRecord",
+      "constraint": "ServiceBookingRecord_providerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceBookingRecord",
+      "constraint": "ServiceBookingRecord_requestId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceBookingRecord",
+      "constraint": "ServiceBookingRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceBookingRecord",
+      "constraint": "ServiceBookingRecord_slotId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceCatalogCountryRecord",
+      "constraint": "ServiceCatalogCountryRecord_countryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceCatalogCountryRecord",
+      "constraint": "ServiceCatalogCountryRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceCatalogLanguageRecord",
+      "constraint": "ServiceCatalogLanguageRecord_languageReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceCatalogLanguageRecord",
+      "constraint": "ServiceCatalogLanguageRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceCatalogRecord",
+      "constraint": "ServiceCatalogRecord_fulfillment_policy",
+      "type": "c",
+      "validated": false,
+      "violations": 0
+    },
+    {
+      "table": "ServiceDeliveryArtifactRecord",
+      "constraint": "ServiceDeliveryArtifactRecord_bookingId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceDeliveryArtifactRecord",
+      "constraint": "ServiceDeliveryArtifactRecord_workflowExecutionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceDiscountRecord",
+      "constraint": "ServiceDiscountRecord_packageId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceDiscountRecord",
+      "constraint": "ServiceDiscountRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServicePackageItemRecord",
+      "constraint": "ServicePackageItemRecord_packageId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServicePackageItemRecord",
+      "constraint": "ServicePackageItemRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServicePricingRecord",
+      "constraint": "ServicePricingRecord_bounded_money",
+      "type": "c",
+      "validated": false,
+      "violations": 0
+    },
+    {
+      "table": "ServicePricingRecord",
+      "constraint": "ServicePricingRecord_packageId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServicePricingRecord",
+      "constraint": "ServicePricingRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServicePromotionRecord",
+      "constraint": "ServicePromotionRecord_discountId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServicePromotionRecord",
+      "constraint": "ServicePromotionRecord_packageId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServicePromotionRecord",
+      "constraint": "ServicePromotionRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceProviderServiceRecord",
+      "constraint": "ServiceProviderServiceRecord_providerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceProviderServiceRecord",
+      "constraint": "ServiceProviderServiceRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceRequestRecord",
+      "constraint": "ServiceRequestRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceWorkflowDefinitionRecord",
+      "constraint": "ServiceWorkflowDefinitionRecord_packageId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceWorkflowDefinitionRecord",
+      "constraint": "ServiceWorkflowDefinitionRecord_serviceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceWorkflowExecutionRecord",
+      "constraint": "ServiceWorkflowExecutionRecord_bookingId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "ServiceWorkflowExecutionRecord",
+      "constraint": "ServiceWorkflowExecutionRecord_workflowDefinitionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "SessionRecord",
+      "constraint": "SessionRecord_identityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "SessionRecord",
+      "constraint": "SessionRecord_parentSessionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "SettingAssignmentRecord",
+      "constraint": "SettingAssignmentRecord_id_currentVersionId_fkey",
+      "type": "f",
+      "validated": false,
+      "violations": 0
+    },
+    {
+      "table": "SettingVersionRecord",
+      "constraint": "SettingVersionRecord_assignmentId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentApplicationChecklistItem",
+      "constraint": "StudentApplicationChecklistItem_trackerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentApplicationDocumentBinding",
+      "constraint": "StudentApplicationDocumentBinding_assetId_fkey",
+      "type": "f",
+      "validated": false,
+      "violations": 0
+    },
+    {
+      "table": "StudentApplicationDocumentBinding",
+      "constraint": "StudentApplicationDocumentBinding_trackerId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentApplicationTracker",
+      "constraint": "StudentApplicationTracker_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentCertificateReadProjection",
+      "constraint": "StudentCertificateReadProjection_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentLearningProjection",
+      "constraint": "StudentLearningProjection_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentNotificationProjection",
+      "constraint": "StudentNotificationProjection_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentPersonalStatistics",
+      "constraint": "StudentPersonalStatistics_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentPrivacyConsentDecision",
+      "constraint": "StudentPrivacyConsentDecision_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentRecentActivity",
+      "constraint": "StudentRecentActivity_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentRecentlyViewed",
+      "constraint": "StudentRecentlyViewed_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentSavedCollection",
+      "constraint": "StudentSavedCollection_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentSavedItem",
+      "constraint": "StudentSavedItem_collectionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentSavedItem",
+      "constraint": "StudentSavedItem_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentSearchHistory",
+      "constraint": "StudentSearchHistory_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentSupportOwnerReadObservation",
+      "constraint": "StudentSupportOwnerReadObservation_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentTimelineEntry",
+      "constraint": "StudentTimelineEntry_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentToolDependencyRecord",
+      "constraint": "StudentToolDependencyRecord_definitionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentToolExecutionRecord",
+      "constraint": "StudentToolExecutionRecord_definitionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentToolExecutionRecord",
+      "constraint": "StudentToolExecutionRecord_versionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentToolVersionRecord",
+      "constraint": "StudentToolVersionRecord_definitionId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentWorkspaceEventInbox",
+      "constraint": "StudentWorkspaceEventInbox_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudentWorkspaceSnapshot",
+      "constraint": "StudentWorkspaceSnapshot_studentReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudyDestinationProfile",
+      "constraint": "StudyDestinationProfile_countryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudyDestinationProfile",
+      "constraint": "StudyDestinationProfile_livingCostCurrencyReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudyDestinationStudyLanguage",
+      "constraint": "StudyDestinationStudyLanguage_languageReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "StudyDestinationStudyLanguage",
+      "constraint": "StudyDestinationStudyLanguage_profileId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "University",
+      "constraint": "University_cityReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "University",
+      "constraint": "University_countryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "University",
+      "constraint": "University_regionReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityAcademicProgram",
+      "constraint": "UniversityAcademicProgram_degreeLevelId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityAcademicProgram",
+      "constraint": "UniversityAcademicProgram_majorId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityAcademicProgram",
+      "constraint": "UniversityAcademicProgram_organizationUnitId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityAcademicProgram",
+      "constraint": "UniversityAcademicProgram_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityAccommodationProfile",
+      "constraint": "UniversityAccommodationProfile_currencyReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityAccommodationProfile",
+      "constraint": "UniversityAccommodationProfile_livingCostCurrencyReferenceId_fk",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityAccommodationProfile",
+      "constraint": "UniversityAccommodationProfile_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityCampus",
+      "constraint": "UniversityCampus_cityReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityCampus",
+      "constraint": "UniversityCampus_countryReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityCampus",
+      "constraint": "UniversityCampus_regionReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityCampus",
+      "constraint": "UniversityCampus_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityImportChange",
+      "constraint": "UniversityImportChange_changeSetId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityImportChange",
+      "constraint": "UniversityImportChange_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityLocalizedText",
+      "constraint": "UniversityLocalizedText_sourceRecordId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityLocalizedText",
+      "constraint": "UniversityLocalizedText_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityOrganizationUnit",
+      "constraint": "UniversityOrganizationUnit_campusId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityOrganizationUnit",
+      "constraint": "UniversityOrganizationUnit_parent_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityOrganizationUnit",
+      "constraint": "UniversityOrganizationUnit_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityProgramAdmissionRequirement",
+      "constraint": "UniversityProgramAdmissionRequirement_program_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityProgramAdmissionRequirement",
+      "constraint": "UniversityProgramAdmissionRequirement_test_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityProgramAdmissionRequirement",
+      "constraint": "UniversityProgramAdmissionRequirement_variant_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityProgramAdmissionRequirement",
+      "constraint": "UniversityProgramAdmissionRequirement_version_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityProgramCampus",
+      "constraint": "UniversityProgramCampus_campus_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityProgramCampus",
+      "constraint": "UniversityProgramCampus_program_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityProgramIntake",
+      "constraint": "UniversityProgramIntake_programId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityProgramStudyLanguage",
+      "constraint": "UniversityProgramStudyLanguage_languageReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityProgramStudyLanguage",
+      "constraint": "UniversityProgramStudyLanguage_programId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityProgramStudyProfile",
+      "constraint": "UniversityProgramStudyProfile_programId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityRanking",
+      "constraint": "UniversityRanking_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversitySourceRecord",
+      "constraint": "UniversitySourceRecord_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityTranslation",
+      "constraint": "UniversityTranslation_sourceRecordId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityTranslation",
+      "constraint": "UniversityTranslation_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityTuitionProfile",
+      "constraint": "UniversityTuitionProfile_currencyReferenceId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UniversityTuitionProfile",
+      "constraint": "UniversityTuitionProfile_universityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    },
+    {
+      "table": "UserRecord",
+      "constraint": "UserRecord_identityId_fkey",
+      "type": "f",
+      "validated": true,
+      "violations": 0
+    }
+  ],
+  "foreignKeyMatchSemantics": "SIMPLE for all measured FKs",
+  "allViolations": 0,
+  "rawCatalogOutsideGit": true
+}

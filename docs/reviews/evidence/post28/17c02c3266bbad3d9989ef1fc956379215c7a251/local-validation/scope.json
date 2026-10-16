@@ -1,0 +1,11 @@
+{
+  "R03LocalDatabase": "PASSED_BEFORE_REPLAY_APP_DEFAULT_GRANT_DEFECT_FOUND_AFTER_REPLAY",
+  "R04": "BLOCKED_SCHEMA_DRIFT_AND_NOT_VALID",
+  "migrationCount": 109,
+  "prismaParityExitCode": 2,
+  "shadowDiffExecuted": false,
+  "secondDeployExecuted": false,
+  "dbTSuitesExecuted": 0,
+  "cloudAcceptance": false,
+  "productionAcceptance": false
+}

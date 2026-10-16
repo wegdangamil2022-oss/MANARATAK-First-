@@ -1,0 +1,73 @@
+
+[*] Changed the `CertificateAuthorityDelegation` table
+  [*] Altered column `updatedAt` (default changed from `Some(Now)` to `None`)
+
+[*] Changed the `CmsBlockSchema` table
+  [*] Altered column `status` (default changed from `Some(Value(String("ACTIVE")))` to `Some(Value(String("DRAFT")))`)
+
+[*] Changed the `CmsContentNode` table
+  [-] Removed index on columns (publicId)
+  [-] Removed index on columns (slug)
+  [-] Removed index on columns (summary)
+  [-] Removed index on columns (title)
+
+[*] Changed the `CmsLocalizedContent` table
+  [-] Removed index on columns (localizedSlug)
+  [-] Removed index on columns (summary)
+  [-] Removed index on columns (title)
+
+[*] Changed the `CmsPublishedContent` table
+  [-] Removed index on columns (body)
+  [-] Removed index on columns (summary)
+  [-] Removed index on columns (title)
+
+[*] Changed the `InternationalTestEvidenceHistory` table
+  [-] Removed foreign key on columns (testId)
+
+[*] Changed the `InternationalTestGovernance` table
+  [-] Removed foreign key on columns (testId)
+
+[*] Changed the `InternationalTestPublicationSnapshot` table
+  [-] Removed foreign key on columns (id)
+  [-] Removed foreign key on columns (testId)
+
+[*] Changed the `MajorPublicationSnapshot` table
+  [-] Removed foreign key on columns (majorId)
+  [-] Removed foreign key on columns (profileId)
+  [-] Removed foreign key on columns (versionId)
+
+[*] Changed the `NewMajorCandidateDecision` table
+  [-] Removed foreign key on columns (majorId)
+
+[*] Changed the `NotificationChannelDelivery` table
+  [-] Removed foreign key on columns (intentId)
+  [+] Added foreign key on columns (intentId)
+
+[*] Changed the `NotificationRateReservation` table
+  [-] Removed foreign key on columns (intentId)
+  [+] Added foreign key on columns (intentId)
+
+[*] Changed the `OwnerTranslationTransferReceipt` table
+  [*] Renamed index `OwnerTranslationTransferReceipt_ownerDomain_targetId_handoffId_` to `OwnerTranslationTransferReceipt_ownerDomain_targetId_handof_key`
+
+[*] Changed the `ServiceRequestRecord` table
+  [-] Removed index on columns (assignedStaffId, status, dueAt)
+
+[*] Changed the `StudentSupportOwnerReadObservation` table
+  [*] Renamed index `StudentSupportOwnerReadObservation_ownerDomain_status_checkedAt` to `StudentSupportOwnerReadObservation_ownerDomain_status_check_idx`
+
+[*] Changed the `UniversityProgramIntake` table
+  [-] Removed foreign key on columns (programId)
+  [+] Added foreign key on columns (programId)
+  [*] Renamed index `UniversityProgramIntake_programId_status_applicationClose_id_id` to `UniversityProgramIntake_programId_status_applicationClose_i_idx`
+
+[*] Changed the `UniversityProgramStudyLanguage` table
+  [-] Removed foreign key on columns (languageReferenceId)
+  [-] Removed foreign key on columns (programId)
+  [+] Added foreign key on columns (programId)
+  [+] Added foreign key on columns (languageReferenceId)
+  [*] Renamed index `UniversityProgramStudyLanguage_languageReferenceId_programId_id` to `UniversityProgramStudyLanguage_languageReferenceId_programI_idx`
+
+[*] Changed the `UniversityProgramStudyProfile` table
+  [-] Removed foreign key on columns (programId)
+  [+] Added foreign key on columns (programId)

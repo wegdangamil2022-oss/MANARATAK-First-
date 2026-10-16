@@ -1,0 +1,9 @@
+{
+  "R03-role-and-isolation.json": "c2772ff20ab02ca931b36247d2f4557c2c46c234ca4a153fb0cac4e02360d097",
+  "checks-private-log-references.json": "04e8e80adb3bebaa88637a6f152fe5472e72c5f525a78f0cc7fb808eb0d0cb78",
+  "local-identities.json": "0b598b532e7376bfa6ed7dac493823df21bce5e95b1f619815e0fbab6744bf6d",
+  "private-audit-tool-hashes.json": "496c5f8bc2fca883ac48c5186d6f6801d742766b0ea00ae2c25926f0e4e18d37",
+  "scope.json": "5b36b148e1902ebcf624764fc3565d65306c2df285452b7ab0679ccd3ec83fa8",
+  "source-and-client-hashes.json": "ad21ee24d2ca52f1152b87be65b16bb3ff4078da458417af6a1dbafb1311cebb",
+  "source-test-counts.json": "6ef26c3d0c96d6a1745a2f9649030fd42b943058dc36b9f45cecfe70d1de495f"
+}

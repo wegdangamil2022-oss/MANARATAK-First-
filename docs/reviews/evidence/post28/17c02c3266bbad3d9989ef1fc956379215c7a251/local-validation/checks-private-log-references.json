@@ -1,0 +1,197 @@
+{
+  "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+  "rawLogsCommitted": false,
+  "sourceChecks": [
+    {
+      "name": "local-tooling-regressions",
+      "command": [
+        "npx",
+        "--yes",
+        "--package=node@22.16.0",
+        "node",
+        "--test",
+        "tests/database/post28-local-forwarder.test.mjs",
+        "tests/database/post28-isolation.test.mjs",
+        "tests/database/greenfield-migration-parity-source.test.mjs",
+        "tests/database/post28-r04-r05-preparation.test.mjs"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "dirty": false,
+      "startedUtc": "2026-10-16T13:26:30.135135+00:00",
+      "finishedUtc": "2026-10-16T13:26:34.634168+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/17c02c3266bbad3d9989ef1fc956379215c7a251/local-source-final/local-tooling-regressions-20261016T132634612192Z.log",
+      "sha256": "00b0353a1d92ec800534b445d355708d4677e5446160731b644fbb7453daf939"
+    },
+    {
+      "name": "local-eslint",
+      "command": [
+        "npx",
+        "--yes",
+        "--package=node@22.16.0",
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "scripts/database/create-post28-lab.mjs",
+        "scripts/database/post28-local-forwarder.mjs",
+        "tests/database/post28-local-forwarder.test.mjs"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "dirty": false,
+      "startedUtc": "2026-10-16T13:28:10.158887+00:00",
+      "finishedUtc": "2026-10-16T13:28:14.354246+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/17c02c3266bbad3d9989ef1fc956379215c7a251/local-source-final/local-eslint-20261016T132814302987Z.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-quality",
+      "command": [
+        "npx",
+        "--yes",
+        "--package=node@22.16.0",
+        "node",
+        "scripts/quality/verify-source-quality.mjs"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "dirty": false,
+      "startedUtc": "2026-10-16T13:28:10.063813+00:00",
+      "finishedUtc": "2026-10-16T13:28:17.890993+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/17c02c3266bbad3d9989ef1fc956379215c7a251/local-source-final/source-quality-20261016T132817843838Z.log",
+      "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+    },
+    {
+      "name": "source-preflight",
+      "command": [
+        "npx",
+        "--yes",
+        "--package=node@22.16.0",
+        "node",
+        "scripts/ci/source-preflight.mjs"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "dirty": false,
+      "startedUtc": "2026-10-16T13:28:10.141763+00:00",
+      "finishedUtc": "2026-10-16T13:28:22.117354+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/17c02c3266bbad3d9989ef1fc956379215c7a251/local-source-final/source-preflight-20261016T132822095614Z.log",
+      "sha256": "f2e2a1cff26dcfdfc931964ceef27e70a1b377fc87711fe7aee2631825d67403"
+    },
+    {
+      "name": "readiness-inventory",
+      "command": [
+        "npx",
+        "--yes",
+        "--package=node@22.16.0",
+        "node",
+        "scripts/testing/verify-post28-readiness-inventory.mjs"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "dirty": false,
+      "startedUtc": "2026-10-16T13:32:08.472313+00:00",
+      "finishedUtc": "2026-10-16T13:32:09.407480+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/17c02c3266bbad3d9989ef1fc956379215c7a251/local-source-final/readiness-inventory-20261016T133209386144Z.log",
+      "sha256": "1223c3cd45df3195c3df75403e3893a99e67f071e3a63654e115bc640e568089"
+    }
+  ],
+  "databaseChecks": [
+    {
+      "name": "R03-pair",
+      "command": [
+        "node",
+        "scripts/database/post28-preflight.mjs",
+        "--pair",
+        "--require-empty"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "startedUtc": "2026-10-16T13:27:04.375523+00:00",
+      "finishedUtc": "2026-10-16T13:27:04.659521+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-EwrEBJ/R03-pair-20261016T132704657450Z.log",
+      "sha256": "b67f0ff780d413ba2998c022efcda7452300ad55005aae5fa418e15e68bff9a2"
+    },
+    {
+      "name": "R03-app",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r03-app.mjs"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "startedUtc": "2026-10-16T13:27:48.471260+00:00",
+      "finishedUtc": "2026-10-16T13:27:48.698057+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-EwrEBJ/R03-app-20261016T132748695821Z.log",
+      "sha256": "c8e6a3fcb2bc74f99c06f759977778942624710c154e7551a2cd7fd05339ad01"
+    },
+    {
+      "name": "R04-greenfield",
+      "command": [
+        "bash",
+        "scripts/database/verify-greenfield-migration-parity.sh"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "startedUtc": "2026-10-16T13:28:09.453773+00:00",
+      "finishedUtc": "2026-10-16T13:28:22.339337+00:00",
+      "exitCode": 2,
+      "log": "/workspace/scratch/post28/labs/lab-EwrEBJ/R04-greenfield-20261016T132822337352Z.log",
+      "sha256": "4a934c5c3448180230edae82a570298bb204c1a399a510c0426d17b031518f34"
+    },
+    {
+      "name": "R04-readonly-audit",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r04-audit.mjs"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "startedUtc": "2026-10-16T13:30:06.971433+00:00",
+      "finishedUtc": "2026-10-16T13:30:28.521705+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-EwrEBJ/R04-readonly-audit-20261016T133028519328Z.log",
+      "sha256": "54041f22c39ac053dc91ab7cdd08dab7c8686cd758d08cf41122b660f6966524"
+    },
+    {
+      "name": "R04-model-coverage",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-model-coverage.mjs"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "startedUtc": "2026-10-16T13:32:08.024008+00:00",
+      "finishedUtc": "2026-10-16T13:32:08.121242+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-EwrEBJ/R04-model-coverage-20261016T133208119109Z.log",
+      "sha256": "c1483e067a74d89212a6b4da54f5fad645e784926f78e930e3469ed60069a0b6"
+    },
+    {
+      "name": "R03-psql-adapter",
+      "command": [
+        "node",
+        "scripts/database/post28-psql.mjs",
+        "-Atqc",
+        "SELECT current_database(),current_user,version();"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "startedUtc": "2026-10-16T13:35:33.767782+00:00",
+      "finishedUtc": "2026-10-16T13:35:33.991419+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-EwrEBJ/R03-psql-adapter-20261016T133533988802Z.log",
+      "sha256": "9cc7aaf368d82cc1c2326424e1cfb2e81e90d13dc3fe1a31be8954e42776d1dc"
+    },
+    {
+      "name": "R04-schema-role-audit",
+      "command": [
+        "node",
+        "scripts/database/post28-psql.mjs",
+        "-Atqc",
+        "SELECT json_build_object('unexpectedSchemas',(SELECT count(*) FROM pg_namespace WHERE nspname NOT IN ('public','information_schema') AND nspname NOT LIKE 'pg_%'),'appLedgerInsert',has_table_privilege('post28_app','public._prisma_migrations','INSERT'),'appLedgerUpdate',has_table_privilege('post28_app','public._prisma_migrations','UPDATE'),'appLedgerDelete',has_table_privilege('post28_app','public._prisma_migrations','DELETE'),'migrationRole',current_user);"
+      ],
+      "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+      "startedUtc": "2026-10-16T13:36:37.342457+00:00",
+      "finishedUtc": "2026-10-16T13:36:37.551593+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-EwrEBJ/R04-schema-role-audit-20261016T133637549131Z.log",
+      "sha256": "fd223e911f92bf82f41f1c87afa321ee7b7bc7ca56ec6ca27a6cadfdbacee527"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "canonicalSourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+  "applied": false,
+  "prismaValidateExitCode": 0,
+  "gitApplyCheckExitCode": 0,
+  "sha256": {
+    "constraint-validation.REVIEW.sql": "7c7f8bd6c9a3995f9ed3fc2775507f62c1d126a49a09b688e216c07519dac53f",
+    "metadata-reconciliation.REVIEW.sql": "2eb95a1cea46b4aca69feda757518da98d2a5f0baabe273673f860500f8b8bc0",
+    "schema-reconciliation.REVIEW.md": "92da48ceb783254f5b6ea05eb313de5bb6a848e003719fa99d8da94f06b9b64f",
+    "README.md": "f1d4bd54158b9249ae7c5f61eb834cfa69d4a4619b4708892021e70b4a57a026",
+    "candidateSchemaOutsideGitSha256": "541b4d5b40f25d866a01b449bd29993394a20b3d356b015a19f71af592a8384b"
+  }
+}

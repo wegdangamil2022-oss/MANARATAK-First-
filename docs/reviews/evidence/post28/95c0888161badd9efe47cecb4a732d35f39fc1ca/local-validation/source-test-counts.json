@@ -1,0 +1,14 @@
+{
+  "sourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+  "counts": {
+    "role-grant-regressions": {
+      "tests": 51,
+      "pass": 51,
+      "fail": 0,
+      "skipped": 0,
+      "todo": 0,
+      "cancelled": 0
+    }
+  },
+  "distinctCountsMustNotBeSummed": true
+}

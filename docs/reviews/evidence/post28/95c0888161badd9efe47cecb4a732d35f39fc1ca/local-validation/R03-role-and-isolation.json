@@ -1,0 +1,27 @@
+{
+  "kind": "POST28_LOCAL_R03_APPLICATION_AND_ISOLATION",
+  "sourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+  "runId": "4c2fbadb-befc-4a96-8e3e-d3340830a611",
+  "app": {
+    "label": "DB-G",
+    "database": "manaratak_post28_greenfield_test",
+    "role": "post28_app",
+    "serverIdentity": "7697259355466080300",
+    "databaseOid": "16387",
+    "postgresMajor": 16,
+    "timezone": "UTC",
+    "publicTables": 0,
+    "probeReadOnly": true
+  },
+  "grants": {
+    "version": "16.15 (Debian 16.15-1.pgdg13+2)",
+    "replication": "origin",
+    "migratorToShadow": false,
+    "shadowToGreenfield": false,
+    "appToShadow": false,
+    "appSchemaCreate": false,
+    "appDefaultDml": 0
+  },
+  "assertionsPassed": 7,
+  "runtimeDatabaseSuitesExecuted": 0
+}

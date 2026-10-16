@@ -1,0 +1,22 @@
+{
+  "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+  "counts": {
+    "local-tooling-regressions": {
+      "tests": 96,
+      "pass": 96,
+      "fail": 0,
+      "skipped": 0,
+      "todo": 0,
+      "cancelled": 0
+    },
+    "source-preflight": {
+      "tests": 36,
+      "pass": 36,
+      "fail": 0,
+      "skipped": 0,
+      "todo": 0,
+      "cancelled": 0
+    }
+  },
+  "distinctCountsMustNotBeSummed": true
+}

@@ -1,0 +1,43 @@
+{
+  "sourceSha": "17c02c3266bbad3d9989ef1fc956379215c7a251",
+  "runId": "2ad85d94-bb98-4e15-82ee-4a4a4633ef32",
+  "containerId": "ee4853ff33934c2ee21fecd825104a4ee802cb758abd48085d5c2a7416eb1f12",
+  "containerName": "post28-pg16-2ad85d94",
+  "network": "post28-net-2ad85d94",
+  "volume": "post28-data-2ad85d94",
+  "port": 15432,
+  "status": "STOPPED_EVIDENCE_PRESERVED",
+  "createdAt": "2026-10-16T13:26:26.178Z",
+  "containerRunning": false,
+  "privateFilesOutsideGit": true,
+  "targets": [
+    {
+      "label": "DB-G",
+      "database": "manaratak_post28_greenfield_test",
+      "role": "post28_migrator",
+      "serverIdentity": "7697256504203268140",
+      "databaseOid": "16387",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    },
+    {
+      "label": "DB-S",
+      "database": "manaratak_post28_shadow_test",
+      "role": "post28_shadow",
+      "serverIdentity": "7697256504203268140",
+      "databaseOid": "16471",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    }
+  ],
+  "contractCommitted": false,
+  "targetsObservationPhase": "INITIAL_EMPTY_R03_PREFLIGHT",
+  "lastMeasuredTableCounts": {
+    "DB-G": 282,
+    "DB-S": 0
+  }
+}

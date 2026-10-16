@@ -1,0 +1,43 @@
+{
+  "sourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+  "runId": "4c2fbadb-befc-4a96-8e3e-d3340830a611",
+  "containerId": "572cf7aa24982aff3a3a7b199cd8799d55a15293a7cb5cd0afc607c8586de2b8",
+  "containerName": "post28-pg16-4c2fbadb",
+  "network": "post28-net-4c2fbadb",
+  "volume": "post28-data-4c2fbadb",
+  "port": 15433,
+  "status": "EMPTY_TARGETS_VERIFIED",
+  "createdAt": "2026-10-16T13:37:30.034Z",
+  "containerRunning": true,
+  "privateFilesOutsideGit": true,
+  "targets": [
+    {
+      "label": "DB-G",
+      "database": "manaratak_post28_greenfield_test",
+      "role": "post28_migrator",
+      "serverIdentity": "7697259355466080300",
+      "databaseOid": "16387",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    },
+    {
+      "label": "DB-S",
+      "database": "manaratak_post28_shadow_test",
+      "role": "post28_shadow",
+      "serverIdentity": "7697259355466080300",
+      "databaseOid": "16469",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    }
+  ],
+  "contractCommitted": false,
+  "targetsObservationPhase": "INITIAL_EMPTY_R03_PREFLIGHT",
+  "lastMeasuredTableCounts": {
+    "DB-G": 0,
+    "DB-S": 0
+  }
+}

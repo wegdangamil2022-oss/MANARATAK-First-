@@ -1,0 +1,76 @@
+{
+  "sourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+  "rawLogsCommitted": false,
+  "sourceChecks": [
+    {
+      "name": "role-grant-eslint",
+      "command": [
+        "npx",
+        "--yes",
+        "--package=node@22.16.0",
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "scripts/database/create-post28-lab.mjs",
+        "scripts/database/post28-local-forwarder.mjs",
+        "tests/database/post28-local-forwarder.test.mjs"
+      ],
+      "sourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+      "dirty": false,
+      "startedUtc": "2026-10-16T13:38:25.433289+00:00",
+      "finishedUtc": "2026-10-16T13:38:27.253621+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/95c0888161badd9efe47cecb4a732d35f39fc1ca/local-source-final/role-grant-eslint-20261016T133827220084Z.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "role-grant-regressions",
+      "command": [
+        "npx",
+        "--yes",
+        "--package=node@22.16.0",
+        "node",
+        "--test",
+        "tests/database/post28-local-forwarder.test.mjs",
+        "tests/database/post28-isolation.test.mjs"
+      ],
+      "sourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+      "dirty": false,
+      "startedUtc": "2026-10-16T13:38:25.428140+00:00",
+      "finishedUtc": "2026-10-16T13:38:28.768705+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/95c0888161badd9efe47cecb4a732d35f39fc1ca/local-source-final/role-grant-regressions-20261016T133828750516Z.log",
+      "sha256": "4cb9b6d1e6735339b7a816aeda339908ee462a4005edf6779c1a2ab0dd57fb1b"
+    }
+  ],
+  "databaseChecks": [
+    {
+      "name": "R03-app-defaults",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r03-app-defaults.mjs"
+      ],
+      "sourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+      "startedUtc": "2026-10-16T13:38:51.803843+00:00",
+      "finishedUtc": "2026-10-16T13:38:52.009708+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-NlhtLs/R03-app-defaults-20261016T133852007851Z.log",
+      "sha256": "3a1b43e5d24b84f6f0b71ff5cc311c3e880cb9396391cc47e30112ec66279ea2"
+    },
+    {
+      "name": "review-schema-validate",
+      "command": [
+        "node",
+        "node_modules/prisma/build/index.js",
+        "validate",
+        "--schema",
+        "/workspace/scratch/post28/local-review-17c02c32/candidate.schema.prisma"
+      ],
+      "sourceSha": "95c0888161badd9efe47cecb4a732d35f39fc1ca",
+      "startedUtc": "2026-10-16T13:42:03.731392+00:00",
+      "finishedUtc": "2026-10-16T13:42:04.339307+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-NlhtLs/review-schema-validate-20261016T134204337315Z.log",
+      "sha256": "bca2d6a696b8e38559889a8596f5cb024abcbbab71234b7780c2db157c47cf09"
+    }
+  ]
+}
