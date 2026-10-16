@@ -492,6 +492,61 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Source only, unapplied. Preserve stable program/intake identities, language links and audit/outbox evidence. Drain writers and recover through a reviewed compatible backup or forward fix; no destructive rollback or backfill is authorized."
+    },
+    "20261013200000_certificate_authority_delegations": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Preserve delegation identity, independent approvals, asset checksums and certificate authority history, including EAP reference/lifecycle guards. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261013210000_student_support_owner_read_health": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Preserve private student ownership and owner-read observation state; do not confuse missing observations with healthy owner reads. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261014010000_owner_translation_receipt": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Preserve unique owner/handoff receipts, approval/reviewer identity and applied/no-change digests; do not delete replay evidence or enable translation authoring. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261014090000_study_destination_governance_source_only": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Retain revision, governance provenance and city references while compatible old readers run; no blanket approval backfill or destructive removal of governance. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261014193000_section27_tracker_cycles": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Preserve LEGACY snapshots, cycle-specific tracker uniqueness, private document bindings, consent and retention history; do not collapse cycles or discard bindings. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261015020000_search_request_actor_boundary": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Preserve actor ownership and private historic NULL ownership; never backfill a guessed actor or expose records during an application rollback. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261015020000_student_tool_test_discovery": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Preserve owner/test revisions, opt-in review decisions, unique links and independent reviewer evidence in the student-tools owner. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261015020100_service_test_discovery": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Preserve owner/test revisions, opt-in review decisions, unique links and independent reviewer evidence in the services owner. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261015030000_student_document_review": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Preserve consent windows, retention bounds and version/asset-bound human attestations; do not drop private review evidence. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261015031000_scholarship_reference_lifecycle": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Preserve immutable scholarship identity, approved reference transitions and anti-deletion/history triggers; do not transfer private student cycles or remove approved decisions. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261015100000_student_document_asset_boundary": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source classification only; no database execution or observed application state asserted. Preserve owner bindings, restrictive asset FK and EAP lifecycle guards. Inventory existing orphans before any separate VALIDATE; do not invent asset references, delete bindings or remove safety guards to roll back. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
     }
   }
 }
