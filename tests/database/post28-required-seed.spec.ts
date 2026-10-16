@@ -34,3 +34,22 @@ describe('Post28 real scanner and bounded JSON sanitizer contract',()=>{
   await expect(security.sanitize(new AssetStorageLocator(AssetStorageZone.QUARANTINE,'expected','../../etc/passwd'))).rejects.toThrow('PATH_INVALID');
  });
 });
+
+describe('Prisma-compatible P7 advisory locks',()=>{
+ it('casts the real owner lock return value without changing lock identity',async()=>{
+  const {PrismaReferenceOwnerReviewGateway}=await import('../../packages/infrastructure/src/reference-data/PrismaReferenceOwnerReviewGateway');
+  const queries:string[]=[];
+  const gateway=new PrismaReferenceOwnerReviewGateway({$queryRaw:async(strings:TemplateStringsArray)=>{queries.push(strings.join(''));return [];}} as never,true);
+  await gateway.lock('review-id');
+  expect(queries).toHaveLength(2);
+  expect(queries.every(sql=>sql.includes('pg_advisory_xact_lock')&&sql.endsWith('::text'))).toBe(true);
+ });
+ it('casts dispatcher receipt lock before screening and preserving the transaction',async()=>{
+  const {PrismaImportScreeningReceiptStore}=await import('../../packages/infrastructure/src/import-foundation/PrismaImportScreeningReceiptStore');
+  const queries:string[]=[];
+  const tx={$queryRaw:async(strings:TemplateStringsArray)=>{queries.push(strings.join(''));return [];},importScreeningReceipt:{findUnique:async()=>({requestHash:'conflict',result:{}})}};
+  const store=new PrismaImportScreeningReceiptStore({$transaction:async(work:(value:typeof tx)=>unknown)=>work(tx)} as never);
+  await expect(store.accept({ownerDomain:'REFERENCE_DATA',handoffId:'row',execution:{executionId:'run',attempt:1}} as never,async()=>({}))).rejects.toThrow('CONTENT_CONFLICT');
+  expect(queries[0]).toContain('::text');
+ });
+});

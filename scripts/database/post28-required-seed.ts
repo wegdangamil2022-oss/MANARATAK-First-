@@ -65,7 +65,7 @@ if(mode==='plan'){
    const results=[];
    for(const {name} of tables){
     const identifier='"'+name.replaceAll('"','""')+'"';
-    const rows=await tx.$queryRawUnsafe(`SELECT count(*)::integer AS count,md5(COALESCE(string_agg(md5(to_jsonb(t)::text),'' ORDER BY md5(to_jsonb(t)::text)),'')) AS digest FROM public.${identifier} t`);
+    const rows=await tx.$queryRawUnsafe(`SELECT count(*)::integer AS count,encode(sha256(convert_to(COALESCE(string_agg(encode(sha256(convert_to(to_jsonb(t)::text,'UTF8')),'hex'),'' ORDER BY encode(sha256(convert_to(to_jsonb(t)::text,'UTF8')),'hex')),''),'UTF8')),'hex') AS digest FROM public.${identifier} t`);
     results.push({table:name,...(rows as any[])[0]});
    }
    return results;
@@ -74,6 +74,7 @@ if(mode==='plan'){
  try{
   const before=await fingerprint();
   if(state.completed){assert.equal(hash(JSON.stringify(before)),state.finalFingerprint,'POST28_SEED_STATE_CHANGED');}
+  if(!state.completed)save();
   fs.writeFileSync(path.join(output,state.completed?'before-reapply.json':'baseline.json'),JSON.stringify(before,null,2)+'\n',{mode:0o600});
   const executor=new AtomicAuditedOutboxMutationExecutor(new PrismaAtomicPersistenceUnitOfWork(db),new PrismaAuditRecordRepository(db),new PrismaTransactionalOutboxStore(db));
   const reviews=new ReferenceOwnerReviewUseCases(new PrismaReferenceOwnerReviewGateway(db),new AtomicDomainMutationCoordinator(executor));

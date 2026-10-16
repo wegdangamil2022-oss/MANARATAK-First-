@@ -15,8 +15,8 @@ export class PrismaReferenceOwnerReviewGateway implements IReferenceOwnerReviewG
   }
   async lock(key: string) {
     if (!this.bound) throw new Error('REFERENCE_OWNER_TRANSACTION_REQUIRED');
-    await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'reference-data:owner-review'}, 0))`;
-    await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`;
+    await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'reference-data:owner-review'}, 0))::text`;
+    await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))::text`;
   }
   async screening(id: string) {
     const receipt = await this.prisma.importScreeningReceipt.findUnique({ where: { id } });
