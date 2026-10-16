@@ -1,0 +1,12 @@
+{
+  "sourceSha": "ce219ecefa5beb446502132ecc3d04c6b7f7de88",
+  "runId": "dcbe9b15-d53d-4c59-b7a4-5a4b021fc61a",
+  "step": "historical-fixture-transaction",
+  "exitCode": 1,
+  "postgresSqlState": "23514",
+  "constraint": "OwnerTranslationTransferReceipt_ownerDomain_check",
+  "cause": "cms is not a permitted translation receipt owner; immutable SQL allows UNIVERSITY/MAJOR",
+  "resolution": "Fixture now points to UNIVERSITY and corresponding UniversityTranslation, plus regression test; historical SQL unchanged",
+  "retry": "New separate lab on source40f93b65; stage108/fixtures46/stage109 succeeded",
+  "archivedPrivateLog": "/workspace/scratch/post28/labs/lab-VUd19q/R05-baseline/fixture-error.log"
+}

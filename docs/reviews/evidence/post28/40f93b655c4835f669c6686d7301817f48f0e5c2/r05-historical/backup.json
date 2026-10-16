@@ -1,0 +1,14 @@
+{
+  "sourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
+  "runId": "57cf058e-7d41-41c3-a410-ee6523853057",
+  "kind": "POST28_R05_CUSTOM_BACKUP",
+  "archiveSha256": "d7ed5aef3d3424ea681c88364f33c6331b449a13d99de851a9ba4e8feb43c634",
+  "bytes": 1046880,
+  "archiveReadable": true,
+  "sqlMaterializationSha256": "15156ea82aa4ff2c731e2a3997631dcf1d561bb67c756926e2459a56dae0fc23",
+  "sourceTableContentSha256": "050b565a0e5be29712d61203f61037e72b05c8f9f7b7543dd985c978d27b80db",
+  "sourceCatalogSha256": "2aa2f4305b7f39d3353a0e052e856148e77aedb92569a060146f0d4fc2a13f1f",
+  "restoreExecuted": false,
+  "representativeFixturesPresent": true,
+  "fixtureManifestSha256": "920fa939286fc599a0914ce7ce0b7699bf0a4db3718047aa4b5a65cf68e9cda8"
+}
