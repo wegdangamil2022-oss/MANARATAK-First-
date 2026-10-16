@@ -1,0 +1,16 @@
+{
+  "name": "native-complete-c1",
+  "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+  "command": [
+    "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+    "scripts/release/post28-diagnostic-build.mjs",
+    "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\c1-native-complete"
+  ],
+  "startedAt": "2026-10-16T22:21:44.679Z",
+  "finishedAt": "2026-10-16T22:22:21.132Z",
+  "exitCode": 0,
+  "node": "v22.16.0",
+  "platform": "win32",
+  "architecture": "x64",
+  "logSha256": "c841675295ed96e51e72324e3d68d07e9fc3fafc867cb5e15d27156d4ab62b78"
+}

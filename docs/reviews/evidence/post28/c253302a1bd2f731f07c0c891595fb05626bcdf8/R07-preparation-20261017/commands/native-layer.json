@@ -1,0 +1,16 @@
+{
+  "name": "native-layer",
+  "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+  "command": [
+    "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+    "scripts/release/post28-prepare-runtime-layer.mjs",
+    "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\c1-native-complete"
+  ],
+  "startedAt": "2026-10-16T22:22:28.641Z",
+  "finishedAt": "2026-10-16T22:24:01.893Z",
+  "exitCode": 0,
+  "node": "v22.16.0",
+  "platform": "win32",
+  "architecture": "x64",
+  "logSha256": "1267f48ed092309b01a425f7b6ec0f3c58eed15171ec0f629cd14c25ca1c537a"
+}

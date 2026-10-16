@@ -1,0 +1,24 @@
+{
+  "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+  "observedAt": "2026-10-16T22:28:18.393Z",
+  "checks": [
+    {
+      "name": "Vercel Preview Comments",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/runs/117223722389"
+    }
+  ],
+  "statuses": [
+    {
+      "context": "Vercel",
+      "state": "success",
+      "description": "Deployment has completed",
+      "url": "https://vercel.com/manatratk/manaratak-2-preview-2026/7qFtpY1xKMnz71ZF2RbxjrwVP3qu",
+      "createdAt": "2026-10-16T22:23:33Z"
+    }
+  ],
+  "fullSourceCiVerified": false,
+  "artifactBootVerified": false,
+  "explicitDeploymentCommandIssued": false
+}

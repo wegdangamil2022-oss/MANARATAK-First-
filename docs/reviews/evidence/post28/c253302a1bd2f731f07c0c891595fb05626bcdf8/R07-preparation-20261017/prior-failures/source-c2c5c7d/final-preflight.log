@@ -1,0 +1,5 @@
+SOURCE_ARCH_GUARD_OPERATIONAL_PRISMA_CONTRACT_DRIFT=1
+SOURCE_ARCH_GUARD_OPERATIONAL_PRISMA_UNCLASSIFIED=1
+SOURCE_ARCHITECTURE_GUARD=FAIL 2
+FAIL operational-prisma-contract-drift scripts/release/build-immutable-artifacts.mjs:1 :: Tooling access classification or required gates no longer match reviewed source.
+FAIL operational-prisma-unclassified scripts/release/lib/RuntimeModules.mjs:8 :: Direct Prisma use in scripts/** must be explicitly classified in the operational tooling policy.

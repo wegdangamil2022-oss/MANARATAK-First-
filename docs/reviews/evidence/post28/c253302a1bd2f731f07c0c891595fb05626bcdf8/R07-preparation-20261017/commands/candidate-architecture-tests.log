@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: blocks Prisma outside Infrastructure but allows Infrastructure ownership adapter
+ok 1 - blocks Prisma outside Infrastructure but allows Infrastructure ownership adapter
+  ---
+  duration_ms: 19.1961
+  type: 'test'
+  ...
+# Subtest: blocks display-label equality used to resolve a relationship
+ok 2 - blocks display-label equality used to resolve a relationship
+  ---
+  duration_ms: 11.7391
+  type: 'test'
+  ...
+# Subtest: blocks live public mocks but allows the explicit prototype adapter
+ok 3 - blocks live public mocks but allows the explicit prototype adapter
+  ---
+  duration_ms: 12.4136
+  type: 'test'
+  ...
+# Subtest: blocks localStorage as P15 live state
+ok 4 - blocks localStorage as P15 live state
+  ---
+  duration_ms: 8.555
+  type: 'test'
+  ...
+# Subtest: blocks a static prototype import even if the mode switch also has a dynamic import
+ok 5 - blocks a static prototype import even if the mode switch also has a dynamic import
+  ---
+  duration_ms: 10.0265
+  type: 'test'
+  ...
+# Subtest: blocks Admin persistence and Application bypass imports
+ok 6 - blocks Admin persistence and Application bypass imports
+  ---
+  duration_ms: 8.8433
+  type: 'test'
+  ...
+# Subtest: blocks AI vendor SDK/endpoints outside P17 and allows the ai-platform adapter
+ok 7 - blocks AI vendor SDK/endpoints outside P17 and allows the ai-platform adapter
+  ---
+  duration_ms: 10.7537
+  type: 'test'
+  ...
+# Subtest: blocks certificate generation inside P13
+ok 8 - blocks certificate generation inside P13
+  ---
+  duration_ms: 10.3403
+  type: 'test'
+  ...
+# Subtest: scripts/** rejects unclassified direct Prisma and presentation bypasses
+ok 9 - scripts/** rejects unclassified direct Prisma and presentation bypasses
+  ---
+  duration_ms: 10.6598
+  type: 'test'
+  ...
+# Subtest: scripts/** permits explicitly classified direct Prisma tooling
+ok 10 - scripts/** permits explicitly classified direct Prisma tooling
+  ---
+  duration_ms: 10.2478
+  type: 'test'
+  ...
+# Subtest: reviewed reference-only Prisma strings grant no database implementation access
+ok 11 - reviewed reference-only Prisma strings grant no database implementation access
+  ---
+  duration_ms: 20.8213
+  type: 'test'
+  ...
+# Subtest: reviewed contracts fail closed when their required isolation gates disappear
+ok 12 - reviewed contracts fail closed when their required isolation gates disappear
+  ---
+  duration_ms: 9.5257
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 242.1216

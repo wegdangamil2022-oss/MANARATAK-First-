@@ -1,0 +1,18 @@
+{
+  "name": "native-https",
+  "sourceSha": "c253302a1bd2f731f07c0c891595fb05626bcdf8",
+  "command": [
+    "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+    "scripts/release/post28-static-boot.mjs",
+    "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\c1-native-complete",
+    "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\diagnostic-tls.crt",
+    "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\diagnostic-tls.key"
+  ],
+  "startedAt": "2026-10-16T22:22:28.687Z",
+  "finishedAt": "2026-10-16T22:22:31.222Z",
+  "exitCode": 0,
+  "node": "v22.16.0",
+  "platform": "win32",
+  "architecture": "x64",
+  "logSha256": "b1e41e570d2fe0c22a19b82990649210511538bdb824c1612a2db5679cf12f63"
+}

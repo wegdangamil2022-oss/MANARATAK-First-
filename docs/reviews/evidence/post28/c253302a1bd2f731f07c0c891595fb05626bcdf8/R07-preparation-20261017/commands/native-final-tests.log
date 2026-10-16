@@ -1,0 +1,112 @@
+TAP version 13
+# Subtest: POSIX npm execution keeps argument boundaries
+ok 1 - POSIX npm execution keeps argument boundaries
+  ---
+  duration_ms: 1.7429
+  type: 'test'
+  ...
+# Subtest: Windows npm invokes JavaScript through Node without shell interpolation
+ok 2 - Windows npm invokes JavaScript through Node without shell interpolation
+  ---
+  duration_ms: 142.04
+  type: 'test'
+  ...
+# Subtest: missing Windows npm CLI fails before execution
+ok 3 - missing Windows npm CLI fails before execution
+  ---
+  duration_ms: 0.5146
+  type: 'test'
+  ...
+# Subtest: GNU tar roundtrip accepts absolute Windows output locations via local paths
+ok 4 - GNU tar roundtrip accepts absolute Windows output locations via local paths
+  ---
+  duration_ms: 389.5458
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: valid
+ok 5 - runtime layer policy: valid
+  ---
+  duration_ms: 45.8875
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: source
+ok 6 - runtime layer policy: source
+  ---
+  duration_ms: 7.097
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: os
+ok 7 - runtime layer policy: os
+  ---
+  duration_ms: 5.3553
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: architecture
+ok 8 - runtime layer policy: architecture
+  ---
+  duration_ms: 4.0054
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: lock
+ok 9 - runtime layer policy: lock
+  ---
+  duration_ms: 17.7769
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: schema
+ok 10 - runtime layer policy: schema
+  ---
+  duration_ms: 13.8477
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: engine
+ok 11 - runtime layer policy: engine
+  ---
+  duration_ms: 5.7914
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: missing-engine
+ok 12 - runtime layer policy: missing-engine
+  ---
+  duration_ms: 4.4291
+  type: 'test'
+  ...
+# Subtest: runtime layer policy: external-fallback
+ok 13 - runtime layer policy: external-fallback
+  ---
+  duration_ms: 6.7483
+  type: 'test'
+  ...
+# Subtest: locked Redis digest dependency loads and executes its native implementation
+ok 14 - locked Redis digest dependency loads and executes its native implementation
+  ---
+  duration_ms: 1.9308
+  type: 'test'
+  ...
+# Subtest: runtime imports follow real esbuild output, excluding builtins and unused declarations
+ok 15 - runtime imports follow real esbuild output, excluding builtins and unused declarations
+  ---
+  duration_ms: 63.678
+  type: 'test'
+  ...
+# Subtest: missing API output or required Prisma import fails the runtime contract
+ok 16 - missing API output or required Prisma import fails the runtime contract
+  ---
+  duration_ms: 0.8073
+  type: 'test'
+  ...
+# Subtest: artifact handler serves actual assets and refuses API/asset fallback and revision drift
+ok 17 - artifact handler serves actual assets and refuses API/asset fallback and revision drift
+  ---
+  duration_ms: 145.2864
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1057.2435

@@ -1,0 +1,15 @@
+{
+  "name": "final-preflight",
+  "sourceSha": "c2c5c7de70d81b5c8110eae6dd589dab0ec60e11",
+  "command": [
+    "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+    "scripts/ci/source-preflight.mjs"
+  ],
+  "startedAt": "2026-10-16T22:15:51.354Z",
+  "finishedAt": "2026-10-16T22:15:57.042Z",
+  "exitCode": 1,
+  "node": "v22.16.0",
+  "platform": "win32",
+  "architecture": "x64",
+  "logSha256": "6ab70677637ce6edd8e637d9103692a07ba39d285faa8a58757adc358fcefb31"
+}
