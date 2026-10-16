@@ -53,7 +53,8 @@ NODE
 # The replayed database must be structurally identical to the canonical datamodel.
 # Connection URLs stay in environment/private Node memory, never OS arguments.
 # The wrapper uses --from-schema-datasource and --to-schema-datamodel for replay;
-# --from-migrations and --shadow-database-url are private Schema Engine RPC inputs.
+# A fresh DB-S deploy + exact ledger replaces automatic --from-migrations /
+# --shadow-database-url reset, which requires prohibited database CREATE privileges.
 node scripts/database/prisma-env-diff.mjs replayed > "$OUT_DIR/replayed-db-to-schema.diff.sql"
 node scripts/database/prisma-env-diff.mjs migrations > "$OUT_DIR/migrations-to-schema.diff.sql"
 

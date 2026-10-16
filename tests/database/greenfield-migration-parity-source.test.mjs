@@ -36,3 +36,12 @@ test('runbook makes migration replay authoritative and rejects db push as produc
   assert.match(runbook, /Source verification alone does not claim database parity/);
   assert.match(runbook, /db push` is not an acceptable staging\/production provisioning mechanism/);
 });
+
+ test('fresh shadow replay refuses reuse and verifies ledger without reset or role elevation',()=>{
+  const wrapper=readFileSync(join(root,'scripts/database/prisma-env-diff.mjs'),'utf8');
+  assert.match(wrapper,/label:'DB-S'[\s\S]*requireEmpty:true/);
+  assert.match(wrapper,/requireDatabaseMutationGate\('post28 fresh shadow replay',\{allowedPurposes:\['migrate'\]\},shadowEnv\)/);
+  assert.match(wrapper,/verifyMigrationLedger\(migrationInventory\(\),JSON.parse\(ledger.stdout\)\)/);
+  assert.match(wrapper,/mode==='migrations'\?prismaDiffArguments\('replayed'\):args/);
+  assert.doesNotMatch(wrapper,/ALTER ROLE|GRANT CREATE|migrate','reset/);
+ });

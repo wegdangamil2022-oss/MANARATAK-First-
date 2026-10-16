@@ -2,11 +2,12 @@
 import Module from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
-import {execFileSync} from 'node:child_process';
+import {execFileSync,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {preflightTargets} from './post28-isolation.mjs';
 import {readDatabaseIdentity} from './post28-preflight.mjs';
 import {requireDatabaseMutationGate} from '../lib/database-mutation-gate.mjs';
+import {migrationInventory,verifyMigrationLedger} from './post28-migration-inventory.mjs';
 import {requirePost28LocalExecution} from './post28-neon-policy.mjs';
 
 export function prismaDiffArguments(mode, env = process.env) {
@@ -35,13 +36,34 @@ if(process.argv[1]===fileURLToPath(import.meta.url)) {
     requirePost28LocalExecution(contract);
     await preflightTargets(contract,[{label:'DB-G',url:process.env.GREENFIELD_DATABASE_URL},
       {label:'DB-S',url:process.env.GREENFIELD_SHADOW_DATABASE_URL}],process.env,sha,readDatabaseIdentity);
-    process.env.DATABASE_URL=process.env.GREENFIELD_DATABASE_URL;
-    process.env.DIRECT_URL=process.env.GREENFIELD_DATABASE_URL;
+    if(mode==='migrations') {
+      // Prisma's automatic shadow reset drops public, requiring database CREATE.
+      // Replay only into a freshly verified empty DB-S, without reset or elevated roles.
+      await preflightTargets(contract,[{label:'DB-S',url:process.env.GREENFIELD_SHADOW_DATABASE_URL}],
+        process.env,sha,readDatabaseIdentity,{requireEmpty:true});
+      const shadowEnv={...process.env,DATABASE_URL:process.env.GREENFIELD_SHADOW_DATABASE_URL,
+        DIRECT_URL:process.env.GREENFIELD_SHADOW_DATABASE_URL,
+        DATABASE_MUTATION_TARGET:`${contract.targets['DB-S'].host}:${contract.targets['DB-S'].port}/${contract.targets['DB-S'].database}`};
+      requireDatabaseMutationGate('post28 fresh shadow replay',{allowedPurposes:['migrate']},shadowEnv);
+      const replay=spawnSync(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy',
+        '--schema=packages/infrastructure/prisma/schema.prisma'],{env:shadowEnv,encoding:'utf8'});
+      if(replay.status!==0)throw new Error('POST28_SHADOW_REPLAY_FAILED');
+      const ledgerSql='SELECT COALESCE(json_agg(row_to_json(x) ORDER BY started_at,id),json_build_array()) FROM (SELECT id,migration_name,checksum,started_at,finished_at,rolled_back_at,applied_steps_count FROM public._prisma_migrations) x';
+      const ledger=spawnSync(process.execPath,['scripts/database/post28-psql.mjs','--shadow','-Atqc',ledgerSql],{env:process.env,encoding:'utf8'});
+      if(ledger.status!==0)throw new Error('POST28_SHADOW_LEDGER_READ_FAILED');
+      const comparison=verifyMigrationLedger(migrationInventory(),JSON.parse(ledger.stdout));
+      console.error('POST28_SHADOW_LEDGER='+JSON.stringify(comparison));
+      process.env.DATABASE_URL=shadowEnv.DATABASE_URL;
+      process.env.DIRECT_URL=shadowEnv.DIRECT_URL;
+    } else {
+      process.env.DATABASE_URL=process.env.GREENFIELD_DATABASE_URL;
+      process.env.DIRECT_URL=process.env.GREENFIELD_DATABASE_URL;
+    }
     for(const stream of [process.stdout,process.stderr]) {
       const write=stream.write.bind(stream);
       stream.write=(chunk,...rest)=>write(String(chunk).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]'),...rest);
     }
-    runPrismaMain(path.resolve('node_modules/prisma/build/index.js'),args);
+    runPrismaMain(path.resolve('node_modules/prisma/build/index.js'),mode==='migrations'?prismaDiffArguments('replayed'):args);
   } catch(error) {
     console.error(error.message?.match(/^(?:POST28_|TARGET_AND_SHADOW_)[A-Z_]+$/)?.[0]??'POST28_DIFF_FAILED');process.exitCode=1;
   }

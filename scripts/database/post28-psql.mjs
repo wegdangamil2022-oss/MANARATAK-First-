@@ -6,9 +6,12 @@ try {
   const contract=JSON.parse(fs.readFileSync(process.env.POST28_TARGET_CONTRACT_FILE,'utf8'));
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())throw new Error('POST28_CLEAN_SOURCE_REQUIRED');
-  validateTargetDeclaration(contract,'DB-G',process.env.GREENFIELD_DATABASE_URL,process.env,sha);
-  const url=new URL(process.env.GREENFIELD_DATABASE_URL);
   const args=process.argv.slice(2);
+  const shadow=args[0]==='--shadow';if(shadow)args.shift();
+  const label=shadow?'DB-S':'DB-G';
+  const raw=shadow?process.env.GREENFIELD_SHADOW_DATABASE_URL:process.env.GREENFIELD_DATABASE_URL;
+  validateTargetDeclaration(contract,label,raw,process.env,sha);
+  const url=new URL(raw);
   if(args.length!==2 || args[0]!=='-Atqc' || !/^\s*SELECT\b/i.test(args[1]))throw new Error('POST28_READ_ONLY_SQL_REQUIRED');
   const connectionEnvironment={...process.env};
   for(const key of ['PGSERVICE','PGSERVICEFILE','PGSYSCONFDIR','PGHOSTADDR','PGPASSFILE'])delete connectionEnvironment[key];

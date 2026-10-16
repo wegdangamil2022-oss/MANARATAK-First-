@@ -36,3 +36,9 @@
 20261016150000_post28_schema_reconciliation: default CMS واحد و9 VALIDATE. يحفظ default شهادة التفويض. كل قيد يسبقه count صريح مطابق لتعبيره أو FK MATCH SIMPLE؛ NULL في CHECK ليس مخالفة. أي مخالفة ترفع استثناء وتلغي transaction كاملة؛ لا حذف/إصلاح صفوف ولا تعطيل trigger/FK. يحتفظ FK إعدادات النظام بـDEFERRABLE INITIALLY DEFERRED.
 
 lock_timeout=3s وstatement_timeout=30s؛ لا يثبت نجاح مختبر فارغ قبول ترقية بيانات قديمة. المعاينة التشغيلية/النسخ الاحتياطي وحل الأيتام وتفويض منفصل واجبة قبل أي هدف مشترك. لا reverse SQL مزعوم؛ على المحلي أعد توفير مختبر جديد. تفاصيل التنفيذ النهائي تُضاف بعد SHA مجمد.
+
+## إصلاح shadow بعد التجربة الأولى
+
+على SHA 8dde53cb نجحت 110 migrations وreplayed diff، ثم فشل shadow الآلي P3006: حذف Prisma مخطط public ولم يستطع الدور المحدود إنشاءه بسبب حظر database CREATE. لم تُمنح صلاحيات أوسع ولم تُعد تهيئة الهدف الفاشل.
+
+أصبح نمط migrations يعيد تشغيل المجلد بواسطة migrate deploy على DB-S مثبتة وفارغة حديثًا فقط، ويتحقق من ledger الكامل بالاسم والترتيب والبصمة ثم يقارن DB-S بـschema. هذا replay مستقل دون automatic shadow reset؛ ليس ادعاء نجاح RPC from-migrations القديم. يُرفض S غير الفارغ. G/S تبقيان مستقلتين، ويفحص gate هوية هدف S قبل deploy. الإصلاح يستلزم SHA ومختبرًا جديدين؛ الأدلة القديمة تبقى منسوبة إلى SHA الأولى.
