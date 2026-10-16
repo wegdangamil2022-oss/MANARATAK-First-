@@ -911,11 +911,20 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     // P18 tests keep private replay results in encrypted owner custody, rather than generic responseBody JSON.
     v1Router.use('/admin', (req, res, next) => {
       if (/^\/student-tools\/[^/]+\/test\/?$/.test(req.path)) return next();
+      // Finance commands authorize their action before replaying owner-ledger receipts.
+      // A generic transport replay would bypass that current action permission.
+      if (/^\/finance(?:\/|$)/i.test(req.path)) return next();
       const command = createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true });
       // Match the existing case-insensitive Scholarship mount before serving
       // receipts, which contain owner data subject to current permissions.
       if (/^\/scholarships(?:\/|$)/i.test(req.path)) {
         return requireAdminPermission('admin:scholarships:manage')(req, res, () => command(req, res, next));
+      }
+      if (/^\/universities(?:\/|$)/i.test(req.path)) {
+        return requireAdminPermission('admin:universities:manage')(req, res, () => command(req, res, next));
+      }
+      if (/^\/student-document-reviews(?:\/|$)/i.test(req.path)) {
+        return requireAdminPermission('admin:students:documents:review')(req, res, () => command(req, res, next));
       }
       return command(req, res, next);
     });
