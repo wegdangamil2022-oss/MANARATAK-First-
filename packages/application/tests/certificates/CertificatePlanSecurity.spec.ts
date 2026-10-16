@@ -101,7 +101,7 @@ describe('section 14 authority and privacy regressions', () => {
       'issuer',
       { status: 'ACTIVE' },
       expect.objectContaining({
-        issuerApproval: { evidenceAssetId: 'evidence', authorityReference: 'authority' },
+        issuerApproval: expect.objectContaining({ evidenceAssetId: 'evidence', authorityReference: 'authority', evidenceChecksum: null }),
       }),
     );
   });
@@ -164,7 +164,7 @@ describe('section 14 authority and privacy regressions', () => {
   for (const kind of ['PDF', 'PREVIEW', 'QR'] as const) {
     it(`stores ${kind} using its intended security classification`, async () => {
       const ingest: any = {
-        requestUploadLocator: vi.fn(async () => {
+        requestGeneratedCertificateUpload: vi.fn(async () => {
           throw new Error('stop before network');
         }),
       };
@@ -186,7 +186,7 @@ describe('section 14 authority and privacy regressions', () => {
           },
         }),
       ).rejects.toThrow('stop before network');
-      expect(ingest.requestUploadLocator.mock.calls[0][0].classification).toBe(
+      expect(ingest.requestGeneratedCertificateUpload.mock.calls[0][0].classification).toBe(
         kind === 'QR' ? 'PUBLIC' : 'INTERNAL',
       );
     });
@@ -609,7 +609,7 @@ describe('scheduled bounded expiry maintenance', () => {
     };
     const repo = new PrismaCertificateRepository({
       $transaction: async (fn: any) => fn(tx),
-    } as any);
+    } as any, { read: async () => ({ retentionDays: 30 }) });
     expect(await repo.expireDue(new Date('2026-10-10'), 'maintenance')).toBe(1);
     expect(tx.$queryRaw.mock.calls[0][0].join('')).toContain('LIMIT 100 FOR UPDATE SKIP LOCKED');
     expect(tx.certificateVerificationLog.findMany).toHaveBeenCalledWith(

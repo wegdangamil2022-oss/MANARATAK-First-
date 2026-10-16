@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
 import type { UniversityProgramWorkspaceUseCases } from '@manaratak/application';
-import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal';
+import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
 const id = z.string().trim().min(1).max(240);
 const query = z
   .object({

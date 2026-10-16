@@ -135,3 +135,16 @@ test('inline immutable action lists enumerate mutations and reject nonliteral me
   assert.equal(buildAuditInventory({...fixture, routerSources:{'TestRouter.ts':source}}).length, 2);
   assert.throws(() => buildAuditInventory({...fixture, routerSources:{'TestRouter.ts':source.replace("'archive'", 'runtimeAction')}}), /DYNAMIC_ROUTE/);
 });
+
+test('finite study destination owner permission factory is verified, fingerprinted, and cannot silently become a no-op', () => {
+  const appSource = "v1Router.use('/admin/study-destinations', StudyDestinationAdminRouter.create({}));";
+  const router = "const router = Router(); const guard = (action: string) => SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:' + action, evaluatorOverride); router.post('/:iso2Code/publish', guard('publish'), handler);";
+  const input = {...fixture, appSource, routerSources: {'StudyDestinationAdminRouter.ts': router}};
+  const rows = buildAuditInventory(input);
+  assert.equal(rows.length, 1);
+  assert.deepEqual(rows[0].permissionEvidence, ['admin:study-destinations:publish']);
+  assert.equal(rows[0].guardPolicyFingerprint.length, 64);
+  assert.throws(() => buildAuditInventory({...input, routerSources: {'StudyDestinationAdminRouter.ts':
+    router.replace("SecurityMiddlewareFactory.createAdminPermissionGuard('admin:study-destinations:' + action, evaluatorOverride)", '(_req, _res, next) => next()')
+  }}), /PERMISSION_GUARD_UNVERIFIED/);
+});
