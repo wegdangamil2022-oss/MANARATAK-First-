@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'dec03-free-study': {files: ['tests/database/post28-dec03-free-study.database.spec.mjs'],minimumCases:8},
   'finance-local-closure': {files: ['tests/database/post28-finance-local-closure.database.spec.mjs'],minimumCases:14},
   'reference-import-closure': {files: ['tests/database/post28-reference-import-closure.database.spec.mjs'],minimumCases:18},
   'finance-provider-safety': {files: ['tests/database/post28-finance-provider-safety.database.spec.mjs'],minimumCases:6},
