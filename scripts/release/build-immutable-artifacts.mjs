@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {assertRegularArtifactInputs} from './lib/ArtifactInputPolicy.mjs';
 import {tarLocalPath} from './lib/DiagnosticProcess.mjs';
+import {runtimeExternalModules} from './lib/RuntimeModules.mjs';
 import { requireSha, REPOSITORY } from './lib/ReleaseContracts.mjs';
 const root = process.cwd(),
   out = path.resolve(process.env.RELEASE_ARTIFACT_OUTPUT_DIR ?? path.join(root, 'release-artifacts'));
@@ -70,6 +71,7 @@ for (const unit of ['web', 'admin']) {
 
 const sha = (f) => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 const artifacts = [];
+const externalModules=runtimeExternalModules(JSON.parse(fs.readFileSync('apps/api/dist/server.meta.json','utf8')));
 for (const [name, items] of units) {
   for (const i of items)
     if (!fs.existsSync(path.join(root, i))) throw new Error(`RELEASE_INPUT_MISSING:${i}`);
@@ -136,18 +138,7 @@ const manifest = {
     lockSha256: sha('package-lock.json'),
     prismaSchemaSha256: sha('packages/infrastructure/prisma/schema.prisma'),
     generatedPrismaClientRequired: true,
-    externalModules: [
-      '@prisma/client',
-      'uuid',
-      'bcrypt',
-      'jsonwebtoken',
-      'cors',
-      'express',
-      'helmet',
-      'pdfkit',
-      'svg-to-pdfkit',
-      'fontkit',
-    ],
+    externalModules,
     bootEvidence: 'UNVERIFIED',
     deploymentUnits: ['api', 'web', 'admin'],
   },
