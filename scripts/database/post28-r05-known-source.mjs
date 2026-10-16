@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {execFileSync} from 'node:child_process';
 import {digest} from './post28-migration-inventory.mjs';
 
 // A new synthetic incident, never provenance for the original rejected fixture.
@@ -17,6 +18,10 @@ export function prepareKnownSourcePacket(directory,{checkoutRoot,sourceSha,runId
  const root=fs.realpathSync(checkoutRoot),parent=fs.realpathSync(path.dirname(directory));
  if(parent===root||parent.startsWith(root+path.sep))throw new Error('POST28_SOURCE_PACKET_OUTSIDE_CHECKOUT_REQUIRED');
  fs.mkdirSync(directory,{mode:0o700});
+ if(process.platform==='win32'){
+  const account=execFileSync('whoami',[],{encoding:'utf8',windowsHide:true}).trim();
+  execFileSync('icacls',[directory,'/inheritance:r','/grant:r',account+':(OI)(CI)F'],{stdio:'pipe',windowsHide:true});
+ }
  const bytes=syntheticHistoricalPdf(),filename='new-synthetic-historical-document.pdf';
  fs.writeFileSync(path.join(directory,filename),bytes,{mode:0o600,flag:'wx'});
  const packet={version:1,kind:'POST28_NEW_SYNTHETIC_KNOWN_SOURCE_CASE',sourceSha,runId,source:{filename,mimeType:'application/pdf',byteSize:bytes.length,sha256:digest(bytes),createdForThisNewCase:true},bindingId,assetId,owner:{ownerId,ownerType:'STUDENT'},requiredReviews:{assetOwner,documentOwner,status:'AWAITING_TECHNICAL_OWNER_REVIEW',approvals:[]},remediationContract:{ingest:'IngestAssetUseCase',lifecycle:'ProcessAssetLifecycleUseCase',directAssetInsertForbidden:true,consentOrBindingReassignmentForbidden:true,realMalwareAndSanitizationEvidenceRequired:true,retentionDecision:'PENDING_TECHNICAL_OWNER_REVIEW'},claims:{originalMissingFileRecovered:false,priorRejectedEvidenceModified:false,assetCreated:false,activeCleanEvidence:false,ownerApproval:false,R05Accepted:false}};

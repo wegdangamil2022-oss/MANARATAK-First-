@@ -85,7 +85,7 @@ test('Prisma connection URLs are passed through private JS argv, absent from OS 
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'post28-argv-'));
   try {
     const cli=path.join(root,'fixture.cjs'),entry=path.join(root,'entry.mjs');
-    fs.writeFileSync(cli,"console.log(JSON.stringify({os:require('node:fs').readFileSync('/proc/self/cmdline','utf8'),args:process.argv}));");
+    fs.writeFileSync(cli,`const osCommand=process.platform==='win32'?require('node:child_process').execFileSync('powershell.exe',['-NoLogo','-NoProfile','-NonInteractive','-Command','Get-CimInstance Win32_Process -Filter "ProcessId='+process.pid+'" | Select-Object -ExpandProperty CommandLine'],{encoding:'utf8',windowsHide:true}):require('node:fs').readFileSync('/proc/self/cmdline','utf8'); console.log(JSON.stringify({os:osCommand,args:process.argv}));`);
     fs.writeFileSync(entry,`import {runPrismaMain,prismaDiffArguments} from ${JSON.stringify(new URL('../../scripts/database/prisma-env-diff.mjs',import.meta.url).href)}; runPrismaMain(${JSON.stringify(cli)},prismaDiffArguments('migrations',process.env));`);
     const fixtureUrl='postgresql://fixture:credential-not-for-os-argv@127.0.0.1/shadow';
     const result=cp.spawnSync(process.execPath,[entry],{encoding:'utf8',env:{...process.env,GREENFIELD_SHADOW_DATABASE_URL:fixtureUrl}});
