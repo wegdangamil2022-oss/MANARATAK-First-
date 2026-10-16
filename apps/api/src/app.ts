@@ -907,13 +907,16 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       principalAccessValidator,
     }));
       const apiIdempotencyStore = container.resolve<any>('apiIdempotencyStore');
+      const requireAdminPermission = SecurityMiddlewareFactory.createAdminPermissionGuard;
+    // Scholarship command receipts contain owner data. Revalidate the existing
+    // domain permission before the shared idempotency boundary can replay it.
+    v1Router.use('/admin/scholarships', requireAdminPermission('admin:scholarships:manage'));
     // P18 tests keep private replay results in encrypted owner custody, rather than generic responseBody JSON.
     v1Router.use('/admin', (req, res, next) => {
       if (/^\/student-tools\/[^/]+\/test\/?$/.test(req.path)) return next();
       return createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true })(req, res, next);
     });
     v1Router.use('/admin', new MutationAuditMiddleware(auditRecordRepository, 'ADMIN').generate());
-      const requireAdminPermission = SecurityMiddlewareFactory.createAdminPermissionGuard;
 
     v1Router.use('/admin/translations', createTranslationWorkspaceRouter(new PrismaTranslationWorkspaceReadGateway(container.resolve('prisma')), container.resolve('authEvaluatorService'), new PrismaTranslationImportGateway(container.resolve('prisma'),container.resolve('authEvaluatorService'))));
 
