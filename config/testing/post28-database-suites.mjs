@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'course-major-visibility': {files: ['tests/database/post28-course-major-visibility.database.spec.mjs'],minimumCases:8},
   'dec05-owner-atomic': {files: ['tests/database/post28-dec05-owner-atomic.database.spec.mjs'],minimumCases:8},
   'dec01-program-pairs': {files: ['tests/database/post28-dec01-program-pairs.database.spec.mjs'],minimumCases:10},
   'dec05-taxonomy-invalidation': {files: ['tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs'],minimumCases:6},
