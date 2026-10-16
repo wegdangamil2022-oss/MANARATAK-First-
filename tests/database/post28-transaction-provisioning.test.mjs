@@ -86,3 +86,10 @@ test('owner relations declares twenty cases and only explicit relation fixture g
  for(const table of ['UniversityCampus','UniversityOrganizationUnit','UniversityProgramCampus','InternationalTestVersion','ScholarshipApplicationCycle'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });
+
+test('HTTP finance suite declares fourteen cases and limited identity and execution tables',async()=>{
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
+ assert.equal(databaseSuite('http-finance').minimumCases,14);
+ for(const table of ['IdentityRecord','UserRecord','AccountRecord','RoleRecord','RoleAssignmentRecord','SessionRecord','ApiIdempotencyRecord','FinanceExchangeRateRecord'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
+ assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
+});
