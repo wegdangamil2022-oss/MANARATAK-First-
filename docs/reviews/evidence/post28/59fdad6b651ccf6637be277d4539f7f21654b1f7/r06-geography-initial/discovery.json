@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Post28 real university canonical geography owner commands > commits matching canonical root geography with actor audit outbox and owner revision",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > commits matching campus geography through normalized owner details and atomic audit outbox",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects a foreign region despite equal country and region display names",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects a foreign city despite identical city display names",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects a same country city belonging to another canonical region",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects mismatched campus geography atomically before creating a campus",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects clearing the country while canonical region and city remain",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects missing canonical country region and city identifiers without mutation",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects a deprecated country even when its legacy active flag remains true",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects a deprecated city even when its legacy active flag remains true",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects an inactive region even when its lifecycle still says active",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > continues to reject inactive country and city flags and retired region lifecycle",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > validates a partial root change against retained canonical geography",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rolls root geography revision and audit back at the actual PostgreSQL outbox failure boundary",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > serializes two valid geography writers with exactly one current owner revision winner",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects a foreign campus identifier and preserves both university owners",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects missing actor reason or stale revision without partial root geography",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university canonical geography owner commands > rejects contradictory country codes even when canonical IDs are individually valid",
+    "file": "tests/database/post28-university-geography.database.spec.mjs"
+  }
+]

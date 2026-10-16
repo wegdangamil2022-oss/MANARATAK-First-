@@ -1,0 +1,46 @@
+{
+  "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+  "sourceTests": {
+    "files": [
+      "packages/infrastructure/tests/universities/UniversityCanonicalRelationshipValidator.spec.ts",
+      "packages/infrastructure/tests/universities/PrismaUniversityRepository.spec.ts"
+    ],
+    "discovered": 35,
+    "executed": 35,
+    "passed": 35,
+    "failed": 0,
+    "skipped": 0
+  },
+  "provisioningSourceTests": {
+    "sourceSha": "59fdad6b651ccf6637be277d4539f7f21654b1f7",
+    "passed": 28,
+    "failed": 0
+  },
+  "infrastructureBuildExitCode": 0,
+  "eslint": {
+    "errors": 0,
+    "warnings": 13
+  },
+  "privateLogs": [
+    {
+      "name": "geo-unit-fix.log",
+      "sha256": "05048298269838dc4af35251de73290448eeee1cc960f12bab136108a803e722",
+      "bytes": 206
+    },
+    {
+      "name": "geo-build.log",
+      "sha256": "dd382912dad97b07d6b1374152b5ecc17319d50e955f805b85554d827666a884",
+      "bytes": 51
+    },
+    {
+      "name": "geo-fix-lint.log",
+      "sha256": "f4b21a51ccbc940f914139fff519cb5a14d3a79de291f66e81c9a5fddb3204a8",
+      "bytes": 1504
+    },
+    {
+      "name": "geo-provisioning.log",
+      "sha256": "1870632252892db194fb1bb19503a3c86e69c1b65de932ef54fc36a13b104a1d",
+      "bytes": 5869
+    }
+  ]
+}

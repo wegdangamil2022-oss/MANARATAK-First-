@@ -1,0 +1,43 @@
+{
+  "baselineDistinct": 149,
+  "initial": {
+    "sourceSha": "59fdad6b651ccf6637be277d4539f7f21654b1f7",
+    "discovered": 18,
+    "executed": 18,
+    "passed": 13,
+    "failed": 5,
+    "skipped": 0,
+    "productDefects": 2,
+    "fixtureErrorsDueToExistingDatabaseConstraints": 3
+  },
+  "final": {
+    "sourceSha": "ea2ab45ccbe8036800fd5af5522130eab3f37c72",
+    "fullDiscoveryPerRun": 18,
+    "selectedRuns": 9,
+    "executed": 9,
+    "passed": 9,
+    "failed": 0,
+    "selectedSkipped": 0,
+    "excludedPerRun": 17,
+    "distinctNewPassingCases": 5,
+    "repeatedAffectedRegressionCases": 4,
+    "caseNames": [
+      "Post28 real university canonical geography owner commands > rejects a deprecated country even when its legacy active flag remains true",
+      "Post28 real university canonical geography owner commands > continues to reject inactive country and city flags and retired region lifecycle",
+      "Post28 real university canonical geography owner commands > serializes two valid geography writers with exactly one current owner revision winner",
+      "Post28 real university canonical geography owner commands > database rejects an inactive region whose lifecycle still says active",
+      "Post28 real university canonical geography owner commands > commits matching campus geography through normalized owner details and atomic audit outbox",
+      "Post28 real university canonical geography owner commands > commits matching canonical root geography with actor audit outbox and owner revision",
+      "Post28 real university canonical geography owner commands > database rejects contradictory city country codes despite individually valid canonical IDs",
+      "Post28 real university canonical geography owner commands > rolls root geography revision and audit back at the actual PostgreSQL outbox failure boundary",
+      "Post28 real university canonical geography owner commands > rejects a deprecated city even when its legacy active flag remains true"
+    ]
+  },
+  "newDistinctSuccessfulCases": 18,
+  "cumulativeDistinctSuccessfulDatabaseCases": 167,
+  "fullProfileAcceptance": false,
+  "fullRequiredCasesAccepted": 0,
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL"
+}

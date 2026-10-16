@@ -1,0 +1,72 @@
+{
+  "scope": "Final staged evidence/documentation on unchanged runtime source ea2ab45ccbe8036800fd5af5522130eab3f37c72; not database case counts",
+  "checks": [
+    {
+      "name": "architecture",
+      "command": [
+        "node",
+        "scripts/architecture/verify-source-architecture-guards.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T18:32:40.525942+00:00",
+      "logSha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+      "bytes": 245
+    },
+    {
+      "name": "quality",
+      "command": [
+        "node",
+        "scripts/quality/verify-source-quality.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T18:32:40.824167+00:00",
+      "logSha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+      "bytes": 185
+    },
+    {
+      "name": "environment",
+      "command": [
+        "node",
+        "scripts/config/verify-environment-contract.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T18:32:43.498798+00:00",
+      "logSha256": "c12b3e207960f88183c712a7d7f17ec19e397d91b6c601e05317bffb653b3483",
+      "bytes": 79
+    },
+    {
+      "name": "organization",
+      "command": [
+        "node",
+        "scripts/verify/verify-final-repository-organization.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T18:32:43.527075+00:00",
+      "logSha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "bytes": 440
+    },
+    {
+      "name": "secrets",
+      "command": [
+        "node",
+        "scripts/security/scan-secrets.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T18:32:46.687101+00:00",
+      "logSha256": "7739ae7a58a803706dd47ab2c0f6585dc91d96950000764c438ad7ddbae0e158",
+      "bytes": 40
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T18:32:48.214865+00:00",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ]
+}

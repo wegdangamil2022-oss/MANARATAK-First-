@@ -1,0 +1,18 @@
+{
+  "sourceSha": "59fdad6b651ccf6637be277d4539f7f21654b1f7",
+  "suite": "university-geography",
+  "discovered": 18,
+  "executed": 18,
+  "passed": 13,
+  "failed": 5,
+  "selectedSkipped": 0,
+  "rawSkippedAssertions": 0,
+  "excludedByExactSelection": 0,
+  "fullProfilePassed": false,
+  "originalRunnerGate": "FAILED_TESTS",
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "fullRequiredCasesAccepted": 0,
+  "productionAcceptance": false
+}

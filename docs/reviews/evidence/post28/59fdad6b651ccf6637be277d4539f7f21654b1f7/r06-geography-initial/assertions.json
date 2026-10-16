@@ -1,0 +1,192 @@
+[
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "commits matching canonical root geography with actor audit outbox and owner revision",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 70.50832599999967,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "commits matching campus geography through normalized owner details and atomic audit outbox",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 45.42895000000044,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects a foreign region despite equal country and region display names",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 25.080982999999833,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects a foreign city despite identical city display names",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 28.356684999999743,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects a same country city belonging to another canonical region",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 27.237483999999768,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects mismatched campus geography atomically before creating a campus",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 27.98077400000011,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects clearing the country while canonical region and city remain",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 32.89610499999981,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects missing canonical country region and city identifiers without mutation",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 48.221559999999954,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects a deprecated country even when its legacy active flag remains true",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "failed",
+    "durationMs": 43.38065099999994,
+    "failureFirstLines": [
+      "Error: promise resolved \"{ …(35) }\" instead of rejecting"
+    ]
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects a deprecated city even when its legacy active flag remains true",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "failed",
+    "durationMs": 40.11110400000007,
+    "failureFirstLines": [
+      "Error: promise resolved \"{ …(35) }\" instead of rejecting"
+    ]
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects an inactive region even when its lifecycle still says active",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "failed",
+    "durationMs": 14.527052999999796,
+    "failureFirstLines": [
+      "PrismaClientUnknownRequestError: "
+    ]
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "continues to reject inactive country and city flags and retired region lifecycle",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "failed",
+    "durationMs": 44.25399000000016,
+    "failureFirstLines": [
+      "PrismaClientUnknownRequestError: "
+    ]
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "validates a partial root change against retained canonical geography",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 20.828033000000232,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rolls root geography revision and audit back at the actual PostgreSQL outbox failure boundary",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 34.4748569999997,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "serializes two valid geography writers with exactly one current owner revision winner",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 32.313944999999876,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects a foreign campus identifier and preserves both university owners",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 44.32895800000006,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects missing actor reason or stale revision without partial root geography",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "passed",
+    "durationMs": 24.782999000000018,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-university-geography.database.spec.mjs",
+    "title": "rejects contradictory country codes even when canonical IDs are individually valid",
+    "ancestors": [
+      "Post28 real university canonical geography owner commands"
+    ],
+    "status": "failed",
+    "durationMs": 11.682544999999664,
+    "failureFirstLines": [
+      "PrismaClientUnknownRequestError: "
+    ]
+  }
+]
