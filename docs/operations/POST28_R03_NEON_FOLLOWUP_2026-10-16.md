@@ -105,3 +105,20 @@ node scripts/database/post28-preflight.mjs --pair --require-empty
 **تنبيه الشبكة:** لا تعني إضافة نطاق إلى قائمة HTTP(S) السماح باتصال PostgreSQL TCP/5432. يجب إثبات دعم البيئة الفعلي لتصريح TCP إلى hostَي Direct، وإلا يبقى الاتصال المباشر `BLOCKED` ويُستخدم مختبر تشغيل يدعم TCP مع أسرار معزولة. لا تحايل عبر CI أو تغيير اسم الهدف.
 
 لم يُغيّر هذا التحقيق صلاحيات الأدوار أو كلمات المرور أو أي سجل تطبيق، ولم يُنفذ migration أو seed أو اختبار runtime. نتيجة `R03=BLOCKED_RUNTIME_CONFIGURATION` باقية. التقرير السابق `fb3fb097` يحتفظ ببصمة `a3dbee92` كمصدر مفحوص ولا تُنسب إليه هذه القياسات الجديدة.
+
+
+## تحديث تنفيذي — تنظيف أدوار Neon المرتفعة (2026-10-16)
+
+بناءً على تفويض المالك لإتمام إعداد القاعدة **التجريبية فقط**، نُفذ فحص قراءة فقط قبل حذف الأدوار القديمة غير المعتمدة، وفي قواعد الاختبار الصحيحة فقط. كانت القيم المقاسة `db_ownership=0` و`schema_ownership=0` و`relation_ownership=0` و`function_ownership=0` و`type_ownership=0` و`default_acls=0` و`active_sessions=0` و`shared_object_dependencies=0` لكل دور. لم يُستخدم `DROP OWNED CASCADE` أو SQL حذف كائنات التطبيق.
+
+حُذفت باستخدام عملية إدارة أدوار Neon المباشرة (لا تعديل قاعدة الإنتاج):
+- فرع DB-G `br-raspy-shadow-ba33tmh3`: `post28_migrator`، `post28_app`.
+- فرع DB-S `br-round-dew-bahzpr4x`: `post28_shadow`.
+
+قائمة أدوار مزود Neon بعد التعديل أكدت غياب الأدوار الثلاثة. بقيت `post28_g_migrate_limited` و`post28_g_app_limited` في G، و`post28_s_shadow_limited` في S، بالإضافة إلى مالك التجربة الموروث `manaratak_test_owner` الذي **يُحظر استعماله للتجارب التشغيلية**.
+
+تم فحص حقول PostgreSQL `pg_authid` للأدوار المحدودة في الجولة السابقة: `rolcanlogin=true` و`rolpassword IS NULL=true`، دون امتيازات الإدارة أو عضوية `neon_superuser`. لذا تعني حالة Neon API `authentication_method=no_login` في هذا السياق **عدم وجود بيانات مصادقة**، لا غياب خاصية LOGIN. لا يُنصح بإعادة إنشاء أدوار عبر Neon API لأن الدور الافتراضي قد يأتي بامتيازات زائدة.
+
+**المتبقي:** تعيين كلمات مرور قوية للأدوار الحالية عبر مسار لا يكشف السر (أداة إدارة معتمدة/مخزن أسرار Codex)، وضبط أسرار `GREENFIELD_DATABASE_URL` و`GREENFIELD_SHADOW_DATABASE_URL` و`DATABASE_URL` و`DIRECT_URL` و`NEON_API_KEY`، والسماح بـTCP/5432 المباشر لنقطتَي G/S، ثم إثبات TLS وجلسات الأدوار والعزل بالقراءة فقط. أداة إدارة Neon لا تضبط **أسرار Codex** آليًا. لا تدوّن كلمات المرور أو الروابط في الملفات أو السجلات.
+
+**الحالة بعد حذف الأدوار القديمة:** `UNSAFE_ROLES_REMOVED`، `R03=BLOCKED_RUNTIME_CONFIGURATION`، `R04=NOT_EXECUTED`، `production=NO_GO`. لا تصف فحوص المصدر السابقة بأنها أُعيدت بعد هذا التغيير؛ كان إجراء Neon إداريًا منفصلًا ولم تُنفذ ترحيلات أو اختبارات PostgreSQL مدمرة.
