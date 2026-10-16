@@ -111,6 +111,14 @@ test('scholarship Admin runtime declares eighteen cases without widening applica
 test('scholarship public relation profile declares four real owner count cases without additional grants',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
  assert.equal(databaseSuite('scholarship-public-relations').minimumCases,4);
- assert.equal(TRANSACTION_APPLICATION_TABLES.length,55);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.length,58);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
+});
+
+test('university geography declares eighteen cases and explicitly grants only three new reference fixture tables',async()=>{
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
+ assert.equal(databaseSuite('university-geography').minimumCases,18);
+ for(const table of ['ReferenceCountry','AdministrativeRegion','ReferenceCity'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
+ assert.equal(TRANSACTION_APPLICATION_TABLES.length,58);
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });
