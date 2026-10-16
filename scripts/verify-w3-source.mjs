@@ -164,7 +164,7 @@ check('MNT-AUD-0011 client cannot forge sanitizer metadata or clean storage loca
   assetRouter.includes('const sanitizeAssetSchema = z.object({}).strict()') && assetRouter.includes('const activateAssetSchema = z.object({}).strict()') &&
   assetRouter.includes("router.post('/:assetId/delivery-grant'") && read('packages/domain/src/asset-platform/aggregates/AssetRecord.ts').includes('ASSET_DELIVERY_REQUIRES_ACTIVE_CLEAN_ASSET'));
 check('MNT-AUD-0011 upload ingestion returns provider-issued upload grant when production storage supports it',
-  assetIngest.includes('storageGateway.generateUploadGrant') && assetIngest.includes('uploadGrant: uploadGrant ?'));
+  assetIngest.includes('storageGateway.generateUploadGrant') && /uploadGrant:\s*uploadGrant\s*\?/.test(assetIngest));
 check('MNT-AUD-0011 provider contract/security tests and runtime pending runbook are authored',
   assetProviderSpec.includes('rejects HTTP grants') && assetProviderSpec.includes('requires explicit threat evidence') &&
   assetRunbook.includes('PROVIDER_RUNTIME_PENDING') && assetRunbook.includes('EICAR'));
@@ -238,8 +238,8 @@ check('MNT-AUD-0093 Course enrollment/progress mutations emit atomic owner event
   courseProgress.includes('atomicMutations.execute') && studentOutboxWorker.includes("['CourseEnrolled', 'CourseProgressUpdated', 'CourseCompleted']"));
 check('MNT-AUD-0016 Identity to StudentWorkspace bridge is idempotent on outbox identity and runtime-wired',
   studentOutboxGateway.includes('context.idempotencyKey !== entry.id') && studentOutboxGateway.includes('StudentIdentityCreated') &&
-  studentOutboxWorker.includes("['IdentityStatusChanged.v1']") && studentOutboxWorker.includes("['RoleAssignmentCreated']") &&
-  studentOutboxGateway.includes("role.roleId === 'student'") && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('runRoleOnce') && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED'));
+  studentOutboxWorker.includes("['IdentityStatusChanged.v1']") && studentOutboxWorker.includes("['RoleAssignmentCreated', 'RoleAssignmentRevoked']") &&
+  /role\.roleId\s*===\s*'student'/.test(studentOutboxGateway) && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('runRoleOnce') && apiServer.includes('startPollingWorkers(container, config)') && pollingRuntime.includes('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED'));
 
 check('MNT-AUD-0017 CMS due schedules execute through a recurring durable background job',
   cmsHandler.includes('processDueSchedules') && recurringJobs.includes('CMS_SCHEDULED_PUBLISH_JOB_TYPE') && apiServer.includes('await registerRecurringJobs(container, config)') && appConfig.includes('BACKGROUND_CMS_CRON'));
