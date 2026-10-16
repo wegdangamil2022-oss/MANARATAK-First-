@@ -76,7 +76,7 @@ export class PrismaUniversityProgramReadPort implements IUniversityProgramReadPo
   async findPublished(
     query: PublishedUniversityProgramQueryV1,
   ): Promise<UniversityProgramReferenceV1[]> {
-    const values = [query.universityId, query.academicProgramId, query.degreeLevelId].filter(
+    const values = [query.universityId, query.academicProgramId, query.degreeLevelId, query.majorId].filter(
       (id): id is string => id !== undefined,
     );
     if (!values.length) throw new Error('UNIVERSITY_PROGRAM_READ_SCOPE_REQUIRED');
@@ -86,6 +86,7 @@ export class PrismaUniversityProgramReadPort implements IUniversityProgramReadPo
         ...(query.universityId ? { universityId: query.universityId } : {}),
         ...(query.academicProgramId ? { id: query.academicProgramId } : {}),
         ...(query.degreeLevelId ? { degreeLevelId: query.degreeLevelId } : {}),
+        ...(query.majorId ? { majorId: query.majorId } : {}),
         status: 'ACTIVE',
         majorMappingState: 'CANONICALLY_MAPPED',
         university: { is: { status: 'PUBLISHED' } },
@@ -103,7 +104,8 @@ export class PrismaUniversityProgramReadPort implements IUniversityProgramReadPo
           row.publiclyEligible &&
           (!query.universityId || row.universityId === query.universityId) &&
           (!query.academicProgramId || row.id === query.academicProgramId) &&
-          (!query.degreeLevelId || row.degreeLevelId === query.degreeLevelId),
+          (!query.degreeLevelId || row.degreeLevelId === query.degreeLevelId) &&
+          (!query.majorId || row.majorId === query.majorId),
       );
   }
 }

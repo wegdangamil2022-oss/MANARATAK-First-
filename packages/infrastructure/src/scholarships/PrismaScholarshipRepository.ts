@@ -572,8 +572,10 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
     if (filters.studyLanguageReferenceId) where.studyLanguageReferenceId = filters.studyLanguageReferenceId;
     if (filters.currencyReferenceId) constraints.push({ benefits: { some: { currencyReferenceId: filters.currencyReferenceId } } });
-    if (filters.degreeLevelId) constraints.push({ degreeTargets: { some: { degreeLevelId: filters.degreeLevelId } } });
-    if (filters.majorId) constraints.push({ OR: [
+    // Independent target lists cannot prove a funded degree-major pair.
+    const pairedProgramFilter = Boolean(filters.degreeLevelId && filters.majorId);
+    if (filters.degreeLevelId && !pairedProgramFilter) constraints.push({ degreeTargets: { some: { degreeLevelId: filters.degreeLevelId } } });
+    if (filters.majorId && !pairedProgramFilter) constraints.push({ OR: [
       { majorTargets: { some: { majorId: filters.majorId, major: { is: { status: MajorStatus.PUBLISHED } } } } },
       { eligibilityItems: { some: { majorId: filters.majorId, major: { is: { status: MajorStatus.PUBLISHED } } } } },
     ] });
@@ -585,14 +587,14 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
                 resolutionStatus: 'RESOLVED', internationalTest: { is: { status: 'PUBLISHED', isPubliclyVisible: true, currentPublishedVersion: { is: { status: 'PUBLISHED', testId: filters.internationalTestId } } } },
               } } },
     ] });
-    if (filters.universityId || filters.academicProgramId) {
+    if (filters.universityId || filters.academicProgramId || pairedProgramFilter) {
       // Filter exact owner/profile proof before both page and count. Oversized owner scope fails explicitly.
       const eligible = await this.programReads.findPublished({
         universityId: filters.universityId, academicProgramId: filters.academicProgramId,
-        degreeLevelId: filters.degreeLevelId,
+        degreeLevelId: filters.degreeLevelId, majorId: filters.majorId,
       });
       const edges: Prisma.ScholarshipUniversityLinkWhereInput[] = eligible.map(program => ({ academicProgramId: program.id, resolutionStatus: 'RESOLVED', OR: [{ universityId: null }, { universityId: program.universityId }] }));
-      if (filters.universityId && !filters.academicProgramId) edges.push({ universityId: filters.universityId, academicProgramId: null, resolutionStatus: 'RESOLVED', university: { is: { status: UniversityStatus.PUBLISHED } } });
+      if (filters.universityId && !filters.academicProgramId && !filters.degreeLevelId && !filters.majorId) edges.push({ universityId: filters.universityId, academicProgramId: null, resolutionStatus: 'RESOLVED', university: { is: { status: UniversityStatus.PUBLISHED } } });
       constraints.push({ universityLinks: { some: edges.length ? { OR: edges } : { id: { in: [] } } } });
     }
     if (filters.fundingType === 'FULL')

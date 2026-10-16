@@ -4,6 +4,7 @@ import { PrismaScholarshipRepository } from '../../src/scholarships/PrismaSchola
 describe('PrismaScholarshipRepository', () => {
   let mockPrisma: any;
   let repository: PrismaScholarshipRepository;
+  let programReads: any;
 
   beforeEach(() => {
     mockPrisma = {
@@ -15,7 +16,7 @@ describe('PrismaScholarshipRepository', () => {
         count: vi.fn(),
       },
     };
-    const programReads = {findByIds: vi.fn(async (ids: string[]) => ids.map(id => ({contractVersion:1 as const,id,universityId:'university-1',degreeLevelId:'degree-bachelor',majorId:'major-cs',status:'ACTIVE',publiclyEligible:true,canonicalName:id,displayName:id}))),findPublished:vi.fn(async (query: {academicProgramId?:string;universityId?:string;degreeLevelId?:string})=>[{contractVersion:1 as const,id:query.academicProgramId??'program-1',universityId:query.universityId??'university-1',degreeLevelId:query.degreeLevelId??'degree-bachelor',majorId:'major-cs',status:'ACTIVE',publiclyEligible:true,canonicalName:'program',displayName:'Program'}]),withTransaction:vi.fn()};
+    programReads = {findByIds: vi.fn(async (ids: string[]) => ids.map(id => ({contractVersion:1 as const,id,universityId:'university-1',degreeLevelId:'degree-bachelor',majorId:'major-cs',status:'ACTIVE',publiclyEligible:true,canonicalName:id,displayName:id}))),findPublished:vi.fn(async (query: {academicProgramId?:string;universityId?:string;degreeLevelId?:string})=>[{contractVersion:1 as const,id:query.academicProgramId??'program-1',universityId:query.universityId??'university-1',degreeLevelId:query.degreeLevelId??'degree-bachelor',majorId:'major-cs',status:'ACTIVE',publiclyEligible:true,canonicalName:'program',displayName:'Program'}]),withTransaction:vi.fn()};
     repository = new PrismaScholarshipRepository(mockPrisma as any, false, programReads);
   });
 
@@ -204,8 +205,9 @@ describe('PrismaScholarshipRepository', () => {
     expect(where.countryReferenceId).toBe('country-qa');
     expect(where.studyLanguageReferenceId).toBe('language-en');
     expect(serialized).toContain('currencyReferenceId');
-    expect(serialized).toContain('degreeLevelId');
-    expect(serialized).toContain('majorId');
+    expect(programReads.findPublished).toHaveBeenCalledWith({universityId:'university-qu',academicProgramId:'program-cs-phd',degreeLevelId:'degree-phd',majorId:'major-cs'});
+    expect(serialized).not.toContain('degreeTargets');
+    expect(serialized).not.toContain('majorTargets');
     expect(serialized).toContain('internationalTestId');
     expect(serialized).toContain('universityId');
     expect(serialized).toContain('academicProgramId');

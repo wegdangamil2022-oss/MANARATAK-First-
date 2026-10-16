@@ -12,10 +12,12 @@ export interface UniversityProgramReferenceV1 {
   status: string;
   publiclyEligible: boolean;
 }
+/** Every supplied dimension must match the same owner program. */
 export interface PublishedUniversityProgramQueryV1 {
   universityId?: string;
   academicProgramId?: string;
   degreeLevelId?: string;
+  majorId?: string;
 }
 export interface IUniversityProgramReadPort {
   /** At most 500 unique IDs; no display-name lookup or inferred parent. */
