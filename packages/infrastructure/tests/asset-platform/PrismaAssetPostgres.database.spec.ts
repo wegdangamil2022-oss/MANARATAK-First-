@@ -11,6 +11,8 @@ import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAsse
 import { PrismaAssetRetentionGateway } from '../../src/retention/PrismaAssetRetentionGateway';
 import { destructiveDatabaseTestsEnabled } from '../courses/disposableDatabaseGuard';
 
+import {assertPost28RuntimeTarget} from '../../../../tests/database/post28-runtime-target.mjs';
+
 const DB_PREFIX = 'eap-pg-disposable-';
 const permitted = process.env.EAP_EPHEMERAL_DB_TESTS === 'true' &&
   destructiveDatabaseTestsEnabled();
@@ -40,7 +42,8 @@ describeDisposable('EAP real PostgreSQL revision CAS and purge cleanup on dispos
   beforeAll(async () => {
     if (!permitted) throw new Error('EAP_DISPOSABLE_POSTGRES_REQUIRED');
     const url = process.env.DATABASE_URL;
-    if (!url || !url.includes('127.0.0.1') || !url.includes('manaratak_eap_ci_test')) {
+    if (process.env.POST28_ISOLATED_EXECUTION === 'YES') await assertPost28RuntimeTarget();
+    else if (!url || !url.includes('127.0.0.1') || !url.includes('manaratak_eap_ci_test')) {
       throw new Error('EAP_DISPOSABLE_LOCAL_POSTGRES_URL_REQUIRED');
     }
     prisma = new PrismaClient();

@@ -50,3 +50,10 @@ test('missing or tampered stage authority cannot silently allow R06',()=>{
   fs.writeFileSync(path.join(tmp,'config/testing/post28-stage-disposition.json'),JSON.stringify(d));assert.throws(()=>requireScopedR06Authorization(tmp),/AUTHORIZATION_REQUIRED/);
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });
+
+
+test('Post28 asset suites require real DB-T preflight rather than an environment-only allow flag',async()=>{
+ const {assertPost28RuntimeTarget}=await import('./post28-runtime-target.mjs');
+ for(const env of [{},{POST28_ISOLATED_EXECUTION:'YES',POST28_TARGET_LABEL:'DB-G'},{POST28_ISOLATED_EXECUTION:'YES',POST28_TARGET_LABEL:'DB-T',POST28_DATABASE_SUITE:'assets',DATABASE_URL:'u',DIRECT_URL:'different'}])await assert.rejects(assertPost28RuntimeTarget(env),/POST28_ASSET_RUNTIME_TARGET_REQUIRED/);
+ for(const file of ['PrismaAssetPostgres.database.spec.ts','PrismaAssetReferenceSerialization.database.spec.ts'])assert.match(fs.readFileSync('packages/infrastructure/tests/asset-platform/'+file,'utf8'),/await assertPost28RuntimeTarget\(\)/);
+});
