@@ -1,0 +1,13 @@
+{
+  "name": "w2",
+  "command": "npm run w2:verify",
+  "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:06:58.761827+00:00",
+  "finishedAt": "2026-10-16T03:06:58.914360+00:00",
+  "exitCode": 0,
+  "logSha256": "a4c38e2c14ac7d6a6c19cb0ef2fa854c8dcb455f50b775dcef7ea0953c87d316",
+  "nodeVersion": "22.16.0",
+  "databaseConnected": false
+}

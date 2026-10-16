@@ -1,0 +1,13 @@
+{
+  "name": "organization",
+  "command": "node scripts/verify/verify-final-repository-organization.mjs",
+  "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:07:08.763437+00:00",
+  "finishedAt": "2026-10-16T03:07:11.897324+00:00",
+  "exitCode": 0,
+  "logSha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+  "nodeVersion": "22.16.0",
+  "databaseConnected": false
+}

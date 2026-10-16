@@ -1,0 +1,508 @@
+TAP version 13
+# Subtest: greenfield parity gate replays migrations and diffs replayed DB plus migration directory
+ok 1 - greenfield parity gate replays migrations and diffs replayed DB plus migration directory
+  ---
+  duration_ms: 0.986372
+  type: 'test'
+  ...
+# Subtest: greenfield parity gate fails closed on unsafe targets and incomplete catalog state
+ok 2 - greenfield parity gate fails closed on unsafe targets and incomplete catalog state
+  ---
+  duration_ms: 0.162322
+  type: 'test'
+  ...
+# Subtest: runbook makes migration replay authoritative and rejects db push as production proof
+ok 3 - runbook makes migration replay authoritative and rejects db push as production proof
+  ---
+  duration_ms: 0.097645
+  type: 'test'
+  ...
+# Subtest: rejects remote target before client/query creation
+ok 4 - rejects remote target before client/query creation
+  ---
+  duration_ms: 1.694068
+  type: 'test'
+  ...
+# Subtest: rejects restore target before client/query creation
+ok 5 - rejects restore target before client/query creation
+  ---
+  duration_ms: 0.369612
+  type: 'test'
+  ...
+# Subtest: rejects production target before client/query creation
+ok 6 - rejects production target before client/query creation
+  ---
+  duration_ms: 1.003708
+  type: 'test'
+  ...
+# Subtest: rejects schema target before client/query creation
+ok 7 - rejects schema target before client/query creation
+  ---
+  duration_ms: 0.226488
+  type: 'test'
+  ...
+# Subtest: rejects port target before client/query creation
+ok 8 - rejects port target before client/query creation
+  ---
+  duration_ms: 0.189623
+  type: 'test'
+  ...
+# Subtest: rejects role target before client/query creation
+ok 9 - rejects role target before client/query creation
+  ---
+  duration_ms: 0.122453
+  type: 'test'
+  ...
+# Subtest: missing isolation flags, stale SHA and forbidden restore label fail before any read
+ok 10 - missing isolation flags, stale SHA and forbidden restore label fail before any read
+  ---
+  duration_ms: 0.530882
+  type: 'test'
+  ...
+# Subtest: different credentials/loopback spelling cannot disguise a shared target/shadow
+ok 11 - different credentials/loopback spelling cannot disguise a shared target/shadow
+  ---
+  duration_ms: 0.588429
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag superuser
+ok 12 - rejects live elevated role flag superuser
+  ---
+  duration_ms: 0.371645
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag createRole
+ok 13 - rejects live elevated role flag createRole
+  ---
+  duration_ms: 0.269753
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag createDatabase
+ok 14 - rejects live elevated role flag createDatabase
+  ---
+  duration_ms: 0.125838
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag replication
+ok 15 - rejects live elevated role flag replication
+  ---
+  duration_ms: 0.184195
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag bypassRls
+ok 16 - rejects live elevated role flag bypassRls
+  ---
+  duration_ms: 0.065278
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag privilegedMembership
+ok 17 - rejects live elevated role flag privilegedMembership
+  ---
+  duration_ms: 0.04663
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag globalWrite
+ok 18 - rejects live elevated role flag globalWrite
+  ---
+  duration_ms: 0.041923
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag databaseOwner
+ok 19 - rejects live elevated role flag databaseOwner
+  ---
+  duration_ms: 0.040891
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag databaseCreate
+ok 20 - rejects live elevated role flag databaseCreate
+  ---
+  duration_ms: 0.04009
+  type: 'test'
+  ...
+# Subtest: rejects changed live database
+ok 21 - rejects changed live database
+  ---
+  duration_ms: 0.086709
+  type: 'test'
+  ...
+# Subtest: rejects changed live role
+ok 22 - rejects changed live role
+  ---
+  duration_ms: 0.043244
+  type: 'test'
+  ...
+# Subtest: rejects changed live sessionRole
+ok 23 - rejects changed live sessionRole
+  ---
+  duration_ms: 0.117766
+  type: 'test'
+  ...
+# Subtest: rejects changed live databaseOid
+ok 24 - rejects changed live databaseOid
+  ---
+  duration_ms: 0.053009
+  type: 'test'
+  ...
+# Subtest: rejects changed live serverIdentity
+ok 25 - rejects changed live serverIdentity
+  ---
+  duration_ms: 0.039979
+  type: 'test'
+  ...
+# Subtest: rejects changed live marker
+ok 26 - rejects changed live marker
+  ---
+  duration_ms: 0.11366
+  type: 'test'
+  ...
+# Subtest: rejects changed live postgresMajor
+ok 27 - rejects changed live postgresMajor
+  ---
+  duration_ms: 0.081152
+  type: 'test'
+  ...
+# Subtest: rejects changed live timezone
+ok 28 - rejects changed live timezone
+  ---
+  duration_ms: 0.059248
+  type: 'test'
+  ...
+# Subtest: application cannot inherit migration DDL privileges; nonempty greenfield is rejected
+ok 29 - application cannot inherit migration DDL privileges; nonempty greenfield is rejected
+  ---
+  duration_ms: 0.125087
+  type: 'test'
+  ...
+# Subtest: valid distinct target/shadow declarations and live identities reach two read-only probes
+ok 30 - valid distinct target/shadow declarations and live identities reach two read-only probes
+  ---
+  duration_ms: 0.540367
+  type: 'test'
+  ...
+# Subtest: suite catalogue includes both actual asset DB suites and rejects an unknown profile
+ok 31 - suite catalogue includes both actual asset DB suites and rejects an unknown profile
+  ---
+  duration_ms: 0.116614
+  type: 'test'
+  ...
+# Subtest: suite result policy rejects missing cases, skipped tests, wrong files and mismatched identities
+ok 32 - suite result policy rejects missing cases, skipped tests, wrong files and mismatched identities
+  ---
+  duration_ms: 2.980939
+  type: 'test'
+  ...
+# Subtest: Prisma connection URLs are passed through private JS argv, absent from OS arguments
+ok 33 - Prisma connection URLs are passed through private JS argv, absent from OS arguments
+  ---
+  duration_ms: 35.6031
+  type: 'test'
+  ...
+# Subtest: destructive database suites reject restore references and protected aliases before test imports
+ok 34 - destructive database suites reject restore references and protected aliases before test imports
+  ---
+  duration_ms: 17.110396
+  type: 'test'
+  ...
+# Subtest: runtime suite preflight rejects NOT VALID constraints and invalid indexes
+ok 35 - runtime suite preflight rejects NOT VALID constraints and invalid indexes
+  ---
+  duration_ms: 0.290093
+  type: 'test'
+  ...
+# Subtest: Vitest refuses a protected restore target before importing test modules
+ok 36 - Vitest refuses a protected restore target before importing test modules
+  ---
+  duration_ms: 829.542857
+  type: 'test'
+  ...
+# Subtest: identity probe must itself run in a read-only transaction
+ok 37 - identity probe must itself run in a read-only transaction
+  ---
+  duration_ms: 0.468189
+  type: 'test'
+  ...
+# Subtest: lab provisioning rejects missing authorization and production mode before creating resources
+ok 38 - lab provisioning rejects missing authorization and production mode before creating resources
+  ---
+  duration_ms: 62.578071
+  type: 'test'
+  ...
+# Subtest: source unit gate explicitly excludes DB profiles and rejects empty discovery
+ok 39 - source unit gate explicitly excludes DB profiles and rejects empty discovery
+  ---
+  duration_ms: 0.432045
+  type: 'test'
+  ...
+# Subtest: actual Vitest discovery and JSON report identities agree with the case-count policy (inert fixture)
+ok 40 - actual Vitest discovery and JSON report identities agree with the case-count policy (inert fixture)
+  ---
+  duration_ms: 1152.018206
+  type: 'test'
+  ...
+# Subtest: migration source inventory reads and hashes every actual migration
+ok 41 - migration source inventory reads and hashes every actual migration
+  ---
+  duration_ms: 8.99026
+  type: 'test'
+  ...
+# Subtest: exact ordered ledger accepts the full chain, not merely a count
+ok 42 - exact ordered ledger accepts the full chain, not merely a count
+  ---
+  duration_ms: 0.327519
+  type: 'test'
+  ...
+# Subtest: ledger refuses same-count name substitution
+ok 43 - ledger refuses same-count name substitution
+  ---
+  duration_ms: 0.254079
+  type: 'test'
+  ...
+# Subtest: ledger refuses checksum substitution
+ok 44 - ledger refuses checksum substitution
+  ---
+  duration_ms: 0.107631
+  type: 'test'
+  ...
+# Subtest: ledger refuses duplicate
+ok 45 - ledger refuses duplicate
+  ---
+  duration_ms: 0.099429
+  type: 'test'
+  ...
+# Subtest: ledger refuses reordered
+ok 46 - ledger refuses reordered
+  ---
+  duration_ms: 0.127981
+  type: 'test'
+  ...
+# Subtest: ledger refuses missing finish
+ok 47 - ledger refuses missing finish
+  ---
+  duration_ms: 0.145297
+  type: 'test'
+  ...
+# Subtest: ledger refuses rollback
+ok 48 - ledger refuses rollback
+  ---
+  duration_ms: 0.146539
+  type: 'test'
+  ...
+# Subtest: ledger refuses resolved without replay
+ok 49 - ledger refuses resolved without replay
+  ---
+  duration_ms: 0.290834
+  type: 'test'
+  ...
+# Subtest: ledger refuses invalid time
+ok 50 - ledger refuses invalid time
+  ---
+  duration_ms: 0.351575
+  type: 'test'
+  ...
+# Subtest: ledger refuses overlapping execution
+ok 51 - ledger refuses overlapping execution
+  ---
+  duration_ms: 0.289091
+  type: 'test'
+  ...
+# Subtest: upgrade comparison handles exact integer money above JS safe range without declaring acceptance
+ok 52 - upgrade comparison handles exact integer money above JS safe range without declaring acceptance
+  ---
+  duration_ms: 1.320341
+  type: 'test'
+  ...
+# Subtest: upgrade refuses missing counter
+ok 53 - upgrade refuses missing counter
+  ---
+  duration_ms: 0.377884
+  type: 'test'
+  ...
+# Subtest: upgrade refuses extra counter
+ok 54 - upgrade refuses extra counter
+  ---
+  duration_ms: 0.164776
+  type: 'test'
+  ...
+# Subtest: upgrade refuses same-count model substitution
+ok 55 - upgrade refuses same-count model substitution
+  ---
+  duration_ms: 0.121562
+  type: 'test'
+  ...
+# Subtest: upgrade refuses lost row
+ok 56 - upgrade refuses lost row
+  ---
+  duration_ms: 0.149984
+  type: 'test'
+  ...
+# Subtest: upgrade refuses changed relation
+ok 57 - upgrade refuses changed relation
+  ---
+  duration_ms: 0.119879
+  type: 'test'
+  ...
+# Subtest: upgrade refuses changed receipt
+ok 58 - upgrade refuses changed receipt
+  ---
+  duration_ms: 0.104176
+  type: 'test'
+  ...
+# Subtest: upgrade refuses changed money
+ok 59 - upgrade refuses changed money
+  ---
+  duration_ms: 0.303443
+  type: 'test'
+  ...
+# Subtest: upgrade refuses changed scale
+ok 60 - upgrade refuses changed scale
+  ---
+  duration_ms: 0.23398
+  type: 'test'
+  ...
+# Subtest: upgrade refuses changed currency
+ok 61 - upgrade refuses changed currency
+  ---
+  duration_ms: 0.162593
+  type: 'test'
+  ...
+# Subtest: upgrade refuses duplicate money group
+ok 62 - upgrade refuses duplicate money group
+  ---
+  duration_ms: 0.392145
+  type: 'test'
+  ...
+# Subtest: upgrade refuses numeric count
+ok 63 - upgrade refuses numeric count
+  ---
+  duration_ms: 0.113199
+  type: 'test'
+  ...
+# Subtest: upgrade refuses missing money
+ok 64 - upgrade refuses missing money
+  ---
+  duration_ms: 0.153159
+  type: 'test'
+  ...
+# Subtest: upgrade refuses restore target
+ok 65 - upgrade refuses restore target
+  ---
+  duration_ms: 0.190805
+  type: 'test'
+  ...
+# Subtest: upgrade refuses changed database
+ok 66 - upgrade refuses changed database
+  ---
+  duration_ms: 0.112648
+  type: 'test'
+  ...
+# Subtest: upgrade refuses wrong run
+ok 67 - upgrade refuses wrong run
+  ---
+  duration_ms: 0.089053
+  type: 'test'
+  ...
+# Subtest: upgrade refuses stale SHA
+ok 68 - upgrade refuses stale SHA
+  ---
+  duration_ms: 0.084376
+  type: 'test'
+  ...
+# Subtest: upgrade refuses trigger bypass
+ok 69 - upgrade refuses trigger bypass
+  ---
+  duration_ms: 0.092668
+  type: 'test'
+  ...
+# Subtest: an unspecified predecessor cannot be turned into an upgrade result
+ok 70 - an unspecified predecessor cannot be turned into an upgrade result
+  ---
+  duration_ms: 0.128973
+  type: 'test'
+  ...
+# Subtest: greenfield runner requires fresh external evidence, exact ledger and idempotent deploy
+ok 71 - greenfield runner requires fresh external evidence, exact ledger and idempotent deploy
+  ---
+  duration_ms: 0.429311
+  type: 'test'
+  ...
+# Subtest: preparation inventories real source and keeps all later execution unaccepted
+ok 72 - preparation inventories real source and keeps all later execution unaccepted
+  ---
+  duration_ms: 61.787861
+  type: 'test'
+  ...
+# Subtest: preparation CLI never overwrites artifacts or writes into the checkout (including symlinks)
+ok 73 - preparation CLI never overwrites artifacts or writes into the checkout (including symlinks)
+  ---
+  duration_ms: 257.06442
+  type: 'test'
+  ...
+# Subtest: Neon declaration validation never authorizes remote execution or claims live identity
+ok 74 - Neon declaration validation never authorizes remote execution or claims live identity
+  ---
+  duration_ms: 10.029842
+  type: 'test'
+  ...
+# Subtest: Neon declaration refuses pooled endpoint
+ok 75 - Neon declaration refuses pooled endpoint
+  ---
+  duration_ms: 0.374479
+  type: 'test'
+  ...
+# Subtest: Neon declaration refuses different host
+ok 76 - Neon declaration refuses different host
+  ---
+  duration_ms: 0.225086
+  type: 'test'
+  ...
+# Subtest: Neon declaration refuses TLS disabled
+ok 77 - Neon declaration refuses TLS disabled
+  ---
+  duration_ms: 0.257385
+  type: 'test'
+  ...
+# Subtest: Neon declaration refuses certificate acceptance
+ok 78 - Neon declaration refuses certificate acceptance
+  ---
+  duration_ms: 0.217865
+  type: 'test'
+  ...
+# Subtest: Neon declaration refuses duplicate TLS option
+ok 79 - Neon declaration refuses duplicate TLS option
+  ---
+  duration_ms: 0.243794
+  type: 'test'
+  ...
+# Subtest: Neon declaration refuses host override option
+ok 80 - Neon declaration refuses host override option
+  ---
+  duration_ms: 0.189232
+  type: 'test'
+  ...
+# Subtest: Neon declaration refuses restore database
+ok 81 - Neon declaration refuses restore database
+  ---
+  duration_ms: 0.117806
+  type: 'test'
+  ...
+# Subtest: Neon declaration refuses owner role
+ok 82 - Neon declaration refuses owner role
+  ---
+  duration_ms: 0.144976
+  type: 'test'
+  ...
+# Subtest: Neon cannot hide the same branch/database behind two endpoints
+ok 83 - Neon cannot hide the same branch/database behind two endpoints
+  ---
+  duration_ms: 0.347419
+  type: 'test'
+  ...
+1..83
+# tests 83
+# suites 0
+# pass 83
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2614.091567

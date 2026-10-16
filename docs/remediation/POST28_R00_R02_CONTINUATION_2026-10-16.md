@@ -13,3 +13,7 @@ The user deferred database creation and Neon linking until the following day and
 R00, R01 and both R02 parts remain explicitly open where owner decisions, remote CI, actual isolated execution or technical producers are missing. Do not treat source success, inert subprocess tests, static discovery or skipped certificate runtime tests as runtime acceptance. R03 was not started. Sections27/28 remain open and production NO_GO.
 
 Report commits after the tested source SHA contain evidence/documentation. They do not relabel previous runs as evidence for another SHA. Re-freeze source and rerun affected checks after further code changes.
+
+## Follow-up preparation requested by the user
+
+R04/R05 source preparation on `3deef4557f181d6d7a3fd05e959990ac1bbfd36a`: [R04 report](POST28_R04_PREPARATION_2026-10-16.md), [R05 report](POST28_R05_PREPARATION_2026-10-16.md), and [Neon setup guide](../operations/POST28_NEON_R04_R05_PREPARATION.md). This follow-up does not close R00/R01/R02 or start actual R03/R04/R05 execution.

@@ -1,0 +1,19 @@
+{
+  "unexpectedRootDirectories": [],
+  "unexpectedRootFiles": [],
+  "temporaryArtifacts": [],
+  "brokenRelativeImports": [],
+  "brokenImportantLinks": [],
+  "packageManager": "npm",
+  "activeLockfiles": [
+    "package-lock.json"
+  ],
+  "competingRootLockfiles": [],
+  "npmWorkspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "internationalTestSourcePresent": true,
+  "majorCatalogSourcePresent": true,
+  "universityImportFilesInRoot": []
+}

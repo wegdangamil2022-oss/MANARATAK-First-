@@ -1,0 +1,13 @@
+{
+  "name": "affected-tests",
+  "command": "node --test tests/database/post28-r04-r05-preparation.test.mjs tests/database/post28-isolation.test.mjs tests/database/greenfield-migration-parity-source.test.mjs",
+  "sourceSha": "3deef4557f181d6d7a3fd05e959990ac1bbfd36a",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:06:55.312544+00:00",
+  "finishedAt": "2026-10-16T03:06:57.977951+00:00",
+  "exitCode": 0,
+  "logSha256": "73d6ffc13d073ff1423a30c6b82c89ed1ba6674d0e012a9f2f8678f0960ff340",
+  "nodeVersion": "22.16.0",
+  "databaseConnected": false
+}
