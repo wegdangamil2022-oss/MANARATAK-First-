@@ -219,7 +219,7 @@ try {
   check('MNT-AUD-0040 native lifecycle source tests execute', /# fail 0/.test(lifecycleTest));
  } catch (error) {
   console.error('shutdown source regression:', error.stderr?.toString() || error.stdout?.toString() || error.message);
-  check('MNT-AUD-0040 native lifecycle tests execute', false);
+  check('MNT-AUD-0040 native lifecycle source tests execute', false);
 }
 try {
   const lifecycleRuntimeTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/runtime/runtime-resource-lifecycle-runtime.test.mjs')], { encoding: 'utf8' });
