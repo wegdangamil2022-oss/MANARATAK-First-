@@ -75,8 +75,9 @@ describe('Live country mapping and bounded discovery', () => {
         nextCursor: null,
       });
     await loadPublishedCountries('en');
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenLastCalledWith({ page: 1, pageSize: 20 });
+    expect(spy).toHaveBeenCalledTimes(2);
+    expect(spy).toHaveBeenCalledWith({ page: 1, pageSize: 20 });
+    expect(spy).toHaveBeenCalledWith({ page: 1, pageSize: 8, isFeatured: true });
     await searchPublishedCountries({ page: 3, q: 'Yemen', region: 'Asia' }, 'en');
     expect(spy).toHaveBeenLastCalledWith({ page: 3, q: 'Yemen', region: 'Asia', pageSize: 20 });
     spy.mockRestore();
