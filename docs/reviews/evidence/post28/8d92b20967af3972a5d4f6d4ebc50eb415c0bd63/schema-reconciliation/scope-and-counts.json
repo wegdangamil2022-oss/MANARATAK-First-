@@ -1,0 +1,38 @@
+{
+  "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+  "status": "BLOCKED",
+  "structuralMigrationGate": "PASS",
+  "reason": "Required reference seed apply is deliberately disabled pending P7 durable atomic owner approval. No seed writes or reapply acceptance.",
+  "historicalMigrationsCompared": 109,
+  "historicalMigrationsChanged": [],
+  "totalMigrations": 110,
+  "tests": {
+    "uniquePassed": 254,
+    "failed": 0,
+    "skipped": 0,
+    "groups": {
+      "finalNodeTests": 91,
+      "finalPreflightSourceTests": 90,
+      "compatibilityOn8dde53cbWithSameSchemaAndClient": 63,
+      "seedApprovalContract": 10
+    },
+    "precommitRepeatedExecutionsNotAddedToUniqueCount": 91
+  },
+  "databaseAudits": 415,
+  "R05Executed": false,
+  "DBTCreated": false,
+  "R06Executed": false,
+  "seedApplyExecuted": false,
+  "neonTouched": false,
+  "productionTouched": false,
+  "sourceDigests": {
+    "packages/infrastructure/prisma/schema.prisma": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+    "package-lock.json": "75269332ee9c7c5b5b66b753a5ac5e94427668cd27b1db20b26291499306b4ee",
+    "node_modules/.prisma/client/schema.prisma": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969"
+  },
+  "privateToolDigests": {
+    "local-r04-full-audit.mjs": "9ece258ab89d96155e28e422655ed5b3bc741e33f159713f6d7f2e3833145409",
+    "local-r04-final-catalog.mjs": "1b16a67523f62d68661c0ac0a29e14b6cf1673a8a817d0f5a00970ad159b7c30",
+    "psql": "e9f3546d33f58a2b6fa880ed9884d5b5dcaaa3eb40259931f88bc339baa451f7"
+  }
+}

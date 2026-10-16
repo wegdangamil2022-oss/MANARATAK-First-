@@ -1,0 +1,7 @@
+{
+  "tables": 282,
+  "foreignKeys": 313,
+  "uniqueConstraints": 35,
+  "checkConstraints": 102,
+  "indexes": 1191
+}

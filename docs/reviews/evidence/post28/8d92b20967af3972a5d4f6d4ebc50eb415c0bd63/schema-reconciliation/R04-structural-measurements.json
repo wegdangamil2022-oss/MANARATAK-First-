@@ -1,0 +1,51 @@
+{
+  "kind": "POST28_LOCAL_R04_READ_ONLY_AUDIT",
+  "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+  "runId": "65411e27-1254-41bb-9d30-e7737a978ec5",
+  "targets": [
+    {
+      "label": "DB-G",
+      "database": "manaratak_post28_greenfield_test",
+      "role": "post28_migrator",
+      "serverIdentity": "7697267490013786155",
+      "databaseOid": "16387",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    },
+    {
+      "label": "DB-S",
+      "database": "manaratak_post28_shadow_test",
+      "role": "post28_shadow",
+      "serverIdentity": "7697267490013786155",
+      "databaseOid": "16469",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "ledger": {
+    "expected": 110,
+    "applied": 110,
+    "checksumsMatched": 110,
+    "partial": 0,
+    "rolledBack": 0
+  },
+  "publicTables": 282,
+  "applicationTables": 281,
+  "applicationRows": 63,
+  "foreignKeys": 313,
+  "checkConstraints": 102,
+  "unvalidatedConstraints": [],
+  "indexes": 1191,
+  "invalidIndexes": 0,
+  "triggers": 40,
+  "orphanAndCheckAudits": 415,
+  "violations": 0,
+  "mutationsExecuted": false,
+  "parityAccepted": true,
+  "secondDeployExecuted": true,
+  "seedExecuted": false
+}

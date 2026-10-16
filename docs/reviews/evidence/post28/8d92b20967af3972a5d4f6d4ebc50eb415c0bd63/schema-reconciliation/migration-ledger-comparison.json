@@ -1,0 +1,12 @@
+{
+  "kind": "POST28_LEDGER_COMPARISON",
+  "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+  "chainSha256": "542a3b4a6f90a50dda5e10bdb062bb2b4eae16e211e79c110417cd3dea8c2ab7",
+  "expected": 110,
+  "applied": 110,
+  "checksumsMatched": 110,
+  "partial": 0,
+  "rolledBack": 0,
+  "runtimeAcceptance": false,
+  "note": "Comparison only; target identity, catalog, parity and provenance are separate required gates."
+}

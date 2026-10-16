@@ -1,0 +1,75 @@
+{
+  "CertificateAuthorityDelegation": [
+    "packages/infrastructure/prisma/migrations/20261013200000_certificate_authority_delegations/migration.sql"
+  ],
+  "CmsBlockSchema": [
+    "packages/infrastructure/prisma/migrations/20260825010000_phase15_phase16_mandatory_closure/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261011065000_cms_block_schema_approval/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261016150000_post28_schema_reconciliation/migration.sql"
+  ],
+  "CmsContentNode": [
+    "packages/infrastructure/prisma/migrations/20260824213000_phase16_enterprise_cms/migration.sql",
+    "packages/infrastructure/prisma/migrations/20260825010000_phase15_phase16_mandatory_closure/migration.sql",
+    "packages/infrastructure/prisma/migrations/20260905014500_cms_domain_links_source_only/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261009010000_eap_asset_reference_serialization/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261011075500_cms_root_last_editor/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261011114500_cms_bounded_search_indexes/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261012020000_asset_rendition_inventory/migration.sql"
+  ],
+  "CmsLocalizedContent": [
+    "packages/infrastructure/prisma/migrations/20260824213000_phase16_enterprise_cms/migration.sql",
+    "packages/infrastructure/prisma/migrations/20260825010000_phase15_phase16_mandatory_closure/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261009010000_eap_asset_reference_serialization/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261011114500_cms_bounded_search_indexes/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261012020000_asset_rendition_inventory/migration.sql"
+  ],
+  "CmsPublishedContent": [
+    "packages/infrastructure/prisma/migrations/20260824213000_phase16_enterprise_cms/migration.sql",
+    "packages/infrastructure/prisma/migrations/20260825010000_phase15_phase16_mandatory_closure/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261009010000_eap_asset_reference_serialization/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261011114500_cms_bounded_search_indexes/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261012020000_asset_rendition_inventory/migration.sql"
+  ],
+  "InternationalTestEvidenceHistory": [
+    "packages/infrastructure/prisma/migrations/20261010100000_tests_publication_governance/migration.sql"
+  ],
+  "InternationalTestGovernance": [
+    "packages/infrastructure/prisma/migrations/20261010100000_tests_publication_governance/migration.sql"
+  ],
+  "InternationalTestPublicationSnapshot": [
+    "packages/infrastructure/prisma/migrations/20261010100000_tests_publication_governance/migration.sql"
+  ],
+  "MajorPublicationSnapshot": [
+    "packages/infrastructure/prisma/migrations/20261010120000_major_review_governance/migration.sql"
+  ],
+  "NewMajorCandidateDecision": [
+    "packages/infrastructure/prisma/migrations/20261010120000_major_review_governance/migration.sql"
+  ],
+  "NotificationChannelDelivery": [
+    "packages/infrastructure/prisma/migrations/20261012010000_section23_channel_delivery/migration.sql"
+  ],
+  "NotificationRateReservation": [
+    "packages/infrastructure/prisma/migrations/20261012010000_section23_channel_delivery/migration.sql"
+  ],
+  "OwnerTranslationTransferReceipt": [
+    "packages/infrastructure/prisma/migrations/20261014010000_owner_translation_receipt/migration.sql"
+  ],
+  "ServiceRequestRecord": [
+    "packages/infrastructure/prisma/migrations/20260903210000_p8_late_domain_integrations/migration.sql",
+    "packages/infrastructure/prisma/migrations/20260906235500_phase20_phase21_optimistic_concurrency/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261012000000_section21_service_safety/migration.sql",
+    "packages/infrastructure/prisma/migrations/20261012010000_section21_close_source/migration.sql"
+  ],
+  "StudentSupportOwnerReadObservation": [
+    "packages/infrastructure/prisma/migrations/20261013210000_student_support_owner_read_health/migration.sql"
+  ],
+  "UniversityProgramIntake": [
+    "packages/infrastructure/prisma/migrations/20261013020000_university_program_workspace/migration.sql"
+  ],
+  "UniversityProgramStudyLanguage": [
+    "packages/infrastructure/prisma/migrations/20261013020000_university_program_workspace/migration.sql"
+  ],
+  "UniversityProgramStudyProfile": [
+    "packages/infrastructure/prisma/migrations/20261013020000_university_program_workspace/migration.sql"
+  ]
+}

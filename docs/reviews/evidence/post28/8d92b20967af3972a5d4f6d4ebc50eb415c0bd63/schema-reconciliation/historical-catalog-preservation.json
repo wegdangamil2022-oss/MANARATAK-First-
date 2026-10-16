@@ -1,0 +1,15 @@
+{
+  "allConstraintNamesAndNormalizedDefinitionsUnchanged": true,
+  "foreignKeys": 313,
+  "indexDefinitionsIdentical": 1191,
+  "userTriggerDefinitionsIdentical": 40,
+  "historicalSnapshotSha256": "c1501d0ed28b66dd14564b73474cb11b51055b323cfbfe7fb040eb0adb725d7a",
+  "currentSnapshotSha256": "5387f9c2f6d434ab74fd2af3bfd9492db3aa3d24fd82a6998d5d1c1082e576cb",
+  "onlyColumnChange": {
+    "table": "CmsBlockSchema",
+    "column": "status",
+    "before": "'ACTIVE'::text",
+    "after": "'DRAFT'::text"
+  },
+  "functionalTriggerTestsExecuted": false
+}

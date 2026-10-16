@@ -1,0 +1,69 @@
+{
+  "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+  "preAuditEvidence": "Each explicit count in the checksummed forward migration must be zero or the transaction raises and rolls back; completion recorded in migration ledger. No separate pre-audit SELECT log is claimed.",
+  "constraints": [
+    {
+      "table": "FinancePaymentRecord",
+      "name": "FinancePayment_positive_units",
+      "validated": true,
+      "definition": "CHECK (\"amountMinorUnits\" ~ '^[1-9][0-9]{0,29}$'::text)",
+      "postAuditViolations": 0
+    },
+    {
+      "table": "FinanceRefundRecord",
+      "name": "FinanceRefund_positive_units",
+      "validated": true,
+      "definition": "CHECK (\"amountMinorUnits\" ~ '^[1-9][0-9]{0,29}$'::text)",
+      "postAuditViolations": 0
+    },
+    {
+      "table": "FinanceTransferRecord",
+      "name": "FinanceTransfer_positive_units",
+      "validated": true,
+      "definition": "CHECK (\"sourceAmountMinorUnits\" ~ '^[1-9][0-9]{0,29}$'::text)",
+      "postAuditViolations": 0
+    },
+    {
+      "table": "FinanceWalletHoldRecord",
+      "name": "FinanceWalletHold_positive_units",
+      "validated": true,
+      "definition": "CHECK (\"amountMinorUnits\" ~ '^[1-9][0-9]{0,29}$'::text)",
+      "postAuditViolations": 0
+    },
+    {
+      "table": "FinancialLedgerEntryRecord",
+      "name": "FinanceLedger_positive_units",
+      "validated": true,
+      "definition": "CHECK (\"amountMinorUnits\" ~ '^[1-9][0-9]{0,29}$'::text AND (direction = ANY (ARRAY['DEBIT'::text, 'CREDIT'::text])))",
+      "postAuditViolations": 0
+    },
+    {
+      "table": "ServiceCatalogRecord",
+      "name": "ServiceCatalogRecord_fulfillment_policy",
+      "validated": true,
+      "definition": "CHECK (\"fulfillmentPolicy\" = ANY (ARRAY['FREE'::text, 'CHARGEABLE'::text, 'QUOTE_REQUIRED'::text]))",
+      "postAuditViolations": 0
+    },
+    {
+      "table": "ServicePricingRecord",
+      "name": "ServicePricingRecord_bounded_money",
+      "validated": true,
+      "definition": "CHECK (\"amountMinorUnits\" ~ '^(0|[1-9][0-9]{0,29})$'::text AND scale >= 0 AND scale <= 6)",
+      "postAuditViolations": 0
+    },
+    {
+      "table": "SettingAssignmentRecord",
+      "name": "SettingAssignmentRecord_id_currentVersionId_fkey",
+      "validated": true,
+      "definition": "FOREIGN KEY (id, \"currentVersionId\") REFERENCES \"SettingVersionRecord\"(\"assignmentId\", id) DEFERRABLE INITIALLY DEFERRED",
+      "postAuditViolations": 0
+    },
+    {
+      "table": "StudentApplicationDocumentBinding",
+      "name": "StudentApplicationDocumentBinding_assetId_fkey",
+      "validated": true,
+      "definition": "FOREIGN KEY (\"assetId\") REFERENCES \"AssetRecord\"(id) ON UPDATE RESTRICT ON DELETE RESTRICT",
+      "postAuditViolations": 0
+    }
+  ]
+}

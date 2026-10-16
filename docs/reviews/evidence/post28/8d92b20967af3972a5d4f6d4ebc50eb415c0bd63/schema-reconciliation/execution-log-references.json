@@ -1,0 +1,111 @@
+{
+  "privateLogsOnly": true,
+  "current": [
+    {
+      "name": "R03-app",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r03-app-defaults.mjs"
+      ],
+      "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+      "startedUtc": "2026-10-16T14:09:18.266356+00:00",
+      "finishedUtc": "2026-10-16T14:09:18.478904+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-CIu8LU/R03-app-20261016T140918477053Z.log",
+      "sha256": "047027744e4545d39837e0bdb3fa724e26159e8341a7e12ee0ef4ebbbb72bddd"
+    },
+    {
+      "name": "R04-parity",
+      "command": [
+        "bash",
+        "scripts/database/verify-greenfield-migration-parity.sh"
+      ],
+      "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+      "startedUtc": "2026-10-16T14:09:19.294937+00:00",
+      "finishedUtc": "2026-10-16T14:09:50.955449+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-CIu8LU/R04-parity-20261016T140950951957Z.log",
+      "sha256": "0eff6fff590994898a4f3f457e6ccc541c34e1056924beee5e7d35522147dcc0"
+    },
+    {
+      "name": "R04-audit",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r04-full-audit.mjs"
+      ],
+      "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+      "startedUtc": "2026-10-16T14:09:58.432335+00:00",
+      "finishedUtc": "2026-10-16T14:10:22.557188+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-CIu8LU/R04-audit-20261016T141022555038Z.log",
+      "sha256": "f214334e5b72e5fc8df17003042ecd1a7b99958c4040d7465821555b50f50d01"
+    },
+    {
+      "name": "R03-postreplay",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r03-app-postreplay.mjs"
+      ],
+      "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+      "startedUtc": "2026-10-16T14:11:51.818003+00:00",
+      "finishedUtc": "2026-10-16T14:11:52.024081+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-CIu8LU/R03-postreplay-20261016T141152022071Z.log",
+      "sha256": "c30adc68ecc962f8a8a0c485198d747ce94f011dcd5a411791f0f8f49b55e5a7"
+    },
+    {
+      "name": "R04-final-catalog",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r04-final-catalog.mjs"
+      ],
+      "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+      "startedUtc": "2026-10-16T14:12:41.797136+00:00",
+      "finishedUtc": "2026-10-16T14:12:42.106985+00:00",
+      "exitCode": 1,
+      "log": "/workspace/scratch/post28/labs/lab-CIu8LU/R04-final-catalog-20261016T141242104581Z.log",
+      "sha256": "7e65fa20d769855330cb76c28b68bd3d2df457d580818b90c6049aa3e770860f"
+    },
+    {
+      "name": "R04-final-catalog",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r04-final-catalog.mjs"
+      ],
+      "sourceSha": "8d92b20967af3972a5d4f6d4ebc50eb415c0bd63",
+      "startedUtc": "2026-10-16T14:13:05.306193+00:00",
+      "finishedUtc": "2026-10-16T14:13:05.793868+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-CIu8LU/R04-final-catalog-20261016T141305790599Z.log",
+      "sha256": "7f37903a8105a073a1555356fa29fb4df02cdda35ea8626761eef5e311466a16"
+    }
+  ],
+  "firstAttempt": [
+    {
+      "name": "R03-app",
+      "command": [
+        "node",
+        "/workspace/scratch/post28/tools/local-r03-app-defaults.mjs"
+      ],
+      "sourceSha": "8dde53cb3d57037a1086ee044cd14588cc025046",
+      "startedUtc": "2026-10-16T14:07:02.843723+00:00",
+      "finishedUtc": "2026-10-16T14:07:03.070694+00:00",
+      "exitCode": 0,
+      "log": "/workspace/scratch/post28/labs/lab-ZbsvSo/R03-app-20261016T140703068636Z.log",
+      "sha256": "23d3da9aa0a7f329668af58af1383451d32d5241642b3c08e0e83eb32c61682d"
+    },
+    {
+      "name": "R04-parity",
+      "command": [
+        "bash",
+        "scripts/database/verify-greenfield-migration-parity.sh"
+      ],
+      "sourceSha": "8dde53cb3d57037a1086ee044cd14588cc025046",
+      "startedUtc": "2026-10-16T14:07:03.952222+00:00",
+      "finishedUtc": "2026-10-16T14:07:20.487452+00:00",
+      "exitCode": 1,
+      "log": "/workspace/scratch/post28/labs/lab-ZbsvSo/R04-parity-20261016T140720484865Z.log",
+      "sha256": "dbf48fd71346ec8efa91c53e420cb1ecc2e094acd49b369a852825138ac3e7fe"
+    }
+  ]
+}
