@@ -1,6 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+export function tarLocalPath(file) {
+  return path.relative(process.cwd(),file).split(path.sep).join('/')||'.';
+}
+
 // Windows cannot exec npm.cmd without a shell. Invoke its JS entry directly instead.
 export function npmInvocation(args, {platform = process.platform, execPath = process.execPath, env = process.env} = {}) {
   if (platform !== 'win32') return {command: 'npm', args};

@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {assertRegularArtifactInputs} from './lib/ArtifactInputPolicy.mjs';
+import {tarLocalPath} from './lib/DiagnosticProcess.mjs';
 import { requireSha, REPOSITORY } from './lib/ReleaseContracts.mjs';
 const root = process.cwd(),
   out = path.resolve(process.env.RELEASE_ARTIFACT_OUTPUT_DIR ?? path.join(root, 'release-artifacts'));
@@ -84,7 +85,7 @@ for (const [name, items] of units) {
       '--group=0',
       '--numeric-owner',
       '-cf',
-      target,
+      tarLocalPath(target),
       ...items,
     ],
     { cwd: root, stdio: 'inherit' },

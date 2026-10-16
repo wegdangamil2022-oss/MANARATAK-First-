@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {npmInvocation} from '../../scripts/release/lib/DiagnosticProcess.mjs';
+import {npmInvocation,tarLocalPath} from '../../scripts/release/lib/DiagnosticProcess.mjs';
 
 test('POSIX npm execution keeps argument boundaries',()=>{
   assert.deepEqual(npmInvocation(['run','build'],{platform:'linux'}),{command:'npm',args:['run','build']});
@@ -22,4 +22,17 @@ test('Windows npm invokes JavaScript through Node without shell interpolation',(
 });
 test('missing Windows npm CLI fails before execution',()=>{
   assert.throws(()=>npmInvocation([],{platform:'win32',execPath:path.join(os.tmpdir(),'absent-node','node.exe'),env:{}}));
+});
+test('GNU tar roundtrip accepts absolute Windows output locations via local paths',()=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'post28-tar-'));
+  try {
+    fs.mkdirSync(path.join(root,'input'));fs.mkdirSync(path.join(root,'unpacked'));
+    fs.writeFileSync(path.join(root,'input/payload'),'artifact bytes');
+    const archive=tarLocalPath(path.join(root,'bundle.tar'));
+    const packed=spawnSync('tar',['--force-local','-cf',archive,'-C',tarLocalPath(path.join(root,'input')),'payload'],{encoding:'utf8'});
+    assert.equal(packed.status,0,packed.stderr);
+    const unpacked=spawnSync('tar',['--force-local','-xf',archive,'-C',tarLocalPath(path.join(root,'unpacked'))],{encoding:'utf8'});
+    assert.equal(unpacked.status,0,unpacked.stderr);
+    assert.equal(fs.readFileSync(path.join(root,'unpacked/payload'),'utf8'),'artifact bytes');
+  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
