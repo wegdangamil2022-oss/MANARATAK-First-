@@ -29,5 +29,6 @@ export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
  'UniversityCampus','UniversityOrganizationUnit','UniversityProgramCampus','UniversityProgramAdmissionRequirement',
  'InternationalTest','InternationalTestVariant','InternationalTestVersion','InternationalTestVersionScoreScale',
  'Scholarship','ScholarshipVersion','ScholarshipApplicationCycle',
- 'University','UniversityAcademicProgram','DegreeLevel','Major','MajorLevelProfile','MajorVersion'
+ 'University','UniversityAcademicProgram','DegreeLevel','Major','MajorLevelProfile','MajorVersion',
+ 'AcademicTaxonomyNode','CourseTaxonomyResolution','CourseAcademicTaxonomyLink','CourseMajorProjection'
 ]);

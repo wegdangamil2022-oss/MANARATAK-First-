@@ -1,0 +1,31 @@
+import {randomUUID as fresh} from 'node:crypto';
+import {beforeAll,afterAll,describe,it,expect} from 'vitest';
+import {PrismaClient} from '@prisma/client';
+import {PrismaCourseRelationshipRepository} from '../../packages/infrastructure/src/courses/PrismaCourseRelationshipRepository.ts';
+let db,other,repository;
+const owner=id=>({id,publicId:id,slug:id,canonicalName:id,canonicalDedupKey:id,displayName:'Synthetic DEC05 owner',status:'PUBLISHED',completenessStatus:'COMPLETE'});
+async function fixture(independent=false){
+ const course=fresh(),major=fresh(),node=fresh(),resolution=fresh(),link=fresh(),projection=fresh();
+ await db.course.create({data:{...owner(course),originType:'NATIVE_MANARATAK_COURSE',accessType:'FREE_STUDY'}});
+ await db.major.create({data:owner(major)});
+ await db.academicTaxonomyNode.create({data:{id:node,deterministicKey:node,nodeType:'DISCIPLINE',canonicalCode:node,canonicalName:node,status:'ACTIVE'}});
+ await db.courseTaxonomyResolution.create({data:{id:resolution,courseId:course,sourceTerm:'Synthetic topic',normalizedTerm:'synthetic topic',status:'APPROVED',candidateTaxonomyNodeIds:[node],chosenTaxonomyNodeId:node}});
+ await db.courseAcademicTaxonomyLink.create({data:{id:link,courseId:course,taxonomyNodeId:node,sourceResolutionId:resolution,matchMethod:'MANUAL_REVIEW',sourceTerm:'Synthetic topic',reviewState:'APPROVED'}});
+ await db.courseMajorProjection.create({data:{id:projection,projectionKey:projection,courseId:course,majorId:major,taxonomyNodeId:node,sourceCourseTaxonomyLinkId:link,sourceType:'TAXONOMY_MAPPING',relationshipType:'RELATED',projectionState:'APPROVED'}});
+ let direct;
+ if(independent){direct=fresh();await db.courseMajorProjection.create({data:{id:direct,projectionKey:direct,courseId:course,majorId:major,sourceType:'DIRECT_REVIEWED',relationshipType:'RELATED',projectionState:'APPROVED'}});}
+ return {course,major,node,resolution,link,projection,direct};
+}
+const review=(r,c,decision='REJECTED')=>r.reviewTaxonomyLink({courseId:c.course,linkId:c.link,decision,actorId:'post28-dec05-reviewer'});
+const state=c=>db.courseMajorProjection.findUniqueOrThrow({where:{id:c.projection}});
+const visible=async c=>(await repository.listPublishedRelatedCourses({majorId:c.major,limit:10})).data.map(x=>x.ownerId);
+describe('Post28 DEC05 taxonomy rejection and dependent projection',()=>{
+ beforeAll(async()=>{if(process.env.POST28_TARGET_LABEL!=='DB-T'||process.env.POST28_DATABASE_SUITE!=='dec05-taxonomy-invalidation'||process.env.RUN_DATABASE_INTEGRATION_TESTS!=='true'||process.env.POST28_TRANSACTION_SETUP_URL)throw new Error('POST28_DB_T_RUNNER_REQUIRED');db=new PrismaClient({log:[],errorFormat:'minimal'});other=new PrismaClient({log:[],errorFormat:'minimal'});await Promise.all([db.$connect(),other.$connect()]);for(const client of [db,other])expect((await client.$queryRaw`SELECT current_user AS role`)[0].role).toBe('post28_app');repository=new PrismaCourseRelationshipRepository(db);});
+ afterAll(async()=>{await Promise.all([db?.$disconnect(),other?.$disconnect()]);});
+ it('withdraws only the rejected taxonomy derived major projection from the next public read',async()=>{const c=await fixture();expect(await visible(c)).toEqual([c.course]);await review(repository,c);expect((await state(c)).projectionState).toBe('REVIEW_REQUIRED');expect(await visible(c)).toEqual([]);expect((await db.courseTaxonomyResolution.findUnique({where:{id:c.resolution}})).status).toBe('REJECTED');});
+ it('preserves independent reviewed major links and all provenance rows',async()=>{const c=await fixture(true);await review(repository,c);expect((await state(c)).projectionState).toBe('REVIEW_REQUIRED');expect((await db.courseMajorProjection.findUnique({where:{id:c.direct}})).projectionState).toBe('APPROVED');expect(await visible(c)).toEqual([c.course]);expect(await db.courseMajorProjection.count({where:{courseId:c.course}})).toBe(2);expect((await state(c)).sourceCourseTaxonomyLinkId).toBe(c.link);});
+ it('does not silently approve withdrawn projections when the taxonomy is reapproved',async()=>{const c=await fixture();await review(repository,c);await review(repository,c,'APPROVED');expect((await state(c)).projectionState).toBe('REVIEW_REQUIRED');expect(await visible(c)).toEqual([]);});
+ it('rejects a foreign course identity without modifying its link or projection',async()=>{const c=await fixture();await expect(review(repository,{...c,course:fresh()})).rejects.toThrow('COURSE_TAXONOMY_LINK_NOT_FOUND');expect((await state(c)).projectionState).toBe('APPROVED');expect((await db.courseAcademicTaxonomyLink.findUnique({where:{id:c.link}})).reviewState).toBe('APPROVED');});
+ it('repeated and concurrent rejection through two connections converges without deleting history',async()=>{const c=await fixture();await Promise.all([review(repository,c),review(new PrismaCourseRelationshipRepository(other),c)]);await review(repository,c);expect((await state(c)).projectionState).toBe('REVIEW_REQUIRED');expect(await visible(c)).toEqual([]);expect(await db.courseAcademicTaxonomyLink.count({where:{id:c.link}})).toBe(1);});
+ it('rolls link resolution and projections back on a real PostgreSQL statement failure',async()=>{const c=await fixture();let injected=false;const broken=new Proxy(db,{get(target,key){if(key==='courseMajorProjection')return new Proxy(target.courseMajorProjection,{get(model,operation){if(operation==='updateMany')return ()=>{injected=true;return target.$executeRawUnsafe('SELECT 1/0');};const value=Reflect.get(model,operation);return typeof value==='function'?value.bind(model):value;}});const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;}});await expect(review(new PrismaCourseRelationshipRepository(broken),c)).rejects.toMatchObject({code:'P2010',meta:{code:'22012'}});expect(injected).toBe(true);expect((await state(c)).projectionState).toBe('APPROVED');expect((await db.courseAcademicTaxonomyLink.findUnique({where:{id:c.link}})).reviewState).toBe('APPROVED');expect((await db.courseTaxonomyResolution.findUnique({where:{id:c.resolution}})).status).toBe('APPROVED');await review(repository,c);expect(await visible(c)).toEqual([]);});
+});
