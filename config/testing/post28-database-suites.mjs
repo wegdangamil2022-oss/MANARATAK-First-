@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'owner-relations': {files: ['tests/database/post28-owner-relations.database.spec.mjs'],minimumCases:16},
   'university-relations': {files: ['tests/database/post28-university-relations.database.spec.mjs'],minimumCases:7},
   'document-consent': {files: ['tests/database/post28-document-consent.database.spec.mjs'],minimumCases:10},
   'owner-workflows': {files: ['tests/database/post28-owner-workflows.database.spec.mjs'],minimumCases:19},
