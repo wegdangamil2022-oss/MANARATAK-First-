@@ -127,7 +127,7 @@ describe('MajorAdminRouter', () => {
     useCases.linkNewMajorCandidate.mockResolvedValue({ universityPrograms: 1, scholarshipMajorTargets: 0, scholarshipEligibilityItems: 0 });
     const app = createApp(useCases);
 
-    const res = await request(app).post('/admin/majors/new-candidates/NMC-1/link').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({ majorId: '913e0a15-54f3-4af1-a771-1f0bfcdd0d77', reason: 'Reviewed source', sourceDigest: 'a'.repeat(64) });
+    const res = await request(app).post('/admin/majors/new-candidates/NMC-1/link').set('If-Match', '1').set('X-Review-Reason', 'Reviewed official source').send({ majorId: '913e0a15-54f3-4af1-a771-1f0bfcdd0d77', expectedTargetRevision: 1, reason: 'Reviewed source', sourceDigest: 'a'.repeat(64) });
 
     expect(res.status).toBe(200);
     expect(useCases.linkNewMajorCandidate).toHaveBeenCalledWith(
