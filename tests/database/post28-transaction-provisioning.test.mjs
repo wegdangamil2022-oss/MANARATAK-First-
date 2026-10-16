@@ -100,3 +100,10 @@ test('atomic relation commands declare eight cases and explicit scholarship link
  for(const table of ['ScholarshipUniversityLink','ScholarshipSponsorContext'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });
+
+test('scholarship Admin runtime declares seventeen cases without widening application grants',async()=>{
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
+ assert.equal(databaseSuite('scholarship-admin').minimumCases,17);
+ for(const table of ['ScholarshipUniversityLink','ScholarshipSponsorContext','RoleRecord','ApiIdempotencyRecord'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
+ assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
+});
