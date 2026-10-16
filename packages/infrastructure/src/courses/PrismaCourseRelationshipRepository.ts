@@ -806,6 +806,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       where.majorProjections = {
         some: {
           majorId: filters.majorId,
+          major: { is: { status: 'PUBLISHED' } },
           projectionState: 'APPROVED',
         },
       };

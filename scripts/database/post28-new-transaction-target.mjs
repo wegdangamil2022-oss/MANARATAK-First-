@@ -6,12 +6,13 @@ import {execFileSync,spawnSync,spawn} from 'node:child_process';
 const fail=code=>{throw new Error(code);};
 /** New database only, on an explicitly identified local disposable memory server. Never relabel an old target. */
 export async function createNewTransactionTarget(parentFile){
+ if(process.env.POST28_LOCAL_LAB_CREATE!=='YES'||!['test','development'].includes(process.env.NODE_ENV)||Number(process.versions.node.split('.')[0])!==22)fail('POST28_LOCAL_LAB_CREATION_NOT_AUTHORIZED');
  const root=fs.realpathSync(process.cwd()),sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
  if(process.env.POST28_LOCAL_LAB_PROFILE!=='transactions'||process.env.POST28_LOCAL_LAB_STORAGE!=='tmpfs')fail('POST28_PARENT_TRANSACTION_MEMORY_ONLY');
  if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())fail('POST28_CLEAN_SOURCE_REQUIRED');
  const file=fs.realpathSync(parentFile);if(file===root||file.startsWith(root+path.sep))fail('POST28_PARENT_OUTSIDE_CHECKOUT_REQUIRED');
  const parent=JSON.parse(fs.readFileSync(file,'utf8'));
- if(parent.kind!=='POST28_LOCAL_LAB'||parent.profile!=='transactions'||parent.storage!=='tmpfs'||parent.scope!=='LOCAL_DEVELOPMENT_REHEARSAL'||!/^[0-9a-f]{64}$/.test(parent.containerId??'')||!/^post28-net-[0-9a-f]{8}$/.test(parent.network??'')||!/^[-0-9a-f]{36}$/.test(parent.runId??''))fail('POST28_PARENT_MEMORY_LAB_REQUIRED');
+ if(parent.kind!=='POST28_LOCAL_LAB'||parent.profile!=='transactions'||parent.storage!=='tmpfs'||parent.scope!=='LOCAL_DEVELOPMENT_REHEARSAL'||!/^[0-9a-f]{64}$/.test(parent.containerId??'')||!/^post28-net-[0-9a-f]{8}$/.test(parent.network??'')||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(parent.runId??''))fail('POST28_PARENT_MEMORY_LAB_REQUIRED');
  const dockerEnv={...process.env};for(const key of ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'])delete dockerEnv[key];
  const docker=(args,input)=>{const r=spawnSync('docker',['--host=unix:///var/run/docker.sock',...args],{env:dockerEnv,input,encoding:'utf8',maxBuffer:4*1024*1024});if(r.status!==0)fail('POST28_PARENT_DOCKER_FAILED');return r.stdout.trim();};
  const [live]=JSON.parse(docker(['inspect',parent.containerId]));const labels=live.Config.Labels??{};
