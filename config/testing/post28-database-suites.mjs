@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'relation-commands': {files: ['tests/database/post28-relation-commands.database.spec.mjs'],minimumCases:8},
   'http-finance': {files: ['tests/database/post28-http-finance.database.spec.mjs'],minimumCases:14},
   'owner-relations': {files: ['tests/database/post28-owner-relations.database.spec.mjs'],minimumCases:20},
   'university-relations': {files: ['tests/database/post28-university-relations.database.spec.mjs'],minimumCases:7},

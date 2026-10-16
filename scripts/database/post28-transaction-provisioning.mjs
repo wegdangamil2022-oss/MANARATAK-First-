@@ -19,6 +19,7 @@ export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
  'AuditRecord','StudentTimelineEntry','StudentPrivacyConsentDecision','StudentSavedCollection','StudentSavedItem','StudentSearchHistory','StudentRecentlyViewed','StudentPersonalStatistics',
  'FinancialAccountRecord','FinancialTransactionRecord','FinancialLedgerEntryRecord','ReferenceCurrency',
  'FinanceApprovalRecord','FinanceApprovalDecisionRecord','FinanceAdjustmentCaseRecord',
+ 'ScholarshipUniversityLink','ScholarshipSponsorContext',
  'IdentityRecord','UserRecord','AccountRecord','RoleRecord','RoleAssignmentRecord','SessionRecord','ApiIdempotencyRecord','FinanceExchangeRateRecord',
  'UniversityCampus','UniversityOrganizationUnit','UniversityProgramCampus','UniversityProgramAdmissionRequirement',
  'InternationalTest','InternationalTestVariant','InternationalTestVersion','InternationalTestVersionScoreScale',

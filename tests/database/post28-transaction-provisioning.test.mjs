@@ -93,3 +93,10 @@ test('HTTP finance suite declares fourteen cases and limited identity and execut
  for(const table of ['IdentityRecord','UserRecord','AccountRecord','RoleRecord','RoleAssignmentRecord','SessionRecord','ApiIdempotencyRecord','FinanceExchangeRateRecord'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });
+
+test('atomic relation commands declare eight cases and explicit scholarship link and sponsor grants',async()=>{
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
+ assert.equal(databaseSuite('relation-commands').minimumCases,8);
+ for(const table of ['ScholarshipUniversityLink','ScholarshipSponsorContext'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
+ assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
+});
