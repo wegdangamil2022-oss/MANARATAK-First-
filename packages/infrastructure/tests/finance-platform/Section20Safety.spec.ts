@@ -573,6 +573,7 @@ describe('P19 replay and recovery regressions', () => {
         findUnique: async () => ({
           id: 'wallet',
           status: 'ACTIVE',
+          ownerReferenceId: ctx.actorId,
           currencyCode: 'USD',
           scale: 2,
           account: { active: true, currencyCode: 'USD', scale: 2 },

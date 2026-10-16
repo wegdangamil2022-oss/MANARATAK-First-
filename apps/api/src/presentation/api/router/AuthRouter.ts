@@ -68,9 +68,19 @@ export class AuthRouter {
           res.status(503).json(responseFormatter.error({ code: 'AUTH_UNAVAILABLE', message: 'Authentication is temporarily unavailable.' }));
         }
       };
-    const emailKey = (field: string) => (req: Request) => typeof req.body?.[field] === 'string'
-      ? req.body[field].trim().toLowerCase().slice(0, 255) : undefined;
-    const tokenKey = (req: Request) => typeof req.body?.token === 'string' ? req.body.token.trim().slice(0, 512) : undefined;
+    // Rate-limit key extraction occurs before each action's own strict command parser.
+    // Parse a bounded key/value object first; never forward raw request bodies to use cases.
+    const rateLimitBody = (req: Request) => z.record(z.string().max(80), z.unknown()).safeParse(req.body);
+    const emailKey = (field: string) => (req: Request) => {
+      const parsed = rateLimitBody(req);
+      const value = parsed.success ? parsed.data[field] : undefined;
+      return typeof value === 'string' ? value.trim().toLowerCase().slice(0, 255) : undefined;
+    };
+    const tokenKey = (req: Request) => {
+      const parsed = rateLimitBody(req);
+      const value = parsed.success ? parsed.data.token : undefined;
+      return typeof value === 'string' ? value.trim().slice(0, 512) : undefined;
+    };
 
     router.post('/change-password',
       (req, res, next) => {

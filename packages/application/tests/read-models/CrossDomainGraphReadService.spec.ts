@@ -44,6 +44,10 @@ function build() {
     findBySlug: vi.fn().mockResolvedValue(university),
     listPublished: vi.fn().mockResolvedValue(page([university])),
     findPublishedByIds: vi.fn().mockResolvedValue([university]),
+    // Country-major edges come from the canonical published owner query, never inferred from a program label.
+    listPublishedMajorGraph: vi.fn().mockResolvedValue({
+      data: [{ ownerId: 'major-1' }], total: 1, hasMore: false, nextCursor: null,
+    }),
     listPublishedProgramGraph: vi
       .fn()
       .mockResolvedValue({
@@ -118,6 +122,7 @@ describe('CrossDomainGraphReadService P4 canonical projections', () => {
     expect(ctx.universityRepository.listPublished).toHaveBeenCalledWith(expect.objectContaining({ countryReferenceId: 'country-ye' }));
     expect(ctx.scholarshipRepository.listPublished).toHaveBeenCalledWith(expect.objectContaining({ countryReferenceId: 'country-ye' }));
     expect(ctx.internationalTestRepository.listPublished).toHaveBeenCalledWith(expect.objectContaining({ countryIso2Code: 'YE' }));
+    expect(ctx.universityRepository.listPublishedMajorGraph).toHaveBeenCalledWith(expect.objectContaining({ countryReferenceId: 'country-ye' }));
     expect(ctx.majorRepository.findPublishedByIds).toHaveBeenCalledWith(['major-1']);
     expect(ctx.courseRelationshipRepository.listPublishedRelatedCourses).toHaveBeenCalledWith(expect.objectContaining({ providerHeadquartersCountryReferenceId: 'country-ye' }));
     expect(graph.relationships.majors[0]).toMatchObject({ ownerId: 'major-1' });
@@ -132,7 +137,7 @@ describe('CrossDomainGraphReadService P4 canonical projections', () => {
       scholarshipCursor: 'sch-next',
       programCursor: 'program-next',
       courseCursor: 'course-next',
-      testPage: 3,
+      testCursor: 'test-next',
     });
     expect(ctx.universityRepository.listPublished).toHaveBeenCalledWith(
       expect.objectContaining({ cursor: 'uni-next' }),
@@ -147,7 +152,7 @@ describe('CrossDomainGraphReadService P4 canonical projections', () => {
       expect.objectContaining({ cursor: 'course-next' }),
     );
     expect(ctx.internationalTestRepository.listPublished).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 3 }),
+      expect.objectContaining({ cursorMode: true, cursor: 'test-next', page: 1 }),
     );
   });
 

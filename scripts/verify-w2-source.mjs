@@ -478,7 +478,7 @@ check('MNT-AUD-0081 canonical policy distinguishes owner disposition and legal h
   retentionDomain.includes('LEGAL_HOLD_ACTIVE') && retentionDomain.includes('AUDIT_EVIDENCE_ARCHIVE') && retentionDomain.includes('IMPORT_RAW_PAYLOAD_EXPIRED') && retentionDomain.includes('ASSET_PERMANENT_POLICY'));
 check('MNT-AUD-0081 durable sweeper is retryable/idempotent and only terminal decisions suppress retry',
   retentionSweepUseCase.includes('hasTerminalDecision') && retentionSweepUseCase.includes("result: 'FAILED'") &&
-  retentionDecisionRepository.includes("result: { in: ['APPLIED', 'SKIPPED'] }") && retentionDecisionRepository.includes("input.result === 'FAILED' ? null : input.decisionKey"));
+  retentionDecisionRepository.includes("result: 'APPLIED'") && !retentionDecisionRepository.includes("result: { in: ['APPLIED', 'SKIPPED'] }") && retentionDecisionRepository.includes("input.result === 'FAILED' ? null : input.decisionKey"));
 check('MNT-AUD-0081 owner gateways claim before mutation and preserve owner-specific retention semantics',
   [importRetentionGateway,auditRetentionGateway,assetRetentionGateway].every((source)=>source.includes('retentionClaimToken') && source.includes('retentionClaimUntil')) &&
   importRetentionGateway.includes('retentionPurged: true') && importRetentionGateway.includes("retentionState: 'RAW_PURGED'") &&
