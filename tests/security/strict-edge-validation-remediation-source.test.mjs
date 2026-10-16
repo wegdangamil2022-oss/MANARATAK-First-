@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { maskValidatedEnvelopeReads } from '../../scripts/security/router-body-source-policy.mjs';
 
 const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
@@ -22,7 +23,7 @@ test('MNT-AUD-0111 privileged routers never forward raw request bodies into appl
   const violations = [];
   for (const name of fs.readdirSync(routerDir).filter((n) => n.endsWith('.ts'))) {
     // Ignore only bodies passed directly to the strict parser, including multiline calls.
-    const source = fs.readFileSync(path.join(routerDir, name), 'utf8');
+    const source = maskValidatedEnvelopeReads(fs.readFileSync(path.join(routerDir, name), 'utf8'));
     const lines = source.replace(/parseStrict\(\s*[A-Za-z_$][\w$]*\s*,\s*req\.body\s*,?\s*\)/g, (call) => call.replace('req.body', 'validatedBody')).split(/\r?\n/);
     for (let index = 0; index < lines.length; index += 1) {
       const line = lines[index];
@@ -55,4 +56,19 @@ test('MNT-AUD-0111 known legacy and later-domain regressions are explicitly sche
   assert.doesNotMatch(testsPlatform, /\.passthrough\(\)/);
   assert.doesNotMatch(testsPlatform, /upsert(?:Variant|Section|ScoreScale|FeeMetadata|OfficialLink|Availability|PreparationMaterial)\(req\.params\.id, req\.body/);
   assert.doesNotMatch(reference, /parse\(\{ \.\.\.req\.body,/);
+});
+
+test('body-read policy accepts parser-only envelopes and bounded keys, rejecting raw DTO and alias forwarding', () => {
+  const safe = 'async (req) => { const {reason: _reason, ...payload} = req.body; command(schema.parse(payload)); }';
+  assert.doesNotMatch(maskValidatedEnvelopeReads(safe), /req\.body/);
+  for (const unsafe of [
+    'async (req) => { const {reason: _reason, ...payload} = req.body; command(payload); }',
+    'async (req) => { const {reason: _reason, ...payload} = req.body; schema.parse(payload); command(payload); }',
+    'async (req) => { const {reason: _reason, ...payload} = req.body; command(_reason, schema.parse(payload)); }',
+    'const emailKey = (field: string) => (req: Request) => req.body[field];',
+    'const tokenKey = (req: Request) => req.body.token;',
+  ]) assert.match(maskValidatedEnvelopeReads(unsafe), /req\.body/);
+  const bounded = "const tokenKey = (req: Request) => typeof req.body?.token === 'string' ? req.body.token.trim().slice(0, 512) : undefined;";
+  assert.doesNotMatch(maskValidatedEnvelopeReads(bounded), /req\.body/);
+  assert.match(maskValidatedEnvelopeReads(bounded.replace('.slice(0, 512)', '')), /req\.body/);
 });

@@ -81,7 +81,8 @@ if (!/aes-256-gcm/.test(asyncProtector) || !/AI_ASYNC_PAYLOAD_KEY/.test(asyncPro
 const asyncWorker = readFileSync('packages/application/src/background-jobs/handlers/AIAsyncBackgroundJobHandler.ts', 'utf8');
 const apiServer = readFileSync('apps/api/src/server.ts', 'utf8');
 const appConfig = readFileSync('packages/config/src/AppConfig.ts', 'utf8');
-if (!/processDueAsyncJobs/.test(asyncWorker) || !/AI_ASYNC_SWEEP_JOB_TYPE/.test(apiServer)) failures.push('async-runtime-worker-not-wired');
+const recurringJobs = readFileSync('apps/api/src/infrastructure/workers/RegisterRecurringJobs.ts', 'utf8');
+if (!/processDueAsyncJobs/.test(asyncWorker) || (!/await registerRecurringJobs\(container, config\)/.test(apiServer) || !/AI_ASYNC_SWEEP_JOB_TYPE/.test(recurringJobs) || !/system.ai.async-sweep/.test(recurringJobs))) failures.push('async-runtime-worker-not-wired');
 if (!/BACKGROUND_AI_CRON/.test(appConfig) || !/BACKGROUND_WORKER_ENABLED/.test(appConfig)) failures.push('async-runtime-worker-config-missing');
 
 if (failures.length) {

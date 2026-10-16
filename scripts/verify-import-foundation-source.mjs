@@ -55,9 +55,10 @@ pass('Capabilities distinguish handoff-ready from staging-only',
 
 const importWorker = read('packages/application/src/background-jobs/handlers/ImportQueueBackgroundJobHandler.ts');
 const apiServer = read('apps/api/src/server.ts');
+const recurringJobs = read('apps/api/src/infrastructure/workers/RegisterRecurringJobs.ts');
 const appConfig = read('packages/config/src/AppConfig.ts');
 pass('Durable Import retry/reclaim has an autonomous runtime worker',
-  importWorker.includes('processNextQueuedBatch') && apiServer.includes('IMPORT_QUEUE_SWEEP_JOB_TYPE') && apiServer.includes('system.import.queue-sweep'));
+  importWorker.includes('processNextQueuedBatch') && apiServer.includes('await registerRecurringJobs(container, config)') && recurringJobs.includes('IMPORT_QUEUE_SWEEP_JOB_TYPE') && recurringJobs.includes('system.import.queue-sweep'));
 pass('Import worker cadence is part of canonical production configuration',
   appConfig.includes('BACKGROUND_IMPORT_CRON must be explicitly configured in production/staging'));
 

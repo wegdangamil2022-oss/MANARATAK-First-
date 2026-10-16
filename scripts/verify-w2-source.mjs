@@ -192,7 +192,8 @@ check('MNT-AUD-0083 migration ledger and required counters fail closed',
   !databaseBaselineSource.includes("number | 'UNAVAILABLE'") &&
   !databaseBaselineSource.includes("return [name, 'UNAVAILABLE']"));
 check('MNT-AUD-0083 baseline manifest covers all persistence-owned models',
-  Object.keys(databaseBaselineManifest.models).length === Object.keys(persistenceManifest.models).length &&
+  JSON.stringify(Object.keys(databaseBaselineManifest.models).sort()) === JSON.stringify(Object.keys(persistenceManifest.models).sort()) &&
+  Object.entries(databaseBaselineManifest.models).every(([name, item]) => item.owner === persistenceManifest.models[name]) &&
   Object.values(databaseBaselineManifest.models).every((item) => item.required === true && Boolean(item.owner)));
 check('MNT-AUD-0083 artifacts include identity and source fingerprints',
   databaseBaselineSource.includes('databaseTargetIdentity') &&
@@ -478,7 +479,7 @@ check('MNT-AUD-0081 canonical policy distinguishes owner disposition and legal h
   retentionDomain.includes('LEGAL_HOLD_ACTIVE') && retentionDomain.includes('AUDIT_EVIDENCE_ARCHIVE') && retentionDomain.includes('IMPORT_RAW_PAYLOAD_EXPIRED') && retentionDomain.includes('ASSET_PERMANENT_POLICY'));
 check('MNT-AUD-0081 durable sweeper is retryable/idempotent and only terminal decisions suppress retry',
   retentionSweepUseCase.includes('hasTerminalDecision') && retentionSweepUseCase.includes("result: 'FAILED'") &&
-  retentionDecisionRepository.includes("result: { in: ['APPLIED', 'SKIPPED'] }") && retentionDecisionRepository.includes("input.result === 'FAILED' ? null : input.decisionKey"));
+  retentionDecisionRepository.includes("where: { decisionKey, result: 'APPLIED' }") && !retentionDecisionRepository.includes("result: { in: ['APPLIED', 'SKIPPED'] }") && retentionDecisionRepository.includes("input.result === 'FAILED' ? null : input.decisionKey"));
 check('MNT-AUD-0081 owner gateways claim before mutation and preserve owner-specific retention semantics',
   [importRetentionGateway,auditRetentionGateway,assetRetentionGateway].every((source)=>source.includes('retentionClaimToken') && source.includes('retentionClaimUntil')) &&
   importRetentionGateway.includes('retentionPurged: true') && importRetentionGateway.includes("retentionState: 'RAW_PURGED'") &&

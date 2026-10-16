@@ -84,7 +84,7 @@ check('MNT-AUD-0078', 'production telemetry provider and HTTP/background instrum
     requireAll(monitoringService, ['this.provider?.startSpan?.', 'this.provider?.forceFlush?.', 'this.provider?.shutdown?.']) &&
     requireAll(app, ['OtlpHttpMonitoringProvider', 'telemetry-exporter']) &&
     requireAll(server, ['startPollingWorkers', 'monitoringProvider']) &&
-    requireAll(read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts'), ['observeWorkerIteration', 'worker.iterations.completed', 'worker.iterations.failed', 'worker.iteration.duration_ms', "pollingWorkerRuntimeRegistry.success('certificate-completion')"]) &&
+    requireAll(read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts'), ['observeWorkerIteration', 'worker.iterations.completed', 'worker.iterations.failed', 'worker.iteration.duration_ms', "register('certificate-completion', intervalMs, () => worker.runOnce(workerId))", "pollingWorkerRuntimeRegistry.success(name)", "pollingWorkerRuntimeRegistry.failure(name, error)"]) &&
     cfg.includes('OTEL_EXPORTER_OTLP_ENDPOINT');
 });
 

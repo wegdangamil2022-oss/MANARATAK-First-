@@ -837,6 +837,12 @@ test('FSA001 source evidence writer preserves skipped gate and never declares ru
   assert.equal(report.pass, false);
   assert.equal(report.runtimeStatus, 'UNVERIFIED');
   assert.equal(report.productionDecision, 'BLOCKED');
+  const manifestBytes = fs.readFileSync('scripts/ci/source-closure-manifest.json');
+  const manifest = JSON.parse(manifestBytes);
+  assert.equal(report.sourceClosureManifest.sha256, hash(manifestBytes));
+  assert.deepEqual(report.sourceClosureManifest.sourceGateIds, manifest.gates.filter(gate => gate.classification === 'SOURCE').map(gate => gate.id));
+  assert.equal(report.runtimePendingManifest, manifest.runtimePendingManifest);
+  assert.equal(report.unitCommand, JSON.parse(fs.readFileSync('package.json')).scripts['test:unit']);
 });
 test('FSA002/013 corrected repository while deployment/recovery remain explicit opt-in', () => {
   const release = fs.readFileSync('.github/workflows/release-promotion.yml', 'utf8'),

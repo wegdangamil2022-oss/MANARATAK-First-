@@ -572,6 +572,7 @@ describe('P19 replay and recovery regressions', () => {
       financeWalletRecord: {
         findUnique: async () => ({
           id: 'wallet',
+          ownerReferenceId: ctx.actorId,
           status: 'ACTIVE',
           currencyCode: 'USD',
           scale: 2,
@@ -592,6 +593,8 @@ describe('P19 replay and recovery regressions', () => {
       new PrismaFinanceRepository(db).createWalletHold('wallet', usd('10'), 'changed', ctx),
     ).rejects.toThrow('FINANCE_IDEMPOTENCY_CONFLICT');
     expect(db.auditRecord.create).not.toHaveBeenCalled();
+    expect(db.transactionalOutboxRecord.create).not.toHaveBeenCalled();
+    expect(db.financeCommandRecord.create).not.toHaveBeenCalled();
   });
   it('rejects destination changes under a transfer creation key', async () => {
     const db = transactional({

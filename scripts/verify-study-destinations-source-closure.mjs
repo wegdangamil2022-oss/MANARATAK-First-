@@ -87,7 +87,7 @@ check('DI registers admin/public routers', di.includes('studyDestinationAdminRou
 
 check('Country graph includes universities', graph.includes('universities: PaginatedGraphCollection'));
 check('Country graph includes canonical majors via university programs', graph.includes('academicPrograms: AcademicProgramGraphIdentity[]') && graph.includes('majors: StableEntityReadIdentity[]'));
-check('Country graph resolves published majors by canonical IDs', graph.includes('canonicalMajorIds') && graph.includes('findPublishedByIds(canonicalMajorIds)'));
+check('Country graph resolves published majors by canonical IDs', graph.includes('listPublishedMajorGraph!({countryReferenceId:country.id!') && graph.includes('findPublishedByIds(majorPage.data.map(row=>row.ownerId))') && graph.includes('total:majorPage.total,hasMore:majorPage.hasMore,nextCursor:majorPage.nextCursor'));
 check('Country graph includes scholarships', graph.includes('scholarships: PaginatedGraphCollection'));
 check('Country graph includes international tests', graph.includes('internationalTests: PaginatedGraphCollection') && graph.includes('countryIso2Code: normalizedCode'));
 check('Country graph includes country-supported services', graph.includes('services: PaginatedGraphCollection') && graph.includes('supportedCountryReferenceId: country.id'));
@@ -154,7 +154,7 @@ check('Public country discovery is server paged', countriesPage.includes('search
 check('Featured grid uses published profile identities rather than fixed counts', read('apps/web/src/features/public-template/components/FeaturedCountries.tsx').includes('item.isFeatured') && !read('apps/web/src/features/public-template/components/FeaturedCountries.tsx').includes('scholarshipsCount:'));
 check('Country graph has independent owner cursors throughout the stack', ['universityCursor','scholarshipCursor','serviceCursor','courseCursor','programCursor'].every(key=>graph.includes(key)&&adminRouter.includes(key)&&adminDetail.includes(key)));
 check('Monthly living costs preserve original currency without USD fiction', publicData.includes('monthlyLivingCostRange') && !publicData.includes('averageLivingCostUsd'));
-check('Scholarship owner list accepts canonical country deep links', read('apps/admin/src/pages/ScholarshipListPage.tsx').includes("get('countryReferenceId')") && adminDetail.includes('All country scholarships'));
+check('Scholarship owner list accepts canonical country deep links', read('apps/admin/src/pages/ScholarshipListPage.tsx').includes('Object.keys(emptyScholarshipCanonicalFilters).map(key=>[key,params.get(key)') && read('apps/admin/src/components/ScholarshipCanonicalFilters.tsx').includes("countryReferenceId: ''") && read('apps/admin/src/pages/ScholarshipListPage.tsx').includes('Object.entries(canonical))if(value)params.set(key,value)') && adminDetail.includes('All country scholarships'));
 check('Prisma repository no longer bypasses generated schema with any', !/\bany\b/.test(repo) && repo.includes('StudyDestinationProfileGetPayload') && repo.includes('Prisma.StudyDestinationProfileWhereInput'));
 check('Owner application regressions are committed', exists('packages/application/tests/study-destinations/StudyDestinationGovernance.spec.ts'));
 check('Owner API negative regressions are committed', exists('apps/api/tests/presentation/api/router/StudyDestinationGovernanceRouter.spec.ts'));

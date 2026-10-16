@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { hasClientAuthStorage } from './lib/public-auth-source-policy.mjs';
+import { readDictionaryEntries } from './translation/dictionary-source.mjs';
 
 const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root,p),'utf8');
@@ -96,14 +97,15 @@ const detailFiles=[
 ].map(f=>`apps/web/src/features/public-template/components/${f}`);
 for(const p of detailFiles) check(`DETAIL_HEADER_${path.basename(p).replace(/\W/g,'_')}`,(p.endsWith('/ExamDetailModal.tsx') ? contains(p,'<ExamDetails {...props}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','<header') : contains(p,'DetailSectionHeader')),p);
 check('DETAIL_NO_TEXT_BACK',!/>\s*العودة\s*</.test(allPublic),'no standalone return text buttons');
-check('DETAIL_BACK_ARIA',contains('apps/web/src/features/public-template/components/DetailUi.tsx',"aria-label={mode === 'close' ? 'إغلاق' : 'العودة'}"),'accessible close/back control');
+check('DETAIL_BACK_ARIA',contains('apps/web/src/features/public-template/components/DetailUi.tsx',"aria-label={mode === 'close' ? publicT('public_close') : publicT('public_back')}"),'accessible close/back control');
 for(const p of ['ScholarshipDetailModal.tsx','UniversityDetailModal.tsx','MajorDetailModal.tsx','CountryDetailModal.tsx','ExamDetailModal.tsx'].map(f=>`apps/web/src/features/public-template/components/${f}`)) check(`DETAIL_CLOSE_MODE_${path.basename(p).replace(/\W/g,'_')}`,(p.endsWith('/ExamDetailModal.tsx') ? contains(p,'<ExamDetails {...props}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','onClick={onClose}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','aria-label={t("إغلاق")}') : contains(p,'mode="close"')),p);
 check('DETAIL_SCROLL_TARGET',contains('apps/web/src/features/public-template/components/DetailUi.tsx','scrollIntoView'),'search anchor scroll');
 check('DETAIL_TEMP_HIGHLIGHT',contains('apps/web/src/features/public-template/components/DetailUi.tsx','mn-search-term-mark'),'temporary matched phrase highlight');
 
 // Roadmap + notifications
 const roadmap='apps/web/src/features/public-template/components/RoadmapPreview.tsx';
-for(const text of ['حدّد هدفك الأكاديمي','اكتشف وقارن الفرص','تحقق من الأهلية والمتطلبات','جهّز طلبك','احفظ وتابع تقدمك']) check(`ROADMAP_${checks.length}`,contains(roadmap,text),text);
+const publicArabic = new Map(readDictionaryEntries(read('apps/web/src/i18n/ar.ts')).map(entry => [entry.key, entry.value]));
+for(const [key,text] of [['public_set_your_academic_goal','حدّد هدفك الأكاديمي'],['public_discover_and_compare_opportunities','اكتشف وقارن الفرص'],['public_check_eligibility_and_requirements','تحقق من الأهلية والمتطلبات'],['public_prepare_your_application','جهّز طلبك'],['public_save_and_track_your_progress','احفظ وتابع تقدمك']]) check(`ROADMAP_${checks.length}`,contains(roadmap,key) && contains(roadmap,'publicT(step.title)') && publicArabic.get(key) === text,text);
 const notifications='apps/web/src/features/public-template/components/PushNotificationCenter.tsx';
 check('NOTIFY_LUCIDE',/from 'lucide-react'/.test(read(notifications)),'Lucide notifications');
 check('NOTIFY_NO_EMOJI',!/[🔥🎓⏰📚❯]/u.test(allPublic),'legacy notification emoji removed');

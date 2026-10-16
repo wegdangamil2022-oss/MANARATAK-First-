@@ -104,3 +104,16 @@ test('source import checks ignore fixture strings and resolve declarations and f
   assert.equal(result.status, 0);
   assert.deepEqual(result.report.brokenRelativeImports, []);
 });
+
+test('reviewed acceptance suite configs are allowed while unregistered hidden configs are rejected', () => {
+  assert.equal(inspect({
+    '.b13-vitest.config.ts': '',
+    '.section20-finance-vitest.config.ts': '',
+    '.postclosure-review-vitest.config.ts': '',
+    '.b10-typecheck.json': '{}',
+  }).status, 0);
+  const unknown = inspect({'.b99-vitest.config.ts': ''}, ['evidence']);
+  assert.equal(unknown.status, 1);
+  assert.deepEqual(unknown.report.unexpectedRootFiles, ['.b99-vitest.config.ts']);
+  assert.deepEqual(unknown.report.unexpectedRootDirectories, ['evidence']);
+});
