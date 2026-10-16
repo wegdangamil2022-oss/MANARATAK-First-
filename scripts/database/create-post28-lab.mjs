@@ -44,7 +44,10 @@ try {
     const available=await new Promise(resolve=>{const server=net.createServer();server.once('error',()=>resolve(false));server.listen(port,'127.0.0.1',()=>server.close(()=>resolve(true)));});
     if(available)break;if(port>15532)throw new Error('POST28_LOCAL_PORT_UNAVAILABLE');
   }
-  run(['network','create','--internal','--label','codex.post28.run='+id,network]);
+  // A bounded explicit subnet avoids exhausting Docker's coarse default pools.
+  // Docker rejects overlaps; the network stays internal with no external route.
+  const subnet=`10.253.${Number.parseInt(suffix.slice(0,2),16)}.0/28`;
+  run(['network','create','--internal','--subnet',subnet,'--label','codex.post28.run='+id,network]);
   if(!memoryStorage)run(['volume','create','--label','codex.post28.run='+id,volume]);
   const containerId=run(['run','-d','--name',name,'--label','codex.post28.run='+id,'--label','codex.post28.scope=DISPOSABLE',
     '--network',network,'--memory','2g','--cpus','2','--pids-limit','256',
@@ -52,7 +55,7 @@ try {
     '-c','timezone=UTC','-c','max_connections=40']);
   if(!/^[0-9a-f]{64}$/.test(containerId))throw new Error('POST28_CONTAINER_ID_INVALID');
   const state={kind:'POST28_LOCAL_LAB',profile:profile.name,runId:id,sourceSha:sha,scope:'LOCAL_DEVELOPMENT_REHEARSAL',image:IMAGE,
-    containerId,containerName:name,network,volume:memoryStorage?null:volume,storage:memoryStorage?'tmpfs':'volume',port,directory,status:'BOOTSTRAPPING',createdAt:new Date().toISOString()};
+    containerId,containerName:name,network,subnet,volume:memoryStorage?null:volume,storage:memoryStorage?'tmpfs':'volume',port,directory,status:'BOOTSTRAPPING',createdAt:new Date().toISOString()};
   fs.writeFileSync(path.join(directory,'lab-state.json'),JSON.stringify(state,null,2)+'\n');
   let ready=false;
   for(let i=0;i<120;i++) {
