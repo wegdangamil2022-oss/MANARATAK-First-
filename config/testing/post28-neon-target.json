@@ -88,6 +88,16 @@
     "secretsConfigured": false,
     "directPrismaTlsVerified": false,
     "remoteMutationsAuthorized": false,
-    "detail": "docs/operations/POST28_R03_NEON_PROVISIONING_2026-10-16.md"
+    "detail": "docs/operations/POST28_R03_NEON_PROVISIONING_2026-10-16.md",
+    "followUp": {
+      "asOf": "2026-10-16",
+      "status": "BLOCKED_RUNTIME_CONFIGURATION",
+      "limitedRoleAuthentication": "PROVIDER_REPORTS_NO_LOGIN_NOT_AUTHENTICATED",
+      "unsafeRoleRemediation": "REQUIRED_NOT_EXECUTED",
+      "tcpConfigured": false,
+      "directPrismaTlsVerified": false,
+      "r04Readiness": "BLOCKED",
+      "report": "docs/operations/POST28_R03_NEON_FOLLOWUP_2026-10-16.md"
+    }
   }
 }

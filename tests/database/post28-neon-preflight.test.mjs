@@ -7,7 +7,7 @@ import {createNeonProviderReader} from '../../scripts/database/post28-neon-provi
 import {inspectDisposableDatabaseTarget} from '../../scripts/lib/disposable-database-target-guard.mjs';
 import {NEON_IDENTITY_SQL,readDatabaseIdentity} from '../../scripts/database/post28-preflight.mjs';
 
-const registry=JSON.parse(fs.readFileSync('config/testing/post28-neon-target.json','utf8'));
+const realRegistry=JSON.parse(fs.readFileSync('config/testing/post28-neon-target.json','utf8'));
 const sha='a'.repeat(40),runId='11111111-1111-4111-8111-111111111111';
 const env={NODE_ENV:'test',DATABASE_TARGET_CLASS:'DISPOSABLE',POST28_ISOLATED_EXECUTION:'YES'};
 const g={branchId:'br-synthetic-g',branchName:'post28-synthetic-g',endpointId:'ep-synthetic-g',
@@ -15,6 +15,9 @@ const g={branchId:'br-synthetic-g',branchName:'post28-synthetic-g',endpointId:'e
   role:'post28_migrator',roleKind:'MIGRATION'};
 const s={...g,branchId:'br-synthetic-s',branchName:'post28-synthetic-s',endpointId:'ep-synthetic-s',
   directHost:g.directHost.replace('synthetic-g','synthetic-s'),database:'manaratak_post28_shadow_test',role:'post28_shadow',roleKind:'SHADOW'};
+const registryFor=(a=g,b=s)=>({...realRegistry,r03:{greenfield:{...a,roles:{migration:a.role}},
+  shadow:{...b,roles:{shadow:b.role}},unapprovedPrivilegedRoles:[]}});
+const registry=registryFor();
 const contract={version:1,kind:'POST28_NEON_TEST_DECLARATIONS',purpose:'READ_ONLY_PREFLIGHT',sourceSha:sha,runId,
   projectId:registry.neon.projectId,referenceBranchId:registry.neon.validationBranchId,postgresMajor:16,
   targets:{'DB-G':g,'DB-S':s}};
@@ -88,7 +91,7 @@ test('all Neon declarations and aliases are checked before provider or SQL reads
   ]){
     const c=structuredClone(contract);c.targets['DB-S']=collision;let reads=0;
     await assert.rejects(preflightTargets(c,[declarations[0],{label:'DB-S',url:urlFor(collision)}],env,sha,
-      async()=>{reads++;},{...opts,readProviderIdentity:async()=>{reads++;}}));assert.equal(reads,0);
+      async()=>{reads++;},{...opts,registry:registryFor(g,collision),readProviderIdentity:async()=>{reads++;}}));assert.equal(reads,0);
   }
 });
 test('Neon cannot use local declaration proof, missing provider callback, empty list or duplicate labels',async()=>{
@@ -257,7 +260,31 @@ test('distinct names cannot hide duplicate live OIDs in the same Neon branch',as
   const other={...s,branchId:g.branchId,branchName:g.branchName,endpointId:g.endpointId,directHost:g.directHost};
   const c={...contract,targets:{'DB-G':g,'DB-S':other}};
   await assert.rejects(preflightTargets(c,[declarations[0],{label:'DB-S',url:urlFor(other)}],env,sha,
-    async(_u,t)=>liveFor(t),opts),/TARGET_ALIAS_COLLISION/);
+    async(_u,t)=>liveFor(t),{...opts,registry:registryFor(g,other)}),/TARGET_ALIAS_COLLISION/);
+});
+
+test('R03 registry pins the actual approved G/S roles and rejects unapproved siblings before any reads',async()=>{
+  const targets={};const declarations=[];
+  for(const [label,row,roleKey,roleKind] of [['DB-G',realRegistry.r03.greenfield,'migration','MIGRATION'],
+    ['DB-S',realRegistry.r03.shadow,'shadow','SHADOW']]) {
+    targets[label]={...row,role:row.roles[roleKey],roleKind};
+    declarations.push({label,url:urlFor(targets[label])});
+  }
+  const c={...contract,targets};
+  for(const {label,url} of declarations)
+    assert.equal(validateTargetDeclaration(c,label,url,env,sha,{registry:realRegistry}).role,targets[label].role);
+  for(const mutate of [
+    x=>{x.targets['DB-G'].role='post28_migrator';},
+    x=>{x.targets['DB-G'].branchId='br-unapproved-sibling';},
+    x=>{x.targets['DB-S'].endpointId='ep-other';x.targets['DB-S'].directHost='ep-other.eu-central-1.aws.neon.tech';},
+    x=>{x.targets['DB-S'].database='manaratak_post28_other_test';},
+  ]){
+    const changed=structuredClone(c);mutate(changed);let reads=0;
+    const ds=declarations.map(d=>({label:d.label,url:urlFor(changed.targets[d.label])}));
+    await assert.rejects(preflightTargets(changed,ds,env,sha,async()=>{reads++;},
+      {registry:realRegistry,readProviderIdentity:async()=>{reads++;}}),/REGISTERED_TARGET_REQUIRED/);
+    assert.equal(reads,0);
+  }
 });
 test('default provider transport sends credentials only on stdin and pins verified HTTPS GET (inert curl)',async()=>{
   const os=await import('node:os'),path=await import('node:path');

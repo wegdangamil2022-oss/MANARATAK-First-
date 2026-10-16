@@ -54,6 +54,14 @@ export function validateNeonPreflightDeclaration(contract,label,rawUrl,env,sourc
   // The long-lived reference is never a destructive target, even if empty.
   if(result.branchId===registry.neon.validationBranchId||
       !/^post28-[a-z0-9-]+$/.test(target.branchName??''))fail('POST28_NEON_REFERENCE_TARGET_FORBIDDEN');
+  const pinned=label==='DB-G'?registry.r03?.greenfield:label==='DB-S'?registry.r03?.shadow:null;
+  const pinnedRole=label==='DB-G'?pinned?.roles?.migration:pinned?.roles?.shadow;
+  if(!pinned||result.branchId!==pinned.branchId||target.branchName!==pinned.branchName||
+      result.endpointId!==pinned.endpointId||result.directHost!==pinned.directHost||
+      result.database!==pinned.database||result.role!==pinnedRole||
+      !Array.isArray(registry.r03?.unapprovedPrivilegedRoles)||
+      registry.r03.unapprovedPrivilegedRoles.includes(result.role))
+    fail('POST28_NEON_REGISTERED_TARGET_REQUIRED');
   return {...result,provider:'NEON',sourceSha,runId:contract.runId,referenceBranchId:contract.referenceBranchId,
     regionId:registry.neon.regionId,branchName:target.branchName};
 }
