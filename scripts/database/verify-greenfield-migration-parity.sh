@@ -7,7 +7,8 @@ cd "$ROOT"
 SCHEMA="packages/infrastructure/prisma/schema.prisma"
 MIGRATIONS="packages/infrastructure/prisma/migrations"
 PRISMA_BIN="node_modules/.bin/prisma"
-OUT_DIR="${GREENFIELD_VERIFY_OUTPUT_DIR:-greenfield-db-verification}"
+OUT_DIR="${GREENFIELD_VERIFY_OUTPUT_DIR:-}"
+[[ -n "$OUT_DIR" ]] || { echo 'GREENFIELD_VERIFY_OUTPUT_DIR must be a fresh absolute path outside Git' >&2; exit 2; }
 TARGET_URL="${GREENFIELD_DATABASE_URL:-}"
 SHADOW_URL="${GREENFIELD_SHADOW_DATABASE_URL:-}"
 
@@ -30,7 +31,16 @@ NODE
 # Targets containing prod|production|live|restore are refused by the shared policy.
 node scripts/database/post28-preflight.mjs --pair --require-empty
 
-mkdir -p "$OUT_DIR"
+node --input-type=module - "$OUT_DIR" <<'NODE'
+import fs from 'node:fs';
+import path from 'node:path';
+const output=process.argv[2];
+const root=fs.realpathSync(process.cwd());
+if(!path.isAbsolute(output))throw new Error('POST28_EVIDENCE_ABSOLUTE_PATH_REQUIRED');
+const parent=fs.realpathSync(path.dirname(output));
+if(parent===root || parent.startsWith(root+path.sep))throw new Error('POST28_EVIDENCE_OUTSIDE_CHECKOUT_REQUIRED');
+fs.mkdirSync(path.join(parent,path.basename(output)),{mode:0o700});
+NODE
 
 "$PRISMA_BIN" validate --schema="$SCHEMA"
 "$PRISMA_BIN" migrate deploy --schema="$SCHEMA"
@@ -50,6 +60,21 @@ APPLIED_MIGRATIONS="$(node scripts/database/post28-psql.mjs -Atqc 'SELECT count(
   exit 1
 }
 
+# Count equality cannot detect a substituted name/checksum or a partial attempt.
+LEDGER_SQL='SELECT COALESCE(json_agg(row_to_json(ledger) ORDER BY started_at,id), json_build_array()) FROM (SELECT id,migration_name,checksum,started_at,finished_at,rolled_back_at,applied_steps_count FROM "_prisma_migrations") ledger;'
+node scripts/database/post28-psql.mjs -Atqc "$LEDGER_SQL" > "$OUT_DIR/migration-ledger.json"
+node scripts/database/verify-post28-migration-ledger.mjs "$OUT_DIR/migration-ledger.json" > "$OUT_DIR/migration-ledger-comparison.json"
+
+# Re-deploy must not append/rewrite any migration record or reapply SQL effects.
+node scripts/database/post28-preflight.mjs --pair
+"$PRISMA_BIN" migrate deploy --schema="$SCHEMA"
+node scripts/database/post28-psql.mjs -Atqc "$LEDGER_SQL" > "$OUT_DIR/migration-ledger-after-redeploy.json"
+node scripts/database/verify-post28-migration-ledger.mjs "$OUT_DIR/migration-ledger-after-redeploy.json" > "$OUT_DIR/migration-ledger-after-redeploy-comparison.json"
+cmp -s "$OUT_DIR/migration-ledger.json" "$OUT_DIR/migration-ledger-after-redeploy.json" || {
+  echo 'Migration ledger changed after repeated deploy' >&2; exit 1;
+}
+
+
 INVALID_INDEXES="$(node scripts/database/post28-psql.mjs -Atqc "SELECT count(*) FROM pg_index i JOIN pg_class c ON c.oid=i.indexrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND NOT i.indisvalid;")"
 UNVALIDATED_CONSTRAINTS="$(node scripts/database/post28-psql.mjs -Atqc "SELECT count(*) FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname='public' AND NOT c.convalidated;")"
 UNEXPECTED_USER_SCHEMAS="$(node scripts/database/post28-psql.mjs -Atqc "SELECT count(*) FROM pg_namespace WHERE nspname NOT IN ('public','information_schema') AND nspname NOT LIKE 'pg_%';")"
@@ -66,18 +91,19 @@ SELECT json_build_object(
   'indexes', (SELECT count(*) FROM pg_indexes WHERE schemaname='public')
 );" > "$OUT_DIR/postgres-catalog-summary.json"
 
-cat > "$OUT_DIR/GREENFIELD_MIGRATION_PARITY.json" <<JSON
-{
-  "version": 1,
-  "kind": "greenfield-migration-parity",
-  "pass": true,
-  "expectedMigrations": $EXPECTED_MIGRATIONS,
-  "appliedMigrations": $APPLIED_MIGRATIONS,
-  "invalidIndexes": $INVALID_INDEXES,
-  "unvalidatedConstraints": $UNVALIDATED_CONSTRAINTS,
-  "unexpectedUserSchemas": $UNEXPECTED_USER_SCHEMAS,
-  "adr": "ADR-028"
-}
-JSON
+node --input-type=module - "$OUT_DIR" "$EXPECTED_MIGRATIONS" "$APPLIED_MIGRATIONS" "$INVALID_INDEXES" "$UNVALIDATED_CONSTRAINTS" "$UNEXPECTED_USER_SCHEMAS" <<'NODE'
+import fs from 'node:fs';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+const [directory,expected,applied,indexes,constraints,schemas]=process.argv.slice(2);
+const ledger=JSON.parse(fs.readFileSync(path.join(directory,'migration-ledger-comparison.json'),'utf8'));
+const result={version:1,kind:'greenfield-migration-parity',pass:true,sourceSha:ledger.sourceSha,
+  migrationChainSha256:ledger.chainSha256,
+  ledgerSha256:createHash('sha256').update(fs.readFileSync(path.join(directory,'migration-ledger.json'))).digest('hex'),
+  expectedMigrations:Number(expected),appliedMigrations:Number(applied),invalidIndexes:Number(indexes),
+  unvalidatedConstraints:Number(constraints),unexpectedUserSchemas:Number(schemas),idempotentRedeployVerified:true,
+  requiredSeedStatus:'NOT_EXECUTED_BY_THIS_VERIFIER',adr:'ADR-028'};
+fs.writeFileSync(path.join(directory,'GREENFIELD_MIGRATION_PARITY.json'),JSON.stringify(result,null,2)+'\n',{flag:'wx',mode:0o600});
+NODE
 
 echo "GREENFIELD_MIGRATION_PARITY=PASS migrations=$APPLIED_MIGRATIONS"
