@@ -131,6 +131,14 @@ export class SettingsAdminRouter {
       z.object({kind:z.literal('VALUES'),expectedPolicyRevision:z.number().int().min(0),changes:z.array(change).min(1).max(20)}).strict(),
       z.object({kind:z.literal('DEPENDENCIES'),expectedPolicyRevision:z.number().int().min(0),policy:dependencyPolicy}).strict(),
     ]);
+    const changeSetExtras = {
+      id: z.string().uuid(), approverId: identifier,
+      previewDigest: z.string().regex(/^[a-f0-9]{64}$/), reason: changeReason,
+    };
+    const changeSetProposalSchema = z.discriminatedUnion('kind', [
+      planSchema.options[0].extend(changeSetExtras).strict(),
+      planSchema.options[1].extend(changeSetExtras).strict(),
+    ]);
     router.get('/governance/approvers',asyncHandler(async (req,res)=>{
       const query=z.object({search:z.string().trim().max(240).optional(),cursor:z.string().max(2048).optional()}).strict().parse(req.query);
       if (!listIdentitiesUseCase || !authEvaluatorService) throw new Error('SETTINGS_GOVERNANCE_UNAVAILABLE');
@@ -147,9 +155,9 @@ export class SettingsAdminRouter {
     router.get('/governance/change-sets',asyncHandler(async (req,res)=>{const query=z.object({cursor:z.string().uuid().optional()}).strict().parse(req.query);
       res.setHeader('Cache-Control','no-store');res.json(responseFormatter.success(await governance().list(actor(req),query.cursor)));}));
     router.post('/governance/change-sets',asyncHandler(async (req,res)=>{
-      const extra=z.object({id:z.string().uuid(),approverId:identifier,previewDigest:z.string().regex(/^[a-f0-9]{64}$/),reason:changeReason}).parse(req.body);
-      const {id:_id,approverId:_approver,previewDigest:_digest,reason:_reason,...plan}=req.body;
-      const input={...planSchema.parse(plan),...extra};await reviewer(req,input.approverId);
+      const { id, approverId, previewDigest, reason, ...plan } = changeSetProposalSchema.parse(req.body);
+      const input = { ...planSchema.parse(plan), id, approverId, previewDigest, reason };
+      await reviewer(req, input.approverId);
       res.status(201).json(responseFormatter.success(await governance().propose(input,context(req))));
     }));
     router.post('/governance/change-sets/:id/approve',asyncHandler(async (req,res)=>{

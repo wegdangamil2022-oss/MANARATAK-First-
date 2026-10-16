@@ -123,6 +123,8 @@ export class StudyDestinationAdminRouter {
           .max(100),
       })
       .strict();
+    const profileCommandSchema = profileSchema.extend(commandSchema.shape).strict();
+    const decisionCommandSchema = decisionSchema.extend(commandSchema.shape).strict();
     const listSchema = z.object({
       q: z.string().trim().max(200).optional(),
       region: z.string().trim().max(100).optional(),
@@ -213,7 +215,7 @@ export class StudyDestinationAdminRouter {
       guard('edit'),
       asyncHandler(async (req: Request, res: Response) => {
         const command = context(req);
-        const { reason: _reason, expectedRevision: _revision, ...payload } = req.body;
+        const { reason: _reason, expectedRevision: _revision, ...payload } = profileCommandSchema.parse(req.body);
         const { expectedUpdatedAt, ...input } = profileSchema.parse(payload);
         res.json(
           await studyDestinationUseCases.upsertProfile(
@@ -239,7 +241,7 @@ export class StudyDestinationAdminRouter {
       guard('verify'),
       asyncHandler(async (req: Request, res: Response) => {
         const command = context(req);
-        const { reason: _reason, expectedRevision: _revision, ...decision } = req.body;
+        const { reason: _reason, expectedRevision: _revision, ...decision } = decisionCommandSchema.parse(req.body);
         res.json(await studyDestinationUseCases.verifySources(req.params.iso2Code,
             command,
             decisionSchema.parse(decision),
