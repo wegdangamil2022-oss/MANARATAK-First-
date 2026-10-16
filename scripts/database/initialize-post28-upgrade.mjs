@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {prepareKnownSourcePacket,manifestWithKnownSource} from './post28-r05-known-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRequire} from 'node:module';
@@ -12,7 +13,8 @@ import {digest,verifyMigrationLedger} from './post28-migration-inventory.mjs';
 import {historicalFixtureManifest,seedHistoricalFixtures,SELECTED_PREDECESSOR,HISTORICAL_STAGE} from './post28-historical-fixtures.mjs';
 const fail=code=>{throw new Error(code);};
 try{
- const historical=process.argv.length===4&&process.argv[3]==='--historical-fixtures';
+ const knownSource=process.argv.length===4&&process.argv[3]==='--historical-known-source';
+ const historical=process.argv.length===4&&(process.argv[3]==='--historical-fixtures'||knownSource);
  if(process.argv.length!==3&&!historical)fail('POST28_UPGRADE_PREDECESSOR_COMMIT_REQUIRED');
  const root=fs.realpathSync(process.cwd()),plan=prepareUpgradeCandidate(root,process.argv[2]);
  let stage,manifest,fixtureProof;
@@ -38,6 +40,12 @@ try{
  const r04=JSON.parse(fs.readFileSync('docs/reviews/evidence/post28/467d1369e8da0a93ea3444bc1ef6a56c5e53d57d/r04-closure/migration-inventory.json','utf8'));
  if(r04.schemaSha256!==plan.after.schemaSha256||r04.chainSha256!==plan.after.migrationChainSha256)fail('POST28_R04_ACCEPTANCE_STALE');
  const directory=path.join(lab,'R05-baseline');fs.mkdirSync(directory,{mode:0o700});
+ if(knownSource){
+  const tracker=manifest.rows.find(row=>row.model==='StudentApplicationTracker');
+  const owners=JSON.parse(fs.readFileSync('docs/architecture/persistence/persistence-ownership.manifest.json','utf8')).models;
+  const packet=prepareKnownSourcePacket(path.join(directory,'known-source'),{checkoutRoot:root,sourceSha:plan.after.sourceSha,runId:contract.runId,assetId:manifest.orphan.missingAssetId,bindingId:manifest.orphan.bindingId,ownerId:tracker.data.studentReferenceId,assetOwner:owners.AssetRecord,documentOwner:owners.StudentApplicationDocumentBinding});
+  manifest=manifestWithKnownSource(manifest,packet);
+ }
  const read=file=>execFileSync('git',['show',`${plan.before.sourceSha}:${file}`],{maxBuffer:16*1024*1024});
  const schemaBytes=read('packages/infrastructure/prisma/schema.prisma');
  fs.writeFileSync(path.join(directory,'source.schema.prisma'),schemaBytes,{mode:0o600});
