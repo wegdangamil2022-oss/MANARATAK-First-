@@ -86,3 +86,22 @@ node scripts/database/post28-preflight.mjs --pair --require-empty
 ```
 
 قارن provider binding وSQL session/TLS/ACL وOID وعدم alias، وافحص دخول التطبيق بصلاحياته المحدودة، ووثّق النتائج الفعلية دون مالك. إذا اجتازت جميع بوابات R03، عندها فقط يُكتب تقرير جاهزية R04 بأوامر التنفيذ ونطاق DB-G/DB-S؛ تبقى الترحيلات منتظرة تفويضها.
+
+
+## تحقيق تكميلي بعد تسليم fb3fb097 — السبب المحدد لـ no_login
+
+**فحص حي إضافي بالقراءة فقط عبر جلسة Neon المخولة** (وليس اتصال Prisma من Codex) على فرعي G/S أظهر في `pg_authid`:
+
+| الدور | rolcanlogin | rolpassword IS NULL | صلاحيات الإدارة / neon_superuser |
+|---|---|---|---|
+| `post28_g_migrate_limited` | `true` | `true` | `false` |
+| `post28_g_app_limited` | `true` | `true` | `false` |
+| `post28_s_shadow_limited` | `true` | `true` | `false` |
+
+هذه النتيجة تحسم أن أدوار SQL محدودة الصلاحيات **تملك خاصية LOGIN، لكنها بلا كلمات مرور**؛ ولهذا يعرض Neon API `authentication_method=no_login`. لا تنشئ بدائل عبر `create_postgres_role` الافتراضي؛ قد تُنشأ صلاحيات مرتفعة. عيّن كلمات مرور قوية للأدوار الموجودة **بواسطة واجهة Neon المعتمدة أو مسار إداري خاص آمن**، واحفظ بياناتها مباشرة في مدير أسرار بيئة Codex. لا تمرر الأسرار عبر أدوات SQL المسجلة أو محادثات الدردشة أو Git، ولا تحاول إنشاء كلمات مرور ضمن تقارير الفحوص.
+
+**تفاصيل اتصال Codex بعد التجهيز:** يحتاج المسار الخاص للقراءة فقط `GREENFIELD_DATABASE_URL` بدور `post28_g_migrate_limited`، و`GREENFIELD_SHADOW_DATABASE_URL` بدور `post28_s_shadow_limited`؛ `DATABASE_URL` و`DIRECT_URL` عندما يتطلبها Prisma لقاعدة G بنفس الدور، و`NEON_API_KEY` بصلاحيات قراءة provider محدودة، و`POST28_TARGET_CONTRACT_FILE` لمسار عقد غير سري خارج checkout. نقاط Direct المضبوطة مسبقًا في registry فقط؛ لا pooler أو wildcard.
+
+**تنبيه الشبكة:** لا تعني إضافة نطاق إلى قائمة HTTP(S) السماح باتصال PostgreSQL TCP/5432. يجب إثبات دعم البيئة الفعلي لتصريح TCP إلى hostَي Direct، وإلا يبقى الاتصال المباشر `BLOCKED` ويُستخدم مختبر تشغيل يدعم TCP مع أسرار معزولة. لا تحايل عبر CI أو تغيير اسم الهدف.
+
+لم يُغيّر هذا التحقيق صلاحيات الأدوار أو كلمات المرور أو أي سجل تطبيق، ولم يُنفذ migration أو seed أو اختبار runtime. نتيجة `R03=BLOCKED_RUNTIME_CONFIGURATION` باقية. التقرير السابق `fb3fb097` يحتفظ ببصمة `a3dbee92` كمصدر مفحوص ولا تُنسب إليه هذه القياسات الجديدة.
