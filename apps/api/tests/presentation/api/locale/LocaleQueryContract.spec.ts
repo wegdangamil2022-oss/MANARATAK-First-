@@ -11,8 +11,12 @@ describe('LocaleQueryContract', () => {
     expect(parseRequestLocale({})).toBe('ar');
   });
 
-  it('normalizes repeated query values to the last value', () => {
-    expect(parseRequestLocale({ locale: ['en', 'ar'] })).toBe('ar');
+  it('rejects ambiguous repeated locale query values rather than silently choosing a language', () => {
+    expect(() => parseRequestLocale({ locale: ['en', 'ar'] })).toThrow(z.ZodError);
+  });
+
+  it('accepts a single query value passed through an array wrapper', () => {
+    expect(parseRequestLocale({ locale: ['ar'] })).toBe('ar');
   });
 
   it('rejects unsupported locale with stable API metadata', () => {
