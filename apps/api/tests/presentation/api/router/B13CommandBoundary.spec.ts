@@ -45,9 +45,11 @@ describe('B13 command HTTP boundaries', () => {
     expect((await request(f.app).post(`/finance${path}`).set('Idempotency-Key', 'synthetic-intent').send(input)).status).toBe(400);
     expect(f.useCases[method]).not.toHaveBeenCalled();
   });
-  it('requires a request key before dispatching a financial command', async () => {
+  it.each([undefined, 'x'.repeat(201)])('rejects a missing or oversized request key (%s)', async key => {
     const f = fixture();
-    const response = await request(f.app).post('/finance/wallet-holds/hold/release').send({expectedVersion: 1});
+    const pending = request(f.app).post('/finance/wallet-holds/hold/release');
+    if (key !== undefined) pending.set('Idempotency-Key', key);
+    const response = await pending.send({expectedVersion: 1});
     expect(response.status).toBe(400); expect(f.useCases.resolveWalletHold).not.toHaveBeenCalled();
   });
 });
