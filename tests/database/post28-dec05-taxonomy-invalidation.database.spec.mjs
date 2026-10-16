@@ -6,7 +6,7 @@ let db,other,repository;
 const owner=id=>({id,publicId:id,slug:id,canonicalName:id,canonicalDedupKey:id,displayName:'Synthetic DEC05 owner',status:'PUBLISHED',completenessStatus:'COMPLETE'});
 async function fixture(independent=false){
  const course=fresh(),major=fresh(),node=fresh(),resolution=fresh(),link=fresh(),projection=fresh();
- await db.course.create({data:{...owner(course),originType:'NATIVE_MANARATAK_COURSE',accessType:'FREE_STUDY'}});
+ await db.course.create({data:{...owner(course),originType:'NATIVE_MANARATAK_COURSE',accessType:'FREE_STUDY',directCourseUrl:'https://example.invalid/synthetic/'+course}});
  await db.major.create({data:owner(major)});
  await db.academicTaxonomyNode.create({data:{id:node,deterministicKey:node,nodeType:'DISCIPLINE',canonicalCode:node,canonicalName:node,status:'ACTIVE'}});
  await db.courseTaxonomyResolution.create({data:{id:resolution,courseId:course,sourceTerm:'Synthetic topic',normalizedTerm:'synthetic topic',status:'APPROVED',candidateTaxonomyNodeIds:[node],chosenTaxonomyNodeId:node}});
