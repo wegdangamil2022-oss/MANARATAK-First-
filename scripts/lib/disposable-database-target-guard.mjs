@@ -23,7 +23,8 @@ export function inspectDisposableDatabaseTarget(operation, env = process.env) {
   const remoteCiApproved = env.CI === 'true' && env.DATABASE_DISPOSABLE_REMOTE_APPROVED === 'YES';
   // Legacy CI approval only covers existing CI services. It cannot turn a Neon
   // baseline or arbitrary Neon endpoint into a disposable mutation target.
-  if(hostname==='neon.tech'||hostname?.endsWith('.neon.tech')) {
+  const canonicalHostname=hostname?.replace(/\.+$/,'');
+  if(canonicalHostname==='neon.tech'||canonicalHostname?.endsWith('.neon.tech')) {
     errors.push('POST28_NEON_RUNTIME_NOT_AUTHORIZED: Neon requires a separately reviewed remote mutation adapter');
   }
   if (hostname && !LOOPBACK_HOSTS.has(hostname) && !remoteCiApproved) {

@@ -156,6 +156,9 @@ test('legacy CI flags cannot authorize any Neon mutation, while local and CI ser
     CI:'true',DATABASE_DISPOSABLE_REMOTE_APPROVED:'YES',DATABASE_URL:urlFor(g),
     DATABASE_DISPOSABLE_CONFIRM_TARGET:`${g.directHost}:5432/${g.database}`};
   assert.equal(inspectDisposableDatabaseTarget('migrate-dev',values).ok,false);
+  for(const host of [g.directHost.toUpperCase(),g.directHost+'.'])
+    assert.equal(inspectDisposableDatabaseTarget('migrate-dev',{...values,
+      DATABASE_URL:urlFor({...g,directHost:host}),DATABASE_DISPOSABLE_CONFIRM_TARGET:`${host.toLowerCase()}:5432/${g.database}`}).ok,false);
   for(const host of ['127.0.0.1','postgres'])
     assert.equal(inspectDisposableDatabaseTarget('migrate-dev',{...values,DATABASE_URL:`postgresql://u:p@${host}:5432/testdb`,
       DATABASE_DISPOSABLE_CONFIRM_TARGET:`${host}:5432/testdb`}).ok,true);
@@ -227,6 +230,8 @@ test('Neon baseline and all Neon aliases are rejected before any destructive tes
   for(const name of ['DATABASE_URL','DIRECT_URL','W3_DATABASE_TEST_DATABASE_URL'])
     assert.throws(()=>rejectProtectedSuiteTargets({[name]:urlFor(g),CI:'true',DATABASE_DISPOSABLE_REMOTE_APPROVED:'YES'}),
       /NEON_RUNTIME_NOT_AUTHORIZED/);
+  for(const host of [g.directHost.toUpperCase(),g.directHost+'.'])
+    assert.throws(()=>rejectProtectedSuiteTargets({DATABASE_URL:urlFor({...g,directHost:host})}),/NEON_RUNTIME_NOT_AUTHORIZED/);
   const os=await import('node:os'),path=await import('node:path'),cp=await import('node:child_process');
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'post28-neon-no-import-'));
   try{
