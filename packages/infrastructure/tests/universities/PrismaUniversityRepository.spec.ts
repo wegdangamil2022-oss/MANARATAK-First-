@@ -50,14 +50,14 @@ describe('PrismaUniversityRepository', () => {
   });
 
   function configureGeography(regionCountry = 'YE') {
-    mockPrisma.referenceCountry = { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE', isActive: true,
+    mockPrisma.referenceCountry = { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE', isActive: true, lifecycleState: 'ACTIVE',
         updatedAt: new Date('2026-10-01T00:00:00.000Z')
     }) };
     mockPrisma.administrativeRegion = { findUnique: vi.fn(async (query) => {
       expect(query.select).toEqual({ countryIso2Code: true, countryReferenceId: true, lifecycleState: true });
       return { countryIso2Code: regionCountry, countryReferenceId: regionCountry === 'YE' ? 'country-ye' : 'country-sa', lifecycleState: 'ACTIVE' };
     }) };
-    mockPrisma.referenceCity = { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', countryReferenceId: 'country-ye', administrativeRegionId: 'region-aden', isActive: true,
+    mockPrisma.referenceCity = { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', countryReferenceId: 'country-ye', administrativeRegionId: 'region-aden', isActive: true, lifecycleState: 'ACTIVE',
         updatedAt: new Date('2026-10-01T00:00:00.000Z')
     }) };
     const record = { id: 'uni-1', status: 'DRAFT', optionalFields: {}, countryReferenceId: 'country-ye', regionReferenceId: 'region-aden', cityReferenceId: 'city-aden',
