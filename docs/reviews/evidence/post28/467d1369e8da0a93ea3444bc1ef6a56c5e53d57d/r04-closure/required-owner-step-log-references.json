@@ -1,0 +1,35 @@
+{
+  "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+  "runId": "5bae63bb-1b6c-457e-af39-89c425deb896",
+  "completed": true,
+  "steps": [
+    {
+      "id": "degree-levels",
+      "sourceHash": "1a5e1fade135f73d08d89a16931a7e3c554ee00d1fb49ef85040f65807df62b5",
+      "completionVerifiedBySuccessfulOrchestration": true,
+      "privateLog": "/workspace/scratch/post28/labs/lab-pPnZus/R04-required-seed/degree-levels.log",
+      "privateLogSha256": "9997af3729ef140061eb8c4c8ff9c5dbff5700524d8b9882bdd4d1bdbe3873a3"
+    },
+    {
+      "id": "academic-taxonomy-isced-f",
+      "sourceHash": "db396914f498c7dca5eadd93dc693ba26b799d6d0642271f2612c556463a1893",
+      "completionVerifiedBySuccessfulOrchestration": true,
+      "privateLog": "/workspace/scratch/post28/labs/lab-pPnZus/R04-required-seed/academic-taxonomy-isced-f.log",
+      "privateLogSha256": "bf2f4e9ade72f7d2b03549494f65ea83ecf999cdf49cd06bda2e443e127003cc"
+    },
+    {
+      "id": "external-course-providers",
+      "sourceHash": "279ab69f7cb5a589d946c7cdbd3d1de389bd21405b364a1ae74255526e7d73f3",
+      "completionVerifiedBySuccessfulOrchestration": true,
+      "privateLog": "/workspace/scratch/post28/labs/lab-pPnZus/R04-required-seed/external-course-providers.log",
+      "privateLogSha256": "ba3afaf92bf57de538e4b6ac504c6a60a93462d068dd299ebca693d211ea31ed"
+    },
+    {
+      "id": "student-tools-registry",
+      "sourceHash": "d5af8c7452d5ac9cd67495ba1fe92093634fd52abbeac1bb082d6187c7c11cf9",
+      "completionVerifiedBySuccessfulOrchestration": true,
+      "privateLog": "/workspace/scratch/post28/labs/lab-pPnZus/R04-required-seed/student-tools-registry.log",
+      "privateLogSha256": "074c05d14a6269c749662093166967180da406d989bea7556e1d4967a64abeab"
+    }
+  ]
+}

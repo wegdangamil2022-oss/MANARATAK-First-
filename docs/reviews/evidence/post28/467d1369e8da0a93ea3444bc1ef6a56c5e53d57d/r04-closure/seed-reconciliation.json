@@ -1,0 +1,62 @@
+{
+  "mode": "SEED_RECONCILIATION",
+  "status": "PASS",
+  "seedSetVersion": "2026-10-16.2",
+  "results": {
+    "ReferenceCurrency": {
+      "count": "168",
+      "rule": {
+        "minimum": 168
+      }
+    },
+    "ReferenceLanguage": {
+      "count": "260",
+      "rule": {
+        "minimum": 260
+      }
+    },
+    "ReferenceCountry": {
+      "count": "194",
+      "rule": {
+        "exact": 194
+      }
+    },
+    "DegreeLevel": {
+      "count": "7",
+      "rule": {
+        "exact": 7
+      }
+    },
+    "AcademicTaxonomyNode": {
+      "count": "163",
+      "rule": {
+        "exact": 163
+      }
+    },
+    "AcademicTaxonomyEdge": {
+      "count": "152",
+      "rule": {
+        "exact": 152
+      }
+    },
+    "AcademicTaxonomyAlias": {
+      "count": "39",
+      "rule": {
+        "exact": 39
+      }
+    },
+    "ExternalCourseProvider": {
+      "count": "18",
+      "rule": {
+        "minimum": 18
+      }
+    },
+    "StudentToolDefinitionRecord": {
+      "count": "83",
+      "rule": {
+        "exact": 83
+      }
+    }
+  },
+  "databaseWrites": 0
+}

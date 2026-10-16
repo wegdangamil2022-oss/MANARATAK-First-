@@ -1,0 +1,144 @@
+[
+  {
+    "name": "R03-app",
+    "command": [
+      "node",
+      "/workspace/scratch/post28/tools/local-r03-app-defaults.mjs"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "startedUtc": "2026-10-16T14:37:50.231937+00:00",
+    "finishedUtc": "2026-10-16T14:37:50.516981+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-pPnZus/R03-app-20261016T143750515133Z.log",
+    "sha256": "fcad06261e876fa98ede73d987adb4ff668219fc2d9688e82933c70b663bbc6a"
+  },
+  {
+    "name": "R04-parity",
+    "command": [
+      "bash",
+      "scripts/database/verify-greenfield-migration-parity.sh"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "startedUtc": "2026-10-16T14:37:51.767206+00:00",
+    "finishedUtc": "2026-10-16T14:38:21.621892+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-pPnZus/R04-parity-20261016T143821620140Z.log",
+    "sha256": "ab2f8dbb209c62aeac354047ab2df9ffc27c1bfb412f0f2e95fa4c90d5a80790"
+  },
+  {
+    "name": "seed-progress",
+    "command": [
+      "node",
+      "scripts/database/post28-psql.mjs",
+      "-Atqc",
+      "SELECT json_build_object('reviewed',(SELECT count(*) FROM \"ReferenceOwnerImportReview\"),'applied',(SELECT count(*) FROM \"ReferenceOwnerImportReview\" WHERE status='APPLIED'));"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "startedUtc": "2026-10-16T14:39:38.796574+00:00",
+    "finishedUtc": "2026-10-16T14:39:38.985178+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-pPnZus/seed-progress-20261016T143938982858Z.log",
+    "sha256": "fe118a0d431a694d3b9c474cd13a2591dd604b15095215300b63cfa6a9cfbd89"
+  },
+  {
+    "name": "R04-seed-apply",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=seed",
+      "node",
+      "node_modules/tsx/dist/cli.mjs",
+      "scripts/database/post28-required-seed.ts",
+      "apply"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "startedUtc": "2026-10-16T14:38:35.564590+00:00",
+    "finishedUtc": "2026-10-16T14:40:36.048798+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-pPnZus/R04-seed-apply-20261016T144036044124Z.log",
+    "sha256": "f0e62d77afe4eebf8c5204336964c9184f4acdf9453ae555f4fc82d8349ecfac"
+  },
+  {
+    "name": "R04-seed-content",
+    "command": [
+      "node",
+      "node_modules/tsx/dist/cli.mjs",
+      "/workspace/scratch/post28/tools/seed-final-reconciliation.mts"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "startedUtc": "2026-10-16T14:40:51.755849+00:00",
+    "finishedUtc": "2026-10-16T14:40:52.956123+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-pPnZus/R04-seed-content-20261016T144052953769Z.log",
+    "sha256": "f84b39496e51f47c4dc932539105713eeb99acdf4e7a5420944a09fe53cc2435"
+  },
+  {
+    "name": "R04-seed-reapply",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=seed",
+      "node",
+      "node_modules/tsx/dist/cli.mjs",
+      "scripts/database/post28-required-seed.ts",
+      "apply"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "startedUtc": "2026-10-16T14:40:41.979174+00:00",
+    "finishedUtc": "2026-10-16T14:41:10.180714+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-pPnZus/R04-seed-reapply-20261016T144110178708Z.log",
+    "sha256": "8733b7388a62d80bf8a86f2d340989ab55c2c40fa34d2c055b1ea918638daab2"
+  },
+  {
+    "name": "R04-final-catalog",
+    "command": [
+      "node",
+      "/workspace/scratch/post28/tools/local-r04-final-catalog.mjs"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "startedUtc": "2026-10-16T15:22:19.248395+00:00",
+    "finishedUtc": "2026-10-16T15:22:19.741349+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-pPnZus/R04-final-catalog-20261016T152219739129Z.log",
+    "sha256": "c386d888f24363467c8681cfd338a20a4219dba708e0be1c7e21c547af18cac2"
+  },
+  {
+    "name": "R03-postreplay",
+    "command": [
+      "node",
+      "/workspace/scratch/post28/tools/local-r03-app-postreplay.mjs"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "startedUtc": "2026-10-16T15:22:20.598644+00:00",
+    "finishedUtc": "2026-10-16T15:22:20.847407+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-pPnZus/R03-postreplay-20261016T152220843338Z.log",
+    "sha256": "6997bc9886ddf8fa7291014756a44afbe725741372b42950fe7a858ee7c870de"
+  },
+  {
+    "name": "R04-post-seed-diff",
+    "command": [
+      "node",
+      "scripts/database/prisma-env-diff.mjs",
+      "replayed"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "startedUtc": "2026-10-16T15:22:21.852082+00:00",
+    "finishedUtc": "2026-10-16T15:22:23.707437+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-pPnZus/R04-post-seed-diff-20261016T152223704554Z.log",
+    "sha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed"
+  },
+  {
+    "name": "R04-final-audit",
+    "command": [
+      "node",
+      "/workspace/scratch/post28/tools/local-r04-full-audit.mjs"
+    ],
+    "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+    "startedUtc": "2026-10-16T15:22:19.142738+00:00",
+    "finishedUtc": "2026-10-16T15:22:42.215098+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-pPnZus/R04-final-audit-20261016T152242212820Z.log",
+    "sha256": "23f51d380e29addf36fa44e72a60f487bd8653f7af1949a369ac186dd7f84674"
+  }
+]

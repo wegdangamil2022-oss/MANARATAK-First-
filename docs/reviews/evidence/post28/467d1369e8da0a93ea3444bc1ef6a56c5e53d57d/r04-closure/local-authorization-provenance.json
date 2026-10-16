@@ -1,0 +1,10 @@
+{
+  "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+  "runId": "5bae63bb-1b6c-457e-af39-89c425deb896",
+  "scope": "LOCAL_DB_G_ONLY",
+  "authorization": "USER_REQUEST_COMPLETE_LOCAL_R04",
+  "actorLabel": "post28-local-user-authorized",
+  "request": "اكمل واغلق R4",
+  "privateApprovalSha256": "6368efd4c2bad56a87e337eab5b95f56a0fe7a436093c9bcc9dd76e963be73a3",
+  "productionIdentityOrApproval": false
+}

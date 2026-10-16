@@ -1,0 +1,15 @@
+{
+  "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+  "runId": "5bae63bb-1b6c-457e-af39-89c425deb896",
+  "kind": "POST28_LOCAL_REQUIRED_SEED",
+  "pass": true,
+  "repeated": true,
+  "applied": 0,
+  "replayed": 622,
+  "aliasCommands": 0,
+  "seedSetVersion": "2026-10-16.2",
+  "scannerImage": "clamav/clamav@sha256:638d90201ee7ee6a82d249a2fc23b132e578673b5f1f2766852b127676ca1ef6",
+  "approvalSha256": "6368efd4c2bad56a87e337eab5b95f56a0fe7a436093c9bcc9dd76e963be73a3",
+  "databaseFingerprint": "3d8d12638b1ef4a9f550f514ef2a920a059d02f2ee2076970461a2f63698f3fc",
+  "wholeDatabaseUnchangedOnReapply": true
+}

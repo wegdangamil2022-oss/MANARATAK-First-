@@ -1,0 +1,39 @@
+{
+  "sourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+  "runId": "5bae63bb-1b6c-457e-af39-89c425deb896",
+  "readOnly": true,
+  "contentMatches": 622,
+  "aliasMatches": 48,
+  "screeningReceipts": 622,
+  "ownerReviews": [
+    {
+      "_count": 622,
+      "status": "APPLIED"
+    }
+  ],
+  "referenceAuditCount": 1886,
+  "referenceOutboxCount": 1886,
+  "assets": [
+    {
+      "id": "post28-seed-1ddd84aada8b59f54a1659477bdf053612c3d6dd1ec08954a1d58a310f3b76c8",
+      "state": "ACTIVE",
+      "checksum": "e569b7b1d93583229270187151826898c03979928988a826b97a3e5b92b4ada8",
+      "persistedMalwareScanStatus": "PASSED",
+      "privateScanEvidenceSha256": "29f1dfc2f49ff7793d6ed445c8debebd7279c9a15ac2dcc3ed7e8631afbbad94"
+    },
+    {
+      "id": "post28-seed-a4014515113d031de0ee862011e2ee28663c0c7b6baaa90ad30f5dfd6070c420",
+      "state": "ACTIVE",
+      "checksum": "8ae042276413ad34f294e9dd752eb163f5bb0b4d5aaca0da89097575f8ba0ee3",
+      "persistedMalwareScanStatus": "PASSED",
+      "privateScanEvidenceSha256": "ff0dcb67d7c931189336eca033afe1b54ab5e0af6e06b8ef24eca4eb89fe048c"
+    },
+    {
+      "id": "post28-seed-c21233bf70b77df1f679e7881750068dd0a4700ae3c04e0816a2811ee68f5cd2",
+      "state": "ACTIVE",
+      "checksum": "53816bfbdac811fe7f8f37a85f33a6a790a5f4e1ae2586b4a02484c92e944bbc",
+      "persistedMalwareScanStatus": "PASSED",
+      "privateScanEvidenceSha256": "ee9289aaeecaf594e3c15c61ed10cf921300a99ea0920f73e692552a87deb4a1"
+    }
+  ]
+}

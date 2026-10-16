@@ -1,0 +1,8 @@
+{
+  "indexesIdentical": 1191,
+  "userTriggerDefinitionsIdentical": 40,
+  "foreignKeys": 313,
+  "allConstraintDefinitionsPreservedApartFromValidation": true,
+  "settingsDeferredPreserved": true,
+  "functionalTriggerBusinessTestsClaimed": false
+}
