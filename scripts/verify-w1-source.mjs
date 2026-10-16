@@ -92,14 +92,15 @@ check('MNT-AUD-0076 archive revokes sessions', archiveIdentity.includes('session
 check('MNT-AUD-0076 purge revokes sessions', purgeIdentity.includes('sessionManager.revokeAllSessions(input.identityId)'));
 check('MNT-AUD-0076 refresh revalidates lifecycle', authService.includes('principalAccessValidator.isAuthenticationAllowed(currentSession.userId)') && authService.includes('principalAccessValidator.isAuthenticationAllowed(rotated.userId)'));
 check('MNT-AUD-0076 learner auth revalidates lifecycle', userAuthMiddleware.includes('principalAccessValidator.isAuthenticationAllowed(payload.userId)') && userAuthMiddleware.includes('sessionManager.revokeAllSessions(payload.userId)'));
-check('MNT-AUD-0065 control plane passes session and lifecycle dependencies', app.includes("createAdminGuard({ mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator })"));
+check('MNT-AUD-0065 control plane passes session and lifecycle dependencies', /createAdminGuard\(\{\s*mfaUseCases:\s*container\.resolve\('mfaUseCases'\),\s*mode:\s*adminAuthMode,\s*tokenProvider:\s*adminTokenProvider,\s*sessionManager:\s*adminSessionManager,\s*principalAccessValidator\s*\}\)/.test(app));
 check('MNT-AUD-0062 legacy AI route uses strict control-plane wrapper', app.includes("v1Router.use('/ai', ...protectControlPlane('admin:ai:execute', 'aiGatewayRouter'))"));
 check('MNT-AUD-0062 canonical AI operator route inherits /admin boundary', app.includes("v1Router.use('/admin/ai/operator', requireAdminPermission('admin:ai:execute'), lazyRouter('aiGatewayRouter'))"));
 
 try {
   const lifecycleSourceTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/auth-lifecycle-remediation-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0076/0065/0062 native source contract tests execute', /# fail 0/.test(lifecycleSourceTest));
-} catch (error) {
+ } catch (error) {
+  console.error('auth-lifecycle source regression:', error.stderr?.toString() || error.stdout?.toString() || error.message);
   check('MNT-AUD-0076/0065/0062 native source contract tests execute', false);
 }
 
@@ -154,7 +155,8 @@ check('MNT-AUD-0111 active Phase 4 baseline rebaselined', read('docs/phases/phas
 try {
   const strictValidationTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/strict-edge-validation-remediation-source.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0111 native source contract tests execute', /# fail 0/.test(strictValidationTest));
-} catch (error) {
+ } catch (error) {
+  console.error('edge-validation source regression:', error.stderr?.toString() || error.stdout?.toString() || error.message);
   check('MNT-AUD-0111 native source contract tests execute', false);
 }
 
@@ -215,8 +217,9 @@ check('MNT-AUD-0040 lifecycle runbook exists', exists('docs/operations/RUNTIME_R
 try {
   const lifecycleTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/runtime/runtime-resource-lifecycle-source.test.mjs'), path.join(root, 'tests/runtime/runtime-shutdown-drain-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0040 native lifecycle source tests execute', /# fail 0/.test(lifecycleTest));
-} catch (error) {
-  check('MNT-AUD-0040 native lifecycle source tests execute', false);
+ } catch (error) {
+  console.error('shutdown source regression:', error.stderr?.toString() || error.stdout?.toString() || error.message);
+  check('MNT-AUD-0040 native lifecycle tests execute', false);
 }
 try {
   const lifecycleRuntimeTest = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/runtime/runtime-resource-lifecycle-runtime.test.mjs')], { encoding: 'utf8' });
@@ -291,7 +294,7 @@ try {
 
 const adminReadOnlyPolicy = read('apps/admin/src/security/LocalAdminReadOnlyPolicy.ts');
 const adminApiClient = read('apps/admin/src/api/client.ts');
-check('MNT-AUD-0067 canonical Admin client blocks unsafe methods before network', adminApiClient.includes('assertLocalReadOnlyRequestAllowed(options.method') && adminReadOnlyPolicy.includes("throw new Error('READ_ONLY_PREVIEW')"));
+check('MNT-AUD-0067 canonical Admin client blocks unsafe methods before network', /assertLocalReadOnlyRequestAllowed\(\s*options\.method\s*,/.test(adminApiClient) && adminReadOnlyPolicy.includes("throw new Error('READ_ONLY_PREVIEW')"));
 check('MNT-AUD-0067 Admin Vite bridge returns 423 for unsafe preview writes', adminVite.includes('localAdminReadOnlyGuardPlugin') && adminVite.includes('res.statusCode = 423'));
 check('MNT-AUD-0067 production/staging builds reject auth-bypass flag', adminVite.includes('assertLocalReadOnlyBuildAllowed') && adminReadOnlyPolicy.includes('forbidden in production/staging builds'));
 try {
@@ -306,7 +309,7 @@ const publicLiveData = read('apps/web/src/features/public-template/usePublicLive
 const publicTemplateApp = read('apps/web/src/features/public-template/PublicTemplateApp.tsx');
 check('MNT-AUD-0070 production/staging builds reject prototype mode', publicDataModePolicy.includes('VITE_PUBLIC_TEMPLATE_DATA_MODE=prototype is forbidden in production/staging builds') && webVite.includes('assertPublicBuildDataMode'));
 check('MNT-AUD-0070 production bundle has compile-time prototype capability gate', webVite.includes('__MANARATAK_PROTOTYPE_DATA_ENABLED__') && publicLiveData.includes('typeof __MANARATAK_PROTOTYPE_DATA_ENABLED__') && publicLiveData.includes('!__MANARATAK_PROTOTYPE_DATA_ENABLED__') && publicLiveData.includes("isProd ? 'api' : requestedMode"));
-check('MNT-AUD-0070 prototype mode has unmistakable visible indicator', publicTemplateApp.includes('وضع تجريبي محلي') && publicTemplateApp.includes('غير إنتاجية'));
+check('MNT-AUD-0070 prototype mode has unmistakable visible indicator', publicTemplateApp.includes("publicDataMode === 'prototype'") && publicTemplateApp.includes("t('public_template_prototype')") && read('apps/web/src/i18n/ar.ts').includes('وضع تجريبي محلي — بيانات غير إنتاجية'));
 try {
   const prototypeRuntime = execFileSync(process.execPath, ['--test', '--test-reporter=tap', path.join(root, 'tests/security/public-prototype-build-guard-runtime.test.mjs')], { encoding: 'utf8' });
   check('MNT-AUD-0070 public prototype build-guard tests execute', /# fail 0/.test(prototypeRuntime));
