@@ -145,7 +145,12 @@ test('FSA003 readiness path matches actual public monitoring mount/route', () =>
     fs.readFileSync('apps/api/src/presentation/api/router/MonitoringRouter.ts', 'utf8'),
     /publicProbe\('\/health\/readiness'/,
   );
-  assert.match(fs.readFileSync('apps/api/src/app.ts', 'utf8'), /\/api\/v1\/monitoring/);
+  const appSource = fs.readFileSync('apps/api/src/app.ts', 'utf8');
+  const apiRouterSource = fs.readFileSync('apps/api/src/presentation/api/router/ApiRouter.ts', 'utf8');
+  assert.match(appSource, /app\.use\(\s*'\/api'\s*,\s*apiRouter\.getRouter\(\)\s*\)/);
+  assert.match(appSource, /apiRouter\.registerVersion\(\s*'v1'\s*,\s*v1Router\s*\)/);
+  assert.match(apiRouterSource, /this\.router\.use\(\s*`\/\$\{version\}`\s*,\s*versionRouter\s*\)/);
+  assert.match(appSource, /v1Router\.use\(\s*'\/monitoring'\s*,\s*MonitoringRouter\.create\(/);
 });
 test('FSA003 API base composition does not duplicate api/v1', () => {
   assert.equal(
