@@ -4,7 +4,7 @@ export const INVARIANT_TABLES={
  financialLedger:['FinancialAccountRecord','FinancialTransactionRecord','FinancialLedgerEntryRecord','FinanceInvoiceRecord','FinancePaymentRecord','FinanceRefundRecord','FinanceWalletRecord','FinanceWalletHoldRecord'],
  studentConsent:['StudentWorkspace','StudentPrivacyConsentDecision','StudentApplicationDocumentBinding','ApiSearchRequestRecord'],
  assetBindings:['AssetRecord','StudentApplicationDocumentBinding'],
- universityPrograms:['University','UniversityAcademicProgram','DegreeLevel'],
+ universityPrograms:['University','UniversityTranslation','UniversityAcademicProgram','DegreeLevel'],
  scholarshipTargets:['Scholarship','ScholarshipDegreeTarget','ScholarshipVersion'],
  courseProjections:['Course','CourseVersion','Major','CourseMajorProjection','StudentLearningProjection'],
  publishedVersions:['CmsContentNode','CmsLocalizedContent','CmsContentRevision','CmsPublishedContent','InternationalTest','InternationalTestVersion','InternationalTestPublicationSnapshot']

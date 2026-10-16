@@ -72,3 +72,12 @@ test('every synthetic fixture uses real scalar columns and supplies required val
   for(const field of fields.values())if(field.isRequired&&!field.hasDefaultValue&&!field.isUpdatedAt)assert.notEqual(row.data[field.name],undefined,row.model+'.'+field.name);
  }
 });
+
+
+test('translation receipt uses an owner actually permitted by immutable historical SQL',()=>{
+ const sql=fs.readFileSync('packages/infrastructure/prisma/migrations/20261014010000_owner_translation_receipt/migration.sql','utf8');
+ const row=manifest.rows.find(r=>r.model==='OwnerTranslationTransferReceipt').data;
+ assert.match(sql,/IN \('UNIVERSITY','MAJOR'\)/);
+ assert.equal(row.ownerDomain,'UNIVERSITY');assert.equal(row.targetId,fixtureId('university'));
+ assert.ok(manifest.rows.some(r=>r.model==='UniversityTranslation'&&r.data.universityId===row.targetId));
+});
