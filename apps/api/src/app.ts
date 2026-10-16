@@ -908,13 +908,16 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     }));
       const apiIdempotencyStore = container.resolve<any>('apiIdempotencyStore');
       const requireAdminPermission = SecurityMiddlewareFactory.createAdminPermissionGuard;
-    // Scholarship command receipts contain owner data. Revalidate the existing
-    // domain permission before the shared idempotency boundary can replay it.
-    v1Router.use('/admin/scholarships', requireAdminPermission('admin:scholarships:manage'));
     // P18 tests keep private replay results in encrypted owner custody, rather than generic responseBody JSON.
     v1Router.use('/admin', (req, res, next) => {
       if (/^\/student-tools\/[^/]+\/test\/?$/.test(req.path)) return next();
-      return createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true })(req, res, next);
+      const command = createCanonicalIdempotencyMiddleware({ store: apiIdempotencyStore, requireKey: true });
+      // Match the existing case-insensitive Scholarship mount before serving
+      // receipts, which contain owner data subject to current permissions.
+      if (/^\/scholarships(?:\/|$)/i.test(req.path)) {
+        return requireAdminPermission('admin:scholarships:manage')(req, res, () => command(req, res, next));
+      }
+      return command(req, res, next);
     });
     v1Router.use('/admin', new MutationAuditMiddleware(auditRecordRepository, 'ADMIN').generate());
 
