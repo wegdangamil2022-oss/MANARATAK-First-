@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Post28 real scholarship public program ownership and counts > returns matching published owner relations with exact forward and reverse counts",
+    "file": "tests/database/post28-scholarship-public-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship public program ownership and counts > rejects foreign university program pairs in results and counts even with valid individual foreign keys",
+    "file": "tests/database/post28-scholarship-public-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship public program ownership and counts > withdraws forward and reverse eligibility when university major profile version or program loses its required lifecycle",
+    "file": "tests/database/post28-scholarship-public-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real scholarship public program ownership and counts > excludes unpublished scholarship and obsolete version proof from both directions",
+    "file": "tests/database/post28-scholarship-public-relations.database.spec.mjs"
+  }
+]

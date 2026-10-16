@@ -1,0 +1,22 @@
+[
+  {
+    "name": "R06-suites/scholarship-admin-tlpMGD/vitest.json",
+    "sha256": "1d638919f6d94ee89dfd6cdfd8fe029ad14510c8e8a5f3fc117261d95024d65a",
+    "bytes": 8004
+  },
+  {
+    "name": "R06-suites/scholarship-admin-tlpMGD/discovery.json",
+    "sha256": "c9889a3f34829c673c79d68a0a49bfa160fc3a1fc72e832f182b1d7b76991ee9",
+    "bytes": 4384
+  },
+  {
+    "name": "R06-setup/result.json",
+    "sha256": "7a7c3ebd34925761b083b346166d66abe3924f372a8e69ae409971c108f18ce3",
+    "bytes": 3220
+  },
+  {
+    "name": "R06-setup/checks.json",
+    "sha256": "014b5085d5def884c15ce7553e1cb75ea2c12c7e09e888e98e62c6d862c9120d",
+    "bytes": 1393
+  }
+]

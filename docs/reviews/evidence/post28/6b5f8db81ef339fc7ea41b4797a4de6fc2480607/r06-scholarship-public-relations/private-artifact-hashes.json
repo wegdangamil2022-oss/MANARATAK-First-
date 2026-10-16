@@ -1,0 +1,22 @@
+[
+  {
+    "name": "R06-suites/scholarship-public-relations-MfC4LD/vitest.json",
+    "sha256": "554d371eb65672f6b295f0904b3a9f0aa17cd93cb208466bab0ae31ffb4c490f",
+    "bytes": 2473
+  },
+  {
+    "name": "R06-suites/scholarship-public-relations-MfC4LD/discovery.json",
+    "sha256": "209a52a0bdaf36f529f2bed19acb65b77370feccdde92763d88ff6b516b8ed8c",
+    "bytes": 1148
+  },
+  {
+    "name": "R06-setup/result.json",
+    "sha256": "d1982ef4abe0ba60d24094c41fe2c65fc8530af8dd40a3c27e0eab8d7ebfd6a7",
+    "bytes": 3220
+  },
+  {
+    "name": "R06-setup/checks.json",
+    "sha256": "8a71137fa568b31583b7f2ecd88a218b463759cc110e7fe406690de5990aa485",
+    "bytes": 1393
+  }
+]

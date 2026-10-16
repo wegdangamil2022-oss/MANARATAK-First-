@@ -1,5 +1,7 @@
 # POST28 continuation handoff — 2026-10-16
 
+> آخر استكمال:149 حالة PostgreSQL مختلفة؛ R06 PARTIAL وR05 BLOCKED. أُصلح تجاوز صلاحية المنح عند replay، وأضيف دليل Admin/DB والقراءة العامة. [التقرير والأدلة](POST28_R06_SCHOLARSHIP_ADMIN_REPLAY_2026-10-16.md).
+
 > أحدث استكمال:127 حالة PostgreSQL مختلفة ناجحة؛ R06 PARTIAL وR05 BLOCKED. تفاصيل العلاقات وHTTP واستهلاك الاعتماد وحدود التشغيل في [تقرير الاستكمال](POST28_R06_OWNER_RELATIONS_HTTP_FINANCE_2026-10-16.md). لا تجمع إعادة الحالات7 أو الاستبعادات13 مع العدد.
 
 ## Repository and environment

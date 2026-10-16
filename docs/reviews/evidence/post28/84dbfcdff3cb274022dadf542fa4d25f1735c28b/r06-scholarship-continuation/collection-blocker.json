@@ -1,0 +1,12 @@
+{
+  "sourceSha": "77ee49859b19adb923f0c98e5d6bbee3d3c75fc8",
+  "kind": "COLLECTION_BLOCKED_NOT_PRODUCT_FAILURE",
+  "executed": 0,
+  "passed": 0,
+  "failed": 0,
+  "skipped": 0,
+  "error": "Missing built local @manaratak/config package entry",
+  "resolution": "Built packages/config with Node22 project TypeScript; unchanged clean source and same valid SHA/run DB-T contract, then fresh runner directory. No database test had executed during failed collection.",
+  "diagnosticLogSha256": "f7c8cf8104bbbd82af98a1e96976b9e2c82ad55957434881cada5614b42c42e6",
+  "buildLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "R06-suites/scholarship-admin-SBZobx/vitest.json",
+    "sha256": "9c48fd74dee2446d2da13d3a1148b6226181d4763536edca8ca6066ca391b830",
+    "bytes": 7631
+  },
+  {
+    "name": "R06-suites/scholarship-admin-SBZobx/discovery.json",
+    "sha256": "c111b914769bb82b01b2af1b2ba5f9cc1a6ce1354d945b3d299c744cf712d175",
+    "bytes": 4653
+  },
+  {
+    "name": "R06-setup/result.json",
+    "sha256": "1ee9be8a560cf628ca3703a2f8e4f61ecd21fd58d099c0e51a7e7280048354dd",
+    "bytes": 3220
+  },
+  {
+    "name": "R06-setup/checks.json",
+    "sha256": "fe9506c3a017e38d7218b460a68aa5d9d5a3d7cfe2ceedf75ac3ec6a5bca931d",
+    "bytes": 1393
+  }
+]

@@ -1,0 +1,182 @@
+[
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "commits the correct program parent version cycle audit and outbox in the actual owner transaction",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "rejects a program paired with a foreign university without changing any owner facts",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "rejects absent archived and unpublished owner program proofs before mutation",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "rejects duplicate child keys without version cycle or audit changes",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "requires actor reason and current revision before committing canonical replacement",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "rolls owner links versions cycle sponsor and audit back on actual PostgreSQL outbox failure",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "serializes two owner writers and leaves one canonical version and one audit outbox pair",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "preserves immutable child ID while appending the next structural version",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "invalidates publish readiness on structural relation replacement without publishing a draft",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "rejects mutations of published and archived scholarship owners",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "denies unauthenticated admin HTTP before owner mutation",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "binds actual HTTP JWT actor and persisted RBAC permission to one audited owner write",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "denies a different role and revalidates permission withdrawal on the next new HTTP command",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "rejects missing and stale If-Match through the actual router",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "rejects forged body authority and missing CSRF before owner writes",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "rechecks the actual owner port inside the transaction after a parent withdraws between lookup and mutation",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "does not replay an earlier successful response after its admin permission is withdrawn",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "skipped",
+    "durationMs": null,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-admin.database.spec.mjs",
+    "title": "replays an authorized canonical command without repeating its owner version audit or outbox",
+    "ancestors": [
+      "Post28 real scholarship admin relations and authorization"
+    ],
+    "status": "passed",
+    "durationMs": 163.1268540000001,
+    "failureFirstLines": []
+  }
+]

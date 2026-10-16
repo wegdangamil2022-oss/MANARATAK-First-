@@ -1,0 +1,42 @@
+[
+  {
+    "file": "tests/database/post28-scholarship-public-relations.database.spec.mjs",
+    "title": "returns matching published owner relations with exact forward and reverse counts",
+    "ancestors": [
+      "Post28 real scholarship public program ownership and counts"
+    ],
+    "status": "passed",
+    "durationMs": 52.74118700000008,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-public-relations.database.spec.mjs",
+    "title": "rejects foreign university program pairs in results and counts even with valid individual foreign keys",
+    "ancestors": [
+      "Post28 real scholarship public program ownership and counts"
+    ],
+    "status": "passed",
+    "durationMs": 47.0101109999996,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-public-relations.database.spec.mjs",
+    "title": "withdraws forward and reverse eligibility when university major profile version or program loses its required lifecycle",
+    "ancestors": [
+      "Post28 real scholarship public program ownership and counts"
+    ],
+    "status": "passed",
+    "durationMs": 74.45557800000006,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-scholarship-public-relations.database.spec.mjs",
+    "title": "excludes unpublished scholarship and obsolete version proof from both directions",
+    "ancestors": [
+      "Post28 real scholarship public program ownership and counts"
+    ],
+    "status": "passed",
+    "durationMs": 53.06916300000012,
+    "failureFirstLines": []
+  }
+]

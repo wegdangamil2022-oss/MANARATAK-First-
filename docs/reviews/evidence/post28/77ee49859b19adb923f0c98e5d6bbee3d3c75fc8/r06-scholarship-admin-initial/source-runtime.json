@@ -1,0 +1,31 @@
+{
+  "sourceSha": "77ee49859b19adb923f0c98e5d6bbee3d3c75fc8",
+  "branch": "fix/post28-ci-environment-inventory-20261016",
+  "tree": "144da409008cd4a513cdee049db72b07cce69c9a",
+  "lockSha256": "75269332ee9c7c5b5b66b753a5ac5e94427668cd27b1db20b26291499306b4ee",
+  "schemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+  "fixtureDefinitionSha256": {
+    "tests/database/post28-scholarship-admin.database.spec.mjs": "5b6b6c55e5bc54a6c14e1ad1db453e0c769bb659be31dd788646779b4f53769c"
+  },
+  "node": "22.16.0",
+  "prisma": "5.22.0",
+  "generatedClientSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+  "runId": "991ed44a-bd4d-4aa3-b990-57b58aeb79d7",
+  "port": 15432,
+  "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+  "containerId": "98056489b7df8c1fdaa11ee6b8c04f15c8d90b53fcfb524c671a00a2042061c2",
+  "target": {
+    "label": "DB-T",
+    "database": "manaratak_post28_transactions_test",
+    "role": "post28_app",
+    "serverIdentity": "7697327898901151787",
+    "databaseOid": "16386",
+    "postgresMajor": 16,
+    "timezone": "UTC",
+    "publicTables": 282,
+    "probeReadOnly": true
+  },
+  "startedAtEpochMs": 1792173885240,
+  "assertionEndEpochMs": 1792173893242.1497,
+  "runtimeBoundary": "Local application role and synthetic UUID owner fixtures; no external provider or production data"
+}

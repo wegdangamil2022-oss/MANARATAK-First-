@@ -1,0 +1,67 @@
+{
+  "codeHead": "84dbfcdff3cb274022dadf542fa4d25f1735c28b",
+  "documentationStaged": true,
+  "node": "22.16.0",
+  "results": [
+    {
+      "command": [
+        "node",
+        "scripts/architecture/verify-source-architecture-guards.mjs"
+      ],
+      "startedAt": "2026-10-16T18:14:57.078Z",
+      "finishedAt": "2026-10-16T18:14:57.386Z",
+      "exitCode": 0,
+      "logSha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/quality/verify-source-quality.mjs"
+      ],
+      "startedAt": "2026-10-16T18:14:57.387Z",
+      "finishedAt": "2026-10-16T18:15:00.150Z",
+      "exitCode": 0,
+      "logSha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/architecture/verify-admin-audit-coverage.mjs"
+      ],
+      "startedAt": "2026-10-16T18:15:00.150Z",
+      "finishedAt": "2026-10-16T18:15:00.934Z",
+      "exitCode": 0,
+      "logSha256": "f8e8ae0e832cf9249bb6835079bc4369a6411e7b514f7d621b16f68bc6e411ae"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/config/verify-environment-contract.mjs"
+      ],
+      "startedAt": "2026-10-16T18:15:00.934Z",
+      "finishedAt": "2026-10-16T18:15:00.962Z",
+      "exitCode": 0,
+      "logSha256": "c12b3e207960f88183c712a7d7f17ec19e397d91b6c601e05317bffb653b3483"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/security/scan-secrets.mjs"
+      ],
+      "startedAt": "2026-10-16T18:15:00.962Z",
+      "finishedAt": "2026-10-16T18:15:02.748Z",
+      "exitCode": 0,
+      "logSha256": "629e407c705d1485b5b6e992240e43a0e2b2c0dc03004376d2787ea6b5be9f4f"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/verify/verify-final-repository-organization.mjs"
+      ],
+      "startedAt": "2026-10-16T18:15:02.748Z",
+      "finishedAt": "2026-10-16T18:15:06.101Z",
+      "exitCode": 0,
+      "logSha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129"
+    }
+  ]
+}

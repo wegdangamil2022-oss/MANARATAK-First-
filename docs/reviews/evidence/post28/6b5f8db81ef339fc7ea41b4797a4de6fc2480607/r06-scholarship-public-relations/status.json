@@ -1,0 +1,23 @@
+{
+  "sourceSha": "6b5f8db81ef339fc7ea41b4797a4de6fc2480607",
+  "suite": "scholarship-public-relations",
+  "discovered": 4,
+  "executed": 4,
+  "passed": 4,
+  "failed": 0,
+  "selectedSkipped": 0,
+  "rawSkippedAssertions": 0,
+  "excludedByExactSelection": 0,
+  "fullProfilePassed": true,
+  "originalRunnerGate": "PASS",
+  "distinctNewPassingCases": 4,
+  "intermediateSupersededByFinalReplayProof": false,
+  "sourceAuditMountGateAtIntermediate": "BLOCKED_AMBIGUOUS_MIDDLEWARE_MOUNT_IN_APP",
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "fullRequiredCasesAccepted": 0,
+  "externalProviderCalled": false,
+  "productionAcceptance": false,
+  "independence": "Read-only owner relation tests are independent of the intermediate Admin middleware mount. No app or source acceptance inferred."
+}
