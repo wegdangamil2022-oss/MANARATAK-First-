@@ -322,6 +322,18 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         },
       }));
     }
+    if (input.decision === 'REJECTED') {
+      // Only projections derived from this source lose approval. Independent
+      // reviewed relationships and their provenance remain intact.
+      operations.push(this.prisma.courseMajorProjection.updateMany({
+        where: {
+          courseId: input.courseId,
+          sourceCourseTaxonomyLinkId: input.linkId,
+          sourceType: 'TAXONOMY_MAPPING',
+        },
+        data: { projectionState: 'REVIEW_REQUIRED' },
+      }));
+    }
     await this.prisma.$transaction(operations);
     const record = await this.prisma.courseAcademicTaxonomyLink.findUniqueOrThrow({
       where: { id: input.linkId },
