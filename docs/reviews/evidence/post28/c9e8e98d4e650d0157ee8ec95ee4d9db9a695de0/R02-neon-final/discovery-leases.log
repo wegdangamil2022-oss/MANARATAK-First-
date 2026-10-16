@@ -1,0 +1,1 @@
+{"kind":"POST28_STATIC_DATABASE_DISCOVERY","suite":"leases","definitions":2,"files":["packages/infrastructure/tests/background-jobs/PrismaBackgroundJobLease.database.spec.ts","packages/infrastructure/tests/event-foundation/PrismaTransactionalOutboxLease.database.spec.ts"],"parameterizedCasesExpanded":false,"runtimeExecuted":false}

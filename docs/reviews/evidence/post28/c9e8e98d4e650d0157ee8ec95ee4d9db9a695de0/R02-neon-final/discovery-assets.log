@@ -1,0 +1,1 @@
+{"kind":"POST28_STATIC_DATABASE_DISCOVERY","suite":"assets","definitions":32,"files":["packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts","packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"],"parameterizedCasesExpanded":false,"runtimeExecuted":false}

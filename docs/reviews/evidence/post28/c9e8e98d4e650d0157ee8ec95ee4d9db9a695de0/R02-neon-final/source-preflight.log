@@ -1,0 +1,232 @@
+SOURCE_ARCHITECTURE_GUARD=PASS
+SOURCE_ARCHITECTURE_GUARD_RULES=PrismaBoundary,CanonicalIdentity,PublicLiveFixtures,P15LocalStorage,P23ControlPlane,P17VendorAuthority,P13P14CertificateBoundary,RoadmapAuthority,CrossPhaseMatrix,OperationalTooling
+DI_REACHABILITY_VERIFY=PASS registrations=424 reachable=424 unreachable=0
+ADMIN_MUTATION_AUDIT_COVERAGE=PASS; handlers=444; uniqueEndpoints=443; owner validation/atomic adoption requires separate evidence
+Environment inventory current: 301 variable names.
+TAP version 13
+# Subtest: Studio exports retain real configuration, runtime contracts and source datasets
+ok 1 - Studio exports retain real configuration, runtime contracts and source datasets
+  ---
+  duration_ms: 1.917325
+  type: 'test'
+  ...
+# Subtest: Studio verification performs requests and assertions rather than printing unconditional success
+ok 2 - Studio verification performs requests and assertions rather than printing unconditional success
+  ---
+  duration_ms: 0.273082
+  type: 'test'
+  ...
+# Subtest: npm workspace manifests keep API runtime guards and full build orchestration
+ok 3 - npm workspace manifests keep API runtime guards and full build orchestration
+  ---
+  duration_ms: 0.683602
+  type: 'test'
+  ...
+# Subtest: branch policy accepts scoped Dependabot updates but rejects arbitrary branch names
+ok 4 - branch policy accepts scoped Dependabot updates but rejects arbitrary branch names
+  ---
+  duration_ms: 148.915512
+  type: 'test'
+  ...
+# Subtest: source-only Prisma job uses the isolated validation gate, never deployment credentials
+ok 5 - source-only Prisma job uses the isolated validation gate, never deployment credentials
+  ---
+  duration_ms: 0.438702
+  type: 'test'
+  ...
+# Subtest: translation builds runtime artifacts before behavioral tests
+ok 6 - translation builds runtime artifacts before behavioral tests
+  ---
+  duration_ms: 0.335256
+  type: 'test'
+  ...
+# Subtest: CodeQL init/analyze stay on the same immutable revision and Dependabot updates them together
+ok 7 - CodeQL init/analyze stay on the same immutable revision and Dependabot updates them together
+  ---
+  duration_ms: 0.299052
+  type: 'test'
+  ...
+# Subtest: Preview Prisma ownership remains in resource authority and operational verifier is explicitly classified
+ok 8 - Preview Prisma ownership remains in resource authority and operational verifier is explicitly classified
+  ---
+  duration_ms: 0.235406
+  type: 'test'
+  ...
+# Subtest: source CI catches inventory drift and negative guard contracts before the full closure matrix
+ok 9 - source CI catches inventory drift and negative guard contracts before the full closure matrix
+  ---
+  duration_ms: 0.398041
+  type: 'test'
+  ...
+# Subtest: source recovery gate uses portable paths, fails closed and never connects to a database
+ok 10 - source recovery gate uses portable paths, fails closed and never connects to a database
+  ---
+  duration_ms: 414.940785
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0079 every migration has explicit recovery classification and existing artifact
+ok 11 - MNT-AUD-0079 every migration has explicit recovery classification and existing artifact
+  ---
+  duration_ms: 2.405122
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0079 rollback companions match their recovery classification and environment boundary
+ok 12 - MNT-AUD-0079 rollback companions match their recovery classification and environment boundary
+  ---
+  duration_ms: 1.279723
+  type: 'test'
+  ...
+# Subtest: MNT-AUD-0079 gate no longer uses transactional_outbox filename exception
+ok 13 - MNT-AUD-0079 gate no longer uses transactional_outbox filename exception
+  ---
+  duration_ms: 0.783974
+  type: 'test'
+  ...
+# Subtest: inventory discovers mounted mutations and refuses an unreviewed added route
+ok 14 - inventory discovers mounted mutations and refuses an unreviewed added route
+  ---
+  duration_ms: 68.815985
+  type: 'test'
+  ...
+# Subtest: inventory detects changed permissions/classification and removed routes
+ok 15 - inventory detects changed permissions/classification and removed routes
+  ---
+  duration_ms: 14.599516
+  type: 'test'
+  ...
+# Subtest: renamed Router variables cannot silently hide new mutations
+ok 16 - renamed Router variables cannot silently hide new mutations
+  ---
+  duration_ms: 9.025569
+  type: 'test'
+  ...
+# Subtest: unresolved mounts and dynamic route paths fail closed
+ok 17 - unresolved mounts and dynamic route paths fail closed
+  ---
+  duration_ms: 9.697995
+  type: 'test'
+  ...
+# Subtest: global audit boundary must follow auth and idempotency and precede mounts
+ok 18 - global audit boundary must follow auth and idempotency and precede mounts
+  ---
+  duration_ms: 1.993731
+  type: 'test'
+  ...
+# Subtest: new collisions between owner routers require a separate explicit review
+ok 19 - new collisions between owner routers require a separate explicit review
+  ---
+  duration_ms: 5.080612
+  type: 'test'
+  ...
+# Subtest: inline router construction retains its owner when cradle repositories are resolved
+ok 20 - inline router construction retains its owner when cradle repositories are resolved
+  ---
+  duration_ms: 6.359162
+  type: 'test'
+  ...
+# Subtest: canonical imported router factories retain every mounted mutation and dependency ownership
+ok 21 - canonical imported router factories retain every mounted mutation and dependency ownership
+  ---
+  duration_ms: 8.248976
+  type: 'test'
+  ...
+# Subtest: unimported, mismatched and type-only router factories fail closed
+ok 22 - unimported, mismatched and type-only router factories fail closed
+  ---
+  duration_ms: 36.206593
+  type: 'test'
+  ...
+# Subtest: a nested factory dependency does not prove the mounted router owner
+ok 23 - a nested factory dependency does not prove the mounted router owner
+  ---
+  duration_ms: 12.597903
+  type: 'test'
+  ...
+# Subtest: named permission middleware retains permission candidates and detects weakened helper bodies
+ok 24 - named permission middleware retains permission candidates and detects weakened helper bodies
+  ---
+  duration_ms: 11.117918
+  type: 'test'
+  ...
+# Subtest: literal action guards retain exact permissions and reject runtime action inference
+ok 25 - literal action guards retain exact permissions and reject runtime action inference
+  ---
+  duration_ms: 15.286503
+  type: 'test'
+  ...
+# Subtest: unused, late and differently scoped named helpers are not route permission evidence
+ok 26 - unused, late and differently scoped named helpers are not route permission evidence
+  ---
+  duration_ms: 11.666367
+  type: 'test'
+  ...
+# Subtest: mounted conditional permission policies remain visible and policy changes require review
+ok 27 - mounted conditional permission policies remain visible and policy changes require review
+  ---
+  duration_ms: 8.485333
+  type: 'test'
+  ...
+# Subtest: unused resolvers, unrelated evaluations and late middleware are not inherited policy evidence
+ok 28 - unused resolvers, unrelated evaluations and late middleware are not inherited policy evidence
+  ---
+  duration_ms: 13.2119
+  type: 'test'
+  ...
+# Subtest: student-tool tests declare owner encrypted replay rather than generic response storage
+ok 29 - student-tool tests declare owner encrypted replay rather than generic response storage
+  ---
+  duration_ms: 3.779257
+  type: 'test'
+  ...
+# Subtest: finite const route registries enumerate every concrete route and retain security evidence
+ok 30 - finite const route registries enumerate every concrete route and retain security evidence
+  ---
+  duration_ms: 18.752808
+  type: 'test'
+  ...
+# Subtest: mutable, escaped or dynamic route registries are never approved by the finite-loop resolver
+ok 31 - mutable, escaped or dynamic route registries are never approved by the finite-loop resolver
+  ---
+  duration_ms: 37.054172
+  type: 'test'
+  ...
+# Subtest: inline immutable action lists enumerate mutations and reject nonliteral members
+ok 32 - inline immutable action lists enumerate mutations and reject nonliteral members
+  ---
+  duration_ms: 7.971467
+  type: 'test'
+  ...
+# Subtest: dictionary keys are independent of quote style, indentation and same-line formatting
+ok 33 - dictionary keys are independent of quote style, indentation and same-line formatting
+  ---
+  duration_ms: 6.094794
+  type: 'test'
+  ...
+# Subtest: blank values remain detectable; computed, dynamic and duplicate entries fail closed
+ok 34 - blank values remain detectable; computed, dynamic and duplicate entries fail closed
+  ---
+  duration_ms: 1.749372
+  type: 'test'
+  ...
+# Subtest: UI translation checks resolve provider aliases, inherited callback scopes and local dictionaries
+ok 35 - UI translation checks resolve provider aliases, inherited callback scopes and local dictionaries
+  ---
+  duration_ms: 3.247754
+  type: 'test'
+  ...
+# Subtest: real missing shared dictionary keys remain checked when another namespace uses t
+ok 36 - real missing shared dictionary keys remain checked when another namespace uses t
+  ---
+  duration_ms: 0.678885
+  type: 'test'
+  ...
+1..36
+# tests 36
+# suites 0
+# pass 36
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1716.6219
+SOURCE_PREFLIGHT=PASS
