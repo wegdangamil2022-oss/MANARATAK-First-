@@ -48,7 +48,7 @@ describe('M10-16 University program persistence integrity', () => {
   it('rejects a foreign campus before changing the existing program', async () => {
     const f = fixture(); f.client.universityCampus.findMany.mockResolvedValue([]);
     await expect(f.repository.upsertAcademicProgram('university', 'program', input())).rejects.toThrow('UNIVERSITY_PROGRAM_CAMPUS_NOT_FOUND');
-    expect(f.client.universityCampus.findMany).toHaveBeenCalledWith({ where: { universityId: 'university', id: { in: ['campus'] } }, select: { id: true } });
+    expect(f.client.universityCampus.findMany).toHaveBeenCalledWith({ where: { universityId: 'university', id: { in: ['campus'] }, status: 'ACTIVE' }, select: { id: true } });
     expect(f.client.universityAcademicProgram.update).not.toHaveBeenCalled();
     expect(f.client.universityProgramCampus.deleteMany).not.toHaveBeenCalled();
   });

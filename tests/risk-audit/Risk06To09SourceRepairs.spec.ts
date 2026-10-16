@@ -14,7 +14,9 @@ describe('RISK-06 through RISK-09 source closure', () => {
   it('does not hide Major catalog DB enrichment failures in runtime environments', () => {
     const catalog = source('packages/infrastructure/src/majors/Phase10CatalogRepository.ts');
     expect(catalog).toContain('this.options.catalogPath');
-    expect(catalog).toContain('this.options.productionLike === true');
+    // SQL enrichment must surface unavailable owner data instead of returning a fabricated catalog.
+    expect(catalog).toContain("throw new Error('MAJOR_CATALOG_READ_UNAVAILABLE')");
+    expect(catalog).toContain('this.prisma.$queryRaw');
     expect(catalog).not.toContain('process.env');
   });
 
