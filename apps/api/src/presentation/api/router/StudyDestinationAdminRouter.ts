@@ -123,8 +123,7 @@ export class StudyDestinationAdminRouter {
           .max(100),
       })
       .strict();
-    const profileCommandSchema = profileSchema.extend(commandSchema.shape).strict();
-    const decisionCommandSchema = decisionSchema.extend(commandSchema.shape).strict();
+
     const listSchema = z.object({
       q: z.string().trim().max(200).optional(),
       region: z.string().trim().max(100).optional(),
@@ -169,6 +168,9 @@ export class StudyDestinationAdminRouter {
         isFeatured: z.boolean().optional(),
       })
       .strict();
+    // Both command metadata and domain payload are strictly validated before destructuring.
+    const profileCommandSchema = profileSchema.extend(commandSchema.shape).strict();
+    const decisionCommandSchema = decisionSchema.extend(commandSchema.shape).strict();
 
     router.get(
       '/',
