@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > binds verified JWT identity to real student collection reads and ignores query impersonation",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects cross student collection updates with the authenticated principal",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects foreign student path aliases and injected body authority",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects missing and tampered JWT tokens before a student read",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > revalidates real session revocation on the next HTTP request",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > revalidates identity suspension and student role withdrawal from PostgreSQL",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > public university graph excludes both students private collections and invoice metadata",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > public graph rejects student identity query injection",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > consumes a bound two checker approval atomically with real FX activation",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects a foreign target approval without consuming it or activating the rate",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects pending approval and stale executor version without consuming approval",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > allows only one of two independent connections to execute one approval",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rolls approval consumption and activation back on a PostgreSQL outbox failure",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > blocks provider payment and automatic FX before any external call or payment write",
+    "file": "tests/database/post28-http-finance.database.spec.mjs"
+  }
+]

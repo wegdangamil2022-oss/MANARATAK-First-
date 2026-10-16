@@ -1,0 +1,22 @@
+[
+  {
+    "name": "R06-suites/http-finance-KkcHaW/vitest.json",
+    "sha256": "096c2078ceb6f7dff48aa7675b76721c32ab4901230a3452ddad6c1b65e39c20",
+    "bytes": 6656
+  },
+  {
+    "name": "R06-suites/http-finance-KkcHaW/discovery.json",
+    "sha256": "b1377786f3f298413283ac0aad82e97b5b99675223a4de993e5aad994a7adaa3",
+    "bytes": 3488
+  },
+  {
+    "name": "R06-setup/result.json",
+    "sha256": "1e1170fbc21c8ecd97e8c4a6f58328c85722565860bec0708aae701d8c225091",
+    "bytes": 3154
+  },
+  {
+    "name": "R06-setup/checks.json",
+    "sha256": "6bd53b02a4e370a67ad434a433778e87bcc813564b38b06cf9e115d7d65f2a08",
+    "bytes": 1393
+  }
+]

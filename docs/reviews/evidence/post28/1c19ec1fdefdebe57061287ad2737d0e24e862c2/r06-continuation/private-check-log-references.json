@@ -1,0 +1,296 @@
+[
+  {
+    "name": "setup-first.log",
+    "sha256": "ab15b33f5d03b991849c84a1b92dcd3305531f1eeafeaf5ce0bb733a40880b07",
+    "bytes": 2364,
+    "modifiedAtEpoch": 1792172265.3326573,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "admission-before.log",
+    "sha256": "2526e017a2d7bfa38d34ca67ee37ff997fb2d38887755a31a8cd324579f6d86e",
+    "bytes": 886,
+    "modifiedAtEpoch": 1792172355.8531137,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "provisioning.log",
+    "sha256": "788ba9264895243b00cb72072b92964eb5e7cf141b57f1212c57381226c6860d",
+    "bytes": 4580,
+    "modifiedAtEpoch": 1792172203.4482882,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "npm-ci.log",
+    "sha256": "14cd6290edb365aa78fd196177e2d0c8119372e7d5143a12fe867f7da342dcfd",
+    "bytes": 1153,
+    "modifiedAtEpoch": 1792172123.9077249,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "selection-lint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "modifiedAtEpoch": 1792172732.2087555,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "final-organization.log",
+    "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+    "bytes": 440,
+    "modifiedAtEpoch": 1792172890.0368474,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "setup-final.log",
+    "sha256": "d219399455505956c2136b72472be8f6d4e04f070200adec22b758d13f3170d2",
+    "bytes": 2364,
+    "modifiedAtEpoch": 1792172444.4975028,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "setup-http.log",
+    "sha256": "2fa4a338954919171150420c95e65938c2e9efd457b6c79106f53263dba83df8",
+    "bytes": 2513,
+    "modifiedAtEpoch": 1792172627.0804417,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "lint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "modifiedAtEpoch": 1792172269.1686797,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "run-http.log",
+    "sha256": "578fb8958e370c8368564dd16a26722e91689ca23fb4c9a2e52381862976435d",
+    "bytes": 147,
+    "modifiedAtEpoch": 1792172638.1570132,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "build-final.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "modifiedAtEpoch": 1792172383.7332437,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "setup-followup.log",
+    "sha256": "6cb0f27e6d2d4101c07b84b65a636ddd6e532741c49c9ec9414a18729dd32e80",
+    "bytes": 2513,
+    "modifiedAtEpoch": 1792172787.5784726,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "build-fix.log",
+    "sha256": "93cde2bc8fdbe5d988b161efb910de2ec9007c07da34be9079a93a3fcafae11b",
+    "bytes": 453,
+    "modifiedAtEpoch": 1792172339.9570413,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "run-final.log",
+    "sha256": "f83ab819ebba980c4d1a64b1b7cf711ef22f7a01d334ebbcaf03898e70d8b1a5",
+    "bytes": 722,
+    "modifiedAtEpoch": 1792172450.385529,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "final-architecture.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+    "bytes": 245,
+    "modifiedAtEpoch": 1792172849.7720082,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "section27.log",
+    "sha256": "04a4e0f35bf7ae95bfeadd8d4874990c5d668a7a132af4e7f7064235d3ff4a4d",
+    "bytes": 14270,
+    "modifiedAtEpoch": 1792172383.7292435,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "run-first.log",
+    "sha256": "384037933006c24cdbbd76d6216ca0b602ff95878e3876e3d75548d2991abe41",
+    "bytes": 150,
+    "modifiedAtEpoch": 1792172283.0407531,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "projection-after.log",
+    "sha256": "934a361318dd363b3af0e78b6dd6bdde3cf96de347a18571b8fb9c3bc17e3df6",
+    "bytes": 204,
+    "modifiedAtEpoch": 1792172382.6572385,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "provisioning-final.log",
+    "sha256": "e09f3bb1ef718b290e10e3fc7d7fe54d7cf74ac8d9ed8c67be04df9f8d1c7048",
+    "bytes": 4579,
+    "modifiedAtEpoch": 1792172404.8653395,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "fix-lint.log",
+    "sha256": "5183b18f0993cdbbf6f0b4d1a1712d5719dc76f32edfa7e515f553f0a48467f0",
+    "bytes": 684,
+    "modifiedAtEpoch": 1792172404.6173384,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "selection-quality.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+    "bytes": 185,
+    "modifiedAtEpoch": 1792172758.2215762,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "http-lint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "modifiedAtEpoch": 1792172579.1534133,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "modifiedAtEpoch": 1792172215.48036,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "selection-tests.log",
+    "sha256": "80970affd3d39a037e9fa96150fda39be5e95cc9b4c704f233380e42222d18f4",
+    "bytes": 8293,
+    "modifiedAtEpoch": 1792172732.2007551,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "final-quality.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+    "bytes": 185,
+    "modifiedAtEpoch": 1792172852.8360834,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "selection-format-tests.log",
+    "sha256": "106240cfe7d87c15cf0a26711d8e1af0bc5733f5e92c594c0c1948dbaed813bc",
+    "bytes": 1010,
+    "modifiedAtEpoch": 1792172849.432,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "final-env.log",
+    "sha256": "c12b3e207960f88183c712a7d7f17ec19e397d91b6c601e05317bffb653b3483",
+    "bytes": 79,
+    "modifiedAtEpoch": 1792172890.064848,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "create-followup.log",
+    "sha256": "d38bf83bcf5adfd00c982bcf204fd202629ec875b22965320e77bd0e5b2293f1",
+    "bytes": 798,
+    "modifiedAtEpoch": 1792172761.1976671,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "final-secrets.log",
+    "sha256": "4e5dc6fa9dcfae12298a53c9aac5e04f447d1ff28343af0e6a304c179ecdcdde",
+    "bytes": 40,
+    "modifiedAtEpoch": 1792172886.9527814,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "run-regression.log",
+    "sha256": "f6d8efba08c73b27df586388f086242c677e0b41e9205c82f6adc0a0eec35b46",
+    "bytes": 729,
+    "modifiedAtEpoch": 1792172455.3655527,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "proof-source.log",
+    "sha256": "afc80d45228f86d9e57ed6cf86c0bebb0442535fe4800e145b0014f82df3679d",
+    "bytes": 206,
+    "modifiedAtEpoch": 1792172320.3689597,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "http-architecture.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+    "bytes": 245,
+    "modifiedAtEpoch": 1792172588.3841379,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "create-first.log",
+    "sha256": "37967fe16636cf93e0dbc3929926dedf4ea453e70e5e2407b2f38defe6a699e0",
+    "bytes": 797,
+    "modifiedAtEpoch": 1792172242.900529,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "http-quality.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+    "bytes": 185,
+    "modifiedAtEpoch": 1792172591.1721923,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "selection-architecture.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+    "bytes": 245,
+    "modifiedAtEpoch": 1792172755.5015194,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "create-http.log",
+    "sha256": "61fd6c6b763c442068beefdd14457b653125400f5d372cfcc8551a5bf11dcca3",
+    "bytes": 797,
+    "modifiedAtEpoch": 1792172594.1482503,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "architecture.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+    "bytes": 245,
+    "modifiedAtEpoch": 1792172398.0373092,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "affected-source.log",
+    "sha256": "a6794726a8684dd089dfddeaf3b61437139ddb479f36a84fffdc749845c5cfce",
+    "bytes": 1375,
+    "modifiedAtEpoch": 1792172369.4571784,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "run-followup.log",
+    "sha256": "e596e2a09d35fa7af63f5c57c93a90efdfecece2bea8ffb83137de7052e743d0",
+    "bytes": 143,
+    "modifiedAtEpoch": 1792172798.3267434,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "create-final.log",
+    "sha256": "00b93d042a0b710db307cfa8d104a6f448a3f9c25e6b28ffc61894bf1a0ce067",
+    "bytes": 797,
+    "modifiedAtEpoch": 1792172420.3333988,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "provisioning-http.log",
+    "sha256": "f134e865dce531ba35231853e70dfae0d1de579621fbc3ed40d0043d1654d577",
+    "bytes": 4817,
+    "modifiedAtEpoch": 1792172588.092132,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  },
+  {
+    "name": "quality.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+    "bytes": 185,
+    "modifiedAtEpoch": 1792172402.8413308,
+    "sourceNote": "Named source checks before freeze are diagnostics, not clean-SHA runtime evidence; runtime source identities are in each suite directory."
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "R06-suites/http-finance-jCsZ9J/vitest.json",
+    "sha256": "7c4c258ae3cfe4453f32059984b935e171e4d6fa284bfd237e63147b4118e2c3",
+    "bytes": 5964
+  },
+  {
+    "name": "R06-suites/http-finance-jCsZ9J/discovery.json",
+    "sha256": "b1377786f3f298413283ac0aad82e97b5b99675223a4de993e5aad994a7adaa3",
+    "bytes": 3488
+  },
+  {
+    "name": "R06-setup/result.json",
+    "sha256": "90d441da8e42682a3253531c80bb6ee0902f632f6a3e802464fb08e2e06d0dc2",
+    "bytes": 3154
+  },
+  {
+    "name": "R06-setup/checks.json",
+    "sha256": "60191b8c31b8c38c063d53cec7920842966b433a0bf67c500ad3ef15a375293c",
+    "bytes": 1393
+  }
+]

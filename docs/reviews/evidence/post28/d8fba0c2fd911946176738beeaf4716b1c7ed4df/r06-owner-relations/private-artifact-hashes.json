@@ -1,0 +1,22 @@
+[
+  {
+    "name": "R06-suites/owner-relations-pDD15p/vitest.json",
+    "sha256": "c13691c20df54b8d561b2669ea0ad11f56a854c39f21e4dd172ebabcb95aa7f9",
+    "bytes": 8242
+  },
+  {
+    "name": "R06-suites/owner-relations-pDD15p/discovery.json",
+    "sha256": "e70a0ff3262d31d40e4199e105f23546203364ac8a72b284a7cd84ee73001946",
+    "bytes": 4781
+  },
+  {
+    "name": "R06-setup/result.json",
+    "sha256": "fe15507c68af527142ef931bacb5eb6e34d0bc15d664b255f7e46c049ede3669",
+    "bytes": 2965
+  },
+  {
+    "name": "R06-setup/checks.json",
+    "sha256": "82bcd24bfa22b5e620253076d2d385391d93169a24f3d9499b5dfe566b5a7c85",
+    "bytes": 1393
+  }
+]

@@ -1,0 +1,144 @@
+[
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "binds verified JWT identity to real student collection reads and ignores query impersonation",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 75.06461500000023,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "rejects cross student collection updates with the authenticated principal",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 53.22634999999991,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "rejects foreign student path aliases and injected body authority",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "failed",
+    "durationMs": 30.513907000000472,
+    "failureFirstLines": [
+      "AssertionError: expected 403 to be 404 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "rejects missing and tampered JWT tokens before a student read",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 13.573859000000084,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "revalidates real session revocation on the next HTTP request",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 22.83061699999962,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "revalidates identity suspension and student role withdrawal from PostgreSQL",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 48.74614199999996,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "public university graph excludes both students private collections and invoice metadata",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 102.92544300000009,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "public graph rejects student identity query injection",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 15.53870999999981,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "consumes a bound two checker approval atomically with real FX activation",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 69.00109100000009,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "rejects a foreign target approval without consuming it or activating the rate",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 100.36435200000051,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "rejects pending approval and stale executor version without consuming approval",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 57.32521199999974,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "allows only one of two independent connections to execute one approval",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 58.37671799999953,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "rolls approval consumption and activation back on a PostgreSQL outbox failure",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 44.75988399999915,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-http-finance.database.spec.mjs",
+    "title": "blocks provider payment and automatic FX before any external call or payment write",
+    "ancestors": [
+      "Post28 real HTTP principal and independent finance execution"
+    ],
+    "status": "passed",
+    "durationMs": 34.46980900000017,
+    "failureFirstLines": []
+  }
+]

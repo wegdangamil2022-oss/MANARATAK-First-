@@ -1,0 +1,28 @@
+{
+  "kind": "POST28_READ_ONLY_SAVED_REPORT_VERIFICATION",
+  "verifiedAt": "2026-10-16T17:48:05.400Z",
+  "verifierSourceSha": "1c19ec1fdefdebe57061287ad2737d0e24e862c2",
+  "executionSourceSha": "f14ed30f667715b309292bf113dc09e48a6d63b2",
+  "inputHashes": {
+    "discovery.json": "b1377786f3f298413283ac0aad82e97b5b99675223a4de993e5aad994a7adaa3",
+    "vitest.json": "7c4c258ae3cfe4453f32059984b935e171e4d6fa284bfd237e63147b4118e2c3",
+    "selection.json": "e16680df2318f1138b27dfa1197ca9d9ea2ee8536d21b121a88bde68d9053cf2"
+  },
+  "result": {
+    "expected": 1,
+    "executed": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  },
+  "selection": {
+    "caseExact": "Post28 real HTTP principal and independent finance execution > rejects foreign student path aliases and injected body authority",
+    "fullDiscoveryCases": 14,
+    "selectedCases": 1,
+    "fullProfileAcceptance": false
+  },
+  "rawSkippedAssertions": 13,
+  "selectedSkipped": 0,
+  "databaseRerun": false,
+  "fullProfileAcceptance": false
+}

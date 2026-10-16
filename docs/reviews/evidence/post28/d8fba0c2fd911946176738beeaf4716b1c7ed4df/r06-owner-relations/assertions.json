@@ -1,0 +1,202 @@
+[
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "writes matching university campus and unit through the actual repository",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 98.03064300000028,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "rejects a foreign campus before any program write",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 112.02057300000024,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "rejects a foreign organization unit before any program write",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 26.55243100000007,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "rejects archived campus and unit on authoring",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 20.364242000000104,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "does not expose an active program after university unpublication or archival",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 31.248845999999958,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "rejects program mutation under a foreign university and preserves the existing links",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 38.69951000000037,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "rejects a missing degree profile in real authoring",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 25.942892999999913,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "excludes a profile pointing at another major and profile published version despite valid FK",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 41.042507000000114,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "excludes draft or superseded versions behind a published profile pointer",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 29.539188000000195,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "excludes a version for another profile of the same major",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 28.516493000000082,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "excludes retired profiles even when their actual version remains published",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 30.52645399999983,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "rejects an implicit current test version owned by another test",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 33.61675500000001,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "rejects a superseded explicit test version without treating an existing FK as public proof",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 24.87929699999995,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "accepts a matching published admission test variant and version",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 25.56683699999985,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "rejects foreign admission test versions and variants despite valid FK targets",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 32.139472999999725,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "rejects nonpublic tests and unpublished explicit admission versions",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 35.19311400000015,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "uses the published owner score scale and rejects out of range scores",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 31.436711000000287,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "resolves a published scholarship cycle only with its own published version",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 36.59993000000031,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "hides unpublished and old scholarship cycles and foreign cycle IDs",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 32.60312399999975,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-relations.database.spec.mjs",
+    "title": "hides withdrawn scholarship owners and closed or future cycles",
+    "ancestors": [
+      "Post28 real owner relation authoring and publication"
+    ],
+    "status": "passed",
+    "durationMs": 36.5961299999999,
+    "failureFirstLines": []
+  }
+]

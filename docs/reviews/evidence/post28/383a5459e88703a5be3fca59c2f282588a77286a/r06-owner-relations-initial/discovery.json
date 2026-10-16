@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Post28 real owner relation authoring and publication > writes matching university campus and unit through the actual repository",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > rejects a foreign campus before any program write",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > rejects a foreign organization unit before any program write",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > rejects archived campus and unit on authoring",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > does not expose an active program after university unpublication or archival",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > rejects program mutation under a foreign university and preserves the existing links",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > rejects a missing degree profile in real authoring",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > excludes a profile pointing at another major and profile published version despite valid FK",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > excludes draft or superseded versions behind a published profile pointer",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > accepts a matching published admission test variant and version",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > rejects foreign admission test versions and variants despite valid FK targets",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > rejects nonpublic tests and unpublished explicit admission versions",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > uses the published owner score scale and rejects out of range scores",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > resolves a published scholarship cycle only with its own published version",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > hides unpublished and old scholarship cycles and foreign cycle IDs",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real owner relation authoring and publication > hides withdrawn scholarship owners and closed or future cycles",
+    "file": "tests/database/post28-owner-relations.database.spec.mjs"
+  }
+]
