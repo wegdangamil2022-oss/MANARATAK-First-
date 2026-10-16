@@ -24,6 +24,9 @@ try {
   if(process.env.POST28_LOCAL_LAB_CREATE!=='YES' || !['test','development'].includes(process.env.NODE_ENV) ||
       Number(process.versions.node.split('.')[0])!==22)throw new Error('POST28_LOCAL_LAB_CREATION_NOT_AUTHORIZED');
   const profile=localLabProfile(process.env.POST28_LOCAL_LAB_PROFILE??'greenfield');
+  const memoryStorage=process.env.POST28_LOCAL_LAB_STORAGE==='tmpfs';
+  if(process.env.POST28_LOCAL_LAB_STORAGE&&!['volume','tmpfs'].includes(process.env.POST28_LOCAL_LAB_STORAGE))throw new Error('POST28_LAB_STORAGE_INVALID');
+  if(memoryStorage&&profile.name!=='transactions')throw new Error('POST28_MEMORY_STORAGE_TRANSACTION_ONLY');
   const root=fs.realpathSync(execFileSync('git',['rev-parse','--show-toplevel'],{encoding:'utf8'}).trim());
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())throw new Error('POST28_CLEAN_SOURCE_REQUIRED');
@@ -42,14 +45,14 @@ try {
     if(available)break;if(port>15532)throw new Error('POST28_LOCAL_PORT_UNAVAILABLE');
   }
   run(['network','create','--internal','--label','codex.post28.run='+id,network]);
-  run(['volume','create','--label','codex.post28.run='+id,volume]);
+  if(!memoryStorage)run(['volume','create','--label','codex.post28.run='+id,volume]);
   const containerId=run(['run','-d','--name',name,'--label','codex.post28.run='+id,'--label','codex.post28.scope=DISPOSABLE',
     '--network',network,'--memory','2g','--cpus','2','--pids-limit','256',
-    '--env-file',containerEnv,'--mount',`type=volume,source=${volume},target=/var/lib/postgresql/data`,IMAGE,
+    '--env-file',containerEnv,'--mount',memoryStorage?'type=tmpfs,destination=/var/lib/postgresql/data,tmpfs-size=805306368':`type=volume,source=${volume},target=/var/lib/postgresql/data`,IMAGE,
     '-c','timezone=UTC','-c','max_connections=40']);
   if(!/^[0-9a-f]{64}$/.test(containerId))throw new Error('POST28_CONTAINER_ID_INVALID');
   const state={kind:'POST28_LOCAL_LAB',profile:profile.name,runId:id,sourceSha:sha,scope:'LOCAL_DEVELOPMENT_REHEARSAL',image:IMAGE,
-    containerId,containerName:name,network,volume,port,directory,status:'BOOTSTRAPPING',createdAt:new Date().toISOString()};
+    containerId,containerName:name,network,volume:memoryStorage?null:volume,storage:memoryStorage?'tmpfs':'volume',port,directory,status:'BOOTSTRAPPING',createdAt:new Date().toISOString()};
   fs.writeFileSync(path.join(directory,'lab-state.json'),JSON.stringify(state,null,2)+'\n');
   let ready=false;
   for(let i=0;i<120;i++) {

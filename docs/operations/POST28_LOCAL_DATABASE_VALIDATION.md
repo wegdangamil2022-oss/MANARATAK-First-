@@ -44,3 +44,19 @@ unselected cases are checked against the complete discovery and recorded as excl
 not as executed successes. The selected case must pass with no skip/failure. This scoped
 result never accepts the whole profile or R06. Freeze source and create a new SHA/run
 contract after fixing code or a fixture; preserve the original failed report.
+
+## Memory-backed R06 transaction lab
+
+When persistent storage has no free space, the official creator accepts
+`POST28_LOCAL_LAB_STORAGE=tmpfs` only with `POST28_LOCAL_LAB_PROFILE=transactions`.
+It creates a new isolated PostgreSQL16 container with a bounded768MiB tmpfs data
+mount, the same2GiB container limit, identities, limited roles, loopback forwarding
+and target guards. The default remains a labelled persistent volume. Invalid
+storage values and memory-backed upgrade/greenfield profiles fail before resource
+creation. The lab state records `storage: tmpfs` and `volume: null`.
+
+This is an ephemeral real PostgreSQL transaction test target. Container termination
+loses the database; save safe runtime evidence first and do not use this mode to
+claim R05 backup/restore, crash durability, R10 recovery or production storage
+acceptance. Existing containers, databases and volumes are not removed to free
+space. Private contracts/logs remain outside Git.

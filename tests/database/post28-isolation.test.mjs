@@ -186,3 +186,11 @@ test('DB-V requires the limited migration role kind before any live probe',async
  const c={...contract,targets:{...contract.targets,'DB-V':{...target,database:'manaratak_post28_upgrade_verify_test',role:'post28_verifier',roleKind:'MIGRATION'}}};
  assert.equal(validateTargetDeclaration(c,'DB-V',verifyUrl,env,sha).roleKind,'MIGRATION');
 });
+
+test('memory-backed labs reject non-transaction profiles and unknown storage before creating resources',async()=>{
+  const {spawnSync}=await import('node:child_process');
+  for(const [profile,storage,error] of [['upgrade','tmpfs','POST28_MEMORY_STORAGE_TRANSACTION_ONLY'],['greenfield','tmpfs','POST28_MEMORY_STORAGE_TRANSACTION_ONLY'],['transactions','external','POST28_LAB_STORAGE_INVALID']]){
+    const result=spawnSync(process.execPath,['scripts/database/create-post28-lab.mjs'],{encoding:'utf8',env:{...process.env,NODE_ENV:'test',POST28_LOCAL_LAB_CREATE:'YES',POST28_LOCAL_LAB_PROFILE:profile,POST28_LOCAL_LAB_STORAGE:storage}});
+    assert.equal(result.status,1);assert.match(result.stderr,new RegExp(error));assert.doesNotMatch(result.stderr,/POST28_LAB_DIAGNOSTICS/);
+  }
+});
