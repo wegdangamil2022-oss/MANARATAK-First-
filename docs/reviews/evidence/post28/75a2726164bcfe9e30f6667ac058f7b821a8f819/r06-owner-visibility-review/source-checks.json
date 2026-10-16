@@ -1,0 +1,126 @@
+{
+  "apiBuildExitCode": 0,
+  "routerSourceTests": {
+    "executed": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0
+  },
+  "targetGuardInitialRound": {
+    "executed": 3,
+    "passed": 2,
+    "failed": 1,
+    "reason": "missing fs import in new unit fixture; not product failure"
+  },
+  "targetGuardCorrectedSelectedRound": {
+    "executed": 1,
+    "passed": 1,
+    "failed": 0
+  },
+  "architectureExitCode": 0,
+  "qualityExitCode": 0,
+  "organizationExitCode": 0,
+  "environmentExitCode": 0,
+  "privateLogs": [
+    {
+      "name": "post28-owner-target-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "post28-owner-target-guards.log",
+      "sha256": "66b68f662c02a046b9787117169154bce34214295059c798b284356c1c3a0b15",
+      "bytes": 1396
+    },
+    {
+      "name": "post28-owner-target-guard-final.log",
+      "sha256": "37c52a49a4a4294337c6695fcaeaa4fe5c7604c173d1d49efb2192a4bb1fb388",
+      "bytes": 396
+    },
+    {
+      "name": "post28-owner-fix-lint.log",
+      "sha256": "3fe9350f6219bf77e075032078c478fb80a405b364d10a384724beda7b548f46",
+      "bytes": 1400
+    },
+    {
+      "name": "post28-owner-fix-build-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "post28-owner-initial-runtime.log",
+      "sha256": "2a22fcf5ebd4c5864e443f1cd814900240d328edd6b4ed4b4e98027cdae2a014",
+      "bytes": 32
+    },
+    {
+      "name": "post28-owner-discovery-error.log",
+      "sha256": "d1294731c115c5a379f1fd1828fc597958fd7ad028e29f706257e7cde420b889",
+      "bytes": 1358
+    },
+    {
+      "name": "post28-major-router-source.log",
+      "sha256": "8e6f3e100854bc522840fab5250f43b8fd03881835941bcbaf974509c789ce82",
+      "bytes": 218
+    },
+    {
+      "name": "post28-major-lint.log",
+      "sha256": "1bb31f98d6cbb2370b8d7a508fecb78497c7527eae05af59a4dbc9d87d1f584b",
+      "bytes": 1869
+    },
+    {
+      "name": "post28-major-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "post28-r06-owner-architecture.log",
+      "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+      "bytes": 245
+    },
+    {
+      "name": "post28-r06-owner-quality.log",
+      "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+      "bytes": 185
+    },
+    {
+      "name": "post28-r06-owner-organization.log",
+      "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "bytes": 440
+    },
+    {
+      "name": "post28-r06-owner-environment.log",
+      "sha256": "c12b3e207960f88183c712a7d7f17ec19e397d91b6c601e05317bffb653b3483",
+      "bytes": 79
+    },
+    {
+      "name": "post28-r06-owner-admin-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "post28-r06-owner-final-lint.log",
+      "sha256": "53993898b34467ba68fb740c557dc3b1590998bf89f7be7ba6123df6428156d9",
+      "bytes": 2592
+    },
+    {
+      "name": "post28-r06-owner-final-organization.log",
+      "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "bytes": 440
+    },
+    {
+      "name": "post28-r06-owner-secrets.log",
+      "sha256": "48a54a7c417da0a3e4466f5f2005b43bf9a850cb323d40b89810ab708bd449bc",
+      "bytes": 40
+    },
+    {
+      "name": "post28-r06-owner-staged-organization.log",
+      "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "bytes": 440
+    }
+  ],
+  "adminBuildExitCode": 0,
+  "finalAffectedLintExitCode": 0,
+  "finalOrganizationExitCode": 0,
+  "stagedSecretsExitCode": 0,
+  "stagedOrganizationExitCode": 0
+}

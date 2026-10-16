@@ -1,0 +1,13 @@
+{
+  "sourceSha": "c2b3af690ee32dc02ea0e021153d0a312e17321a",
+  "runId": "f212d750-29ce-4c51-817e-71115184eecc",
+  "suite": "dec05-taxonomy-invalidation",
+  "discovered": 6,
+  "executed": 6,
+  "passed": 6,
+  "failed": 0,
+  "skipped": 0,
+  "fullProfilePassed": true,
+  "alreadyInBaselineDistinctCount": true,
+  "R06Accepted": false
+}
