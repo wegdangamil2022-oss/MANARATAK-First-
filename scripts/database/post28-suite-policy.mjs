@@ -25,7 +25,7 @@ export function verifySuiteResults(name, discovery, report, root = process.cwd()
   const selected = selectedDiscovery(name,discovery,caseExact,root);
   const expected = selected.map(row => `${relative(root,row.file)}\0${row.name}`).sort();
   if (caseExact !== undefined) {
-    // Vitest reports deliberately unselected cases as pending. Validate every
+    // Vitest reports deliberately unselected cases as skipped (and counts them as pending). Validate every
     // identity and status before removing those exclusions from the scoped view.
     const all = verifyDiscovery(name,discovery,root);
     const seen = [];
@@ -35,7 +35,7 @@ export function verifySuiteResults(name, discovery, report, root = process.cwd()
         const id = `${relative(root,file.name)}\0${[...row.ancestorTitles,row.title].join(' > ')}`;
         seen.push(id);
         if (expected.includes(id)) return true;
-        if (!all.includes(id) || row.status !== 'pending') fail('POST28_SELECTION_EXCLUSION_INVALID');
+        if (!all.includes(id) || row.status !== 'skipped') fail('POST28_SELECTION_EXCLUSION_INVALID');
         return false;
       }),
     })).filter(file => file.assertionResults.length);

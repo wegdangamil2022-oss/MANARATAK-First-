@@ -39,7 +39,7 @@ The DB-G application role receives CONNECT/USAGE for read-only identity/grant in
 
 The official runner also accepts `run-post28-suite.mjs <profile> --case-exact '<suite > case>'`.
 It still performs DB-T identity/catalog checks and full mandatory profile discovery, then
-requires exactly one matching case identity. Vitest's pending results for the explicitly
+requires exactly one matching case identity. Vitest's skipped assertion results (counted as pending in its JSON totals) for the explicitly
 unselected cases are checked against the complete discovery and recorded as exclusions,
 not as executed successes. The selected case must pass with no skip/failure. This scoped
 result never accepts the whole profile or R06. Freeze source and create a new SHA/run
