@@ -547,6 +547,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Source classification only; no database execution or observed application state asserted. Preserve owner bindings, restrictive asset FK and EAP lifecycle guards. Inventory existing orphans before any separate VALIDATE; do not invent asset references, delete bindings or remove safety guards to roll back. Shared environments require a verified compatible pre-mutation backup and reviewed restore/reconciliation or forward fix; no destructive down SQL is authorized. Fresh disposable targets may be reprovisioned under the existing policy."
+    },
+    "20261016150000_post28_schema_reconciliation": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Reprovision a fresh disposable target; shared environments require pre-mutation backup and separate authorization. No reverse validation or row repair asserted."
     }
   }
 }
