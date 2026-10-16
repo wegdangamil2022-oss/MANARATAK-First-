@@ -1,5 +1,9 @@
 # POST28 — تحقق Neon بالقراءة فقط قبل R03
 
+## متابعة R03 الحالية
+
+أُنشئت أهداف G/S في جولة لاحقة؛ راجع [متابعة R03](POST28_R03_NEON_FOLLOWUP_2026-10-16.md) للحالة الحالية. التصريحات الآن تطابق أهداف وأدوار R03 المسجلة حرفيًا؛ لا يكفي أي فرع شقيق مشتق من المرجع. الفقرات التي تصف عدم الإنشاء أدناه سجل لجولة تجهيز الحارس السابقة. المصادقة المباشرة والأسرار وTCP ما زالت محجوبة.
+
 ## النطاق والوضع الحقيقي
 
 المرجع المعتمد هو [سجل الهدف](../../config/testing/post28-neon-target.json). المشروع `lively-feather-03681988` والفرع المرجعي `br-patient-recipe-bahs1ix7` وقاعدته `manaratak_test` مخصصون للاختبار. هذا الفرع طويل العمر مرجع، ولا يُقبل كهدف DB-G/DB-S/DB-T حتى إن كان فارغًا. لم تُنشأ أهداف إضافية في هذه الجولة.
@@ -24,7 +28,7 @@
 
 هذه قائمة تجهيز لاحقة؛ **ليست تفويض إنشاء أو تغيير موارد**:
 
-1. تفويض مستقل ومحدد للأهداف الجديدة والأدوار وحدودها، ثم إنشاء DB-G وDB-S فارغتين بهويتين منفصلتين عن المرجع. لا تستعمل رابط المالك الحالي ولا تعِد تسمية host لتجاوز السياسة.
+1. أهداف G/S المسجلة أُنشئت في تجهيز R03 اللاحق؛ تحقّق منها وفق تقرير المتابعة ولا تُنشئ بدائل. أي هدف جديد أو تغيير أدوار يحتاج تفويضه وحدوده. لا تستعمل رابط المالك الحالي ولا تعِد تسمية host لتجاوز السياسة.
 2. حقن روابط Direct ذات أدوار محدودة في أسرار بيئة التنفيذ، وبصلاحيات اختبار المشروع فقط. للحالة الزوجية يستعمل المسار `GREENFIELD_DATABASE_URL` و`GREENFIELD_SHADOW_DATABASE_URL`، وللحالة الفردية DATABASE_URL وPOST28_TARGET_LABEL. DIRECT_URL مطلوب في إعداد Prisma العام؛ لا تضبطه على قاعدة أخرى أو دور أعلى. لا رابط أو token في الدردشة أو Git أو OS argv.
 3. توفير NEON_API_KEY مصرح له بقراءة بيانات المشروع/الفرع المطلوبة؛ تحفظ قيمته في أسرار البيئة فقط. قراءة MCP لا توفر هذه القيمة لعملية Codex. لا تشغّل تسجيل دخول تفاعليًا نيابة عن المستخدم، ولا تنشئ مشروعًا بديلًا عند فشل المصادقة.
 4. عبر إعداد البيئة المدعوم، تصريح TCP باسم **كل مضيف Direct بعينه**؛ HTTPS المفتوح أو wildcard لا يحقق شرط المسار. يحتفظ curl بالـproxy وCA، ويعطل تحميل curlrc ولا يعطل TLS. تحقّق من جاهزية الأسرار والسياسة بعد إعداد البيئة.
@@ -44,21 +48,21 @@
   "postgresMajor": 16,
   "targets": {
     "DB-G": {
-      "branchId": "<authorized new branch ID>",
-      "branchName": "post28-<run>-g",
-      "endpointId": "<exact ep-ID>",
-      "directHost": "<exact direct hostname from Neon>",
+      "branchId": "br-raspy-shadow-ba33tmh3",
+      "branchName": "post28-r03-db-g-20261016",
+      "endpointId": "ep-red-king-baoyw96q",
+      "directHost": "ep-red-king-baoyw96q.c-8.eu-central-1.aws.neon.tech",
       "database": "manaratak_post28_greenfield_test",
-      "role": "post28_migrator",
+      "role": "post28_g_migrate_limited",
       "roleKind": "MIGRATION"
     },
     "DB-S": {
-      "branchId": "<authorized new shadow branch ID>",
-      "branchName": "post28-<run>-s",
-      "endpointId": "<exact shadow ep-ID>",
-      "directHost": "<exact shadow direct hostname from Neon>",
+      "branchId": "br-round-dew-bahzpr4x",
+      "branchName": "post28-r03-db-s-20261016",
+      "endpointId": "ep-tiny-recipe-ba15g3br",
+      "directHost": "ep-tiny-recipe-ba15g3br.c-8.eu-central-1.aws.neon.tech",
       "database": "manaratak_post28_shadow_test",
-      "role": "post28_shadow",
+      "role": "post28_s_shadow_limited",
       "roleKind": "SHADOW"
     }
   }

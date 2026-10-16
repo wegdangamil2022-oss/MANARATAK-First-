@@ -1,0 +1,82 @@
+[
+  {
+    "name": "eslint",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "scripts/database/post28-neon-policy.mjs",
+      "tests/database/post28-neon-preflight.test.mjs"
+    ],
+    "sourceSha": "a3dbee929ecf9a091efedab70b60c5acad689664",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:59:35.276270+00:00",
+    "finishedUtc": "2026-10-16T12:59:39.154925+00:00",
+    "exitCode": 0,
+    "log": "eslint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "originalLogPath": "/workspace/scratch/post28/a3dbee929ecf9a091efedab70b60c5acad689664/R03-followup/eslint-20261016T125939074865Z.log"
+  },
+  {
+    "name": "source-quality",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/quality/verify-source-quality.mjs"
+    ],
+    "sourceSha": "a3dbee929ecf9a091efedab70b60c5acad689664",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:59:35.287055+00:00",
+    "finishedUtc": "2026-10-16T12:59:43.107092+00:00",
+    "exitCode": 0,
+    "log": "source-quality.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+    "originalLogPath": "/workspace/scratch/post28/a3dbee929ecf9a091efedab70b60c5acad689664/R03-followup/source-quality-20261016T125943068703Z.log"
+  },
+  {
+    "name": "targeted-tests",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "--test",
+      "tests/database/post28-neon-preflight.test.mjs",
+      "tests/database/post28-isolation.test.mjs",
+      "tests/database/post28-r04-r05-preparation.test.mjs",
+      "tests/database/greenfield-migration-parity-source.test.mjs",
+      "tests/remediation/w2-disposable-db-mutation-guard.test.mjs",
+      "tests/operations/database-mutation-gate.test.mjs"
+    ],
+    "sourceSha": "a3dbee929ecf9a091efedab70b60c5acad689664",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:59:35.305838+00:00",
+    "finishedUtc": "2026-10-16T12:59:44.536390+00:00",
+    "exitCode": 0,
+    "log": "targeted-tests.log",
+    "sha256": "db901749c433f3860cc393cb07034bebcf12b77c5a3741ae9c76155f9900a8a2",
+    "originalLogPath": "/workspace/scratch/post28/a3dbee929ecf9a091efedab70b60c5acad689664/R03-followup/targeted-tests-20261016T125944495016Z.log"
+  },
+  {
+    "name": "source-preflight",
+    "command": [
+      "npx",
+      "--yes",
+      "--package=node@22.16.0",
+      "node",
+      "scripts/ci/source-preflight.mjs"
+    ],
+    "sourceSha": "a3dbee929ecf9a091efedab70b60c5acad689664",
+    "dirty": false,
+    "startedUtc": "2026-10-16T12:59:35.339631+00:00",
+    "finishedUtc": "2026-10-16T12:59:47.746344+00:00",
+    "exitCode": 0,
+    "log": "source-preflight.log",
+    "sha256": "dbc4915eaf446b92cb2d74035bd1cc61cc16e7c6f9bf654171f5ee86e30b96ef",
+    "originalLogPath": "/workspace/scratch/post28/a3dbee929ecf9a091efedab70b60c5acad689664/R03-followup/source-preflight-20261016T125947728374Z.log"
+  }
+]

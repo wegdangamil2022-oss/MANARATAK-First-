@@ -1,0 +1,9 @@
+{
+  "checks.json": "590e8a1c7ea5ec4d7544a747450c132a745b55c252d714cf86c083685c696c0a",
+  "eslint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "provider-and-environment.json": "c8fdd9c4630dedf69f728735a9548ca7dce027142602117f5527c95fdb16cbea",
+  "source-preflight.log": "dbc4915eaf446b92cb2d74035bd1cc61cc16e7c6f9bf654171f5ee86e30b96ef",
+  "source-quality.log": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+  "summary.json": "3b57cd5e038513af44cabbb310bb40d07d81afe42d57469e48f8c600a56ddf93",
+  "targeted-tests.log": "db901749c433f3860cc393cb07034bebcf12b77c5a3741ae9c76155f9900a8a2"
+}

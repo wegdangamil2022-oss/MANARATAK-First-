@@ -1,0 +1,30 @@
+{
+  "kind": "POST28_R03_FOLLOWUP_SOURCE_AND_BLOCKERS",
+  "sourceSha": "a3dbee929ecf9a091efedab70b60c5acad689664",
+  "baseSha": "da22d6a812e89bc82e60f301713c046f90d15361",
+  "cleanSourceDuringChecks": true,
+  "sourceChecksPassed": 4,
+  "targetedTests": {
+    "executed": 182,
+    "passed": 182,
+    "failed": 0,
+    "skipped": 0,
+    "todo": 0,
+    "cancelled": 0
+  },
+  "sourcePreflightTests": 36,
+  "databaseSqlStatementsExecuted": 0,
+  "ownerSessionsUsedForTests": 0,
+  "directPrismaTlsVerified": false,
+  "remoteDatabaseSuitesExecuted": 0,
+  "R03": "BLOCKED_RUNTIME_CONFIGURATION",
+  "R04": "NOT_READY_NOT_EXECUTED",
+  "unsafeRoleRemediation": "PLAN_ONLY_NOT_EXECUTED",
+  "sourceSha256": {
+    "scripts/database/post28-neon-policy.mjs": "0ada1f6816ee0b8786d986ad950c988905239fa26c61b9756c084f43aaabeb12",
+    "tests/database/post28-neon-preflight.test.mjs": "d81867c196282d80805225d02a68e3649105650a436858d1fadac6a4e62be294",
+    "config/testing/post28-neon-target.json": "ce9e98dd27b8517650d09ed8cf160740be332abd4059197ae7ef5830cf63276b",
+    "package-lock.json": "75269332ee9c7c5b5b66b753a5ac5e94427668cd27b1db20b26291499306b4ee",
+    "packages/infrastructure/prisma/schema.prisma": "56966e566cbcd7ea60966d3954a4368630753f35a265e24b8ece354387450d45"
+  }
+}
