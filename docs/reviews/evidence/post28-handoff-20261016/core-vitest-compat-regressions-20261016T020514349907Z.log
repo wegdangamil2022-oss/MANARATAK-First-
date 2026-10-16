@@ -1,0 +1,260 @@
+TAP version 13
+# Subtest: greenfield parity gate replays migrations and diffs replayed DB plus migration directory
+ok 1 - greenfield parity gate replays migrations and diffs replayed DB plus migration directory
+  ---
+  duration_ms: 0.825266
+  type: 'test'
+  ...
+# Subtest: greenfield parity gate fails closed on unsafe targets and incomplete catalog state
+ok 2 - greenfield parity gate fails closed on unsafe targets and incomplete catalog state
+  ---
+  duration_ms: 0.166201
+  type: 'test'
+  ...
+# Subtest: runbook makes migration replay authoritative and rejects db push as production proof
+ok 3 - runbook makes migration replay authoritative and rejects db push as production proof
+  ---
+  duration_ms: 0.094332
+  type: 'test'
+  ...
+# Subtest: rejects remote target before client/query creation
+ok 4 - rejects remote target before client/query creation
+  ---
+  duration_ms: 1.296167
+  type: 'test'
+  ...
+# Subtest: rejects restore target before client/query creation
+ok 5 - rejects restore target before client/query creation
+  ---
+  duration_ms: 0.219121
+  type: 'test'
+  ...
+# Subtest: rejects production target before client/query creation
+ok 6 - rejects production target before client/query creation
+  ---
+  duration_ms: 0.161103
+  type: 'test'
+  ...
+# Subtest: rejects schema target before client/query creation
+ok 7 - rejects schema target before client/query creation
+  ---
+  duration_ms: 0.151138
+  type: 'test'
+  ...
+# Subtest: rejects port target before client/query creation
+ok 8 - rejects port target before client/query creation
+  ---
+  duration_ms: 0.189086
+  type: 'test'
+  ...
+# Subtest: rejects role target before client/query creation
+ok 9 - rejects role target before client/query creation
+  ---
+  duration_ms: 0.124729
+  type: 'test'
+  ...
+# Subtest: missing isolation flags, stale SHA and forbidden restore label fail before any read
+ok 10 - missing isolation flags, stale SHA and forbidden restore label fail before any read
+  ---
+  duration_ms: 0.411542
+  type: 'test'
+  ...
+# Subtest: different credentials/loopback spelling cannot disguise a shared target/shadow
+ok 11 - different credentials/loopback spelling cannot disguise a shared target/shadow
+  ---
+  duration_ms: 0.433264
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag superuser
+ok 12 - rejects live elevated role flag superuser
+  ---
+  duration_ms: 0.451071
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag createRole
+ok 13 - rejects live elevated role flag createRole
+  ---
+  duration_ms: 0.272031
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag createDatabase
+ok 14 - rejects live elevated role flag createDatabase
+  ---
+  duration_ms: 0.121574
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag replication
+ok 15 - rejects live elevated role flag replication
+  ---
+  duration_ms: 0.061623
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag bypassRls
+ok 16 - rejects live elevated role flag bypassRls
+  ---
+  duration_ms: 0.048223
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag privilegedMembership
+ok 17 - rejects live elevated role flag privilegedMembership
+  ---
+  duration_ms: 0.045148
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag globalWrite
+ok 18 - rejects live elevated role flag globalWrite
+  ---
+  duration_ms: 0.05978
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag databaseOwner
+ok 19 - rejects live elevated role flag databaseOwner
+  ---
+  duration_ms: 0.042684
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag databaseCreate
+ok 20 - rejects live elevated role flag databaseCreate
+  ---
+  duration_ms: 0.044037
+  type: 'test'
+  ...
+# Subtest: rejects changed live database
+ok 21 - rejects changed live database
+  ---
+  duration_ms: 0.08608
+  type: 'test'
+  ...
+# Subtest: rejects changed live role
+ok 22 - rejects changed live role
+  ---
+  duration_ms: 0.266232
+  type: 'test'
+  ...
+# Subtest: rejects changed live sessionRole
+ok 23 - rejects changed live sessionRole
+  ---
+  duration_ms: 0.047822
+  type: 'test'
+  ...
+# Subtest: rejects changed live databaseOid
+ok 24 - rejects changed live databaseOid
+  ---
+  duration_ms: 0.04679
+  type: 'test'
+  ...
+# Subtest: rejects changed live serverIdentity
+ok 25 - rejects changed live serverIdentity
+  ---
+  duration_ms: 0.040371
+  type: 'test'
+  ...
+# Subtest: rejects changed live marker
+ok 26 - rejects changed live marker
+  ---
+  duration_ms: 0.03993
+  type: 'test'
+  ...
+# Subtest: rejects changed live postgresMajor
+ok 27 - rejects changed live postgresMajor
+  ---
+  duration_ms: 0.116285
+  type: 'test'
+  ...
+# Subtest: rejects changed live timezone
+ok 28 - rejects changed live timezone
+  ---
+  duration_ms: 0.074673
+  type: 'test'
+  ...
+# Subtest: application cannot inherit migration DDL privileges; nonempty greenfield is rejected
+ok 29 - application cannot inherit migration DDL privileges; nonempty greenfield is rejected
+  ---
+  duration_ms: 0.134954
+  type: 'test'
+  ...
+# Subtest: valid distinct target/shadow declarations and live identities reach two read-only probes
+ok 30 - valid distinct target/shadow declarations and live identities reach two read-only probes
+  ---
+  duration_ms: 0.434256
+  type: 'test'
+  ...
+# Subtest: suite catalogue includes both actual asset DB suites and rejects an unknown profile
+ok 31 - suite catalogue includes both actual asset DB suites and rejects an unknown profile
+  ---
+  duration_ms: 0.11238
+  type: 'test'
+  ...
+# Subtest: suite result policy rejects missing cases, skipped tests, wrong files and mismatched identities
+ok 32 - suite result policy rejects missing cases, skipped tests, wrong files and mismatched identities
+  ---
+  duration_ms: 1.789993
+  type: 'test'
+  ...
+# Subtest: Prisma connection URLs are passed through private JS argv, absent from OS arguments
+ok 33 - Prisma connection URLs are passed through private JS argv, absent from OS arguments
+  ---
+  duration_ms: 30.482662
+  type: 'test'
+  ...
+# Subtest: destructive database suites reject restore references and protected aliases before test imports
+ok 34 - destructive database suites reject restore references and protected aliases before test imports
+  ---
+  duration_ms: 22.621601
+  type: 'test'
+  ...
+# Subtest: runtime suite preflight rejects NOT VALID constraints and invalid indexes
+ok 35 - runtime suite preflight rejects NOT VALID constraints and invalid indexes
+  ---
+  duration_ms: 0.276338
+  type: 'test'
+  ...
+# Subtest: Vitest refuses a protected restore target before importing test modules
+ok 36 - Vitest refuses a protected restore target before importing test modules
+  ---
+  duration_ms: 696.779235
+  type: 'test'
+  ...
+# Subtest: identity probe must itself run in a read-only transaction
+ok 37 - identity probe must itself run in a read-only transaction
+  ---
+  duration_ms: 0.660478
+  type: 'test'
+  ...
+# Subtest: lab provisioning rejects missing authorization and production mode before creating resources
+ok 38 - lab provisioning rejects missing authorization and production mode before creating resources
+  ---
+  duration_ms: 68.053498
+  type: 'test'
+  ...
+# Subtest: source unit gate explicitly excludes DB profiles and rejects empty discovery
+ok 39 - source unit gate explicitly excludes DB profiles and rejects empty discovery
+  ---
+  duration_ms: 0.480866
+  type: 'test'
+  ...
+# Subtest: actual Vitest discovery and JSON report identities agree with the case-count policy (inert fixture)
+not ok 40 - actual Vitest discovery and JSON report identities agree with the case-count policy (inert fixture)
+  ---
+  duration_ms: 1134.034336
+  type: 'test'
+  location: '/workspace/MANARATAK-First-/tests/database/post28-isolation.test.mjs:139:1'
+  failureType: 'testCodeFailure'
+  error: 'POST28_DATABASE_CASE_SET_CHANGED'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    fail (file:///workspace/MANARATAK-First-/scripts/database/post28-suite-policy.mjs:4:29)
+    verifySuiteResults (file:///workspace/MANARATAK-First-/scripts/database/post28-suite-policy.mjs:30:61)
+    TestContext.<anonymous> (file:///workspace/MANARATAK-First-/tests/database/post28-isolation.test.mjs:151:18)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..40
+# tests 40
+# suites 0
+# pass 39
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2058.967848
