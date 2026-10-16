@@ -323,11 +323,6 @@
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Unapplied source migration. After authoring starts, restoring a backup is required to preserve region lifecycle, aliases, versions and dependent relationships; no destructive reverse SQL is asserted."
     },
-    "20261009070000_import_governance_receipts": {
-      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
-      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
-      "decision": "Additive import control-plane evidence must be retained; recover from pre-mutation backup or reprovision a disposable target. No destructive reverse SQL is asserted."
-    },
     "20261009010000_eap_asset_reference_serialization": {
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
@@ -357,6 +352,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Source classification only; no database execution. Validation rules become policy evidence once definitions are authored. Preserve them via backup restore or a reviewed forward fix rather than dropping stored rules."
+    },
+    "20261009070000_import_governance_receipts": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Additive import control-plane evidence must be retained; recover from pre-mutation backup or reprovision a disposable target. No destructive reverse SQL is asserted."
     },
     "20261010000000_course_assessment_type": {
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
@@ -443,11 +443,6 @@
       "artifact": "docs/reviews/section-19-migration-recovery.md",
       "decision": "Unapplied additive expansion. Rehearse backup restore after section 28; no down SQL or legacy plaintext backfill is executed."
     },
-    "20261012010000_section23_channel_delivery": {
-      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
-      "artifact": "docs/reviews/section-23-migration-recovery.md",
-      "decision": "Source-only additive channel checkpoints, immutable template snapshots and reservation ledger. Preserve receipts/replay fingerprints; recover with a verified backup or reviewed forward fix. Not applied."
-    },
     "20261011221500_section20_financial_safety": {
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/reviews/section-20-migration-recovery.md",
@@ -458,15 +453,20 @@
       "artifact": "docs/reviews/section-21-migration-recovery.md",
       "decision": "Source-only unapplied additive safety migration. Disable dispatch/maintenance first; preserve immutable intents, approval, outbox and financial evidence. Recover with a verified compatible backup and reconcile external outcomes, or use a reviewed forward fix. No destructive down SQL authorized."
     },
+    "20261012010000_audit_workspace": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source only. No migration was applied in this work. Drain API/workers and preserve investigation/approval/notification evidence and asset journals. Use a compatible verified backup or a reviewed forward fix; no destructive down SQL is authorized."
+    },
     "20261012010000_section21_close_source": {
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/reviews/section-21-migration-recovery.md",
       "decision": "Source-only unapplied additive safety migration. Disable dispatch/maintenance first; preserve immutable intents, approval, outbox and financial evidence. Recover with a verified compatible backup and reconcile external outcomes, or use a reviewed forward fix. No destructive down SQL authorized."
     },
-    "20261012010000_audit_workspace": {
+    "20261012010000_section23_channel_delivery": {
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
-      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
-      "decision": "Source only. No migration was applied in this work. Drain API/workers and preserve investigation/approval/notification evidence and asset journals. Use a compatible verified backup or a reviewed forward fix; no destructive down SQL is authorized."
+      "artifact": "docs/reviews/section-23-migration-recovery.md",
+      "decision": "Source-only additive channel checkpoints, immutable template snapshots and reservation ledger. Preserve receipts/replay fingerprints; recover with a verified backup or reviewed forward fix. Not applied."
     },
     "20261012020000_asset_rendition_inventory": {
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
@@ -492,6 +492,61 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Source only, unapplied. Preserve stable program/intake identities, language links and audit/outbox evidence. Drain writers and recover through a reviewed compatible backup or forward fix; no destructive rollback or backfill is authorized."
+    },
+    "20261013200000_certificate_authority_delegations": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. Certificate delegation records, private evidence and issuer key provenance are trust/audit records. Restore a verified compatible backup or execute a separately reviewed forward repair; never drop delegated-issuer evidence."
+    },
+    "20261013210000_student_support_owner_read_health": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. Student support read-health observations refer to private student owners. Recovery must preserve references and access/privacy semantics; use a compatible backup or reviewed forward repair."
+    },
+    "20261014010000_owner_translation_receipt": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. Translation handoff receipts and approval digests are immutable governance evidence. Restore a compatible backup or reviewed forward repair; no receipt deletion or fabricated approval."
+    },
+    "20261014090000_study_destination_governance_source_only": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. New revision/governance/linked-city fields hold source and publication review provenance. Never drop them to roll back; restore compatible backup or reviewed forward repair."
+    },
+    "20261014193000_section27_tracker_cycles": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. This migration changes the student tracker uniqueness index and backfills legacy snapshot/cycle identifiers. Retain the pre-transition state and snapshots; rollback requires compatible verified backup and reviewed reconciliation rather than regenerating student cycle history."
+    },
+    "20261015020000_search_request_actor_boundary": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. Historical search ownership is not inferable from NULL owner references. Restore verified backup or reviewed forward fix; never default legacy records to another actor."
+    },
+    "20261015020000_student_tool_test_discovery": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. Owner/test discovery links, review decisions and revisions are auditable links. Restore verified backup or use reviewed forward repair without fabricating publication/approval."
+    },
+    "20261015020100_service_test_discovery": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. Service/test discovery links, review decisions and revisions are auditable links. Restore verified backup or use reviewed forward repair without fabricating publication/approval."
+    },
+    "20261015030000_student_document_review": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. Private review consent periods and attestations are sensitive legal/security evidence. Preserve consent and review history with a compatible verified backup or reviewed forward fix."
+    },
+    "20261015031000_scholarship_reference_lifecycle": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. Scholarship reference transition, tombstone and merge review evidence must remain canonical and durable. Restore verified backup or reviewed forward fix, not physical deletion or arbitrary relinking."
+    },
+    "20261015100000_student_document_asset_boundary": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Source-only, not applied by this source review. Cross-owner student/asset foreign keys are NOT VALID until orphan reconciliation and lock-order rehearsal. Backup restore or separately approved forward repair is required; never cascade-delete student bindings or bypass the asset owner."
     }
   }
 }
