@@ -56,8 +56,22 @@ test('suite result policy rejects missing cases, skipped tests, wrong files and 
   const suite=databaseSuite('leases'),root='/project';
   const rows=suite.files.map((file,i)=>({file:root+'/'+file,name:'case '+i}));
   const report={success:true,numFailedTests:0,numPendingTests:0,numTotalTests:2,numPassedTests:2,
-    testResults:rows.map(row=>({name:row.file,status:'passed',assertionResults:[{fullName:row.name,status:'passed'}]}))};
+    testResults:rows.map(row=>({name:row.file,status:'passed',assertionResults:[{ancestorTitles:[],title:row.name,fullName:row.name,status:'passed'}]}))};
   assert.equal(verifySuiteResults('leases',rows,report,root).passed,2);
+  for (const patch of [
+    {ancestorTitles:['forged'],title:rows[0].name,fullName:'forged '+rows[0].name},
+    {ancestorTitles:[],title:rows[0].name,fullName:'forged'},
+    {ancestorTitles:undefined,title:rows[0].name},
+  ]) {
+    const changed=structuredClone(report);
+    Object.assign(changed.testResults[0].assertionResults[0],patch);
+    assert.throws(()=>verifySuiteResults('leases',rows,changed,root));
+  }
+  assert.throws(()=>verifySuiteResults('leases',rows,{...report,testResults:[...report.testResults,
+    {name:root+'/extra.spec.ts',status:'passed',assertionResults:[]}]},root),/FILES_MISMATCH/);
+  assert.throws(()=>verifySuiteResults('leases',rows,{...report,testResults:[...report.testResults,
+    report.testResults[0]]},root),/FILES_MISMATCH/);
+
   assert.throws(()=>verifyDiscovery('leases',rows.slice(0,1),root));
   assert.throws(()=>verifySuiteResults('leases',rows,{...report,numPendingTests:1},root));
   assert.throws(()=>verifySuiteResults('leases',rows,{...report,numPassedTests:0,numTotalTests:0},root));
@@ -142,12 +156,13 @@ test('actual Vitest discovery and JSON report identities agree with the case-cou
   try {
     const suite=databaseSuite('leases'),config=path.join(root,'config.mjs'),report=path.join(root,'results.json');
     const vitest=new URL('../../node_modules/vitest/dist/index.js',import.meta.url).href;
-    for(const file of suite.files){fs.mkdirSync(path.dirname(path.join(root,file)),{recursive:true});fs.writeFileSync(path.join(root,file),`import {describe,it} from ${JSON.stringify(vitest)}; describe('lease fixture',()=>{it('inert case, no database',()=>{});});`);}
+    for(const file of suite.files){fs.mkdirSync(path.dirname(path.join(root,file)),{recursive:true});fs.writeFileSync(path.join(root,file),`import {describe,it} from ${JSON.stringify(vitest)}; describe('lease fixture',()=>{describe('nested > literal',()=>{it('inert  case > no database',()=>{});});}); it('top level',()=>{}); it.each([1,2])('parameter %s',()=>{});`);}
     fs.writeFileSync(config,`export default {test:{root:${JSON.stringify(root)},include:${JSON.stringify(suite.files)},maxWorkers:1,passWithNoTests:false}};`);
     const collect=cp.spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','list','--config',config,'--json'],{encoding:'utf8'});
     assert.equal(collect.status,0,collect.stderr);const rows=JSON.parse(collect.stdout);
     const run=cp.spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run','--config',config,'--reporter=json','--outputFile',report],{encoding:'utf8'});
     assert.equal(run.status,0,run.stderr);
-    assert.equal(verifySuiteResults('leases',rows,JSON.parse(fs.readFileSync(report,'utf8')),root).passed,2);
+    const actual=JSON.parse(fs.readFileSync(report,'utf8'));
+    assert.equal(verifySuiteResults('leases',rows,actual,root).passed,8);
   } finally {fs.rmSync(root,{recursive:true,force:true});}
 });

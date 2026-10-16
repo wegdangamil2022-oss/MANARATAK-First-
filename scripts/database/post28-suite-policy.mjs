@@ -20,11 +20,20 @@ export function verifySuiteResults(name, discovery, report, root = process.cwd()
       (report.numTodoTests ?? 0) !== 0 || report.numTotalTests !== expected.length ||
       report.numPassedTests !== expected.length || !Array.isArray(report.testResults))
     fail('POST28_DATABASE_SUITE_NOT_FULLY_PASSED');
+  const resultFiles = report.testResults.map(file => relative(root,file.name)).sort();
+  if (JSON.stringify(resultFiles) !== JSON.stringify([...databaseSuite(name).files].sort()))
+    fail('POST28_SUITE_FILES_MISMATCH');
   const results = report.testResults.flatMap(file => {
     if (file.status !== 'passed' || !Array.isArray(file.assertionResults)) fail('POST28_DATABASE_SUITE_FILE_FAILED');
     return file.assertionResults.map(row => {
       if (row.status !== 'passed') fail('POST28_DATABASE_SUITE_SKIPPED_OR_FAILED');
-      return `${relative(root,file.name)}\0${row.fullName}`;
+      // Vitest list uses ` > ` between suites; JSON fullName uses spaces.
+      // Reconstruct from structured titles without replacing characters in names.
+      if (!Array.isArray(row.ancestorTitles) || row.ancestorTitles.some(title => typeof title !== 'string') ||
+          typeof row.title !== 'string' || !row.title.trim() ||
+          row.fullName !== [...row.ancestorTitles,row.title].join(' '))
+        fail('POST28_DATABASE_CASE_IDENTITY_INVALID');
+      return `${relative(root,file.name)}\0${[...row.ancestorTitles,row.title].join(' > ')}`;
     });
   }).sort();
   if (JSON.stringify(results) !== JSON.stringify(expected)) fail('POST28_DATABASE_CASE_SET_CHANGED');
