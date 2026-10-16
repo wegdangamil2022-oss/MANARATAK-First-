@@ -1,0 +1,158 @@
+[
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > rejects one of two concurrent writes against the same DB revision",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > enforces actual DB retention, legal hold, and worker lease ownership before purge",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > persists inaccessible PURGED before provider delete and safely retries failed cleanup",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > stores archive uncertainty and blocks a fresh provider retry",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > fences concurrent same-state metadata saves even when updates occur within one millisecond",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > persists INITIATED before any object exists, then QUARANTINED only with signed verification evidence",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > durably rehydrates PREPARED promotion after post-move persistence failure, then completes the same operation",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > does not commit ACTIVE before provider has proven restored CLEAN bytes",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > retains a recovery barrier without compensation if a transaction invalidates restore CAS",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > restore claim blocks an already-hydrated purge and any new retention purge",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > restore cannot publish ACTIVE when its lease expires or is replaced",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > preserves persisted version history during a real-DB lifecycle transition",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > composes workspace JSON facets with canonical cursor and family predicates in PostgreSQL",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > rejects compensation authorization after restore lease expiry or a competing ACTIVE commit",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > discovers only old persisted pending activation intents for recovery",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > filters tampered ACTIVE reuse proof and advances empty PostgreSQL pages",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > keeps a crashed restore intent blocking takeover and purge after lease expiry",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > renews an expired lease owned by the durable operation before verified ACTIVE commit",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > holds an ambiguous provider failure without compensation or automatic retry",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > cancels only a pre-provider intent and permits a fresh safe restore",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > blocks delete, restore and a second archive while the first provider archive is in flight",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > preserves an archive recovery barrier across restart and excludes it from retention",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP real PostgreSQL revision CAS and purge cleanup on disposable localhost > requires verification for a legacy ARCHIVED record before another provider archive",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > owner-first transaction blocks ARCHIVED until commit, then rejects lifecycle change",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > owner-first transaction blocks DELETED until commit, then rejects lifecycle change",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > owner-first transaction blocks PURGED until commit, then rejects lifecycle change",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > owner-first transaction blocks PHYSICAL_DELETE until commit, then rejects lifecycle change",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > lifecycle-first ARCHIVED rejects a waiting owner write after commit",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > lifecycle-first DELETED rejects a waiting owner write after commit",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > lifecycle-first PURGED rejects a waiting owner write after commit",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > lifecycle-first PHYSICAL_DELETE rejects a waiting owner write after commit",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > blocks provider archive after an initially empty usage check loses the owner race",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > permits deletion after unlinking and rejects only newly added invalid references",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > holds a JSON SEO reference lock until its owner commits",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > covers CMS published attachment arrays and prevents asset identity changes",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > rejects destructive snapshot-isolation transactions (RepeatableRead)",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > rejects destructive snapshot-isolation transactions (Serializable)",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > usage facets cross empty keyset pages and compose with owner filters against actual owner data",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  },
+  {
+    "name": "EAP canonical owner/lifecycle serialization on disposable PostgreSQL > batch usage detects JSON attachments and SEO references without a separate owner registry",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+  }
+]

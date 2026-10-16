@@ -1,0 +1,47 @@
+[
+  {
+    "name": "r06-db-t-setup",
+    "command": [
+      "node",
+      "scripts/database/initialize-post28-transactions.mjs"
+    ],
+    "sourceSha": "853fe76646c018e1fd9955034cd155311760856f",
+    "startedUtc": "2026-10-16T16:32:58.531370+00:00",
+    "finishedUtc": "2026-10-16T16:33:11.759194+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-VI9X4S/r06-db-t-setup-20261016T163311757224Z.log",
+    "sha256": "fb0f4101131c649fd500ce83d755e974844173f757217dd79556388ed31ed191"
+  },
+  {
+    "name": "r06-leases",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/run-post28-suite.mjs",
+      "leases"
+    ],
+    "sourceSha": "853fe76646c018e1fd9955034cd155311760856f",
+    "startedUtc": "2026-10-16T16:33:28.153408+00:00",
+    "finishedUtc": "2026-10-16T16:33:34.055352+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-VI9X4S/r06-leases-20261016T163334053058Z.log",
+    "sha256": "2bbf105ea9783e2d952d9c95f51489b5813ecedaf9f65ccc49b424cff2d32c8f"
+  },
+  {
+    "name": "r06-core-transactions",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/run-post28-suite.mjs",
+      "core-transactions"
+    ],
+    "sourceSha": "853fe76646c018e1fd9955034cd155311760856f",
+    "startedUtc": "2026-10-16T16:33:47.680278+00:00",
+    "finishedUtc": "2026-10-16T16:33:49.039176+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-VI9X4S/r06-core-transactions-20261016T163349036973Z.log",
+    "sha256": "1260b5ae76a4c84b48c5af4dbf7d73739ca12471b8857a4cf74c50689544566d"
+  }
+]

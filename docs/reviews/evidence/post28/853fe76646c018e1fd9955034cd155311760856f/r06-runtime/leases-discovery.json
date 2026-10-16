@@ -1,0 +1,10 @@
+[
+  {
+    "name": "MNT-AUD-0007 durable background-job lease fencing on disposable PostgreSQL > allows exactly one concurrent claimant, reclaims expiry, and rejects the stale owner",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/background-jobs/PrismaBackgroundJobLease.database.spec.ts"
+  },
+  {
+    "name": "MNT-AUD-0068 transactional-outbox lease fencing on disposable PostgreSQL > reclaims an expired PROCESSING row and fences stale terminal writes",
+    "file": "/workspace/MANARATAK-First-/packages/infrastructure/tests/event-foundation/PrismaTransactionalOutboxLease.database.spec.ts"
+  }
+]

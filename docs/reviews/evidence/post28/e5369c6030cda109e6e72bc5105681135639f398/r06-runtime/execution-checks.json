@@ -1,0 +1,31 @@
+[
+  {
+    "name": "r06-assets-db-t-setup",
+    "command": [
+      "node",
+      "scripts/database/initialize-post28-transactions.mjs"
+    ],
+    "sourceSha": "e5369c6030cda109e6e72bc5105681135639f398",
+    "startedUtc": "2026-10-16T16:35:45.474881+00:00",
+    "finishedUtc": "2026-10-16T16:35:59.340229+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-AqEUS8/r06-assets-db-t-setup-20261016T163559338123Z.log",
+    "sha256": "0fedc10f09492bd4b755f5c60ce4a25443ddfb62681eac8c5f3948f49fe876cc"
+  },
+  {
+    "name": "r06-assets",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/run-post28-suite.mjs",
+      "assets"
+    ],
+    "sourceSha": "e5369c6030cda109e6e72bc5105681135639f398",
+    "startedUtc": "2026-10-16T16:36:09.609999+00:00",
+    "finishedUtc": "2026-10-16T16:36:25.190959+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-AqEUS8/r06-assets-20261016T163625188733Z.log",
+    "sha256": "225053d84f0c910bd146cce49d39a33b255cd1051cb67e75789b4f6335f72e67"
+  }
+]
