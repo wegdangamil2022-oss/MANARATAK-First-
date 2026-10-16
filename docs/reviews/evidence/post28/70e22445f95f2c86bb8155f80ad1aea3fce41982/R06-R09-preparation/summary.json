@@ -1,0 +1,110 @@
+{
+  "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+  "databaseConnected": false,
+  "checks": [
+    {
+      "name": "diagnostic-build",
+      "command": "node scripts/release/post28-diagnostic-build.mjs /workspace/post28-private/r06-r09-70e22445f95f2c86bb8155f80ad1aea3fce41982/diagnostic-build",
+      "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:18:25.408655+00:00",
+      "endedAt": "2026-10-16T03:19:05.338976+00:00",
+      "exitCode": 0,
+      "logSha256": "b6c0109b84230cfbaad8bb43c9a1e67112881efc439822e578bf663aa576b74e",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "affected-tests",
+      "command": "node --test tests/release/section28.test.mjs tests/release/post28-r07-static-runtime.test.mjs tests/certificates/runtime-bundle.test.mjs tests/remediation/w6-reliability-contract.test.mjs",
+      "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:18:25.409054+00:00",
+      "endedAt": "2026-10-16T03:18:27.835278+00:00",
+      "exitCode": 0,
+      "logSha256": "db313535d15d3c496eb11322a1832fc23c12685d6a4f4554977b6d3510ccb0b0",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "preflight",
+      "command": "npm run ci:preflight",
+      "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:18:27.835730+00:00",
+      "endedAt": "2026-10-16T03:18:41.569506+00:00",
+      "exitCode": 0,
+      "logSha256": "61f35e9367a070575281672aadcd789ef9b109995205989ad2a3599c3e85f81f",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "tooling-eslint",
+      "command": "node node_modules/eslint/bin/eslint.js scripts/release/lib/StaticScriptPolicy.mjs scripts/release/lib/StaticBuildPolicy.mjs scripts/release/lib/SmokeContracts.mjs scripts/release/lib/ArtifactInputPolicy.mjs scripts/release/build-immutable-artifacts.mjs scripts/release/post28-diagnostic-build.mjs scripts/database/prepare-post28-r06-r09.mjs tests/release/post28-r07-static-runtime.test.mjs",
+      "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:18:41.569931+00:00",
+      "endedAt": "2026-10-16T03:18:43.049278+00:00",
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "quality",
+      "command": "npm run quality:source",
+      "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:18:43.049559+00:00",
+      "endedAt": "2026-10-16T03:18:46.708399+00:00",
+      "exitCode": 0,
+      "logSha256": "8da3e12185549330fd7da4e28e9bde9bde31bb13fe1c2321e77859983ec6e0bd",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "organization",
+      "command": "node scripts/verify/verify-final-repository-organization.mjs",
+      "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:18:46.708831+00:00",
+      "endedAt": "2026-10-16T03:18:52.074753+00:00",
+      "exitCode": 0,
+      "logSha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "secrets",
+      "command": "npm run security:secrets",
+      "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:18:52.075011+00:00",
+      "endedAt": "2026-10-16T03:18:53.970519+00:00",
+      "exitCode": 0,
+      "logSha256": "c2d3d47937a27cad1414ed459bef59fce71d03e31eaf576c2b7d2854d668e414",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    },
+    {
+      "name": "coverage-inventory",
+      "command": "node scripts/database/prepare-post28-r06-r09.mjs /workspace/post28-private/r06-r09-70e22445f95f2c86bb8155f80ad1aea3fce41982/R06-R09-preparation.json",
+      "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:18:53.971026+00:00",
+      "endedAt": "2026-10-16T03:18:54.077835+00:00",
+      "exitCode": 0,
+      "logSha256": "87c920711dd1140f350c15a14bd9b12df72231d46825b4683cb541f3a52e4ef4",
+      "nodeVersion": "22.16.0",
+      "databaseConnected": false
+    }
+  ]
+}

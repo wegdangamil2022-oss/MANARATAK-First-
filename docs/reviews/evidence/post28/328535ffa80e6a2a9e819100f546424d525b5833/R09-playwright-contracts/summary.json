@@ -1,0 +1,67 @@
+{
+  "sourceSha": "328535ffa80e6a2a9e819100f546424d525b5833",
+  "checks": [
+    {
+      "name": "playwright-contracts",
+      "command": "node --test tests/release/post28-playwright-policy.test.mjs tests/imported-courses/wp-ic-10-runtime-lib.test.mjs",
+      "sourceSha": "328535ffa80e6a2a9e819100f546424d525b5833",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:23:02.926145+00:00",
+      "endedAt": "2026-10-16T03:23:04.952834+00:00",
+      "exitCode": 0,
+      "logSha256": "814e19f4dfdd957f203aa10510fa72b10a40cba35e97614117204ce52ea934f7",
+      "nodeVersion": "22.16.0"
+    },
+    {
+      "name": "eslint",
+      "command": "node node_modules/eslint/bin/eslint.js scripts/wp-ic-10-browser-e2e.mjs scripts/release/lib/PlaywrightCasePolicy.mjs tests/release/post28-playwright-policy.test.mjs",
+      "sourceSha": "328535ffa80e6a2a9e819100f546424d525b5833",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:23:04.953142+00:00",
+      "endedAt": "2026-10-16T03:23:05.617819+00:00",
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nodeVersion": "22.16.0"
+    },
+    {
+      "name": "architecture",
+      "command": "node scripts/architecture/verify-source-architecture-guards.mjs",
+      "sourceSha": "328535ffa80e6a2a9e819100f546424d525b5833",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:23:05.618119+00:00",
+      "endedAt": "2026-10-16T03:23:05.909758+00:00",
+      "exitCode": 0,
+      "logSha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+      "nodeVersion": "22.16.0"
+    },
+    {
+      "name": "environment-inventory",
+      "command": "node scripts/aistudio/environment.mjs --check",
+      "sourceSha": "328535ffa80e6a2a9e819100f546424d525b5833",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:23:05.910091+00:00",
+      "endedAt": "2026-10-16T03:23:08.905911+00:00",
+      "exitCode": 0,
+      "logSha256": "40fe0d4ad2f425c6b8bc545d3aa0359304863920f517c2d973848ee097b4ba95",
+      "nodeVersion": "22.16.0"
+    },
+    {
+      "name": "secrets",
+      "command": "npm run security:secrets",
+      "sourceSha": "328535ffa80e6a2a9e819100f546424d525b5833",
+      "cleanAtStart": true,
+      "cleanAtEnd": true,
+      "startedAt": "2026-10-16T03:23:08.906176+00:00",
+      "endedAt": "2026-10-16T03:23:10.165522+00:00",
+      "exitCode": 0,
+      "logSha256": "d1da8ca16cf6a41c5f56ea1ef69102f94a27d342ceb54c89db391c41dea2797c",
+      "nodeVersion": "22.16.0"
+    }
+  ],
+  "browserLaunched": false,
+  "databaseConnected": false
+}

@@ -17,3 +17,7 @@ Report commits after the tested source SHA contain evidence/documentation. They 
 ## Follow-up preparation requested by the user
 
 R04/R05 source preparation on `3deef4557f181d6d7a3fd05e959990ac1bbfd36a`: [R04 report](POST28_R04_PREPARATION_2026-10-16.md), [R05 report](POST28_R05_PREPARATION_2026-10-16.md), and [Neon setup guide](../operations/POST28_NEON_R04_R05_PREPARATION.md). This follow-up does not close R00/R01/R02 or start actual R03/R04/R05 execution.
+
+## R06–R09 follow-up
+
+Source preparation and one diagnostic artifact build: [R06](POST28_R06_PREPARATION_2026-10-16.md), [R07](POST28_R07_DIAGNOSTIC_2026-10-16.md), [R08/R09](POST28_R08_R09_PREPARATION_2026-10-16.md). Build evidence belongs to `70e22445f95f2c86bb8155f80ad1aea3fce41982`; HTTP report-policy repair belongs to `328535ffa80e6a2a9e819100f546424d525b5833`. No database or service boot, no browser E2E acceptance, and no stage closure.

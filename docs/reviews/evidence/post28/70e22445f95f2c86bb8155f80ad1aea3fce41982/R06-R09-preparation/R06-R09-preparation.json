@@ -1,0 +1,508 @@
+{
+  "version": 1,
+  "kind": "POST28_R06_R09_SOURCE_PREPARATION",
+  "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+  "cleanSource": true,
+  "R06": {
+    "status": "PREPARED_NOT_EXECUTED",
+    "target": "DB-T",
+    "requires": [
+      "R04/R05 accepted",
+      "live limited application role",
+      "isolated synthetic owner fixtures"
+    ],
+    "caseRequirements": [
+      {
+        "caseId": "CD-001",
+        "owners": [
+          "P11",
+          "P7"
+        ],
+        "expected": "مدينة/منطقة لا تطابق دولة الجامعة أو مقر campus: رفض كتابة/نشر مع حفظ transaction/audit كما يقتضي العقد؛ الاسم المكرر لا يتغلب على ID",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-002",
+        "owners": [
+          "P10",
+          "P11",
+          "P8"
+        ],
+        "expected": "برنامج جامعي ينتسب إلى University/Campus/AcademicUnit صحيحة؛ إدخال campus لجامعة أخرى يرفض؛ جامعة غير منشورة لا تنتج برنامجًا عامًا",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-003",
+        "owners": [
+          "P10",
+          "P8"
+        ],
+        "expected": "MajorLevelProfile يطابق degreeLevelId قبل نشر برنامج؛ رفض profile غائب/مرحلة غير متطابقة والتعامل الصحيح مع retired/unpublished",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-004",
+        "owners": [
+          "P7",
+          "P8",
+          "P9"
+        ],
+        "expected": "Admission international test/variant/version/score تابع للاختبار المنشور وصاحب البرنامج؛ رفض نسخة اختبار أجنبية أو غير منشورة",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-005",
+        "owners": [
+          "P9"
+        ],
+        "expected": "تكرار متطلب اختبار لبرنامج عندما تكون variant/version Nullable ومعاملتان متزامنتان: لا ينتج سجلان صالحان لنفس المفتاح المنطقي؛ فحص unique composite + validator وقفل مناسب",
+        "decisionRefs": [
+          "DEC-06"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-006",
+        "owners": [
+          "P11",
+          "P12"
+        ],
+        "expected": "منحة مرتبطة universityId ببرنامج لجامعة مختلفة ترفض؛ program غير منشور/غير مؤهل لا يمر نتيجة search أو authoring",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-007",
+        "owners": [
+          "P10",
+          "P11",
+          "P12",
+          "P8"
+        ],
+        "expected": "S2 تستهدف BSc-CS وPhD-MED، والبحث BSc+MED يرجع **صفر** وليس S2؛ المقابلة BSc+CS وPhD+MED تعيد S2 وفق عقد الملكية",
+        "decisionRefs": [
+          "DEC-01"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-008",
+        "owners": [
+          "P10",
+          "P11",
+          "P12",
+          "P8"
+        ],
+        "expected": "البحث المركب degree+major+program+university يثبت اقتران الحقول لنفس العرض/العلاقة المعتمدة؛ عدم خلط eligibility بشرط التخصص المقدم",
+        "decisionRefs": [
+          "DEC-01"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-009",
+        "owners": [
+          "P12",
+          "P7"
+        ],
+        "expected": "دولة الدراسة ≠ جنسية المتقدم ≠ دولة الممول؛ تفحص كل خانة وفق معناها دون اشتقاق خفي أو اختزال حقل واحد؛ multi-destination BLOCKED لحين عقده إن لم يكن مدعومًا",
+        "decisionRefs": [
+          "DEC-02"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-010",
+        "owners": [
+          "P11",
+          "P12",
+          "P7",
+          "P7-P21 + P16 CMS"
+        ],
+        "expected": "منحة مصدرها خام/غير محسم/غير متحقق/مسودة لا تظهر كمنشورة ولا عبر graph أو counts أو بطاقات CMS",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-011",
+        "owners": [
+          "P9"
+        ],
+        "expected": "امتحان مطلوب لمنحة أو برنامج: القراءة المعيارية فقط، وغياب/أرشفة الاختبار يمنع الإيهام باستمرار شرط قبول نشط",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-012",
+        "owners": [
+          "P13",
+          "P7"
+        ],
+        "expected": "جدول حالات FX-COURSE-01 الأربعة يشهد معيارًا **واحدًا** بين import mapper وpublication guard وcatalog/major graph؛ لا publish تلقائي؛ لا ادعاء شهادة مجانية بلا دليل",
+        "decisionRefs": [
+          "DEC-03"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-013",
+        "owners": [
+          "P10",
+          "P13",
+          "P8"
+        ],
+        "expected": "رفض CourseAcademicTaxonomyLink معتمد يسحب فورًا إسقاطات TAXONOMY_MAPPING التابعة من نتائج Major وCourse، مع rollback كامل عند فشل audit/outbox",
+        "decisionRefs": [
+          "DEC-05"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-014",
+        "owners": [
+          "P10",
+          "P13",
+          "P8"
+        ],
+        "expected": "علاقة DIRECT_REVIEWED مستقلة تبقى بعد رفض taxonomy آخر؛ لكن إسقاط mapping ملغى لا يستعيد APPROVED دون قرار مراجعة صحيح",
+        "decisionRefs": [
+          "DEC-05"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-015",
+        "owners": [
+          "P06 Import",
+          "P10",
+          "P7",
+          "P8"
+        ],
+        "expected": "إزالة source term أو تغيّر URL/import refresh يوسم resolutions/links/projections القديمة مراجعة ويلغيها من graph؛ لا تتسرب stale cache",
+        "decisionRefs": [
+          "DEC-05"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-016",
+        "owners": [
+          "P10",
+          "P13"
+        ],
+        "expected": "رابط major projection PROPOSED أو REVIEW_REQUIRED أو major غير منشور: لا يظهر في major reverse view؛ approved+published فقط",
+        "decisionRefs": [
+          "DEC-05"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-017",
+        "owners": [
+          "P10",
+          "P13",
+          "P8"
+        ],
+        "expected": "مستوى Major العام مقابل MajorLevelProfile؛ profileId لا يعني فلترًا متاحًا تلقائيًا؛ إذا تقرر دعم facet المستوى اختبره end-to-end وإلا لا يُعرض خيار غير مدعوم",
+        "decisionRefs": [
+          "DEC-04"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-018",
+        "owners": [
+          "P13",
+          "P7"
+        ],
+        "expected": "HeadquartersCountry للمزود الخارجي لا يعامل studyCountry للدورة؛ لغة الدورة canonical وACTIVE، source label وحده لا يكفي",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-019",
+        "owners": [
+          "P06 Import",
+          "P13",
+          "P7",
+          "P8"
+        ],
+        "expected": "provider native key+language version dedup، allow-listed direct URL، redirect/history/provenance، وعدم تحويل import خام إلى publish دون مراجعة",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-026",
+        "owners": [
+          "P10",
+          "P11",
+          "P12",
+          "P13",
+          "P14",
+          "P16",
+          "P17",
+          "P18",
+          "P19",
+          "P20",
+          "P21",
+          "P23 Admin",
+          "P7",
+          "P8",
+          "P9"
+        ],
+        "expected": "إنشاء/تعديل/موافقة/رفض علاقات بواسطة الأدوار الصحيحة؛ رفض caller غير مخوّل/وصول مباشر ويُثبت audit/transaction/outbox",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-028",
+        "owners": [
+          "Event/Worker foundation",
+          "P13",
+          "P14"
+        ],
+        "expected": "Course enrollment/progress/learning-path completion لا يفوض إصدار شهادة خارجي تلقائي؛ completion event→P14 inbox بإصدار واحد idempotent",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-029",
+        "owners": [
+          "P05 Identity/Auth",
+          "P10",
+          "P11",
+          "P12",
+          "P13",
+          "P14",
+          "P15",
+          "P19",
+          "P20"
+        ],
+        "expected": "الطالب A لا يستطيع قراءة/حفظ/تعديل محفوظات الطالب B أو كشف الوثائق والشهادات/الفواتير بالـgraph/public",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-030",
+        "owners": [
+          "P19",
+          "P20",
+          "P7"
+        ],
+        "expected": "الطلب الخدمي يشير إلى finance originReferenceId دون امتلاك دفتر الأستاذ؛ العملة canonical ومعاملات الدفع/العكس بدون double posting",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-035",
+        "owners": [
+          "Event/Worker foundation",
+          "P05 Identity",
+          "P06 Import",
+          "P13"
+        ],
+        "expected": "Import→owner mapping، job lease/outbox retry/replay/crash before/after ack؛ idempotent records وcanonical IDs لا تتغير بالـretry",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-036",
+        "owners": [
+          "P05 EAP",
+          "P05 Identity",
+          "P05 Identity/Auth",
+          "P14"
+        ],
+        "expected": "asset ref/tenant/owner/retention/consent وإلغاء الصلاحية تحت التزامن؛ لا عرض أو تنزيل طالب آخر",
+        "decisionRefs": [],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      },
+      {
+        "caseId": "CD-040",
+        "owners": [
+          "P10",
+          "P21",
+          "P7",
+          "P8"
+        ],
+        "expected": "تغيير Published/Archived/Deprecated للمالك أو parent/reference أثناء استعلام متعدد الصفحات: منع stale grants/old children وخطأ cross-owner، مع pagination consistency",
+        "decisionRefs": [
+          "DEC-07"
+        ],
+        "measuredExecution": false,
+        "ownerRuntimeCommand": null,
+        "expectedRuntimeCount": null
+      }
+    ],
+    "databaseProfiles": [
+      {
+        "profile": "assets",
+        "files": [
+          "packages/infrastructure/tests/asset-platform/PrismaAssetPostgres.database.spec.ts",
+          "packages/infrastructure/tests/asset-platform/PrismaAssetReferenceSerialization.database.spec.ts"
+        ],
+        "minimumDefinitions": 32,
+        "runtimeExecuted": false,
+        "coverage": "Existing profiles cover only their declared files; they do not cover all R06 requirements."
+      },
+      {
+        "profile": "leases",
+        "files": [
+          "packages/infrastructure/tests/background-jobs/PrismaBackgroundJobLease.database.spec.ts",
+          "packages/infrastructure/tests/event-foundation/PrismaTransactionalOutboxLease.database.spec.ts"
+        ],
+        "minimumDefinitions": 2,
+        "runtimeExecuted": false,
+        "coverage": "Existing profiles cover only their declared files; they do not cover all R06 requirements."
+      },
+      {
+        "profile": "persistence",
+        "files": [
+          "packages/infrastructure/tests/database/WholePlatformPersistence.integration.spec.ts"
+        ],
+        "minimumDefinitions": 4,
+        "runtimeExecuted": false,
+        "coverage": "Existing profiles cover only their declared files; they do not cover all R06 requirements."
+      },
+      {
+        "profile": "sections123",
+        "files": [
+          "tests/e2e/sections123/section01.database.spec.ts",
+          "tests/e2e/sections123/section02.database.spec.ts",
+          "tests/e2e/sections123/section03.database.spec.ts"
+        ],
+        "minimumDefinitions": 12,
+        "runtimeExecuted": false,
+        "coverage": "Existing profiles cover only their declared files; they do not cover all R06 requirements."
+      }
+    ],
+    "concurrencyProof": [
+      "two independently identified backend PIDs",
+      "bounded barriers, not arbitrary sleeps",
+      "observed blocking/lease/CAS result",
+      "owner+audit+outbox/receipt commit-or-rollback assertions"
+    ],
+    "missingOwnerRuntimeCoverage": [
+      "finance SQL rollback/replay/parallel approval",
+      "student consent withdrawal and concurrent access",
+      "university/major/scholarship compound relation invariants",
+      "course projection invalidation",
+      "artifact references versus purge lock ordering"
+    ],
+    "accepted": false
+  },
+  "R07": {
+    "status": "DIAGNOSTIC_BUILD_ALLOWED_RUNTIME_BOOT_PENDING",
+    "diagnosticCommand": "node scripts/release/post28-diagnostic-build.mjs /absolute/private/fresh-directory",
+    "requires": [
+      "fresh build exact SHA",
+      "API/web/admin verified tar digests and SBOM",
+      "fresh unpack outside checkout",
+      "Node22/native runtime layer/Prisma engines/external modules",
+      "live approved DB-E and Redis/storage",
+      "trusted TLS and same-source health"
+    ],
+    "staticPresenceIsNotBrowserOrApiBoot": true,
+    "accepted": false
+  },
+  "R08": {
+    "status": "SOURCE_TESTS_ONLY_RUNTIME_PENDING",
+    "target": "separate DB-E or DB-T",
+    "requirements": [
+      "once-only",
+      "duplicates",
+      "reorder",
+      "delay",
+      "crash-restart",
+      "lease-fencing",
+      "dead-letter-alert",
+      "student-privacy",
+      "ledger-invariants"
+    ],
+    "sourceRuntimeTests": [
+      "tests/runtime/runtime-shutdown-drain-runtime.test.mjs",
+      "tests/runtime/runtime-resource-lifecycle-runtime.test.mjs",
+      "tests/runtime/monitoring-required-dependency-runtime.test.mjs"
+    ],
+    "limitation": "Tests use isolated resources and do not establish actual two-worker PostgreSQL/Redis or provider effects.",
+    "accepted": false
+  },
+  "R09": {
+    "status": "PREPARED_NOT_EXECUTED",
+    "relationships": 77,
+    "cases": 42,
+    "domainMatrixCount": 26,
+    "dimensions": [
+      "public-truth",
+      "permission-denial",
+      "owner-isolation",
+      "lifecycle",
+      "locale"
+    ],
+    "requires": [
+      "three built units with actual API/DB and trusted TLS",
+      "owner permission negatives",
+      "canonical fixture IDs",
+      "approved DEC/market/teaching-language scope"
+    ],
+    "interceptedHttpIsNotRuntimeProof": true,
+    "accepted": false
+  },
+  "databaseConnected": false,
+  "providersContacted": false,
+  "productionDecision": "NO_GO"
+}

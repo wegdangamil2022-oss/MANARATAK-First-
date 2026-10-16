@@ -1,0 +1,13 @@
+{
+  "name": "affected-tests",
+  "command": "node --test tests/release/section28.test.mjs tests/release/post28-r07-static-runtime.test.mjs tests/certificates/runtime-bundle.test.mjs tests/remediation/w6-reliability-contract.test.mjs",
+  "sourceSha": "70e22445f95f2c86bb8155f80ad1aea3fce41982",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:18:25.409054+00:00",
+  "endedAt": "2026-10-16T03:18:27.835278+00:00",
+  "exitCode": 0,
+  "logSha256": "db313535d15d3c496eb11322a1832fc23c12685d6a4f4554977b6d3510ccb0b0",
+  "nodeVersion": "22.16.0",
+  "databaseConnected": false
+}

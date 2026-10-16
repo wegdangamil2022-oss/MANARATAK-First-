@@ -1,0 +1,12 @@
+{
+  "name": "architecture",
+  "command": "node scripts/architecture/verify-source-architecture-guards.mjs",
+  "sourceSha": "328535ffa80e6a2a9e819100f546424d525b5833",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T03:23:05.618119+00:00",
+  "endedAt": "2026-10-16T03:23:05.909758+00:00",
+  "exitCode": 0,
+  "logSha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+  "nodeVersion": "22.16.0"
+}
