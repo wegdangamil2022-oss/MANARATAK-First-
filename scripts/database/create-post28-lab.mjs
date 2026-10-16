@@ -95,7 +95,7 @@ try {
   const connection=(label,password)=>{const url=new URL(`postgresql://${targets[label].role}@127.0.0.1:${port}/${targets[label].database}`);url.password=password;url.searchParams.set('schema','public');return url.href;};
   const g=connection(profile.primary,passwords[profile.targets[0].role]),s=connection(profile.secondary,passwords[profile.targets[1].role]);secrets.push(g,s);
   const labEnv={NODE_ENV:'test',POST28_ISOLATED_EXECUTION:'YES',DATABASE_TARGET_CLASS:'DISPOSABLE',POST28_TARGET_CONTRACT_FILE:contractFile,
-    ...(profile.name==='greenfield'?{GREENFIELD_DATABASE_URL:g,GREENFIELD_SHADOW_DATABASE_URL:s}:{UPGRADE_DATABASE_URL:g,UPGRADE_VERIFY_DATABASE_URL:s,POST28_TARGET_LABEL:'DB-U'}),DATABASE_URL:g,DIRECT_URL:g,
+    ...(profile.name==='greenfield'?{GREENFIELD_DATABASE_URL:g,GREENFIELD_SHADOW_DATABASE_URL:s}:{UPGRADE_DATABASE_URL:g,UPGRADE_VERIFY_DATABASE_URL:s,POST28_TARGET_LABEL:'DB-U',POST28_UPGRADE_VERIFY_MUTATION_TARGET:`127.0.0.1:${port}/${targets['DB-V'].database}`}),DATABASE_URL:g,DIRECT_URL:g,
     GREENFIELD_DATABASE_IS_DISPOSABLE:'true',GREENFIELD_SHADOW_DATABASE_IS_DISPOSABLE:'true',
     GREENFIELD_VERIFY_OUTPUT_DIR:path.join(directory,'R04-greenfield'),POST28_APP_PASSWORD:passwords.app,
     DATABASE_PROVISIONING_GATE:'APPROVED',ALLOW_DATABASE_MUTATIONS:'YES',DATABASE_MUTATION_ENVIRONMENT:'test',DATABASE_MUTATION_PURPOSE:'migrate',

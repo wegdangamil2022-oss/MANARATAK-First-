@@ -8,3 +8,11 @@ test('only preprovisioned public schema and pg_trgm are excluded',()=>{
  assert.notEqual(r.originalSha256,r.filteredSha256);
 });
 for(const [name,input,code] of [['invalid','',/TOC_INVALID/],['unknown schema',toc.replace('SCHEMA - public','SCHEMA - secret'),/UNEXPECTED_SCHEMA/],['unknown extension',toc.replaceAll('pg_trgm','dblink'),/UNEXPECTED_EXTENSION/],['missing schema',toc.replace('5; 2615 2200 SCHEMA - public owner\n',''),/INCOMPLETE/],['missing extension',toc.replace(/^.*(?:EXTENSION).*\n/gm,''),/INCOMPLETE/]])test(name,()=>assert.throws(()=>verificationRestoreList(input),code));
+
+test('DB-V restore mutation gate requires its own explicit target',async()=>{
+ const {inspectDatabaseMutationGate}=await import('../../scripts/lib/database-mutation-gate.mjs');
+ const env={NODE_ENV:'test',DATABASE_MUTATION_ENVIRONMENT:'test',DATABASE_PROVISIONING_GATE:'APPROVED',ALLOW_DATABASE_MUTATIONS:'YES',DATABASE_MUTATION_PURPOSE:'maintenance',DATABASE_URL:'postgresql://post28_verifier:synthetic@127.0.0.1:15432/manaratak_post28_upgrade_verify_test',DATABASE_MUTATION_TARGET:'127.0.0.1:15432/manaratak_post28_upgrade_test'};
+ assert.equal(inspectDatabaseMutationGate('DB-V',{allowedPurposes:['maintenance']},env).ok,false);
+ assert.equal(inspectDatabaseMutationGate('DB-V',{allowedPurposes:['maintenance']},{...env,DATABASE_MUTATION_TARGET:undefined}).ok,false);
+ assert.equal(inspectDatabaseMutationGate('DB-V',{allowedPurposes:['maintenance']},{...env,DATABASE_MUTATION_TARGET:'127.0.0.1:15432/manaratak_post28_upgrade_verify_test'}).ok,true);
+});

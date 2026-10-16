@@ -21,6 +21,7 @@ try{
  if(lab===root||lab.startsWith(root+path.sep))fail('POST28_LAB_SECRETS_OUTSIDE_CHECKOUT_REQUIRED');
  const contract=JSON.parse(fs.readFileSync(contractFile,'utf8'));requirePost28LocalExecution(contract);
  requireDatabaseMutationGate('post28 isolated upgrade backup verification',{allowedPurposes:['maintenance']});
+ if(mode==='verify')requireDatabaseMutationGate('post28 explicit DB-V restore authorization',{allowedPurposes:['maintenance']},{...process.env,DATABASE_URL:process.env.UPGRADE_VERIFY_DATABASE_URL,DIRECT_URL:process.env.UPGRADE_VERIFY_DATABASE_URL,DATABASE_MUTATION_TARGET:process.env.POST28_UPGRADE_VERIFY_MUTATION_TARGET});
  if(!contract.targets?.['DB-U']||!contract.targets?.['DB-V']||contract.targets['DB-G']||contract.targets['DB-S'])fail('POST28_UPGRADE_PROFILE_REQUIRED');
  const declarations=[{label:'DB-U',url:process.env.UPGRADE_DATABASE_URL},{label:'DB-V',url:process.env.UPGRADE_VERIFY_DATABASE_URL}];
  await preflightTargets(contract,declarations,process.env,sourceSha,readDatabaseIdentity);

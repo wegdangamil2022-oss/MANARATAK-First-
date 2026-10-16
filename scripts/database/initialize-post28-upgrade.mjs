@@ -33,6 +33,8 @@ try{
  const schemaBytes=read('packages/infrastructure/prisma/schema.prisma');
  fs.writeFileSync(path.join(directory,'source.schema.prisma'),schemaBytes,{mode:0o600});
  if(digest(schemaBytes)!==plan.before.schemaSha256)fail('POST28_UPGRADE_SCHEMA_HASH_MISMATCH');
+ // Resolve the installed, version-checked dependency tree without network auto-install.
+ fs.symlinkSync(path.join(root,'node_modules'),path.join(directory,'node_modules'),'dir');
  const clientDirectory=path.join(directory,'previous-client');
  const schema=schemaBytes.toString('utf8').replace(/generator client\s*\{/,match=>match+'\n  output = '+JSON.stringify(clientDirectory));
  if(schema===schemaBytes.toString('utf8'))fail('POST28_UPGRADE_CLIENT_GENERATOR_REQUIRED');
@@ -49,7 +51,7 @@ try{
  const redact=text=>String(text).replaceAll(process.env.UPGRADE_DATABASE_URL,'[REDACTED]').replaceAll(decodeURIComponent(primary.password),'[REDACTED]').replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]');
  const checks=[];
  for(const args of [['validate'],['generate'],['migrate','deploy'],['migrate','status']]){
-  const startedAt=new Date().toISOString();const result=spawnSync(process.execPath,['node_modules/prisma/build/index.js',...args,'--schema='+schemaFile],{env:process.env,encoding:'utf8',timeout:120000,maxBuffer:4*1024*1024});
+  const startedAt=new Date().toISOString();const result=spawnSync(process.execPath,['node_modules/prisma/build/index.js',...args,'--schema='+schemaFile],{env:{...process.env,PRISMA_GENERATE_SKIP_AUTOINSTALL:'1'},encoding:'utf8',timeout:120000,maxBuffer:4*1024*1024});
   const log=path.join(directory,args.join('-')+'.log');fs.writeFileSync(log,redact(result.stdout)+redact(result.stderr),{mode:0o600});
   checks.push({args,startedAt,finishedAt:new Date().toISOString(),exitCode:result.status,privateLog:log,logSha256:digest(fs.readFileSync(log))});
   fs.writeFileSync(path.join(directory,'checks.json'),JSON.stringify(checks,null,2)+'\n',{mode:0o600});
