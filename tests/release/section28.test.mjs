@@ -178,6 +178,7 @@ function healthyFetch(overrides = {}) {
           },
         },
       );
+    if(new URL(url).pathname.endsWith('.js'))return new Response('export {};',{headers:{'content-type':'application/javascript'}});
     const unit = url.includes('admin') ? 'admin' : 'web';
     if (url.endsWith('/health/build'))
       return new Response(
@@ -234,12 +235,14 @@ test('FSA008 stamp matches exact static unit and source', () => {
   const root = temp();
   fs.writeFileSync(
     path.join(root, 'index.html'),
-    `<meta name="manaratak-build-sha" content="${sha}">`,
+    `<meta name="manaratak-build-sha" content="${sha}"><div id="root"></div><script src="/assets/app.js"></script>`,
   );
   fs.writeFileSync(
     path.join(root, 'manaratak-build.json'),
     JSON.stringify({ version: 1, unit: 'web', sourceSha: sha }),
   );
+  fs.mkdirSync(path.join(root,'assets'));
+  fs.writeFileSync(path.join(root,'assets/app.js'),'export {};');
   assert.equal(inspectStaticBuild(root, 'web', sha).status, 'BUILT');
   assert.equal(inspectStaticBuild(root, 'admin', sha).status, 'UNBUILT');
   assert.equal(inspectStaticBuild(root, 'web', 'b'.repeat(40)).status, 'UNBUILT');
