@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import net from 'node:net';
+import {createNewTransactionTarget} from './post28-new-transaction-target.mjs';
 import {localLabProfile} from './post28-lab-profile.mjs';
 import {randomBytes,randomUUID} from 'node:crypto';
 import {execFileSync,spawnSync,spawn} from 'node:child_process';
@@ -23,6 +24,7 @@ const quote=value=>"'"+String(value).replaceAll("'","''")+"'";
 try {
   if(process.env.POST28_LOCAL_LAB_CREATE!=='YES' || !['test','development'].includes(process.env.NODE_ENV) ||
       Number(process.versions.node.split('.')[0])!==22)throw new Error('POST28_LOCAL_LAB_CREATION_NOT_AUTHORIZED');
+  if(process.env.POST28_LOCAL_LAB_PARENT_STATE){await createNewTransactionTarget(process.env.POST28_LOCAL_LAB_PARENT_STATE);process.exit(0);}
   const profile=localLabProfile(process.env.POST28_LOCAL_LAB_PROFILE??'greenfield');
   const memoryStorage=process.env.POST28_LOCAL_LAB_STORAGE==='tmpfs';
   if(process.env.POST28_LOCAL_LAB_STORAGE&&!['volume','tmpfs'].includes(process.env.POST28_LOCAL_LAB_STORAGE))throw new Error('POST28_LAB_STORAGE_INVALID');
