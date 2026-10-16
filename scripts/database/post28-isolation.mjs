@@ -3,7 +3,7 @@ import {validateNeonPreflightDeclaration,requireDistinctNeonDeclarations,
 
 const SHA = /^[0-9a-f]{40}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const LABELS = new Set(['DB-G', 'DB-S', 'DB-U', 'DB-T', 'DB-E', 'DB-L']);
+const LABELS = new Set(['DB-G', 'DB-S', 'DB-U', 'DB-V', 'DB-T', 'DB-E', 'DB-L']);
 const fail = code => { throw new Error(code); };
 
 export function validateTargetDeclaration(contract, label, rawUrl, env, sourceSha, options = {}) {
@@ -34,7 +34,7 @@ export function validateTargetDeclaration(contract, label, rawUrl, env, sourceSh
   if (database !== expected.database || role !== expected.role ||
       Number(url.port || 5432) !== expected.port || expected.host !== '127.0.0.1')
     fail('POST28_DECLARED_TARGET_MISMATCH');
-  if ((label === 'DB-G' && expected.roleKind !== 'MIGRATION') ||
+  if ((['DB-G','DB-U','DB-V'].includes(label) && expected.roleKind !== 'MIGRATION') ||
       (label === 'DB-S' && expected.roleKind !== 'SHADOW') ||
       (['DB-T', 'DB-E', 'DB-L'].includes(label) && expected.roleKind !== 'APPLICATION'))
     fail('POST28_TARGET_ROLE_KIND_MISMATCH');

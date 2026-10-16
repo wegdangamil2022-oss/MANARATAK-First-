@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {preflightDeclarations} from './post28-lab-profile.mjs';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
@@ -99,9 +100,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       const branch=execFileSync('git',['branch','--show-current'],{encoding:'utf8'}).trim();
       if(branch!==options.registry.git.workingBranch)throw new Error('POST28_NEON_GIT_BRANCH_MISMATCH');
     }
-    const declarations = process.argv.includes('--pair')
-      ? [{label:'DB-G',url:process.env.GREENFIELD_DATABASE_URL},{label:'DB-S',url:process.env.GREENFIELD_SHADOW_DATABASE_URL}]
-      : [{label:process.env.POST28_TARGET_LABEL,url:process.env.DATABASE_URL}];
+    const declarations = preflightDeclarations(process.argv.slice(2),process.env);
     if(contract.kind==='POST28_NEON_TEST_DECLARATIONS') {
       let policy;
       try{policy=JSON.parse(fs.readFileSync('/etc/codex/network-policy.json','utf8'));}

@@ -192,6 +192,50 @@
         "POST28_SEED_REAPPLY_CHANGED_DATABASE"
       ],
       "review": "R04 local execution authorized by user request to complete and close R4, 2026-10-16; no production source approval or DEC change"
+    },
+    "scripts/database/initialize-post28-upgrade.mjs": {
+      "purpose": "Deploy exact historical prefix on fresh local DB-U with matching previous generated client",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22; local disposable U/V contract bound to clean SHA/run; no cloud or DB-R"
+      ],
+      "gate": "Limited roles; exact identity and separate targets; no existing target overwrite; private artifacts outside Git",
+      "requiredSourceMarkers": [
+        "preflightTargets",
+        "requireDatabaseMutationGate",
+        "requireEmpty:true",
+        "POST28_R04_ACCEPTANCE_STALE"
+      ],
+      "review": "POST28 local R05 preparation 2026-10-16; no R05 acceptance implied"
+    },
+    "scripts/database/verify-post28-upgrade-backup.mjs": {
+      "purpose": "Custom backup of DB-U and structural verification on new isolated DB-V only",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22; local disposable U/V contract bound to clean SHA/run; no cloud or DB-R"
+      ],
+      "gate": "Limited roles; exact identity and separate targets; no existing target overwrite; private artifacts outside Git",
+      "requiredSourceMarkers": [
+        "preflightTargets",
+        "requireDatabaseMutationGate",
+        "--single-transaction",
+        "requireEmpty:true",
+        "POST28_BACKUP_CONTAINER_IDENTITY_MISMATCH"
+      ],
+      "review": "POST28 local R05 preparation 2026-10-16; no R05 acceptance implied"
+    },
+    "scripts/database/prepare-post28-upgrade.mjs": {
+      "purpose": "Read Git schema and package lock metadata for exact historical migration prefix and previous Prisma version",
+      "access": "reference-only",
+      "environment": [
+        "Source-only Git inventory; no database credentials or client construction"
+      ],
+      "gate": "Read-only Git blobs; exact immutable prefix; no runtime acceptance",
+      "requiredSourceMarkers": [
+        "POST28_UPGRADE_IMMUTABLE_MIGRATION_PREFIX_REQUIRED",
+        "runtimeAcceptance:false"
+      ],
+      "review": "POST28 local R05 2026-10-16"
     }
   }
 }

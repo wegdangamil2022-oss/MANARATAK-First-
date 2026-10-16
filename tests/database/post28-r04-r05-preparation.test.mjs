@@ -20,8 +20,9 @@ for(const [name,mutate] of [
   ['invalid time',rows=>{rows[0].started_at='invalid';}],
   ['overlapping execution',rows=>{rows[1].started_at=rows[0].started_at;}],
 ])test(`ledger refuses ${name}`,()=>{const rows=structuredClone(ledger);mutate(rows);assert.throws(()=>verifyMigrationLedger(inventory,rows));});
-const plan={version:1,runId:'11111111-1111-4111-8111-111111111111',beforeSourceSha:'a'.repeat(40),afterSourceSha:'b'.repeat(40),requiredModels:['Invoice','Binding'],requiredInvariants:['receipts','relationships']};
-const before={version:1,kind:'POST28_UPGRADE_MEASUREMENT',runId:plan.runId,sourceSha:plan.beforeSourceSha,target:{label:'DB-U',serverIdentity:'123',databaseOid:'456'},sessionReplicationRole:'origin',schemaSha256:'c'.repeat(64),migrationChainSha256:'d'.repeat(64),counts:{Invoice:'9007199254740993',Binding:'2'},invariants:{receipts:'e'.repeat(64),relationships:'f'.repeat(64)},financialTotals:[{accountId:'synthetic',currency:'USD',scale:2,balanceUnits:'9007199254740993'}]};
+const target={label:'DB-U',host:'127.0.0.1',port:15432,database:'manaratak_post28_upgrade_test',role:'post28_upgrade',roleKind:'MIGRATION',serverIdentity:'123',databaseOid:'456',markerSha256:'1'.repeat(64)};
+const plan={version:2,expectedTarget:target,beforeSchemaSha256:'c'.repeat(64),afterSchemaSha256:'c'.repeat(64),beforeMigrationChainSha256:'d'.repeat(64),afterMigrationChainSha256:'d'.repeat(64),runId:'11111111-1111-4111-8111-111111111111',beforeSourceSha:'a'.repeat(40),afterSourceSha:'b'.repeat(40),requiredModels:['Invoice','Binding'],requiredInvariants:['receipts','relationships']};
+const before={version:1,kind:'POST28_UPGRADE_MEASUREMENT',runId:plan.runId,sourceSha:plan.beforeSourceSha,target:structuredClone(target),sessionReplicationRole:'origin',schemaSha256:'c'.repeat(64),migrationChainSha256:'d'.repeat(64),counts:{Invoice:'9007199254740993',Binding:'2'},invariants:{receipts:'e'.repeat(64),relationships:'f'.repeat(64)},financialTotals:[{accountId:'synthetic',currency:'USD',scale:2,balanceUnits:'9007199254740993'}]};
 const after={...structuredClone(before),sourceSha:plan.afterSourceSha};
 test('upgrade comparison handles exact integer money above JS safe range without declaring acceptance',()=>{
   const result=verifyUpgradePreservation(plan,before,after);assert.equal(result.runtimeAcceptance,false);assert.equal(result.models,2);
@@ -101,3 +102,15 @@ test('Neon cannot hide the same branch/database behind two endpoints',async()=>{
   assert.throws(()=>requireDistinctNeonDeclarations(a,{...a,endpointId:'ep-other',directHost:'ep-other.us-east-2.aws.neon.tech'}));
   assert.doesNotThrow(()=>requireDistinctNeonDeclarations(a,{...a,database:'manaratak_post28_shadow_test'}));
 });
+
+for(const field of ['beforeSchemaSha256','afterSchemaSha256','beforeMigrationChainSha256','afterMigrationChainSha256']){
+ test('upgrade refuses missing expected '+field,()=>{const p=structuredClone(plan);delete p[field];assert.throws(()=>verifyUpgradePreservation(p,before,after),/EXPECTED_DIGESTS_REQUIRED/);});
+ test('upgrade refuses substituted expected '+field,()=>{const p=structuredClone(plan);p[field]='f'.repeat(64);assert.throws(()=>verifyUpgradePreservation(p,before,after),/EXPECTED_DIGEST_MISMATCH/);});
+}
+test('matching tampered targets before and after cannot override the plan',()=>{
+ const a=structuredClone(before),b=structuredClone(after);a.target.databaseOid=b.target.databaseOid='999';
+ assert.throws(()=>verifyUpgradePreservation(plan,a,b),/EXPECTED_TARGET_MISMATCH/);
+});
+for(const [field,value] of [['host','remote.example'],['role','post28_bootstrap'],['roleKind','APPLICATION'],['label','DB-R'],['markerSha256',null],['database','manaratak_post28_restore_test']])
+ test('upgrade expected target rejects '+field+':'+value,()=>{const p=structuredClone(plan);p.expectedTarget[field]=value;assert.throws(()=>verifyUpgradePreservation(p,before,after),/EXPECTED_TARGET_REQUIRED/);});
+test('old plans without pinned identities and digests cannot execute comparison',()=>assert.throws(()=>verifyUpgradePreservation({...plan,version:1},before,after),/PLAN_INCOMPLETE/));

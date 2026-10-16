@@ -17,16 +17,28 @@ function financialRows(rows) {
   }).sort((a,b)=>a.id.localeCompare(b.id));
 }
 export function verifyUpgradePreservation(plan,before,after) {
-  if(plan?.version!==1||!uuid.test(plan.runId??'')||!sha.test(plan.beforeSourceSha??'')||!sha.test(plan.afterSourceSha??'')||
+  if(plan?.version!==2||!uuid.test(plan.runId??'')||!sha.test(plan.beforeSourceSha??'')||!sha.test(plan.afterSourceSha??'')||
       !Array.isArray(plan.requiredModels)||!plan.requiredModels.length||new Set(plan.requiredModels).size!==plan.requiredModels.length||
       !Array.isArray(plan.requiredInvariants)||!plan.requiredInvariants.length||new Set(plan.requiredInvariants).size!==plan.requiredInvariants.length)
     fail('POST28_UPGRADE_PLAN_INCOMPLETE');
+  for(const name of ['beforeSchemaSha256','afterSchemaSha256','beforeMigrationChainSha256','afterMigrationChainSha256'])
+    if(!hash.test(plan[name]??''))fail('POST28_UPGRADE_EXPECTED_DIGESTS_REQUIRED');
+  const target=plan.expectedTarget;
+  if(target?.label!=='DB-U'||target.host!=='127.0.0.1'||!Number.isInteger(target.port)||target.port<1024||target.port>65535||
+      !/^[1-9][0-9]*$/.test(target.serverIdentity??'')||!/^[1-9][0-9]*$/.test(target.databaseOid??'')||
+      !/^manaratak_post28_[a-z0-9_]+_test$/.test(target.database??'')||/prod|production|live|restore/.test(target.database)||
+      !/^post28_[a-z0-9_]+$/.test(target.role??'')||/bootstrap|postgres|admin/.test(target.role)||
+      target.roleKind!=='MIGRATION'||!hash.test(target.markerSha256??''))fail('POST28_UPGRADE_EXPECTED_TARGET_REQUIRED');
   for(const [snapshot,expectedSha] of [[before,plan.beforeSourceSha],[after,plan.afterSourceSha]]) {
     if(snapshot?.version!==1||snapshot.kind!=='POST28_UPGRADE_MEASUREMENT'||snapshot.runId!==plan.runId||
         snapshot.sourceSha!==expectedSha||snapshot.target?.label!=='DB-U'||
         !/^[1-9][0-9]*$/.test(snapshot.target.serverIdentity??'')||!/^[1-9][0-9]*$/.test(snapshot.target.databaseOid??'')||
         snapshot.sessionReplicationRole!=='origin'||!hash.test(snapshot.schemaSha256??'')||!hash.test(snapshot.migrationChainSha256??''))
       fail('POST28_UPGRADE_MEASUREMENT_IDENTITY_INVALID');
+    if(snapshot.schemaSha256!==plan[snapshot===before?'beforeSchemaSha256':'afterSchemaSha256']||
+        snapshot.migrationChainSha256!==plan[snapshot===before?'beforeMigrationChainSha256':'afterMigrationChainSha256'])
+      fail('POST28_UPGRADE_EXPECTED_DIGEST_MISMATCH');
+    if(!isDeepStrictEqual(snapshot.target,plan.expectedTarget))fail('POST28_UPGRADE_EXPECTED_TARGET_MISMATCH');
     if(!sameKeys(snapshot.counts,plan.requiredModels)||!sameKeys(snapshot.invariants,plan.requiredInvariants))
       fail('POST28_UPGRADE_PROOF_SET_CHANGED');
     if(Object.values(snapshot.counts).some(n=>typeof n!=='string'||!/^(0|[1-9][0-9]*)$/.test(n))||

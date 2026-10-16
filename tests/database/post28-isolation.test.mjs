@@ -166,3 +166,23 @@ test('actual Vitest discovery and JSON report identities agree with the case-cou
     assert.equal(verifySuiteResults('leases',rows,actual,root).passed,8);
   } finally {fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('DB-U requires the limited migration role kind before any live probe',async()=>{
+ const upgradeUrl=url.replaceAll('post28_migrator','post28_upgrade').replace('greenfield_test','upgrade_test');
+ for(const roleKind of ['APPLICATION','SHADOW','INSPECTOR']){
+  const c={...contract,targets:{...contract.targets,'DB-U':{...target,database:'manaratak_post28_upgrade_test',role:'post28_upgrade',roleKind}}};
+  let reads=0;await assert.rejects(preflightTargets(c,[{label:'DB-U',url:upgradeUrl}],env,sha,async()=>{reads++;return live;}),/ROLE_KIND_MISMATCH/);assert.equal(reads,0);
+ }
+ const c={...contract,targets:{...contract.targets,'DB-U':{...target,database:'manaratak_post28_upgrade_test',role:'post28_upgrade',roleKind:'MIGRATION'}}};
+ assert.equal(validateTargetDeclaration(c,'DB-U',upgradeUrl,env,sha).roleKind,'MIGRATION');
+});
+
+test('DB-V requires the limited migration role kind before any live probe',async()=>{
+ const verifyUrl=url.replaceAll('post28_migrator','post28_verifier').replace('greenfield_test','upgrade_verify_test');
+ for(const roleKind of ['APPLICATION','SHADOW','INSPECTOR']){
+  const c={...contract,targets:{...contract.targets,'DB-V':{...target,database:'manaratak_post28_upgrade_verify_test',role:'post28_verifier',roleKind}}};
+  let reads=0;await assert.rejects(preflightTargets(c,[{label:'DB-V',url:verifyUrl}],env,sha,async()=>{reads++;return live;}),/ROLE_KIND_MISMATCH/);assert.equal(reads,0);
+ }
+ const c={...contract,targets:{...contract.targets,'DB-V':{...target,database:'manaratak_post28_upgrade_verify_test',role:'post28_verifier',roleKind:'MIGRATION'}}};
+ assert.equal(validateTargetDeclaration(c,'DB-V',verifyUrl,env,sha).roleKind,'MIGRATION');
+});
