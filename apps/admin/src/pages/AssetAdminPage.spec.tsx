@@ -32,6 +32,8 @@ describe('asset workspace bilingual contract', () => {
     expect(html).not.toContain('asset_text_');
     expect(html).toContain('Asset version history');
     expect(html).toContain('Archive file');
-    expect(html).toContain('No asset');
+    // Without the reuse permission, the picker deliberately hides selectable assets.
+    expect(html).toContain('Asset selection requires reuse permission.');
+    expect(html).not.toContain('Asset selection requires reuse permission. ID:');
   });
 });
