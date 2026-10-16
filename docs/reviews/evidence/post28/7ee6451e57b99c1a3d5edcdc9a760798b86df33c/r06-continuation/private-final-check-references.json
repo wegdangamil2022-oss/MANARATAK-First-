@@ -1,0 +1,111 @@
+{
+  "codeHead": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+  "note": "Source diagnostics before freeze retain their original timing; safe documentation staged during delivery checks. No DB run attributed to this document commit.",
+  "logs": [
+    {
+      "name": "final-all-secrets.log",
+      "bytes": 40,
+      "sha256": "b0bffd52e2c9fa10802b83bc32ff2506ac444d825fd6d5f0160aabcd01278a71",
+      "modifiedAtEpoch": 1792173392.0978706
+    },
+    {
+      "name": "final-all-organization.log",
+      "bytes": 440,
+      "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "modifiedAtEpoch": 1792173395.073887
+    },
+    {
+      "name": "final-all-env.log",
+      "bytes": 79,
+      "sha256": "c12b3e207960f88183c712a7d7f17ec19e397d91b6c601e05317bffb653b3483",
+      "modifiedAtEpoch": 1792173395.1018875
+    },
+    {
+      "name": "final-all-architecture.log",
+      "bytes": 245,
+      "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+      "modifiedAtEpoch": 1792173395.3818889
+    },
+    {
+      "name": "final-all-quality.log",
+      "bytes": 185,
+      "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+      "modifiedAtEpoch": 1792173398.1699038
+    },
+    {
+      "name": "staged-secrets.log",
+      "bytes": 40,
+      "sha256": "55327bd4815eae3b33905495687e39cdb45fb054836904186354e58e5d98fe76",
+      "modifiedAtEpoch": 1792173414.5539856
+    },
+    {
+      "name": "staged-organization.log",
+      "bytes": 440,
+      "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "modifiedAtEpoch": 1792173417.6540003
+    },
+    {
+      "name": "provisioning-commands.log",
+      "bytes": 5074,
+      "sha256": "3eaffb81395edb05b6a0d554b8eef066f5e3612005dbb57610e947abf1c72c77",
+      "modifiedAtEpoch": 1792173164.8004282
+    },
+    {
+      "name": "commands-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modifiedAtEpoch": 1792173153.0363262
+    },
+    {
+      "name": "rollback-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modifiedAtEpoch": 1792173261.309131
+    },
+    {
+      "name": "selection-format-tests.log",
+      "bytes": 1010,
+      "sha256": "106240cfe7d87c15cf0a26711d8e1af0bc5733f5e92c594c0c1948dbaed813bc",
+      "modifiedAtEpoch": 1792172849.432
+    },
+    {
+      "name": "selection-tests.log",
+      "bytes": 8293,
+      "sha256": "80970affd3d39a037e9fa96150fda39be5e95cc9b4c704f233380e42222d18f4",
+      "modifiedAtEpoch": 1792172732.2007551
+    },
+    {
+      "name": "build-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "modifiedAtEpoch": 1792172383.7332437
+    },
+    {
+      "name": "affected-source.log",
+      "bytes": 1375,
+      "sha256": "a6794726a8684dd089dfddeaf3b61437139ddb479f36a84fffdc749845c5cfce",
+      "modifiedAtEpoch": 1792172369.4571784
+    },
+    {
+      "name": "projection-after.log",
+      "bytes": 204,
+      "sha256": "934a361318dd363b3af0e78b6dd6bdde3cf96de347a18571b8fb9c3bc17e3df6",
+      "modifiedAtEpoch": 1792172382.6572385
+    },
+    {
+      "name": "section27.log",
+      "bytes": 14270,
+      "sha256": "04a4e0f35bf7ae95bfeadd8d4874990c5d668a7a132af4e7f7064235d3ff4a4d",
+      "modifiedAtEpoch": 1792172383.7292435
+    }
+  ],
+  "sourceQuality": "PASS",
+  "sourceArchitecture": "PASS",
+  "environmentContract": "PASS_59_REQUIRED_KEYS",
+  "stagedSecrets": "PASS_5593_FILES",
+  "organization": "PASS",
+  "build": "DOMAIN_APPLICATION_INFRASTRUCTURE_PASS",
+  "newTestAndRunnerLint": "ZERO_ERRORS_ZERO_WARNINGS",
+  "legacyAffectedCmsLint": "ZERO_ERRORS_FIVE_EXISTING_ANY_WARNINGS",
+  "prismaSchemaAndMigrationChanges": false
+}

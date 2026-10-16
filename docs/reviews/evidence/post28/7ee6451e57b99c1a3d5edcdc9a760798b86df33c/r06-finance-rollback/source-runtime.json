@@ -1,0 +1,17 @@
+{
+  "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+  "branch": "fix/post28-ci-environment-inventory-20261016",
+  "tree": "ba2e481f09ab515978b88dfa177a9f251b1ee614",
+  "lockSha256": "75269332ee9c7c5b5b66b753a5ac5e94427668cd27b1db20b26291499306b4ee",
+  "schemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+  "node": "22.16.0",
+  "prisma": "5.22.0",
+  "generatedClientSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+  "runId": "a36db469-f266-4264-9ab3-1b5e508a312b",
+  "port": 15437,
+  "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+  "containerId": "9555316c6be7d0cc87e18a98c7bee47fef6fc2ae7dfc7cacff1abbd4db65aa34",
+  "startedAtEpochMs": 1792173308646,
+  "assertionEndEpochMs": 1792173313296.9307,
+  "fixture": "unique synthetic UUID owner namespace; no production data; actual transactional repositories and audit/outbox"
+}

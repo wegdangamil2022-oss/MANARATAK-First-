@@ -1,6 +1,6 @@
 # POST28 continuation handoff — 2026-10-16
 
-> أحدث استكمال:119 حالة PostgreSQL مختلفة ناجحة؛ R06 PARTIAL وR05 BLOCKED. تفاصيل العلاقات وHTTP واستهلاك الاعتماد وحدود التشغيل في [تقرير الاستكمال](POST28_R06_OWNER_RELATIONS_HTTP_FINANCE_2026-10-16.md). لا تجمع إعادة الحالات7 أو الاستبعادات13 مع العدد.
+> أحدث استكمال:127 حالة PostgreSQL مختلفة ناجحة؛ R06 PARTIAL وR05 BLOCKED. تفاصيل العلاقات وHTTP واستهلاك الاعتماد وحدود التشغيل في [تقرير الاستكمال](POST28_R06_OWNER_RELATIONS_HTTP_FINANCE_2026-10-16.md). لا تجمع إعادة الحالات7 أو الاستبعادات13 مع العدد.
 
 ## Repository and environment
 - Repository: https://github.com/wegdangamil2022-oss/MANARATAK-First-

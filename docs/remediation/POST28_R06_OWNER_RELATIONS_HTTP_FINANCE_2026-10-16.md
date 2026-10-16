@@ -8,7 +8,7 @@
 
 ## النتيجة والأعداد غير المكررة
 
-أضيفت **34 حالة PostgreSQL مختلفة ناجحة**:20 علاقات و14 HTTP/مالية. التراكمي **119=85+34**. هذه حصيلة أدلة متعددة SHAs، وليست قبولًا كاملًا لـR06 أو ادعاء بأن مجموعة14 نجحت كلها في تشغيل واحد على SHA واحد.
+أضيفت **42 حالة PostgreSQL مختلفة ناجحة**:20 علاقات و14 HTTP/مالية و8 أوامر علاقات ذرية. التراكمي **127=85+42**. هذه حصيلة أدلة متعددة SHAs، وليست قبولًا كاملًا لـR06 أو ادعاء بأن مجموعة14 نجحت كلها في تشغيل واحد على SHA واحد.
 
 | SHA التشغيل | المجموعة | المكتشف | المنفذ | الناجح | الفاشل | المتخطى |
 |---|---|---:|---:|---:|---:|---:|
@@ -17,6 +17,9 @@
 |نفس SHA|university-relations، إعادة متأثرة|7|7|7|0|0|
 |`293b2eee2514b29c91a2d6f8ad3a35353cab9454`|http-finance|14|14|13|1|0|
 |`f14ed30f667715b309292bf113dc09e48a6d63b2`|http-finance، حالة واحدة محددة بالاسم|14 في الجرد؛1 محددة|1|1|0|0 داخل المحددة؛13 مستبعدة صراحةً|
+|`ea2286d37a7c7b32b9bbde03d69c43aa736252b0`|relation-commands|8|8|8|0|0|
+|`7ee6451e57b99c1a3d5edcdc9a760798b86df33c`|relation-commands، تقوية إثبات rollback|8 في الجرد؛1 محددة|1|1|0|0 داخل المحددة؛7 مستبعدة|
+|نفس SHA|http-finance، تقوية إثبات rollback|14 في الجرد؛1 محددة|1|1|0|0 داخل المحددة؛13 مستبعدة|
 
 حالات الجولة الأولى16 داخلة في20؛والسبع السابقة داخلة في85؛ولا تضيف أي منهما عددًا جديدًا. حالات HTTP الناجحة13 محفوظة علىSHAها، ثم نجحت الحالة المصححة منفردة علىSHA لاحق. تقرير Vitest الخام للأخيرة يحوي14 تعريفًا:1 passed و13 skipped، وnumPendingTests=13؛هذه استبعادات اختيار معلنة وليست نجاحات أو اكتمال profile.
 
@@ -38,7 +41,7 @@
 - validator القبول الحقيقي معPostgreSQL يقبل test/variant/version متطابقة،ويرفض النسخ والأنواع الأجنبية،والنسخة الافتراضية الأجنبية،والاختبار غير العام،والنسخDRAFT/SUPERSEDED،والدرجة101 خارج مقياس0…100 المنشور الصناعي؛75 مقبولة من المقياس نفسه،دون اختراع حدود اختبار حقيقي.
 - `ScholarshipStudentApplicationTrackerGateway` مع`PrismaScholarshipRepository` الحقيقيين يقبل دورة منشورة بنسخة تخص المنحة نفسها؛يرفض نسخة منحة أخرى ودورة منحة أخرى والنسخ القديمةSUPERSEDED والدورة المستقبلية/المنتهية والمالك المسحوب. زرعت الروابط الأجنبية مباشرة كـnegative fixtures لإثبات أنFK وحدها لا تكفي؛ليس ذلك أمر تأليف مالك ناجحًا.
 
-لم يُختبر كل publish workflow أوتزامن تحديث روابط الجامعة أوأثر أرشفة parent بعد ربطه عبر صفحات متعددة؛لا اعتماد ضمني لـDEC-07. رفض المؤرشف عند التأليف مثبت،ولا نستنتج منه سياسة جديدة لمعالجة جميع الروابط التاريخية. المنحة ودورتها لا تعني اجتياز اقترانdegree+major+program فيCD-007/008.
+لم يُختبر كل publish workflow أوتزامن تحديث روابط الجامعة أوأثر أرشفة parent بعد ربطه عبر صفحات متعددة؛لا اعتماد لقرارات DEC أو ضمان لاتساق الصفحات من هذه الحالات. رفض المؤرشف عند التأليف مثبت،ولا نستنتج منه سياسة جديدة لمعالجة جميع الروابط التاريخية. المنحة ودورتها لا تعني اجتياز اقترانdegree+major+program فيCD-007/008.
 
 ## HTTP والـgraph —8 حالات
 
@@ -60,9 +63,26 @@
 
 لا تثبت هذه الحالات payment/refund/settlement ناجحة،أوretry ناجحًا لنفس أمر تفعيلFX بعد الاستهلاك،أوصلاحياتFinance Admin عبرHTTP. لاfee policy مستعملة،والregistries الخارجية فارغة. يبقى مسارrefund والتسوية مرتبطًا بدليلgateway وattestation مصرحين؛لم نخترع provider ناجحًا أوأثرًا ماليًا خارجيًا.
 
+## أوامر العلاقات الذرية —8 حالات إضافية
+
+استُعمل `AdminUniversityUseCases` مع `PrismaUniversityRepository` و`AtomicDomainMutationCoordinator` و`AtomicAuditedOutboxMutationExecutor` و`PrismaAtomicPersistenceUnitOfWork` ومستودعي audit/outbox الحقيقيين:
+
+1. حفظ البرنامج والمقر ومتطلب اختبار بـvariant/version=NULL مع audit/outbox وزيادة revision في معاملة واحدة.
+2. رفض متطلبين بالمفتاح المنطقي نفسه داخل الطلب، دون كتابة أو زيادة revision.
+3. اتصالان مستقلان يعدلان البرنامج بالـrevision نفسها:نجاح واحد،ورفض الآخر بـ`UNIVERSITY_STALE_REVISION`،ومتطلب واحد فقط حتى مع الحقلينNULL.
+4. فشل PostgreSQL عندoutbox أعاد البرنامج وروابط المقر والمتطلب والتدقيق وrevision كاملة.
+5. رفض actor أوreason أوrevision مفقودة دون كتابة.
+6. مستودع المنح الحقيقي يستنتج الجامعة الصحيحة من مالك البرنامج؛يحفظ version وcycle بحالةDRAFT ولا يجعل المنحة عامة. بقيcycle.versionId=NULL في مسار الإنشاء القائم،ولم نغير عقده.
+7. رفض ربط منحة بجامعة غير جامعة البرنامج قبل إنشاء أي منحة.
+8. رفض تأليف الرابط بعد أرشفة البرنامج أوتحويل نسخة تخصصه الفعلية إلىDRAFT،دون صف منحة جزئي.
+
+**حدود القبول:**نجاح CAS في مسار المالك لا يحسم **DEC-06** المتعلق بآلية منع تكرارNullable والاستيراد المتوازي؛لا اختيار لقيد جديد أوتعديلSQL تاريخي،ولا قبول كامل لـCD-005. صححت المصفوفة الجديدة إغفال رابطDEC-06 الموجود صراحةً فيقسم12.6 منالخطة،دون تغيير مصفوفة الأدلة القديمة. اختبارات ربط المنحة استعملت المستودع الحقيقي،لكنها لم تنفذ دورةScholarship Admin كاملة معaudit/outbox؛CD-006 باقيةجزئية.
+
+قُوّيت حالتاrollback فيالبرنامج وFX على`7ee6451e` بإثبات الوصول إلىموضع الحقن وبالخطأ الفعلي Prisma P2010/meta SQLSTATE22012. أعيدت هاتان فقط بمختبر جديد،ونجحتا؛المشغّل المصحح قبل تقريري الاختيار مباشرةً،مع استبعادات7 و13 مسجلة. لا تضيفان حالتين جديدتين إلى127.
+
 ## المختبرات والفحوص
 
-أربعة مختبرات جديدة بالأدوات الرسمية،Node22.16.0 وPrisma5.22.0 وصورةPostgreSQL16 المثبتة. DB-T مستقلة في كل خادم:
+ستة مختبرات جديدة بالأدوات الرسمية،Node22.16.0 وPrisma5.22.0 وصورةPostgreSQL16 المثبتة. DB-T مستقلة في كل خادم:
 
 | SHA | Run | Port | server identity |
 |---|---|---:|---|
@@ -70,18 +90,21 @@
 |`d8fba0c2`|`748b1540-9b7f-4adb-aca8-31b288accf30`|15433|7697321926309654571|
 |`293b2eee`|`487da37e-98b9-48f9-9c80-4e2e2f054c6b`|15434|7697322672700772396|
 |`f14ed30f`|`919c3658-bada-44ee-8698-b5147edcac81`|15435|7697323390166020142|
+|`ea2286d3`|`76951788-3fe3-4b6b-ab2d-1eaf863dcaa3`|15436|7697325149223993389|
+|`7ee6451e`|`a36db469-f266-4264-9ab3-1b5e508a312b`|15437|7697325553041788972|
 
-العقود والأسرار والسجلات في`/workspace/scratch/post28/labs/` خارجGit؛لا تفترض بقاءها بعد البيئة. لكل مختبر110 migrations مطبقة ومطابقة بالأسماء والترتيب والبصمات،0partial/rolledBack،وvalidate/status/diff ناجحة وcatalog preflight ناجح و282 جدولًا. bootstrap للإنشاء فقط،`post28_tx_migrator` للإعداد،و`post28_app` للاختبارات. قوائمDML الصريحة45 جدولًا للعلاقات،ثم53 بإضافة8 جداول الهوية والتنفيذ؛281 جدول تطبيق للقراءة. لاDDL أوملكية قاعدة أوكتابةledger أوdefault grants للتطبيق. grants مختبر صناعي لا وصفة إنتاج.
+العقود والأسرار والسجلات في`/workspace/scratch/post28/labs/` خارجGit؛لا تفترض بقاءها بعد البيئة. لكل مختبر110 migrations مطبقة ومطابقة بالأسماء والترتيب والبصمات،0partial/rolledBack،وvalidate/status/diff ناجحة وcatalog preflight ناجح و282 جدولًا. bootstrap للإنشاء فقط،`post28_tx_migrator` للإعداد،و`post28_app` للاختبارات. قوائمDML الصريحة45 جدولًا للعلاقات،ثم53 بإضافة8 جداول الهوية والتنفيذ،ثم55 بإضافةScholarshipUniversityLink وScholarshipSponsorContext للأوامر الجديدة؛281 جدول تطبيق للقراءة. لاDDL أوملكية قاعدة أوكتابةledger أوdefault grants للتطبيق. grants مختبر صناعي لا وصفة إنتاج.
 
-الفحوص المصدرية أثناء التطوير:108 حالاتVitest متأثرة (صحح fixture projection واحدة ثم نجحت3/3؛107 السابقة ناجحة)،و69 حالةNode لعقودsection27،و24 provisioning،و39 isolation و4 selection؛لا نجمع الجولات المكررة. هذه فحوص تطوير قبلfreeze وليست دليل تشغيلDB علىSHA آخر. build TypeScript للوحداتdomain/application/infrastructure نجح. architecture/source quality ناجحتان. ESLint للملفات الجديدة وأداةالاختيار0errors/0warnings؛فحص الملفات القديمة المتأثرة0errors و5 تحذيراتany فيCMS قائمة قبل التعديل. فحوصsecrets/organization/environment مسجلة ببصمات خارجية،ويعاد فحص الأدلة والتقرير قبلcommit التسليم.
+الفحوص المصدرية أثناء التطوير:108 حالاتVitest متأثرة (صحح fixture projection واحدة ثم نجحت3/3؛107 السابقة ناجحة)،و69 حالةNode لعقودsection27،و25 provisioning (تشمل24 السابقة)،و39 isolation و4 selection؛لا نجمع الجولات المكررة. هذه فحوص تطوير قبلfreeze وليست دليل تشغيلDB علىSHA آخر. build TypeScript للوحداتdomain/application/infrastructure نجح. architecture/source quality ناجحتان. ESLint للملفات الجديدة وأداةالاختيار0errors/0warnings؛فحص الملفات القديمة المتأثرة0errors و5 تحذيراتany فيCMS قائمة قبل التعديل. فحوصsecrets/organization/environment مسجلة ببصمات خارجية،ويعاد فحص الأدلة والتقرير قبلcommit التسليم.
 
 ## الأدلة والمتبقي
 
 - [كشف العلاقات](../reviews/evidence/post28/383a5459e88703a5be3fca59c2f282588a77286a/r06-owner-relations-initial/status.json)،[العلاقات20](../reviews/evidence/post28/d8fba0c2fd911946176738beeaf4716b1c7ed4df/r06-owner-relations/status.json)،[إعادة7 المتأثرة](../reviews/evidence/post28/d8fba0c2fd911946176738beeaf4716b1c7ed4df/r06-university-regression/status.json).
 - [HTTP/مالية:13 نجاحًا وفشل توقع](../reviews/evidence/post28/293b2eee2514b29c91a2d6f8ad3a35353cab9454/r06-http-finance/status.json)، [الحالة المحددة](../reviews/evidence/post28/f14ed30f667715b309292bf113dc09e48a6d63b2/r06-http-ownership-followup/status.json)، وبجوارها التقرير المنقح وبصمات الأصل ونتيجة التحقق المقروء فقط.
-- [المصفوفة26](../reviews/evidence/post28/1c19ec1fdefdebe57061287ad2737d0e24e862c2/r06-continuation/required-case-status.json):119 حالة مختلفة كأساس جزئي، و0 قبول كامل لسيناريوهات المصفوفة؛ قرارات DEC المعلقة محفوظة.
+- [الأوامر8](../reviews/evidence/post28/ea2286d37a7c7b32b9bbde03d69c43aa736252b0/r06-relation-commands/status.json)، [تقوية rollback البرنامج](../reviews/evidence/post28/7ee6451e57b99c1a3d5edcdc9a760798b86df33c/r06-command-rollback/status.json)، [تقوية rollback الاعتماد](../reviews/evidence/post28/7ee6451e57b99c1a3d5edcdc9a760798b86df33c/r06-finance-rollback/status.json).
+- [المصفوفة26](../reviews/evidence/post28/7ee6451e57b99c1a3d5edcdc9a760798b86df33c/r06-continuation/required-case-status.json):127 حالة مختلفة كأساس جزئي، و0 قبول كامل لسيناريوهات المصفوفة؛ قرارات DEC المعلقة محفوظة.
 
-**نقطة الاستئناف:** CD-005 لتزامن متطلب الاختبار ذي variant/version nullable، ثم CD-006 لتأليف ربط المنحة بالبرنامج وذرية owner/audit/outbox، مع إبقاء CD-007/008 والقرارات عند مالكها. بعد ذلك بقية المصفوفة، ومسارات graph الخاصة الفعلية وFinance Admin HTTP. لا تكرر119 حالة إلا إذا مسّها التغيير.
+**نقطة الاستئناف:** استكمال CD-006 عبر Scholarship Admin use cases مع audit/outbox والتراجع وHTTP permissions، ثم بقية الحالات المستقلة CD-001/010/011/018/019/028 ومسارات graph الخاصة وFinance Admin HTTP. لم تنفذ هذه السيناريوهات كاملة،ولا نصنف عدم تنفيذها عائق خدمات تلقائيًا. CD-005 تحتاج حسم DEC-06 قبل استنتاج منع شامل عبر الاستيراد؛CD-007/008 وبقية قرارات المالك تبقى معلقة. لا تكرر127 حالة إلا إذا مسّها التغيير.
 
 دورة رفع وثيقة → فحص → تعقيم → تفعيل → ربط → review → attestation والتنزيل وسحب URL سبق تسليمه **غير مثبتة**: بيئة الجلسة لا تحمل asset provider مهيأ، والبدائل الافتراضية للفحص والتعقيم تعلن UNAVAILABLE؛ أداة R04 الخاصة تقبل canonical JSON فقط ولا تعوض تعقيم PDF/صورة. يلزم provider مختبر حقيقي مع storage/scanner/sanitizer وعقد تسليم وإبطال، لا noop ناجح. payment/refund/settlement تحتاج provider مختبر ودليل attestation ومطابقة العقود؛ لم تنفذ المسارات التابعة بدونها.
 
