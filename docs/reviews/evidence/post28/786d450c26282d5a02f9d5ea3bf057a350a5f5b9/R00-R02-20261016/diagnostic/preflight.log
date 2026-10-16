@@ -1,0 +1,19 @@
+
+> manaratak-2.0-monorepo@0.0.0 ci:preflight
+> node scripts/ci/source-preflight.mjs
+
+SOURCE_ARCHITECTURE_GUARD=PASS
+SOURCE_ARCHITECTURE_GUARD_RULES=PrismaBoundary,CanonicalIdentity,PublicLiveFixtures,P15LocalStorage,P23ControlPlane,P17VendorAuthority,P13P14CertificateBoundary,RoadmapAuthority,CrossPhaseMatrix,OperationalTooling
+DI_REACHABILITY_VERIFY=PASS registrations=424 reachable=424 unreachable=0
+ADMIN_MUTATION_AUDIT_COVERAGE=PASS; handlers=444; uniqueEndpoints=443; owner validation/atomic adoption requires separate evidence
+file:///workspace/MANARATAK-First-/scripts/aistudio/environment.mjs:103
+      throw new Error('Environment inventory stale: run node scripts/aistudio/environment.mjs --write');
+            ^
+
+Error: Environment inventory stale: run node scripts/aistudio/environment.mjs --write
+    at file:///workspace/MANARATAK-First-/scripts/aistudio/environment.mjs:103:13
+    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.16.0

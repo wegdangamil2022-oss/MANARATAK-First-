@@ -1,0 +1,13 @@
+{
+  "name": "catalog",
+  "command": "node scripts/testing/verify-post28-readiness-inventory.mjs",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:49:30.558154+00:00",
+  "endedAt": "2026-10-16T02:49:30.630769+00:00",
+  "exitCode": 0,
+  "logSha256": "1223c3cd45df3195c3df75403e3893a99e67f071e3a63654e115bc640e568089",
+  "nodeVersion": "22.16.0"
+}

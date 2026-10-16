@@ -1,0 +1,13 @@
+{
+  "name": "unit",
+  "command": "npm run test:unit",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:45:14.307343+00:00",
+  "endedAt": "2026-10-16T02:53:48.432633+00:00",
+  "exitCode": 0,
+  "logSha256": "e73410c032acc29ee4111a37d4c72e0d0ae3a34bbd253f2fc298d8d0e283a06c",
+  "nodeVersion": "22.16.0"
+}

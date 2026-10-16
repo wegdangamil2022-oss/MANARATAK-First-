@@ -1,0 +1,52 @@
+{
+  "observedAt": "2026-10-16T02:47:18.462461+00:00",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "sourceTree": "3dd35e762287e81ddd5cac5b0841af1980c8e5d6",
+  "branch": "fix/post28-ci-environment-inventory-20261016",
+  "handoffSha": "d82ff2e3b23152025a001f529a0d4abd5d160bfa",
+  "mainObservedSha": "b1702289f43d0363d7bbf91f8eba465e4355c53c",
+  "mainMerged": false,
+  "clean": true,
+  "node": "22.16.0",
+  "hostNode": "24.19.0",
+  "npm": "11.9.0",
+  "os": "Debian GNU/Linux 13",
+  "kernel": "6.18.44",
+  "dockerServer": "28.4.0",
+  "nginx": "1.26.3",
+  "psql": "17.11",
+  "postgresServer": null,
+  "redisServer": null,
+  "toolsProvisioning": "Debian packages verified against HTTPS package-index SHA256, extracted to private scratch; no privileged installation",
+  "secretBindings": [],
+  "runtimeVariables": [],
+  "outboundIdentities": [],
+  "network": {
+    "httpMode": "unrestricted",
+    "observedHttpEnforcementState": "unknown",
+    "tcpGrants": [],
+    "vpnConfigured": false
+  },
+  "githubPermission": {
+    "actor": "wegdangamil2022-oss",
+    "push": true,
+    "admin": true
+  },
+  "database": {
+    "created": false,
+    "connected": false,
+    "runtimeTestsExecuted": 0,
+    "neonStatus": "NOT_CONFIRMED_AND_DEFERRED_BY_USER",
+    "userDirection": "2026-10-16: postpone database creation/linking until next day; continue other checks",
+    "secretValuesReadOrExported": false
+  },
+  "hashes": {
+    "package-lock.json": "75269332ee9c7c5b5b66b753a5ac5e94427668cd27b1db20b26291499306b4ee",
+    "packages/infrastructure/prisma/schema.prisma": "56966e566cbcd7ea60966d3954a4368630753f35a265e24b8ece354387450d45",
+    "scripts/ci/source-closure-manifest.json": "ec2ddf269334d014355104027207725556b56a1d339c0b11011bb12be3564fa2",
+    "docs/remediation/POST28_ISOLATED_VALIDATION_EXECUTION_PLAN_v1.3_2026-10-16.md": "956e4c59215cf9496e7ed967e48697e9d4c1914b5e862cc4156eabbbb26c8c1c",
+    "docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md": "dccb5861521537ea4fcc0e0974b4cc3a60b601faf86b8a369e35e9009cd40d65",
+    "config/release/section-task-inventory.json": "643d2feb6493fa8c7ee285199399c94f2151c014ccf35c77ab7867c8e99ccb31",
+    "node_modules/.prisma/client/schema.prisma": "5313811c52de26d85e9eed7b7540f62faa3c6225f565b675c7108a66299eed3c"
+  }
+}

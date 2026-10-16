@@ -1,0 +1,13 @@
+{
+  "name": "post28-regressions",
+  "command": "node --test tests/database/post28-isolation.test.mjs tests/database/greenfield-migration-parity-source.test.mjs",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:47:28.582588+00:00",
+  "endedAt": "2026-10-16T02:47:31.030991+00:00",
+  "exitCode": 0,
+  "logSha256": "ee4e6ceb729e2ec0ac271fe7a3c91dfa9da4d99569657a56338f4f699e1d29e5",
+  "nodeVersion": "22.16.0"
+}

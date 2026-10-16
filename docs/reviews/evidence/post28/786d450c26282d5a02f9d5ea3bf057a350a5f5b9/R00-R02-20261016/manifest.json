@@ -1,0 +1,13 @@
+{
+  "name": "manifest",
+  "command": "npm run ci:closure:manifest",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:45:14.307839+00:00",
+  "endedAt": "2026-10-16T02:47:28.581915+00:00",
+  "exitCode": 0,
+  "logSha256": "5e5b739d8723127a26b2db3c664ce86633b7a1eacf10cf7bde8d9cf7b99f8c34",
+  "nodeVersion": "22.16.0"
+}

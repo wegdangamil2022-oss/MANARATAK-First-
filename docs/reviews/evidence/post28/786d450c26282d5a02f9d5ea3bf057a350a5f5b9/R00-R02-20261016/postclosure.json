@@ -1,0 +1,13 @@
+{
+  "name": "postclosure",
+  "command": "node node_modules/vitest/vitest.mjs run --config .postclosure-review-vitest.config.ts",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:47:50.975808+00:00",
+  "endedAt": "2026-10-16T02:47:57.925030+00:00",
+  "exitCode": 0,
+  "logSha256": "508ca98e1f8533c22f39d0eed6cf46de6d6dd964ff32744588b73fbf41e6bef5",
+  "nodeVersion": "22.16.0"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "unit",
+  "command": "npm run test:unit",
+  "sourceSha": "1ac45bc4b1c4cf84e69314d4f528cbef607d7a9d",
+  "workingTreeDiffSha256": "b0afbe0c4521d50911e0b160573722b20e0151c2f72f8339d60ace6389a3c441",
+  "startedAt": "2026-10-16T02:34:56.605178+00:00",
+  "endedAt": "2026-10-16T02:42:14.563215+00:00",
+  "exitCode": 1,
+  "logSha256": "db054b9af70d84ca17a9adc6f70e40c393025f6fdc3f7f07e8758abc9883cd49"
+}

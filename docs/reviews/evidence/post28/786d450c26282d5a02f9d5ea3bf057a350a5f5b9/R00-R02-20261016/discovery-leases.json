@@ -1,0 +1,13 @@
+{
+  "name": "discovery-leases",
+  "command": "node scripts/database/post28-suite-discovery.mjs leases",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:49:34.567439+00:00",
+  "endedAt": "2026-10-16T02:49:35.046473+00:00",
+  "exitCode": 0,
+  "logSha256": "21905487e4ce92da82bae7b8d85321469bfa861e02c8e8cf50f1ed8e550c5aa0",
+  "nodeVersion": "22.16.0"
+}

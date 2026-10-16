@@ -1,0 +1,250 @@
+TAP version 13
+# Subtest: greenfield parity gate replays migrations and diffs replayed DB plus migration directory
+ok 1 - greenfield parity gate replays migrations and diffs replayed DB plus migration directory
+  ---
+  duration_ms: 1.031664
+  type: 'test'
+  ...
+# Subtest: greenfield parity gate fails closed on unsafe targets and incomplete catalog state
+ok 2 - greenfield parity gate fails closed on unsafe targets and incomplete catalog state
+  ---
+  duration_ms: 0.197438
+  type: 'test'
+  ...
+# Subtest: runbook makes migration replay authoritative and rejects db push as production proof
+ok 3 - runbook makes migration replay authoritative and rejects db push as production proof
+  ---
+  duration_ms: 0.100151
+  type: 'test'
+  ...
+# Subtest: rejects remote target before client/query creation
+ok 4 - rejects remote target before client/query creation
+  ---
+  duration_ms: 1.358786
+  type: 'test'
+  ...
+# Subtest: rejects restore target before client/query creation
+ok 5 - rejects restore target before client/query creation
+  ---
+  duration_ms: 0.203085
+  type: 'test'
+  ...
+# Subtest: rejects production target before client/query creation
+ok 6 - rejects production target before client/query creation
+  ---
+  duration_ms: 0.155514
+  type: 'test'
+  ...
+# Subtest: rejects schema target before client/query creation
+ok 7 - rejects schema target before client/query creation
+  ---
+  duration_ms: 1.001488
+  type: 'test'
+  ...
+# Subtest: rejects port target before client/query creation
+ok 8 - rejects port target before client/query creation
+  ---
+  duration_ms: 0.180041
+  type: 'test'
+  ...
+# Subtest: rejects role target before client/query creation
+ok 9 - rejects role target before client/query creation
+  ---
+  duration_ms: 0.12009
+  type: 'test'
+  ...
+# Subtest: missing isolation flags, stale SHA and forbidden restore label fail before any read
+ok 10 - missing isolation flags, stale SHA and forbidden restore label fail before any read
+  ---
+  duration_ms: 0.386142
+  type: 'test'
+  ...
+# Subtest: different credentials/loopback spelling cannot disguise a shared target/shadow
+ok 11 - different credentials/loopback spelling cannot disguise a shared target/shadow
+  ---
+  duration_ms: 0.422225
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag superuser
+ok 12 - rejects live elevated role flag superuser
+  ---
+  duration_ms: 0.490679
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag createRole
+ok 13 - rejects live elevated role flag createRole
+  ---
+  duration_ms: 0.270998
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag createDatabase
+ok 14 - rejects live elevated role flag createDatabase
+  ---
+  duration_ms: 0.118358
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag replication
+ok 15 - rejects live elevated role flag replication
+  ---
+  duration_ms: 0.05997
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag bypassRls
+ok 16 - rejects live elevated role flag bypassRls
+  ---
+  duration_ms: 0.047532
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag privilegedMembership
+ok 17 - rejects live elevated role flag privilegedMembership
+  ---
+  duration_ms: 0.03984
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag globalWrite
+ok 18 - rejects live elevated role flag globalWrite
+  ---
+  duration_ms: 0.094031
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag databaseOwner
+ok 19 - rejects live elevated role flag databaseOwner
+  ---
+  duration_ms: 0.058037
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag databaseCreate
+ok 20 - rejects live elevated role flag databaseCreate
+  ---
+  duration_ms: 0.055283
+  type: 'test'
+  ...
+# Subtest: rejects changed live database
+ok 21 - rejects changed live database
+  ---
+  duration_ms: 0.084427
+  type: 'test'
+  ...
+# Subtest: rejects changed live role
+ok 22 - rejects changed live role
+  ---
+  duration_ms: 0.041232
+  type: 'test'
+  ...
+# Subtest: rejects changed live sessionRole
+ok 23 - rejects changed live sessionRole
+  ---
+  duration_ms: 0.035624
+  type: 'test'
+  ...
+# Subtest: rejects changed live databaseOid
+ok 24 - rejects changed live databaseOid
+  ---
+  duration_ms: 0.040991
+  type: 'test'
+  ...
+# Subtest: rejects changed live serverIdentity
+ok 25 - rejects changed live serverIdentity
+  ---
+  duration_ms: 0.035754
+  type: 'test'
+  ...
+# Subtest: rejects changed live marker
+ok 26 - rejects changed live marker
+  ---
+  duration_ms: 0.038097
+  type: 'test'
+  ...
+# Subtest: rejects changed live postgresMajor
+ok 27 - rejects changed live postgresMajor
+  ---
+  duration_ms: 0.035464
+  type: 'test'
+  ...
+# Subtest: rejects changed live timezone
+ok 28 - rejects changed live timezone
+  ---
+  duration_ms: 0.035724
+  type: 'test'
+  ...
+# Subtest: application cannot inherit migration DDL privileges; nonempty greenfield is rejected
+ok 29 - application cannot inherit migration DDL privileges; nonempty greenfield is rejected
+  ---
+  duration_ms: 0.108493
+  type: 'test'
+  ...
+# Subtest: valid distinct target/shadow declarations and live identities reach two read-only probes
+ok 30 - valid distinct target/shadow declarations and live identities reach two read-only probes
+  ---
+  duration_ms: 0.519382
+  type: 'test'
+  ...
+# Subtest: suite catalogue includes both actual asset DB suites and rejects an unknown profile
+ok 31 - suite catalogue includes both actual asset DB suites and rejects an unknown profile
+  ---
+  duration_ms: 0.115715
+  type: 'test'
+  ...
+# Subtest: suite result policy rejects missing cases, skipped tests, wrong files and mismatched identities
+ok 32 - suite result policy rejects missing cases, skipped tests, wrong files and mismatched identities
+  ---
+  duration_ms: 2.96938
+  type: 'test'
+  ...
+# Subtest: Prisma connection URLs are passed through private JS argv, absent from OS arguments
+ok 33 - Prisma connection URLs are passed through private JS argv, absent from OS arguments
+  ---
+  duration_ms: 34.732313
+  type: 'test'
+  ...
+# Subtest: destructive database suites reject restore references and protected aliases before test imports
+ok 34 - destructive database suites reject restore references and protected aliases before test imports
+  ---
+  duration_ms: 21.336474
+  type: 'test'
+  ...
+# Subtest: runtime suite preflight rejects NOT VALID constraints and invalid indexes
+ok 35 - runtime suite preflight rejects NOT VALID constraints and invalid indexes
+  ---
+  duration_ms: 0.231378
+  type: 'test'
+  ...
+# Subtest: Vitest refuses a protected restore target before importing test modules
+ok 36 - Vitest refuses a protected restore target before importing test modules
+  ---
+  duration_ms: 897.202848
+  type: 'test'
+  ...
+# Subtest: identity probe must itself run in a read-only transaction
+ok 37 - identity probe must itself run in a read-only transaction
+  ---
+  duration_ms: 0.207911
+  type: 'test'
+  ...
+# Subtest: lab provisioning rejects missing authorization and production mode before creating resources
+ok 38 - lab provisioning rejects missing authorization and production mode before creating resources
+  ---
+  duration_ms: 81.87519
+  type: 'test'
+  ...
+# Subtest: source unit gate explicitly excludes DB profiles and rejects empty discovery
+ok 39 - source unit gate explicitly excludes DB profiles and rejects empty discovery
+  ---
+  duration_ms: 0.399157
+  type: 'test'
+  ...
+# Subtest: actual Vitest discovery and JSON report identities agree with the case-count policy (inert fixture)
+ok 40 - actual Vitest discovery and JSON report identities agree with the case-count policy (inert fixture)
+  ---
+  duration_ms: 1233.956104
+  type: 'test'
+  ...
+1..40
+# tests 40
+# suites 0
+# pass 40
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2394.843129

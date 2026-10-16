@@ -1,0 +1,13 @@
+{
+  "name": "action-pins",
+  "command": "npm run ci:actions:verify",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:49:32.071803+00:00",
+  "endedAt": "2026-10-16T02:49:32.271032+00:00",
+  "exitCode": 0,
+  "logSha256": "45a0d55a00b4594e48e695c6c3f74a9cbeb54bc5c207c127fe1c9b892c4136d1",
+  "nodeVersion": "22.16.0"
+}

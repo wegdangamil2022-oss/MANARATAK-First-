@@ -1,0 +1,13 @@
+{
+  "name": "section20",
+  "command": "node node_modules/vitest/vitest.mjs run --config .section20-finance-vitest.config.ts packages/infrastructure/tests/finance-platform/Section20Safety.spec.ts packages/infrastructure/tests/finance-platform/Section20ApprovalBoundaries.spec.ts apps/api/tests/presentation/api/router/FinanceSection20.spec.ts",
+  "sourceSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "endSha": "786d450c26282d5a02f9d5ea3bf057a350a5f5b9",
+  "cleanAtStart": true,
+  "cleanAtEnd": true,
+  "startedAt": "2026-10-16T02:47:31.031262+00:00",
+  "endedAt": "2026-10-16T02:47:35.783713+00:00",
+  "exitCode": 0,
+  "logSha256": "21222dbba26c0a7214e4ae5e0b4beb340c88ad0fa793af365d8a688ded49174e",
+  "nodeVersion": "22.16.0"
+}
