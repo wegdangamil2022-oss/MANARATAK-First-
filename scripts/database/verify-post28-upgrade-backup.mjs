@@ -11,6 +11,7 @@ import {requireDatabaseMutationGate} from '../lib/database-mutation-gate.mjs';
 import {verificationRestoreList} from './post28-backup-contract.mjs';
 import {measureUpgradeCatalog} from './post28-upgrade-catalog.mjs';
 import {digest} from './post28-migration-inventory.mjs';
+import {assertNativeLabState,nativePgEnvironment} from './post28-native-lab-policy.mjs';
 const fail=code=>{throw new Error(code);};
 try{
  if(Number(process.versions.node.split('.')[0])!==22)fail('POST28_NODE22_REQUIRED');
@@ -30,13 +31,25 @@ try{
  const state=JSON.parse(fs.readFileSync(path.join(lab,'lab-state.json'),'utf8'));
  const dockerEnv={...process.env};for(const key of ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'])delete dockerEnv[key];
  const docker=(args,options={})=>spawnSync('docker',['--host=unix:///var/run/docker.sock',...args],{env:dockerEnv,timeout:120000,maxBuffer:64*1024*1024,...options});
- const inspected=docker(['inspect',state.containerId,'--format','{{index .Config.Labels "codex.post28.run"}} {{index .Config.Labels "codex.post28.scope"}} {{.State.Running}}'],{encoding:'utf8'});
- if(inspected.status!==0||inspected.stdout.trim()!==`${contract.runId} DISPOSABLE true`||state.sourceSha!==sourceSha)fail('POST28_BACKUP_CONTAINER_IDENTITY_MISMATCH');
+ const native=state.runtime==='NATIVE_WINDOWS';
+ if(native){
+  if(process.platform!=='win32')fail('POST28_NATIVE_WINDOWS_REQUIRED');
+  assertNativeLabState(state,contract,sourceSha,lab);
+ }else{
+  const inspected=docker(['inspect',state.containerId,'--format','{{index .Config.Labels "codex.post28.run"}} {{index .Config.Labels "codex.post28.scope"}} {{.State.Running}}'],{encoding:'utf8'});
+  if(inspected.status!==0||inspected.stdout.trim()!==`${contract.runId} DISPOSABLE true`||state.sourceSha!==sourceSha)fail('POST28_BACKUP_CONTAINER_IDENTITY_MISMATCH');
+ }
  const directory=path.join(lab,'R05-backup');
  if(mode==='backup')fs.mkdirSync(directory,{mode:0o700});else if(!fs.existsSync(directory))fail('POST28_BACKUP_ARTIFACT_REQUIRED');
  const archive=path.join(directory,'predecessor.dump');
  const pg=(label,args,input)=>{
   const url=new URL(declarations.find(x=>x.label===label).url);
+  if(native){
+   assertNativeLabState(state,contract,sourceSha,lab);
+   const result=spawnSync(path.join(state.pgBin,args[0]+'.exe'),args.slice(1),{env:nativePgEnvironment(state,url.href,{readOnly:mode==='backup'}),input,windowsHide:true,timeout:120000,maxBuffer:64*1024*1024});
+   if(result.status!==0)fail('POST28_BACKUP_NATIVE_TOOL_FAILED');
+   return result.stdout;
+  }
   const envFile=path.join(directory,label+'.pg.env');
   fs.writeFileSync(envFile,`PGHOST=127.0.0.1\nPGPORT=5432\nPGDATABASE=${decodeURIComponent(url.pathname.slice(1))}\nPGUSER=${decodeURIComponent(url.username)}\nPGPASSWORD=${decodeURIComponent(url.password)}\nPGSSLMODE=disable\nPGOPTIONS=-c statement_timeout=30000 -c lock_timeout=3000${mode==='backup'?' -c default_transaction_read_only=on':''}\n`,{mode:0o600});
   const result=docker(['exec','-i','--env-file',envFile,state.containerId,...args],{input});
@@ -63,8 +76,8 @@ try{
    await preflightTargets(contract,[declarations[1]],process.env,sourceSha,readDatabaseIdentity,{requireEmpty:true});
    const list=verificationRestoreList(pg('DB-U',['pg_restore','--list'],bytes).toString());
    const listFile=path.join(directory,'verification-list.txt');fs.writeFileSync(listFile,list.text,{mode:0o600});
-   const remoteList='/tmp/post28-'+contract.runId+'.list';
-   if(docker(['cp',listFile,state.containerId+':'+remoteList]).status!==0)fail('POST28_BACKUP_LIST_TRANSFER_FAILED');
+   const remoteList=native?listFile:'/tmp/post28-'+contract.runId+'.list';
+   if(!native&&docker(['cp',listFile,state.containerId+':'+remoteList]).status!==0)fail('POST28_BACKUP_LIST_TRANSFER_FAILED');
    pg('DB-V',['pg_restore','--single-transaction','--exit-on-error','--no-owner','--no-acl','--use-list='+remoteList,'--dbname='+contract.targets['DB-V'].database],bytes);
    const verifyClient=new PrismaClient({datasources:{db:{url:process.env.UPGRADE_VERIFY_DATABASE_URL}},log:[],errorFormat:'minimal'});
    let restored;try{restored=await measureUpgradeCatalog(verifyClient);}finally{await verifyClient.$disconnect();}
