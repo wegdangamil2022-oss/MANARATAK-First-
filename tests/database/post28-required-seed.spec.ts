@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {AssetStorageLocator,AssetStorageZone} from '@manaratak/domain';
-import {referenceSeedPlan} from '../../scripts/database/post28-reference-seed-plan';
+import {referenceSeedPlan,referenceSeedPayload} from '../../scripts/database/post28-reference-seed-plan';
 import {Post28SeedAssetSecurity,scannerImage} from '../../scripts/database/post28-seed-asset-security';
 describe('Post28 required seed source plan',()=>{
  it('validates reviewed source hashes, counts and currency/language dependencies before country apply',async()=>{
@@ -51,5 +51,18 @@ describe('Prisma-compatible P7 advisory locks',()=>{
   const store=new PrismaImportScreeningReceiptStore({$transaction:async(work:(value:typeof tx)=>unknown)=>work(tx)} as never);
   await expect(store.accept({ownerDomain:'REFERENCE_DATA',handoffId:'row',execution:{executionId:'run',attempt:1}} as never,async()=>({}))).rejects.toThrow('CONTENT_CONFLICT');
   expect(queries[0]).toContain('::text');
+ });
+});
+
+describe('all required reference rows satisfy the real P6 wire contract',()=>{
+ it('screens every one of 622 JSON payloads without skipping or weakening owner validation',async()=>{
+  const {ReferenceDataScreeningHandoffConsumer}=await import('../../packages/application/src/reference-data/services/ReferenceDataScreeningHandoffConsumer');
+  const consumer=new ReferenceDataScreeningHandoffConsumer();let count=0;
+  for(const input of await referenceSeedPlan(process.cwd()))for(const [index,record] of input.records.entries()){
+   const payload=referenceSeedPayload(input,record);
+   const decision=await consumer.accept({handoffId:input.id+index,ownerDomain:'REFERENCE_DATA',artifact:{sourceId:input.id,artifactId:'unit-shape-only'},normalizedPayload:payload,provenance:{sourceSystem:'unit-source-shape',contentHash:'a'.repeat(64)},validation:{state:'VALID',issues:[]},execution:{executionId:'unit',attempt:1,dryRun:true,idempotencyKey:String(index)},referenceMetadata:{referenceEntityType:input.type}});
+   expect(decision.issues,`${input.id}:${index}`).toEqual([]);expect(decision.state).toBe('NEEDS_OWNER_REVIEW');count++;
+  }
+  expect(count).toBe(622);
  });
 });

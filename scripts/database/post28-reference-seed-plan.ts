@@ -44,3 +44,9 @@ export async function referenceSeedPlan(root: string): Promise<SeedInput[]> {
   if(result[2].records.some(r=>r.defaultCurrencyCode&&!currencies.has(r.defaultCurrencyCode)||r.defaultLanguageCode&&!languages.has(r.defaultLanguageCode)))throw new Error('POST28_SEED_DEPENDENCY_MISSING');
   return result;
 }
+
+/** Match the persisted JSON artifact and actual P6 wire format; undefined means absent. */
+export function referenceSeedPayload(input:SeedInput,record:Record<string,any>):Record<string,any>{
+ const {aliases,...fields}=record;
+ return JSON.parse(JSON.stringify({...fields,metadata:{...fields.metadata,post28SeedSource:{sha256:input.sourceHash,version:input.sourceVersion},...(aliases?.length?{reviewedSourceAliases:aliases}:{})}}));
+}

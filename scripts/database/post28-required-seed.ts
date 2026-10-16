@@ -8,7 +8,7 @@ import { AtomicAuditedOutboxMutationExecutor, AtomicDomainMutationCoordinator, R
   ReferenceDataScreeningHandoffConsumer, ImportHandoffDispatcher, IngestAssetUseCase, ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import { PrismaAtomicPersistenceUnitOfWork, PrismaAuditRecordRepository, PrismaTransactionalOutboxStore, PrismaReferenceOwnerReviewGateway,
   PrismaReferenceDataRepository, PrismaImportScreeningReceiptStore, PrismaAssetRecordRepository, LocalAssetStorageGateway, PrismaAssetUsageRegistryGateway } from '@manaratak/infrastructure';
-import { referenceSeedPlan, hash } from './post28-reference-seed-plan';
+import { referenceSeedPlan, referenceSeedPayload, hash } from './post28-reference-seed-plan';
 import { Post28SeedAssetSecurity, scannerImage } from './post28-seed-asset-security';
 // @ts-expect-error Operational ESM guard has no TS declaration.
 import { preflightTargets } from './post28-isolation.mjs';
@@ -102,8 +102,8 @@ if(mode==='plan'){
    const asset=await assets.findById(new AssetId(assetId));asset!.assertCanDeliver();assert.equal(asset!.checksum?.hash,artifactHash);
    assert.equal(hash(await storage.read(asset!.locator,10*1024*1024)),artifactHash);
    for(const [index,record] of input.records.entries()){
-    const {aliases,...fields}=record;
-    const payload={...fields,metadata:{...fields.metadata,post28SeedSource:{sha256:input.sourceHash,version:input.sourceVersion},...(aliases?.length?{reviewedSourceAliases:aliases}:{})}};
+    const {aliases}=record;
+    const payload=referenceSeedPayload(input,record);
     const handoff:UniversalImportHandoff={handoffId:input.id+':'+index,ownerDomain:'REFERENCE_DATA',artifact:{sourceId:input.id,artifactId:assetId},normalizedPayload:payload,provenance:{sourceSystem:'post28-local-governed-manifest',contentHash:artifactHash,sourceRowNumber:index+1},validation:{state:'VALID',issues:[]},execution:{executionId:contract.runId,dryRun:false,attempt:1,idempotencyKey:input.id+':'+index},referenceMetadata:{referenceEntityType:input.type,sourceVersion:input.sourceVersion}};
     const screened:any=await dispatcher.dispatch(handoff);assert.equal(screened.state,'NEEDS_OWNER_REVIEW');assert.equal(screened.issues.length,0);
     // Read the real dispatcher-created receipt; never synthesize an approval row.
