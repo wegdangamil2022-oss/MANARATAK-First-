@@ -54,7 +54,7 @@ try{
    const sql=pg('DB-U',['pg_restore','--no-owner','--no-acl','--file=-'],bytes); // Parse the entire archive; never execute its SQL.
    fs.writeFileSync(path.join(directory,'archive-list.txt'),list,{mode:0o600});
    fs.writeFileSync(path.join(directory,'source-snapshot.json'),JSON.stringify(source,null,2)+'\n',{mode:0o600});
-   const result={sourceSha,runId:contract.runId,kind:'POST28_R05_CUSTOM_BACKUP',archiveSha256:digest(bytes),bytes:bytes.length,archiveReadable:true,sqlMaterializationSha256:digest(sql),sourceTableContentSha256:source.tableContentSha256,sourceCatalogSha256:source.catalogSha256,restoreExecuted:false};
+   const result={sourceSha,runId:contract.runId,kind:'POST28_R05_CUSTOM_BACKUP',archiveSha256:digest(bytes),bytes:bytes.length,archiveReadable:true,sqlMaterializationSha256:digest(sql),sourceTableContentSha256:source.tableContentSha256,sourceCatalogSha256:source.catalogSha256,restoreExecuted:false,representativeFixturesPresent:baseline.representativeFixturesProvisioned===true,fixtureManifestSha256:baseline.fixtureProof?.manifestSha256??null};
    fs.writeFileSync(path.join(directory,'backup-result.json'),JSON.stringify(result,null,2)+'\n',{mode:0o600});console.log(JSON.stringify(result));
   }else{
    const proof=JSON.parse(fs.readFileSync(path.join(directory,'backup-result.json'),'utf8')),bytes=fs.readFileSync(archive);
@@ -72,7 +72,7 @@ try{
    const sourceAfter=await measureUpgradeCatalog(sourceClient);assert.deepEqual(sourceAfter,source);
    const identities=await preflightTargets(contract,declarations,process.env,sourceSha,readDatabaseIdentity);
    fs.writeFileSync(path.join(directory,'restored-snapshot.json'),JSON.stringify(restored,null,2)+'\n',{mode:0o600});
-   const result={sourceSha,runId:contract.runId,kind:'POST28_R05_STRUCTURAL_BACKUP_VERIFICATION',archiveSha256:proof.archiveSha256,identities,restoredTables:restored.tables.length,allRowContentMatched:true,allCatalogDefinitionsMatched:true,sourceUnchanged:true,tableContentSha256:restored.tableContentSha256,catalogSha256:restored.catalogSha256,excludedPreprovisionedObjects:list.excluded,R05Accepted:false,representativeFixturesPresent:false};
+   const result={sourceSha,runId:contract.runId,kind:'POST28_R05_STRUCTURAL_BACKUP_VERIFICATION',archiveSha256:proof.archiveSha256,identities,restoredTables:restored.tables.length,allRowContentMatched:true,allCatalogDefinitionsMatched:true,sourceUnchanged:true,tableContentSha256:restored.tableContentSha256,catalogSha256:restored.catalogSha256,excludedPreprovisionedObjects:list.excluded,R05Accepted:false,representativeFixturesPresent:baseline.representativeFixturesProvisioned===true,fixtureManifestSha256:baseline.fixtureProof?.manifestSha256??null};
    fs.writeFileSync(path.join(directory,'verification-result.json'),JSON.stringify(result,null,2)+'\n',{mode:0o600});console.log(JSON.stringify(result));
   }
  }finally{await sourceClient.$disconnect();}

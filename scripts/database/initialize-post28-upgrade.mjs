@@ -9,10 +9,19 @@ import {readDatabaseIdentity} from './post28-preflight.mjs';
 import {requirePost28LocalExecution} from './post28-neon-policy.mjs';
 import {requireDatabaseMutationGate} from '../lib/database-mutation-gate.mjs';
 import {digest,verifyMigrationLedger} from './post28-migration-inventory.mjs';
+import {historicalFixtureManifest,seedHistoricalFixtures,SELECTED_PREDECESSOR,HISTORICAL_STAGE} from './post28-historical-fixtures.mjs';
 const fail=code=>{throw new Error(code);};
 try{
- if(process.argv.length!==3)fail('POST28_UPGRADE_PREDECESSOR_COMMIT_REQUIRED');
+ const historical=process.argv.length===4&&process.argv[3]==='--historical-fixtures';
+ if(process.argv.length!==3&&!historical)fail('POST28_UPGRADE_PREDECESSOR_COMMIT_REQUIRED');
  const root=fs.realpathSync(process.cwd()),plan=prepareUpgradeCandidate(root,process.argv[2]);
+ let stage,manifest,fixtureProof;
+ if(historical){
+  if(plan.before.sourceSha!==SELECTED_PREDECESSOR||plan.before.migrations.length!==109)fail('POST28_SELECTED_PREDECESSOR_REQUIRED');
+  stage=prepareUpgradeCandidate(root,HISTORICAL_STAGE);
+  if(stage.before.migrations.length!==108||JSON.stringify(stage.before.migrations)!==JSON.stringify(plan.before.migrations.slice(0,108)))fail('POST28_HISTORICAL_PREFIX_REQUIRED');
+  manifest=historicalFixtureManifest(JSON.parse(fs.readFileSync('docs/architecture/persistence/persistence-ownership.manifest.json','utf8')).models);
+ }
  if(!plan.cleanSource)fail('POST28_CLEAN_SOURCE_REQUIRED');
  if(Number(process.versions.node.split('.')[0])!==22)fail('POST28_NODE22_REQUIRED');
  const contractFile=fs.realpathSync(process.env.POST28_TARGET_CONTRACT_FILE),lab=path.dirname(contractFile);
@@ -41,7 +50,7 @@ try{
  const schemaFile=path.join(directory,'schema.prisma');fs.writeFileSync(schemaFile,schema,{mode:0o600});
  fs.mkdirSync(path.join(directory,'migrations'),{mode:0o700});
  fs.writeFileSync(path.join(directory,'migrations/migration_lock.toml'),read('packages/infrastructure/prisma/migrations/migration_lock.toml'),{mode:0o600});
- for(const migration of plan.before.migrations){
+ for(const migration of plan.before.migrations.slice(0,historical?108:plan.before.migrations.length)){
   const bytes=read(`packages/infrastructure/prisma/migrations/${migration.name}/migration.sql`);
   if(digest(bytes)!==migration.checksum)fail('POST28_UPGRADE_MIGRATION_HASH_MISMATCH');
   const folder=path.join(directory,'migrations',migration.name);fs.mkdirSync(folder,{mode:0o700});fs.writeFileSync(path.join(folder,'migration.sql'),bytes,{mode:0o600});
@@ -50,9 +59,25 @@ try{
  if(currentCli!==plan.before.clientGeneration.prismaCliVersion||currentCli!==plan.before.clientGeneration.prismaClientVersion)fail('POST28_UPGRADE_PINNED_PRISMA_VERSION_REQUIRED');
  const redact=text=>String(text).replaceAll(process.env.UPGRADE_DATABASE_URL,'[REDACTED]').replaceAll(decodeURIComponent(primary.password),'[REDACTED]').replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]');
  const checks=[];
- for(const args of [['validate'],['generate'],['migrate','deploy'],['migrate','status']]){
+ const commands=[['validate'],['generate'],['migrate','deploy'],...(historical?[['migrate','deploy']]:[]),['migrate','status']];
+ for(const [index,args] of commands.entries()){
+  if(historical&&index===3){
+   const {PrismaClient:PreviousClient}=createRequire(import.meta.url)(path.join(clientDirectory,'index.js'));
+   const previous=new PreviousClient({datasources:{db:{url:process.env.UPGRADE_DATABASE_URL}},log:[],errorFormat:'minimal'});
+   try{
+    const stageLedger=await previous.$transaction(async tx=>{await tx.$executeRawUnsafe('SET TRANSACTION READ ONLY');return tx.$queryRawUnsafe('SELECT id,migration_name,checksum,started_at::text,finished_at::text,rolled_back_at::text,applied_steps_count FROM public._prisma_migrations ORDER BY started_at,id');});
+    const stageLedgerProof=verifyMigrationLedger({migrations:stage.before.migrations},stageLedger);
+    fs.writeFileSync(path.join(directory,'historical-stage-ledger.json'),JSON.stringify({sourceSha:stage.before.sourceSha,verification:stageLedgerProof,rows:stageLedger},null,2)+'\n',{mode:0o600});
+    fixtureProof=await seedHistoricalFixtures(previous,manifest);
+   }catch(error){fs.writeFileSync(path.join(directory,'fixture-error.log'),redact(error.message),{mode:0o600});throw error;}finally{await previous.$disconnect();}
+   fs.writeFileSync(path.join(directory,'fixture-manifest.json'),JSON.stringify(manifest,null,2)+'\n',{mode:0o600});
+   fs.writeFileSync(path.join(directory,'fixture-result.json'),JSON.stringify(fixtureProof,null,2)+'\n',{mode:0o600});
+   const migration=plan.before.migrations.at(-1),bytes=read(`packages/infrastructure/prisma/migrations/${migration.name}/migration.sql`);
+   if(digest(bytes)!==migration.checksum)fail('POST28_UPGRADE_MIGRATION_HASH_MISMATCH');
+   const folder=path.join(directory,'migrations',migration.name);fs.mkdirSync(folder,{mode:0o700});fs.writeFileSync(path.join(folder,'migration.sql'),bytes,{mode:0o600});
+  }
   const startedAt=new Date().toISOString();const result=spawnSync(process.execPath,['node_modules/prisma/build/index.js',...args,'--schema='+schemaFile],{env:{...process.env,PRISMA_GENERATE_SKIP_AUTOINSTALL:'1'},encoding:'utf8',timeout:120000,maxBuffer:4*1024*1024});
-  const log=path.join(directory,args.join('-')+'.log');fs.writeFileSync(log,redact(result.stdout)+redact(result.stderr),{mode:0o600});
+  const log=path.join(directory,index+'-'+args.join('-')+'.log');fs.writeFileSync(log,redact(result.stdout)+redact(result.stderr),{mode:0o600});
   checks.push({args,startedAt,finishedAt:new Date().toISOString(),exitCode:result.status,privateLog:log,logSha256:digest(fs.readFileSync(log))});
   fs.writeFileSync(path.join(directory,'checks.json'),JSON.stringify(checks,null,2)+'\n',{mode:0o600});
   if(result.status!==0)fail('POST28_UPGRADE_BASELINE_STEP_FAILED');
@@ -82,7 +107,7 @@ try{
   previousClientVersion:currentCli,sourceSchemaSha256:plan.before.schemaSha256,generationSchemaSha256:digest(schema),
   generatedSchemaSha256:digest(fs.readFileSync(path.join(clientDirectory,'schema.prisma'))),
   applicationRows:snapshot.tables.filter(t=>t.name!=='_prisma_migrations').reduce((n,t)=>n+t.rows,0),catalog:snapshot.catalog,
-  representativeFixturesProvisioned:false,upgradeExecuted:false,R05Accepted:false};
+  representativeFixturesProvisioned:historical,fixtureProof:fixtureProof??null,historicalStageSourceSha:historical?HISTORICAL_STAGE:null,ownerRemediationApproved:false,upgradeExecuted:false,R05Accepted:false};
  for(const [name,value] of Object.entries({plan,snapshot,result}))fs.writeFileSync(path.join(directory,name+'.json'),JSON.stringify(value,null,2)+'\n',{mode:0o600});
  console.log(JSON.stringify(result));
 }catch(error){console.error(error.message?.match(/^POST28_[A-Z_]+$/)?.[0]??'POST28_UPGRADE_BASELINE_FAILED');process.exitCode=1;}

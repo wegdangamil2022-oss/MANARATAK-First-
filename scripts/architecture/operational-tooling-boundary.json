@@ -204,7 +204,9 @@
         "preflightTargets",
         "requireDatabaseMutationGate",
         "requireEmpty:true",
-        "POST28_R04_ACCEPTANCE_STALE"
+        "POST28_R04_ACCEPTANCE_STALE",
+        "POST28_HISTORICAL_PREFIX_REQUIRED",
+        "seedHistoricalFixtures"
       ],
       "review": "POST28 local R05 preparation 2026-10-16; no R05 acceptance implied"
     },
@@ -236,6 +238,21 @@
         "runtimeAcceptance:false"
       ],
       "review": "POST28 local R05 2026-10-16"
+    },
+    "scripts/database/audit-post28-upgrade.mjs": {
+      "purpose": "Read-only preupgrade audits of representative local DB-U fixtures using the matching old client; no migration execution",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22; clean SHA/run-bound local U/V; verified representative backup and fixture digest"
+      ],
+      "gate": "Local preflight before client construction; read-only transactions; report BLOCKED when any upgrade audit has violations",
+      "requiredSourceMarkers": [
+        "preflightTargets",
+        "SET TRANSACTION READ ONLY",
+        "POST28_REPRESENTATIVE_BACKUP_PROOF_REQUIRED",
+        "mutationCommandsExecuted:0"
+      ],
+      "review": "POST28 local R05 historical fixture validation 2026-10-16; no owner remediation or DEC approval"
     }
   }
 }
