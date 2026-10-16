@@ -163,7 +163,11 @@
     "test:node": "node scripts/testing/run-node-unit-tests.mjs",
     "certificates:template:export": "tsc -b packages/shared && tsx scripts/certificates/export-approved-template.ts",
     "notifications:source:verify": "tsc -b apps/api apps/admin && vitest run tests/notifications/section23.spec.ts packages/application/tests/students/StudentApplicationReminderDeliveryPolicy.spec.ts",
-    "ci:preflight": "node scripts/ci/source-preflight.mjs"
+    "ci:preflight": "node scripts/ci/source-preflight.mjs",
+    "post28:db:preflight": "node scripts/database/post28-preflight.mjs",
+    "post28:db:discover": "node scripts/database/post28-suite-discovery.mjs",
+    "post28:db:test": "node scripts/database/run-post28-suite.mjs",
+    "post28:db:create": "node scripts/database/create-post28-lab.mjs"
   },
   "dependencies": {
     "@e965/xlsx": "0.20.3",

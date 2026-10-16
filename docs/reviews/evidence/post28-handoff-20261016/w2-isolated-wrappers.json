@@ -1,0 +1,17 @@
+{
+  "name": "w2-isolated-wrappers",
+  "command": [
+    "npx",
+    "--yes",
+    "--package=node@22.16.0",
+    "node",
+    "scripts/verify-w2-source.mjs"
+  ],
+  "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+  "dirty": true,
+  "startedUtc": "2026-10-16T01:50:22.573673+00:00",
+  "finishedUtc": "2026-10-16T01:50:23.478309+00:00",
+  "exitCode": 0,
+  "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R02-core/w2-isolated-wrappers-20261016T015023459799Z.log",
+  "sha256": "4923d2f01a10d760573235caf147b21fdbacebfd5c89bf7f08939754d110e068"
+}

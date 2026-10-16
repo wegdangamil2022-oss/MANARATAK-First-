@@ -166,12 +166,13 @@ check('MNT-AUD-0088 Phase 02 active authority reconciles schema-isolation drift'
 
 
 const greenfieldParity = read('scripts/database/verify-greenfield-migration-parity.sh');
+const greenfieldDiffSource = read('scripts/database/prisma-env-diff.mjs');
 const greenfieldParityRunbook = read('docs/operations/GREENFIELD_MIGRATION_PARITY_VERIFICATION.md');
 check('MNT-AUD-0041 source contains authoritative greenfield migration replay + parity diff',
   greenfieldParity.includes('migrate deploy') &&
-  greenfieldParity.includes('--from-url') && greenfieldParity.includes('--from-migrations') &&
+  greenfieldParity.includes('--from-schema-datasource') && greenfieldParity.includes('post28-preflight.mjs --pair --require-empty') && greenfieldParity.includes('--from-migrations') &&
   greenfieldParity.includes('--to-schema-datamodel') && greenfieldParity.includes('--shadow-database-url') &&
-  greenfieldParity.includes('--exit-code'));
+  greenfieldDiffSource.includes("'--exit-code'") && greenfieldDiffSource.includes('preflightTargets') && greenfieldDiffSource.includes('runPrismaMain'));
 check('MNT-AUD-0041 verifier fails closed on unsafe targets and catalog anomalies',
   greenfieldParity.includes('GREENFIELD_DATABASE_IS_DISPOSABLE') &&
   greenfieldParity.includes('TARGET_AND_SHADOW_MUST_DIFFER') &&

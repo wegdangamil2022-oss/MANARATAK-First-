@@ -4,10 +4,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    passWithNoTests: true,
+    passWithNoTests: false,
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
+      // POST28: real PostgreSQL suites have explicit isolated profiles, not source skips.
+      '**/*.database.spec.ts',
+      'packages/infrastructure/tests/database/WholePlatformPersistence.integration.spec.ts',
       // These use node:test and must run under Node so assertion failures fail CI.
       '**/*.test.mjs',
       '**/*.test.cjs',

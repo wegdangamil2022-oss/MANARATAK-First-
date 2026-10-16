@@ -152,6 +152,25 @@
         "runtime.externalModules.includes('@prisma/client')"
       ],
       "review": "B04 2026-10-15"
+    },
+    "scripts/database/post28-preflight.mjs": {
+      "purpose": "Read-only identity check for declared local POST28 disposable targets before migration or suite execution",
+      "access": "isolated-read-write",
+      "environment": [
+        "NODE_ENV=test or development",
+        "POST28_ISOLATED_EXECUTION=YES",
+        "DATABASE_TARGET_CLASS=DISPOSABLE",
+        "POST28_TARGET_CONTRACT_FILE bound to current source SHA and bootstrap database comment"
+      ],
+      "gate": "preflightTargets validates all target declarations and pair uniqueness before constructing any client; inspectLiveTarget rejects elevated roles and wrong server/database/marker; connection may be a migration role but identity SQL runs inside SET TRANSACTION READ ONLY",
+      "requiredSourceMarkers": [
+        "preflightTargets",
+        "readDatabaseIdentity",
+        "POST28_IDENTITY_READ_FAILED",
+        "--require-empty",
+        "SET TRANSACTION READ ONLY"
+      ],
+      "review": "POST28 R02-core 2026-10-16; local source preparation, no production or restore authority"
     }
   }
 }

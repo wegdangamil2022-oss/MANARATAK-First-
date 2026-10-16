@@ -1,0 +1,17 @@
+{
+  "name": "source-preflight",
+  "command": [
+    "npx",
+    "--yes",
+    "--package=node@22.16.0",
+    "node",
+    "scripts/ci/source-preflight.mjs"
+  ],
+  "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+  "dirty": true,
+  "startedUtc": "2026-10-16T01:53:06.732281+00:00",
+  "finishedUtc": "2026-10-16T01:53:13.979896+00:00",
+  "exitCode": 0,
+  "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R02-core/source-preflight-20261016T015313962134Z.log",
+  "sha256": "f6606905fd39345323bf8177d474e793b6ce6d00da4a63914799137fbb83b423"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "core-vitest-compat-regressions",
+  "command": [
+    "npx",
+    "--yes",
+    "--package=node@22.16.0",
+    "node",
+    "--test",
+    "tests/database/post28-isolation.test.mjs",
+    "tests/database/greenfield-migration-parity-source.test.mjs"
+  ],
+  "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+  "dirty": true,
+  "startedUtc": "2026-10-16T02:05:11.594394+00:00",
+  "finishedUtc": "2026-10-16T02:05:14.365809+00:00",
+  "exitCode": 1,
+  "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R02-core/core-vitest-compat-regressions-20261016T020514349907Z.log",
+  "sha256": "146db601db32e4d9fbef07f0496cae467261c9b8084b4dee65961bdea21c25ba"
+}

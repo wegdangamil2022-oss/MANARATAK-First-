@@ -1,0 +1,17 @@
+{
+  "name": "architecture-fixed",
+  "command": [
+    "npx",
+    "--yes",
+    "--package=node@22.16.0",
+    "node",
+    "scripts/architecture/verify-source-architecture-guards.mjs"
+  ],
+  "sourceSha": "15cf903313fe6f4702e183702c03a00dc09bae2e",
+  "dirty": true,
+  "startedUtc": "2026-10-16T01:50:21.424005+00:00",
+  "finishedUtc": "2026-10-16T01:50:22.540557+00:00",
+  "exitCode": 0,
+  "log": "/workspace/scratch/post28/15cf903313fe6f4702e183702c03a00dc09bae2e/R02-core/architecture-fixed-20261016T015022522647Z.log",
+  "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659"
+}
