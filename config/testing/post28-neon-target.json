@@ -53,5 +53,41 @@
     "marking_evidence_PASS_without_real_tests"
   ],
   "handoff": "docs/operations/POST28_NEON_TEST_DATABASE_HANDOFF.md",
-  "readOnlyPreflightGuide": "docs/operations/POST28_NEON_READ_ONLY_PREFLIGHT.md"
+  "readOnlyPreflightGuide": "docs/operations/POST28_NEON_READ_ONLY_PREFLIGHT.md",
+  "r03": {
+    "status": "PARTIALLY_PROVISIONED_BLOCKED",
+    "asOf": "2026-10-16",
+    "greenfield": {
+      "branchName": "post28-r03-db-g-20261016",
+      "branchId": "br-raspy-shadow-ba33tmh3",
+      "endpointId": "ep-red-king-baoyw96q",
+      "directHost": "ep-red-king-baoyw96q.c-8.eu-central-1.aws.neon.tech",
+      "database": "manaratak_post28_greenfield_test",
+      "roles": {
+        "migration": "post28_g_migrate_limited",
+        "application": "post28_g_app_limited"
+      },
+      "publicTablesAtCheck": 0
+    },
+    "shadow": {
+      "branchName": "post28-r03-db-s-20261016",
+      "branchId": "br-round-dew-bahzpr4x",
+      "endpointId": "ep-tiny-recipe-ba15g3br",
+      "directHost": "ep-tiny-recipe-ba15g3br.c-8.eu-central-1.aws.neon.tech",
+      "database": "manaratak_post28_shadow_test",
+      "roles": {
+        "shadow": "post28_s_shadow_limited"
+      },
+      "publicTablesAtCheck": 0
+    },
+    "unapprovedPrivilegedRoles": [
+      "post28_migrator",
+      "post28_app",
+      "post28_shadow"
+    ],
+    "secretsConfigured": false,
+    "directPrismaTlsVerified": false,
+    "remoteMutationsAuthorized": false,
+    "detail": "docs/operations/POST28_R03_NEON_PROVISIONING_2026-10-16.md"
+  }
 }
