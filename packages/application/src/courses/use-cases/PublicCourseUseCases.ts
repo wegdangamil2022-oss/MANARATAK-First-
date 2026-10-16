@@ -146,8 +146,7 @@ export class PublicCourseUseCases {
 
   private publicEligible(course: any): boolean {
     if (course.originType !== CourseOriginType.EXTERNAL_LINKED_COURSE) return true;
-    return course.accessType === CourseAccessType.FREE_STUDY_AND_CERTIFICATE
-      && course.isStudyFree === true
-      && course.isFreeCertificate === true;
+    return [CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE].includes(course.accessType)
+      && course.isStudyFree === true;
   }
 }

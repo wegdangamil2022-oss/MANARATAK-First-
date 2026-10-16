@@ -48,6 +48,7 @@ describe('M10-14 course source publication gate', () => {
       await expect(new CoursePublicationService({} as ICourseRepository).assertPublicationReady({ ...course, originType, accessType: CourseAccessType.PAID, isStudyFree: false, isFreeCertificate: false })).resolves.toBeUndefined();
     }
     const f = fixture();
-    await expect(f.service.assertPublicationReady({ ...course, isFreeCertificate: false })).rejects.toThrow('IMPORTED_COURSE_FREE_STUDY_AND_CERTIFICATE_REQUIRED');
+    await expect(f.service.assertPublicationReady({ ...course, accessType: CourseAccessType.FREE_STUDY, isFreeCertificate: false })).resolves.toBeUndefined();
+    await expect(f.service.assertPublicationReady({ ...course, isStudyFree: false })).rejects.toThrow('IMPORTED_COURSE_FREE_STUDY_REQUIRED');
   });
 });

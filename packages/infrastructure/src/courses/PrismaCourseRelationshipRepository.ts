@@ -750,9 +750,8 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
           { originType: { not: 'EXTERNAL_LINKED_COURSE' } },
           {
             originType: 'EXTERNAL_LINKED_COURSE',
-            accessType: 'FREE_STUDY_AND_CERTIFICATE',
+            accessType: { in: ['FREE_STUDY', 'FREE_STUDY_AND_CERTIFICATE'] },
             isStudyFree: true,
-            isFreeCertificate: true,
           },
         ],
       }, publicCourseLanguageProof()],

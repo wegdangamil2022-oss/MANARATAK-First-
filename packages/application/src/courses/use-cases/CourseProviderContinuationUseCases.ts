@@ -594,7 +594,7 @@ export class CourseProviderContinuationUseCases {
         malformedRows.push({ index: index + 1, reason: 'REQUIRED_FIELD_MISSING' });
         continue;
       }
-      if (!/^(yes|no)$/i.test(row.studyFreeRaw.trim()) || !/^(yes|no)$/i.test(row.freeCertificateRaw.trim())) {
+      if (!/^(yes|no)$/i.test(row.studyFreeRaw.trim()) || !/^(yes|no|unknown|)$/i.test(row.freeCertificateRaw.trim())) {
         malformedRows.push({ index: index + 1, reason: 'FREE_STATE_NOT_EXPLICIT_YES_NO' });
         continue;
       }

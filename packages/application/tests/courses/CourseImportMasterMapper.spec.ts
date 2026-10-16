@@ -98,3 +98,13 @@ describe('CourseImportMasterMapper', () => {
     expect(update.directCourseUrl).toBeUndefined();
   });
 });
+
+describe('DEC-03 unknown certificate evidence',()=>{
+ it('keeps free study with an unknown certificate price and does not claim a free certificate',()=>{
+  const source=payload();source.semanticRow.freeCertificateRaw='Unknown';source.semanticRow.certificateTypeRaw='';
+  const mapped=CourseImportMasterMapper.map(source,'dec03:unknown','rec-unknown');
+  expect(mapped.accessType).toBe(CourseAccessType.FREE_STUDY);expect(mapped.createData.isFreeCertificate).toBeUndefined();
+  const update=CourseImportMasterMapper.buildMergeUpdate({isFreeCertificate:true},mapped,new Set(['freeCertificateRaw']),false);
+  expect(update.isFreeCertificate).toBeNull();
+ });
+});

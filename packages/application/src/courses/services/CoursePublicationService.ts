@@ -59,11 +59,10 @@ export class CoursePublicationService {
     if (!this.importedOperations) throw new Error('IMPORTED_COURSE_PUBLICATION_EVIDENCE_NOT_CONFIGURED');
 
     if (
-      course.accessType !== CourseAccessType.FREE_STUDY_AND_CERTIFICATE ||
-      course.isStudyFree !== true ||
-      course.isFreeCertificate !== true
+      ![CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE].includes(course.accessType) ||
+      course.isStudyFree !== true
     ) {
-      throw new Error('IMPORTED_COURSE_FREE_STUDY_AND_CERTIFICATE_REQUIRED');
+      throw new Error('IMPORTED_COURSE_FREE_STUDY_REQUIRED');
     }
 
     const detail = await this.importedOperations.getImportedCourseById(course.id);
