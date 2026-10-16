@@ -79,7 +79,10 @@ try {
     const database=`manaratak_post28_${kind}_test`,nonce=randomBytes(32).toString('hex');
     sql('postgres',`CREATE DATABASE ${database} OWNER post28_bootstrap TEMPLATE template0 ENCODING 'UTF8' LC_COLLATE 'C.UTF-8' LC_CTYPE 'C.UTF-8';\nREVOKE ALL ON DATABASE ${database} FROM PUBLIC;\nGRANT CONNECT ON DATABASE ${database} TO post28_${role};\nCOMMENT ON DATABASE ${database} IS ${quote(`POST28_DISPOSABLE:${id}:${label}:${nonce}`)};`);
     sql(database,`CREATE EXTENSION IF NOT EXISTS pg_trgm;\nREVOKE ALL ON SCHEMA public FROM PUBLIC;\nALTER SCHEMA public OWNER TO post28_${role};\nGRANT USAGE,CREATE ON SCHEMA public TO post28_${role};\nGRANT EXECUTE ON FUNCTION pg_control_system() TO post28_${role};`);
-    if(label==='DB-G')sql(database,`GRANT CONNECT ON DATABASE ${database} TO post28_app;\nGRANT USAGE ON SCHEMA public TO post28_app;\nGRANT EXECUTE ON FUNCTION pg_control_system() TO post28_app;\nALTER DEFAULT PRIVILEGES FOR ROLE post28_migrator IN SCHEMA public GRANT SELECT,INSERT,UPDATE,DELETE ON TABLES TO post28_app;\nALTER DEFAULT PRIVILEGES FOR ROLE post28_migrator IN SCHEMA public GRANT USAGE,SELECT ON SEQUENCES TO post28_app;`);
+    // DB-G is migration proof, not an application fixture database. Blanket
+    // default DML grants would also let the app rewrite _prisma_migrations.
+    // Later DB-T/E grants need an explicit reviewed application-table list.
+    if(label==='DB-G')sql(database,`GRANT CONNECT ON DATABASE ${database} TO post28_app;\nGRANT USAGE ON SCHEMA public TO post28_app;\nGRANT EXECUTE ON FUNCTION pg_control_system() TO post28_app;`);
     const identity=JSON.parse(sql(database,"SELECT json_build_object('serverIdentity',(SELECT system_identifier::text FROM pg_control_system()),'databaseOid',(SELECT oid::text FROM pg_database WHERE datname=current_database()));"));
     targets[label]={host:'127.0.0.1',port,database,role:'post28_'+role,roleKind:label==='DB-G'?'MIGRATION':'SHADOW',nonce,...identity};
   }

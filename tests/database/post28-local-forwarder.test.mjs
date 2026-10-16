@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import net from 'node:net';
+import fs from 'node:fs';
 import {validateForwarderTarget,createLoopbackForwarder} from '../../scripts/database/post28-local-forwarder.mjs';
 const now=1000000,runId='11111111-1111-4111-8111-111111111111';
 const config={version:1,containerId:'a'.repeat(64),runId,network:'post28-net-11111111',port:15432,expiresAt:now+3600000};
@@ -29,4 +30,9 @@ test('actual inert TCP relay binds only loopback and closes its connections',asy
       socket.once('error',reject);socket.once('data',data=>{resolve(data.toString());socket.destroy();});});
     assert.equal(reply,'inert');
   }finally{relay.close();await new Promise(resolve=>upstream.close(resolve));}
+});
+test('greenfield bootstrap never grants default app DML that could rewrite the Prisma ledger',()=>{
+  const source=fs.readFileSync('scripts/database/create-post28-lab.mjs','utf8');
+  assert.doesNotMatch(source,/ALTER DEFAULT PRIVILEGES[^;]+GRANT[^;]+TO post28_app/);
+  assert.match(source,/GRANT USAGE ON SCHEMA public TO post28_app/);
 });
