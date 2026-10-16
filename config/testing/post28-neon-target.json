@@ -80,24 +80,27 @@
       },
       "publicTablesAtCheck": 0
     },
-    "unapprovedPrivilegedRoles": [
-      "post28_migrator",
-      "post28_app",
-      "post28_shadow"
-    ],
+    "unapprovedPrivilegedRoles": [],
     "secretsConfigured": false,
     "directPrismaTlsVerified": false,
     "remoteMutationsAuthorized": false,
     "detail": "docs/operations/POST28_R03_NEON_PROVISIONING_2026-10-16.md",
     "followUp": {
       "asOf": "2026-10-16",
-      "status": "BLOCKED_RUNTIME_CONFIGURATION",
-      "limitedRoleAuthentication": "PROVIDER_REPORTS_NO_LOGIN_NOT_AUTHENTICATED",
-      "unsafeRoleRemediation": "REQUIRED_NOT_EXECUTED",
+      "status": "BLOCKED_RUNTIME_CONFIGURATION_AFTER_UNSAFE_ROLE_REMOVAL",
+      "limitedRoleAuthentication": "LOGIN_TRUE_PASSWORD_MISSING_3_ROLES",
+      "unsafeRoleRemediation": "VERIFIED_REMOVED_2026-10-16",
       "tcpConfigured": false,
       "directPrismaTlsVerified": false,
       "r04Readiness": "BLOCKED",
-      "report": "docs/operations/POST28_R03_NEON_FOLLOWUP_2026-10-16.md"
-    }
+      "report": "docs/operations/POST28_R03_NEON_FOLLOWUP_2026-10-16.md",
+      "latestVerifiedGitHubReport": "docs/operations/POST28_R03_NEON_FOLLOWUP_2026-10-16.md"
+    },
+    "unsafeRolesRemoved": [
+      "post28_migrator",
+      "post28_app",
+      "post28_shadow"
+    ],
+    "rolesRemediation": "VERIFIED_REMOVED_2026-10-16"
   }
 }
