@@ -111,7 +111,7 @@ test('scholarship Admin runtime declares eighteen cases without widening applica
 test('scholarship public relation profile declares four real owner count cases without additional grants',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
  assert.equal(databaseSuite('scholarship-public-relations').minimumCases,4);
- assert.equal(TRANSACTION_APPLICATION_TABLES.length,78);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.length,80);
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });
 
@@ -119,7 +119,7 @@ test('university geography declares eighteen cases and explicitly grants only th
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
  assert.equal(databaseSuite('university-geography').minimumCases,18);
  for(const table of ['ReferenceCountry','AdministrativeRegion','ReferenceCity'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
- assert.equal(TRANSACTION_APPLICATION_TABLES.length,78);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.length,80);
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });
 
@@ -135,11 +135,11 @@ test('reference/import and unavailable finance providers have explicit profiles 
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
  assert.equal(databaseSuite('reference-import-closure').minimumCases,18);assert.equal(databaseSuite('finance-provider-safety').minimumCases,6);
  for(const table of ['ReferenceLanguage','ExternalCourseProvider','ExternalCourseProviderDomain','CourseSourceIdentity','CourseSourceUrlHistory','FinanceRefundRecord','FinanceWalletRecord','FinanceTransferRecord'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
- assert.equal(TRANSACTION_APPLICATION_TABLES.length,78);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.length,80);
 });
 
 test('independent local finance requires fourteen cases and only three additional owner tables',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('finance-local-closure').minimumCases,14);
  for(const table of ['FinanceDocumentRecord','FinanceInstallmentPlanRecord','FinanceWalletHoldRecord'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
- assert.equal(TRANSACTION_APPLICATION_TABLES.length,78);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.length,80);
 });
