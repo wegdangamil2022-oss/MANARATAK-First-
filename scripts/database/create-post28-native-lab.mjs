@@ -25,14 +25,16 @@ try {
   privateEnvironment.PATH=bin+';'+process.env.SystemRoot+'\\System32';
   const redact=value=>Object.values(passwords).reduce((text,password)=>text.replaceAll(password,'[REDACTED]'),String(value));
   const command=(name,args,extra={})=>{const result=spawnSync(path.join(bin,name+'.exe'),args,{env:privateEnvironment,encoding:'utf8',windowsHide:true,timeout:120000,...extra});
-    fs.appendFileSync(path.join(directory,'bootstrap.log'),redact(result.stdout??'')+redact(result.stderr??''));if(result.status!==0)throw new Error('POST28_NATIVE_'+name.toUpperCase()+'_FAILED');return result.stdout.trim();};
+    fs.appendFileSync(path.join(directory,'bootstrap.log'),redact(result.stdout??'')+redact(result.stderr??''));if(result.status!==0)throw new Error('POST28_NATIVE_'+name.toUpperCase()+'_FAILED');return (result.stdout??'').trim();};
   const data=path.join(directory,'data'),passwordFile=path.join(directory,'bootstrap-password');fs.writeFileSync(passwordFile,passwords.bootstrap+'\n',{flag:'wx'});
   command('initdb',['-D',data,'-U','post28_bootstrap','--pwfile='+passwordFile,'--auth-local=scram-sha-256','--auth-host=scram-sha-256','--encoding=UTF8','--locale=C']);
   const port=await new Promise((resolve,reject)=>{const server=net.createServer();server.once('error',reject);server.listen(0,'127.0.0.1',()=>{const value=server.address().port;server.close(()=>resolve(value));});});
   fs.appendFileSync(path.join(data,'postgresql.conf'),`\nlisten_addresses='127.0.0.1'\nport=${port}\ntimezone='UTC'\nmax_connections=40\nshared_buffers='64MB'\nlog_statement='none'\n`);
   const state={kind:'POST28_NATIVE_LOCAL_LAB',runtime:'NATIVE_WINDOWS',scope:'DISPOSABLE',profile:'upgrade',sourceSha:sha,runId:id,postgresMajor:16,postgresVersion:version,pgBin:bin,dataDirectory:data,directory,port,status:'BOOTSTRAPPING',createdAt:new Date().toISOString(),postgresBinarySha256:createHash('sha256').update(fs.readFileSync(path.join(bin,'postgres.exe'))).digest('hex')};
   fs.writeFileSync(path.join(directory,'lab-state.json'),JSON.stringify(state,null,2)+'\n');
-  command('pg_ctl',['-D',data,'-l',path.join(directory,'server.log'),'-w','start']);
+  // A Windows postmaster can inherit pipe handles beyond pg_ctl's lifetime.
+  // Keep daemon startup off captured pipes; its dedicated server log is retained.
+  command('pg_ctl',['-D',data,'-l',path.join(directory,'server.log'),'-w','start'],{stdio:'ignore'});
   state.postmasterPid=Number(fs.readFileSync(path.join(data,'postmaster.pid'),'utf8').split(/\r?\n/)[0]);
   const quote=value=>"'"+String(value).replaceAll("'","''")+"'";
   const sql=(database,input)=>command('psql',['-X','-v','ON_ERROR_STOP=1','-At'],{input,env:{...privateEnvironment,PGHOST:'127.0.0.1',PGPORT:String(port),PGUSER:'post28_bootstrap',PGPASSWORD:passwords.bootstrap,PGDATABASE:database,PGSSLMODE:'disable'}});
