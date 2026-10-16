@@ -1,0 +1,11 @@
+﻿{
+    "kind":  "POST28_ABANDONED_NATIVE_START_ATTEMPT",
+    "directory":  "native-pg16-5Kd9UJ",
+    "sourceSha":  "2b5bc283bad25bf87f38f3f65f9639f3f64293df",
+    "reason":  "Windows inherited startup pipe handles prevented creator completion",
+    "baselineLoaded":  false,
+    "acceptedAsEvidence":  false,
+    "recordedPort":  56313,
+    "listenerPresentNow":  false,
+    "directoryPreserved":  true
+}

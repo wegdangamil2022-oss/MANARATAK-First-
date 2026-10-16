@@ -1,0 +1,100 @@
+{
+  "kind": "POST28_R05_PREUPGRADE_AUDIT",
+  "sourceSha": "15b993e19c770563281f0a29db00b1ae881103c0",
+  "predecessorSha": "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+  "runId": "d5030244-7c77-4d3e-abff-f0d3cffcd6d9",
+  "identities": [
+    {
+      "label": "DB-U",
+      "database": "manaratak_post28_upgrade_test",
+      "role": "post28_upgrader",
+      "serverIdentity": "7697409333430046084",
+      "databaseOid": "16387",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    },
+    {
+      "label": "DB-V",
+      "database": "manaratak_post28_upgrade_verify_test",
+      "role": "post28_verifier",
+      "serverIdentity": "7697409333430046084",
+      "databaseOid": "16469",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "gate": "BLOCKED",
+  "reason": "POST28_UPGRADE_OWNER_REMEDIATION_REQUIRED",
+  "audits": [
+    {
+      "constraint": "FinancePayment_positive_units",
+      "violations": "0"
+    },
+    {
+      "constraint": "FinanceRefund_positive_units",
+      "violations": "0"
+    },
+    {
+      "constraint": "FinanceTransfer_positive_units",
+      "violations": "0"
+    },
+    {
+      "constraint": "FinanceWalletHold_positive_units",
+      "violations": "0"
+    },
+    {
+      "constraint": "FinanceLedger_positive_units",
+      "violations": "0"
+    },
+    {
+      "constraint": "ServiceCatalogRecord_fulfillment_policy",
+      "violations": "0"
+    },
+    {
+      "constraint": "ServicePricingRecord_bounded_money",
+      "violations": "0"
+    },
+    {
+      "constraint": "SettingAssignmentRecord_id_currentVersionId_fkey",
+      "violations": "0"
+    },
+    {
+      "constraint": "StudentApplicationDocumentBinding_assetId_fkey",
+      "violations": "1"
+    }
+  ],
+  "modelsMeasured": 281,
+  "invariantsMeasured": 8,
+  "financialGroups": 2,
+  "financialTotals": [
+    {
+      "accountId": "8dc9e95e-9850-49cf-84ba-35ce74da1569",
+      "currency": "USD",
+      "scale": 2,
+      "balanceUnits": "-900719925474099312345"
+    },
+    {
+      "accountId": "c755e42b-f43c-4663-88ec-9a095867b589",
+      "currency": "USD",
+      "scale": 2,
+      "balanceUnits": "900719925474099312345"
+    }
+  ],
+  "legacyUnattributedSearchRows": 1,
+  "fixtureReadProbes": {
+    "rows": 46,
+    "allDeclaredFieldsMatched": true,
+    "readOnly": true
+  },
+  "sourceUnchanged": true,
+  "tableContentSha256": "2d3ac5bec617356cf5b90426378a6401f912072b1e53bfcf401993e024068adb",
+  "catalogSha256": "2aa2f4305b7f39d3353a0e052e856148e77aedb92569a060146f0d4fc2a13f1f",
+  "readOnly": true,
+  "mutationCommandsExecuted": 0,
+  "upgradeExecuted": false,
+  "R05Accepted": false
+}
