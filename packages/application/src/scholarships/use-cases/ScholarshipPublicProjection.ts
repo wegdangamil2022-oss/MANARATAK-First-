@@ -10,9 +10,12 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
     return major?.status === 'PUBLISHED';
   };
   const institutionPublished = (value: unknown) => isPublicScholarshipUniversityLink(value as Parameters<typeof isPublicScholarshipUniversityLink>[0]);
-  const testPublished = (value: unknown) =>
-    (value as { internationalTest?: { status?: string } })?.internationalTest?.status ===
-    'PUBLISHED';
+  const testPublished = (value: unknown) => {
+    const test = (value as { internationalTest?: { id?: string; status?: string; isPubliclyVisible?: boolean; currentPublishedVersionId?: string; currentPublishedVersion?: {id: string; testId: string; status: string} } })?.internationalTest;
+    const version = test?.currentPublishedVersion;
+    return test?.status === 'PUBLISHED' && test.isPubliclyVisible === true && Boolean(version) &&
+      version?.status === 'PUBLISHED' && version.id === test.currentPublishedVersionId && version.testId === test.id;
+  };
   return {
     publicId: source.publicId, slug: source.slug, canonicalName: source.canonicalName,
     displayName, providerName: source.providerName,

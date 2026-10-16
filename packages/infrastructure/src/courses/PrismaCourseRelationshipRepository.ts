@@ -1,3 +1,4 @@
+import { publicCourseLanguageProof } from './CoursePublicLanguageProof';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -50,6 +51,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         category: true,
         learningLanguageRaw: true,
         learningLanguageReferenceId: true,
+        learningLanguageReference: { select: { isActive: true, lifecycleState: true } },
         learningLanguageResolutionState: true,
         learningLanguageResolutionMethod: true,
         learningLanguageReviewedBy: true,
@@ -81,7 +83,8 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       shortCourseTopicsRaw: course.shortCourseTopicsRaw ?? course.category,
       learningLanguageRaw: course.learningLanguageRaw,
       learningLanguageReferenceId: course.learningLanguageReferenceId,
-      learningLanguageResolutionState: course.learningLanguageResolutionState as CourseRelationshipSourceDto['learningLanguageResolutionState'],
+      learningLanguageResolutionState: course.learningLanguageReferenceId && (!course.learningLanguageReference?.isActive || course.learningLanguageReference.lifecycleState !== 'ACTIVE')
+        ? 'REVIEW_REQUIRED' : course.learningLanguageResolutionState as CourseRelationshipSourceDto['learningLanguageResolutionState'],
       learningLanguageResolutionMethod: course.learningLanguageResolutionMethod as CourseRelationshipSourceDto['learningLanguageResolutionMethod'],
       learningLanguageReviewedBy: course.learningLanguageReviewedBy,
       learningLanguageAdminReviewedRaw: course.learningLanguageAdminReviewedRaw,
@@ -381,6 +384,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
     const records = await this.prisma.referenceLanguage.findMany({
       where: {
         isActive: true,
+        lifecycleState: 'ACTIVE',
         OR: [
           { isoCode: { equals: term, mode: 'insensitive' } },
           { name: { equals: term, mode: 'insensitive' } },
@@ -435,6 +439,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       where: {
         id: input.languageReferenceId,
         isActive: true,
+        lifecycleState: 'ACTIVE',
       },
       select: { id: true },
     });
@@ -750,7 +755,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
             isFreeCertificate: true,
           },
         ],
-      }],
+      }, publicCourseLanguageProof()],
     };
 
     if (filters.accessType) where.accessType = filters.accessType;

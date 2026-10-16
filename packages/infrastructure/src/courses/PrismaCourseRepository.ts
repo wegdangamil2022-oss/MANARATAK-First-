@@ -1,3 +1,4 @@
+import { publicCourseLanguageProof } from './CoursePublicLanguageProof';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   AtomicPersistenceContext,
@@ -348,8 +349,8 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     return this.listPage(where, page, pageSize);
   }
 
-  public async listPublished(filters: PublicCourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
-    const where: Prisma.CourseWhereInput = {
+  private publishedWhere(): Prisma.CourseWhereInput {
+    return {
       status: CourseStatus.PUBLISHED,
       completenessStatus: CourseImportCompletenessState.COMPLETE,
       AND: [{
@@ -362,8 +363,20 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
             isFreeCertificate: true,
           },
         ],
-      }],
+      }, publicCourseLanguageProof()],
     };
+
+  }
+
+  public async findPublishedBySlug(slug: string): Promise<CourseDto | null> {
+    const record = await this.prisma.course.findFirst({ where: { ...this.publishedWhere(), slug },
+      include: {majorProjections:{where:{projectionState:'APPROVED',major:{status:'PUBLISHED'}},select:{major:{select:{id:true,displayName:true}}}}},
+    });
+    return record ? this.mapToDto(record) : null;
+  }
+
+  public async listPublished(filters: PublicCourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
+    const where = this.publishedWhere();
 
     if (filters.accessType) where.accessType = filters.accessType;
     if (filters.originType) where.originType = filters.originType;

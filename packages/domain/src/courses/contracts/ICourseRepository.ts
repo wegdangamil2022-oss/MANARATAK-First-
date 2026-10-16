@@ -73,6 +73,7 @@ export interface ICourseRepository {
   findById(id: string): Promise<CourseDto | null>;
   findByPublicId(publicId: string): Promise<CourseDto | null>;
   findBySlug(slug: string): Promise<CourseDto | null>;
+  findPublishedBySlug(slug: string): Promise<CourseDto | null>;
   updateStatus(id: string, status: CourseStatus): Promise<void>;
   updateImportLink(id: string, sourceImportRecordId: string): Promise<void>;
   listByStatus(status: CourseStatus): Promise<CourseDto[]>;

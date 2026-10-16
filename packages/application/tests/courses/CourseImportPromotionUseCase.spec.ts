@@ -16,6 +16,7 @@ describe('CourseImportPromotionUseCase', () => {
     findById: vi.fn(),
     findByPublicId: vi.fn(),
     findBySlug: vi.fn(),
+    findPublishedBySlug: vi.fn(),
     updateStatus: vi.fn(),
     updateImportLink: vi.fn(),
     listByStatus: vi.fn(),

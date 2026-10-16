@@ -288,7 +288,10 @@ describe('PrismaCourseRepository', () => {
             isStudyFree: true,
             isFreeCertificate: true,
           },
-        ] }],
+        ] }, {OR: [
+          {learningLanguageReferenceId:null,AND:[{OR:[{learningLanguageRaw:null},{learningLanguageRaw:''}]},{OR:[{learningLanguage:null},{learningLanguage:''}]}]},
+          {learningLanguageResolutionState:'RESOLVED',learningLanguageReference:{is:{isActive:true,lifecycleState:'ACTIVE'}}},
+        ]}],
       },
       take: 11,
       orderBy: { id: 'asc' },

@@ -145,7 +145,7 @@ describe('PrismaScholarshipRepository', () => {
         where: expect.objectContaining({ publicationStatus: 'PUBLISHED' }),
         include: expect.objectContaining({
           benefits: {include: {currency: {select: {isoCode: true, nameAr: true, name: true}}}},
-          requiredDocuments: expect.objectContaining({include:{internationalTest:{select:{status:true}}}}),
+          requiredDocuments: expect.objectContaining({include:{internationalTest:{select:{id:true,status:true,isPubliclyVisible:true,currentPublishedVersionId:true,currentPublishedVersion:{select:{id:true,testId:true,status:true}}}}}}),
           universityLinks: {include: {university: {select: {id:true,status:true,displayName:true}}}},
         }),
       }),

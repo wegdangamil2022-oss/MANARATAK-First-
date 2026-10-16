@@ -40,7 +40,7 @@ export class PublicCourseUseCases {
     slug: string,
     locale: SupportedLocale = DEFAULT_LOCALE,
   ): Promise<PublicCourseDto> {
-    const course = await this.repository.findBySlug(slug);
+    const course = await this.repository.findPublishedBySlug(slug);
 
     if (!course || course.status !== CourseStatus.PUBLISHED || course.completenessStatus !== CourseImportCompletenessState.COMPLETE || !this.publicEligible(course)) {
       throw new Error('Course not found');

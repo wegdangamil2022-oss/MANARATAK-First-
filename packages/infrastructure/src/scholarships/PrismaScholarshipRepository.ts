@@ -107,9 +107,9 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     degreeTargets: { include: { degreeLevel: { select: { canonicalCode: true, nameEn: true, nameAr: true } } } },
     majorTargets: { include: { major: { select: { status: true } } } },
     eligibilityItems: { include: { major: { select: { status: true } },
-        internationalTest: { select: { status: true } },
+        internationalTest: { select: { id: true, status: true, isPubliclyVisible: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, testId: true, status: true } } } },
       } },
-    requiredDocuments: { include: { internationalTest: { select: { status: true } } } },
+    requiredDocuments: { include: { internationalTest: { select: { id: true, status: true, isPubliclyVisible: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, testId: true, status: true } } } } } },
     sourceEvidence: true,
     universityLinks: { include: { university: { select: { id: true, status: true, displayName: true } } } },
     versions: { orderBy: { versionNumber: 'asc' as const } },
@@ -579,10 +579,10 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     ] });
     if (filters.internationalTestId) constraints.push({ OR: [
       { eligibilityItems: { some: { internationalTestId: filters.internationalTestId,
-                internationalTest: { is: { status: 'PUBLISHED' } },
+                resolutionStatus: 'RESOLVED', internationalTest: { is: { status: 'PUBLISHED', isPubliclyVisible: true, currentPublishedVersion: { is: { status: 'PUBLISHED', testId: filters.internationalTestId } } } },
               } } },
       { requiredDocuments: { some: { internationalTestId: filters.internationalTestId,
-                internationalTest: { is: { status: 'PUBLISHED' } },
+                resolutionStatus: 'RESOLVED', internationalTest: { is: { status: 'PUBLISHED', isPubliclyVisible: true, currentPublishedVersion: { is: { status: 'PUBLISHED', testId: filters.internationalTestId } } } },
               } } },
     ] });
     if (filters.universityId || filters.academicProgramId) {
