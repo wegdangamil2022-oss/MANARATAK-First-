@@ -136,10 +136,18 @@
       ],
       "gate": "Must not import/instantiate Prisma or query a database",
       "requiredSourceMarkers": [
-        "externalModules:",
-        "'@prisma/client'"
+        "runtimeExternalModules(JSON.parse",
+        "externalModules,"
       ],
-      "review": "B04 2026-10-15"
+      "review": "R07 2026-10-17; metadata now follows actual esbuild external imports; reference-only restrictions retained"
+    },
+    "scripts/release/lib/RuntimeModules.mjs": {
+      "purpose": "Read esbuild metadata to enumerate required external modules, without loading Prisma or accessing a database",
+      "access": "reference-only",
+      "environment": ["Filesystem build metadata only; no database credentials"],
+      "gate": "Must not import/instantiate Prisma or query a database",
+      "requiredSourceMarkers": ["modules.includes('@prisma/client')", "!isBuiltin(row.path)"],
+      "review": "R07 2026-10-17; static import metadata enumeration only"
     },
     "scripts/release/lib/ReleaseContracts.mjs": {
       "purpose": "Validate release metadata declaring required runtime modules",
