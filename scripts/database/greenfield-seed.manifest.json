@@ -1,7 +1,7 @@
 {
   "version": 1,
   "authority": "MNT-AUD-0035",
-  "seedSetVersion": "2026-09-06.1",
+  "seedSetVersion": "2026-10-16.2",
   "policy": {
     "requiresMigrationStatusClean": true,
     "requiresGreenfieldMutationGate": true,
@@ -10,27 +10,8 @@
   },
   "steps": [
     {
-      "id": "reference-countries",
-      "order": 10,
-      "required": true,
-      "owner": "reference",
-      "state": "READY",
-      "script": "scripts/seed-reference-countries.ts",
-      "sourcePath": "workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx",
-      "sourceSha256": "f596c0b4a9bc9227f2b008f81a7f61104d95211cb75c2f73cf5edb9565ad6f75",
-      "sourceVersion": "2026-09-30/f596c0b4a9bc9227",
-      "requiredReviewStatus": "REVIEWED",
-      "observedReviewStatus": "REVIEWED",
-      "expected": {
-        "ReferenceCountry": {
-          "exact": 194
-        }
-      },
-      "provenance": "ISO-3166/UN-M49/IANA/ITU/CLDR references declared in governed workbook"
-    },
-    {
       "id": "reference-currencies",
-      "order": 20,
+      "order": 10,
       "required": true,
       "owner": "reference",
       "state": "READY",
@@ -47,7 +28,7 @@
     },
     {
       "id": "reference-languages",
-      "order": 30,
+      "order": 20,
       "required": true,
       "owner": "reference",
       "state": "READY",
@@ -61,6 +42,25 @@
         }
       },
       "provenance": "ISO-639/BCP47/CLDR authoritative dataset required"
+    },
+    {
+      "id": "reference-countries",
+      "order": 30,
+      "required": true,
+      "owner": "reference",
+      "state": "READY",
+      "script": "scripts/seed-reference-countries.ts",
+      "sourcePath": "workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx",
+      "sourceSha256": "f596c0b4a9bc9227f2b008f81a7f61104d95211cb75c2f73cf5edb9565ad6f75",
+      "sourceVersion": "2026-09-30/f596c0b4a9bc9227",
+      "requiredReviewStatus": "REVIEWED",
+      "observedReviewStatus": "REVIEWED",
+      "expected": {
+        "ReferenceCountry": {
+          "exact": 194
+        }
+      },
+      "provenance": "ISO-3166/UN-M49/IANA/ITU/CLDR references declared in governed workbook"
     },
     {
       "id": "degree-levels",
@@ -152,5 +152,12 @@
     "large city/region imports",
     "backfills",
     "provider synchronization"
-  ]
+  ],
+  "localValidationProfile": {
+    "id": "POST28_LOCAL_REQUIRED_SEED/v1",
+    "script": "scripts/database/post28-required-seed.ts",
+    "approval": "Private source/run/SHA/manifest-bound user approval, then durable P7 owner review/apply",
+    "legacyReferenceApplyEnabled": false,
+    "productionApproval": false
+  }
 }

@@ -19,6 +19,8 @@ if (mode === 'plan' || mode === 'source-verify') {
     sourceErrors: inspection.sourceErrors,
     status: inspection.blockers.length || inspection.sourceErrors.length ? 'BLOCKED' : 'READY',
     databaseWrites: 0,
+    runtimeStatus: 'LEGACY_REFERENCE_APPLY_BLOCKED',
+    localValidationProfile: manifest.localValidationProfile ?? null,
   }, null, 2));
   if (mode === 'source-verify' && inspection.sourceErrors.length) process.exit(1);
   process.exit(0);
@@ -27,6 +29,8 @@ if (mode === 'plan' || mode === 'source-verify') {
 if (mode !== 'apply') throw new Error(`Unsupported seed orchestrator mode: ${mode}`);
 if (inspection.sourceErrors.length) fail(`SEED_SOURCE_INVALID: ${inspection.sourceErrors.join('; ')}`);
 if (inspection.blockers.length) fail(`SEED_PRECONDITION_BLOCKED: ${inspection.blockers.join('; ')}`);
+
+if (manifest.localValidationProfile?.legacyReferenceApplyEnabled === false) fail('SEED_OWNER_ROUTE_REQUIRED: use the reviewed local Post28 profile with a private approval; legacy SeedApply remains disabled');
 
 const gate = requireDatabaseMutationGate('greenfield-db-seed', { allowedPurposes: ['seed'] });
 requireMigrationStatusClean();

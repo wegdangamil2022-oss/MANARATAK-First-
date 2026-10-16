@@ -172,6 +172,26 @@
         "SET TRANSACTION READ ONLY"
       ],
       "review": "POST28 R02-core 2026-10-16; local and remote read-only source preparation, no Neon runtime, production or restore authority"
+    },
+    "scripts/database/post28-required-seed.ts": {
+      "purpose": "Required-only local R04 seed using existing P7 reviewed owner commands, durable receipts and real asset lifecycle; no legacy SeedApply enablement",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22",
+        "POST28 local contract matching clean SHA and DB-G/DB-S",
+        "Private source/run/manifest bound user local seed approval",
+        "Successful structural parity evidence"
+      ],
+      "gate": "Local-only identity and limited roles; private explicit approval checked before constructing a client; partial runs fail closed; no reset/delete/prod/Neon",
+      "requiredSourceMarkers": [
+        "POST28_CLEAN_SOURCE_REQUIRED",
+        "requirePost28LocalExecution",
+        "POST28_LOCAL_REQUIRED_SEED_APPROVAL",
+        "requireValidatedCatalog:true",
+        "ReferenceOwnerReviewUseCases",
+        "POST28_SEED_REAPPLY_CHANGED_DATABASE"
+      ],
+      "review": "R04 local execution authorized by user request to complete and close R4, 2026-10-16; no production source approval or DEC change"
     }
   }
 }
