@@ -14,7 +14,9 @@
     "validationDatabase": "manaratak_test",
     "pgMajorVersion": 16,
     "regionId": "aws-eu-central-1",
-    "purpose": "long-lived disposable-test BASELINE / reference, never production"
+    "purpose": "long-lived disposable-test BASELINE / reference, never production",
+    "validationEndpointId": "ep-restless-wind-badta11i",
+    "validationDirectHost": "ep-restless-wind-badta11i.c-8.eu-central-1.aws.neon.tech"
   },
   "validation": {
     "checkedAt": "2026-10-16",
@@ -22,11 +24,20 @@
     "neonReadOnlyConnectionVerified": true,
     "databaseTableCountAtVerification": 0,
     "codexEnvironmentAccess": "NOT_CONFIGURED",
-    "repoRemoteDatabaseGuardCompatibility": "NOT_IMPLEMENTED",
+    "repoRemoteDatabaseGuardCompatibility": "READ_ONLY_PREFLIGHT_IMPLEMENTED_REMOTE_MUTATIONS_BLOCKED",
     "applicationMigrationsApplied": false,
     "schemaParityVerified": false,
     "runtimeAcceptance": "NOT_STARTED",
-    "productionAcceptance": "NOT_AUTHORIZED"
+    "productionAcceptance": "NOT_AUTHORIZED",
+    "latestReadOnlyInspection": {
+      "transport": "Neon MCP, explicit project/branch/endpoint/database/owner role",
+      "publicTables": 0,
+      "ownerRolePrivileged": true,
+      "sqlSessionTls": false,
+      "directCodexPrismaConnection": "BLOCKED_NO_SECRETS_OR_TCP_GRANT",
+      "R02Core": "PARTIAL",
+      "R03": "BLOCKED"
+    }
   },
   "requiredSecretNames": [
     "DATABASE_URL",
@@ -41,5 +52,6 @@
     "using_this_branch_for_production",
     "marking_evidence_PASS_without_real_tests"
   ],
-  "handoff": "docs/operations/POST28_NEON_TEST_DATABASE_HANDOFF.md"
+  "handoff": "docs/operations/POST28_NEON_TEST_DATABASE_HANDOFF.md",
+  "readOnlyPreflightGuide": "docs/operations/POST28_NEON_READ_ONLY_PREFLIGHT.md"
 }

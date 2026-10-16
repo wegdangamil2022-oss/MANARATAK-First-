@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {preflightTargets} from './post28-isolation.mjs';
 import {readDatabaseIdentity} from './post28-preflight.mjs';
 import {requireDatabaseMutationGate} from '../lib/database-mutation-gate.mjs';
+import {requirePost28LocalExecution} from './post28-neon-policy.mjs';
 
 export function prismaDiffArguments(mode, env = process.env) {
   const schema='packages/infrastructure/prisma/schema.prisma';
@@ -31,6 +32,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)) {
     const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
     if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())throw new Error('POST28_CLEAN_SOURCE_REQUIRED');
     const contract=JSON.parse(fs.readFileSync(process.env.POST28_TARGET_CONTRACT_FILE,'utf8'));
+    requirePost28LocalExecution(contract);
     await preflightTargets(contract,[{label:'DB-G',url:process.env.GREENFIELD_DATABASE_URL},
       {label:'DB-S',url:process.env.GREENFIELD_SHADOW_DATABASE_URL}],process.env,sha,readDatabaseIdentity);
     process.env.DATABASE_URL=process.env.GREENFIELD_DATABASE_URL;

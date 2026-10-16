@@ -154,15 +154,16 @@
       "review": "B04 2026-10-15"
     },
     "scripts/database/post28-preflight.mjs": {
-      "purpose": "Read-only identity check for declared local POST28 disposable targets before migration or suite execution",
+      "purpose": "Read-only identity check for declared local POST28 targets or registry/provider-bound Neon rehearsal targets; no Neon mutation authority",
       "access": "isolated-read-write",
       "environment": [
         "NODE_ENV=test or development",
         "POST28_ISOLATED_EXECUTION=YES",
         "DATABASE_TARGET_CLASS=DISPOSABLE",
-        "POST28_TARGET_CONTRACT_FILE bound to current source SHA and bootstrap database comment"
+        "POST28_TARGET_CONTRACT_FILE bound to current source SHA/run and local bootstrap comment OR exact Neon project/branch/endpoint/database/role",
+        "Neon requires fresh authenticated provider GETs, exact TCP grant and strict Prisma TLS; no CI bypass"
       ],
-      "gate": "preflightTargets validates all target declarations and pair uniqueness before constructing any client; inspectLiveTarget rejects elevated roles and wrong server/database/marker; connection may be a migration role but identity SQL runs inside SET TRANSACTION READ ONLY",
+      "gate": "preflightTargets validates declarations and pair uniqueness before constructing any client; local server/database/marker or live Neon provider mapping plus SQL TLS/identity/grants are mandatory; SET TRANSACTION READ ONLY; all existing mutation runners still refuse Neon",
       "requiredSourceMarkers": [
         "preflightTargets",
         "readDatabaseIdentity",
@@ -170,7 +171,7 @@
         "--require-empty",
         "SET TRANSACTION READ ONLY"
       ],
-      "review": "POST28 R02-core 2026-10-16; local source preparation, no production or restore authority"
+      "review": "POST28 R02-core 2026-10-16; local and remote read-only source preparation, no Neon runtime, production or restore authority"
     }
   }
 }

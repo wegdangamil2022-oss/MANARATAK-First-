@@ -4,6 +4,12 @@
 **Scope:** TESTING ONLY — provisioned metadata and read-only connectivity; no migrations, import, application runtime, database test execution, or production approval.  
 **Source of truth for IDs:** `config/testing/post28-neon-target.json` on the Git branch named below.
 
+## Current continuation — R02-core / R03
+
+The 2026-10-16 continuation implements a **read-only** Neon adapter, with source tests, at [POST28_NEON_READ_ONLY_PREFLIGHT.md](POST28_NEON_READ_ONLY_PREFLIGHT.md). Earlier statements below that remote guard adaptation is NOT IMPLEMENTED describe the original setup checkpoint. Remote **mutations remain blocked**, including with legacy CI flags. Codex secrets/TCP access remain unconfigured; the owner role is privileged and unsuitable for runtime suites. MCP read-only SQL succeeds, but its SQL session reports TLS=false and does not establish direct Prisma TLS. R02-core is PARTIAL; R03 is BLOCKED.
+
+The current user instruction authorizes scoped repairs and targeted tests; it supersedes the old Luna/manual-model-switch protocol quoted below. No additional infrastructure, migration, seed, destructive suite or deployment is authorized by this continuation.
+
 ## 1. Stable repository-to-database mapping
 
 | Item | Verified value |

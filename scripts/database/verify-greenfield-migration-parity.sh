@@ -22,7 +22,11 @@ command -v psql >/dev/null || { echo 'psql is required for catalog parity checks
 export DATABASE_URL="$TARGET_URL"
 export DIRECT_URL="$TARGET_URL"
 node --input-type=module - <<'NODE'
+import fs from 'node:fs';
 import { requireDatabaseMutationGate } from './scripts/lib/database-mutation-gate.mjs';
+import { requirePost28LocalExecution } from './scripts/database/post28-neon-policy.mjs';
+const contract=JSON.parse(fs.readFileSync(process.env.POST28_TARGET_CONTRACT_FILE,'utf8'));
+requirePost28LocalExecution(contract);
 requireDatabaseMutationGate('post28 greenfield replay', { allowedPurposes: ['migrate'] });
 NODE
 

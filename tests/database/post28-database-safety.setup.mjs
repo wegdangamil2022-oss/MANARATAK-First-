@@ -9,6 +9,8 @@ export function rejectProtectedSuiteTargets(env = process.env) {
     const database=decodeURIComponent(url.pathname.slice(1)),role=decodeURIComponent(url.username);
     if(!['postgres:','postgresql:'].includes(url.protocol) || /prod|production|live|restore/i.test(database) ||
       role==='manaratak_restore_runner')throw new Error('POST28_DESTRUCTIVE_SUITE_PROTECTED_TARGET_FORBIDDEN');
+    if(url.hostname==='neon.tech'||url.hostname.endsWith('.neon.tech'))
+      throw new Error('POST28_NEON_RUNTIME_NOT_AUTHORIZED');
   }
 }
 export default function setup() {rejectProtectedSuiteTargets();}

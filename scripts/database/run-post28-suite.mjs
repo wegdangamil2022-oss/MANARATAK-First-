@@ -7,6 +7,7 @@ import {readDatabaseIdentity} from './post28-preflight.mjs';
 import {databaseSuite} from '../../config/testing/post28-database-suites.mjs';
 import {verifyDiscovery,verifySuiteResults} from './post28-suite-policy.mjs';
 import {requireDatabaseMutationGate} from '../lib/database-mutation-gate.mjs';
+import {requirePost28LocalExecution} from './post28-neon-policy.mjs';
 
 // Must be invoked only after R04/R05 parity and before destructive DB-T tests.
 try {
@@ -16,6 +17,9 @@ try {
   const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
   if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())throw new Error('POST28_CLEAN_SOURCE_REQUIRED');
   const contract=JSON.parse(fs.readFileSync(process.env.POST28_TARGET_CONTRACT_FILE,'utf8'));
+  // Read-only Neon proof is not a destructive execution capability. Child test
+  // harnesses and migration tools require their own reviewed remote adapter.
+  requirePost28LocalExecution(contract);
   const targets=await preflightTargets(contract,[{label:'DB-T',url:process.env.DATABASE_URL}],process.env,sha,readDatabaseIdentity,{requireValidatedCatalog:true});
   if(targets[0].publicTables<281)throw new Error('POST28_MIGRATED_SCHEMA_REQUIRED');
   const baseDirectory=path.resolve(process.env.POST28_EVIDENCE_DIR ?? 'test-results/post28');
