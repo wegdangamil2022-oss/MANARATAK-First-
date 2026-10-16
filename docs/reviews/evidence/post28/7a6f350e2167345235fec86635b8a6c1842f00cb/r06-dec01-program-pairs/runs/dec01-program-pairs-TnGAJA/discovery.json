@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > matches an explicit funded program without requiring duplicated independent targets",
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > rejects Cartesian pairs even when both independent target lists contain the requested values",
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > keeps each explicitly funded pair with exact API counts",
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > rejects a major inconsistent with the explicitly requested program",
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > does not use a university-only link as evidence of a funded degree major pair",
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > withdraws paired filter eligibility when the published profile version is withdrawn",
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > rejects a foreign university link despite valid individual foreign keys and target lists",
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > does not infer pairs from independent targets when the program relationship is unresolved",
+    "file": "tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  }
+]

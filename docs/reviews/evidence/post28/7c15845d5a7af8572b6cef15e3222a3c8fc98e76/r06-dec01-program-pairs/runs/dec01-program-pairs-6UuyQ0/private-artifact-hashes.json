@@ -1,0 +1,22 @@
+[
+  {
+    "name": "summary.json",
+    "sha256": "c4d227b8eec484f5d91964898486bec74dbb09924175924b712267b2fb4163ee",
+    "bytes": 856
+  },
+  {
+    "name": "vitest.json",
+    "sha256": "ff53f16aed0f4a60f4aa3aba2114db3d3be20e36dbd30c64be87bb403a90d5a9",
+    "bytes": 4732
+  },
+  {
+    "name": "discovery.json",
+    "sha256": "0fe083be48cffd1f220069d7a9a6dbe6ff1aca974ea572d4fb37ecff7f35f0a3",
+    "bytes": 2571
+  },
+  {
+    "name": "selection.json",
+    "sha256": "93ef22ebf97a3327b17174c423d9a554c907260d76a2d0bb857066f2897e3480",
+    "bytes": 108
+  }
+]

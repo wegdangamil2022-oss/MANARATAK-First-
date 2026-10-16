@@ -1,0 +1,56 @@
+{
+  "baselineDistinctSuccessfulDatabaseCases": 257,
+  "newDistinctSuccessfulDatabaseCases": 10,
+  "cumulativeDistinctSuccessfulDatabaseCases": 267,
+  "distinctBySuite": {
+    "dec01-program-pairs": 10
+  },
+  "cases": [
+    "Post28 DEC01 exact funded degree major program pairs > does not infer pairs from independent targets when the program relationship is unresolved",
+    "Post28 DEC01 exact funded degree major program pairs > does not use a university-only link as evidence of a funded degree major pair",
+    "Post28 DEC01 exact funded degree major program pairs > filters exact pairs before cursor pagination and preserves totals across two pages",
+    "Post28 DEC01 exact funded degree major program pairs > keeps each explicitly funded pair with exact API counts",
+    "Post28 DEC01 exact funded degree major program pairs > matches an explicit funded program without requiring duplicated independent targets",
+    "Post28 DEC01 exact funded degree major program pairs > rejects Cartesian pairs even when both independent target lists contain the requested values",
+    "Post28 DEC01 exact funded degree major program pairs > rejects a current profile version belonging to a different major and profile despite valid foreign keys",
+    "Post28 DEC01 exact funded degree major program pairs > rejects a foreign university link despite valid individual foreign keys and target lists",
+    "Post28 DEC01 exact funded degree major program pairs > rejects a major inconsistent with the explicitly requested program",
+    "Post28 DEC01 exact funded degree major program pairs > withdraws paired filter eligibility when the published profile version is withdrawn"
+  ],
+  "runs": [
+    {
+      "sourceSha": "7a6f350e2167345235fec86635b8a6c1842f00cb",
+      "runId": "9a2014e1-00d9-4ec3-9aba-72a6808c4f99",
+      "discovered": 8,
+      "executed": 8,
+      "passed": 1,
+      "failed": 7,
+      "skipped": 0,
+      "fullProfilePassed": false,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/7a6f350e2167345235fec86635b8a6c1842f00cb/r06-dec01-program-pairs/runs/dec01-program-pairs-TnGAJA/status.json"
+    },
+    {
+      "sourceSha": "7c15845d5a7af8572b6cef15e3222a3c8fc98e76",
+      "runId": "eedd717a-bd42-4494-b888-779870d4424a",
+      "discovered": 10,
+      "executed": 10,
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "fullProfilePassed": true,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/7c15845d5a7af8572b6cef15e3222a3c8fc98e76/r06-dec01-program-pairs/runs/dec01-program-pairs-6UuyQ0/status.json"
+    }
+  ],
+  "repeatedPassingAttemptsExcluded": 1,
+  "initialActualProductAssertionFailures": 7,
+  "noFixtureFailuresInThisProfile": true,
+  "fullR06Acceptance": false,
+  "limitations": [
+    "Synthetic historical published owner fixtures, real PostgreSQL and public HTTP router.",
+    "No complete owner publication, dashboard agreement or built browser acceptance.",
+    "Sequential two-page read proof, not concurrent pagination snapshot proof.",
+    "Memory-backed final lab is not crash durability or R05/R10 recovery proof."
+  ]
+}

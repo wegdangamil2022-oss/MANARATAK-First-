@@ -28,8 +28,10 @@
       "rollbackCompatibility": null,
       "ownerFunctionalDecision": "APPROVED",
       "technicalDesign": "REVIEW_REQUIRED",
-      "runtimeEvidence": "PENDING_DEC_POLICY_PROOF",
-      "acceptance": "NOT_CLOSED"
+      "runtimeEvidence": "PARTIAL_LOCAL_POSTGRESQL_PUBLIC_HTTP_PAIR_PROOF",
+      "acceptance": "NOT_CLOSED",
+      "implementationEvidence": "docs/remediation/POST28_R06_DEC01_PROGRAM_PAIR_EXECUTION_2026-10-16.md",
+      "fullScenarioAccepted": false
     },
     {
       "decisionId": "DEC-02",

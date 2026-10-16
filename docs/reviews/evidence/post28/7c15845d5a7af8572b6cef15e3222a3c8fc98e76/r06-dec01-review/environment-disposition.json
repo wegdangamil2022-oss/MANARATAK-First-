@@ -1,0 +1,15 @@
+{
+  "persistentLabAttempt": "POSTGRES_STARTUP_TIMEOUT: no space left on device",
+  "failedPersistentLab": "lab-VPTkoY",
+  "failedPersistentSourceSha": "d17507de",
+  "subsequentPersistentAttempt": "LAB_CREATION_FAILED before target creation",
+  "memoryAttemptOnFullWorkspace": "LAB_CREATION_FAILED before target creation",
+  "finalSuccessfulLabRoot": "/tmp/post28-labs",
+  "finalStorage": "tmpfs, bounded 768 MiB, transactions only",
+  "noExistingDatabaseOrVolumeDeleted": true,
+  "npmCacheCleanAttempt": "did not free enough workspace storage",
+  "regenerableBuildCacheRemovedBytes": 409429,
+  "evidenceCheckout": "/tmp/manaratak-post28-continuation",
+  "checkoutReason": "workspace filesystem ENOSPC prevented creating evidence directories; shared clone of same repository/branch and exact frozen source; no new project",
+  "R05RecoveryClaim": false
+}

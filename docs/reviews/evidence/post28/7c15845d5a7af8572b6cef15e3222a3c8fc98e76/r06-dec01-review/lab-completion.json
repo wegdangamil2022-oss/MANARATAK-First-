@@ -1,0 +1,18 @@
+[
+  {
+    "sourceSha": "7a6f350e2167345235fec86635b8a6c1842f00cb",
+    "runId": "9a2014e1-00d9-4ec3-9aba-72a6808c4f99",
+    "forwarderStopped": true,
+    "containerAndDatabasePreserved": true,
+    "storage": "volume",
+    "crashDurabilityClaim": false
+  },
+  {
+    "sourceSha": "7c15845d5a7af8572b6cef15e3222a3c8fc98e76",
+    "runId": "eedd717a-bd42-4494-b888-779870d4424a",
+    "forwarderStopped": true,
+    "containerAndDatabasePreserved": true,
+    "storage": "tmpfs",
+    "crashDurabilityClaim": false
+  }
+]

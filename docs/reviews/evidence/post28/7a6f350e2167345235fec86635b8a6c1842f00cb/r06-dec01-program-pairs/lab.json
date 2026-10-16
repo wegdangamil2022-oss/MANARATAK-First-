@@ -1,0 +1,10 @@
+{
+  "profile": "transactions",
+  "sourceSha": "7a6f350e2167345235fec86635b8a6c1842f00cb",
+  "runId": "9a2014e1-00d9-4ec3-9aba-72a6808c4f99",
+  "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+  "containerName": "post28-pg16-9a2014e1",
+  "port": 15432,
+  "createdAt": "2026-10-16T21:16:58.860Z",
+  "volume": "post28-data-9a2014e1"
+}

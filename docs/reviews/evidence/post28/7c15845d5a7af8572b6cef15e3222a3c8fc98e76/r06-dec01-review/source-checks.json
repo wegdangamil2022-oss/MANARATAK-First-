@@ -1,0 +1,106 @@
+{
+  "sourceSelected": {
+    "discovered": 7,
+    "executed": 1,
+    "passed": 1,
+    "failed": 0,
+    "unselected": 6
+  },
+  "provisioningAffectedSelected": {
+    "executed": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "storageSafetySelected": {
+    "executed": 2,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0
+  },
+  "apiWebBuildExitCode": 0,
+  "affectedLintExitCode": 0,
+  "lintWarnings": 9,
+  "architectureExitCode": 0,
+  "privateLogs": [
+    {
+      "name": "dec01-provisioning.log",
+      "sha256": "4f43100ca4ae03ef6282927578ffa89c281db9a68d1cdc062deff90380f4db9e",
+      "bytes": 1181
+    },
+    {
+      "name": "dec01-source.log",
+      "sha256": "6a4cee7acd3f3b6b2d9000f78ceaa7c915f9ac1d9e6b67a6a7dba9f4f1d01757",
+      "bytes": 215
+    },
+    {
+      "name": "dec01-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "dec01-lint.log",
+      "sha256": "e8d2e63389d1bf546f1f19729e9630d7755f7d3e775e81e61949d02863d9d89a",
+      "bytes": 1007
+    },
+    {
+      "name": "dec01-architecture.log",
+      "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+      "bytes": 245
+    },
+    {
+      "name": "dec01-storage-guards.log",
+      "sha256": "fae9d56ae20db648f01d90ba86d588b3c32079f2adfbd01d8d43eecd65a45252",
+      "bytes": 639
+    },
+    {
+      "name": "dec01-storage-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "dec01-fixed-lab-error.log",
+      "sha256": "60969710953097680c0a104ac8649dbdb6771ad11ef66d5c68f20f16bdd593ee",
+      "bytes": 97
+    },
+    {
+      "name": "dec01-fixed-lab-retry-error.log",
+      "sha256": "f079b9159ca4dcd5ec5d261fe02a0593e0a642266b4379c67aad3ee00765e5a1",
+      "bytes": 27
+    },
+    {
+      "name": "dec01-fixed-lab-memory-error.log",
+      "sha256": "f079b9159ca4dcd5ec5d261fe02a0593e0a642266b4379c67aad3ee00765e5a1",
+      "bytes": 27
+    },
+    {
+      "name": "post28-dec01-architecture.log",
+      "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+      "bytes": 245
+    },
+    {
+      "name": "post28-dec01-quality.log",
+      "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+      "bytes": 185
+    },
+    {
+      "name": "post28-dec01-organization.log",
+      "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "bytes": 440
+    },
+    {
+      "name": "post28-dec01-environment.log",
+      "sha256": "c12b3e207960f88183c712a7d7f17ec19e397d91b6c601e05317bffb653b3483",
+      "bytes": 79
+    },
+    {
+      "name": "post28-dec01-secrets.log",
+      "sha256": "4263e43c69dc40735f64d7328fe1827dc900258793f7bb1bfc29a16e84a0d043",
+      "bytes": 40
+    }
+  ],
+  "qualityExitCode": 0,
+  "organizationExitCode": 0,
+  "environmentExitCode": 0,
+  "stagedSecretsExitCode": 0
+}
