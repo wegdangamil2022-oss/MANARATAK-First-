@@ -1,6 +1,8 @@
 import { defineConfig } from 'vitest/config';
+import {nodeTestFiles} from './scripts/testing/node-test-files.mjs';
 
 export default defineConfig({
+  esbuild: {jsx: 'automatic'},
   test: {
     globals: true,
     environment: 'node',
@@ -14,6 +16,7 @@ export default defineConfig({
       // These use node:test and must run under Node so assertion failures fail CI.
       '**/*.test.mjs',
       '**/*.test.cjs',
+      ...nodeTestFiles,
       'work/**',
       'wp-ic-10-results/**',
       'wp12-11-evidence/**',

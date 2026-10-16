@@ -32,6 +32,6 @@ describe('asset workspace bilingual contract', () => {
     expect(html).not.toContain('asset_text_');
     expect(html).toContain('Asset version history');
     expect(html).toContain('Archive file');
-    expect(html).toContain('No asset');
+    expect(html).toContain('Asset selection requires reuse permission.');
   });
 });

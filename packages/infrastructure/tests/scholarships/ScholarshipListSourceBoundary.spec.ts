@@ -1,6 +1,6 @@
 import{describe,it,expect,vi}from'vitest';
 import{PrismaScholarshipRepository}from'../../src/scholarships/PrismaScholarshipRepository';
-function setup(){const db:any={scholarship:{findMany:vi.fn().mockResolvedValue([]),count:vi.fn().mockResolvedValue(0)}};db.$transaction=vi.fn(async(fn:any)=>fn(db));return{db,repo:new PrismaScholarshipRepository(db)};}
+function setup(){const db:any={scholarship:{findMany:vi.fn().mockResolvedValue([]),count:vi.fn().mockResolvedValue(0)}};db.$transaction=vi.fn(async(fn:any)=>fn(db));return{db,repo:new PrismaScholarshipRepository(db,false,{findByIds:vi.fn(async()=>[{id:'p',universityId:'u',degreeLevelId:'d'}])} as any)};}
 describe('scholarship relational filtering and ordering',()=>{
  it('canonical country remains mandatory even alongside a raw label',async()=>{const f=setup();await f.repo.list({countryReferenceId:'canonical',countryLabel:'similar'});const where=f.db.scholarship.findMany.mock.calls[0][0].where;expect(where.countryReferenceId).toBe('canonical');expect(JSON.stringify(where)).not.toContain('similar');});
  it('university and program constraints use the same link',async()=>{const f=setup();await f.repo.list({universityId:'u',academicProgramId:'p'});const where=f.db.scholarship.findMany.mock.calls[0][0].where;expect(where.AND).toHaveLength(1);expect(where.AND[0].universityLinks.some.academicProgramId).toBe('p');expect(JSON.stringify(where.AND[0])).toContain('universityId');});

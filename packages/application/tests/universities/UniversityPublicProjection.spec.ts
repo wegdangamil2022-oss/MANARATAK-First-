@@ -44,7 +44,7 @@ const university = (): UniversityDto => ({
       campusIds: ['campus-1'],
       admissionRequirements: [
         { id: 'internal-req-1', academicProgramId: 'program-1', internationalTestId: 'test-1',
-          internationalTest: { displayName: 'Test', canonicalName: 'Test', slug: 'test', status: 'PUBLISHED' },
+          internationalTest: { displayName: 'Test', canonicalName: 'Test', slug: 'test', status: 'PUBLISHED', currentPublishedVersion: {status:'PUBLISHED',scoreScales:[{overallMinimum:0,overallMaximum:9}]} },
           status: 'ACTIVE', minimumScore: 6.5 },
         { id: 'internal-req-2', academicProgramId: 'program-1', internationalTestId: 'test-2',
           internationalTest: { displayName: 'Unpublished', canonicalName: 'Unpublished', slug: 'draft', status: 'READY_TO_REVIEW' },

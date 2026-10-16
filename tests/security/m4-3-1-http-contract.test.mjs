@@ -1,3 +1,4 @@
+import {ForgotPasswordUseCase,ResetPasswordUseCase} from '@manaratak/application';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
@@ -39,6 +40,9 @@ test('AuthRouter - POST /forgot-password & POST /reset-password HTTP Contract', 
   };
 
   const cradle = {
+    forgotPasswordUseCase:new ForgotPasswordUseCase({identityRepository,tokenRepository:passwordResetTokenRepository,emailDeliveryGateway}),
+    resetPasswordUseCase:new ResetPasswordUseCase({identityRepository,tokenRepository:passwordResetTokenRepository,passwordHasher:PasswordHasher}),
+    authRateLimitKey:value=>`isolated-test:${value}`,
     authService: {},
     identityRepository,
     securityService,

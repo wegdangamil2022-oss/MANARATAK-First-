@@ -12,7 +12,10 @@ test('credential disable HTTP boundary authenticates actor, checks permission an
   const disable = new DisablePasswordCredentialUseCase({ disable: async (...args) => writes.push(args) }, access,
     { evaluatePermission: async actor => ({ isGranted: actor === 'admin' }) });
   const app = express(); app.use(express.json());
-  app.use('/auth', AuthRouter.create({ authService: {}, identityRepository: {}, principalAccessValidator: access,
+  app.use('/auth', AuthRouter.create({
+    forgotPasswordUseCase:{execute:async()=>{throw new Error('UNEXPECTED_RECOVERY_CALL');}},
+    resetPasswordUseCase:{execute:async()=>{throw new Error('UNEXPECTED_RECOVERY_CALL');}},
+    authRateLimitKey:value=>`isolated-test:${value}`, authService: {}, identityRepository: {}, principalAccessValidator: access,
     tokenProvider: { verifyAccessToken: async token => ({ userId: token, sessionId: 'session' }) },
     sessionManager: { isSessionActive: async () => true }, disablePasswordCredentialUseCase: disable,
     securityService: { validateCsrfToken: token => token === 'valid-csrf' },

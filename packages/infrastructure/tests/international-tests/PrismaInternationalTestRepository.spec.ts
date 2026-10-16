@@ -133,6 +133,7 @@ describe('PrismaInternationalTestRepository', () => {
         where: {
           slug: 'private-test',
           isPubliclyVisible: true,
+          status:{notIn:['ARCHIVED','REJECTED']},
         },
       }),
     );

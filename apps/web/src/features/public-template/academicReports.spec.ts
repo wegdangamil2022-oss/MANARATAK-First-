@@ -1,5 +1,7 @@
 import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToStaticMarkup as renderStatic } from 'react-dom/server';
+import {I18nProvider} from '../../i18n/I18nProvider';
+const renderToStaticMarkup=(element:ReturnType<typeof createElement>)=>renderStatic(createElement(I18nProvider,{children:element}));
 import { describe, expect, it } from 'vitest';
 import { AcademicReportsPage } from './components/AcademicReportsPage';
 

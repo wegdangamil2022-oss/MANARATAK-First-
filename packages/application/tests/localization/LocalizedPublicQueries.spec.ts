@@ -28,7 +28,7 @@ describe('localized public query adapters', () => {
             completenessStatus: UniversityImportCompletenessState.COMPLETE,
             sourceRecords: [{ sourceLocale: 'en' }],
             translations: [
-              { locale: 'ar', displayName: 'جامعة فلورنسا', reviewStatus: 'PUBLISHED' },
+              { locale: 'ar', displayName: 'جامعة فلورنسا', reviewStatus: 'PUBLISHED', publicationSourceStatus:'CURRENT' },
             ],
           },
         ],

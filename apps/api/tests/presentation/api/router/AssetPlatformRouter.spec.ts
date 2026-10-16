@@ -13,7 +13,7 @@ describe('AssetPlatformRouter', () => {
       metadata: { originalFilename: 'test.pdf', mimeType: 'application/pdf', fileExtension: 'pdf', byteSize: 64 }, restoreOperation: operation, archiveOperation: { ...operation, phase: 'RECOVERY_REQUIRED' } };
     const app = express();
     app.use('/assets', AssetPlatformRouter.create({ ingestAssetUseCase: {} as any, processAssetLifecycleUseCase: {} as any,
-      assetRecordRepository: { findAdminDetails: vi.fn(async () => ({ asset, governance: {} })) } as any }));
+      assetRecordRepository: { findAdminDetails: vi.fn(async () => ({ asset, governance: {updatedAt:new Date('2026-10-09T00:00:00Z')} })) } as any }));
     const response = await request(app).get('/assets/pending');
     expect(response.status).toBe(200); expect(response.body.securityEvidence.restorePhase).toBe('RECOVERY_REQUIRED');
     expect(response.body.securityEvidence.archivePhase).toBe('RECOVERY_REQUIRED');
