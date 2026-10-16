@@ -20,7 +20,9 @@ const program = (change: Record<string, unknown> = {}) => ({
       {
         degreeLevelId: 'degree',
         status: 'PUBLISHED',
+        id: 'profile',
         currentPublishedVersionId: 'published-version',
+        currentPublishedVersion: { id: 'published-version', majorId: 'major', profileId: 'profile', status: 'PUBLISHED' },
       },
     ],
   },

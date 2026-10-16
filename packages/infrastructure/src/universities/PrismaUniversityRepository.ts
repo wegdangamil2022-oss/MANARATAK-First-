@@ -34,7 +34,7 @@ import {
 const universityDetails = {
   campuses: true,
   organizationUnits: true,
-  academicPrograms: { include: { campuses: true, major: { select: { status: true, levelProfiles: { select: { degreeLevelId: true, status: true, currentPublishedVersionId: true } } } }, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true, isPubliclyVisible:true,
+  academicPrograms: { include: { campuses: true, major: { select: { status: true, levelProfiles: { select: { id: true, degreeLevelId: true, status: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, majorId: true, profileId: true, status: true } } } } } }, degreeLevel: { select: { canonicalCode: true, nameAr: true, nameEn: true } }, admissionRequirements: { include: { internationalTest: { select: { displayName: true, canonicalName: true, slug: true, status: true, isPubliclyVisible:true,
               currentPublishedVersion: { include: { scoreScales: true } },
             },
           },
@@ -492,7 +492,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     };
   }
 
-  async readProgramIntegrityReference(id:string){const row=await this.prisma.universityAcademicProgram.findUnique({where:{id},include:{university:{select:{status:true}},major:{select:{status:true,levelProfiles:{select:{degreeLevelId:true,status:true,currentPublishedVersionId:true}}}}}});return row?{id:row.id,universityId:row.universityId,publiclyEligible:row.university.status==='PUBLISHED'&&isPublicUniversityProgram(row)}:null;}
+  async readProgramIntegrityReference(id:string){const row=await this.prisma.universityAcademicProgram.findUnique({where:{id},include:{university:{select:{status:true}},major:{select:{status:true,levelProfiles:{select:{id:true,degreeLevelId:true,status:true,currentPublishedVersionId:true,currentPublishedVersion:{select:{id:true,majorId:true,profileId:true,status:true}}}}}}}});return row?{id:row.id,universityId:row.universityId,publiclyEligible:row.university.status==='PUBLISHED'&&isPublicUniversityProgram(row)}:null;}
 
   async listPublishedMajorGraph(filters:{countryReferenceId:string;cursor?:string;limit?:number}) {
     const limit=boundedCursorLimit(filters.limit,12,50),after=decodeStableCursor(filters.cursor);
@@ -600,7 +600,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
           select: {
             status: true,
             levelProfiles: {
-              select: { degreeLevelId: true, status: true, currentPublishedVersionId: true },
+              select: { id: true, degreeLevelId: true, status: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, majorId: true, profileId: true, status: true } } },
             },
           },
         },
@@ -1138,6 +1138,8 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         major: program.major ? {
           status: program.major.status,
           levelProfiles: program.major.levelProfiles.map((profile) => ({
+            id: profile.id,
+            currentPublishedVersion: profile.currentPublishedVersion,
             degreeLevelId: profile.degreeLevelId,
             status: profile.status,
             currentPublishedVersionId: profile.currentPublishedVersionId,

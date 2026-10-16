@@ -518,6 +518,7 @@ export class UniversityDeduplicationService {
 export interface UniversityProgramAdmissionRequirementReadDto {
   internationalTest?: { displayName: string; canonicalName: string; slug: string; status: string;
     currentPublishedVersion?: {
+      testId?: string;
       id: string;
       status: string;
       scoreScales?: Array<{ overallMinimum?: number | null; overallMaximum?: number | null }>;
@@ -544,6 +545,8 @@ export interface UniversityProgramAdmissionRequirementReadDto {
 export interface UniversityAcademicProgramReadDto {
   /** Internal P10 owner/profile publication state; never exposed in public DTOs. */
   major?: { status: string; levelProfiles: Array<{
+    id?: string;
+    currentPublishedVersion?: { id: string; majorId: string; profileId: string | null; status: string } | null;
     degreeLevelId: string | null;
     status: string;
     currentPublishedVersionId: string | null;

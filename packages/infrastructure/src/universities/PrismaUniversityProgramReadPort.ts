@@ -21,7 +21,7 @@ const proofSelect = {
     select: {
       status: true,
       levelProfiles: {
-        select: { degreeLevelId: true, status: true, currentPublishedVersionId: true },
+        select: { id: true, degreeLevelId: true, status: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, majorId: true, profileId: true, status: true } } },
       },
     },
   },

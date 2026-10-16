@@ -50,7 +50,7 @@ const program: any = {
   admissionRequirements: [],
   major: {
     status: 'PUBLISHED',
-    levelProfiles: [{ degreeLevelId: 'd', status: 'PUBLISHED', currentPublishedVersionId: 'mv' }],
+    levelProfiles: [{ id: 'profile', degreeLevelId: 'd', status: 'PUBLISHED', currentPublishedVersionId: 'mv', currentPublishedVersion: { id: 'mv', majorId: 'm', profileId: 'profile', status: 'PUBLISHED' } }],
   },
 };
 const university: any = {
@@ -90,6 +90,7 @@ const req: any = {
     status: 'PUBLISHED',
     currentPublishedVersion: {
       id: 'v',
+      testId: 't',
       status: 'PUBLISHED',
       scoreScales: [{ overallMinimum: 0, overallMaximum: 9 }],
     },

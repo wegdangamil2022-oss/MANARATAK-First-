@@ -59,7 +59,7 @@ describe('B11 University owner evidence reaches the public reader',()=>{
   });
   it.each([false,true])('applies the same freshness rule to university names in public program graphs (source changed: %s)',async(changed)=>{
     const f=fixture(); if(changed) f.owner.optionalFields.description='Changed source';
-    f.db.universityAcademicProgram={findMany:vi.fn(async()=>[{id:'program',sourceProgramName:'Program',status:'ACTIVE',majorMappingState:'CANONICALLY_MAPPED',majorId:'major',degreeLevelId:'degree',major:{status:'PUBLISHED',levelProfiles:[{degreeLevelId:'degree',status:'PUBLISHED',currentPublishedVersionId:'v'}]},university:f.owner}])};
+    f.db.universityAcademicProgram={findMany:vi.fn(async()=>[{id:'program',sourceProgramName:'Program',status:'ACTIVE',majorMappingState:'CANONICALLY_MAPPED',majorId:'major',degreeLevelId:'degree',major:{status:'PUBLISHED',levelProfiles:[{id:'profile',degreeLevelId:'degree',status:'PUBLISHED',currentPublishedVersionId:'v',currentPublishedVersion:{id:'v',majorId:'major',profileId:'profile',status:'PUBLISHED'}}]},university:f.owner}])};
     const result=await f.repo.findPublishedAcademicProgramsByIds(['program']);
     expect(result).toHaveLength(1);
     expect(result[0].universityLocalizedNames).toEqual(changed ? {} : {ar:'اسم معتمد'});

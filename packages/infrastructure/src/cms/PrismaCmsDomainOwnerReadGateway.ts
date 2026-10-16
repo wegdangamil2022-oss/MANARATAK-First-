@@ -136,9 +136,11 @@ export class PrismaCmsDomainOwnerReadGateway {
                 status: true,
                 levelProfiles: {
                   select: {
+                    id: true,
                     degreeLevelId: true,
                     status: true,
                     currentPublishedVersionId: true,
+                    currentPublishedVersion: { select: { id: true, majorId: true, profileId: true, status: true } },
                   },
                 },
               },
