@@ -13,15 +13,42 @@ export function verifyDiscovery(name, rows, root = process.cwd()) {
   if (new Set(ids).size !== ids.length) fail('POST28_DUPLICATE_CASE_IDENTITY');
   return ids.sort();
 }
-export function verifySuiteResults(name, discovery, report, root = process.cwd()) {
-  const expected = verifyDiscovery(name,discovery,root);
+export function selectedDiscovery(name, discovery, caseExact, root = process.cwd()) {
+  verifyDiscovery(name,discovery,root);
+  if (caseExact === undefined) return discovery;
+  if (typeof caseExact !== 'string' || !caseExact.trim()) fail('POST28_CASE_SELECTION_INVALID');
+  const selected = discovery.filter(row => row.name === caseExact);
+  if (selected.length !== 1) fail('POST28_CASE_SELECTION_NOT_UNIQUE');
+  return selected;
+}
+export function verifySuiteResults(name, discovery, report, root = process.cwd(), caseExact) {
+  const selected = selectedDiscovery(name,discovery,caseExact,root);
+  const expected = selected.map(row => `${relative(root,row.file)}\0${row.name}`).sort();
+  if (caseExact !== undefined) {
+    // Vitest reports deliberately unselected cases as pending. Validate every
+    // identity and status before removing those exclusions from the scoped view.
+    const all = verifyDiscovery(name,discovery,root);
+    const seen = [];
+    const testResults = (report?.testResults ?? []).map(file => ({...file,
+      assertionResults: (file.assertionResults ?? []).filter(row => {
+        if (!Array.isArray(row.ancestorTitles) || typeof row.title !== 'string') fail('POST28_DATABASE_CASE_IDENTITY_INVALID');
+        const id = `${relative(root,file.name)}\0${[...row.ancestorTitles,row.title].join(' > ')}`;
+        seen.push(id);
+        if (expected.includes(id)) return true;
+        if (!all.includes(id) || row.status !== 'pending') fail('POST28_SELECTION_EXCLUSION_INVALID');
+        return false;
+      }),
+    })).filter(file => file.assertionResults.length);
+    if (JSON.stringify(seen.sort()) !== JSON.stringify(all) || report.numPendingTests !== all.length-expected.length || report.numTotalTests !== all.length) fail('POST28_SELECTION_EXCLUSION_INVALID');
+    report = {...report,numTotalTests:expected.length,numPendingTests:0,testResults};
+  }
   if (report?.success !== true || (report.numFailedTestSuites ?? 0) !== 0 ||
       (report.numPendingTestSuites ?? 0) !== 0 || report.numFailedTests !== 0 || report.numPendingTests !== 0 ||
       (report.numTodoTests ?? 0) !== 0 || report.numTotalTests !== expected.length ||
       report.numPassedTests !== expected.length || !Array.isArray(report.testResults))
     fail('POST28_DATABASE_SUITE_NOT_FULLY_PASSED');
   const resultFiles = report.testResults.map(file => relative(root,file.name)).sort();
-  if (JSON.stringify(resultFiles) !== JSON.stringify([...databaseSuite(name).files].sort()))
+  if (JSON.stringify(resultFiles) !== JSON.stringify([...new Set(selected.map(row => relative(root,row.file)))].sort()))
     fail('POST28_SUITE_FILES_MISMATCH');
   const results = report.testResults.flatMap(file => {
     if (file.status !== 'passed' || !Array.isArray(file.assertionResults)) fail('POST28_DATABASE_SUITE_FILE_FAILED');

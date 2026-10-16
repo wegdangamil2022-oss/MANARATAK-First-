@@ -34,3 +34,13 @@ The lab keeps an internal Docker network with no external routing. Because Docke
 The private lab directory records its PID/config/log. Stop only that lab's forwarder when finished; preserve its database/evidence if a gate fails. A source fix requires a new frozen SHA and a new lab, rather than relabelling a previous target contract. The local preflight still authenticates migration/shadow roles through localhost and checks the live system identifier, OID and marker; forwarding does not grant database privileges.
 
 The DB-G application role receives CONNECT/USAGE for read-only identity/grant inspection, with no blanket default table or sequence grants. Otherwise it would inherit DML on Prisma's migration ledger. Actual application fixtures belong on independent DB-T/E targets, with an explicit reviewed table grant list excluding the ledger; never use DB-G as a substitute.
+
+## Scoped regression after a recorded failure
+
+The official runner also accepts `run-post28-suite.mjs <profile> --case-exact '<suite > case>'`.
+It still performs DB-T identity/catalog checks and full mandatory profile discovery, then
+requires exactly one matching case identity. Vitest's pending results for the explicitly
+unselected cases are checked against the complete discovery and recorded as exclusions,
+not as executed successes. The selected case must pass with no skip/failure. This scoped
+result never accepts the whole profile or R06. Freeze source and create a new SHA/run
+contract after fixing code or a fixture; preserve the original failed report.
