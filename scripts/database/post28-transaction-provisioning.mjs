@@ -18,5 +18,6 @@ export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
  'FinanceInvoiceRecord','FinancePaymentRecord','FinanceCommandRecord',
  'AuditRecord','StudentTimelineEntry','StudentPrivacyConsentDecision','StudentSavedCollection','StudentSavedItem','StudentSearchHistory','StudentRecentlyViewed','StudentPersonalStatistics',
  'FinancialAccountRecord','FinancialTransactionRecord','FinancialLedgerEntryRecord','ReferenceCurrency',
- 'FinanceApprovalRecord','FinanceApprovalDecisionRecord','FinanceAdjustmentCaseRecord'
+ 'FinanceApprovalRecord','FinanceApprovalDecisionRecord','FinanceAdjustmentCaseRecord',
+ 'University','UniversityAcademicProgram','DegreeLevel','Major','MajorLevelProfile','MajorVersion'
 ]);

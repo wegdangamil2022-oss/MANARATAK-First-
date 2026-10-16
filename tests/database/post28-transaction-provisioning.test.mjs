@@ -72,3 +72,10 @@ test('document consent suite requires ten cases and only adds timeline DML to th
  assert.ok(TRANSACTION_APPLICATION_TABLES.includes('StudentTimelineEntry'));
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });
+
+test('university relation suite declares seven cases and explicit owner fixture tables',async()=>{
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
+ assert.equal(databaseSuite('university-relations').minimumCases,7);
+ for(const table of ['University','UniversityAcademicProgram','DegreeLevel','Major','MajorLevelProfile','MajorVersion'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
+ assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
+});
