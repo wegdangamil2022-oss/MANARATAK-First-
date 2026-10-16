@@ -58,9 +58,9 @@ test('Post28 asset suites require real DB-T preflight rather than an environment
  for(const file of ['PrismaAssetPostgres.database.spec.ts','PrismaAssetReferenceSerialization.database.spec.ts'])assert.match(fs.readFileSync('packages/infrastructure/tests/asset-platform/'+file,'utf8'),/await assertPost28RuntimeTarget\(\)/);
 });
 
-test('owner workflow profile keeps all fourteen real cases and grants only declared owner tables',async()=>{
+test('owner workflow profile keeps all nineteen real cases and grants only declared owner tables',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');const p=databaseSuite('owner-workflows');
- assert.equal(p.minimumCases,14);assert.deepEqual(p.files,['tests/database/post28-owner-workflows.database.spec.mjs']);
+ assert.equal(p.minimumCases,19);assert.deepEqual(p.files,['tests/database/post28-owner-workflows.database.spec.mjs']);
  for(const table of ['AuditRecord','StudentPrivacyConsentDecision','StudentSavedItem','StudentSearchHistory','FinancialAccountRecord','FinancialTransactionRecord','FinancialLedgerEntryRecord','ReferenceCurrency'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
  assert.ok(fs.readFileSync('vitest.config.ts','utf8').includes('**/*.database.spec.mjs'));

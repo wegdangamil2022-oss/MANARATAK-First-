@@ -40,6 +40,15 @@ async function issueFacts(id){
  const transactions=await db.financialTransactionRecord.findMany({where:{businessReferenceType:'INVOICE',businessReferenceId:id},include:{entries:true}});
  return {transactions:transactions.length,entries:transactions.flatMap(t=>t.entries),audits:await db.auditRecord.count({where:{targetId:id,action:'FINANCE_INVOICE_ISSUED'}}),outbox:await db.transactionalOutboxRecord.count({where:{aggregateId:id,eventType:'FINANCE_INVOICE_ISSUED'}})};
 }
+
+async function approval(){
+ const maker=identity(),caseId='CASE:'+randomUUID();
+ // Seed an owner-local OPEN case as a historical fixture. This does not approve
+ // a source document or execute a manual ledger adjustment.
+ await db.financeAdjustmentCaseRecord.create({data:{publicId:caseId,reasonCode:'RECONCILIATION_CORRECTION',supportingDocumentId:fresh(),makerId:maker.actorId}});
+ const row=await finance.createApproval({actionType:'MANUAL_LEDGER_POST',targetReferenceId:caseId,requiredApprovals:2,commandPayload:{synthetic:true,caseId},amount:usd('1000')},maker);
+ return {row,maker};
+}
 describe('Post28 R06 real student and finance owner workflows',()=>{
  beforeAll(async()=>{
   if(process.env.POST28_TARGET_LABEL!=='DB-T'||process.env.POST28_DATABASE_SUITE!=='owner-workflows'||process.env.RUN_DATABASE_INTEGRATION_TESTS!=='true'||process.env.POST28_TRANSACTION_SETUP_URL)throw new Error('POST28_OWNER_WORKFLOW_DB_T_REQUIRED');
@@ -129,4 +138,37 @@ describe('Post28 R06 real student and finance owner workflows',()=>{
   const persisted=await db.financeInvoiceRecord.findUnique({where:{id:row.id}});expect(persisted.status).toBe('DRAFT');expect(persisted.version).toBe(1);
   const facts=await issueFacts(row.id);expect(facts.transactions).toBe(0);expect(facts.entries).toHaveLength(0);expect(facts.audits).toBe(0);expect(facts.outbox).toBe(0);expect(await db.financeCommandRecord.count({where:{id:commandId(ctx)}})).toBe(0);
  });
+ it('rejects maker self-approval and checker identity substitution without a decision or version change',async()=>{
+  const {row,maker}=await approval();
+  await expect(finance.decideApproval(row.id,'APPROVE',maker.actorId,undefined,{...maker,idempotencyKey:fresh(),expectedVersion:1})).rejects.toThrow('Maker cannot approve their own financial action');
+  const checker=fresh();await expect(finance.decideApproval(row.id,'APPROVE',checker,undefined,{...identity(),actorId:fresh(),expectedVersion:1})).rejects.toThrow('FINANCE_CHECKER_IDENTITY_MISMATCH');
+  expect(await db.financeApprovalDecisionRecord.count({where:{approvalId:row.id}})).toBe(0);expect((await db.financeApprovalRecord.findUnique({where:{id:row.id}})).version).toBe(1);
+ });
+ it('requires two distinct checkers and replays an old checker command without adding evidence',async()=>{
+  const {row}=await approval(),a={...identity(),actorId:fresh(),expectedVersion:1},b={...identity(),actorId:fresh(),expectedVersion:2};
+  expect((await finance.decideApproval(row.id,'APPROVE',a.actorId,undefined,a)).status).toBe('PENDING');
+  expect((await finance.decideApproval(row.id,'APPROVE',b.actorId,undefined,b)).status).toBe('APPROVED');
+  expect((await finance.decideApproval(row.id,'APPROVE',a.actorId,undefined,a)).id).toBe(row.id);
+  const persisted=await db.financeApprovalRecord.findUnique({where:{id:row.id}});expect(persisted.status).toBe('APPROVED');expect(persisted.version).toBe(3);expect(persisted.consumedAt).toBeNull();
+  expect(await db.financeApprovalDecisionRecord.count({where:{approvalId:row.id}})).toBe(2);expect(await db.auditRecord.count({where:{targetId:row.id,action:'FINANCE_APPROVAL_APPROVED'}})).toBe(2);expect(await db.transactionalOutboxRecord.count({where:{aggregateId:row.id,eventType:'FINANCE_APPROVAL_APPROVED'}})).toBe(2);
+ });
+ it('deduplicates concurrent retries by the same financial checker on independent connections',async()=>{
+  const {row}=await approval(),ctx={...identity(),actorId:fresh(),expectedVersion:1};
+  const results=await Promise.allSettled([finance.decideApproval(row.id,'APPROVE',ctx.actorId,undefined,ctx),financeFacade(other).decideApproval(row.id,'APPROVE',ctx.actorId,undefined,ctx)]);
+  expect(results.filter(r=>r.status==='fulfilled')).toHaveLength(2);const persisted=await db.financeApprovalRecord.findUnique({where:{id:row.id}});expect(persisted.version).toBe(2);expect(persisted.status).toBe('PENDING');
+  expect(await db.financeApprovalDecisionRecord.count({where:{approvalId:row.id}})).toBe(1);expect(await db.financeCommandRecord.count({where:{id:commandId(ctx)}})).toBe(1);expect(await db.auditRecord.count({where:{targetId:row.id,action:'FINANCE_APPROVAL_APPROVED'}})).toBe(1);
+ });
+ it('rejects a stale competing checker version without a partial decision or false quorum',async()=>{
+  const {row}=await approval(),a={...identity(),actorId:fresh(),expectedVersion:1},b={...identity(),actorId:fresh(),expectedVersion:1};
+  const results=await Promise.allSettled([finance.decideApproval(row.id,'APPROVE',a.actorId,undefined,a),financeFacade(other).decideApproval(row.id,'APPROVE',b.actorId,undefined,b)]);
+  expect(results.filter(r=>r.status==='fulfilled')).toHaveLength(1);expect(String(results.find(r=>r.status==='rejected').reason)).toContain('FINANCE_VERSION_CONFLICT');
+  const persisted=await db.financeApprovalRecord.findUnique({where:{id:row.id}});expect(persisted.version).toBe(2);expect(persisted.status).toBe('PENDING');expect(await db.financeApprovalDecisionRecord.count({where:{approvalId:row.id}})).toBe(1);
+ });
+ it('rolls a checker decision version receipt and audit back after PostgreSQL precommit failure',async()=>{
+  const {row}=await approval(),ctx={...identity(),actorId:fresh(),expectedVersion:1};
+  await expect(financeFacade(withOutboxFailure(db)).decideApproval(row.id,'APPROVE',ctx.actorId,undefined,ctx)).rejects.toThrow(/division by zero/);
+  const persisted=await db.financeApprovalRecord.findUnique({where:{id:row.id}});expect(persisted.version).toBe(1);expect(persisted.status).toBe('PENDING');expect(await db.financeApprovalDecisionRecord.count({where:{approvalId:row.id}})).toBe(0);
+  expect(await db.financeCommandRecord.count({where:{id:commandId(ctx)}})).toBe(0);expect(await db.auditRecord.count({where:{targetId:row.id,action:'FINANCE_APPROVAL_APPROVED'}})).toBe(0);expect(await db.transactionalOutboxRecord.count({where:{aggregateId:row.id,eventType:'FINANCE_APPROVAL_APPROVED'}})).toBe(0);
+ });
+
 });

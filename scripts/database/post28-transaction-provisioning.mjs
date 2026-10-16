@@ -17,5 +17,6 @@ export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
  'CmsContentNode','CmsPublishedContent','AssetRecord','StudentWorkspace','StudentApplicationTracker','StudentApplicationDocumentBinding',
  'FinanceInvoiceRecord','FinancePaymentRecord','FinanceCommandRecord',
  'AuditRecord','StudentPrivacyConsentDecision','StudentSavedCollection','StudentSavedItem','StudentSearchHistory','StudentRecentlyViewed','StudentPersonalStatistics',
- 'FinancialAccountRecord','FinancialTransactionRecord','FinancialLedgerEntryRecord','ReferenceCurrency'
+ 'FinancialAccountRecord','FinancialTransactionRecord','FinancialLedgerEntryRecord','ReferenceCurrency',
+ 'FinanceApprovalRecord','FinanceApprovalDecisionRecord','FinanceAdjustmentCaseRecord'
 ]);
