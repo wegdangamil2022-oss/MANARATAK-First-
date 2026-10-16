@@ -6,6 +6,7 @@ import {execFileSync,spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {verifyReleaseManifest} from './lib/ReleaseContracts.mjs';
 import {inspectStaticBuild} from './lib/StaticBuildPolicy.mjs';
+import {npmInvocation} from './lib/DiagnosticProcess.mjs';
 const hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 let directory;
 try {
@@ -18,15 +19,16 @@ try {
   directory=path.join(parent,path.basename(out));fs.mkdirSync(directory,{mode:0o700});
   const checks=[];
   const run=(name,command,args,env={})=>{
+    if(command==='npm')({command,args}=npmInvocation(args));
     const log=path.join(directory,name+'.log'),startedAt=new Date().toISOString();
     const fd=fs.openSync(log,'wx',0o600);
     let result;try{result=spawnSync(command,args,{env:{...process.env,...env},stdio:['ignore',fd,fd]});}finally{fs.closeSync(fd);}
-    checks.push({name,command:[command,...args],startedAt,finishedAt:new Date().toISOString(),exitCode:result.status,logSha256:hash(log)});
+    checks.push({name,command:[command,...args],startedAt,finishedAt:new Date().toISOString(),exitCode:result.status,spawnError:result.error?.code??null,logSha256:hash(log)});
     fs.writeFileSync(path.join(directory,'checks.json'),JSON.stringify({sourceSha:sha,checks},null,2)+'\n');
     if(result.status!==0||result.error)throw new Error('POST28_DIAGNOSTIC_BUILD_STEP_FAILED');
   };
   run('prisma-generate','npm',['run','db:generate']);
-  run('workspace-build','npm',['run','build']);clean();
+  for(const unit of ['api','web','admin'])run(unit+'-build','npm',['run','build','--workspace','@manaratak/'+unit]);clean();
   const artifacts=path.join(directory,'artifacts');
   run('package',process.execPath,['scripts/release/build-immutable-artifacts.mjs'],{SOURCE_SHA:sha,RELEASE_ARTIFACT_OUTPUT_DIR:artifacts});
   const manifest=verifyReleaseManifest(artifacts,sha);
