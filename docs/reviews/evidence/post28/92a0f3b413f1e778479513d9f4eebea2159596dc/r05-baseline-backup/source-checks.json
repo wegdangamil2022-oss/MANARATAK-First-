@@ -1,0 +1,139 @@
+[
+  {
+    "name": "affected-source",
+    "command": [
+      "node",
+      "--test",
+      "tests/database/post28-backup-contract.test.mjs",
+      "tests/database/post28-lab-profile.test.mjs",
+      "tests/database/post28-upgrade-candidate.test.mjs",
+      "tests/database/post28-isolation.test.mjs",
+      "tests/database/post28-neon-preflight.test.mjs",
+      "tests/database/post28-local-forwarder.test.mjs",
+      "tests/database/post28-r04-r05-preparation.test.mjs"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "dirty": false,
+    "startedUtc": "2026-10-16T15:55:17.785478+00:00",
+    "finishedUtc": "2026-10-16T15:55:22.642532+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/92a0f3b413f1e778479513d9f4eebea2159596dc/R05-final/affected-source-20261016T155522625473Z.log",
+    "sha256": "e3a720c5decce4d594c8387adfbcd324e0559839543eef554fcb69170d5809e8"
+  },
+  {
+    "name": "architecture",
+    "command": [
+      "node",
+      "scripts/architecture/verify-source-architecture-guards.mjs"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "dirty": false,
+    "startedUtc": "2026-10-16T15:55:38.596343+00:00",
+    "finishedUtc": "2026-10-16T15:55:38.971361+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/92a0f3b413f1e778479513d9f4eebea2159596dc/R05-final/architecture-20261016T155538940013Z.log",
+    "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659"
+  },
+  {
+    "name": "source-quality",
+    "command": [
+      "node",
+      "scripts/quality/verify-source-quality.mjs"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "dirty": false,
+    "startedUtc": "2026-10-16T15:55:39.005316+00:00",
+    "finishedUtc": "2026-10-16T15:55:42.286263+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/92a0f3b413f1e778479513d9f4eebea2159596dc/R05-final/source-quality-20261016T155542262903Z.log",
+    "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073"
+  },
+  {
+    "name": "inventory",
+    "command": [
+      "node",
+      "scripts/aistudio/environment.mjs",
+      "--check"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "dirty": false,
+    "startedUtc": "2026-10-16T15:55:42.318684+00:00",
+    "finishedUtc": "2026-10-16T15:55:46.903857+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/92a0f3b413f1e778479513d9f4eebea2159596dc/R05-final/inventory-20261016T155546884917Z.log",
+    "sha256": "29c1251bbf64bfb976eab81494a68c3a3e561b6f0398f97b6a4e0f1ce527f444"
+  },
+  {
+    "name": "eslint",
+    "command": [
+      "npx",
+      "eslint",
+      "scripts/database/initialize-post28-upgrade.mjs",
+      "scripts/database/verify-post28-upgrade-backup.mjs",
+      "scripts/database/post28-upgrade-catalog.mjs",
+      "scripts/database/post28-backup-contract.mjs",
+      "scripts/database/post28-lab-profile.mjs",
+      "scripts/database/prepare-post28-upgrade.mjs",
+      "scripts/database/post28-upgrade-preservation.mjs",
+      "scripts/database/create-post28-lab.mjs",
+      "scripts/database/post28-preflight.mjs",
+      "scripts/database/post28-isolation.mjs",
+      "scripts/database/prepare-post28-acceptance.mjs",
+      "tests/database/post28-backup-contract.test.mjs",
+      "tests/database/post28-lab-profile.test.mjs",
+      "tests/database/post28-upgrade-candidate.test.mjs",
+      "tests/database/post28-isolation.test.mjs",
+      "tests/database/post28-r04-r05-preparation.test.mjs"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "dirty": false,
+    "startedUtc": "2026-10-16T15:55:46.967165+00:00",
+    "finishedUtc": "2026-10-16T15:55:49.653917+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/92a0f3b413f1e778479513d9f4eebea2159596dc/R05-final/eslint-20261016T155549635216Z.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "repository-organization",
+    "command": [
+      "node",
+      "scripts/verify/verify-final-repository-organization.mjs"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "dirty": false,
+    "startedUtc": "2026-10-16T15:56:36.997186+00:00",
+    "finishedUtc": "2026-10-16T15:56:40.837440+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/92a0f3b413f1e778479513d9f4eebea2159596dc/R05-final/repository-organization-20261016T155640819568Z.log",
+    "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129"
+  },
+  {
+    "name": "secrets",
+    "command": [
+      "node",
+      "scripts/security/scan-secrets.mjs"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "dirty": false,
+    "startedUtc": "2026-10-16T15:56:40.871793+00:00",
+    "finishedUtc": "2026-10-16T15:56:42.143766+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/92a0f3b413f1e778479513d9f4eebea2159596dc/R05-final/secrets-20261016T155642123028Z.log",
+    "sha256": "998f5224df15d9403aca333d5a569a014f8558b8c028cb34494cdad2ee0b943b"
+  },
+  {
+    "name": "diff-check",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "sourceSha": "92a0f3b413f1e778479513d9f4eebea2159596dc",
+    "dirty": false,
+    "startedUtc": "2026-10-16T15:56:42.187426+00:00",
+    "finishedUtc": "2026-10-16T15:56:42.213190+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/92a0f3b413f1e778479513d9f4eebea2159596dc/R05-final/diff-check-20261016T155642195483Z.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]
