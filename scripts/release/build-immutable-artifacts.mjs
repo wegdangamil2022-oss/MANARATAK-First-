@@ -43,8 +43,11 @@ const units = [
       'package-lock.json',
     ],
   ],
-  ['web', ['apps/web/dist']],
-  ['admin', ['apps/admin/dist']],
+  ...['web','admin'].map(unit=>[unit,[`apps/${unit}/dist`,
+    'scripts/release/serve-static-artifact.mjs',
+    'scripts/release/lib/StaticBuildPolicy.mjs',
+    'scripts/release/lib/StaticScriptPolicy.mjs',
+    'scripts/release/lib/ReleaseContracts.mjs']]),
 ];
 for(const [,items] of units)assertRegularArtifactInputs(root,items);
 for (const unit of ['web', 'admin']) {
@@ -74,6 +77,7 @@ for (const [name, items] of units) {
   childProcess.execFileSync(
     'tar',
     [
+      '--force-local',
       '--sort=name',
       '--mtime=UTC 1970-01-01',
       '--owner=0',

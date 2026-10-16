@@ -35,12 +35,12 @@ try {
   const units=[];
   for(const row of manifest.artifacts) {
     const archive=path.join(artifacts,row.file);
-    const names=execFileSync('tar',['-tf',archive],{encoding:'utf8',maxBuffer:8*1024*1024}).trim().split('\n');
-    const listing=execFileSync('tar',['-tvf',archive],{encoding:'utf8',maxBuffer:16*1024*1024}).trim().split('\n');
+    const names=execFileSync('tar',['--force-local','-tf',archive],{encoding:'utf8',maxBuffer:8*1024*1024}).trim().split('\n');
+    const listing=execFileSync('tar',['--force-local','-tvf',archive],{encoding:'utf8',maxBuffer:16*1024*1024}).trim().split('\n');
     if(names.some(name=>name.startsWith('/')||name.includes('\\')||name.split('/').includes('..'))||listing.some(line=>!/^[-d]/.test(line)))
       throw new Error('POST28_DIAGNOSTIC_ARCHIVE_PATH_OR_TYPE_INVALID');
     const unpack=path.join(directory,'unpacked-'+row.unit);fs.mkdirSync(unpack,{mode:0o700});
-    execFileSync('tar',['-xf',archive,'-C',unpack],{stdio:'pipe'});
+    execFileSync('tar',['--force-local','-xf',archive,'-C',unpack],{stdio:'pipe'});
     if(row.unit!=='api'&&inspectStaticBuild(path.join(unpack,'apps',row.unit,'dist'),row.unit,sha).status!=='BUILT')throw new Error('POST28_DIAGNOSTIC_STATIC_UNPACK_INVALID');
     if(row.unit==='api'&&!fs.statSync(path.join(unpack,'apps/api/dist/server.cjs')).isFile())throw new Error('POST28_DIAGNOSTIC_API_ENTRY_MISSING');
     if(fs.existsSync(path.join(unpack,'node_modules'))||fs.existsSync(path.join(unpack,'.git')))throw new Error('POST28_DIAGNOSTIC_UNPACK_CONTAMINATED');
