@@ -50,3 +50,9 @@ node scripts/release/post28-diagnostic-build.mjs /absolute/private/new-r07-run
 تدرج الحزمة متطلبات العمال والجلسات والمزودين،و77 علاقة و42 حالة ومصفوفة26 مجالًا بأبعادها الخمسة. اختبارات shutdown/lifecycle بمصادر معزولة لا تثبت تشغيل عاملين حقيقيين أوPostgreSQL/Redis أوprovider effects. اختبارات HTTP المعترضة لا تثبت built-browser+DB.
 
 لا تشغيل SMTP أودفع أومزودAI حقيقي،ولا FLUSHALL علىRedis مشترك،ولاload أوrestore دون هدف وميزانية وسلطات مرحلتها. تبقى كل نتائج التشغيل NOT_EXECUTED حتى قياسها؛لا R03–R09 CLOSED بسبب تقرير تجهيز أوbuild تشخيصي.
+
+## تصحيح مشغّل WP-IC-10 القديم
+
+`wp-ic-10-browser-e2e.mjs` يختبر ثلاث حالات HTTP مع dev server،ولا يستعمل page/browser. لم يعد يكتب browser E2E PASS:يحفظ `IMPORTED_COURSE_HTTP_BOUNDARY_DIAGNOSTIC` مع pass=false وbuiltBrowserVerified=false وruntimeAcceptance=false حتى لو نجحت الحالات. finalizer الذي يطلب browser acceptance يبقى BLOCKED. يتطلب مجلدًا جديدًا مطلقًا خارج Git؛لا تستخدم نتائج قديمة أوتخلطها بقبولR09.
+
+أضيف جمع Playwright JSON قبل التشغيل ومقارنة file/case/project نفسها بعده،ورفض zero/skip/flaky/retry/missing/extra cases. اختبار subprocess فعلي يستعمل Playwright test runner بحالة inert بلا browser أوwebServer أوDB ليثبت صيغة التقرير؛ليس دليل متصفح تشغيلي. مشغّل built API/Web/Admin الحقيقي وTLS وfixtures لا يزال مطلوبًا.
