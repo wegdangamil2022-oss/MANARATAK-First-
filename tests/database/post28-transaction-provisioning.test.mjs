@@ -65,3 +65,10 @@ test('owner workflow profile keeps all nineteen real cases and grants only decla
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
  assert.ok(fs.readFileSync('vitest.config.ts','utf8').includes('**/*.database.spec.mjs'));
 });
+
+test('document consent suite requires ten cases and only adds timeline DML to the declared application whitelist',async()=>{
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
+ assert.equal(databaseSuite('document-consent').minimumCases,10);
+ assert.ok(TRANSACTION_APPLICATION_TABLES.includes('StudentTimelineEntry'));
+ assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
+});

@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'document-consent': {files: ['tests/database/post28-document-consent.database.spec.mjs'],minimumCases:10},
   'owner-workflows': {files: ['tests/database/post28-owner-workflows.database.spec.mjs'],minimumCases:19},
   'core-transactions': {files: ['tests/database/post28-core-transactions.database.spec.mjs'],minimumCases:8},
   assets: {

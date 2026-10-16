@@ -94,6 +94,7 @@ export class StudentDocumentReviewUseCases {
     return { binding, tracker, asset };
   }
   async open(bindingId: string, reviewerId: string) {
+    if (!reviewerId.trim()) throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
     const { binding, tracker, asset } = await this.context(bindingId, reviewerId);
     if (!this.repository.recordDocumentReviewAccess)
       throw new Error('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');
