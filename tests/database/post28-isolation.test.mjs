@@ -194,3 +194,13 @@ test('memory-backed labs reject non-transaction profiles and unknown storage bef
     assert.equal(result.status,1);assert.match(result.stderr,new RegExp(error));assert.doesNotMatch(result.stderr,/POST28_LAB_DIAGNOSTICS/);
   }
 });
+
+test('parent-host creation refuses non-memory scope and a fabricated parent before Docker or target mutation',async()=>{
+ const {spawnSync}=await import('node:child_process');const temp=fs.mkdtempSync(path.join(os.tmpdir(),'post28-parent-'));
+ try{const file=path.join(temp,'state.json');fs.writeFileSync(file,JSON.stringify({kind:'FOREIGN_HOST'}));
+  for(const [profile,storage,error] of [['upgrade','tmpfs','POST28_PARENT_TRANSACTION_MEMORY_ONLY'],['transactions','volume','POST28_PARENT_TRANSACTION_MEMORY_ONLY'],['transactions','tmpfs','POST28_PARENT_MEMORY_LAB_REQUIRED']]){
+   const r=spawnSync(process.execPath,['scripts/database/create-post28-lab.mjs'],{encoding:'utf8',env:{...process.env,NODE_ENV:'test',POST28_LOCAL_LAB_CREATE:'YES',POST28_LOCAL_LAB_PROFILE:profile,POST28_LOCAL_LAB_STORAGE:storage,POST28_LOCAL_LAB_PARENT_STATE:file}});
+   assert.equal(r.status,1);assert.match(r.stderr,new RegExp(error));assert.doesNotMatch(r.stderr,/POST28_LAB_DIAGNOSTICS/);
+  }
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
