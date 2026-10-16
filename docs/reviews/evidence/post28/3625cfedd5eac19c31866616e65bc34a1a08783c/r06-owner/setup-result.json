@@ -1,0 +1,90 @@
+{
+  "kind": "POST28_R06_LOCAL_DB_T_SETUP",
+  "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+  "runId": "036909f0-5a81-47da-9756-235b8f9a6a29",
+  "authorization": {
+    "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY",
+    "R04": "PASS_LOCAL_MATCHING_SCHEMA",
+    "R05": "BLOCKED_USER_AUTHORIZED_SCOPED_R06",
+    "fullR06Acceptance": false,
+    "deploymentAuthorized": false
+  },
+  "identities": {
+    "runtime": {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7697311221793009707",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    },
+    "setup": {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_tx_migrator",
+      "serverIdentity": "7697311221793009707",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    }
+  },
+  "finalIdentity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7697311221793009707",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "ledger": {
+    "expected": 110,
+    "applied": 110,
+    "checksumsMatched": 110,
+    "partial": 0,
+    "rolledBack": 0
+  },
+  "applicationReadTables": 281,
+  "applicationWriteTables": [
+    "BackgroundJobRecord",
+    "BackgroundJobExecutionRecord",
+    "BackgroundJobDeadLetterRecord",
+    "TransactionalOutboxRecord",
+    "CmsContentNode",
+    "CmsPublishedContent",
+    "AssetRecord",
+    "StudentWorkspace",
+    "StudentApplicationTracker",
+    "StudentApplicationDocumentBinding",
+    "FinanceInvoiceRecord",
+    "FinancePaymentRecord",
+    "FinanceCommandRecord",
+    "AuditRecord",
+    "StudentPrivacyConsentDecision",
+    "StudentSavedCollection",
+    "StudentSavedItem",
+    "StudentSearchHistory",
+    "StudentRecentlyViewed",
+    "StudentPersonalStatistics",
+    "FinancialAccountRecord",
+    "FinancialTransactionRecord",
+    "FinancialLedgerEntryRecord",
+    "ReferenceCurrency",
+    "FinanceApprovalRecord",
+    "FinanceApprovalDecisionRecord",
+    "FinanceAdjustmentCaseRecord"
+  ],
+  "ledgerGranted": false,
+  "DDLGranted": false,
+  "schemaDiffExitCode": 0,
+  "R06Accepted": false
+}

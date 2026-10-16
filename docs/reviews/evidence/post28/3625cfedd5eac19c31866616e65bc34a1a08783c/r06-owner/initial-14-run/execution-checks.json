@@ -1,0 +1,31 @@
+[
+  {
+    "name": "r06-owner-db-t-setup",
+    "command": [
+      "node",
+      "scripts/database/initialize-post28-transactions.mjs"
+    ],
+    "sourceSha": "b180c75713b7967716a23dd859bc27eeaaecefc3",
+    "startedUtc": "2026-10-16T16:54:48.089959+00:00",
+    "finishedUtc": "2026-10-16T16:55:03.471304+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-Netsgt/r06-owner-db-t-setup-20261016T165503469363Z.log",
+    "sha256": "f364484f2bcdbe14fea21c3628ce9579962968bf9244bb3e7179749854cc0b14"
+  },
+  {
+    "name": "r06-owner-workflows",
+    "command": [
+      "env",
+      "DATABASE_MUTATION_PURPOSE=maintenance",
+      "node",
+      "scripts/database/run-post28-suite.mjs",
+      "owner-workflows"
+    ],
+    "sourceSha": "b180c75713b7967716a23dd859bc27eeaaecefc3",
+    "startedUtc": "2026-10-16T16:55:31.351150+00:00",
+    "finishedUtc": "2026-10-16T16:55:37.535111+00:00",
+    "exitCode": 0,
+    "log": "/workspace/scratch/post28/labs/lab-Netsgt/r06-owner-workflows-20261016T165537533026Z.log",
+    "sha256": "2cd971ea5362276ef3b96331c517a36dd255c3d424af61cd30bf76f5331b5c3f"
+  }
+]

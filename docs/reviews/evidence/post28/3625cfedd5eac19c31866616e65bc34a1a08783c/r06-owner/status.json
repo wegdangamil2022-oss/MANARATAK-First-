@@ -1,0 +1,50 @@
+{
+  "phase": "R06",
+  "status": "PARTIAL_OWNER_WORKFLOWS_PASSED",
+  "sourceSha": "3625cfedd5eac19c31866616e65bc34a1a08783c",
+  "runId": "036909f0-5a81-47da-9756-235b8f9a6a29",
+  "currentDatabaseCases": {
+    "passed": 19,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sourceChecks": {
+    "passed": 67,
+    "failed": 0,
+    "skipped": 0
+  },
+  "cumulativeDistinctDatabaseCases": 68,
+  "previous49Evidence": [
+    "docs/reviews/evidence/post28/853fe76646c018e1fd9955034cd155311760856f/r06-runtime/status.json",
+    "docs/reviews/evidence/post28/e5369c6030cda109e6e72bc5105681135639f398/r06-runtime/status.json"
+  ],
+  "initial14Run": {
+    "sourceSha": "b180c75713b7967716a23dd859bc27eeaaecefc3",
+    "passed": 14,
+    "includedWithinFinal19": true,
+    "countedAgain": false
+  },
+  "applicationUseCasesExecuted": [
+    "StudentWorkspaceUseCases",
+    "FinancePlatformUseCases"
+  ],
+  "realPrismaRepositories": [
+    "PrismaStudentWorkspaceRepository",
+    "PrismaFinanceRepository",
+    "PrismaFinanceCurrencyReferenceGateway"
+  ],
+  "realPostgresTransactionRollback": true,
+  "injectedDatabaseError": "SQLSTATE22012 at precommit outbox boundary via real PostgreSQL transaction",
+  "providersContacted": false,
+  "R05": "REVIEW_COMPLETE_WITH_BLOCKERS_NOT_PASSED",
+  "fullR06Acceptance": false,
+  "cloudAcceptance": false,
+  "deploymentAuthorized": false,
+  "notProven": [
+    "HTTP authenticated principal binding and role policy",
+    "Document delivery consent withdrawal and simultaneous access grants",
+    "Financial approval consumption and provider settlement/refund flows",
+    "Full university/major/scholarship/test/course relation scenarios",
+    "Pending DEC01_to07 decisions"
+  ]
+}
