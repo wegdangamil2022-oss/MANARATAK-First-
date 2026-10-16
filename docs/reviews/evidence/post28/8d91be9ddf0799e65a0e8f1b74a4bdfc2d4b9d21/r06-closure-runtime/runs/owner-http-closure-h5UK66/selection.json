@@ -1,0 +1,6 @@
+{
+  "caseExact": "Post28 owner HTTP closure with current persisted authority > HTTP refuses cached invoice response when action permission alone is withdrawn",
+  "fullDiscoveryCases": 12,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

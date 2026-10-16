@@ -1,0 +1,15 @@
+[
+  "commits one credit note ledger adjustment and durable replay receipt",
+  "rejects over-credit and denomination mismatch without ledger or receipt mutation",
+  "requires current revision for credit notes before any partial mutation",
+  "rolls credit note invoice ledger audit outbox and receipt back on PostgreSQL failure",
+  "commits a future balanced installment schedule with the invoice revision",
+  "rejects wrong sum mixed denomination and past installment dates atomically",
+  "replays installments without a second plan and rejects a different schedule for the same key",
+  "serializes independent installment writers into one plan and one invoice revision",
+  "reserves and releases an owned invoice hold without changing the opening ledger balance",
+  "rejects a foreign wallet payer without an obligation reservation",
+  "prevents two connections reserving more than one wallet available balance",
+  "rolls hold reservation wallet and invoice revisions back with its failed audit outbox receipt boundary",
+  "rolls captured hold ledger and invoice payment back when PostgreSQL rejects outbox persistence"
+]

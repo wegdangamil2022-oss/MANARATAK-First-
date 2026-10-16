@@ -1,0 +1,33 @@
+{
+  "kind": "POST28_DATABASE_SUITE_EXECUTION",
+  "sourceSha": "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+  "suite": "attestation-closure",
+  "caseExact": "Post28 real document attestation owner asset and HTTP boundaries > HTTP records real JWT reviewer and current persisted review permission",
+  "fullDiscoveryCases": 14,
+  "fullProfileAcceptance": false,
+  "authorization": {
+    "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY",
+    "R04": "PASS_LOCAL_MATCHING_SCHEMA",
+    "R05": "BLOCKED_USER_AUTHORIZED_SCOPED_R06",
+    "fullR06Acceptance": false,
+    "deploymentAuthorized": false
+  },
+  "targets": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7697337925026607149",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "expected": 1,
+  "executed": 1,
+  "passed": 1,
+  "failed": 0,
+  "skipped": 0
+}

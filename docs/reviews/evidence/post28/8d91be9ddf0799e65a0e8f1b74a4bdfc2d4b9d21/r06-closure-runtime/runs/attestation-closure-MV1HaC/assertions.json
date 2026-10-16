@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "serializes two independent reviewers to one decision timeline two scoped audits and outbox",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 189.94124600000032,
+    "failureFirstLines": []
+  }
+]

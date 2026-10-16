@@ -1,0 +1,126 @@
+[
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP binds university geography audit to the authenticated JWT actor",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 379.2254729999995,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP rejects a foreign region and leaves root revision audit and outbox unchanged",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 48.421846999999616,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP rejects deprecated country and city canonical references",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 96.84291399999893,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP rejects missing revision stale revision and missing CSRF",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 77.20497500000056,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP refuses university writes and cached replay after permission withdrawal",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "failed",
+    "durationMs": 104.7235039999996,
+    "failureFirstLines": [
+      "AssertionError: expected 200 to be 403 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP replays authorized university commands without duplicate mutation",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 60.15382800000043,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP denies an admin without university permission before root writes",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 35.647391000000425,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP executes invoice issuance under both finance and action permission with JWT audit actor",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 61.52125199999864,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP denies invoice action permission despite generic finance access",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 27.253420999999435,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP refuses cached invoice response when action permission alone is withdrawn",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "failed",
+    "durationMs": 50.77685299999939,
+    "failureFirstLines": [
+      "AssertionError: expected 200 to be 403 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP replays an authorized invoice issue using one owner receipt and one audit event",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 52.46542799999952,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP session revocation prevents university cached replay",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 48.802128000001176,
+    "failureFirstLines": []
+  }
+]

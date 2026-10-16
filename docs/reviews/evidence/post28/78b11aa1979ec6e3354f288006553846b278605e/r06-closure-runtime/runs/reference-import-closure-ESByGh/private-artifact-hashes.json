@@ -1,0 +1,17 @@
+[
+  {
+    "name": "R06-suites/reference-import-closure-ESByGh/vitest.json",
+    "sha256": "c21ee72de7d3c4c54572785e578cc802776ecaf3a571dee027e382012f8b02f6",
+    "bytes": 7831
+  },
+  {
+    "name": "R06-suites/reference-import-closure-ESByGh/discovery.json",
+    "sha256": "7febb5842e6ff20e5bd479be884240e2223835012d1c8451eab6ea908883f8a4",
+    "bytes": 4875
+  },
+  {
+    "name": "R06-suites/reference-import-closure-ESByGh/selection.json",
+    "sha256": "463578cf43222060a05ab3f410dc289f8d958d2fcd24aa9693457759a8eaa015",
+    "bytes": 250
+  }
+]

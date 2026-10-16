@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "HTTP records real JWT reviewer and current persisted review permission",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 201.14866900000015,
+    "failureFirstLines": []
+  }
+]

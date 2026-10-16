@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > commits verified attestation bound to canonical scholarship cycle version and real asset checksum",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > persists an explicit rejected attestation without granting verified status",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > rejects a stale attestation revision atomically",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > refuses self review and malformed validity or evidence without an audit",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > rejects attestation after consent withdrawal",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > serializes two independent reviewers to one decision timeline two scoped audits and outbox",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > rejects repeat decisions and removes the decided binding from the real review queue",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > fails closed when the actual scholarship cycle or owner publication is withdrawn",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > real asset policy refuses another owner and untrusted bytes before any attestation",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > rolls attestation tracker timeline and audit back at real PostgreSQL outbox failure",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP records real JWT reviewer and current persisted review permission",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses a caller lacking review permission before a decision",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > HTTP refuses cached attestation after review permission withdrawal",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real document attestation owner asset and HTTP boundaries > real delivery service refuses opening bytes when secure storage capability is absent",
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP replays an authorized invoice issue using one owner receipt and one audit event",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 139.9641670000001,
+    "failureFirstLines": []
+  }
+]

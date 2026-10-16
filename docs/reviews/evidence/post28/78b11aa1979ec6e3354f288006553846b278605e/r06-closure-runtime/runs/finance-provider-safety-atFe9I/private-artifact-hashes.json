@@ -1,0 +1,17 @@
+[
+  {
+    "name": "R06-suites/finance-provider-safety-atFe9I/vitest.json",
+    "sha256": "e87c2ac43af9b7a29f5a6171ef109f7964a377ce1ee069fc14cbb7c965c3f188",
+    "bytes": 3184
+  },
+  {
+    "name": "R06-suites/finance-provider-safety-atFe9I/discovery.json",
+    "sha256": "e873ca87c507c2fddd2b871e257c6111486099586e038e5c82c37d39e1a49d8c",
+    "bytes": 1671
+  },
+  {
+    "name": "R06-suites/finance-provider-safety-atFe9I/selection.json",
+    "sha256": "6484216cdf53c817e1468212ff4a81ad6ff628140c0e55531560cd7168a7277f",
+    "bytes": 278
+  }
+]

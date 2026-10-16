@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "public course card and list withdraw a previously resolved language after canonical deprecation",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 139.08656599999995,
+    "failureFirstLines": []
+  }
+]

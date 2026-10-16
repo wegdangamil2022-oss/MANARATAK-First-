@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "rejects inactive and deprecated canonical languages despite a valid language FK",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 68.05739699999958,
+    "failureFirstLines": []
+  }
+]

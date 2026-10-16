@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Post28 canonical test language and imported source contracts > projects a resolved scholarship test document backed by its own published version",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > withdraws archived test requirements from scholarship public projection",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > withdraws a hidden canonical test from scholarship public requirements even when status remains published",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > withdraws test requirements when the currently referenced version is no longer published",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > does not treat an unresolved named test as an approved canonical requirement",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > keeps provider headquarters separate from course study geography",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > resolves an active canonical course language through its actual repository",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > rejects inactive and deprecated canonical languages despite a valid language FK",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > does not publish source language labels without a reviewed canonical reference",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > public course card and list withdraw a previously resolved language after canonical deprecation",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > public course list excludes raw language only records without canonical proof",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > deduplicates one provider native language key across two actual connections",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > preserves separate source identities for each language version and provider",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > approved provider domains reject lookalike external hosts and accept the exact owned host",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > records supplied synthetic redirect evidence once and retains original first seen provenance",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > rejects a stale link-check result after a controlled URL replacement without changing history",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > forbids uncontrolled imported provider origin and URL identity edits before any owner mutation",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 canonical test language and imported source contracts > blocks publishing a raw external source without persisted direct-link verification",
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs"
+  }
+]

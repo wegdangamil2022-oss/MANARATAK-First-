@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP binds university geography audit to the authenticated JWT actor",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 145.9151980000006,
+    "failureFirstLines": []
+  }
+]

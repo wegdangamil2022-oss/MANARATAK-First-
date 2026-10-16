@@ -1,0 +1,15 @@
+[
+  "commits verified attestation bound to canonical scholarship cycle version and real asset checksum",
+  "persists an explicit rejected attestation without granting verified status",
+  "rejects a stale attestation revision atomically",
+  "refuses self review and malformed validity or evidence without an audit",
+  "rejects attestation after consent withdrawal",
+  "serializes two independent reviewers to one decision timeline two scoped audits and outbox",
+  "rejects repeat decisions and removes the decided binding from the real review queue",
+  "fails closed when the actual scholarship cycle or owner publication is withdrawn",
+  "real asset policy refuses another owner and untrusted bytes before any attestation",
+  "rolls attestation tracker timeline and audit back at real PostgreSQL outbox failure",
+  "HTTP records real JWT reviewer and current persisted review permission",
+  "HTTP refuses a caller lacking review permission before a decision",
+  "real delivery service refuses opening bytes when secure storage capability is absent"
+]

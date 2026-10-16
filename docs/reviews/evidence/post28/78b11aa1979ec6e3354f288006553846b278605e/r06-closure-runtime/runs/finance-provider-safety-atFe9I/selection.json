@@ -1,0 +1,6 @@
+{
+  "caseExact": "Post28 provider absence refund and settlement safety on PostgreSQL > does not consume refund approval or reserve execution when its original payment provider is unconfigured",
+  "fullDiscoveryCases": 6,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

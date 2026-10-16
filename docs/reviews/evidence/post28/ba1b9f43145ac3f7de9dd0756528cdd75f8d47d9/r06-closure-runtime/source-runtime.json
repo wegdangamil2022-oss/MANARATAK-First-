@@ -1,0 +1,31 @@
+{
+  "sourceSha": "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+  "branch": "fix/post28-ci-environment-inventory-20261016",
+  "tree": "a56e34ea8ac66b517d647d97fdc9dfbb4e071ca1",
+  "lockSha256": "75269332ee9c7c5b5b66b753a5ac5e94427668cd27b1db20b26291499306b4ee",
+  "schemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+  "generatedClientSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+  "fixtureDefinitionSha256": {
+    "tests/database/post28-finance-local-closure.database.spec.mjs": "d4b51913df648b5037b05ccc28ec64eef82ac8be525a0752ab63e8d1e73e1a14"
+  },
+  "node": "22.16.0",
+  "prisma": "5.22.0",
+  "runId": "a96d8bdd-da83-4820-a773-d2cc54c0cb09",
+  "port": 15437,
+  "image": "postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+  "containerId": "40959c949ec6e298279e961727318955e9dfc94e00fcb8ef5b200f53216a95cf",
+  "target": {
+    "label": "DB-T",
+    "database": "manaratak_post28_transactions_test",
+    "role": "post28_app",
+    "serverIdentity": "7697366736576303148",
+    "databaseOid": "16386",
+    "postgresMajor": 16,
+    "timezone": "UTC",
+    "publicTables": 282,
+    "probeReadOnly": true
+  },
+  "privateContractSha256": "6e4a42f608ca6466da1683d1b747341803f7399e5c60cd3934196b3827db0aa4",
+  "setupEvidenceSha256": "5da8eab17d5811536c903d246e0222c4be2f361c6f099a2b549ec46f6b42ffc8",
+  "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY"
+}

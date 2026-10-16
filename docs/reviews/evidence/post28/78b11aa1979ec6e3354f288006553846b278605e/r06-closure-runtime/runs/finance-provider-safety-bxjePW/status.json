@@ -1,0 +1,18 @@
+{
+  "discovered": 6,
+  "executed": 1,
+  "passed": 1,
+  "failed": 0,
+  "selectedSkipped": 0,
+  "rawExcludedAssertions": 5,
+  "fullProfilePassed": false,
+  "sourceSha": "78b11aa1979ec6e3354f288006553846b278605e",
+  "suite": "finance-provider-safety",
+  "runId": "517a9ec8-f9c2-473d-ad4a-c95f45318d1c",
+  "caseExact": "Post28 provider absence refund and settlement safety on PostgreSQL > refuses another refund target approval without consuming either approval",
+  "originalRunnerGate": "PASS",
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "productionAcceptance": false
+}

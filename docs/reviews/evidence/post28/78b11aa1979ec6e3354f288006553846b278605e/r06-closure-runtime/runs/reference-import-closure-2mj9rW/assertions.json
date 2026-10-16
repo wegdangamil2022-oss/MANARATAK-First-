@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "does not publish source language labels without a reviewed canonical reference",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 60.17479500000081,
+    "failureFirstLines": []
+  }
+]

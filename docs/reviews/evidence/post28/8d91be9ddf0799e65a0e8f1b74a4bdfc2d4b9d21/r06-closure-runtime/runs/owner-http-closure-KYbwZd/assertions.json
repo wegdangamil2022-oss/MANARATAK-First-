@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-owner-http-closure.database.spec.mjs",
+    "title": "HTTP replays authorized university commands without duplicate mutation",
+    "ancestors": [
+      "Post28 owner HTTP closure with current persisted authority"
+    ],
+    "status": "passed",
+    "durationMs": 182.3310249999995,
+    "failureFirstLines": []
+  }
+]

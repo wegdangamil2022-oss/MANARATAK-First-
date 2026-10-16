@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs",
+    "title": "does not consume refund approval or reserve execution when its original payment provider is unconfigured",
+    "ancestors": [
+      "Post28 provider absence refund and settlement safety on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 73.43881399999964,
+    "failureFirstLines": []
+  }
+]

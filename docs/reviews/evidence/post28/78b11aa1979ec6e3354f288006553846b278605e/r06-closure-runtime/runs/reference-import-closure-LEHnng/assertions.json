@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-reference-import-closure.database.spec.mjs",
+    "title": "blocks publishing a raw external source without persisted direct-link verification",
+    "ancestors": [
+      "Post28 canonical test language and imported source contracts"
+    ],
+    "status": "passed",
+    "durationMs": 89.21971399999984,
+    "failureFirstLines": []
+  }
+]

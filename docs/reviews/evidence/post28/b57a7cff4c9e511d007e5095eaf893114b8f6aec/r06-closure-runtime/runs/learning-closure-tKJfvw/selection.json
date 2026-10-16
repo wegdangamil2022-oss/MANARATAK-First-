@@ -1,0 +1,6 @@
+{
+  "caseExact": "Post28 learning completion and certificate trust boundaries on PostgreSQL > real completion worker dispatches noncredential events and records missing authority as retryable failure",
+  "fullDiscoveryCases": 12,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

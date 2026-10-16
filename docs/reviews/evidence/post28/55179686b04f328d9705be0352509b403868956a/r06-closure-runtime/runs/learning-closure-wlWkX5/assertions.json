@@ -1,0 +1,146 @@
+[
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "persists enrollment audit and authoritative outbox without issuing a certificate",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 27.268340999999964,
+    "failureFirstLines": [
+      "Error: Course with id 9d4b31f5-54db-48f3-90c0-e8aebd12d354 not found"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "rejects completion below full progress without partial completion audit or event",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 15.856814999999642,
+    "failureFirstLines": [
+      "Error: Course with id 5b527f70-2447-4028-bb7a-97079d53877e not found"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "atomically commits completed enrollment completion audit and versioned credential signal only",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 8.921731999999793,
+    "failureFirstLines": [
+      "Error: Course with id 49f49c19-3de8-4cc8-b7c7-a5277aaf4241 not found"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "does not duplicate a completion audit or signal on sequential retry",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 8.299798999999894,
+    "failureFirstLines": [
+      "Error: Course with id 97ddeb1c-3ff6-42cc-9354-d14139e7dbdb not found"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "serializes completion from independent connections into exactly one completion and event",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 8.138356999999814,
+    "failureFirstLines": [
+      "Error: Course with id b4403234-6b16-437a-8368-a9dbe50dc5d1 not found"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "rolls completion enrollment and audit back on the actual PostgreSQL outbox failure boundary",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 12.446148999999878,
+    "failureFirstLines": [
+      "Error: Course with id e70f45aa-0d01-4301-8de1-4204c423df07 not found"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "refuses external linked course enrollment progress and completion without local writes",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 12.036984999999731,
+    "failureFirstLines": [
+      "Error: expected [Function] to throw error including 'External linked courses' but got 'Course with id b488b5e0-58b4-43db-878…'"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "rejects a persisted external-course certificate claim despite eligible completion payload",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 10.131115999999565,
+    "failureFirstLines": [
+      "Error: expected [Function] to throw error including 'MANARATAK_CERTIFICATE_NATIVE_COURSE_R…' but got 'CERTIFICATE_SOURCE_EVENT_AUTHORITY_IN…'"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "acknowledges persisted noncredential completion as a no-op without any issuance",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 9.681721999999809,
+    "failureFirstLines": [
+      "Error: Course with id 8dc9ada8-e85d-40ad-a9f3-ced6257bf085 not found"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "fails closed for native credential completion when no approved active template exists",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 7.22156300000006,
+    "failureFirstLines": [
+      "Error: Course with id 8b43fcb4-7a35-422c-be40-c248732c010c not found"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "rejects wrong event domain type version and delivery idempotency identity before issuing",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 7.892277999999806,
+    "failureFirstLines": [
+      "Error: Course with id 71e022d2-b1cd-46bd-b129-d137fd37e82f not found"
+    ]
+  },
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "real completion worker dispatches noncredential events and records missing authority as retryable failure",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 8.292868999999882,
+    "failureFirstLines": [
+      "Error: Course with id b2fa0826-fb33-4e6d-a55a-fab503dec3ca not found"
+    ]
+  }
+]

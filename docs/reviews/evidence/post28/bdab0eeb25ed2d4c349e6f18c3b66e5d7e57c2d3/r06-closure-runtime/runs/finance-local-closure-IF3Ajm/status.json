@@ -1,0 +1,18 @@
+{
+  "discovered": 14,
+  "executed": 1,
+  "passed": 1,
+  "failed": 0,
+  "selectedSkipped": 0,
+  "rawExcludedAssertions": 13,
+  "fullProfilePassed": false,
+  "sourceSha": "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3",
+  "suite": "finance-local-closure",
+  "runId": "0319dc3a-34dd-4b45-845c-2dada93941c4",
+  "caseExact": "Post28 independent local credit installments and wallet obligation invariants > commits one credit note ledger adjustment and durable replay receipt",
+  "originalRunnerGate": "PASS",
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "productionAcceptance": false
+}

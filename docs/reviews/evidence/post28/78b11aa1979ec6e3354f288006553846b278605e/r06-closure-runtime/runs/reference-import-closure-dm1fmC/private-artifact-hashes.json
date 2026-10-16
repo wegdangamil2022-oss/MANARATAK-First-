@@ -1,0 +1,17 @@
+[
+  {
+    "name": "R06-suites/reference-import-closure-dm1fmC/vitest.json",
+    "sha256": "1358866d953230f54b6c199468e0cfe7e47373fd6f1b61bb409a4ab099733045",
+    "bytes": 7832
+  },
+  {
+    "name": "R06-suites/reference-import-closure-dm1fmC/discovery.json",
+    "sha256": "7febb5842e6ff20e5bd479be884240e2223835012d1c8451eab6ea908883f8a4",
+    "bytes": 4875
+  },
+  {
+    "name": "R06-suites/reference-import-closure-dm1fmC/selection.json",
+    "sha256": "c05fa38ee539408ec8acdc410755942410a9427d5f85e210aff1a1a65a948f86",
+    "bytes": 264
+  }
+]

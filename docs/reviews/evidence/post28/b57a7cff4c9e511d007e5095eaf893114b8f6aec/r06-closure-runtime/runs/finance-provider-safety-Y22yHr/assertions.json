@@ -1,0 +1,64 @@
+[
+  {
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs",
+    "title": "does not consume refund approval or reserve execution when its original payment provider is unconfigured",
+    "ancestors": [
+      "Post28 provider absence refund and settlement safety on PostgreSQL"
+    ],
+    "status": "failed",
+    "durationMs": 100.38977700000032,
+    "failureFirstLines": [
+      "AssertionError: expected { refund: { …(20) }, …(5) } to deeply equal { refund: { …(20) }, …(5) }"
+    ]
+  },
+  {
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs",
+    "title": "refuses another refund target approval without consuming either approval",
+    "ancestors": [
+      "Post28 provider absence refund and settlement safety on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 101.1443519999998,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs",
+    "title": "rejects over-refund and noncaptured original payment without creating a second refund",
+    "ancestors": [
+      "Post28 provider absence refund and settlement safety on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 48.383188000000246,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs",
+    "title": "refuses a bank transfer request before reservation when the bank provider is absent",
+    "ancestors": [
+      "Post28 provider absence refund and settlement safety on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 16.0755079999999,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs",
+    "title": "does not settle or post a ledger transaction without configured bank evidence",
+    "ancestors": [
+      "Post28 provider absence refund and settlement safety on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 19.626792999999907,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs",
+    "title": "reconciliation reports unavailable providers while preserving unresolved financial status",
+    "ancestors": [
+      "Post28 provider absence refund and settlement safety on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 70.3535240000001,
+    "failureFirstLines": []
+  }
+]

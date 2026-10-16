@@ -1,0 +1,17 @@
+[
+  {
+    "name": "R06-suites/learning-closure-0rkxcD/vitest.json",
+    "sha256": "860c40cefd382eb71e12dc03ec4c97951a50b8e8948f28bc7ab0cc3d5f0b29da",
+    "bytes": 6416
+  },
+  {
+    "name": "R06-suites/learning-closure-0rkxcD/discovery.json",
+    "sha256": "89ae10d17e81385cdeac7d27aaf405700d9c2d1db87205d9466a552cb33575bf",
+    "bytes": 3350
+  },
+  {
+    "name": "R06-suites/learning-closure-0rkxcD/selection.json",
+    "sha256": "4a17741d7448de0b878a9a4d0132dc53c81c7cc0ebec54d5adca09730288bc43",
+    "bytes": 108
+  }
+]

@@ -1,0 +1,13 @@
+[
+  "HTTP binds university geography audit to the authenticated JWT actor",
+  "HTTP rejects a foreign region and leaves root revision audit and outbox unchanged",
+  "HTTP rejects deprecated country and city canonical references",
+  "HTTP rejects missing revision stale revision and missing CSRF",
+  "HTTP refuses university writes and cached replay after permission withdrawal",
+  "HTTP denies an admin without university permission before root writes",
+  "HTTP executes invoice issuance under both finance and action permission with JWT audit actor",
+  "HTTP denies invoice action permission despite generic finance access",
+  "HTTP refuses cached invoice response when action permission alone is withdrawn",
+  "HTTP replays an authorized invoice issue using one owner receipt and one audit event",
+  "HTTP session revocation prevents university cached replay"
+]

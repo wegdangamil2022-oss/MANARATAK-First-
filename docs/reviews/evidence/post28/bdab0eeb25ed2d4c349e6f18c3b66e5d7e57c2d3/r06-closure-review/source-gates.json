@@ -1,0 +1,101 @@
+{
+  "scope": "Final staged safe evidence/documentation on unchanged product source after78b11aa1; not additional database cases",
+  "checks": [
+    {
+      "name": "architecture",
+      "command": [
+        "node",
+        "scripts/architecture/verify-source-architecture-guards.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T20:38:49.736692+00:00",
+      "logSha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+      "bytes": 245
+    },
+    {
+      "name": "quality",
+      "command": [
+        "node",
+        "scripts/quality/verify-source-quality.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T20:38:50.010816+00:00",
+      "logSha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+      "bytes": 185
+    },
+    {
+      "name": "environment",
+      "command": [
+        "node",
+        "scripts/config/verify-environment-contract.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T20:38:52.789837+00:00",
+      "logSha256": "c12b3e207960f88183c712a7d7f17ec19e397d91b6c601e05317bffb653b3483",
+      "bytes": 79
+    },
+    {
+      "name": "organization",
+      "command": [
+        "node",
+        "scripts/verify/verify-final-repository-organization.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T20:38:52.819393+00:00",
+      "logSha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "bytes": 440,
+      "resolution": "Corrected report-relative link line suffix to an existing file anchor; verifier rules unchanged."
+    },
+    {
+      "name": "secrets",
+      "command": [
+        "node",
+        "scripts/security/scan-secrets.mjs"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T20:38:56.312103+00:00",
+      "logSha256": "30e8e61a2f0984466f083b569fb02474a24bef9591fcb0276bd72e70d5052622",
+      "bytes": 40
+    },
+    {
+      "name": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-10-16T20:38:57.637528+00:00",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "supersededOrganizationFailure": {
+    "name": "organization",
+    "command": [
+      "node",
+      "scripts/verify/verify-final-repository-organization.mjs"
+    ],
+    "exitCode": 1,
+    "startedAt": "2026-10-16T20:38:52.819393+00:00",
+    "logSha256": "77acc9a5707569e535cf8020afd83e8333912a6ee972f2e1a228e67b290cdecf",
+    "bytes": 572
+  },
+  "additionalPassingCheckLogHashes": [
+    {
+      "name": "closure-audit-final.log",
+      "sha256": "f8e8ae0e832cf9249bb6835079bc4369a6411e7b514f7d621b16f68bc6e411ae",
+      "bytes": 131
+    },
+    {
+      "name": "closure-replay-source-final.log",
+      "sha256": "f5370d780cf079aa284d4d4b913a4039a2e7e838c7f70625ad55f56270acbfbd",
+      "bytes": 357
+    },
+    {
+      "name": "closure-final-provisioning.log",
+      "sha256": "e3019ca1b4a78b0e6530603bebda8040d7ab36c53796d77c83f9e62bf6676d2c",
+      "bytes": 6689
+    }
+  ]
+}

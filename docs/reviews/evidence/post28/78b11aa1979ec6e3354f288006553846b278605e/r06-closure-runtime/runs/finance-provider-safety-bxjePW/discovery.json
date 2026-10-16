@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Post28 provider absence refund and settlement safety on PostgreSQL > does not consume refund approval or reserve execution when its original payment provider is unconfigured",
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs"
+  },
+  {
+    "name": "Post28 provider absence refund and settlement safety on PostgreSQL > refuses another refund target approval without consuming either approval",
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs"
+  },
+  {
+    "name": "Post28 provider absence refund and settlement safety on PostgreSQL > rejects over-refund and noncaptured original payment without creating a second refund",
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs"
+  },
+  {
+    "name": "Post28 provider absence refund and settlement safety on PostgreSQL > refuses a bank transfer request before reservation when the bank provider is absent",
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs"
+  },
+  {
+    "name": "Post28 provider absence refund and settlement safety on PostgreSQL > does not settle or post a ledger transaction without configured bank evidence",
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs"
+  },
+  {
+    "name": "Post28 provider absence refund and settlement safety on PostgreSQL > reconciliation reports unavailable providers while preserving unresolved financial status",
+    "file": "tests/database/post28-finance-provider-safety.database.spec.mjs"
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "discovered": 18,
+  "executed": 18,
+  "passed": 13,
+  "failed": 5,
+  "selectedSkipped": 0,
+  "rawExcludedAssertions": 0,
+  "fullProfilePassed": false,
+  "sourceSha": "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+  "suite": "reference-import-closure",
+  "runId": "1dc55377-c2e6-44b7-b14f-f9b059e05f6a",
+  "caseExact": null,
+  "originalRunnerGate": "FAILED_TESTS",
+  "R04": "PASS_LOCAL_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL",
+  "productionAcceptance": false
+}

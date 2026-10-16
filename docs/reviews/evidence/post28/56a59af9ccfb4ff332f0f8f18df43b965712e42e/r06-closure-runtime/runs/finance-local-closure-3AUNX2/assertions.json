@@ -1,0 +1,148 @@
+[
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "commits one credit note ledger adjustment and durable replay receipt",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "failed",
+    "durationMs": 136.86187000000018,
+    "failureFirstLines": [
+      "AssertionError: expected { …(7) } to deeply equal { …(7) }"
+    ]
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "rejects over-credit and denomination mismatch without ledger or receipt mutation",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 61.682660999999825,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "requires current revision for credit notes before any partial mutation",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 67.60699299999987,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "rolls credit note invoice ledger audit outbox and receipt back on PostgreSQL failure",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 112.5296959999996,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "commits a future balanced installment schedule with the invoice revision",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 51.417231000000356,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "rejects wrong sum mixed denomination and past installment dates atomically",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 44.30959699999994,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "replays installments without a second plan and rejects a different schedule for the same key",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "failed",
+    "durationMs": 44.16702499999974,
+    "failureFirstLines": [
+      "AssertionError: expected { …(7) } to deeply equal { …(7) }"
+    ]
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "serializes independent installment writers into one plan and one invoice revision",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 98.9826449999996,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "reserves and releases an owned invoice hold without changing the opening ledger balance",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 82.38868200000024,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "captures an owned hold into a balanced ledger settlement once and clears its invoice",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "failed",
+    "durationMs": 87.38161300000002,
+    "failureFirstLines": [
+      "AssertionError: expected { …(10) } to deeply equal { …(10) }"
+    ]
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "rejects a foreign wallet payer without an obligation reservation",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 55.96378300000015,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "prevents two connections reserving more than one wallet available balance",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 130.20130999999992,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "rolls hold reservation wallet and invoice revisions back with its failed audit outbox receipt boundary",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 103.8432899999998,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-finance-local-closure.database.spec.mjs",
+    "title": "rolls captured hold ledger and invoice payment back when PostgreSQL rejects outbox persistence",
+    "ancestors": [
+      "Post28 independent local credit installments and wallet obligation invariants"
+    ],
+    "status": "passed",
+    "durationMs": 116.4488879999999,
+    "failureFirstLines": []
+  }
+]

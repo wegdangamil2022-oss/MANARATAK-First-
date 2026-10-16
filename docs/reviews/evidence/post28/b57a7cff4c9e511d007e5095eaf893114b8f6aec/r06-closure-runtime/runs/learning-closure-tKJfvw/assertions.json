@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/database/post28-learning-closure.database.spec.mjs",
+    "title": "real completion worker dispatches noncredential events and records missing authority as retryable failure",
+    "ancestors": [
+      "Post28 learning completion and certificate trust boundaries on PostgreSQL"
+    ],
+    "status": "passed",
+    "durationMs": 189.92798500000026,
+    "failureFirstLines": []
+  }
+]

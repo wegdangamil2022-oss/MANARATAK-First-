@@ -1,0 +1,148 @@
+[
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "commits verified attestation bound to canonical scholarship cycle version and real asset checksum",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "failed",
+    "durationMs": 134.86750200000097,
+    "failureFirstLines": [
+      "AssertionError: expected 2 to be 1 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "persists an explicit rejected attestation without granting verified status",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 36.22383599999921,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "rejects a stale attestation revision atomically",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 32.242151999998896,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "refuses self review and malformed validity or evidence without an audit",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 54.89865499999905,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "rejects attestation after consent withdrawal",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 38.29675700000007,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "serializes two independent reviewers to one decision timeline audit and outbox",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "failed",
+    "durationMs": 45.40227700000105,
+    "failureFirstLines": [
+      "AssertionError: expected 2 to be 1 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "rejects repeat decisions and removes the decided binding from the real review queue",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 36.67420300000049,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "fails closed when the actual scholarship cycle or owner publication is withdrawn",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 54.23597999999947,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "real asset policy refuses another owner and untrusted bytes before any attestation",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 80.11198100000001,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "rolls attestation tracker timeline and audit back at real PostgreSQL outbox failure",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 83.3503610000007,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "HTTP records real JWT reviewer and current persisted review permission",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 107.110498,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "HTTP refuses a caller lacking review permission before a decision",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 38.096160000000964,
+    "failureFirstLines": []
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "HTTP refuses cached attestation after review permission withdrawal",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "failed",
+    "durationMs": 65.84171700000115,
+    "failureFirstLines": [
+      "AssertionError: expected 200 to be 403 // Object.is equality"
+    ]
+  },
+  {
+    "file": "tests/database/post28-attestation-closure.database.spec.mjs",
+    "title": "real delivery service refuses opening bytes when secure storage capability is absent",
+    "ancestors": [
+      "Post28 real document attestation owner asset and HTTP boundaries"
+    ],
+    "status": "passed",
+    "durationMs": 40.633842999999615,
+    "failureFirstLines": []
+  }
+]
