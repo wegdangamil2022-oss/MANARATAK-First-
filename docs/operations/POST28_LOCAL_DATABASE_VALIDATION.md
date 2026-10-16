@@ -26,3 +26,9 @@ Both the legacy DB config and the POST28 config install a global guard before te
 R02-coverage remains separate: launch markets, canonical teaching languages, DEC decisions, producers for browser/worker/load/recovery evidence and independent signing/recovery authorities require their planned work. Neither static discovery nor local target preflight closes those gates.
 
 Create only new local resources with `NODE_ENV=test POST28_LOCAL_LAB_CREATE=YES node scripts/database/create-post28-lab.mjs` on clean committed source. The emitted state contains file paths and non-secret identities; load the private env file without printing it.
+
+## Internal Docker network and loopback access
+
+The lab keeps an internal Docker network with no external routing. Because Docker may ignore published ports on an internal network, the official creator starts `post28-local-forwarder.mjs`. It binds only `127.0.0.1`, resolves PostgreSQL port5432 from the exact new container ID, and checks the run/scope labels, running state, internal network membership and private address. It rechecks identity every5 seconds and stops on drift or after3 hours. No host networking, external endpoint, DNS alias, Docker policy change or database guard exception is used.
+
+The private lab directory records its PID/config/log. Stop only that lab's forwarder when finished; preserve its database/evidence if a gate fails. A source fix requires a new frozen SHA and a new lab, rather than relabelling a previous target contract. The local preflight still authenticates migration/shadow roles through localhost and checks the live system identifier, OID and marker; forwarding does not grant database privileges.

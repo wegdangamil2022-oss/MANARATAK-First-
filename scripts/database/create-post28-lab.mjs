@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import net from 'node:net';
 import {randomBytes,randomUUID} from 'node:crypto';
-import {execFileSync,spawnSync} from 'node:child_process';
+import {execFileSync,spawnSync,spawn} from 'node:child_process';
 
 // Creates new labelled resources only. It cannot select an existing service/volume.
 const IMAGE='postgres@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d';
@@ -40,7 +40,7 @@ try {
   run(['network','create','--internal','--label','codex.post28.run='+id,network]);
   run(['volume','create','--label','codex.post28.run='+id,volume]);
   const containerId=run(['run','-d','--name',name,'--label','codex.post28.run='+id,'--label','codex.post28.scope=DISPOSABLE',
-    '--network',network,'--memory','2g','--cpus','2','--pids-limit','256','-p',`127.0.0.1:${port}:5432`,
+    '--network',network,'--memory','2g','--cpus','2','--pids-limit','256',
     '--env-file',containerEnv,'--mount',`type=volume,source=${volume},target=/var/lib/postgresql/data`,IMAGE,
     '-c','timezone=UTC','-c','max_connections=40']);
   if(!/^[0-9a-f]{64}$/.test(containerId))throw new Error('POST28_CONTAINER_ID_INVALID');
@@ -53,6 +53,24 @@ try {
     if(probe.status===0){ready=true;break;}await new Promise(resolve=>setTimeout(resolve,250));
   }
   if(!ready)throw new Error('POST28_POSTGRES_STARTUP_TIMEOUT');
+  // Internal Docker networks do not reliably publish ports. Keep their egress
+  // isolation and forward only loopback to this exact labelled container.
+  const forwarderConfig=path.join(directory,'forwarder.json');
+  fs.writeFileSync(forwarderConfig,JSON.stringify({version:1,containerId,runId:id,network,port,
+    expiresAt:Date.now()+3*3600000})+'\n',{mode:0o600});
+  const forwarderLog=fs.openSync(path.join(directory,'forwarder.log'),'a',0o600);
+  const forwarder=spawn(process.execPath,['scripts/database/post28-local-forwarder.mjs',forwarderConfig],
+    {cwd:root,detached:true,stdio:['ignore',forwarderLog,forwarderLog]});
+  forwarder.unref();fs.closeSync(forwarderLog);state.forwarderPid=forwarder.pid;
+  fs.writeFileSync(path.join(directory,'lab-state.json'),JSON.stringify(state,null,2)+'\n');
+  let loopbackReady=false;
+  for(let attempt=0;attempt<40;attempt++) {
+    loopbackReady=await new Promise(resolve=>{const socket=net.createConnection({host:'127.0.0.1',port});
+      socket.setTimeout(250);socket.once('connect',()=>{socket.destroy();resolve(true);});
+      socket.once('error',()=>resolve(false));socket.once('timeout',()=>{socket.destroy();resolve(false);});});
+    if(loopbackReady)break;await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  if(!loopbackReady)throw new Error('POST28_LOCAL_FORWARDER_NOT_READY');
   const sql=(database,input)=>run(['exec','-i',containerId,'psql','-X','-v','ON_ERROR_STOP=1','-U','post28_bootstrap','-d',database,'-At'],input);
   sql('postgres',Object.entries(passwords).filter(([key])=>key!=='bootstrap').map(([key,password])=>
     `CREATE ROLE post28_${key} LOGIN PASSWORD ${quote(password)} NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;`).join('\n'));
