@@ -111,7 +111,7 @@ test('scholarship Admin runtime declares eighteen cases without widening applica
 test('scholarship public relation profile declares four real owner count cases without additional grants',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
  assert.equal(databaseSuite('scholarship-public-relations').minimumCases,4);
- assert.equal(TRANSACTION_APPLICATION_TABLES.length,63);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.length,71);
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });
 
@@ -119,7 +119,7 @@ test('university geography declares eighteen cases and explicitly grants only th
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
  assert.equal(databaseSuite('university-geography').minimumCases,18);
  for(const table of ['ReferenceCountry','AdministrativeRegion','ReferenceCity'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
- assert.equal(TRANSACTION_APPLICATION_TABLES.length,63);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.length,71);
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });
 
@@ -129,4 +129,11 @@ test('remaining independent profiles declare explicit scoped cases and fixture t
  for(const table of ['ScholarshipRequiredDocument','Course','CourseVersion','CourseEnrollment','CourseCompletion'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('Certificate'),false);
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('CertificateIssuanceInbox'),false);
+});
+
+test('reference/import and unavailable finance providers have explicit profiles and eight fixture grants',async()=>{
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
+ assert.equal(databaseSuite('reference-import-closure').minimumCases,18);assert.equal(databaseSuite('finance-provider-safety').minimumCases,6);
+ for(const table of ['ReferenceLanguage','ExternalCourseProvider','ExternalCourseProviderDomain','CourseSourceIdentity','CourseSourceUrlHistory','FinanceRefundRecord','FinanceWalletRecord','FinanceTransferRecord'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
+ assert.equal(TRANSACTION_APPLICATION_TABLES.length,71);
 });

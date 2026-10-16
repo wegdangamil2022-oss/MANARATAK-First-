@@ -1,4 +1,6 @@
 export const DATABASE_SUITES = Object.freeze({
+  'reference-import-closure': {files: ['tests/database/post28-reference-import-closure.database.spec.mjs'],minimumCases:18},
+  'finance-provider-safety': {files: ['tests/database/post28-finance-provider-safety.database.spec.mjs'],minimumCases:6},
   'owner-http-closure': {files: ['tests/database/post28-owner-http-closure.database.spec.mjs'],minimumCases:12},
   'attestation-closure': {files: ['tests/database/post28-attestation-closure.database.spec.mjs'],minimumCases:14},
   'learning-closure': {files: ['tests/database/post28-learning-closure.database.spec.mjs'],minimumCases:12},
