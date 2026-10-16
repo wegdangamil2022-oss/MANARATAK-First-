@@ -1,0 +1,32 @@
+# R06 — مصفوفة التسليم للسيناريوهات الـ26
+
+حالة المصدر عند بدء التسليم: `6429b6ee85018351f4e2d9c8006be92d2d706a17`. قبول كامل0/26؛ أدلة جزئية25؛ CD-009 بلا دليل جزئي مخصص. كل الحالات ما زالت تابعة لـR05. تفاصيل المراجع والأصول السابقة محفوظة في [JSON](required-case-status.json).
+
+| الحالة | ما نجح فعليًا | المتبقي وعائق القبول |
+| --- | --- | --- |
+| CD-001 | رفض مراجع جغرافية خاطئة/متقاعدة؛ أوامر الجامعة وJWT والصلاحيات والتراجع مثبتة جزئيًا. | إكمال دورة الكتابة والمراجعة والنشر للجذر والمقر والوحدة مع مصفوفة API المتأثرة. (IMPLEMENTATION_OR_PROOF) |
+| CD-002 | قبول campus/unit للجامعة نفسها ورفض الأجنبية والمؤرشفة؛ أمر المالك وrollback SQL22012. | سلسلة HTTP author→review→publish كاملة وعكس العلاقات بعد تغيّر حالة الآباء. (IMPLEMENTATION_OR_PROOF) |
+| CD-003 | مطابقة profile/degree ونسخة major/profile الحالية؛ رفض الغائبة والمتقاعدة والنسخة الأجنبية. | نشر البرنامج الفعلي مع التزامن وتغيّر المرجع أثناء المعاملة. (IMPLEMENTATION_OR_PROOF) |
+| CD-004 | تحقق variant/version/score واختبار المالك؛ رفض النسخ الأجنبية وغير المنشورة؛ قبول nullable موثق. | دورة الاختبار/إصداره كاملة وcountry/language/taxonomy وAPI والروابط القديمة. (IMPLEMENTATION_OR_PROOF) |
+| CD-005 | validator يمنع التكرار في الطلب؛ قفل المالك وCAS باتصالين يمنعان تكرار مسار الأمر المختبر. | حماية PostgreSQL من التكرار المنطقي مع NULL لجميع المسارات؛ audit وتصميم migration ومراجعة/بوابات schema. (DATABASE_DESIGN_AND_IMPLEMENTATION, R04_R05_MIGRATION_GATES) |
+| CD-006 | رفض علاقة جامعة/برنامج أجنبي أو غير مؤهل؛ أوامر المنحة وCAS/rollback وHTTP replay مع سحب الصلاحية. | استكمال دورة نشر المالك وجميع الكتابات/القراءات المتأثرة بسحب مرجع البرنامج. (IMPLEMENTATION_OR_PROOF) |
+| CD-007 | HTTP/SQL يرفضان حاصل ضرب قوائم الدرجة والتخصص؛ يقبلان كل زوج صريح من برنامج واحد. | إسقاط الأزواج في تفاصيل المنحة والإدارة والواجهة النهائية ودورة المالك. (IMPLEMENTATION_OR_PROOF) |
+| CD-008 | الدرجة والتخصص والجامعة والبرنامج تُقيد بنفس دليل المالك قبل count/page؛ رفض FK الأجنبية ونسخ profiles الخاطئة. | تطابق البحث والتفاصيل والإدارة/الفلاتر، والتحولات المتزامنة خلال القراءة. (IMPLEMENTATION_OR_PROOF) |
+| CD-009 | DEC-02 معتمدة وظيفيًا؛ لا دليل سيناريو PostgreSQL كامل أو جزئي مخصص لها في المصفوفة. | فصل مصادر وحقول الدراسة والجنسية والتمويل وفلاترها؛ لا استنتاج جنسية من وجهة؛ تعدد الوجهات غير معتمد. (DATA_CONTRACT_AND_IMPLEMENTATION, SCOPE_MULTI_DESTINATION_NOT_APPROVED) |
+| CD-010 | إخفاء منحة غير منشورة ونسخة obsolete من الاتجاهين والعدادات. | المسار الكامل raw import→verification→review→publication وCMS/graph دون تسرب. (IMPLEMENTATION_OR_PROOF) |
+| CD-011 | HTTP المنحة يسحب متطلب الاختبار عند الأرشفة/إخفائه/سحب النسخة؛ الفلتر والعدد يتفقان. | نشر وتغيير الاختبار والبرنامج والمنحة وإبطال القراءات بجميع الاتجاهات. (IMPLEMENTATION_OR_PROOF) |
+| CD-012 | DEC-03 أُصلحت: مجانية الدراسة مستقلة عن رسوم الشهادة؛8 حالات DB مع نشر/audit/outbox وHTTP ومحوّل UI. | import→owner approval→publish→built browser بمصدر وفحص رابط فعليين؛ لا تعويض synthetic link proof بالمزود. (IMPLEMENTATION_OR_PROOF, REAL_SOURCE_SERVICE) |
+| CD-013 | رفض المالك ومعاملته وإبطال projection ونسخة الجذر وaudit/outbox؛ rollback فعلي عند فشلهما؛ CAS وتزامن. | مسار HTTP/JWT لأمر الدورة وreverse Major graph والمصفوفة الكاملة؛ المنشور يتطلب unpublish وفق العقد القائم. (IMPLEMENTATION_OR_PROOF) |
+| CD-014 | العلاقة DIRECT_REVIEWED المستقلة تبقى؛ تغيير المصدر يسحب APPROVED؛ إعادة اعتماد taxonomy لا تعيد الإسقاط تلقائيًا. | كل مسارات المراجعة والإعادة/refresh والقراءات العكسية ضمن سير المالك وHTTP. (IMPLEMENTATION_OR_PROOF) |
+| CD-015 | إزالة source terms عبر أمر المالك مع audit/outbox؛ HTTP no-store التالي يسحب المشتق ويبقي المستقل. | URL/import refresh والعامل/crash/ack وجميع إسقاطات/كاش العميل؛ no-store لا يثبت مصفوفة الكاش كاملة. (IMPLEMENTATION_OR_PROOF) |
+| CD-016 | HTTP قائمة الدورات وعددها يحجبان PROPOSED/REVIEW_REQUIRED وmajor DRAFT/ARCHIVED، ويقبلان approved+published. | دورة reverse Major router كاملة والنشر/الأرشفة وإثبات تطابق الواجهة. (IMPLEMENTATION_OR_PROOF) |
+| CD-017 | القائمة العامة تقبل علاقة بلا profile دون استنتاج درجة؛ API يرفض degree/profile غير المدعومين400. | إثبات واجهة المتصفح وعدم عرض facet غير مدعوم وتطابق reverse view؛ لا اختراع ربط درجة. (BUILT_BROWSER_AND_REVERSE_PROOF) |
+| CD-018 | لا اشتقاق studyCountry من مقر المزود؛ لغة الدورة canonical/ACTIVE، وسحبها يغير النشر والقراءة. | تطابق لغة البرنامج الأكاديمي متعددة اللغات وفلاتر المنحة/الواجهة؛ أسواق الإطلاق قرار نطاق مستقل. (IMPLEMENTATION_OR_PROOF, LAUNCH_MARKET_SCOPE) |
+| CD-019 | dedup provider/native/language باتصالين؛ domain allowlist ورفض stale checks وتغيير الهوية غير المتحكم به. | فحص شبكة ومصدر فعليان، redirect/provenance، دورة الاستيراد والمراجعة والنشر كاملة. (REAL_SOURCE_SERVICE, IMPLEMENTATION_OR_PROOF) |
+| CD-026 | JWT وجلسات وRBAC/CSRF لبعض أوامر الجامعة/المنحة/الوثائق/المالية؛ رفض replay بعد سحب الصلاحية. | مصفوفة جميع أوامر العلاقات المباشرة وroles/actor/reason/audit؛ إثبات MFA/فصل الواجبات والطوارئ حيث يلزم. (AUTHORIZATION_COVERAGE_AND_RUNTIME) |
+| CD-028 | enrollment/completion وتراجع/audit/outbox وretry مثبتة؛ رفض منح شهادة خارجية؛ عامل P14 حقيقي يرفض غياب template. | learning-path كامل وإصدار شهادة واحد→inbox→تحقق→إلغاء مع authority/template معتمدين. (CERTIFICATE_AUTHORITY_AND_TEMPLATE, IMPLEMENTATION_OR_PROOF) |
+| CD-029 | JWT principal وجلسات/أدوار؛ منع انتحال الطالب وكتابة مجموعات غيره؛ graph الجامعة لا يكشف sentinels خاصة. | كل مسارات الوثائق والشهادات والفواتير والـgraph بين طالبين، وليس فقط المسارات المختبرة. (PRIVACY_AND_HTTP_COVERAGE) |
+| CD-030 | قيود محلية متوازنة وwallet/installment/credit/replay/CAS/rollback؛ غياب refund provider يُرفض قبل استهلاك الاعتماد. | ربط service originReference والعملة، payment/refund/settlement الفعلية وأثرها الخارجي وreplay الآمن. (REAL_FINANCE_PROVIDER, IMPLEMENTATION_OR_PROOF) |
+| CD-035 | leases/retry وعامل completion وdedup provider/native/language بهويات مستقرة. | import→owner mapping كامل، تعطل العامل قبل/بعد ack ثم resume/replay دون أثر مكرر. (WORKER_IMPORT_CRASH_RECOVERY_PROOF) |
+| CD-036 | consent/asset/tenant/owner وattestation وCAS وrollback؛ سحب أثناء تجهيز grant يمنع إرجاعه. | خدمة فحص/تنقية/تخزين وتسليم فعلية، سحب رابط سبق تسليمه ودورة attestation كاملة؛ synthetic clean ليس دليل فحص. (REAL_ASSET_STORAGE_SCAN_DELIVERY, IMPLEMENTATION_OR_PROOF) |
+| CD-040 | الطلب التالي يعكس سحب نسخة الاختبار/اللغة؛ صفحتان متسلسلتان لزوج البرنامج بعدد صحيح. | تغيّر مالك/parent/reference أثناء الطلب وبين الصفحات، snapshot/pagination consistency ومنع stale grants. (CONCURRENT_READ_LIFECYCLE_PROOF) |

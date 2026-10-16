@@ -1,0 +1,21 @@
+{
+  "kind": "POST28_R06_TRANSFER_STATE",
+  "repository": "wegdangamil2022-oss/MANARATAK-First-",
+  "branch": "fix/post28-ci-environment-inventory-20261016",
+  "sourceStateAtStartOfHandoff": "6429b6ee85018351f4e2d9c8006be92d2d706a17",
+  "deliveryHeadResolution": "Use git HEAD containing this handoff and compare git ls-remote for the branch; the final commit is reported in the delivery message.",
+  "R04": "PASS_CLOSED_LOCAL_110_UNCHANGED",
+  "R05": "BLOCKED",
+  "R06": "PARTIAL_NOT_CLOSED",
+  "production": "NO_GO",
+  "requiredCases": 26,
+  "fullyAccepted": 0,
+  "partialEvidence": 25,
+  "withoutPartialEvidence": 1,
+  "distinctPostgresSuccessfulCases": 283,
+  "newRuntimeTestsDuringHandoff": 0,
+  "functionalDEC01through07": "APPROVED_FUNCTIONAL_ONLY",
+  "writerDisposition": "Originating agent stops branch writes after final push and read-only verification; recipient resumes from remote HEAD.",
+  "privateLabsMayBeAbsent": true,
+  "currentCheckoutHint": "/tmp/manaratak-post28-continuation; /workspace/manaratak is an older checkout on a full filesystem; do not assume either survives."
+}
