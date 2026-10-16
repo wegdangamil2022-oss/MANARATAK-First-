@@ -1,0 +1,44 @@
+{
+  "sourceSha": "3988832ed599baf94a569a41e9f116806da2546a",
+  "runId": "738a8fc8-5581-44a0-ad3e-98e2a4722013",
+  "kind": "POST28_R05_STRUCTURAL_BACKUP_VERIFICATION",
+  "archiveSha256": "8f6486c6e66912abb267123076a5feac02149c89871de21f055ea5b9f5f77245",
+  "identities": [
+    {
+      "label": "DB-U",
+      "database": "manaratak_post28_upgrade_test",
+      "role": "post28_upgrader",
+      "serverIdentity": "7697373911682539566",
+      "databaseOid": "16387",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    },
+    {
+      "label": "DB-V",
+      "database": "manaratak_post28_upgrade_verify_test",
+      "role": "post28_verifier",
+      "serverIdentity": "7697373911682539566",
+      "databaseOid": "16469",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "restoredTables": 282,
+  "allRowContentMatched": true,
+  "allCatalogDefinitionsMatched": true,
+  "sourceUnchanged": true,
+  "tableContentSha256": "9c830c80b50723b0e8340a7c5cbfc602bf00557f057b5ab3f1e01a6c05557f2d",
+  "catalogSha256": "2aa2f4305b7f39d3353a0e052e856148e77aedb92569a060146f0d4fc2a13f1f",
+  "excludedPreprovisionedObjects": [
+    "6; 2615 2200 SCHEMA - public post28_upgrader",
+    "2; 3079 16388 EXTENSION - pg_trgm ",
+    "7429; 0 0 COMMENT - EXTENSION pg_trgm "
+  ],
+  "R05Accepted": false,
+  "representativeFixturesPresent": true,
+  "fixtureManifestSha256": "0ec2bbe356815834deddd1495a9cb0987d74c2a1981e2ed9de25ffc956961c1f"
+}

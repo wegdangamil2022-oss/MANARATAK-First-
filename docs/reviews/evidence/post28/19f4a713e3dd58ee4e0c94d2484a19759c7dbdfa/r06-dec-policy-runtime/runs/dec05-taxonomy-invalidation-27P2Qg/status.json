@@ -1,0 +1,15 @@
+{
+  "sourceSha": "19f4a713e3dd58ee4e0c94d2484a19759c7dbdfa",
+  "runId": "597ef5a8-9024-409c-94d9-9d0fd754a04f",
+  "suite": "dec05-taxonomy-invalidation",
+  "discovered": 6,
+  "selected": 1,
+  "executed": 1,
+  "passed": 0,
+  "failed": 1,
+  "skipped": 0,
+  "unselected": 5,
+  "caseExact": "Post28 DEC05 taxonomy rejection and dependent projection > withdraws only the rejected taxonomy derived major projection from the next public read",
+  "fullProfilePassed": false,
+  "R06Accepted": false
+}

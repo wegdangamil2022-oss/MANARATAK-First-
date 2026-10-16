@@ -1,0 +1,17 @@
+[
+  {
+    "name": "selection.json",
+    "sha256": "07e1b0e65dba2ffffaad3be2d2e3980639673b96dba2c8b49ce97511cbbc3b7e",
+    "bytes": 106
+  },
+  {
+    "name": "vitest.json",
+    "sha256": "2f4ac95c7d8875b08defda49662cac24ba80629b5dba69624ed096b4176ab041",
+    "bytes": 8245
+  },
+  {
+    "name": "discovery.json",
+    "sha256": "9eac35145b49bd64dde8ff067ab78dcc965fe1f762724803493f0d3acdaea722",
+    "bytes": 2036
+  }
+]

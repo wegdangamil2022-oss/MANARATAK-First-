@@ -1,0 +1,119 @@
+{
+  "sourceDistinctPassed": 36,
+  "sourceFirstRound": {
+    "executed": 36,
+    "passed": 35,
+    "failed": 1
+  },
+  "sourceCorrectedSelectedRound": {
+    "executed": 1,
+    "passed": 1,
+    "failed": 0,
+    "unselected": 5
+  },
+  "provisioningFirstRound": {
+    "executed": 31,
+    "passed": 27,
+    "failed": 4
+  },
+  "provisioningCorrectedSelectedRound": {
+    "executed": 4,
+    "passed": 4,
+    "failed": 0
+  },
+  "r05FixtureAndPacketSourceTests": {
+    "executed": 27,
+    "passed": 27,
+    "failed": 0
+  },
+  "apiAndWebBuildExitCode": 0,
+  "architectureExitCode": 0,
+  "sourceQualityExitCode": 0,
+  "environmentExitCode": 0,
+  "organizationExitCode": 0,
+  "notFinalCandidateCIAcceptance": true,
+  "privateLogs": [
+    {
+      "name": "dec03-source-tests.log",
+      "sha256": "1a40fe374278e5729745aa63a6b52fc7111b282858fc8206a335fa6468a5b00b",
+      "bytes": 1294
+    },
+    {
+      "name": "dec03-source-unknown-final.log",
+      "sha256": "8862c232f14edf346a1f2aa910c10f0dee8fabfa994e1fdb4393e02153155e54",
+      "bytes": 215
+    },
+    {
+      "name": "dec03-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "dec03-lint.log",
+      "sha256": "3d3629c17f77fc9843ebc0f7bac712e681719141563d2263ea3a035571849878",
+      "bytes": 3996
+    },
+    {
+      "name": "dec05-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "dec05-lint.log",
+      "sha256": "083c4aade709d3945bdf5179ccf040a7642ba4cc4ad5fa055c1e478124dc32aa",
+      "bytes": 1386
+    },
+    {
+      "name": "dec05-provisioning.log",
+      "sha256": "900bb78eff56b44f410f1d598ad5399927c8fa1260a00ff9dcb0b1b830eabf64",
+      "bytes": 9018
+    },
+    {
+      "name": "dec05-provisioning-final.log",
+      "sha256": "3affe00ddf3d8cd76267f0788b30ba4f55c3d318fb9af2d2ea5ec434795ced96",
+      "bytes": 1178
+    },
+    {
+      "name": "r05-known-source-unit.log",
+      "sha256": "866f86bb607ae03ae3ab1315c7b1c5af453a8befd097c5123eef330c2a4e5d68",
+      "bytes": 6084
+    },
+    {
+      "name": "r05-known-source-lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "current-architecture.log",
+      "sha256": "d36e1bd31fd623dd9ce05f1f28bc8987179244b5866c13f9b3f99f72fe181659",
+      "bytes": 245
+    },
+    {
+      "name": "current-quality.log",
+      "sha256": "8daa71196d00abadd4187100380e53e6cbf5bc350814699090b7ec21883a6073",
+      "bytes": 185
+    },
+    {
+      "name": "current-environment.log",
+      "sha256": "c12b3e207960f88183c712a7d7f17ec19e397d91b6c601e05317bffb653b3483",
+      "bytes": 79
+    },
+    {
+      "name": "current-organization-final.log",
+      "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "bytes": 440
+    },
+    {
+      "name": "current-organization-after-docs.log",
+      "sha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "bytes": 440
+    },
+    {
+      "name": "current-secrets-staged.log",
+      "sha256": "6f01b7011cf8c89c3433ae4316690f0f7407dc9028e3d0c66dd32e55c859bb74",
+      "bytes": 40
+    }
+  ],
+  "stagedSecretScanExitCode": 0,
+  "organizationAfterDocumentationExitCode": 0
+}

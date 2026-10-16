@@ -1,0 +1,74 @@
+[
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "FX COURSE 01 study true certificate true obeys owner free study rule",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "FX COURSE 01 study true certificate false obeys owner free study rule",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "FX COURSE 01 study false certificate true obeys owner free study rule",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "FX COURSE 01 study false certificate false obeys owner free study rule",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "keeps unknown certificate cost unknown on the actual API and UI while allowing free study",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "relationship filters return the same paid certificate free study owner",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "free classification does not bypass persisted link source verification",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec03-free-study.database.spec.mjs",
+    "title": "free paid certificate publication rolls owner version audit and outbox back on actual PostgreSQL failure",
+    "ancestors": [
+      "Post28 DEC03 actual free study publication and UI contract"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  }
+]

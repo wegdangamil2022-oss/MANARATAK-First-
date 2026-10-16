@@ -1,0 +1,15 @@
+{
+  "sourceSha": "a78b6b94dc31cc6cc280c42314cf47e544a8b929",
+  "runId": "d3154458-1cf7-4170-9480-c7485b5cfd41",
+  "suite": "dec03-free-study",
+  "discovered": 8,
+  "selected": 8,
+  "executed": 8,
+  "passed": 8,
+  "failed": 0,
+  "skipped": 0,
+  "unselected": 0,
+  "caseExact": null,
+  "fullProfilePassed": true,
+  "R06Accepted": false
+}

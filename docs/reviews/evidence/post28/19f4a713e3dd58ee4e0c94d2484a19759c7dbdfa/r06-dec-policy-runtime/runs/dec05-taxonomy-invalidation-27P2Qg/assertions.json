@@ -1,0 +1,58 @@
+[
+  {
+    "file": "tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs",
+    "title": "withdraws only the rejected taxonomy derived major projection from the next public read",
+    "ancestors": [
+      "Post28 DEC05 taxonomy rejection and dependent projection"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "PrismaClientValidationError: "
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs",
+    "title": "preserves independent reviewed major links and all provenance rows",
+    "ancestors": [
+      "Post28 DEC05 taxonomy rejection and dependent projection"
+    ],
+    "status": "skipped",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs",
+    "title": "does not silently approve withdrawn projections when the taxonomy is reapproved",
+    "ancestors": [
+      "Post28 DEC05 taxonomy rejection and dependent projection"
+    ],
+    "status": "skipped",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs",
+    "title": "rejects a foreign course identity without modifying its link or projection",
+    "ancestors": [
+      "Post28 DEC05 taxonomy rejection and dependent projection"
+    ],
+    "status": "skipped",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs",
+    "title": "repeated and concurrent rejection through two connections converges without deleting history",
+    "ancestors": [
+      "Post28 DEC05 taxonomy rejection and dependent projection"
+    ],
+    "status": "skipped",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs",
+    "title": "rolls link resolution and projections back on a real PostgreSQL statement failure",
+    "ancestors": [
+      "Post28 DEC05 taxonomy rejection and dependent projection"
+    ],
+    "status": "skipped",
+    "failureFirstLine": []
+  }
+]

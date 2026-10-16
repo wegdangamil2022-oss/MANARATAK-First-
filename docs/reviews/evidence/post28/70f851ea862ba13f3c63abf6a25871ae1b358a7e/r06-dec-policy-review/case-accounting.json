@@ -1,0 +1,104 @@
+{
+  "baselineDistinctSuccessfulDatabaseCases": 243,
+  "newDistinctSuccessfulDatabaseCases": 14,
+  "cumulativeDistinctSuccessfulDatabaseCases": 257,
+  "distinctBySuite": {
+    "dec03-free-study": 8,
+    "dec05-taxonomy-invalidation": 6
+  },
+  "cases": {
+    "dec03-free-study": [
+      "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study false certificate false obeys owner free study rule",
+      "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study false certificate true obeys owner free study rule",
+      "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study true certificate false obeys owner free study rule",
+      "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study true certificate true obeys owner free study rule",
+      "Post28 DEC03 actual free study publication and UI contract > free classification does not bypass persisted link source verification",
+      "Post28 DEC03 actual free study publication and UI contract > free paid certificate publication rolls owner version audit and outbox back on actual PostgreSQL failure",
+      "Post28 DEC03 actual free study publication and UI contract > keeps unknown certificate cost unknown on the actual API and UI while allowing free study",
+      "Post28 DEC03 actual free study publication and UI contract > relationship filters return the same paid certificate free study owner"
+    ],
+    "dec05-taxonomy-invalidation": [
+      "Post28 DEC05 taxonomy rejection and dependent projection > does not silently approve withdrawn projections when the taxonomy is reapproved",
+      "Post28 DEC05 taxonomy rejection and dependent projection > preserves independent reviewed major links and all provenance rows",
+      "Post28 DEC05 taxonomy rejection and dependent projection > rejects a foreign course identity without modifying its link or projection",
+      "Post28 DEC05 taxonomy rejection and dependent projection > repeated and concurrent rejection through two connections converges without deleting history",
+      "Post28 DEC05 taxonomy rejection and dependent projection > rolls link resolution and projections back on a real PostgreSQL statement failure",
+      "Post28 DEC05 taxonomy rejection and dependent projection > withdraws only the rejected taxonomy derived major projection from the next public read"
+    ]
+  },
+  "runs": [
+    {
+      "sourceSha": "00b304441865e9ebbcc45a32e5fbeecbaef6fa44",
+      "runId": "1331d112-5b65-458d-97b8-0c3e83d46e42",
+      "suite": "dec03-free-study",
+      "discovered": 8,
+      "selected": 8,
+      "executed": 8,
+      "passed": 1,
+      "failed": 7,
+      "skipped": 0,
+      "unselected": 0,
+      "caseExact": null,
+      "fullProfilePassed": false,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/00b304441865e9ebbcc45a32e5fbeecbaef6fa44/r06-dec-policy-runtime/runs/dec03-free-study-8if7rG/status.json"
+    },
+    {
+      "sourceSha": "a78b6b94dc31cc6cc280c42314cf47e544a8b929",
+      "runId": "d3154458-1cf7-4170-9480-c7485b5cfd41",
+      "suite": "dec03-free-study",
+      "discovered": 8,
+      "selected": 8,
+      "executed": 8,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "unselected": 0,
+      "caseExact": null,
+      "fullProfilePassed": true,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/a78b6b94dc31cc6cc280c42314cf47e544a8b929/r06-dec-policy-runtime/runs/dec03-free-study-cgwIfA/status.json"
+    },
+    {
+      "sourceSha": "19f4a713e3dd58ee4e0c94d2484a19759c7dbdfa",
+      "runId": "597ef5a8-9024-409c-94d9-9d0fd754a04f",
+      "suite": "dec05-taxonomy-invalidation",
+      "discovered": 6,
+      "selected": 1,
+      "executed": 1,
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "unselected": 5,
+      "caseExact": "Post28 DEC05 taxonomy rejection and dependent projection > withdraws only the rejected taxonomy derived major projection from the next public read",
+      "fullProfilePassed": false,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/19f4a713e3dd58ee4e0c94d2484a19759c7dbdfa/r06-dec-policy-runtime/runs/dec05-taxonomy-invalidation-27P2Qg/status.json"
+    },
+    {
+      "sourceSha": "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+      "runId": "9447b2a0-382f-46a7-abc2-30b8fcd20293",
+      "suite": "dec05-taxonomy-invalidation",
+      "discovered": 6,
+      "selected": 6,
+      "executed": 6,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "unselected": 0,
+      "caseExact": null,
+      "fullProfilePassed": true,
+      "R06Accepted": false,
+      "evidence": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-runtime/runs/dec05-taxonomy-invalidation-jwqSdN/status.json"
+    }
+  ],
+  "notes": [
+    "Repeated passes excluded from distinct count.",
+    "Initial DEC03 7 failures include policy guard differences and expected error-code differences.",
+    "Initial DEC05 selected attempt failed in fixture construction before the reviewed method; not a demonstrated pre-fix product failure.",
+    "DEC03 first fixed-run invocation failed input gate (maintenance purpose missing); zero tests executed; corrected without source or target relabelling."
+  ],
+  "fullRequiredCasesAccepted": 0,
+  "R06": "PARTIAL",
+  "productionAcceptance": false
+}
