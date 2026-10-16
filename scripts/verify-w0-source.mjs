@@ -12,7 +12,7 @@ const check = (name, ok, detail='') => checks.push({ name, ok: Boolean(ok), deta
 
 const roadmap = read('docs/governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md');
 check('roadmap_version_6', roadmap.includes('**Version:** 6.0'));
-check('roadmap_source_through_phase19', roadmap.includes('Source implementation is present through **Phase 19'));
+check('roadmap_source_through_phase19', roadmap.includes('**Phase 2–19 deep source audit:** complete.') && roadmap.includes('remediation is active') && roadmap.includes('not yet globally closed for production/runtime'));
 check('roadmap_runtime_boundary', roadmap.includes('runtime-pending') && roadmap.includes('Greenfield database mutation gate'));
 check('roadmap_no_obsolete_recovery_authority', !roadmap.includes('Original Development Database'));
 
