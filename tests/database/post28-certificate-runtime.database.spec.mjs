@@ -23,6 +23,7 @@ import {AtomicAuditedOutboxMutationExecutor} from '../../packages/application/sr
 import {PrismaAtomicPersistenceUnitOfWork} from '../../packages/infrastructure/src/event-foundation/PrismaAtomicPersistenceUnitOfWork.ts';
 import {PrismaTransactionalOutboxStore} from '../../packages/infrastructure/src/event-foundation/PrismaTransactionalOutboxStore.ts';
 import {PrismaAuditRecordRepository} from '../../packages/infrastructure/src/audit/PrismaAuditRecordRepository.ts';
+import {ProviderNeutralCertificateRenderingService} from '../../packages/infrastructure/src/certificates/ProviderNeutralCertificateRenderingService.ts';
 
 let db,other,certificates,otherCertificates,repository,issuer,template,app,authorityChecks;
 const keyReference='lab-hmac://post28-synthetic-certificate',secret=randomBytes(32).toString('hex');
@@ -88,6 +89,20 @@ describe('Post28 actual synthetic certificate owner issuance and verification wo
  });
  it('issues a locally signed path certificate only from actual opted-in published path completion',async()=>{
   const event=await pathCompletion(),cert=await consume(event),f=await effects(event);expect(cert.certificateType).toBe('LEARNING_PATH');expect(cert.learningPathId).toBe(event.payload.learningPathId);expect(cert.learningPathCompletionId).toBe(event.id);expect(cert.digitalSignature).toMatch(/^[a-f0-9]{64}$/);expect(f.rows).toHaveLength(1);expect(f.inbox).toHaveLength(1);expect(f.ledgers.map(x=>x.action)).toEqual(['ISSUED']);expect(f.audit).toBe(1);expect(await db.transactionalOutboxRecord.count({where:{aggregateId:cert.id,eventType:'CertificateRenderRequested'}})).toBe(1);const result=await verify(cert);expect(result.status,result.text).toBe(200);expect(result.text).not.toContain(event.payload.studentReferenceId);
+ });
+ it('renders real PDF preview and QR from the persisted signed path identity and pinned template',async()=>{
+  const event=await pathCompletion(),cert=await consume(event),version=await repository.findTemplateVersionById(cert.templateVersionId);
+  await certificates.assertRenderable(cert);
+  const renderer=new ProviderNeutralCertificateRenderingService({resolve:async(id,hash)=>{
+   const bytes=fs.readFileSync(path.join(path.dirname(process.env.POST28_TARGET_CONTRACT_FILE),'certificate-synthetic-assets',id+'.png'));
+   expect(createHash('sha256').update(bytes).digest('hex')).toBe(hash);return {bytes,mimeType:'image/png'};
+  }});
+  const rendered=await renderer.render({certificate:cert,templateVersion:version});expect(rendered.artifacts.map(row=>row.kind).sort()).toEqual(['PDF','PREVIEW','QR']);
+  const output=path.join(path.dirname(process.env.POST28_TARGET_CONTRACT_FILE),'certificate-rendered-output',cert.id);fs.mkdirSync(output,{recursive:true});
+  for(const row of rendered.artifacts){expect(row.bytes.byteLength).toBeGreaterThan(0);fs.writeFileSync(path.join(output,row.kind.toLowerCase()+(row.kind==='PDF'?'.pdf':'.svg')),row.bytes,{flag:'wx'});}
+  expect(Buffer.from(rendered.artifacts.find(row=>row.kind==='PDF').bytes).subarray(0,5).toString()).toBe('%PDF-');
+  expect(Buffer.from(rendered.artifacts.find(row=>row.kind==='PREVIEW').bytes).toString()).toContain(cert.serialNumber);
+  expect((await repository.findById(cert.id)).pdfAssetId).toBeNull();
  });
  it('serializes two actual path consumers and replay into one certificate and immutable enrollment identity',async()=>{
   const event=await pathCompletion(),results=await Promise.all([consume(event),consume(event,otherCertificates)]);expect(results[0].id).toBe(results[1].id);expect((await consume(event)).id).toBe(results[0].id);const f=await effects(event);expect(f.rows).toHaveLength(1);expect(f.inbox).toHaveLength(1);expect(f.ledgers).toHaveLength(1);expect(f.audit).toBe(1);
