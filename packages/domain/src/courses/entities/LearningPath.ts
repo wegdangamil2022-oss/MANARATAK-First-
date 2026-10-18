@@ -19,6 +19,7 @@ export interface LearningPathCourseDto {
 }
 
 export interface LearningPathDto {
+  certificateEligible?: boolean;
   id: string;
   publicId: string;
   slug: string;
@@ -34,6 +35,7 @@ export interface LearningPathDto {
 }
 
 export interface CreateLearningPathDto {
+  certificateEligible?: boolean;
   publicId: string;
   slug: string;
   title: string;

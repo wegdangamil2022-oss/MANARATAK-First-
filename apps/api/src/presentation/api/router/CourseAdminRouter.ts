@@ -215,6 +215,7 @@ export class CourseAdminRouter {
       requiresFinancialClearance: z.boolean().optional(),
     });
     const learningPathSchema = z.object({
+      certificateEligible: z.boolean().optional(),
       title: z.string().trim().min(1),
       description: z.string().nullable().optional(),
       slug: z.string().trim().min(1).optional(),
