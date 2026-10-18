@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 353,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 355,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 70,
+  "newDistinctThisContinuation": 72,
   "rows": [
     {
       "caseId": "CD-001",
@@ -667,7 +667,7 @@
           "scope": "Real CourseProgressUseCases enrollment/completion audit/outbox commit, retry/concurrency and SQLSTATE22012 rollback. External-linked enrollment/completion and certificate claims refused. P14 real consumer/gateway/worker acknowledges noncredential event and retries native eligible events lacking approved template; no certificate issued or inbox invented."
         }
       ],
-      "whatRemains": "learning-path كامل وإصدار شهادة واحد→inbox→تحقق→إلغاء مع authority/template معتمدين.",
+      "whatRemains": "Real issuance and verification analytics Prisma void-lock defects repaired; absent-authority rollback and independent-connection analytics dedup proven. Still complete successful synthetic maker/checker template and issuer workflow, authoritative issuance/inbox replay, valid signed public verification/revocation and real artifact binding; external production signer/renderer approvals remain separate.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -677,7 +677,9 @@
           "IMPLEMENTATION_OR_PROOF"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/6ad9dc526147315bcacb57a54892a6e7199b5713/R06-certificate-locks"
+      ]
     },
     {
       "caseId": "CD-029",
@@ -871,5 +873,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 57
+  "newDistinctThisR06OnlyTask": 59
 }
