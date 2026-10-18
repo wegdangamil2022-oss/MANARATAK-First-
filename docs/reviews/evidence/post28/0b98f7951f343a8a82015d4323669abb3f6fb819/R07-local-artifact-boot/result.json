@@ -1,0 +1,25 @@
+{
+  "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+  "R06MergedFrom": "55d423959f622cee8cbfe644695d7ba46f56b8a2",
+  "priorR07": "ae5f55969a6b8585d5d43b157dc7a3f80c33f61c",
+  "builds": 3,
+  "independentRuntimeNativeLoad": true,
+  "apiReadiness": {
+    "status": 200,
+    "protocolVersion": 2,
+    "statusBody": "UP",
+    "code": "AVAILABLE",
+    "transport": "HTTP_LOOPBACK_ONLY"
+  },
+  "staticHttpsObservations": 19,
+  "testResults": {
+    "total": 33,
+    "passed": 29,
+    "failed": 4,
+    "skipped": 0,
+    "failureReason": "Windows EPERM creating test symlinks"
+  },
+  "R07Accepted": false,
+  "C2Executed": false,
+  "promotionAuthorized": false
+}

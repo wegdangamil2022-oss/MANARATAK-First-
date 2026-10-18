@@ -1,0 +1,29 @@
+{
+  "kind": "POST28_R07_STATIC_ARTIFACT_HTTPS_DIAGNOSTIC",
+  "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+  "measuredAt": "2026-10-18T23:02:08.910Z",
+  "node": "v22.16.0",
+  "os": "win32",
+  "architecture": "x64",
+  "certificateSha256": "15a7b71097c95c8dde2f2c8b5aa486ab618796535096400ce633115f7af468ad",
+  "observations": [],
+  "processes": [
+    {
+      "unit": "web",
+      "pid": 3600,
+      "terminated": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "portClosed": true,
+      "logSha256": "0d2f0ef3ff696dd615a4a398f9ead322e68cf325b4eac5167dbc69536ff0bd3d",
+      "checkoutPresent": false,
+      "inheritedNodeModules": false
+    }
+  ],
+  "outcome": "FAIL",
+  "failure": "CERT_HAS_EXPIRED",
+  "apiReadinessVerified": false,
+  "stageAccepted": false,
+  "promotionAuthorized": false
+}

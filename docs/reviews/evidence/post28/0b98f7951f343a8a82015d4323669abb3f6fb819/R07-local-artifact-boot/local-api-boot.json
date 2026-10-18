@@ -1,0 +1,38 @@
+{
+  "sourceSha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+  "identity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698145442854597408",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "observations": [
+    {
+      "status": 200,
+      "sha": "0b98f7951f343a8a82015d4323669abb3f6fb819",
+      "body": {
+        "protocolVersion": 2,
+        "status": "UP",
+        "timestamp": "2026-10-18T23:03:18.687Z",
+        "code": "AVAILABLE"
+      }
+    }
+  ],
+  "exit": {
+    "code": null,
+    "signal": "SIGTERM"
+  },
+  "readinessVerified": true,
+  "error": null,
+  "transport": "HTTP_LOOPBACK_ONLY",
+  "tlsVerified": false,
+  "stageAccepted": false,
+  "productionContact": false
+}

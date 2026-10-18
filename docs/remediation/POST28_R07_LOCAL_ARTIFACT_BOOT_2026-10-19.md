@@ -1,0 +1,13 @@
+# R07 current-source artifact runtime continuation
+
+Source 0b98f7951f343a8a82015d4323669abb3f6fb819 merges R06 55d4239 into the existing R07 branch without rewriting earlier R07 artifacts or history. R06 remains partial. This is diagnostic C1 work, not C2 or release acceptance.
+
+API, Web and Admin were built and packaged once from this clean merged SHA. The three archives were freshly unpacked outside checkout. A clean production-only runtime installation and native engine verification succeeded; its archive was unpacked again for API boot. Exact source, lock, schema, native-engine, SBOM and artifact hashes are preserved in docs/reviews/evidence/post28/0b98f7951f343a8a82015d4323669abb3f6fb819/R07-local-artifact-boot.
+
+A new isolated native PostgreSQL 16.15 cluster (system 7698145442854597408, run 0a86b220-0234-4c12-86c6-a60fa332d9cd) was verified empty before schema provisioning. All 110 migrations/checksums and schema parity passed. Application role has SELECT on 281 application tables, no DDL or migration ledger grants; workers were explicitly disabled. No existing database, Neon or production was used.
+
+API booted from api-boot-root without checkout and returned HTTP loopback readiness 200, protocolVersion 2, UP, AVAILABLE, a fresh timestamp and the exact source SHA. Process was terminated after probing; Windows SIGTERM does not prove graceful production drain. Web and Admin served 19 actual verified HTTPS observations including JS/CSS/fonts, build SHA and negative fallback checks. These are separate host diagnostics, not integrated browser, TLS API ingress, session or CORS acceptance.
+
+Preserved failures: R06-only initializer rejected R07; it was not weakened. Separate local provisioning helper initially called the ledger verifier with incorrect arguments after schema setup; the resume helper verified the existing exact cluster and corrected the call before granting read access. Old test TLS certificate had expired; a new local certificate was explicitly trusted by the request, without disabling TLS checks. A repeat static probe collided with its write-once result file; the original result is preserved before final probing. Runtime tests with GNU tar: 29 passed, 4 EPERM failures creating symlink fixtures, zero skipped; no complete test-suite PASS is claimed.
+
+Remaining: symlink-capable test environment, full source CI on the candidate, integrated TLS ingress/API/Web/Admin wiring, CORS/cookies/session flows, required R05/R06 acceptance and final exact-SHA gates. No promotion, main merge or production deployment. Artifacts and TLS private key stay outside Git; artifact-store recovery is not proved.
