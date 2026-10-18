@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 296,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 306,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 13,
+  "newDistinctThisContinuation": 23,
   "rows": [
     {
       "caseId": "CD-001",
@@ -153,7 +153,7 @@
           "scope": "Owner validator rejects duplicate nullable keys in one request; two real connections through existing owner row lock/revision CAS yield one success, one stale rejection and exactly one logical requirement. Does not prove direct/import paths or adopt DEC-06 schema remedy."
         }
       ],
-      "whatRemains": "حماية PostgreSQL من التكرار المنطقي مع NULL لجميع المسارات؛ audit وتصميم migration ومراجعة/بوابات schema.",
+      "whatRemains": "DB uniqueness for every direct writer with NULL, reviewed append-only migration and R04/R05 schema gates; candidate index unexecuted. Application/admin/import concurrency proof does not close this database gap.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -163,7 +163,9 @@
           "R04_R05_MIGRATION_GATES"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/e9a94eac920552470a0e648c315bfae48f97669b/R06-admission-import-20261018"
+      ]
     },
     {
       "caseId": "CD-006",
@@ -764,7 +766,9 @@
           "WORKER_IMPORT_CRASH_RECOVERY_PROOF"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/e9a94eac920552470a0e648c315bfae48f97669b/R06-admission-import-20261018"
+      ]
     },
     {
       "caseId": "CD-036",
@@ -838,5 +842,6 @@
       },
       "newEvidence": []
     }
-  ]
+  ],
+  "newDistinctThisR06OnlyTask": 10
 }
