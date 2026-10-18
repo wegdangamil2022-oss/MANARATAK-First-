@@ -1,6 +1,6 @@
 import {randomUUID,randomBytes} from 'node:crypto';
 import express from 'express';
-import {asValue} from 'awilix';
+import {asValue} from '../../vendor/awilix-core/index.mjs';
 import {container} from '../../apps/api/src/infrastructure/di/container.ts';
 import fs from 'node:fs';
 import ts from 'typescript';
