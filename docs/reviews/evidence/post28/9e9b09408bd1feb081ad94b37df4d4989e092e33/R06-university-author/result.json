@@ -1,0 +1,22 @@
+{
+  "sourceSha": "9e9b09408bd1feb081ad94b37df4d4989e092e33",
+  "runId": "9e078790-c44f-48dc-8bfe-e3d3e9dbcdbb",
+  "passedDatabaseCases": 16,
+  "newDistinctCases": 4,
+  "repeatedCases": 12,
+  "cumulativeDistinctAcrossShas": 389,
+  "allAtCurrentHead": false,
+  "R06Accepted": false,
+  "unitPassed": 15,
+  "schemaChanged": false,
+  "earlierSourceRegression": {
+    "suites": {
+      "referenceImport": 18,
+      "universityGeography": 22,
+      "ownerHttp": 16
+    },
+    "sourceSha": "19a7f8b412ab14a2104e72c79dc3bcbb18e7e46c",
+    "passed": 56
+  },
+  "provisioningUnitPassed": 35
+}

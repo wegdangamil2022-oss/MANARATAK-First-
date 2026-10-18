@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP binds university geography audit to the authenticated JWT actor",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP rejects a foreign region and leaves root revision audit and outbox unchanged",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP rejects deprecated country and city canonical references",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP rejects missing revision stale revision and missing CSRF",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP refuses university writes and cached replay after permission withdrawal",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP replays authorized university commands without duplicate mutation",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP denies an admin without university permission before root writes",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP executes invoice issuance under both finance and action permission with JWT audit actor",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP denies invoice action permission despite generic finance access",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP refuses cached invoice response when action permission alone is withdrawn",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP replays an authorized invoice issue using one owner receipt and one audit event",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP session revocation prevents university cached replay",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP creates reviews publishes and withdraws a newly authored university with stable canonical campus and unit",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP replays authored creation with one permanent identity audit and outbox",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP refuses authored creation replay after current university authority is withdrawn",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  },
+  {
+    "name": "Post28 owner HTTP closure with current persisted authority > HTTP rejects a new university with a withdrawn canonical country before any owner audit or outbox",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-http-closure.database.spec.mjs"
+  }
+]

@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 385,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 389,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 102,
+  "newDistinctThisContinuation": 106,
   "rows": [
     {
       "caseId": "CD-001",
@@ -36,7 +36,7 @@
           "scope": "Real JWT UniversityAdminRouter root geography accept/reject/If-Match/CSRF/actor proof; permission revocation denies replay. Not full university publication workflow."
         }
       ],
-      "whatRemains": "Atomic University review/publish and root canonical withdrawal race proven. Still complete campus/unit owner HTTP publication chain and affected public reads.",
+      "whatRemains": "New authored root canonical geography/campus/faculty review/publication/unpublication now proven through actual JWT HTTP; geography22 and reference/import18 repeat on source19a7f8b. Still verify published geography parent withdrawal/detail/list/CMS matrix and owning-phase browser gates; formal R05 retained.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -46,7 +46,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication"
+        "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication",
+        "docs/reviews/evidence/post28/9e9b09408bd1feb081ad94b37df4d4989e092e33/R06-university-author"
       ]
     },
     {
@@ -76,7 +77,7 @@
           "scope": "Explicit injection-reached assertion plus Prisma P2010/meta SQLSTATE22012; owner/approval and audit/outbox rollback. Two already counted cases, no new distinct count."
         }
       ],
-      "whatRemains": "سلسلة HTTP author→review→publish كاملة وعكس العلاقات بعد تغيّر حالة الآباء.",
+      "whatRemains": "New root/campus/faculty author-review-publication lifecycle and stable campus/unit ownership are proven via actual HTTP. Full canonical AcademicProgram author/review/publish and parent withdrawal HTTP/reverse graph remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -85,7 +86,9 @@
           "IMPLEMENTATION_OR_PROOF"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/9e9b09408bd1feb081ad94b37df4d4989e092e33/R06-university-author"
+      ]
     },
     {
       "caseId": "CD-003",
@@ -885,5 +888,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 89
+  "newDistinctThisR06OnlyTask": 93
 }
