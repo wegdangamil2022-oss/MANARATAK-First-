@@ -14,6 +14,7 @@ import {
   assertProgramEvidenceUrl,
 } from '@manaratak/domain';
 import { PrismaUniversityRepository } from './PrismaUniversityRepository';
+import {publicUniversityGeographySql} from './UniversityPublicEligibility';
 export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgramWorkspaceGateway {
   constructor(private readonly db: PrismaClient) {}
   private where(input: ProgramQuery, publicOnly: boolean) {
@@ -60,7 +61,7 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
     if (input.hasScholarships !== undefined)
       clauses.push(input.hasScholarships ? scholarship : Prisma.sql`NOT ${scholarship}`);
     if (publicOnly)
-      clauses.push(Prisma.sql`u.status='PUBLISHED' AND p.status='ACTIVE' AND p."majorMappingState"='CANONICALLY_MAPPED'
+      clauses.push(Prisma.sql`u.status='PUBLISHED' AND ${publicUniversityGeographySql()} AND p.status='ACTIVE' AND p."majorMappingState"='CANONICALLY_MAPPED'
       AND EXISTS(SELECT 1 FROM "Major" m JOIN "MajorLevelProfile" ml ON ml."majorId"=m.id JOIN "MajorVersion" mv ON mv.id=ml."currentPublishedVersionId" AND mv."majorId"=m.id AND mv."profileId"=ml.id AND mv.status='PUBLISHED' WHERE m.id=p."majorId" AND m.status='PUBLISHED' AND ml."degreeLevelId"=p."degreeLevelId" AND ml.status='PUBLISHED')
       AND EXISTS(SELECT 1 FROM "DegreeLevel" dl WHERE dl.id=p."degreeLevelId" AND dl.status='ACTIVE')`);
     if (
