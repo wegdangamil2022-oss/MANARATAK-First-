@@ -8,7 +8,7 @@ import {
 
 describe('public scholarship data source', () => {
   it('does not restore legacy degree or major values after the funded pairs are withdrawn', () => {
-    const mapped = mapPublicScholarshipDto({publicId:'withdrawn',slug:'withdrawn',displayName:'Withdrawn',canonicalName:'Withdrawn',degreeLevel:'Bachelor',eligibleMajorsOrFields:['Legacy medicine'],fundedProgramPairs:[],updatedAt:'2026-10-18T00:00:00.000Z'});
+    const mapped = mapPublicScholarshipDto({publicId:'withdrawn',slug:'withdrawn',displayName:'Withdrawn',canonicalName:'Withdrawn',fundingCoverage:'',coverageDetails:'',degreeLevel:'Bachelor',eligibleMajorsOrFields:['Legacy medicine'],fundedProgramPairs:[],updatedAt:'2026-10-18T00:00:00.000Z'});
     expect(mapped.degreeLevel).toEqual([]);
     expect(mapped.field).toBe('');
   });

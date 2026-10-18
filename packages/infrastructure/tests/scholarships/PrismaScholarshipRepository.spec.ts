@@ -203,9 +203,9 @@ describe('PrismaScholarshipRepository', () => {
     const where = mockPrisma.scholarship.findMany.mock.calls[0][0].where;
     const serialized = JSON.stringify(where);
     expect(where.countryReferenceId).toBe('country-qa');
-    expect(where.studyLanguageReferenceId).toBe('language-en');
+    expect(where.studyLanguageReferenceId).toBeUndefined();
     expect(serialized).toContain('currencyReferenceId');
-    expect(programReads.findPublished).toHaveBeenCalledWith({universityId:'university-qu',academicProgramId:'program-cs-phd',degreeLevelId:'degree-phd',majorId:'major-cs'});
+    expect(programReads.findPublished).toHaveBeenCalledWith({universityId:'university-qu',academicProgramId:'program-cs-phd',degreeLevelId:'degree-phd',majorId:'major-cs',languageReferenceId:'language-en'});
     expect(serialized).not.toContain('degreeTargets');
     expect(serialized).not.toContain('majorTargets');
     expect(serialized).toContain('internationalTestId');

@@ -13,7 +13,7 @@ interface EligibilityRow { itemKey: string; itemTypeCode: string; operatorCode?:
 interface DocumentRow { documentKey: string; documentTypeCode?: string | null; displayName: string; description?: string | null; internationalTestId?: string | null; sourceLabel?: string | null; isRequired?: boolean; displayOrder?: number; metadata?: JsonObject | null; }
 interface UniversityLinkRow { linkKey: string; universityId?: string | null; academicProgramId?: string | null; sourceLabel?: string | null; relationshipTypeCode?: string; metadata?: JsonObject | null; }
 interface ScholarshipDetail {
-  fundedProgramPairs?: Array<{linkKey:string;degreeLevelId:string;majorId:string;programName:string;degreeLabel?:string;majorLabel?:string}>;
+  fundedProgramPairs?: Array<{linkKey:string;degreeLevelId:string;majorId:string;programName:string;degreeLabel?:string;majorLabel?:string;studyLanguages?:Array<{id:string;name:string}>}>;
   id: string; revision: number; displayName: string; status: string; publicationStatus?: string;
   sponsorContext?: { universityId?: string | null }; countryReferenceId?: string | null; studyLanguageReferenceId?: string | null;
   benefits?: BenefitRow[]; degreeTargets?: DegreeRow[]; majorTargets?: MajorRow[];
@@ -77,7 +77,7 @@ export function ScholarshipRelationshipEditorPage({ embedded = false, disabled =
     {disabled && <p role="status">احفظ التعديلات الوصفية أولاً قبل تحرير العلاقات.</p>}
     <section aria-label="Funded degree and major pairs" className="rounded-lg border p-4">
       <h3 className="font-bold">Funded degree and major pairs</h3>
-      {scholarship.fundedProgramPairs?.length ? <table className="w-full text-left text-sm"><thead><tr><th>Degree</th><th>Major</th><th>Programme</th></tr></thead><tbody>{scholarship.fundedProgramPairs.map(pair => <tr key={pair.linkKey}><td>{pair.degreeLabel || pair.degreeLevelId}</td><td>{pair.majorLabel || pair.majorId}</td><td>{pair.programName}</td></tr>)}</tbody></table> : <p>No evidenced degree and major pair specified.</p>}
+      {scholarship.fundedProgramPairs?.length ? <table className="w-full text-left text-sm"><thead><tr><th>Degree</th><th>Major</th><th>Programme</th><th>Teaching languages</th></tr></thead><tbody>{scholarship.fundedProgramPairs.map(pair => <tr key={pair.linkKey}><td>{pair.degreeLabel || pair.degreeLevelId}</td><td>{pair.majorLabel || pair.majorId}</td><td>{pair.programName}</td><td>{pair.studyLanguages?.map(language=>language.name).join(", ") || "Unspecified"}</td></tr>)}</tbody></table> : <p>No evidenced degree and major pair specified.</p>}
     </section>
     <fieldset disabled={disabled || saving || immutable} className="space-y-6">
     <label className="block text-sm font-medium">Review reason (required for audit)<input value={reviewReason} onChange={event => setReviewReason(event.target.value)} placeholder="Why are these relationships changing?" className="mt-2 w-full rounded-lg border border-[#DDEFF2] px-3 py-2" /></label>

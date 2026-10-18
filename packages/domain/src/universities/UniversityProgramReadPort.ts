@@ -11,11 +11,13 @@ export interface UniversityProgramReferenceV1 {
   displayName: string;
   degreeLabel?: string;
   majorLabel?: string;
+  studyLanguages?: Array<{id:string;name:string}>;
   status: string;
   publiclyEligible: boolean;
 }
 /** Every supplied dimension must match the same owner program. */
 export interface PublishedUniversityProgramQueryV1 {
+  languageReferenceId?: string;
   universityId?: string;
   academicProgramId?: string;
   degreeLevelId?: string;

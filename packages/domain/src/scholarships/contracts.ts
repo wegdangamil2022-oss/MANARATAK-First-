@@ -249,6 +249,7 @@ export interface ScholarshipApplicationCycleDto {
 }
 
 export interface ScholarshipFundedProgramPairDto {
+  studyLanguages?: Array<{id:string;name:string}>;
   linkKey: string;
   universityId: string;
   academicProgramId: string;

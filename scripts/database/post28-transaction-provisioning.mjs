@@ -14,6 +14,7 @@ export async function preflightTransactionProvisioning(contract,appUrl,setupUrl,
 }
 export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
  'UniversityImportChangeSet','UniversityImportChange',
+ 'UniversityProgramStudyProfile','UniversityProgramStudyLanguage',
  'BackgroundJobRecord','BackgroundJobExecutionRecord','BackgroundJobDeadLetterRecord','TransactionalOutboxRecord',
  'CmsContentNode','CmsPublishedContent','AssetRecord','StudentWorkspace','StudentApplicationTracker','StudentApplicationDocumentBinding',
  'FinanceInvoiceRecord','FinancePaymentRecord','FinanceCommandRecord',

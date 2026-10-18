@@ -23,6 +23,7 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
       linkKey: pair.linkKey, universityId: pair.universityId, academicProgramId: pair.academicProgramId,
       degreeLevelId: pair.degreeLevelId, majorId: pair.majorId, programName: pair.programName,
       degreeLabel: pair.degreeLabel, majorLabel: pair.majorLabel,
+      studyLanguages:(pair.studyLanguages??[]).map(language=>({id:language.id,name:language.name})),
     })),
     academicYear: source.academicYear, cycleName: source.cycleName,
     countryReferenceId: source.countryReferenceId, countrySourceLabel: source.countrySourceLabel,
