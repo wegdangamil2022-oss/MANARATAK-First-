@@ -365,6 +365,10 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   }
 
   public async findPublishedBySlug(slug: string): Promise<CourseDto | null> {
+    if (!this.transactionBound) return this.prisma.$transaction(
+      tx => new PrismaCourseRepository(tx as unknown as PrismaClient, true).findPublishedBySlug(slug),
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
     const record = await this.prisma.course.findFirst({ where: { ...this.publishedWhere(), slug },
       include: {majorProjections:{where:{projectionState:'APPROVED',major:{status:'PUBLISHED'}},select:{major:{select:{id:true,displayName:true}}}}},
     });
@@ -372,6 +376,10 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   }
 
   public async listPublished(filters: PublicCourseFilters): Promise<PaginatedCourseResult<CourseDto>> {
+    if (!this.transactionBound) return this.prisma.$transaction(
+      tx => new PrismaCourseRepository(tx as unknown as PrismaClient, true).listPublished(filters),
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
     const where = this.publishedWhere();
 
     if (filters.accessType) where.accessType = filters.accessType;

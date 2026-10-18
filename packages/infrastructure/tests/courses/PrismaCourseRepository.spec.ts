@@ -59,6 +59,7 @@ describe('PrismaCourseRepository', () => {
       courseQuestion: { findMany: vi.fn().mockResolvedValue([]) },
       courseVersion: { create: vi.fn().mockResolvedValue({}) },
     };
+    prisma.$transaction = vi.fn((work: (tx: unknown) => Promise<unknown>) => work(prisma));
     repository = new PrismaCourseRepository(prisma);
   });
 

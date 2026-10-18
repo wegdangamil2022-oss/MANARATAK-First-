@@ -771,6 +771,10 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
   public async listPublishedRelatedCourses(
     filters: CourseRelationshipPublicFilters,
   ): Promise<PaginatedCourseResult<CourseRelationshipPublicCourseDto>> {
+    if (!this.transactionBound) return this.prisma.$transaction(
+      tx => new PrismaCourseRelationshipRepository(tx as unknown as PrismaClient, true).listPublishedRelatedCourses(filters),
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
     const where: Prisma.CourseWhereInput = publicCourseEligibility();
 
     if (filters.accessType) where.accessType = filters.accessType;
