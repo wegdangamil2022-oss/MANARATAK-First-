@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 404,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 408,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 121,
+  "newDistinctThisContinuation": 125,
   "rows": [
     {
       "caseId": "CD-001",
@@ -36,7 +36,7 @@
           "scope": "Real JWT UniversityAdminRouter root geography accept/reject/If-Match/CSRF/actor proof; permission revocation denies replay. Not full university publication workflow."
         }
       ],
-      "whatRemains": "New authored root canonical geography/campus/faculty review/publication/unpublication now proven through actual JWT HTTP; geography22 and reference/import18 repeat on source19a7f8b. Still verify published geography parent withdrawal/detail/list/CMS matrix and owning-phase browser gates; formal R05 retained.",
+      "whatRemains": "Actual University create/review/publication plus root country/region/city withdrawal/restoration is proven in HTTP detail/base and Major-filtered lists/counts, owner batches and CMS without changing historical owner facts. Missing canonical-country historical published owner remains admin-readable but public-hidden. Program workspace/facet geography and cross-query snapshots remain; owning-phase browser and formal R05 gates retained.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -47,7 +47,8 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication",
-        "docs/reviews/evidence/post28/9e9b09408bd1feb081ad94b37df4d4989e092e33/R06-university-author"
+        "docs/reviews/evidence/post28/9e9b09408bd1feb081ad94b37df4d4989e092e33/R06-university-author",
+        "docs/reviews/evidence/post28/8c15bdbfe1d744365e7245d80812792571b6dcdf/R06-university-public-geography"
       ]
     },
     {
@@ -77,7 +78,7 @@
           "scope": "Explicit injection-reached assertion plus Prisma P2010/meta SQLSTATE22012; owner/approval and audit/outbox rollback. Two already counted cases, no new distinct count."
         }
       ],
-      "whatRemains": "Actual JWT canonical program author/review/publish/archive cycle and same-owner relationships proven. Current Major version withdrawal/foreign-owner pointer now hides programs consistently in detail, filtered university count, program/major graph and CMS, with explicit restoration. Geography and other parent/reference withdrawal plus browser gates remain.",
+      "whatRemains": "Canonical program author/publication, current same-owner Major version withdrawal and root geography withdrawal now deny detail/list/program/major graph/CMS and consumer owner-proof port. Public program workspace/facets geography, remaining child/reference withdrawal and browser gates remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -89,7 +90,8 @@
       "newEvidence": [
         "docs/reviews/evidence/post28/9e9b09408bd1feb081ad94b37df4d4989e092e33/R06-university-author",
         "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author",
-        "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version"
+        "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version",
+        "docs/reviews/evidence/post28/8c15bdbfe1d744365e7245d80812792571b6dcdf/R06-university-public-geography"
       ]
     },
     {
@@ -548,7 +550,7 @@
           "scope": "Provider headquarters has no derived study country; active canonical language review, rejects inactive/deprecated reference; raw labels excluded, card/list/relationship HTTP and publication guard withdraw deprecated language. No teaching-market DEC-07 acceptance."
         }
       ],
-      "whatRemains": "University root/campus/faculty/canonical program HTTP lifecycle is now proven; program-language8 repeats on this frozen source. Full language author/review workspace and built-browser parity remain; original external Course provider-headquarters versus course-study-country semantics are preserved, not replaced by program-language coverage.",
+      "whatRemains": "Canonical University author cycle, program-language8, funded pairs14 and University/program owner reads repeat with valid synthetic canonical-country prerequisites. Public program workspace/facet geography withdrawal and full language author/review/browser matrix remain; original Course headquarters/study-country semantics preserved.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -561,7 +563,8 @@
       "newEvidence": [
         "docs/reviews/evidence/post28/48102fc653314f2bc49308b62301a21305a2bf2c/R06-languages",
         "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
-        "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version"
+        "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version",
+        "docs/reviews/evidence/post28/8c15bdbfe1d744365e7245d80812792571b6dcdf/R06-university-public-geography"
       ]
     },
     {
@@ -877,7 +880,7 @@
           "scope": "Current canonical test version and language withdrawal affect next actual public request/list; no full multi-page parent/reference lifecycle matrix or snapshot/pagination consistency acceptance."
         }
       ],
-      "whatRemains": "Actual Course publication precheck-to-commit races fixed for provider/domain/link/language with bound revalidation and shared locks. University same-owner version SQL withdrawal and HTTP identity/revision races remain proven. Dynamic geography, post-publication domain/source reads, broader relationship-reference races and query snapshot matrix remain.",
+      "whatRemains": "University root geography is checked consistently in public repository, graph, CMS and program owner-proof reads, with historical admin visibility retained. Course publication/source and HTTP identity races remain proven. Program workspace/facets geography and University/Course multi-query snapshot races still require proof.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -893,9 +896,10 @@
         "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source",
         "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author",
         "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version",
-        "docs/reviews/evidence/post28/13082808c616f4aefddecfc0d96893b3d3e6008a/R06-course-publication-races"
+        "docs/reviews/evidence/post28/13082808c616f4aefddecfc0d96893b3d3e6008a/R06-course-publication-races",
+        "docs/reviews/evidence/post28/8c15bdbfe1d744365e7245d80812792571b6dcdf/R06-university-public-geography"
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 108
+  "newDistinctThisR06OnlyTask": 112
 }
