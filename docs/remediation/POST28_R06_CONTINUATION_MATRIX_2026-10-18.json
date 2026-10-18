@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 378,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 385,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 95,
+  "newDistinctThisContinuation": 102,
   "rows": [
     {
       "caseId": "CD-001",
@@ -360,7 +360,7 @@
           "scope": "DEC03 free-study policy implemented with independent paid/free/unknown certificate evidence. Real publication/audit/outbox, HTTP router and actual UI data adapter; no browser or real provider link check."
         }
       ],
-      "whatRemains": "DEC03 eight PostgreSQL cases repeat successfully with canonical receipt fix. Still complete controlled real-source staged import through actual review/check/publication and HTTP display.",
+      "whatRemains": "Actual free-study/certificate publication, CMS eligibility, controlled manual review of acquired real source, actual HTTPS link check and public HTTP display now proven. Full admin JWT review route matrix and owning-phase built-browser parity still separate; formal R05 gate retained.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -371,7 +371,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts"
+        "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts",
+        "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source"
       ]
     },
     {
@@ -575,7 +576,7 @@
           "scope": "Two-connection provider/native-key/language identity dedup and preserved IDs; domain allowlist, persisted synthetic redirect/history evidence, stale result rejection, controlled identity edit guard and raw source publication rejection. No external network check or end-to-end import approval."
         }
       ],
-      "whatRemains": "Actual public raw GET and pinned Node22 DNS contract repaired; five canonical receipt concurrency/rollback cases pass. Still complete source acquisition materialization/analysis/change review/publication chain and lineage change matrix.",
+      "whatRemains": "Actual acquisition/snapshot/digest, explicit manual semantic review, canonical transfer/provenance, language/topic/link review, publication and public withdrawal proven. Still controlled URL/metadata refresh lineage, registered automatic provider adapter if required, domain-allowlist withdrawal, full admin JWT routes and owner worker crash-to-canonical handoff; production raw persistence readiness separate.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -588,7 +589,8 @@
       "newEvidence": [
         "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network",
         "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
-        "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts"
+        "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts",
+        "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source"
       ]
     },
     {
@@ -866,7 +868,7 @@
           "scope": "Current canonical test version and language withdrawal affect next actual public request/list; no full multi-page parent/reference lifecycle matrix or snapshot/pagination consistency acceptance."
         }
       ],
-      "whatRemains": "Scholarship snapshot/live cursor, document IO revocation and owner/source lock concurrency proven for tested paths. Student ownership definition resolved; remaining graph/cache/HTTP withdrawal matrix still requires tests.",
+      "whatRemains": "Adds actual course language/provider approval withdrawal across public detail/list/count and CMS, with no-store HTTP. Domain-allowlist withdrawal and wider graph/cache/JWT mutation race matrix remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -878,9 +880,10 @@
       "newEvidence": [
         "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
         "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
-        "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks"
+        "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
+        "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source"
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 82
+  "newDistinctThisR06OnlyTask": 89
 }

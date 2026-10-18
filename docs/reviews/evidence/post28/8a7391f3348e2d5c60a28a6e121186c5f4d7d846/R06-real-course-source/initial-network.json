@@ -1,0 +1,27 @@
+{
+  "manualSemanticReview": true,
+  "automatedHtmlParser": false,
+  "localSnapshotClassification": "DEVELOPMENT_ONLY",
+  "requests": [
+    {
+      "artifactId": "raw_2d7fdf8dc3aa5d0079f6fc44b5806386a5b82e01b0af55c7641e1d3b01064517",
+      "sha256": "725961a0a479ae7f0cd4fe796aba7a26ceb3db0a1c5b99dfd9b9542f1fe6cac2",
+      "byteSize": 20477,
+      "statusCode": 200,
+      "requestedUrl": "https://cs50.harvard.edu/x/",
+      "finalUrl": "https://cs50.harvard.edu/x/",
+      "fetchedAt": "2026-10-18T17:41:11.913Z",
+      "attempts": 1
+    },
+    {
+      "artifactId": "raw_874bf32f1e683e301043fefae6a73189652cb25f839c47018a0d6e62c20778d7",
+      "sha256": "35c292739d3e1ff2d3e4df97bd3cea787a9a8359997db9cc9ea5f787a7cf8d49",
+      "byteSize": 16015,
+      "statusCode": 200,
+      "requestedUrl": "https://cs50.harvard.edu/x/certificate/",
+      "finalUrl": "https://cs50.harvard.edu/x/certificate/",
+      "fetchedAt": "2026-10-18T17:41:12.837Z",
+      "attempts": 1
+    }
+  ]
+}
