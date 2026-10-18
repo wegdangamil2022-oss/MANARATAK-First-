@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 348,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 353,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 65,
+  "newDistinctThisContinuation": 70,
   "rows": [
     {
       "caseId": "CD-001",
@@ -697,7 +697,7 @@
           "scope": "Foreign path alias returns contract 403; strict body rejects injected principal; 1 actual selected pass, 13 deliberate exclusions. Saved report verified on 1c19ec1fdefdebe57061287ad2737d0e24e862c2 without rerunning DB."
         }
       ],
-      "whatRemains": "Owner clarified Cross-Tenant means existing student ownership isolation. Institutional tenant design is not required for this R06 scope. Still complete cross-student certificate/invoice/graph HTTP checks; document review ownership negatives remain preserved evidence.",
+      "whatRemains": "Student ownership definition resolved. Actual invoice list/count/details/history and payment-command denials, revoked certificate list/cursor/artifact denials, public University graph and document review IO ownership negatives proven. Still complete genuine issued certificate artifact delivery and wider graph/document student route coverage; no institutional tenant design required.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -708,7 +708,8 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
-        "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network"
+        "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network",
+        "docs/reviews/evidence/post28/be687e82df88317ab2aae10ce0cdb7689246c9c9/R06-student-isolation"
       ]
     },
     {
@@ -743,7 +744,7 @@
           "scope": "Real FinanceAdminRouter invoice action/JWT/receipt checks. Unconfigured refund provider rejected before approval consumption/reservation; unavailable bank cannot submit or settle; reconciliation records provider absence. Real local credit, installments, wallet holds/release/capture/replay/conflict/CAS/rollback with balanced synthetic historical funding; no external payment/refund/settlement success proof."
         }
       ],
-      "whatRemains": "ربط service originReference والعملة، payment/refund/settlement الفعلية وأثرها الخارجي وreplay الآمن.",
+      "whatRemains": "Real issued invoice student ownership HTTP reads and denied foreign payment attempts now proven without provider dispatch. Still service origin/currency link scenarios and genuine sandbox payment/refund/settlement/replay; local financial 14-case evidence preserved.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -753,7 +754,9 @@
           "IMPLEMENTATION_OR_PROOF"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/be687e82df88317ab2aae10ce0cdb7689246c9c9/R06-student-isolation"
+      ]
     },
     {
       "caseId": "CD-035",
@@ -868,5 +871,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 52
+  "newDistinctThisR06OnlyTask": 57
 }
