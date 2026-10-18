@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 333,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 338,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 50,
+  "newDistinctThisContinuation": 55,
   "rows": [
     {
       "caseId": "CD-001",
@@ -771,7 +771,7 @@
           "scope": "Real persisted completion worker dispatch with retries and provider/native/language identity concurrent dedup; not full import-to-owner crash/ack recovery."
         }
       ],
-      "whatRemains": "import→owner mapping كامل، تعطل العامل قبل/بعد ack ثم resume/replay دون أثر مكرر.",
+      "whatRemains": "Actual worker/handler/Prisma screening pipeline, killed process before/after receipt and acknowledgment, recovery, no-repeat screening and conflict rejection now proven. Canonical owner mapping with transactionally coupled owner receipt plus explicit reconciliation/replay workflow still requires implementation/proof; screening receipts are not canonical-write receipts.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -781,7 +781,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/e9a94eac920552470a0e648c315bfae48f97669b/R06-admission-import-20261018"
+        "docs/reviews/evidence/post28/e9a94eac920552470a0e648c315bfae48f97669b/R06-admission-import-20261018",
+        "docs/reviews/evidence/post28/4e0549faab38ad9e40d42af6540f96157730aa22/R06-worker-crash"
       ]
     },
     {
@@ -860,5 +861,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 37
+  "newDistinctThisR06OnlyTask": 42
 }
