@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 355,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 363,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 72,
+  "newDistinctThisContinuation": 80,
   "rows": [
     {
       "caseId": "CD-001",
@@ -667,7 +667,7 @@
           "scope": "Real CourseProgressUseCases enrollment/completion audit/outbox commit, retry/concurrency and SQLSTATE22012 rollback. External-linked enrollment/completion and certificate claims refused. P14 real consumer/gateway/worker acknowledges noncredential event and retries native eligible events lacking approved template; no certificate issued or inbox invented."
         }
       ],
-      "whatRemains": "Real issuance and verification analytics Prisma void-lock defects repaired; absent-authority rollback and independent-connection analytics dedup proven. Still complete successful synthetic maker/checker template and issuer workflow, authoritative issuance/inbox replay, valid signed public verification/revocation and real artifact binding; external production signer/renderer approvals remain separate.",
+      "whatRemains": "Successful actual synthetic maker/checker issuer/template lifecycle, authoritative course event issuance, inbox replay/concurrency, rollback, local signature public HTTP verification/revocation and authority withdrawal race proven. Still learning-path completion and real rendered artifact attachment/delivery/recovery; production signer/renderer approvals separate.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -678,7 +678,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/6ad9dc526147315bcacb57a54892a6e7199b5713/R06-certificate-locks"
+        "docs/reviews/evidence/post28/6ad9dc526147315bcacb57a54892a6e7199b5713/R06-certificate-locks",
+        "docs/reviews/evidence/post28/a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5/R06-certificate-runtime"
       ]
     },
     {
@@ -699,7 +700,7 @@
           "scope": "Foreign path alias returns contract 403; strict body rejects injected principal; 1 actual selected pass, 13 deliberate exclusions. Saved report verified on 1c19ec1fdefdebe57061287ad2737d0e24e862c2 without rerunning DB."
         }
       ],
-      "whatRemains": "Student ownership definition resolved. Actual invoice list/count/details/history and payment-command denials, revoked certificate list/cursor/artifact denials, public University graph and document review IO ownership negatives proven. Still complete genuine issued certificate artifact delivery and wider graph/document student route coverage; no institutional tenant design required.",
+      "whatRemains": "Actual student invoice/certificate list/cursor/foreign artifact denials and public University graph isolation proven; public verification of a genuinely locally signed certificate now excludes private student ID/signature/hash/key. Still actual issued file delivery ownership, wider graph/document student route coverage.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -711,7 +712,8 @@
       "newEvidence": [
         "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
         "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network",
-        "docs/reviews/evidence/post28/be687e82df88317ab2aae10ce0cdb7689246c9c9/R06-student-isolation"
+        "docs/reviews/evidence/post28/be687e82df88317ab2aae10ce0cdb7689246c9c9/R06-student-isolation",
+        "docs/reviews/evidence/post28/a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5/R06-certificate-runtime"
       ]
     },
     {
@@ -873,5 +875,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 59
+  "newDistinctThisR06OnlyTask": 67
 }

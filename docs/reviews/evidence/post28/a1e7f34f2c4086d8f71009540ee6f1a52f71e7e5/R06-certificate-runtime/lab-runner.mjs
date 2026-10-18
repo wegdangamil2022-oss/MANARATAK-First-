@@ -1,0 +1,10 @@
+import fs from 'node:fs';import path from 'node:path';import {spawnSync} from 'node:child_process';
+const [lab,stage,suite]=process.argv.slice(2),cwd=path.resolve('work/r06-runtime');
+if(!lab||!['initialize','suite'].includes(stage))throw Error('STAGE_REQUIRED');
+const state=JSON.parse(fs.readFileSync(path.join(lab,'lab-state.json')));if(state.profile!=='transactions'||state.status!=='EMPTY_TARGETS_VERIFIED')throw Error('NEW_TRANSACTION_LAB_REQUIRED');
+const env={...process.env,...Object.fromEntries(fs.readFileSync(path.join(lab,'lab.env'),'utf8').trim().split(/\r?\n/).map(s=>{const i=s.indexOf('=');return [s.slice(0,i),s.slice(i+1)];}))};
+env.DATABASE_MUTATION_PURPOSE=stage==='initialize'?'migrate':'maintenance';env.PRISMA_QUERY_ENGINE_LIBRARY=path.join(cwd,'node_modules/@prisma/engines/query_engine-windows.dll.node');env.PRISMA_SCHEMA_ENGINE_BINARY=path.join(cwd,'node_modules/@prisma/engines/schema-engine-windows.exe');
+const args=stage==='initialize'?['scripts/database/initialize-post28-transactions.mjs','--certificate-fixtures']:['scripts/database/run-post28-suite.mjs',suite];
+const r=spawnSync(process.execPath,args,{cwd,env,encoding:'utf8',windowsHide:true,timeout:600000,maxBuffer:32*1024*1024});
+let output=(r.stdout??'')+(r.stderr??'');for(const key of ['DATABASE_URL','DIRECT_URL','POST28_TRANSACTION_SETUP_URL'])if(env[key])output=output.replaceAll(env[key],'[REDACTED_POSTGRES_URL]').replaceAll(decodeURIComponent(new URL(env[key]).password),'[REDACTED]');
+output=output.replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]');fs.writeFileSync(path.join(lab,`stage-${stage}-${suite??'setup'}.log`),output,{flag:'wx'});console.log(output);console.log(JSON.stringify({stage,suite,exitCode:r.status,error:r.error?.code??null}));process.exitCode=r.status??1;
