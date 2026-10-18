@@ -1,0 +1,135 @@
+{
+  "sourceSha": "c9264f40eef75ca5ab5142707f30f4203d381d60",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "checks.json",
+      "bytes": 3175,
+      "sha256": "43b3baadba62445f7331be3da8aee63b95d2386f0d875a610a1f09188a395276"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 1376,
+      "sha256": "eb39a872c0bb7193505cbaa02853ef5321587778e436cf3ad4392cf492e11ae9"
+    },
+    {
+      "path": "runtime-layer.json",
+      "bytes": 2162,
+      "sha256": "60bba5a4a8081c8054dc2a06d525c6506cb37cf50c8692b170474a7eaf2042c8"
+    },
+    {
+      "path": "integration.json",
+      "bytes": 2540,
+      "sha256": "3a6e39646d6ef000558d588eda5192c8f1bcdcf4b0bb009b98cc2f45292f5023"
+    },
+    {
+      "path": "integration-api.log",
+      "bytes": 2142,
+      "sha256": "77cdaacb5faf7b2d8cf4479edc72bb6b095391eec7f4e22184b771945e41a6c1"
+    },
+    {
+      "path": "integration-gateway.log",
+      "bytes": 136,
+      "sha256": "d510b9ef02800ca62139ccfeca7bcec5bb2add396fed43bd6a74618750284552"
+    },
+    {
+      "path": "integration-probe-contract-failure.json",
+      "bytes": 1772,
+      "sha256": "9598f9c8a9bc8d7ed3eb0f8e85d2aad5501735b7eb2c3c1ac271cc9684dec311"
+    },
+    {
+      "path": "integration-probe-route-failure.json",
+      "bytes": 2090,
+      "sha256": "a377d603be2e1fc6cd80fe2b3b0a0639c4459829b3bc31d85816014683554a9b"
+    },
+    {
+      "path": "api-build.log",
+      "bytes": 861,
+      "sha256": "b4e6f37b79031a042263cac66e616c87ee00d61e16b614b0ca360a82f2cb48ba"
+    },
+    {
+      "path": "web-build.log",
+      "bytes": 790,
+      "sha256": "569f8dcdc086ff57d36aa528f5f48ba88799742a9ca8a25bfac49c7993743a2a"
+    },
+    {
+      "path": "admin-build.log",
+      "bytes": 1426,
+      "sha256": "3a681194517d4241af08638f9fbf32892c92dc2e785107cc9c6d4071714bf571"
+    },
+    {
+      "path": "package.log",
+      "bytes": 83,
+      "sha256": "7ba392e2e2e44899a4fe65e37f4c5efa226bfb4d863036f4a6862e7550bbc3e3"
+    },
+    {
+      "path": "runtime-install.log",
+      "bytes": 612,
+      "sha256": "97a42c4b3af956b9879327d6ce1cee77e8617692b6b941e5ffee0ba0abbc67ae"
+    },
+    {
+      "path": "artifacts/release-manifest.json",
+      "bytes": 1923,
+      "sha256": "e8a5878b813a2223eb59f58586f98d1bcf3f7d6a98b04a7e60f5457e4d663742"
+    },
+    {
+      "path": "artifacts/release-sbom.cdx.json",
+      "bytes": 113384,
+      "sha256": "2fcba3f3eb82efbe536e4545daa267a00a699c0e390907d5054487e60c729272"
+    },
+    {
+      "path": "artifacts/SHA256SUMS",
+      "bytes": 465,
+      "sha256": "5cbc344cb51f495f054b425b66de6538d0652bc45ebcfa8195eb3d2a6d74cd95"
+    },
+    {
+      "path": "lab/targets.json",
+      "bytes": 667,
+      "sha256": "6143f8119036503fab42ca5d015cc0f074bdca639fa5763e5190382d707f80c4"
+    },
+    {
+      "path": "lab/target-preflight.log",
+      "bytes": 426,
+      "sha256": "1f3414f1df9b03e4f8b16e00a4876c092764c9798ba2201759122f70a8563ea8"
+    },
+    {
+      "path": "lab/R07-setup/checks.json",
+      "bytes": 688,
+      "sha256": "bd1db4e50eb50193c3708c692ef3fc8b32c5b7d5c6264391be7757cc0588cc1c"
+    },
+    {
+      "path": "lab/R07-setup/result.json",
+      "bytes": 973,
+      "sha256": "682ab2c0b1f2cbdad9cbaca0b9943d02d5ce7543a297533f7def473314d742f8"
+    },
+    {
+      "path": "r07-gateway-final-tests.log",
+      "bytes": 2706,
+      "sha256": "e4a489ae5ed8709ba2a2ae0694151b1b0a69c8d2ad049e20710392c5c05ca7a9"
+    },
+    {
+      "path": "r07-gateway-red.log",
+      "bytes": 3656,
+      "sha256": "2074bcd73d6530df8b5dbf40f197949637598d63da137ec64db8f0870ec30b06"
+    },
+    {
+      "path": "r07-gateway-quality.log",
+      "bytes": 384,
+      "sha256": "eec55ba731573ad76875e3cff714bdc27a87514146f57511d67392efccd7ee81"
+    },
+    {
+      "path": "r07-gateway-integration.mjs",
+      "bytes": 6671,
+      "sha256": "2623b4ca574d7c9353a00be53b7ccf110fedead132b1e78d18420ffea7ea5ff0"
+    },
+    {
+      "path": "r07-provision-verified.mjs",
+      "bytes": 4094,
+      "sha256": "a2be0a5410994bbe54d68076faacbe6139cb925d2fb6972c730e299e1d73b864"
+    }
+  ]
+}
