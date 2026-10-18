@@ -124,6 +124,8 @@ export class ProviderNeutralCertificateRenderingService implements ICertificateR
       const logo =
         visualAssets.logoAssetId?.bytes ??
         (await readFile(certificateAsset('manaratak-logo-official.png')));
+      const logoMimeType = visualAssets.logoAssetId?.mimeType ?? 'image/jpeg';
+      assertCertificateVisualImage(logo, logoMimeType);
       const metrics = new PDFDocument({ autoFirstPage: false });
       metrics.registerFont('CertificateArabic', font);
       const latinFont = await readFile(certificateAsset('DejaVuSerif.ttf'));
@@ -152,7 +154,7 @@ export class ProviderNeutralCertificateRenderingService implements ICertificateR
         issuedAt: input.certificate.issuedAt.toISOString().slice(0, 10),
         verificationUrl: input.certificate.verificationUrl,
         issuerName: input.certificate.issuerName,
-        logoUrl: `data:${visualAssets.logoAssetId?.mimeType ?? 'image/png'};base64,${Buffer.from(logo).toString('base64')}`,
+        logoUrl: `data:${logoMimeType};base64,${Buffer.from(logo).toString('base64')}`,
         signatureUrl: imageUrl('signatureAssetId'),
         sealUrl: imageUrl('sealAssetId'),
         arabicFontUrl: `data:font/ttf;base64,${font.toString('base64')}`,
