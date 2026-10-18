@@ -14,7 +14,7 @@ export class PrismaSourceAcquisitionLimiter implements ISourceAcquisitionLimiter
       { key: `ORIGIN:${new URL(source.baseUrl).origin}`, interval: Math.max(1000, Math.ceil(60_000 / rate)) },
       { key: `SOURCE:${source.sourceId}`, interval: Math.ceil(60_000 / rate) }].sort((a,b) => a.key.localeCompare(b.key));
     const delay = await this.prisma.$transaction(async tx => {
-      for (const budget of budgets) await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`source-budget:${budget.key}`}, 0))`;
+      for (const budget of budgets) await tx.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${`source-budget:${budget.key}`}, 0))`;
       const now = Date.now(); let scheduled = now;
       for (const budget of budgets) {
         const row = await tx.importRateBudget.findUnique({ where: { budgetKey: budget.key } });

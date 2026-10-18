@@ -54,7 +54,7 @@ export class PrismaStudyDestinationRepository implements IStudyDestinationReposi
   async lockCountry(countryReferenceId: string): Promise<void> {
     this.assertBound();
     await this.prisma.$queryRaw(
-      Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${countryReferenceId}, 12012))`,
+      Prisma.sql`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${countryReferenceId}, 12012))`,
     );
     const rows = await this.prisma.$queryRaw<Array<{ isActive: boolean; lifecycleState: string }>>(
       Prisma.sql`SELECT "isActive", "lifecycleState" FROM "ReferenceCountry" WHERE "id"=${countryReferenceId} FOR SHARE`,

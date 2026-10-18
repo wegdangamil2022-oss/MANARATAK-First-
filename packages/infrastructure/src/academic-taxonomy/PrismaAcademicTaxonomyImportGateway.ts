@@ -19,7 +19,7 @@ export class PrismaAcademicTaxonomyImportGateway implements IAcademicTaxonomyImp
     if (asset.checksum?.algorithm.toLowerCase() !== 'sha256' || asset.checksum.hash.toLowerCase() !== sha256.toLowerCase())
       throw new Error('TAXONOMY_IMPORT_SOURCE_HASH_CONFLICT');
   }
-  async lock(id: string) { await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`taxonomy-import:${id}`}, 0))`; }
+  async lock(id: string) { await this.prisma.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${`taxonomy-import:${id}`}, 0))`; }
   async screening(receiptId: string) {
     const row = await this.prisma.importScreeningReceipt.findUnique({ where: { id: receiptId } });
     return row && ['ACADEMIC_TAXONOMY', 'TAXONOMY'].includes(row.ownerDomain) ? { id: row.id, requestHash: row.requestHash, result: row.result } : null;
