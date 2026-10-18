@@ -130,7 +130,7 @@ test('university geography declares twenty-two cases and explicitly grants only 
 
 test('remaining independent profiles allow certificate read fixtures without issuance inbox or approval grants',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
- for(const [suite,count] of [['owner-http-closure',12],['attestation-closure',24],['learning-closure',14]])assert.equal(databaseSuite(suite).minimumCases,count);
+ for(const [suite,count] of [['owner-http-closure',16],['attestation-closure',24],['learning-closure',14]])assert.equal(databaseSuite(suite).minimumCases,count);
  for(const table of ['ScholarshipRequiredDocument','Course','CourseVersion','CourseEnrollment','CourseCompletion'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('Certificate'),true);
  for(const table of ['CertificateIssuer','CertificateTemplate','CertificateTemplateVersion'])assert.equal(TRANSACTION_APPLICATION_TABLES.includes(table),false);
@@ -161,4 +161,13 @@ test('optional certificate workflow scope is explicit and contains five owner ta
 });
 test('owner lock profile executes ten actual gateway contracts with one source budget fixture grant',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('owner-advisory-locks').minimumCases,10);assert.ok(TRANSACTION_APPLICATION_TABLES.includes('ImportRateBudget'));assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
+});
+
+test('course receipt and real source profiles require explicit two-table fixture scope',async()=>{
+ const {COURSE_FIXTURE_APPLICATION_TABLES}=await import('../../scripts/database/post28-transaction-provisioning.mjs');
+ assert.deepEqual(COURSE_FIXTURE_APPLICATION_TABLES,['CourseImportAnalysis','CourseFieldProvenance']);
+ assert.ok(COURSE_FIXTURE_APPLICATION_TABLES.every(table=>!TRANSACTION_APPLICATION_TABLES.includes(table)));
+ const initializer=fs.readFileSync('scripts/database/initialize-post28-transactions.mjs','utf8');
+ assert.ok(initializer.includes("process.argv[2]==='--course-fixtures'"));assert.ok(initializer.includes('if(courseFixtures)await setup.$executeRawUnsafe'));
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('course-import-receipt').minimumCases,5);assert.equal(databaseSuite('real-course-source').minimumCases,7);
 });
