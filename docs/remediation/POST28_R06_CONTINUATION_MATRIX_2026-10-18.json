@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 318,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 325,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 35,
+  "newDistinctThisContinuation": 42,
   "rows": [
     {
       "caseId": "CD-001",
@@ -102,7 +102,7 @@
           "scope": "Missing degree profile rejected in authoring. Public eligibility rejects foreign major/profile version, draft/superseded version and retired profile. Publication workflow concurrency not fully executed."
         }
       ],
-      "whatRemains": "نشر البرنامج الفعلي مع التزامن وتغيّر المرجع أثناء المعاملة.",
+      "whatRemains": "Full publication command concurrency; current major/profile/version ownership is now enforced in University workspace SQL list/facets and tested.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -111,7 +111,9 @@
           "IMPLEMENTATION_OR_PROOF"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots"
+      ]
     },
     {
       "caseId": "CD-004",
@@ -246,7 +248,7 @@
           "scope": "Same owner program proves degree-major pair in real public HTTP filtering before count and pagination; invalid/unresolved/foreign-owner and obsolete/mismatched version rejected. Dashboard, final UI and full owner workflow not accepted."
         }
       ],
-      "whatRemains": "Concurrent owner/reference transitions during read and built-browser filter/details parity; sequential HTTP/list/count/withdrawal proof passed.",
+      "whatRemains": "Built-browser filter/details parity and remaining owner lifecycle; actual two-connection major/program withdrawal during public reads is now coherent and proven.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -256,7 +258,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/1ea67d54555c17ce725483a087a404dc113088d0/R06-pairs"
+        "docs/reviews/evidence/post28/1ea67d54555c17ce725483a087a404dc113088d0/R06-pairs",
+        "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots"
       ]
     },
     {
@@ -531,7 +534,7 @@
           "scope": "Provider headquarters has no derived study country; active canonical language review, rejects inactive/deprecated reference; raw labels excluded, card/list/relationship HTTP and publication guard withdraw deprecated language. No teaching-market DEC-07 acceptance."
         }
       ],
-      "whatRemains": "Full University owner author/review/publish and HTTP/built-browser language/filter parity, concurrent transition consistency; actual canonical program read and scholarship HTTP/list/count multilanguage and withdrawal are proven. Launch markets remain a separate owner scope decision.",
+      "whatRemains": "Full University owner author/review/publish and built-browser parity; University program language query/facet and scholarship HTTP/list/count source/reference parity now proven.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -542,7 +545,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/48102fc653314f2bc49308b62301a21305a2bf2c/R06-languages"
+        "docs/reviews/evidence/post28/48102fc653314f2bc49308b62301a21305a2bf2c/R06-languages",
+        "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots"
       ]
     },
     {
@@ -837,7 +841,7 @@
           "scope": "Current canonical test version and language withdrawal affect next actual public request/list; no full multi-page parent/reference lifecycle matrix or snapshot/pagination consistency acceptance."
         }
       ],
-      "whatRemains": "تغيّر مالك/parent/reference أثناء الطلب وبين الصفحات، snapshot/pagination consistency ومنع stale grants.",
+      "whatRemains": "Issued-grant revocation and remaining graph/cache/HTTP concurrency matrix; cross-request catalogue traversal is live immutable-ID paging, not a historic snapshot. Scholarship list/details internal snapshot consistency and deleted relation-anchor continuation are proven.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -846,8 +850,10 @@
           "CONCURRENT_READ_LIFECYCLE_PROOF"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots"
+      ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 22
+  "newDistinctThisR06OnlyTask": 29
 }

@@ -1,0 +1,13 @@
+{
+  "sourceSha": "60c3808dc8c9dc9b08c8de0591c7bbab25234a42",
+  "runId": "fabb8d2b-b004-4f83-bf90-c1ce73906d85",
+  "passedDatabaseCases": 51,
+  "newDistinctCases": 7,
+  "repeatedCases": 44,
+  "cumulativeDistinctAcrossShas": 325,
+  "allAtCurrentHead": false,
+  "R06Accepted": false,
+  "isolationLevel": "RepeatableRead",
+  "twoIndependentPostgresSessions": true,
+  "schemaChanged": false
+}

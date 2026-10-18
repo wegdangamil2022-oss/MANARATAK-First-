@@ -1,0 +1,181 @@
+{
+  "sourceSha": "60c3808dc8c9dc9b08c8de0591c7bbab25234a42",
+  "runId": "fabb8d2b-b004-4f83-bf90-c1ce73906d85",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "targets.json",
+      "bytes": 667,
+      "sha256": "c6d2c16b289b5aefe3b47647bc78ea79d35b08789ea50a58c221d8dc3083eaf9"
+    },
+    {
+      "path": "target-preflight.log",
+      "bytes": 426,
+      "sha256": "bff4dd74ee08f992613bd67e50844d141167685c6129fb851ac940af4c9af482"
+    },
+    {
+      "path": "stage-initialize-setup.log",
+      "bytes": 3294,
+      "sha256": "1a030f2b60f6073e80206fc1a8eb35d1fbf4c016378aaa255703de283c6d37bf"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "6b71afbe4887564b5ca0baf8a9b456f448766ee11a2b63463f88b127aafe95bf"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 4095,
+      "sha256": "262b221e32d33952acb376c07a8b0be51c538b40d9140ca219be1af00057a260"
+    },
+    {
+      "path": "course-major-visibility-JRoFUL/discovery.json",
+      "bytes": 2629,
+      "sha256": "08b4610e8dda74a32a01a1f634e4cadadd2e34346d883deeaa90bcbab9252252"
+    },
+    {
+      "path": "course-major-visibility-JRoFUL/selection.json",
+      "bytes": 106,
+      "sha256": "07e1b0e65dba2ffffaad3be2d2e3980639673b96dba2c8b49ce97511cbbc3b7e"
+    },
+    {
+      "path": "course-major-visibility-JRoFUL/vitest.json",
+      "bytes": 4068,
+      "sha256": "08dcd68d2bbb345acf0d3f09880e3d08071715083bc456eabda75cb21ca431d7"
+    },
+    {
+      "path": "course-major-visibility-JRoFUL/summary.json",
+      "bytes": 856,
+      "sha256": "aa4d979b60b3b736aa78515a57a840e25820dc69267cfcd642d43ccffbada648"
+    },
+    {
+      "path": "dec01-program-pairs-NeaCdq/discovery.json",
+      "bytes": 4495,
+      "sha256": "a478d05e402da03db9089437862f2b8bc755c7692aafaaed85b71e01cc6d8e04"
+    },
+    {
+      "path": "dec01-program-pairs-NeaCdq/selection.json",
+      "bytes": 108,
+      "sha256": "b260a2d0019d1a2a74a04788ba59349159d1e2a210b7ca285502f940c9d6d1fc"
+    },
+    {
+      "path": "dec01-program-pairs-NeaCdq/vitest.json",
+      "bytes": 6457,
+      "sha256": "dc6061a4ee94938465f6d4c7c77db7f610fe951d8674449b05f58430b26d0f34"
+    },
+    {
+      "path": "dec01-program-pairs-NeaCdq/summary.json",
+      "bytes": 856,
+      "sha256": "0a6540e8d4405345f84dd0be1f7a4e2d2c8f3753baab46f5cdc37e438f120982"
+    },
+    {
+      "path": "program-language-iulAQi/discovery.json",
+      "bytes": 2420,
+      "sha256": "cf93dcc9c15b72bcf00a80bbd26b0060467da657acb206d04d23050547732225"
+    },
+    {
+      "path": "program-language-iulAQi/selection.json",
+      "bytes": 106,
+      "sha256": "07e1b0e65dba2ffffaad3be2d2e3980639673b96dba2c8b49ce97511cbbc3b7e"
+    },
+    {
+      "path": "program-language-iulAQi/vitest.json",
+      "bytes": 3752,
+      "sha256": "230d361fedcef4c83e4dbfa2e1134403ab73b1c56bc37a3e21cbc788aaf289a1"
+    },
+    {
+      "path": "program-language-iulAQi/summary.json",
+      "bytes": 849,
+      "sha256": "ee654fd5812387cdfd4c76a3818031149f1fb5324fd27f7bf1e794e40eae5470"
+    },
+    {
+      "path": "scholarship-country-semantics-tl43Gf/discovery.json",
+      "bytes": 2465,
+      "sha256": "8c9fff6afd5eb55067502c78aba1db0395849ad9fb6e179ec7f257b8eb37711a"
+    },
+    {
+      "path": "scholarship-country-semantics-tl43Gf/selection.json",
+      "bytes": 106,
+      "sha256": "355e83f494da9f75de244c5765f208065e2e6e00f0fbef27a6f306f68be1e944"
+    },
+    {
+      "path": "scholarship-country-semantics-tl43Gf/vitest.json",
+      "bytes": 3902,
+      "sha256": "124bd3f173e59d70ab2515b61c24855493d035f0890667bf91ca13284b4d133c"
+    },
+    {
+      "path": "scholarship-country-semantics-tl43Gf/summary.json",
+      "bytes": 862,
+      "sha256": "7376c11dad54143a843c6e4e27d32b65f82b1f0be20bbad96a2f79f963fd44a4"
+    },
+    {
+      "path": "scholarship-read-concurrency-dVZyKr/discovery.json",
+      "bytes": 2372,
+      "sha256": "2c47b192142dac2b9799687b9cfb7e2055bd2c57a9e56fde95702a8aa8736a84"
+    },
+    {
+      "path": "scholarship-read-concurrency-dVZyKr/selection.json",
+      "bytes": 106,
+      "sha256": "355e83f494da9f75de244c5765f208065e2e6e00f0fbef27a6f306f68be1e944"
+    },
+    {
+      "path": "scholarship-read-concurrency-dVZyKr/vitest.json",
+      "bytes": 3716,
+      "sha256": "353b3fdcdfc0c5911fd6d13c758423b71aecddc9e57d516a4d495322a879b408"
+    },
+    {
+      "path": "scholarship-read-concurrency-dVZyKr/summary.json",
+      "bytes": 861,
+      "sha256": "6bfe00c5395928ee6192c9432f5541d6b4e68d56d2e41b9ff4e2849a9ea8f07b"
+    },
+    {
+      "path": "university-relations-BOozLx/discovery.json",
+      "bytes": 2300,
+      "sha256": "cb8e73d6f1661700c57ecc433e302ad588007d9275cdd443509d88a8348d9ff8"
+    },
+    {
+      "path": "university-relations-BOozLx/selection.json",
+      "bytes": 106,
+      "sha256": "355e83f494da9f75de244c5765f208065e2e6e00f0fbef27a6f306f68be1e944"
+    },
+    {
+      "path": "university-relations-BOozLx/vitest.json",
+      "bytes": 3692,
+      "sha256": "d8317df582b5692837905eff9fd4a898a212022edbf8a40bf176f36675f39fff"
+    },
+    {
+      "path": "university-relations-BOozLx/summary.json",
+      "bytes": 853,
+      "sha256": "e4fd2ce5993853abdbdae867410f0c5dd06c52f2afdc7fba0db38471e982ddfc"
+    },
+    {
+      "path": "unit-final.json",
+      "bytes": 9318,
+      "sha256": "000954c1729623eed331c2f5dea9c039892b290827e3e98df7a3868e487a1fd6"
+    },
+    {
+      "path": "failed/native-pg16-hKeL5I/scholarship-read-concurrency-Cc2gTd/discovery.json",
+      "bytes": 2363,
+      "sha256": "dd92252682b5eeef750061397298287123f817730fc4ef352c2db6c1fc68eb1e"
+    },
+    {
+      "path": "failed/native-pg16-hKeL5I/scholarship-read-concurrency-Cc2gTd/selection.json",
+      "bytes": 106,
+      "sha256": "355e83f494da9f75de244c5765f208065e2e6e00f0fbef27a6f306f68be1e944"
+    },
+    {
+      "path": "failed/native-pg16-hKeL5I/scholarship-read-concurrency-Cc2gTd/vitest.json",
+      "bytes": 5139,
+      "sha256": "ffd4b331e52d3aa199d1753fbf9c0e323af082385cdac685f7c32fe22541b9b9"
+    },
+    {
+      "path": "result.json",
+      "bytes": 388,
+      "sha256": "10fb99e4286ed4311d1abfcdffdc1a1b096f994a56b164bce309d0127c1dfd76"
+    }
+  ]
+}
