@@ -178,5 +178,5 @@ test('learning-path fixture grants are optional four-owner-table scope without c
  assert.ok(LEARNING_PATH_FIXTURE_APPLICATION_TABLES.every(table=>!TRANSACTION_APPLICATION_TABLES.includes(table)));
  const initializer=fs.readFileSync('scripts/database/initialize-post28-transactions.mjs','utf8');
  assert.ok(initializer.includes("process.argv[2]==='--learning-path-fixtures'"));assert.ok(initializer.includes('if(learningPathFixtures)await setup.$executeRawUnsafe'));
- const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('learning-path-completion').minimumCases,3);
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('learning-path-completion').minimumCases,4);
 });

@@ -17,11 +17,11 @@ import {PrismaTransactionalOutboxStore} from '../../packages/infrastructure/src/
 import {PrismaAuditRecordRepository} from '../../packages/infrastructure/src/audit/PrismaAuditRecordRepository.ts';
 let db,paths,progress,courses,consumer;
 const atomic=client=>new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutationExecutor(new PrismaAtomicPersistenceUnitOfWork(client),new PrismaAuditRecordRepository(client),new PrismaTransactionalOutboxStore(client)));
-async function fixture(){
+async function fixture(certificateEligible=false){
  const key=fresh(),student=fresh();
  // Synthetic published native Course prerequisite; actual learning-path author transitions below.
  const c=await courses.create({publicId:key,slug:key,canonicalName:key,canonicalDedupKey:key,displayName:'Synthetic path course',accessType:'FREE_STUDY_AND_CERTIFICATE',originType:'NATIVE_MANARATAK_COURSE',directCourseUrl:'https://example.invalid/'+key,status:'PUBLISHED',completenessStatus:'COMPLETE',certificateAvailable:true});
- const p=await paths.create({title:'Synthetic path '+key,courses:[{courseId:c.id,position:1,required:true,prerequisiteCourseIds:[]}]});await paths.markReadyToPublish(p.id);await paths.publish(p.id);const enrollment=await paths.enroll(p.id,student);
+ const p=await paths.create({title:'Synthetic path '+key,certificateEligible,courses:[{courseId:c.id,position:1,required:true,prerequisiteCourseIds:[]}]});await paths.markReadyToPublish(p.id);await paths.publish(p.id);const enrollment=await paths.enroll(p.id,student);
  return {course:c.id,path:p.id,student,enrollment};
 }
 async function finish(c){await progress.enroll(c.course,c.student);await db.courseEnrollment.update({where:{courseId_studentReferenceId:{courseId:c.course,studentReferenceId:c.student}},data:{progressPercentage:100}});await progress.completeCourse(c.course,c.student);}
@@ -37,5 +37,6 @@ describe('CD028 real LearningPath completion policy and durable event',()=>{
   expect(await consumer.consume(e)).toBeNull();expect(await consumer.consume(e)).toBeNull();expect(await db.certificate.count({where:{sourceEventId:e.id}})).toBe(0);expect(await db.certificateIssuanceInbox.count({where:{eventId:e.id}})).toBe(0);
  });
  it('does not create a completion event or certificate while required Course completion is absent',async()=>{const c=await fixture();const result=await paths.refreshProgress(c.path,c.student);expect(result.status).toBe('ACTIVE');expect(result.progressPercentage).toBe(0);expect(await event(c)).toBeNull();expect(await db.certificate.count({where:{studentReferenceId:c.student}})).toBe(0);});
+ it('emits eligible completion only for an explicitly opted-in published version and still requires a governed issuer',async()=>{const c=await fixture(true);expect((await paths.get(c.path)).certificateEligible).toBe(true);await finish(c);await paths.refreshProgress(c.path,c.student);const e=await event(c);expect(e.payload.eligibleForCertificate).toBe(true);await expect(consumer.consume(e)).rejects.toThrow('ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED');expect(await db.certificate.count({where:{sourceEventId:e.id}})).toBe(0);});
  it('completes against the enrolled immutable version after the current owner points to a new version',async()=>{const c=await fixture();await finish(c);await db.learningPathVersion.create({data:{learningPathId:c.path,versionNumber:c.enrollment.learningPathVersion+1,status:'DRAFT',snapshot:{title:'Synthetic later draft',courses:[]}}});await db.learningPath.update({where:{id:c.path},data:{version:c.enrollment.learningPathVersion+1,status:'DRAFT'}});const result=await paths.refreshProgress(c.path,c.student);expect(result.status).toBe('COMPLETED');expect(result.learningPathVersion).toBe(c.enrollment.learningPathVersion);const e=await event(c);expect(e.payload.learningPathVersion).toBe(c.enrollment.learningPathVersion);expect(e.payload.eligibleForCertificate).toBe(false);expect(await consumer.consume(e)).toBeNull();});
 });
