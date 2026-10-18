@@ -102,7 +102,7 @@ describe('Post28 actual synthetic certificate owner issuance and verification wo
   for(const row of rendered.artifacts){expect(row.bytes.byteLength).toBeGreaterThan(0);fs.writeFileSync(path.join(output,row.kind.toLowerCase()+(row.kind==='PDF'?'.pdf':'.svg')),row.bytes,{flag:'wx'});}
   expect(Buffer.from(rendered.artifacts.find(row=>row.kind==='PDF').bytes).subarray(0,5).toString()).toBe('%PDF-');
   expect(Buffer.from(rendered.artifacts.find(row=>row.kind==='PREVIEW').bytes).toString()).toContain(cert.serialNumber);
-  expect((await db.certificate.findUniqueOrThrow({where:{id:cert.id}})).pdfAssetId).toBeNull();
+  expect((await db.certificate.findUniqueOrThrow({where:{id:cert.id}})).certificatePdfAssetId).toBeNull();
  });
  it('serializes two actual path consumers and replay into one certificate and immutable enrollment identity',async()=>{
   const event=await pathCompletion(),results=await Promise.all([consume(event),consume(event,otherCertificates)]);expect(results[0].id).toBe(results[1].id);expect((await consume(event)).id).toBe(results[0].id);const f=await effects(event);expect(f.rows).toHaveLength(1);expect(f.inbox).toHaveLength(1);expect(f.ledgers).toHaveLength(1);expect(f.audit).toBe(1);
