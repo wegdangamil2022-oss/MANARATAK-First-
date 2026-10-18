@@ -2,6 +2,7 @@ import {randomUUID as fresh} from 'node:crypto';
 import {beforeAll,afterAll,describe,it,expect} from 'vitest';
 import {PrismaClient} from '@prisma/client';
 import {PrismaCourseRepository} from '../../packages/infrastructure/src/courses/PrismaCourseRepository.ts';
+import {PrismaCourseRelationshipRepository} from '../../packages/infrastructure/src/courses/PrismaCourseRelationshipRepository.ts';
 let db,other;
 async function fixture(){
  const id=fresh(),provider=fresh(),language=fresh();
@@ -32,10 +33,11 @@ describe('CD040 actual two-connection Course public read snapshots',()=>{
   const [[a],[b]]=await Promise.all([db.$queryRaw`SELECT pg_backend_pid() AS pid,current_user AS role`,other.$queryRaw`SELECT pg_backend_pid() AS pid,current_user AS role`]);expect(a.role).toBe('post28_app');expect(b.role).toBe('post28_app');expect(a.pid).not.toBe(b.pid);
  });
  afterAll(async()=>{await Promise.all([db?.$disconnect(),other?.$disconnect()]);});
- for(const target of ['provider','language'])it(`keeps public card and count coherent when ${target} withdraws after selection`,async()=>{
+ for(const adapter of ['owner','relationships'])for(const target of ['provider','language'])it(`keeps ${adapter} public card and count coherent when ${target} withdraws after selection`,async()=>{
   const c=await fixture(),r=race(db,()=>target==='provider'?other.externalCourseProvider.update({where:{id:c.provider},data:{status:'SUSPENDED'}}):other.referenceLanguage.update({where:{id:c.language},data:{lifecycleState:'DEPRECATED'}}));
-  const filters={platformName:c.id};const page=await new PrismaCourseRepository(r.client).listPublished(filters);
-  expect(r.changed()).toBe(true);expect(page.data.map(x=>x.id)).toEqual([c.id]);expect(page.total).toBe(1);
-  const later=await new PrismaCourseRepository(db).listPublished(filters);expect(later.data).toEqual([]);expect(later.total).toBe(0);
+  const filters={platformName:c.id},read=client=>adapter==='owner'?new PrismaCourseRepository(client).listPublished(filters):new PrismaCourseRelationshipRepository(client).listPublishedRelatedCourses(filters);
+  const page=await read(r.client);
+  expect(r.changed()).toBe(true);expect(page.data.map(x=>adapter==='owner'?x.id:x.ownerId)).toEqual([c.id]);expect(page.total).toBe(1);
+  const later=await read(db);expect(later.data).toEqual([]);expect(later.total).toBe(0);
  });
 });
