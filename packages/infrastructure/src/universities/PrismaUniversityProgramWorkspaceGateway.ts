@@ -61,7 +61,7 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
       clauses.push(input.hasScholarships ? scholarship : Prisma.sql`NOT ${scholarship}`);
     if (publicOnly)
       clauses.push(Prisma.sql`u.status='PUBLISHED' AND p.status='ACTIVE' AND p."majorMappingState"='CANONICALLY_MAPPED'
-      AND EXISTS(SELECT 1 FROM "Major" m JOIN "MajorLevelProfile" ml ON ml."majorId"=m.id WHERE m.id=p."majorId" AND m.status='PUBLISHED' AND ml."degreeLevelId"=p."degreeLevelId" AND ml.status='PUBLISHED' AND ml."currentPublishedVersionId" IS NOT NULL)
+      AND EXISTS(SELECT 1 FROM "Major" m JOIN "MajorLevelProfile" ml ON ml."majorId"=m.id JOIN "MajorVersion" mv ON mv.id=ml."currentPublishedVersionId" AND mv."majorId"=m.id AND mv."profileId"=ml.id AND mv.status='PUBLISHED' WHERE m.id=p."majorId" AND m.status='PUBLISHED' AND ml."degreeLevelId"=p."degreeLevelId" AND ml.status='PUBLISHED')
       AND EXISTS(SELECT 1 FROM "DegreeLevel" dl WHERE dl.id=p."degreeLevelId" AND dl.status='ACTIVE')`);
     if (
       publicOnly &&
@@ -69,7 +69,7 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
         (input.studyMode && input.studyMode !== 'UNKNOWN') ||
         (input.teachingDelivery && input.teachingDelivery !== 'UNKNOWN'))
     )
-      clauses.push(Prisma.sql`s."verificationStatus"='VERIFIED'`);
+      clauses.push(Prisma.sql`s."verificationStatus"='VERIFIED' AND s."officialSourceUrl" ~* '^https://[^/@[:space:]]+([/?#]|$)'`);
     return Prisma.join(clauses, ' AND ');
   }
   async query(input: ProgramQuery, publicOnly = false) {
@@ -317,7 +317,7 @@ export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgr
         label: input.locale === 'ar' ? Prisma.sql`COALESCE(f."nameAr",f.name)` : Prisma.sql`f.name`,
         status: Prisma.sql`f."lifecycleState"`,
         extra: publicOnly
-          ? Prisma.sql`AND s."verificationStatus"='VERIFIED' AND f."isActive" AND f."lifecycleState"='ACTIVE'`
+          ? Prisma.sql`AND s."verificationStatus"='VERIFIED' AND s."officialSourceUrl" ~* '^https://[^/@[:space:]]+([/?#]|$)' AND f."isActive" AND f."lifecycleState"='ACTIVE'`
           : Prisma.empty,
       },
     };

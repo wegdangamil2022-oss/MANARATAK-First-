@@ -142,8 +142,9 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   async findPublishedBySlug(slug: string): Promise<ScholarshipDto | null> {
+    if (!this.transactionBound) return this.readSnapshot(repository=>repository.findPublishedBySlug(slug));
     const record = await this.prisma.scholarship.findFirst({
-      where: { slug, status: ScholarshipStatus.PUBLISHED, publicationStatus: ScholarshipPublicationStatus.PUBLISHED, verificationStatus: ScholarshipVerificationStatus.VERIFIED, versions: { some: { status: 'PUBLISHED' } } },
+      where: { slug, status: ScholarshipStatus.PUBLISHED, publicationStatus: ScholarshipPublicationStatus.PUBLISHED, verificationStatus: ScholarshipVerificationStatus.VERIFIED, completenessStatus:ScholarshipCompletenessState.COMPLETE, versions: { some: { status: 'PUBLISHED' } } },
       include: this.normalizedInclude,
     });
     return record ? (await this.hydrateProgramOwners([this.mapToDto(record)]))[0] : null;
@@ -559,6 +560,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   async listPublished(filters: PublicScholarshipFilters): Promise<ScholarshipPage<ScholarshipDto>> {
+    if (!this.transactionBound) return this.readSnapshot(repository=>repository.listPublished(filters));
     const where: Prisma.ScholarshipWhereInput = {
       publicationStatus: ScholarshipPublicationStatus.PUBLISHED,
       status: ScholarshipStatus.PUBLISHED,
@@ -627,6 +629,13 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       cursor: filters.cursor, limit: filters.limit, map: (record: any) => this.mapToDto(record),
     });
     return {...page, data: await this.hydrateProgramOwners(page.data)};
+  }
+
+  private async readSnapshot<T>(work:(repository:PrismaScholarshipRepository)=>Promise<T>):Promise<T> {
+    return this.prisma.$transaction(async transactionClient=> {
+      const context={boundaryId:'scholarship-public-read-snapshot-v1',transactionClient};
+      return work(new PrismaScholarshipRepository(transactionClient as PrismaClient,true,this.programReads.withTransaction(context)));
+    },{isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead});
   }
 
   private async hydrateProgramOwners(records: ScholarshipDto[]): Promise<ScholarshipDto[]> {

@@ -16,7 +16,9 @@ describe('PrismaScholarshipRepository', () => {
         count: vi.fn(),
       },
     };
+    mockPrisma.$transaction = vi.fn(async (work: (client: unknown)=>unknown)=>work(mockPrisma));
     programReads = {findByIds: vi.fn(async (ids: string[]) => ids.map(id => ({contractVersion:1 as const,id,universityId:'university-1',degreeLevelId:'degree-bachelor',majorId:'major-cs',status:'ACTIVE',publiclyEligible:true,canonicalName:id,displayName:id}))),findPublished:vi.fn(async (query: {academicProgramId?:string;universityId?:string;degreeLevelId?:string})=>[{contractVersion:1 as const,id:query.academicProgramId??'program-1',universityId:query.universityId??'university-1',degreeLevelId:query.degreeLevelId??'degree-bachelor',majorId:'major-cs',status:'ACTIVE',publiclyEligible:true,canonicalName:'program',displayName:'Program'}]),withTransaction:vi.fn()};
+    programReads.withTransaction.mockImplementation(()=>programReads);
     repository = new PrismaScholarshipRepository(mockPrisma as any, false, programReads);
   });
 
