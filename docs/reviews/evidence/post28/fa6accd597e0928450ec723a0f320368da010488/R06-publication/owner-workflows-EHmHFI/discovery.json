@@ -1,0 +1,78 @@
+[
+  {
+    "name": "Post28 R06 real student and finance owner workflows > rejects another student as consent actor and whitespace purpose without any write",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > commits canonical privacy state decision audit and outbox together through the real use case",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > stops subsequent history and analytics writes immediately after canonical consent withdrawal",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > allows one concurrent privacy CAS writer and rolls the stale writer back without duplicate evidence",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > rolls privacy decision workspace version and audit back after a real PostgreSQL precommit error",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > encrypts a private result and refuses another student even with its exact saved reference",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > rejects expired and suspended-owner private result reads against current PostgreSQL state",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > rejects cross-student collection updates and deletes without changing the owners record",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > creates an application-calculated draft with real canonical currency audit and outbox",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > replays identical invoice creation and rejects reuse with a changed request",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > replays a draft edit through its durable command receipt and rejects changed replay payload",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > issues and replays an invoice once with exact balanced ledger and one durable receipt",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > serializes competing invoice issuance requests without double posting",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > rolls invoice issuance ledger and audit back after a real PostgreSQL failure before outbox commit",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > rejects maker self-approval and checker identity substitution without a decision or version change",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > requires two distinct checkers and replays an old checker command without adding evidence",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > deduplicates concurrent retries by the same financial checker on independent connections",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > rejects a stale competing checker version without a partial decision or false quorum",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  },
+  {
+    "name": "Post28 R06 real student and finance owner workflows > rolls a checker decision version receipt and audit back after PostgreSQL precommit failure",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-workflows.database.spec.mjs"
+  }
+]

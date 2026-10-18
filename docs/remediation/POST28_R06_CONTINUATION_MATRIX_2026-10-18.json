@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 329,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 333,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 46,
+  "newDistinctThisContinuation": 50,
   "rows": [
     {
       "caseId": "CD-001",
@@ -36,7 +36,7 @@
           "scope": "Real JWT UniversityAdminRouter root geography accept/reject/If-Match/CSRF/actor proof; permission revocation denies replay. Not full university publication workflow."
         }
       ],
-      "whatRemains": "إكمال دورة الكتابة والمراجعة والنشر للجذر والمقر والوحدة مع مصفوفة API المتأثرة.",
+      "whatRemains": "Atomic University review/publish and root canonical withdrawal race proven. Still complete campus/unit owner HTTP publication chain and affected public reads.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -45,7 +45,9 @@
           "IMPLEMENTATION_OR_PROOF"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication"
+      ]
     },
     {
       "caseId": "CD-002",
@@ -102,7 +104,7 @@
           "scope": "Missing degree profile rejected in authoring. Public eligibility rejects foreign major/profile version, draft/superseded version and retired profile. Publication workflow concurrency not fully executed."
         }
       ],
-      "whatRemains": "Full publication command concurrency; current major/profile/version ownership is now enforced in University workspace SQL list/facets and tested.",
+      "whatRemains": "Major withdrawal between precheck and actual University publication is now rejected atomically; reference locks and exact current version ownership are enforced. Full program author/review/publish HTTP lifecycle and remaining withdrawal matrix still required.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -112,7 +114,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots"
+        "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
+        "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication"
       ]
     },
     {
@@ -808,7 +811,7 @@
           "scope": "Real scholarship gateway and AssetReferencePolicy/Prisma asset storage back document attestations and HTTP reviewer. Verified/rejected, CAS two-reviewer race, revoked consent/owner/cycle/asset trust, duplicate queue exclusion and actual DB outbox rollback. Stored clean evidence is synthetic; real secure delivery absent refuses open. No already-delivered storage grant revocation claim."
         }
       ],
-      "whatRemains": "خدمة فحص/تنقية/تخزين وتسليم فعلية، سحب رابط سبق تسليمه ودورة attestation كاملة؛ synthetic clean ليس دليل فحص.",
+      "whatRemains": "Six actual Defender/MuPDF/Prisma lifecycle cases remain valid preserved evidence. Still issued delivery-grant revocation, cross-student/tenant HTTP, concurrency and complete attestation lifecycle; production sanitization provider/licensing approval remains separate.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -819,7 +822,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/6e5e9691c6f5d51fb3b12a0ec7c311d1e45cff37/R06-real-pdf-20261018"
+        "docs/reviews/evidence/post28/6e5e9691c6f5d51fb3b12a0ec7c311d1e45cff37/R06-real-pdf-20261018",
+        "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication"
       ]
     },
     {
@@ -856,5 +860,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 33
+  "newDistinctThisR06OnlyTask": 37
 }
