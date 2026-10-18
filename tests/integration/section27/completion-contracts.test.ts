@@ -623,7 +623,7 @@ test('admission variant: a mutable active root variant is not proof it belonged 
     testVariant: { testId: 'test', isActive: true },
     internationalTest: {
       status: 'PUBLISHED',
-      currentPublishedVersion: { id: 'v', status: 'PUBLISHED', scoreScales: [] },
+      currentPublishedVersion: { id: 'v',testId:'test', status: 'PUBLISHED', scoreScales: [] },
     },
   };
   assert.equal(isPublicAdmissionRequirement(requirement), false);
@@ -641,7 +641,7 @@ test('admission variant: a mutable active root variant is not proof it belonged 
     true,
   );
 });
-test('private review delivery: grant is capped by both consent and original asset retention, and access leaves reminder version intact', async () => {
+test('private review delivery: authenticated path is capped by consent and original asset retention without changing reminder version', async () => {
   const deadline = new Date(Date.now() + 25000),
     item = {
       binding: { ...binding, attestation: null },
@@ -653,7 +653,7 @@ test('private review delivery: grant is capped by both consent and original asse
         status: 'ACTIVE',
       },
     };
-  let ttl = 0,
+  let deliveryConfigured = false,
     accesses = 0;
   const service = new StudentDocumentReviewUseCases(
     {
@@ -679,17 +679,15 @@ test('private review delivery: grant is capped by both consent and original asse
       }),
     } as any,
     {
-      requestDeliveryGrant: async (input: any) => {
-        ttl = input.expiresInSeconds;
-        return {
-          url: 'https://storage.example/private',
-          headers: {},
-          expiresAt: new Date(Date.now() + ttl * 1000).toISOString(),
-        };
-      },
+      assertAuthenticatedDeliveryConfigured: () => {deliveryConfigured=true;},
     } as any,
   );
   const result = await service.open('binding', 'reviewer');
+  const ttl=(Date.parse(result.delivery.expiresAt)-Date.now())/1000;
+  assert.equal(deliveryConfigured,true);
+  assert.equal(result.delivery.kind,'AUTHENTICATED_REVIEW');
+  assert.match(result.delivery.path,/^\/admin\/student-document-reviews\//);
+  assert.equal('url' in result.delivery,false);
   assert.ok(ttl > 0 && ttl <= 25);
   assert.equal(accesses, 1);
   assert.equal(result.expectedVersion, 2);
@@ -723,7 +721,7 @@ test('saved owner lifecycle: reuse of an old slug cannot silently move private h
   assert.equal(explicitNewSave.ownerId, 'new-owner');
   assert.equal(explicitNewSave.available, true);
 });
-test('private review: withdrawal during grant issuance prevents the URL from being returned', async () => {
+test('private review: withdrawal during authenticated content read prevents bytes from being returned', async () => {
   let consented = true;
   const pending = { ...binding, attestation: null },
     tracker = {
@@ -758,15 +756,15 @@ test('private review: withdrawal during grant issuance prevents the URL from bei
       }),
     } as any,
     {
-      requestDeliveryGrant: async () => {
+      assertAuthenticatedDeliveryConfigured:()=>{},
+      readAuthenticatedDelivery: async () => {
         consented = false;
         return {
-          url: 'https://storage.example/SECRET',
-          headers: {},
-          expiresAt: new Date(Date.now() + 30000).toISOString(),
+          bytes:Buffer.from('synthetic unit content'),mimeType:'application/pdf',checksumSha256:'a'.repeat(64),
         };
       },
     } as any,
   );
-  await assert.rejects(() => service.open('binding', 'reviewer'), /UNAVAILABLE/);
+  const opened=await service.open('binding','reviewer');
+  await assert.rejects(() => service.readContent('binding','reviewer',opened.expectedVersion,Date.parse(opened.delivery.expiresAt)), /UNAVAILABLE/);
 });
