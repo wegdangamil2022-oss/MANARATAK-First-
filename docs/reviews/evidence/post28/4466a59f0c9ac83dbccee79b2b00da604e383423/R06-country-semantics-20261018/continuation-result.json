@@ -1,0 +1,64 @@
+{
+  "kind": "POST28_R06_COUNTRY_SEMANTICS_CONTINUATION",
+  "date": "2026-10-18",
+  "sourceSha": "4466a59f0c9ac83dbccee79b2b00da604e383423",
+  "runId": "d6cb79af-7cc8-4180-ba35-d6e0e6f1a6db",
+  "postgresVersion": "postgres (PostgreSQL) 16.15",
+  "serverIdentity": "7698001184477545960",
+  "port": 61476,
+  "postmasterPid": 8480,
+  "formalHandoffVerification": {
+    "sourceSha": "da3f4ce100a128422b7b9c64c472a4afda14d441",
+    "status": "PASS",
+    "indexedJsonFiles": 631,
+    "historicalDistinctCases": 283,
+    "acceptedCases": 0
+  },
+  "sourceTests": {
+    "passed": 42,
+    "failed": 0,
+    "skipped": 0
+  },
+  "runtime": {
+    "executed": 11,
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0,
+    "newDistinctCases": 7,
+    "repeatedHistoricalCases": 4,
+    "cumulativeDistinctAcrossSources": 290,
+    "all290RunTogether": false
+  },
+  "CD009": {
+    "status": "PARTIAL_RUNTIME_EVIDENCE_NOT_FULL_SCENARIO",
+    "fullScenarioPassed": false,
+    "proven": [
+      "Single destination filter is independent of nationality and funding metadata",
+      "Two explicit nationality conditions survive public projection without creating multiple destinations",
+      "Country changes preserve unrelated provenance",
+      "Missing destination is not inferred",
+      "Unsupported country-filter semantics return HTTP400",
+      "Restricted application role has no schema or migration-ledger write permission"
+    ],
+    "remaining": [
+      "Canonical sponsor/funding-country owner contract and reviewed source mapping",
+      "Independent eligibility/nationality and funding-country filters across repository, HTTP, admin and built browser",
+      "Import-to-review-to-publish lifecycle with real source evidence",
+      "Full reference lifecycle and concurrency coverage",
+      "Multi-destination cardinality remains unapproved"
+    ]
+  },
+  "R05": {
+    "status": "BLOCKED",
+    "technicalApprovals": [],
+    "historicalUpgradeExecuted": false
+  },
+  "R06Accepted": false,
+  "fullRequiredCasesAccepted": 0,
+  "requiredCases": 26,
+  "requiredCasesWithPartialEvidence": 26,
+  "productionAcceptance": false,
+  "cloudMutationAuthorized": false,
+  "deploymentAuthorized": false,
+  "privateCredentialsIncluded": false
+}
