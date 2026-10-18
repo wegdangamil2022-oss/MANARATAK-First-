@@ -15,11 +15,13 @@ async function fixture(overrides={}){
  return {student,tracker,asset,id,requirementId,ownerVersionId,cycleId};
 }
 // Explicit owner/asset/delivery port fixtures: the review application and Prisma
-// repository/transactions/audit/outbox are real; cloud delivery is not tested.
-function useCases(c,onMint=async()=>{}){
+// repository/transactions/audit/outbox are real; authenticated delivery capability is a fixture here.
+// Actual local bytes and HTTP revocation are covered by attestation-closure.
+function useCases(c,onPrepare=async()=>{}){
  const scholarships={resolve:async()=>{const t=await db.studentApplicationTracker.findUnique({where:{id:c.tracker}});return {available:true,id:t.scholarshipId,cycleId:c.cycleId,ownerVersionId:c.ownerVersionId,requirements:[{id:c.requirementId}]};}};
- const assets={assertUsable:async()=>({checksum:{hash:'a'.repeat(64)},metadata:{mimeType:'application/pdf'},retention:{expiresAt:null}})};
- const lifecycle={requestDeliveryGrant:vi.fn(async()=>{await onMint();return {url:'https://storage.invalid/synthetic',headers:{},expiresAt:new Date(Date.now()+30000).toISOString()};})};
+ let observations=0;
+ const assets={assertUsable:async()=>{if(++observations===2)await onPrepare();return {checksum:{hash:'a'.repeat(64)},metadata:{mimeType:'application/pdf'},retention:{expiresAt:null}};}};
+ const lifecycle={assertAuthenticatedDeliveryConfigured:vi.fn(),requestDeliveryGrant:vi.fn()};
  return {app:new StudentDocumentReviewUseCases(repo,scholarships,assets,lifecycle),lifecycle};
 }
 async function countAudit(c){return db.auditRecord.count({where:{targetId:c.id,category:'STUDENT_DOCUMENT_REVIEW'}});}
@@ -46,10 +48,10 @@ describe('Post28 document consent with real PostgreSQL owner persistence',()=>{
   const c=await fixture();const results=await Promise.allSettled([repo.setDocumentReviewConsent(c.student,c.tracker,c.requirementId,1,false),otherRepo.setDocumentReviewConsent(c.student,c.tracker,c.requirementId,1,true)]);
   expect(results.filter(x=>x.status==='fulfilled')).toHaveLength(1);expect(String(results.find(x=>x.status==='rejected').reason)).toContain('STUDENT_APPLICATION_TRACKER_VERSION_CONFLICT');expect((await db.studentApplicationTracker.findUnique({where:{id:c.tracker}})).version).toBe(2);expect(await db.transactionalOutboxRecord.count({where:{aggregateId:c.tracker}})).toBe(1);
  });
- it('returns a delivery fixture only while current consent remains valid',async()=>{const c=await fixture(),{app,lifecycle}=useCases(c);const result=await app.open(c.id,'reviewer');expect(result.id).toBe(c.id);expect(lifecycle.requestDeliveryGrant).toHaveBeenCalledOnce();expect(await countAudit(c)).toBe(1);});
+ it('returns a delivery fixture only while current consent remains valid',async()=>{const c=await fixture(),{app,lifecycle}=useCases(c);const result=await app.open(c.id,'reviewer');expect(result.id).toBe(c.id);expect(lifecycle.assertAuthenticatedDeliveryConfigured).toHaveBeenCalledOnce();expect(lifecycle.requestDeliveryGrant).not.toHaveBeenCalled();expect(await countAudit(c)).toBe(1);});
  it('refuses returning an in-flight grant after another connection withdraws consent',async()=>{
   const c=await fixture(),{app,lifecycle}=useCases(c,()=>otherRepo.setDocumentReviewConsent(c.student,c.tracker,c.requirementId,1,false));
-  await expect(app.open(c.id,'reviewer')).rejects.toThrow('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');expect(lifecycle.requestDeliveryGrant).toHaveBeenCalledOnce();expect(await countAudit(c)).toBe(1);expect((await db.studentApplicationDocumentBinding.findUnique({where:{id:c.id}})).reviewConsentUntil).toBeNull();
+  await expect(app.open(c.id,'reviewer')).rejects.toThrow('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');expect(lifecycle.assertAuthenticatedDeliveryConfigured).toHaveBeenCalledOnce();expect(lifecycle.requestDeliveryGrant).not.toHaveBeenCalled();expect(await countAudit(c)).toBe(1);expect((await db.studentApplicationDocumentBinding.findUnique({where:{id:c.id}})).reviewConsentUntil).toBeNull();
  });
  it('rejects a later application request before minting after withdrawal',async()=>{
   const c=await fixture();await repo.setDocumentReviewConsent(c.student,c.tracker,c.requirementId,1,false);const {app,lifecycle}=useCases(c);await expect(app.open(c.id,'reviewer')).rejects.toThrow('STUDENT_DOCUMENT_REVIEW_UNAVAILABLE');expect(lifecycle.requestDeliveryGrant).not.toHaveBeenCalled();expect(await countAudit(c)).toBe(0);
