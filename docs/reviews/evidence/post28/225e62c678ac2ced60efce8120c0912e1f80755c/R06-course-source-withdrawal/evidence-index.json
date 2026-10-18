@@ -1,0 +1,131 @@
+{
+  "sourceSha": "225e62c678ac2ced60efce8120c0912e1f80755c",
+  "runId": "052b3bf2-cf0b-44a6-b45f-03a0f0366544",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "targets.json",
+      "bytes": 667,
+      "sha256": "5df9b712a83e0e0cb515f593949b043085a178097ec067215da004e12757f2c3"
+    },
+    {
+      "path": "target-preflight.log",
+      "bytes": 426,
+      "sha256": "96f323a92eea58f699fdb4c04a4b3b89d2e22c63ee2d65e1109e885b2fcecf85"
+    },
+    {
+      "path": "stage-initialize-setup.log",
+      "bytes": 3598,
+      "sha256": "e71a468074b6ae015b7234b353d9c0a5ac3f70942e2da9aa36fbfdca20d27a1e"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "3f13e3aea3a65e1d1b925ab1dbef62650712d6c46b13a213836fd9d9735ee86c"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 4458,
+      "sha256": "24f18a7776a14cabad4316be121b93210ff12e4c3c4bb2800ce9e2d2c1bbf4bb"
+    },
+    {
+      "path": "course-major-visibility-p6LPgE/discovery.json",
+      "bytes": 2629,
+      "sha256": "08b4610e8dda74a32a01a1f634e4cadadd2e34346d883deeaa90bcbab9252252"
+    },
+    {
+      "path": "course-major-visibility-p6LPgE/selection.json",
+      "bytes": 106,
+      "sha256": "07e1b0e65dba2ffffaad3be2d2e3980639673b96dba2c8b49ce97511cbbc3b7e"
+    },
+    {
+      "path": "course-major-visibility-p6LPgE/vitest.json",
+      "bytes": 4068,
+      "sha256": "64fa70e155f4e0743632e156f9bd0807051cd1acd9705774118edd6f9b3722a4"
+    },
+    {
+      "path": "course-major-visibility-p6LPgE/summary.json",
+      "bytes": 856,
+      "sha256": "2cad62ba7b27ebf6463375f14e7d32c0370f423ce37ee2b3792983f7f950f393"
+    },
+    {
+      "path": "course-read-concurrency-aIC409/discovery.json",
+      "bytes": 1331,
+      "sha256": "9e8279c0ce2128d369c827e7793a331a8b9ce25540baab7d9a58a6408e75b3db"
+    },
+    {
+      "path": "course-read-concurrency-aIC409/selection.json",
+      "bytes": 106,
+      "sha256": "fe3f92ec7f436d720a08e61934e2b6e94365fae5152a8b18482d63be57d6fe19"
+    },
+    {
+      "path": "course-read-concurrency-aIC409/vitest.json",
+      "bytes": 2436,
+      "sha256": "81572dd76a7a1e9db23227e07ada3175741df3dcdd3e68688058c4c4e402d436"
+    },
+    {
+      "path": "course-read-concurrency-aIC409/summary.json",
+      "bytes": 856,
+      "sha256": "e0d99f1d398962f251d379c2e2cceda4c3cacff01166b1ad8f290206f7536eb5"
+    },
+    {
+      "path": "dec03-free-study-lQSS2M/discovery.json",
+      "bytes": 8306,
+      "sha256": "0c52984b1b895c7d9b5beb27b6db8f1cbe549f749194e1b2684855fefa9fa6e4"
+    },
+    {
+      "path": "dec03-free-study-lQSS2M/selection.json",
+      "bytes": 108,
+      "sha256": "0d9086a4318f266d0fa9a0b54ec63244599f50cc0627db0a06f2bf0936059873"
+    },
+    {
+      "path": "dec03-free-study-lQSS2M/vitest.json",
+      "bytes": 11432,
+      "sha256": "4499528626baead6babc2fe49192fdfda11b914b42149838cfe2d8e77007db11"
+    },
+    {
+      "path": "dec03-free-study-lQSS2M/summary.json",
+      "bytes": 853,
+      "sha256": "c21787c37d848cab7b77638e6d0445e66d4586c6a21d9d63e08453e4202220ba"
+    },
+    {
+      "path": "earlier-test-parse-failure.json",
+      "bytes": 113789,
+      "sha256": "b83e9b3228d0f016cafedae471b8f0133733f9e83324e87ab89fae82aa7713c2"
+    },
+    {
+      "path": "types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "unit-tests.json",
+      "bytes": 117277,
+      "sha256": "69240bae01f7c860c377a5790948df3e5bc72ce8f7998e0320beb5f24bc9931f"
+    },
+    {
+      "path": "selection-tests.log",
+      "bytes": 2072,
+      "sha256": "cf558519ac4322f2cf63a46c2d79f49979fa577c519cb6cc0cfc3c460dab73cc"
+    },
+    {
+      "path": "earlier-unit-failures.json",
+      "bytes": 123083,
+      "sha256": "141603c96261e67532ab61ec829912aac3cf20f9007b96692cafd851e8bdd9cd"
+    },
+    {
+      "path": "quality.log",
+      "bytes": 384,
+      "sha256": "eec55ba731573ad76875e3cff714bdc27a87514146f57511d67392efccd7ee81"
+    },
+    {
+      "path": "result.json",
+      "bytes": 398,
+      "sha256": "bfac303ed35ae2509b428e71e609088f03e34727d6be20d233dd5cf6a7d57c5b"
+    }
+  ]
+}
