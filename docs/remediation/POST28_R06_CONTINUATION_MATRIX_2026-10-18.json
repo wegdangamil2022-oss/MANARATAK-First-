@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 451,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 457,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 168,
+  "newDistinctThisContinuation": 174,
   "rows": [
     {
       "caseId": "CD-001",
@@ -918,5 +918,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 155
+  "newDistinctThisR06OnlyTask": 161
 }
