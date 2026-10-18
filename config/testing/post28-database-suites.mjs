@@ -13,7 +13,7 @@ export const DATABASE_SUITES = Object.freeze({
   'dec05-owner-atomic': {files: ['tests/database/post28-dec05-owner-atomic.database.spec.mjs'],minimumCases:8},
   'dec01-program-pairs': {files: ['tests/database/post28-dec01-program-pairs.database.spec.mjs'],minimumCases:14},
   'dec05-taxonomy-invalidation': {files: ['tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs'],minimumCases:6},
-  'dec03-free-study': {files: ['tests/database/post28-dec03-free-study.database.spec.mjs'],minimumCases:12},
+  'dec03-free-study': {files: ['tests/database/post28-dec03-free-study.database.spec.mjs'],minimumCases:16},
   'finance-local-closure': {files: ['tests/database/post28-finance-local-closure.database.spec.mjs'],minimumCases:14},
   'reference-import-closure': {files: ['tests/database/post28-reference-import-closure.database.spec.mjs'],minimumCases:18},
   'finance-provider-safety': {files: ['tests/database/post28-finance-provider-safety.database.spec.mjs'],minimumCases:6},

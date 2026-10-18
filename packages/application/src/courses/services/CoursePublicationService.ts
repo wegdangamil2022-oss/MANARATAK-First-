@@ -117,6 +117,18 @@ export class CoursePublicationService {
       if (!current || current.status !== CourseStatus.READY_TO_PUBLISH || current.version !== course.version) {
         throw new Error('COURSE_PUBLICATION_STATE_CHANGED');
       }
+      if (!tx.lockPublicationReferences) throw new Error('COURSE_PUBLICATION_REFERENCE_LOCK_REQUIRED');
+      await tx.lockPublicationReferences(course.id);
+      if (this.relationshipRepository && !this.relationshipRepository.withTransaction)
+        throw new Error('COURSE_RELATIONSHIP_TRANSACTION_REQUIRED');
+      if (this.importedOperations && !this.importedOperations.withTransaction)
+        throw new Error('COURSE_SOURCE_TRANSACTION_REQUIRED');
+      await new CoursePublicationService(
+        tx,
+        this.importedOperations?.withTransaction?.(persistence),
+        undefined,
+        this.relationshipRepository?.withTransaction?.(persistence),
+      ).assertPublicationReady(current);
       await tx.updateStatus(course.id, CourseStatus.PUBLISHED);
     });
   }

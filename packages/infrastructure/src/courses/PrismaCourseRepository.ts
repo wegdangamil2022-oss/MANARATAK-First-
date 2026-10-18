@@ -186,6 +186,17 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     if (rows[0].version !== expectedVersion) throw new Error('COURSE_STALE_VERSION');
   }
 
+  public async lockPublicationReferences(id: string): Promise<void> {
+    if (!this.transactionBound) throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
+    // The caller already holds the Course revision lock. Lock parents before
+    // their dependent evidence, then reread readiness on this transaction.
+    await this.prisma.$queryRaw`SELECT id FROM "ExternalCourseProvider" WHERE id IN (SELECT "externalProviderId" FROM "Course" WHERE id=${id}) ORDER BY id FOR SHARE`;
+    await this.prisma.$queryRaw`SELECT id FROM "ExternalCourseProviderDomain" WHERE "providerId" IN (SELECT "externalProviderId" FROM "Course" WHERE id=${id}) ORDER BY id FOR SHARE`;
+    await this.prisma.$queryRaw`SELECT id FROM "ReferenceLanguage" WHERE id IN (SELECT "learningLanguageReferenceId" FROM "Course" WHERE id=${id}) ORDER BY id FOR SHARE`;
+    await this.prisma.$queryRaw`SELECT id FROM "CourseSourceIdentity" WHERE "courseId"=${id} ORDER BY id FOR SHARE`;
+    await this.prisma.$queryRaw`SELECT id FROM "CourseSourceUrlHistory" WHERE "courseSourceIdentityId" IN (SELECT id FROM "CourseSourceIdentity" WHERE "courseId"=${id}) ORDER BY id FOR SHARE`;
+  }
+
   public async create(data: CreateCourseDto): Promise<CourseDto> {
     return this.withVersionTransaction(async db => {
       const record = await db.course.create({

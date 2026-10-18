@@ -67,6 +67,7 @@ export interface UpdateCourseDto {
 
 export interface ICourseRepository {
   assertCurrentVersion?(id: string, expectedVersion: number): Promise<void>;
+  lockPublicationReferences?(id: string): Promise<void>;
   create(data: CreateCourseDto): Promise<CourseDto>;
   update(id: string, data: UpdateCourseDto): Promise<CourseDto>;
   findByDedupKey(dedupKey: string): Promise<CourseDto | null>;
