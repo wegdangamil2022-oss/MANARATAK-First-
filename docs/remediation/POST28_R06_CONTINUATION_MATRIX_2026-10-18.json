@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 306,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 310,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 23,
+  "newDistinctThisContinuation": 27,
   "rows": [
     {
       "caseId": "CD-001",
@@ -219,7 +219,7 @@
           "scope": "Same owner program proves degree-major pair in real public HTTP filtering before count and pagination; invalid/unresolved/foreign-owner and obsolete/mismatched version rejected. Dashboard, final UI and full owner workflow not accepted."
         }
       ],
-      "whatRemains": "إسقاط الأزواج في تفاصيل المنحة والإدارة والواجهة النهائية ودورة المالك.",
+      "whatRemains": "Built-browser verification of exact pairs and full owner publication lifecycle; derived details/admin code and interactive component are implemented and tested.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -228,7 +228,9 @@
           "IMPLEMENTATION_OR_PROOF"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/1ea67d54555c17ce725483a087a404dc113088d0/R06-pairs"
+      ]
     },
     {
       "caseId": "CD-008",
@@ -244,7 +246,7 @@
           "scope": "Same owner program proves degree-major pair in real public HTTP filtering before count and pagination; invalid/unresolved/foreign-owner and obsolete/mismatched version rejected. Dashboard, final UI and full owner workflow not accepted."
         }
       ],
-      "whatRemains": "تطابق البحث والتفاصيل والإدارة/الفلاتر، والتحولات المتزامنة خلال القراءة.",
+      "whatRemains": "Concurrent owner/reference transitions during read and built-browser filter/details parity; sequential HTTP/list/count/withdrawal proof passed.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -253,7 +255,9 @@
           "IMPLEMENTATION_OR_PROOF"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/1ea67d54555c17ce725483a087a404dc113088d0/R06-pairs"
+      ]
     },
     {
       "caseId": "CD-009",
@@ -843,5 +847,5 @@
       "newEvidence": []
     }
   ],
-  "newDistinctThisR06OnlyTask": 10
+  "newDistinctThisR06OnlyTask": 14
 }

@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > matches an explicit funded program without requiring duplicated independent targets",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > rejects Cartesian pairs even when both independent target lists contain the requested values",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > keeps each explicitly funded pair with exact API counts",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > rejects a major inconsistent with the explicitly requested program",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > does not use a university-only link as evidence of a funded degree major pair",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > withdraws paired filter eligibility when the published profile version is withdrawn",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > rejects a foreign university link despite valid individual foreign keys and target lists",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > does not infer pairs from independent targets when the program relationship is unresolved",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > filters exact pairs before cursor pagination and preserves totals across two pages",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > rejects a current profile version belonging to a different major and profile despite valid foreign keys",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > projects only the two actual funded pairs in details and list, never their Cartesian product",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > withdraws the details pair immediately when its program is inactive, retaining no legacy substitute",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > withdraws the details pair immediately when its major proof is withdrawn",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC01 exact funded degree major program pairs > excludes foreign-university and unresolved program links from the details pairs",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec01-program-pairs.database.spec.mjs"
+  }
+]
