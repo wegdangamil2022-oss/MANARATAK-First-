@@ -1,0 +1,16 @@
+{
+  "sourceSha": "48102fc653314f2bc49308b62301a21305a2bf2c",
+  "runId": "d2a10a0a-24e6-47bd-815e-73a01968e397",
+  "passedDatabaseCases": 29,
+  "newDistinctCases": 8,
+  "repeatedCases": 21,
+  "cumulativeDistinctAcrossShas": 318,
+  "allAtCurrentHead": false,
+  "R06Accepted": false,
+  "unitPassed": 19,
+  "setupMigrations": 110,
+  "appDmlTables": 85,
+  "ddlGranted": false,
+  "migrationLedgerGranted": false,
+  "schemaChanged": false
+}

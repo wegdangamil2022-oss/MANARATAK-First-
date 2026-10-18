@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 310,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 318,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 27,
+  "newDistinctThisContinuation": 35,
   "rows": [
     {
       "caseId": "CD-001",
@@ -531,7 +531,7 @@
           "scope": "Provider headquarters has no derived study country; active canonical language review, rejects inactive/deprecated reference; raw labels excluded, card/list/relationship HTTP and publication guard withdraw deprecated language. No teaching-market DEC-07 acceptance."
         }
       ],
-      "whatRemains": "تطابق لغة البرنامج الأكاديمي متعددة اللغات وفلاتر المنحة/الواجهة؛ أسواق الإطلاق قرار نطاق مستقل.",
+      "whatRemains": "Full University owner author/review/publish and HTTP/built-browser language/filter parity, concurrent transition consistency; actual canonical program read and scholarship HTTP/list/count multilanguage and withdrawal are proven. Launch markets remain a separate owner scope decision.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -541,7 +541,9 @@
           "LAUNCH_MARKET_SCOPE"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/48102fc653314f2bc49308b62301a21305a2bf2c/R06-languages"
+      ]
     },
     {
       "caseId": "CD-019",
@@ -847,5 +849,5 @@
       "newEvidence": []
     }
   ],
-  "newDistinctThisR06OnlyTask": 14
+  "newDistinctThisR06OnlyTask": 22
 }
