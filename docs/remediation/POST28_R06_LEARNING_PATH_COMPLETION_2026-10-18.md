@@ -1,0 +1,13 @@
+# R06 actual LearningPath completion and certificate eligibility boundary
+
+Source 51b0e139c0356c318121a25b72232c7663cfce59; run 29d5ed39-41c3-42f5-99c9-b534588ab72f; PostgreSQL postgres (PostgreSQL) 16.15, system 7698093792751671604.
+
+Three actual PostgreSQL cases exercise path author creation, review, publication and enrollment through existing application use cases and real Prisma repositories. A synthetic native published Course prerequisite is completed through actual CourseProgressUseCases and its atomic coordinator. The path then completes through LearningPathUseCases with one owner audit and durable LearningPathCompleted event. Its current producer sets eligibleForCertificate:false unconditionally; the real CertificateCompletionEventConsumer deliberately returns null on repeated delivery, creating neither certificate nor inbox. This proves the current non-credential contract, not successful path credential issuance. Partial progress creates no completion event. A later-current-draft fixture proves refresh retains the original enrolled version.
+
+The first run passes1/3 because the test wrongly assumes publication remains version1 and attempts to create an already existing version2. Actual review/publication each append a version. Assertions and later-version fixture now derive from the persisted enrollment version; original failed evidence is retained. No production version behavior is changed.
+
+A new explicit --learning-path-fixtures initializer flag adds only four existing owner tables to this new disposable lab: LearningPath,LearningPathVersion,LearningPathCourse,LearningPathEnrollment. Default91 DML tables and optional certificate/course scopes remain separate. No certificate issuance DML, migration ledger or DDL grants are added. Provisioning36 and source quality pass,110 migration checksums match, schema diff0.
+
+The code supports eligible path certificate consumption, but neither the path model nor author DTO defines governed eligibility; making all completions true would invent product policy. The separate decision artifact recommends explicit future-version opt-in, default false, preserving historic enrollments/events. Any schema implementation remains subject to R04/R05 gates. Other R06 work continues independently. R05/R07 are unchanged; no scenario is fully accepted.
+
+Evidence: docs/reviews/evidence/post28/51b0e139c0356c318121a25b72232c7663cfce59/R06-learning-path-completion/evidence-index.json. Actual database cases: 3 passed, zero failed/skipped in final runs. New distinct 3; repeats 0; cumulative 437 across SHAs, not one current-head acceptance run. R06 remains 0/26 accepted.

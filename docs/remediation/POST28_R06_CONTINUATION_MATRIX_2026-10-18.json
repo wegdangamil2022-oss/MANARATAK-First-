@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 434,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 437,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 151,
+  "newDistinctThisContinuation": 154,
   "rows": [
     {
       "caseId": "CD-001",
@@ -690,7 +690,7 @@
           "scope": "Real CourseProgressUseCases enrollment/completion audit/outbox commit, retry/concurrency and SQLSTATE22012 rollback. External-linked enrollment/completion and certificate claims refused. P14 real consumer/gateway/worker acknowledges noncredential event and retries native eligible events lacking approved template; no certificate issued or inbox invented."
         }
       ],
-      "whatRemains": "Successful actual synthetic maker/checker issuer/template lifecycle, authoritative course event issuance, inbox replay/concurrency, rollback, local signature public HTTP verification/revocation and authority withdrawal race proven. Still learning-path completion and real rendered artifact attachment/delivery/recovery; production signer/renderer approvals separate.",
+      "whatRemains": "Actual path create/review/publish/enroll/native Course completion now yields one pinned-version LearningPathCompleted event and deliberate no-op Certificate consumer replay because producer hardcodes eligibleForCertificate:false. Partial progress emits no completion. Successful credential-bearing path issuance needs explicit owner eligibility policy and any reviewed schema gates, not blanket true or rewritten historical events. Course issuance8 remains proven; rendered artifact attachment/delivery/recovery and production signer/renderer approvals remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -702,7 +702,8 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/6ad9dc526147315bcacb57a54892a6e7199b5713/R06-certificate-locks",
-        "docs/reviews/evidence/post28/a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5/R06-certificate-runtime"
+        "docs/reviews/evidence/post28/a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5/R06-certificate-runtime",
+        "docs/reviews/evidence/post28/51b0e139c0356c318121a25b72232c7663cfce59/R06-learning-path-completion"
       ]
     },
     {
@@ -912,5 +913,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 138
+  "newDistinctThisR06OnlyTask": 141
 }

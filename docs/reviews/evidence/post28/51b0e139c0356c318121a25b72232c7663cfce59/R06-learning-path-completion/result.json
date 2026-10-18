@@ -1,0 +1,13 @@
+{
+  "sourceSha": "51b0e139c0356c318121a25b72232c7663cfce59",
+  "runId": "29d5ed39-41c3-42f5-99c9-b534588ab72f",
+  "passedDatabaseCases": 3,
+  "newDistinctCases": 3,
+  "repeatedCases": 0,
+  "cumulativeDistinctAcrossShas": 437,
+  "allAtCurrentHead": false,
+  "R06Accepted": false,
+  "provisioningUnitPassed": 36,
+  "schemaChanged": false,
+  "productionEligibilityChanged": false
+}
