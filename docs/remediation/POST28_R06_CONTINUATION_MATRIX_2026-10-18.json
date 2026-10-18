@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 389,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 394,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 106,
+  "newDistinctThisContinuation": 111,
   "rows": [
     {
       "caseId": "CD-001",
@@ -77,7 +77,7 @@
           "scope": "Explicit injection-reached assertion plus Prisma P2010/meta SQLSTATE22012; owner/approval and audit/outbox rollback. Two already counted cases, no new distinct count."
         }
       ],
-      "whatRemains": "New root/campus/faculty author-review-publication lifecycle and stable campus/unit ownership are proven via actual HTTP. Full canonical AcademicProgram author/review/publish and parent withdrawal HTTP/reverse graph remain.",
+      "whatRemains": "Actual authenticated canonical program create/publication/public detail and major-filter count, explicit unpublish/archive/republish, foreign campus/faculty rejection, mismatched Major/degree rejection and one-winner owner revision HTTP concurrency proven. Major/Profile/Version are explicit synthetic historical fixtures, not independently authored/approved Major workflows. Dynamic reference withdrawal graph, broader workspace languages and owning-phase browser gates remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -87,7 +87,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/9e9b09408bd1feb081ad94b37df4d4989e092e33/R06-university-author"
+        "docs/reviews/evidence/post28/9e9b09408bd1feb081ad94b37df4d4989e092e33/R06-university-author",
+        "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author"
       ]
     },
     {
@@ -871,7 +872,7 @@
           "scope": "Current canonical test version and language withdrawal affect next actual public request/list; no full multi-page parent/reference lifecycle matrix or snapshot/pagination consistency acceptance."
         }
       ],
-      "whatRemains": "Adds actual course language/provider approval withdrawal across public detail/list/count and CMS, with no-store HTTP. Domain-allowlist withdrawal and wider graph/cache/JWT mutation race matrix remain.",
+      "whatRemains": "Command identity serializable conflicts now retry whole aborted transactions (five attempts max), preserving serializable isolation and durable replay. Actual same-owner HTTP revision race and same-key creation convergence pass. Full dynamic published parent withdrawal/detail/list/CMS and snapshot consistency matrix remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -884,9 +885,10 @@
         "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
         "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
         "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
-        "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source"
+        "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source",
+        "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author"
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 93
+  "newDistinctThisR06OnlyTask": 98
 }
