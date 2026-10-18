@@ -1,5 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
-  'student-document-http': {files:['tests/database/post28-student-document-http.database.spec.mjs'],minimumCases:14},
+  'student-document-http': {files:['tests/database/post28-student-document-http.database.spec.mjs'],minimumCases:18},
   'course-read-concurrency': {files:['tests/database/post28-course-read-concurrency.database.spec.mjs'],minimumCases:4},
   'university-read-concurrency': {files:['tests/database/post28-university-read-concurrency.database.spec.mjs'],minimumCases:4},
   'real-course-source': {files: ['tests/database/post28-real-course-source.database.spec.mjs'],minimumCases:7},
