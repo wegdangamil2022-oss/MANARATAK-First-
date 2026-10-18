@@ -1,0 +1,14 @@
+{
+  "sourceSha": "1494b36591f057047dfac2b222c767925be1b386",
+  "node": "v22.16.0",
+  "kind": "SOURCE_UNIT_AND_RECORDED_ROW_REPLAY",
+  "passed": 17,
+  "failed": 0,
+  "skipped": 0,
+  "newPostgresRuns": 0,
+  "actualRecordProvenanceSourceSha": "6e5e9691c6f5d51fb3b12a0ec7c311d1e45cff37",
+  "historicalRemediationExecuted": false,
+  "upgradeAuthorized": false,
+  "technicalDecisionApproved": false,
+  "reviewAuthority": "User explicitly documented holding technical authority for Assets, Student and Audit; said they will review decision."
+}
