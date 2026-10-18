@@ -14,7 +14,7 @@ export function verifyEvidenceIndex(indexFile,{gitRef,root=process.cwd()}={}) {
   seen.add(entry.path);
   const file=path.resolve(base,entry.path);
   if(!file.startsWith(base+path.sep)||fs.realpathSync(file)!==file||fs.lstatSync(file).isSymbolicLink())throw Error('EVIDENCE_PATH_UNSAFE');
-  const bytes=gitRef?execFileSync('git',['show',gitRef+':'+path.relative(root,file).replaceAll('\\','/')],{cwd:root,maxBuffer:32*1024*1024}):fs.readFileSync(file);
+  const bytes=gitRef?execFileSync('git',['show',(gitRef===':'?'':gitRef)+':'+path.relative(root,file).replaceAll('\\','/')],{cwd:root,maxBuffer:32*1024*1024}):fs.readFileSync(file);
   if(bytes.length!==entry.bytes||createHash('sha256').update(bytes).digest('hex')!==entry.sha256)throw Error('EVIDENCE_BYTES_MISMATCH: '+entry.path);
  }
  return {files:seen.size,sourceSha:index.sourceSha,gitRef:gitRef??null,readOnly:true};
