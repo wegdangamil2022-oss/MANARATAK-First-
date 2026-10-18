@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 325,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 329,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 42,
+  "newDistinctThisContinuation": 46,
   "rows": [
     {
       "caseId": "CD-001",
@@ -268,7 +268,7 @@
       "status": "PARTIAL_NOT_ACCEPTED",
       "fullScenarioPassed": false,
       "historicalEvidence": [],
-      "whatRemains": "فصل مصادر وحقول الدراسة والجنسية والتمويل وفلاترها؛ لا استنتاج جنسية من وجهة؛ تعدد الوجهات غير معتمد.",
+      "whatRemains": "Canonical funding-country data/source contract requires reviewed schema decision and R04/R05 gates; then implement owner/import/API filters and prove publication/rollback. Built-browser parity remains. Study destination and explicit canonical nationality inclusion/exclusion/source labels and separate donor filter are implemented and proven.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -279,7 +279,8 @@
         ]
       },
       "newEvidence": [
-        "docs/remediation/POST28_R06_COUNTRY_SEMANTICS_2026-10-18.md"
+        "docs/remediation/POST28_R06_COUNTRY_SEMANTICS_2026-10-18.md",
+        "docs/reviews/evidence/post28/f29504b5ac830ba54df7c02c501118c6e78c402a/R06-country-contract"
       ]
     },
     {
@@ -855,5 +856,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 29
+  "newDistinctThisR06OnlyTask": 33
 }
