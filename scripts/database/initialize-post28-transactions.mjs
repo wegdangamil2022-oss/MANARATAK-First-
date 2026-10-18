@@ -12,9 +12,10 @@ import {requireDatabaseMutationGate} from '../lib/database-mutation-gate.mjs';
 import {digest,migrationInventory,verifyMigrationLedger} from './post28-migration-inventory.mjs';
 const fail=code=>{throw new Error(code);};
 try{
- const certificateFixtures=process.argv.length===3&&process.argv[2]==='--certificate-fixtures';
+ const credentialFixtures=process.argv.length===3&&process.argv[2]==='--learning-path-certificate-fixtures';
+ const certificateFixtures=(process.argv.length===3&&process.argv[2]==='--certificate-fixtures')||credentialFixtures;
  const courseFixtures=process.argv.length===3&&process.argv[2]==='--course-fixtures';
- const learningPathFixtures=process.argv.length===3&&process.argv[2]==='--learning-path-fixtures';
+ const learningPathFixtures=(process.argv.length===3&&process.argv[2]==='--learning-path-fixtures')||credentialFixtures;
  if((process.argv.length!==2&&!certificateFixtures&&!courseFixtures&&!learningPathFixtures)||Number(process.versions.node.split('.')[0])!==22)fail('POST28_NODE22_REQUIRED');
  const root=fs.realpathSync(process.cwd()),sourceSha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
  if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())fail('POST28_CLEAN_SOURCE_REQUIRED');

@@ -16,6 +16,8 @@ import {PrismaCourseRepository} from '../../packages/infrastructure/src/courses/
 import {PrismaCourseCurriculumRepository} from '../../packages/infrastructure/src/courses/PrismaCourseCurriculumRepository.ts';
 import {PrismaCourseProgressRepository} from '../../packages/infrastructure/src/courses/PrismaCourseProgressRepository.ts';
 import {CourseProgressUseCases} from '../../packages/application/src/courses/use-cases/CourseProgressUseCases.ts';
+import {LearningPathUseCases} from '../../packages/application/src/courses/use-cases/LearningPathUseCases.ts';
+import {PrismaLearningPathRepository} from '../../packages/infrastructure/src/courses/PrismaLearningPathRepository.ts';
 import {AtomicDomainMutationCoordinator} from '../../packages/application/src/event-foundation/use-cases/AtomicDomainMutationCoordinator.ts';
 import {AtomicAuditedOutboxMutationExecutor} from '../../packages/application/src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor.ts';
 import {PrismaAtomicPersistenceUnitOfWork} from '../../packages/infrastructure/src/event-foundation/PrismaAtomicPersistenceUnitOfWork.ts';
@@ -26,7 +28,7 @@ let db,other,certificates,otherCertificates,repository,issuer,template,app,autho
 const keyReference='lab-hmac://post28-synthetic-certificate',secret=randomBytes(32).toString('hex');
 const maker='POST28_SYNTHETIC_AUTHOR',checker='POST28_SYNTHETIC_REVIEWER';
 const context=(actorId,patch={})=>({actorId,reason:'Synthetic isolated owner workflow; not project technical approval',correlationId:fresh(),...patch});
-function facade(client){return new CertificateUseCases(new PrismaCertificateRepository(client),new PrismaCourseRepository(client),new PrismaAssetRecordRepository(client),{signingSecret:secret,signingKeyReference:keyReference,productionLike:false,publicVerificationBaseUrl:'http://localhost:5173'},undefined,undefined,new PrismaCourseCurriculumRepository(client));}
+function facade(client){return new CertificateUseCases(new PrismaCertificateRepository(client),new PrismaCourseRepository(client),new PrismaAssetRecordRepository(client),{signingSecret:secret,signingKeyReference:keyReference,productionLike:false,publicVerificationBaseUrl:'http://localhost:5173'},new PrismaLearningPathRepository(client),undefined,new PrismaCourseCurriculumRepository(client));}
 
 // Inert synthetic historical trust fixtures. Bytes are materialized and hashed;
 // no fresh antivirus/sanitizer run or production issuer approval is represented.
@@ -46,6 +48,12 @@ async function completion(){
  return db.transactionalOutboxRecord.findFirstOrThrow({where:{aggregateId:id+':'+student,eventType:'CourseCompleted'}});
 }
 const consume=(event,facade=certificates)=>new CertificateCompletionEventConsumer(facade).consume(event);
+async function pathCompletion(){
+ const completed=await completion(),{courseId,studentReferenceId}=completed.payload;
+ const paths=new LearningPathUseCases(new PrismaLearningPathRepository(db),new PrismaCourseRepository(db),new PrismaCourseProgressRepository(db),new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutationExecutor(new PrismaAtomicPersistenceUnitOfWork(db),new PrismaAuditRecordRepository(db),new PrismaTransactionalOutboxStore(db))));
+ const path=await paths.create({title:'Synthetic credential path '+fresh(),certificateEligible:true,courses:[{courseId,position:1,required:true,prerequisiteCourseIds:[]}]});await paths.markReadyToPublish(path.id);await paths.publish(path.id);const enrollment=await paths.enroll(path.id,studentReferenceId);await paths.refreshProgress(path.id,studentReferenceId);
+ const event=await db.transactionalOutboxRecord.findFirstOrThrow({where:{aggregateId:enrollment.id,eventType:'LearningPathCompleted'}});expect(event.payload.eligibleForCertificate).toBe(true);return event;
+}
 async function effects(event){const rows=await db.certificate.findMany({where:{sourceEventId:event.id}});return {rows,inbox:await db.certificateIssuanceInbox.findMany({where:{eventId:event.id}}),ledgers:rows.length?await db.certificateLedgerEntry.findMany({where:{certificateId:rows[0].id}}):[],audit:rows.length?await db.auditRecord.count({where:{targetId:rows[0].id}}):0};}
 const verify=cert=>request(app).get('/certificates/verify/'+cert.verificationCode);
 
@@ -77,6 +85,12 @@ describe('Post28 actual synthetic certificate owner issuance and verification wo
   const event=await completion(),cert=await consume(event),f=await effects(event);expect(cert.status).toBe('ACTIVE');expect(cert.expiresAt.getTime()-cert.issuedAt.getTime()).toBe(180*86400000);expect(cert.digitalSignature).toMatch(/^[a-f0-9]{64}$/);expect(f.rows).toHaveLength(1);expect(f.inbox).toHaveLength(1);expect(f.ledgers.map(x=>x.action)).toEqual(['ISSUED']);expect(f.audit).toBe(1);
   expect(await db.transactionalOutboxRecord.count({where:{aggregateId:cert.id,eventType:'CertificateIssued'}})).toBe(1);expect(await db.transactionalOutboxRecord.count({where:{aggregateId:cert.id,eventType:'CertificateRenderRequested'}})).toBe(1);
   expect(await certificates.readiness()).toMatchObject({artifactRendererRuntimeReady:false,artifactRendererStatus:'NOT_CONFIGURED'});
+ });
+ it('issues a locally signed path certificate only from actual opted-in published path completion',async()=>{
+  const event=await pathCompletion(),cert=await consume(event),f=await effects(event);expect(cert.certificateType).toBe('LEARNING_PATH');expect(cert.learningPathId).toBe(event.payload.learningPathId);expect(cert.learningPathCompletionId).toBe(event.id);expect(cert.digitalSignature).toMatch(/^[a-f0-9]{64}$/);expect(f.rows).toHaveLength(1);expect(f.inbox).toHaveLength(1);expect(f.ledgers.map(x=>x.action)).toEqual(['ISSUED']);expect(f.audit).toBe(1);expect(await db.transactionalOutboxRecord.count({where:{aggregateId:cert.id,eventType:'CertificateRenderRequested'}})).toBe(1);const result=await verify(cert);expect(result.status,result.text).toBe(200);expect(result.text).not.toContain(event.payload.studentReferenceId);
+ });
+ it('serializes two actual path consumers and replay into one certificate and immutable enrollment identity',async()=>{
+  const event=await pathCompletion(),results=await Promise.all([consume(event),consume(event,otherCertificates)]);expect(results[0].id).toBe(results[1].id);expect((await consume(event)).id).toBe(results[0].id);const f=await effects(event);expect(f.rows).toHaveLength(1);expect(f.inbox).toHaveLength(1);expect(f.ledgers).toHaveLength(1);expect(f.audit).toBe(1);
  });
  it('serializes independent consumers and repeated delivery into one persisted certificate and inbox',async()=>{
   const event=await completion(),results=await Promise.all([consume(event),consume(event,otherCertificates)]);expect(results[0].id).toBe(results[1].id);expect((await consume(event)).id).toBe(results[0].id);const f=await effects(event);expect(f.rows).toHaveLength(1);expect(f.inbox).toHaveLength(1);expect(f.ledgers).toHaveLength(1);expect(f.audit).toBe(1);
