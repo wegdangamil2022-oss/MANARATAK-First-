@@ -45,8 +45,11 @@ try{
   const quoted=names=>names.map(n=>'public."'+n+'"').join(',');
   await setup.$executeRawUnsafe('GRANT SELECT ON '+quoted(models)+' TO post28_app');
   await setup.$executeRawUnsafe('GRANT INSERT,UPDATE,DELETE ON '+quoted(TRANSACTION_APPLICATION_TABLES)+' TO post28_app');
+  // SELECT FOR UPDATE requires UPDATE privilege even for an absent reference.
+  // No INSERT/DELETE or issuance approval capability is granted on these owners.
+  await setup.$executeRawUnsafe('GRANT UPDATE ON public."CertificateTemplate",public."CertificateIssuer" TO post28_app');
  }finally{await setup.$disconnect();}
  const finalIdentity=await preflightTargets(contract,[{label:'DB-T',url:process.env.DATABASE_URL}],process.env,sourceSha,readDatabaseIdentity,{requireValidatedCatalog:true});
- const result={kind:'POST28_R06_LOCAL_DB_T_SETUP',sourceSha,runId:contract.runId,authorization,identities,finalIdentity,ledger,applicationReadTables:281,applicationWriteTables:TRANSACTION_APPLICATION_TABLES,ledgerGranted:false,DDLGranted:false,schemaDiffExitCode:0,R06Accepted:false};
+ const result={kind:'POST28_R06_LOCAL_DB_T_SETUP',sourceSha,runId:contract.runId,authorization,identities,finalIdentity,ledger,applicationReadTables:281,applicationUpdateOnlyReferenceLockTables:['CertificateTemplate','CertificateIssuer'],applicationWriteTables:TRANSACTION_APPLICATION_TABLES,ledgerGranted:false,DDLGranted:false,schemaDiffExitCode:0,R06Accepted:false};
  fs.writeFileSync(path.join(directory,'result.json'),JSON.stringify(result,null,2)+'\n',{mode:0o600});console.log(JSON.stringify(result));
 }catch(error){console.error(error.message?.match(/^POST28_[A-Z_]+$/)?.[0]??'POST28_TRANSACTION_SETUP_FAILED');process.exitCode=1;}

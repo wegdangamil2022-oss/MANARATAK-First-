@@ -550,7 +550,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async recordVerification(certificateId: string, result: string, channel: string): Promise<void> {
     await this.db.$transaction(async (tx: any) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`verify:${certificateId}`}, 0))`;
+      await tx.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${`verify:${certificateId}`}, 0))`;
       const recent = await tx.certificateVerificationLog.findFirst({where:{certificateId, result, occurredAt:{gte:new Date(Date.now()-60000)}}});
       if (recent) return;
       await tx.certificateVerificationLog.create({ data: { certificateId, result, channel } });
