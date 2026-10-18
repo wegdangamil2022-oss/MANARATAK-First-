@@ -84,7 +84,7 @@ describe('Post28 real HTTP principal and independent finance execution',()=>{
   expect((await get(a,'/certificates?studentReferenceId='+b.id)).status).toBe(400);
  });
  it('rejects foreign certificate cursors and artifacts before storage delivery with unchanged certificate',async()=>{
-  const a=await principal(),b=await principal();const cert=await db.certificate.create({data:{id:fresh(),publicId:fresh(),serialNumber:fresh(),verificationCode:fresh(),verificationHash:fresh(),studentReferenceId:b.id,status:'REVOKED',templateVersion:'synthetic-historical-only',skills:[],competencies:[],certificatePdfAssetId:fresh()}});
+  const a=await principal(),b=await principal();const cert=await db.certificate.create({data:{id:fresh(),publicId:fresh(),serialNumber:fresh(),verificationCode:fresh(),verificationHash:fresh(),studentReferenceId:b.id,status:'REVOKED',templateVersion:'synthetic-historical-only',skills:[],competencies:[]}});
   const r=await get(a,'/certificates?cursor='+cert.id);expect(r.status).toBe(400);expect(JSON.stringify(r.body)).not.toContain(b.id);
   for(const kind of ['pdf','preview']){const denied=await request(app).post('/student/certificates/'+cert.id+'/artifacts/'+kind+'/delivery-grant').set('Authorization','Bearer '+a.token).set('Idempotency-Key',fresh()).send({});expect(denied.status).toBe(404);expect(denied.body).toEqual({error:'CERTIFICATE_NOT_FOUND'});}
   expect(await db.certificate.findUnique({where:{id:cert.id}})).toEqual(cert);
