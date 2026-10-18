@@ -17,7 +17,8 @@ const program = () => ({
   major: {
     status: 'PUBLISHED',
     levelProfiles: [
-      { degreeLevelId: 'bachelor', status: 'PUBLISHED', currentPublishedVersionId: 'version' },
+      { id: 'profile', degreeLevelId: 'bachelor', status: 'PUBLISHED', currentPublishedVersionId: 'version',
+        currentPublishedVersion: { id: 'version', majorId: 'major', profileId: 'profile', status: 'PUBLISHED' } },
     ],
   },
 });

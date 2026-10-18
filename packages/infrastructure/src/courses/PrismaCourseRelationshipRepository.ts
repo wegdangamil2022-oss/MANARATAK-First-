@@ -1,4 +1,4 @@
-import { publicCourseLanguageProof } from './CoursePublicLanguageProof';
+import { publicCourseEligibility } from './CoursePublicEligibility';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -771,20 +771,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
   public async listPublishedRelatedCourses(
     filters: CourseRelationshipPublicFilters,
   ): Promise<PaginatedCourseResult<CourseRelationshipPublicCourseDto>> {
-    const where: Prisma.CourseWhereInput = {
-      status: 'PUBLISHED',
-      completenessStatus: 'COMPLETE',
-      AND: [{
-        OR: [
-          { originType: { not: 'EXTERNAL_LINKED_COURSE' } },
-          {
-            originType: 'EXTERNAL_LINKED_COURSE',
-            accessType: { in: ['FREE_STUDY', 'FREE_STUDY_AND_CERTIFICATE'] },
-            isStudyFree: true,
-          },
-        ],
-      }, publicCourseLanguageProof()],
-    };
+    const where: Prisma.CourseWhereInput = publicCourseEligibility();
 
     if (filters.accessType) where.accessType = filters.accessType;
     if (filters.originType) where.originType = filters.originType;

@@ -1,4 +1,4 @@
-import { publicCourseLanguageProof } from './CoursePublicLanguageProof';
+import { publicCourseEligibility } from './CoursePublicEligibility';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   AtomicPersistenceContext,
@@ -350,21 +350,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
   }
 
   private publishedWhere(): Prisma.CourseWhereInput {
-    return {
-      status: CourseStatus.PUBLISHED,
-      completenessStatus: CourseImportCompletenessState.COMPLETE,
-      AND: [{
-        OR: [
-          { originType: { not: CourseOriginType.EXTERNAL_LINKED_COURSE } },
-          {
-            originType: CourseOriginType.EXTERNAL_LINKED_COURSE,
-            accessType: { in: [CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE] },
-            isStudyFree: true,
-          },
-        ],
-      }, publicCourseLanguageProof()],
-    };
-
+    return publicCourseEligibility();
   }
 
   public async findPublishedBySlug(slug: string): Promise<CourseDto | null> {

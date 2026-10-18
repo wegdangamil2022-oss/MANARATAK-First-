@@ -286,6 +286,7 @@ describe('PrismaCourseRepository', () => {
             originType: CourseOriginType.EXTERNAL_LINKED_COURSE,
             accessType: { in: [CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE] },
             isStudyFree: true,
+            externalProvider: { is: { status: 'APPROVED' } },
           },
         ] }, {OR: [
           {learningLanguageReferenceId:null,AND:[{OR:[{learningLanguageRaw:null},{learningLanguageRaw:''}]},{OR:[{learningLanguage:null},{learningLanguage:''}]}]},
