@@ -1,0 +1,71 @@
+{
+  "sourceSha": "b8f7643d22324ef51ffef2d92e35e2720d73d4e8",
+  "runId": "1ee8c547-47c3-4fd3-a1de-8c7e679f60ef",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "targets.json",
+      "bytes": 667,
+      "sha256": "79d77c2549bfec7a0925266bea01c26bdd96696e2baff529b7adc21075cb189e"
+    },
+    {
+      "path": "target-preflight.log",
+      "bytes": 426,
+      "sha256": "71c836820241b2d52673a09af894a8a5b1f0edf6d8260cfad79c04aabdd683ad"
+    },
+    {
+      "path": "stage-initialize-setup.log",
+      "bytes": 3761,
+      "sha256": "d9b6113a99a08ae1657038ce3d84df9b3ce6606578e2ecd1b344ced52b1879ba"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "e1025e223a500c69f49f2c2de41d6d50e387a39981c7b96c3a1ec5721a083928"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 4659,
+      "sha256": "ca8e9c0838d5c50ec7863269022fca5a64b6b57d3d34949332dc268a9ff465f1"
+    },
+    {
+      "path": "certificate-runtime-v2LvLY/discovery.json",
+      "bytes": 5014,
+      "sha256": "3d455e4cdb0131cbc07abaa676c834cb5aa3583f023ceb9f85b7528726c3ad7a"
+    },
+    {
+      "path": "certificate-runtime-v2LvLY/selection.json",
+      "bytes": 108,
+      "sha256": "b260a2d0019d1a2a74a04788ba59349159d1e2a210b7ca285502f940c9d6d1fc"
+    },
+    {
+      "path": "certificate-runtime-v2LvLY/vitest.json",
+      "bytes": 7485,
+      "sha256": "b5e3946517ecda995dd5a47bd13c89260baa12b8b92fe0e897324688eccfe46c"
+    },
+    {
+      "path": "certificate-runtime-v2LvLY/summary.json",
+      "bytes": 856,
+      "sha256": "ada73609303dcc77ddd32187e65ba1577da7e532d52013cc226c47811060be60"
+    },
+    {
+      "path": "provisioning.log",
+      "bytes": 16148,
+      "sha256": "8e0a6127cb154910244c3282fa6048869e498f2e74a15423a412e41b2a6a022f"
+    },
+    {
+      "path": "source-quality.log",
+      "bytes": 384,
+      "sha256": "eec55ba731573ad76875e3cff714bdc27a87514146f57511d67392efccd7ee81"
+    },
+    {
+      "path": "result.json",
+      "bytes": 398,
+      "sha256": "34f2c723832f5dd9c33d3ddc42044867090bf8630f098312718255b8a265280a"
+    }
+  ]
+}

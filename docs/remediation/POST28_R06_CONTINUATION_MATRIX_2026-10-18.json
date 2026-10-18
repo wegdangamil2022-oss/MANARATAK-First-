@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 448,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 451,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 165,
+  "newDistinctThisContinuation": 168,
   "rows": [
     {
       "caseId": "CD-001",
@@ -690,7 +690,7 @@
           "scope": "Real CourseProgressUseCases enrollment/completion audit/outbox commit, retry/concurrency and SQLSTATE22012 rollback. External-linked enrollment/completion and certificate claims refused. P14 real consumer/gateway/worker acknowledges noncredential event and retries native eligible events lacking approved template; no certificate issued or inbox invented."
         }
       ],
-      "whatRemains": "Actual persisted signed path identity and pinned governed template now produce real PDF, SVG preview and QR bytes after assertRenderable. Correct bundled JPEG MIME is validated. Artifact EAP ingestion/attachment, student delivery and crash recovery remain, along with visual browser verification and production signer/provider approvals.",
+      "whatRemains": "Three actual PG cases now prove guarded attachment/replay, own-student artifact identity resolution, foreign-owner denial, withdrawal after certificate revocation, two-connection competing attachment immutability and revoked/foreign attachment rollback. Real rendered PDF bytes are materialized under explicitly synthetic historical ACTIVE trust. Fresh EAP processing/full three-artifact orchestration, JWT issued-artifact HTTP delivery and crash recovery remain; production signer/provider approvals and browser gates remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -707,7 +707,8 @@
         "docs/reviews/evidence/post28/20f8b6560cb359ec1f7a23e95aa81fdea7eee80b/R06-path-certificate-eligibility",
         "docs/reviews/evidence/post28/0f81149fd46344b14b5e932be5828e1e6de952cc/R06-path-certificate-issuance",
         "docs/reviews/evidence/post28/aa90799417996f04d12af807c65ac1a3694e159d/R06-learning-path-http",
-        "docs/reviews/evidence/post28/3d04e28ba209c38765e43fc553563e17669bce4f/R06-path-certificate-rendering"
+        "docs/reviews/evidence/post28/3d04e28ba209c38765e43fc553563e17669bce4f/R06-path-certificate-rendering",
+        "docs/reviews/evidence/post28/b8f7643d22324ef51ffef2d92e35e2720d73d4e8/R06-certificate-attachment"
       ]
     },
     {
@@ -917,5 +918,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 152
+  "newDistinctThisR06OnlyTask": 155
 }

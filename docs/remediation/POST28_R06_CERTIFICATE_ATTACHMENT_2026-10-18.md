@@ -1,0 +1,11 @@
+# R06 actual certificate artifact attachment ownership and concurrent immutability
+
+Source b8f7643d22324ef51ffef2d92e35e2720d73d4e8; run 1ee8c547-47c3-4fd3-a1de-8c7e679f60ef; PostgreSQL postgres (PostgreSQL) 16.15, system 7698111422299573136.
+
+Three new actual PostgreSQL cases use locally signed certificates created from actual opted-in path completion. PDF bytes come from the real pinned-template renderer and are materialized and hashed. The AssetRecord fixtures are explicitly synthetic historical ACTIVE/CLEAN trust records; their scanner/sanitizer metadata is fixture data and does not represent fresh EAP processing. PERMANENT follows the existing generated-certificate contract and applies only to these new synthetic records, unrelated to the R05 student PDF retention decision.
+
+The real CertificateUseCases and PrismaCertificateRepository attach an owned PDF once; replay adds no ARTIFACTS_ATTACHED ledger entry. Own-student deliveryArtifact resolves the attached ID; a foreign student gets CERTIFICATE_NOT_FOUND. Revocation then blocks deliveryArtifact while retaining the original asset identity and bytes. This is application/persistence delivery authorization, not a real JWT HTTP delivery grant or storage download.
+
+A second case races two independent Prisma-backed facades attaching two distinct valid owned PDF assets. Exactly one wins and one fails CERTIFICATE_ARTIFACT_IMMUTABLE, with one attachment ledger entry. A third rejects another certificate's asset without changing either owner; after revocation the certificate rejects even its own valid asset and preserves the revoked row and zero attachment ledgers. Existing11 issuance/render cases repeat:14/14, zero failed/skipped.36 provisioning checks and source quality pass. No schema or historical migration changed;110 checksums and schema diff0 remain verified. Remaining EAP ingestion/three-artifact orchestration, HTTP delivery, recovery and external approval gates are not declared passed. R06 formal acceptance remains0/26.
+
+Evidence: docs/reviews/evidence/post28/b8f7643d22324ef51ffef2d92e35e2720d73d4e8/R06-certificate-attachment/evidence-index.json. Actual database cases: 14 passed, zero failed/skipped in final runs. New distinct 3; repeats 11; cumulative 451 across SHAs, not one current-head acceptance run. R06 remains 0/26 accepted.
