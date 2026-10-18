@@ -1,0 +1,842 @@
+{
+  "date": "2026-10-18",
+  "formalHandoffSourceSha": "da3f4ce100a128422b7b9c64c472a4afda14d441",
+  "required": 26,
+  "accepted": 0,
+  "partial": 26,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 296,
+  "all296ExecutedAtCurrentHead": false,
+  "newDistinctThisContinuation": 13,
+  "rows": [
+    {
+      "caseId": "CD-001",
+      "expected": "مدينة/منطقة لا تطابق دولة الجامعة أو مقر campus: رفض كتابة/نشر مع حفظ transaction/audit كما يقتضي العقد؛ الاسم المكرر لا يتغلب على ID",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "59fdad6b651ccf6637be277d4539f7f21654b1f7",
+            "ea2ab45ccbe8036800fd5af5522130eab3f37c72"
+          ],
+          "suite": "university-geography",
+          "scope": "18 distinct real PostgreSQL cases across initial 13 passing and 5 corrected final cases; 4 repeated affected regressions excluded from distinct count. Actual university owner commands/coordinator/audit/outbox, canonical geography consistency, root/campus commits, exact DB outbox failure rollback, owner revision CAS, foreign campus rejection. Two cases assert existing database constraints directly. No HTTP or full publication workflow proof."
+        },
+        {
+          "sourceShas": [
+            "55179686b04f328d9705be0352509b403868956a",
+            "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "78b11aa1979ec6e3354f288006553846b278605e",
+            "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+          ],
+          "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+          "scope": "Real JWT UniversityAdminRouter root geography accept/reject/If-Match/CSRF/actor proof; permission revocation denies replay. Not full university publication workflow."
+        }
+      ],
+      "whatRemains": "إكمال دورة الكتابة والمراجعة والنشر للجذر والمقر والوحدة مع مصفوفة API المتأثرة.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-002",
+      "expected": "برنامج جامعي ينتسب إلى University/Campus/AcademicUnit صحيحة؛ إدخال campus لجامعة أخرى يرفض؛ جامعة غير منشورة لا تنتج برنامجًا عامًا",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceSha": "41fb7c90ccb732177a160677669634982fc61173",
+          "suite": "university-relations",
+          "scope": "Real owner publication and degree profile read eligibility; not full mutation/API/campus scenario"
+        },
+        {
+          "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+          "suite": "owner-relations",
+          "scope": "Repository authoring accepts same-owner campus/unit, rejects foreign and archived references before program write; wrong university mutation rejected; owner withdrawal hides public program. Not full API author/review/publish atomic chain."
+        },
+        {
+          "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+          "suite": "relation-commands",
+          "scope": "Actual AdminUniversityUseCases with real atomic coordinator, unit of work, audit and outbox; program/campus/nullable test writes commit together; PostgreSQL outbox failure rolls owner revision and all relations back. No Admin HTTP permission proof."
+        },
+        {
+          "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+          "suite": "exact rollback regression",
+          "scope": "Explicit injection-reached assertion plus Prisma P2010/meta SQLSTATE22012; owner/approval and audit/outbox rollback. Two already counted cases, no new distinct count."
+        }
+      ],
+      "whatRemains": "سلسلة HTTP author→review→publish كاملة وعكس العلاقات بعد تغيّر حالة الآباء.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-003",
+      "expected": "MajorLevelProfile يطابق degreeLevelId قبل نشر برنامج؛ رفض profile غائب/مرحلة غير متطابقة والتعامل الصحيح مع retired/unpublished",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceSha": "41fb7c90ccb732177a160677669634982fc61173",
+          "suite": "university-relations",
+          "scope": "Real owner publication and degree profile read eligibility; not full mutation/API/campus scenario"
+        },
+        {
+          "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+          "suite": "owner-relations",
+          "scope": "Missing degree profile rejected in authoring. Public eligibility rejects foreign major/profile version, draft/superseded version and retired profile. Publication workflow concurrency not fully executed."
+        }
+      ],
+      "whatRemains": "نشر البرنامج الفعلي مع التزامن وتغيّر المرجع أثناء المعاملة.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-004",
+      "expected": "Admission international test/variant/version/score تابع للاختبار المنشور وصاحب البرنامج؛ رفض نسخة اختبار أجنبية أو غير منشورة",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+          "suite": "owner-relations",
+          "scope": "Actual admission validator with PostgreSQL proves matching test variant/version, rejects foreign explicit and implicit versions, nonpublic/superseded/draft versions and out of range score. Not all test country/language/taxonomy API lifecycles."
+        },
+        {
+          "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+          "suite": "relation-commands",
+          "scope": "Actual owner command persists an eligible test requirement with both nullable variant/version fields absent."
+        }
+      ],
+      "whatRemains": "دورة الاختبار/إصداره كاملة وcountry/language/taxonomy وAPI والروابط القديمة.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-005",
+      "expected": "تكرار متطلب اختبار لبرنامج عندما تكون variant/version Nullable ومعاملتان متزامنتان: لا ينتج سجلان صالحان لنفس المفتاح المنطقي؛ فحص unique composite + validator وقفل مناسب",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+          "suite": "relation-commands",
+          "scope": "Owner validator rejects duplicate nullable keys in one request; two real connections through existing owner row lock/revision CAS yield one success, one stale rejection and exactly one logical requirement. Does not prove direct/import paths or adopt DEC-06 schema remedy."
+        }
+      ],
+      "whatRemains": "حماية PostgreSQL من التكرار المنطقي مع NULL لجميع المسارات؛ audit وتصميم migration ومراجعة/بوابات schema.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "DATABASE_DESIGN_AND_IMPLEMENTATION",
+          "R04_R05_MIGRATION_GATES"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-006",
+      "expected": "منحة مرتبطة universityId ببرنامج لجامعة مختلفة ترفض؛ program غير منشور/غير مؤهل لا يمر نتيجة search أو authoring",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+          "suite": "relation-commands",
+          "scope": "Actual scholarship repository derives university from eligible program, rejects explicit foreign university and archived program/draft actual major version before scholarship creation. Creates DRAFT version and DRAFT cycle, not automatic publication. Not full scholarship Admin audit/outbox chain."
+        },
+        {
+          "sourceSha": "77ee49859b19adb923f0c98e5d6bbee3d3c75fc8",
+          "suite": "scholarship-admin",
+          "scope": "11 real owner cases plus 5 real HTTP cases passed before replay fix. Canonical replacement with correct parent, foreign/missing/unpublished owner rejection, duplicate keys, revision/actor/reason guards, full links/version/cycle/sponsor/audit/outbox SQLSTATE22012 rollback, two-writer CAS, stable child ID, readiness invalidation, published/archive write rejection and parent withdrawal between lookup and actual transaction."
+        },
+        {
+          "sourceSha": "6b5f8db81ef339fc7ea41b4797a4de6fc2480607",
+          "suite": "scholarship-public-relations",
+          "scope": "4 PostgreSQL cases: exact forward/reverse results and counts; rejects FK-valid foreign university link; hides relations after university/major/profile/version/program lifecycle withdrawal and root/version unpublication. Published rows are explicit historical fixtures, not an owner publish workflow."
+        },
+        {
+          "sourceSha": "84dbfcdff3cb274022dadf542fa4d25f1735c28b",
+          "suite": "scholarship-admin exact replay cases",
+          "scope": "Actual mounted app.ts callback extracted and executed with real JWT, sessions, CSRF, persisted roles/evaluator/idempotency store; denies cached replay after permission withdrawal and permits authorized replay without repeated owner/audit/outbox."
+        }
+      ],
+      "whatRemains": "استكمال دورة نشر المالك وجميع الكتابات/القراءات المتأثرة بسحب مرجع البرنامج.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-007",
+      "expected": "S2 تستهدف BSc-CS وPhD-MED، والبحث BSc+MED يرجع **صفر** وليس S2؛ المقابلة BSc+CS وPhD+MED تعيد S2 وفق عقد الملكية",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "7c15845d5a7af8572b6cef15e3222a3c8fc98e76"
+          ],
+          "evidence": "docs/reviews/evidence/post28/7c15845d5a7af8572b6cef15e3222a3c8fc98e76/r06-dec01-review/case-accounting.json",
+          "scope": "Same owner program proves degree-major pair in real public HTTP filtering before count and pagination; invalid/unresolved/foreign-owner and obsolete/mismatched version rejected. Dashboard, final UI and full owner workflow not accepted."
+        }
+      ],
+      "whatRemains": "إسقاط الأزواج في تفاصيل المنحة والإدارة والواجهة النهائية ودورة المالك.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-008",
+      "expected": "البحث المركب degree+major+program+university يثبت اقتران الحقول لنفس العرض/العلاقة المعتمدة؛ عدم خلط eligibility بشرط التخصص المقدم",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "7c15845d5a7af8572b6cef15e3222a3c8fc98e76"
+          ],
+          "evidence": "docs/reviews/evidence/post28/7c15845d5a7af8572b6cef15e3222a3c8fc98e76/r06-dec01-review/case-accounting.json",
+          "scope": "Same owner program proves degree-major pair in real public HTTP filtering before count and pagination; invalid/unresolved/foreign-owner and obsolete/mismatched version rejected. Dashboard, final UI and full owner workflow not accepted."
+        }
+      ],
+      "whatRemains": "تطابق البحث والتفاصيل والإدارة/الفلاتر، والتحولات المتزامنة خلال القراءة.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-009",
+      "expected": "دولة الدراسة ≠ جنسية المتقدم ≠ دولة الممول؛ تفحص كل خانة وفق معناها دون اشتقاق خفي أو اختزال حقل واحد؛ multi-destination BLOCKED لحين عقده إن لم يكن مدعومًا",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [],
+      "whatRemains": "فصل مصادر وحقول الدراسة والجنسية والتمويل وفلاترها؛ لا استنتاج جنسية من وجهة؛ تعدد الوجهات غير معتمد.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "DATA_CONTRACT_AND_IMPLEMENTATION",
+          "SCOPE_MULTI_DESTINATION_NOT_APPROVED"
+        ]
+      },
+      "newEvidence": [
+        "docs/remediation/POST28_R06_COUNTRY_SEMANTICS_2026-10-18.md"
+      ]
+    },
+    {
+      "caseId": "CD-010",
+      "expected": "منحة مصدرها خام/غير محسم/غير متحقق/مسودة لا تظهر كمنشورة ولا عبر graph أو counts أو بطاقات CMS",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+          "suite": "owner-relations",
+          "scope": "Real scholarship gateway rejects withdrawn owner and nonpublic/foreign/closed/future cycles. Not full raw-import verification, CMS or graph counts scenario."
+        },
+        {
+          "sourceSha": "6b5f8db81ef339fc7ea41b4797a4de6fc2480607",
+          "suite": "scholarship-public-relations",
+          "scope": "Unpublished scholarship and obsolete published-version proof excluded in both forward and reverse counts. Not complete raw import/verification/CMS workflow."
+        }
+      ],
+      "whatRemains": "المسار الكامل raw import→verification→review→publication وCMS/graph دون تسرب.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-011",
+      "expected": "امتحان مطلوب لمنحة أو برنامج: القراءة المعيارية فقط، وغياب/أرشفة الاختبار يمنع الإيهام باستمرار شرط قبول نشط",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "55179686b04f328d9705be0352509b403868956a",
+            "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "78b11aa1979ec6e3354f288006553846b278605e",
+            "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+          ],
+          "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+          "scope": "Real ScholarshipPublicRouter and Prisma projection withdraw test documents after archive, visibility revocation or current-version unpublication; public test-filter totals exclude withdrawn proof. Existing program proof remains separate; no full owner publication/invalidation workflow acceptance."
+        }
+      ],
+      "whatRemains": "نشر وتغيير الاختبار والبرنامج والمنحة وإبطال القراءات بجميع الاتجاهات.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-012",
+      "expected": "جدول حالات FX-COURSE-01 الأربعة يشهد معيارًا **واحدًا** بين import mapper وpublication guard وcatalog/major graph؛ لا publish تلقائي؛ لا ادعاء شهادة مجانية بلا دليل",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+            "a78b6b94dc31cc6cc280c42314cf47e544a8b929"
+          ],
+          "evidence": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-review/case-accounting.json",
+          "scope": "DEC03 free-study policy implemented with independent paid/free/unknown certificate evidence. Real publication/audit/outbox, HTTP router and actual UI data adapter; no browser or real provider link check."
+        }
+      ],
+      "whatRemains": "import→owner approval→publish→built browser بمصدر وفحص رابط فعليين؛ لا تعويض synthetic link proof بالمزود.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF",
+          "REAL_SOURCE_SERVICE"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-013",
+      "expected": "رفض CourseAcademicTaxonomyLink معتمد يسحب فورًا إسقاطات TAXONOMY_MAPPING التابعة من نتائج Major وCourse، مع rollback كامل عند فشل audit/outbox",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+            "a78b6b94dc31cc6cc280c42314cf47e544a8b929"
+          ],
+          "evidence": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-review/case-accounting.json",
+          "scope": "DEC05 link rejection invalidates its TAXONOMY_MAPPING projections atomically; independent direct links and provenance retained. Local PostgreSQL concurrency/retry/statement-failure rollback tested; no full source-change/reconciliation/cache/owner-command audit acceptance."
+        },
+        {
+          "sourceShas": [
+            "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+            "c2b3af690ee32dc02ea0e021153d0a312e17321a"
+          ],
+          "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+          "scope": "Actual CourseAdminCommandUseCases transaction now supports relationship writes without nested $transaction; rejection/projection invalidation/root version/audit/outbox atomic, real SQL22012 rollback in both audit and outbox, optimistic concurrency and stale replay. Published structure still requires actual unpublish first."
+        }
+      ],
+      "whatRemains": "مسار HTTP/JWT لأمر الدورة وreverse Major graph والمصفوفة الكاملة؛ المنشور يتطلب unpublish وفق العقد القائم.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-014",
+      "expected": "علاقة DIRECT_REVIEWED مستقلة تبقى بعد رفض taxonomy آخر؛ لكن إسقاط mapping ملغى لا يستعيد APPROVED دون قرار مراجعة صحيح",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+            "a78b6b94dc31cc6cc280c42314cf47e544a8b929"
+          ],
+          "evidence": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-review/case-accounting.json",
+          "scope": "DEC05 independent DIRECT_REVIEWED projection retained after taxonomy rejection; reapproval does not silently restore withdrawn derived projection. PostgreSQL proof, not full API/browser/source-refresh acceptance."
+        },
+        {
+          "sourceShas": [
+            "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+            "c2b3af690ee32dc02ea0e021153d0a312e17321a"
+          ],
+          "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+          "scope": "Independent DIRECT_REVIEWED projections preserved during owner rejection and removed-source reconciliation; source change forces dependent mapping projection REVIEW_REQUIRED."
+        }
+      ],
+      "whatRemains": "كل مسارات المراجعة والإعادة/refresh والقراءات العكسية ضمن سير المالك وHTTP.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-015",
+      "expected": "إزالة source term أو تغيّر URL/import refresh يوسم resolutions/links/projections القديمة مراجعة ويلغيها من graph؛ لا تتسرب stale cache",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+            "c2b3af690ee32dc02ea0e021153d0a312e17321a"
+          ],
+          "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+          "scope": "Removed terms reconciled through actual owner command with audit/outbox; next real public HTTP no-store graph withdraws stale derived mapping while independent reviewed relation remains. Full import/URL-change/worker/browser-cache matrix not proven."
+        }
+      ],
+      "whatRemains": "URL/import refresh والعامل/crash/ack وجميع إسقاطات/كاش العميل؛ no-store لا يثبت مصفوفة الكاش كاملة.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-016",
+      "expected": "رابط major projection PROPOSED أو REVIEW_REQUIRED أو major غير منشور: لا يظهر في major reverse view؛ approved+published فقط",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+            "c2b3af690ee32dc02ea0e021153d0a312e17321a"
+          ],
+          "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+          "scope": "Real public course HTTP page/count rejects PROPOSED/REVIEW_REQUIRED mappings and mappings targeting DRAFT/ARCHIVED majors; approved+published allowed. Full reverse Major router lifecycle not accepted."
+        }
+      ],
+      "whatRemains": "دورة reverse Major router كاملة والنشر/الأرشفة وإثبات تطابق الواجهة.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-017",
+      "expected": "مستوى Major العام مقابل MajorLevelProfile؛ profileId لا يعني فلترًا متاحًا تلقائيًا؛ إذا تقرر دعم facet المستوى اختبره end-to-end وإلا لا يُعرض خيار غير مدعوم",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+            "c2b3af690ee32dc02ea0e021153d0a312e17321a"
+          ],
+          "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+          "scope": "General major listing accepts approved course link without profile and infers no degree from training text. Real API rejects unsupported degree/profile facets with400; built browser control matrix not accepted."
+        }
+      ],
+      "whatRemains": "إثبات واجهة المتصفح وعدم عرض facet غير مدعوم وتطابق reverse view؛ لا اختراع ربط درجة.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "BUILT_BROWSER_AND_REVERSE_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-018",
+      "expected": "HeadquartersCountry للمزود الخارجي لا يعامل studyCountry للدورة؛ لغة الدورة canonical وACTIVE، source label وحده لا يكفي",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "55179686b04f328d9705be0352509b403868956a",
+            "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "78b11aa1979ec6e3354f288006553846b278605e",
+            "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+          ],
+          "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+          "scope": "Provider headquarters has no derived study country; active canonical language review, rejects inactive/deprecated reference; raw labels excluded, card/list/relationship HTTP and publication guard withdraw deprecated language. No teaching-market DEC-07 acceptance."
+        }
+      ],
+      "whatRemains": "تطابق لغة البرنامج الأكاديمي متعددة اللغات وفلاتر المنحة/الواجهة؛ أسواق الإطلاق قرار نطاق مستقل.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "IMPLEMENTATION_OR_PROOF",
+          "LAUNCH_MARKET_SCOPE"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-019",
+      "expected": "provider native key+language version dedup، allow-listed direct URL، redirect/history/provenance، وعدم تحويل import خام إلى publish دون مراجعة",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "55179686b04f328d9705be0352509b403868956a",
+            "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "78b11aa1979ec6e3354f288006553846b278605e",
+            "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+          ],
+          "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+          "scope": "Two-connection provider/native-key/language identity dedup and preserved IDs; domain allowlist, persisted synthetic redirect/history evidence, stale result rejection, controlled identity edit guard and raw source publication rejection. No external network check or end-to-end import approval."
+        }
+      ],
+      "whatRemains": "فحص شبكة ومصدر فعليان، redirect/provenance، دورة الاستيراد والمراجعة والنشر كاملة.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "REAL_SOURCE_SERVICE",
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-026",
+      "expected": "إنشاء/تعديل/موافقة/رفض علاقات بواسطة الأدوار الصحيحة؛ رفض caller غير مخوّل/وصول مباشر ويُثبت audit/transaction/outbox",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        "Real use-case maker/checker identity rejection, server quorum2, decision replay/concurrent CAS/rollback; HTTP authorization not executed",
+        {
+          "sourceSha": "293b2eee2514b29c91a2d6f8ad3a35353cab9454",
+          "suite": "http-finance",
+          "scope": "Real JWT, session, principal lifecycle and student role reads; FX two-checker approval consumption/activation, foreign binding rejection, stale version, two connections, outbox SQL rollback. Not all Admin role permissions."
+        },
+        {
+          "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+          "suite": "relation-commands",
+          "scope": "Actual University owner context/revision required; transaction audit/outbox and rollback verified. Reviewer context is synthetic local input, not an authenticated Admin principal."
+        },
+        {
+          "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+          "suite": "exact rollback regression",
+          "scope": "Explicit injection-reached assertion plus Prisma P2010/meta SQLSTATE22012; owner/approval and audit/outbox rollback. Two already counted cases, no new distinct count."
+        },
+        {
+          "sourceSha": "84dbfcdff3cb274022dadf542fa4d25f1735c28b",
+          "suite": "scholarship-admin",
+          "scope": "Current admin:scholarships:manage revalidated before cached receipt; original defect on77ee4985 returned200 after permission withdrawal, fixed to403; legitimate replay200 with unchanged persisted facts. No full production MFA/duty/emergency-policy proof."
+        },
+        {
+          "sourceShas": [
+            "59fdad6b651ccf6637be277d4539f7f21654b1f7",
+            "ea2ab45ccbe8036800fd5af5522130eab3f37c72"
+          ],
+          "suite": "university-geography",
+          "scope": "18 distinct real PostgreSQL cases across initial 13 passing and 5 corrected final cases; 4 repeated affected regressions excluded from distinct count. Actual university owner commands/coordinator/audit/outbox, canonical geography consistency, root/campus commits, exact DB outbox failure rollback, owner revision CAS, foreign campus rejection. Two cases assert existing database constraints directly. No HTTP or full publication workflow proof."
+        },
+        {
+          "sourceShas": [
+            "55179686b04f328d9705be0352509b403868956a",
+            "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "78b11aa1979ec6e3354f288006553846b278605e",
+            "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+          ],
+          "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+          "scope": "Current JWT/persisted RBAC checked before private cached responses on universities and student-document-reviews; Finance action permissions precede owner receipt replay. No full production MFA/duty/emergency proof."
+        }
+      ],
+      "whatRemains": "مصفوفة جميع أوامر العلاقات المباشرة وroles/actor/reason/audit؛ إثبات MFA/فصل الواجبات والطوارئ حيث يلزم.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "AUTHORIZATION_COVERAGE_AND_RUNTIME"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-028",
+      "expected": "Course enrollment/progress/learning-path completion لا يفوض إصدار شهادة خارجي تلقائي؛ completion event→P14 inbox بإصدار واحد idempotent",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "55179686b04f328d9705be0352509b403868956a",
+            "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "78b11aa1979ec6e3354f288006553846b278605e",
+            "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+          ],
+          "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+          "scope": "Real CourseProgressUseCases enrollment/completion audit/outbox commit, retry/concurrency and SQLSTATE22012 rollback. External-linked enrollment/completion and certificate claims refused. P14 real consumer/gateway/worker acknowledges noncredential event and retries native eligible events lacking approved template; no certificate issued or inbox invented."
+        }
+      ],
+      "whatRemains": "learning-path كامل وإصدار شهادة واحد→inbox→تحقق→إلغاء مع authority/template معتمدين.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "CERTIFICATE_AUTHORITY_AND_TEMPLATE",
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-029",
+      "expected": "الطالب A لا يستطيع قراءة/حفظ/تعديل محفوظات الطالب B أو كشف الوثائق والشهادات/الفواتير بالـgraph/public",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        "Real use-case cross-student collection writes and encrypted private-result reads rejected; expiry/suspension enforced. HTTP principal binding and graph isolation not executed",
+        {
+          "sourceSha": "293b2eee2514b29c91a2d6f8ad3a35353cab9454",
+          "suite": "http-finance",
+          "scope": "Actual student router/JWT/DB sessions/persona and collection owners; query impersonation and cross-owner collection update rejected; role withdrawal and suspension enforced. Actual university graph router/service/owner repositories exclude both student collections and private metadata sentinels. Does not prove every certificate/invoice/document graph route."
+        },
+        {
+          "sourceSha": "f14ed30f667715b309292bf113dc09e48a6d63b2",
+          "suite": "http-finance exact selection",
+          "scope": "Foreign path alias returns contract 403; strict body rejects injected principal; 1 actual selected pass, 13 deliberate exclusions. Saved report verified on 1c19ec1fdefdebe57061287ad2737d0e24e862c2 without rerunning DB."
+        }
+      ],
+      "whatRemains": "كل مسارات الوثائق والشهادات والفواتير والـgraph بين طالبين، وليس فقط المسارات المختبرة.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "PRIVACY_AND_HTTP_COVERAGE"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-030",
+      "expected": "الطلب الخدمي يشير إلى finance originReferenceId دون امتلاك دفتر الأستاذ؛ العملة canonical ومعاملات الدفع/العكس بدون double posting",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        "SQL invoice/receipt/outbox atomicity and exact unit storage; no full payment-provider/refund/double-posting owner proof",
+        "Real canonical currency lookup, invoice calculation/create/edit/issue replay, exact balanced postings, concurrent issue and rollback. Service origin/payment/refund full chain not executed",
+        {
+          "sourceSha": "293b2eee2514b29c91a2d6f8ad3a35353cab9454",
+          "suite": "http-finance",
+          "scope": "Manual FX approval consumption and activation with real DB, atomic outbox rollback and concurrent single executor. Unconfigured payment/automatic FX fail closed without provider call/payment write. No successful payment/refund/settlement claim."
+        },
+        {
+          "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+          "suite": "exact rollback regression",
+          "scope": "Explicit injection-reached assertion plus Prisma P2010/meta SQLSTATE22012; owner/approval and audit/outbox rollback. Two already counted cases, no new distinct count."
+        },
+        {
+          "sourceShas": [
+            "55179686b04f328d9705be0352509b403868956a",
+            "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "78b11aa1979ec6e3354f288006553846b278605e",
+            "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+          ],
+          "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+          "scope": "Real FinanceAdminRouter invoice action/JWT/receipt checks. Unconfigured refund provider rejected before approval consumption/reservation; unavailable bank cannot submit or settle; reconciliation records provider absence. Real local credit, installments, wallet holds/release/capture/replay/conflict/CAS/rollback with balanced synthetic historical funding; no external payment/refund/settlement success proof."
+        }
+      ],
+      "whatRemains": "ربط service originReference والعملة، payment/refund/settlement الفعلية وأثرها الخارجي وreplay الآمن.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "REAL_FINANCE_PROVIDER",
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-035",
+      "expected": "Import→owner mapping، job lease/outbox retry/replay/crash before/after ack؛ idempotent records وcanonical IDs لا تتغير بالـretry",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        "2 actual lease fencing/reclaim/stale-write cases; no full import-to-owner/ack crash chain",
+        {
+          "sourceShas": [
+            "55179686b04f328d9705be0352509b403868956a",
+            "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "78b11aa1979ec6e3354f288006553846b278605e",
+            "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+          ],
+          "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+          "scope": "Real persisted completion worker dispatch with retries and provider/native/language identity concurrent dedup; not full import-to-owner crash/ack recovery."
+        }
+      ],
+      "whatRemains": "import→owner mapping كامل، تعطل العامل قبل/بعد ack ثم resume/replay دون أثر مكرر.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "WORKER_IMPORT_CRASH_RECOVERY_PROOF"
+        ]
+      },
+      "newEvidence": []
+    },
+    {
+      "caseId": "CD-036",
+      "expected": "asset ref/tenant/owner/retention/consent وإلغاء الصلاحية تحت التزامن؛ لا عرض أو تنزيل طالب آخر",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        "39 asset lifecycle/CAS/reference/restore cases and two document binding lock-order cases; no full tenant/consent/download authorization flow",
+        "Privacy consent actor validation, actual consent state/audit/outbox atomicity, search/analytics withdrawal and stale writer rollback; document download consent/grant race not executed",
+        {
+          "sourceSha": "10e0ddf1fa72697dae2c5597786c0707ef6c3687",
+          "suite": "document-consent",
+          "scope": "Review consent withdrawal with real persistence and controlled external ports; no storage revocation proof"
+        },
+        {
+          "sourceShas": [
+            "55179686b04f328d9705be0352509b403868956a",
+            "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "78b11aa1979ec6e3354f288006553846b278605e",
+            "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+          ],
+          "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+          "scope": "Real scholarship gateway and AssetReferencePolicy/Prisma asset storage back document attestations and HTTP reviewer. Verified/rejected, CAS two-reviewer race, revoked consent/owner/cycle/asset trust, duplicate queue exclusion and actual DB outbox rollback. Stored clean evidence is synthetic; real secure delivery absent refuses open. No already-delivered storage grant revocation claim."
+        }
+      ],
+      "whatRemains": "خدمة فحص/تنقية/تخزين وتسليم فعلية، سحب رابط سبق تسليمه ودورة attestation كاملة؛ synthetic clean ليس دليل فحص.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "REAL_ASSET_STORAGE_SCAN_DELIVERY",
+          "IMPLEMENTATION_OR_PROOF"
+        ]
+      },
+      "newEvidence": [
+        "docs/reviews/evidence/post28/6e5e9691c6f5d51fb3b12a0ec7c311d1e45cff37/R06-real-pdf-20261018"
+      ]
+    },
+    {
+      "caseId": "CD-040",
+      "expected": "تغيير Published/Archived/Deprecated للمالك أو parent/reference أثناء استعلام متعدد الصفحات: منع stale grants/old children وخطأ cross-owner، مع pagination consistency",
+      "status": "PARTIAL_NOT_ACCEPTED",
+      "fullScenarioPassed": false,
+      "historicalEvidence": [
+        {
+          "sourceShas": [
+            "55179686b04f328d9705be0352509b403868956a",
+            "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+            "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+            "78b11aa1979ec6e3354f288006553846b278605e",
+            "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+            "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+            "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+          ],
+          "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+          "scope": "Current canonical test version and language withdrawal affect next actual public request/list; no full multi-page parent/reference lifecycle matrix or snapshot/pagination consistency acceptance."
+        }
+      ],
+      "whatRemains": "تغيّر مالك/parent/reference أثناء الطلب وبين الصفحات، snapshot/pagination consistency ومنع stale grants.",
+      "acceptanceBlockers": {
+        "global": [
+          "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
+        ],
+        "caseSpecific": [
+          "CONCURRENT_READ_LIFECYCLE_PROOF"
+        ]
+      },
+      "newEvidence": []
+    }
+  ]
+}
