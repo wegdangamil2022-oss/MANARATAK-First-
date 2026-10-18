@@ -130,7 +130,7 @@ test('university geography declares twenty-two cases and explicitly grants only 
 
 test('remaining independent profiles declare explicit scoped cases and fixture tables without certificate issuance grants',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
- for(const [suite,count] of [['owner-http-closure',12],['attestation-closure',14],['learning-closure',12]])assert.equal(databaseSuite(suite).minimumCases,count);
+ for(const [suite,count] of [['owner-http-closure',12],['attestation-closure',24],['learning-closure',12]])assert.equal(databaseSuite(suite).minimumCases,count);
  for(const table of ['ScholarshipRequiredDocument','Course','CourseVersion','CourseEnrollment','CourseCompletion'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('Certificate'),false);
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('CertificateIssuanceInbox'),false);

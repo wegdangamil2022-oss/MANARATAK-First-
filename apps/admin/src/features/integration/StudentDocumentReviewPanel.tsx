@@ -10,7 +10,7 @@ type Review = {
   retentionUntil: string;
   documentExpiresAt: string | null;
   consentUntil: string;
-  delivery: { url: string; headers: Record<string, string>; expiresAt: string };
+  delivery: { kind: 'AUTHENTICATED_REVIEW'; path: string; expiresAt: string };
 };
 type Page = {
   items: Array<{ id: string; requirementName: string; consentUntil: string }>;
@@ -105,26 +105,10 @@ export function StudentDocumentReviewPanel() {
         Date.parse(data.delivery.expiresAt) <= Date.now()
       )
         throw new Error('REVIEW_RESPONSE_INVALID');
-      const target = new URL(data.delivery.url);
-      if (
-        target.username ||
-        target.password ||
-        (target.protocol !== 'https:' &&
-          !(
-            import.meta.env.DEV &&
-            target.protocol === 'http:' &&
-            ['localhost', '127.0.0.1'].includes(target.hostname)
-          ))
-      )
+      const expectedPath = `/admin/student-document-reviews/${encodeURIComponent(id)}/content?expectedVersion=${data.expectedVersion}&expiresAt=${Date.parse(data.delivery.expiresAt)}`;
+      if (data.delivery.kind !== 'AUTHENTICATED_REVIEW' || data.delivery.path !== expectedPath)
         throw new Error('PRIVATE_DELIVERY_INVALID');
-      const response = await fetch(target, {
-        headers: data.delivery.headers,
-        credentials: 'omit',
-        redirect: 'error',
-        cache: 'no-store',
-      });
-      if (!response.ok) throw new Error('PRIVATE_DELIVERY_UNAVAILABLE');
-      const blob = await response.blob();
+      const blob = await adminApiClient.requestBlob(expectedPath);
       if (request !== generation.current) return;
       if (blob.size < 1 || blob.size > 10 * 1024 * 1024)
         throw new Error('PRIVATE_DOCUMENT_INVALID');
