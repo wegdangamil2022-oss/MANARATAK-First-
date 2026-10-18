@@ -41,4 +41,13 @@ describe('Post28 learning completion and certificate trust boundaries on Postgre
   await expect(repository.issue({sourceEventId:fresh(),sourceCompletionId:fresh(),templateId:fresh(),templateVersionId:fresh(),issuerId:fresh(),templateVersion:'1.0.0',signingKeyReference:'post28-unconfigured-synthetic-key'})).rejects.toThrow('ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED');
   expect({certificates:await db.certificate.count(),inbox:await db.certificateIssuanceInbox.count(),audits:await db.auditRecord.count(),outbox:await db.transactionalOutboxRecord.count()}).toEqual(before);
  });
+ it('deduplicates public verification analytics from independent connections under actual PostgreSQL locks',async()=>{
+  // Historical revoked synthetic row: this tests analytics serialization, not a trusted credential or signature.
+  const cert=await db.certificate.create({data:{id:fresh(),publicId:fresh(),serialNumber:fresh(),verificationCode:fresh(),verificationHash:fresh(),studentReferenceId:fresh(),status:'REVOKED',templateVersion:'synthetic-historical-only',skills:[],competencies:[]}});
+  const a=new PrismaCertificateRepository(db),b=new PrismaCertificateRepository(other);
+  await Promise.all([a.recordVerification(cert.id,'REVOKED','PUBLIC_CODE'),b.recordVerification(cert.id,'REVOKED','PUBLIC_CODE')]);
+  expect(await db.certificateVerificationLog.count({where:{certificateId:cert.id,result:'REVOKED'}})).toBe(1);
+  expect(await db.transactionalOutboxRecord.count({where:{aggregateId:cert.id,eventType:'CertificateVerified'}})).toBe(1);
+  expect(await db.certificate.findUnique({where:{id:cert.id}})).toEqual(cert);
+ });
 });

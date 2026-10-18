@@ -15,7 +15,7 @@ export const DATABASE_SUITES = Object.freeze({
   'finance-provider-safety': {files: ['tests/database/post28-finance-provider-safety.database.spec.mjs'],minimumCases:6},
   'owner-http-closure': {files: ['tests/database/post28-owner-http-closure.database.spec.mjs'],minimumCases:12},
   'attestation-closure': {files: ['tests/database/post28-attestation-closure.database.spec.mjs'],minimumCases:24},
-  'learning-closure': {files: ['tests/database/post28-learning-closure.database.spec.mjs'],minimumCases:13},
+  'learning-closure': {files: ['tests/database/post28-learning-closure.database.spec.mjs'],minimumCases:14},
   'university-geography': {files: ['tests/database/post28-university-geography.database.spec.mjs'],minimumCases:22},
   'scholarship-public-relations': {files: ['tests/database/post28-scholarship-public-relations.database.spec.mjs'],minimumCases:4},
   'scholarship-admin': {files: ['tests/database/post28-scholarship-admin.database.spec.mjs'],minimumCases:18},
