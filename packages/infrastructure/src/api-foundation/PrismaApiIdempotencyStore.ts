@@ -23,6 +23,19 @@ export class PrismaApiIdempotencyStore {
   constructor(private readonly prisma: any) {}
 
   async begin(input: ApiIdempotencyBeginInput): Promise<ApiIdempotencyBeginDecision> {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await this.beginAttempt(input);
+      } catch (error: any) {
+        // Retry the complete aborted transaction, including its initial read.
+        // P2002 covers a competing insert of this scope; querying inside that
+        // failed PostgreSQL transaction would itself fail with 25P02.
+        if (attempt >= 4 || !['P2034', 'P2002'].includes(error?.code)) throw error;
+      }
+    }
+  }
+
+  private async beginAttempt(input: ApiIdempotencyBeginInput): Promise<ApiIdempotencyBeginDecision> {
     const now = new Date();
     const expiresAt = new Date(now.getTime() + input.ttlSeconds * 1000);
     const leaseExpiresAt = new Date(now.getTime() + input.leaseSeconds * 1000);
@@ -39,7 +52,6 @@ export class PrismaApiIdempotencyStore {
       }
 
       if (!existing) {
-        try {
           await tx.apiIdempotencyRecord.create({
             data: {
               scopeHash: input.scopeHash,
@@ -55,10 +67,6 @@ export class PrismaApiIdempotencyStore {
             },
           });
           return { kind: 'STARTED', scopeHash: input.scopeHash, leaseToken } as const;
-        } catch (error: any) {
-          if (error?.code !== 'P2002') throw error;
-          existing = await tx.apiIdempotencyRecord.findUnique({ where: { scopeHash: input.scopeHash } });
-        }
       }
 
       if (!existing) throw new Error('API_IDEMPOTENCY_CONCURRENT_CREATE_UNRESOLVED');
