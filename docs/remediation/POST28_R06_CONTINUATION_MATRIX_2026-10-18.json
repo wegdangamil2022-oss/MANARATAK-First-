@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 338,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 348,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 55,
+  "newDistinctThisContinuation": 65,
   "rows": [
     {
       "caseId": "CD-001",
@@ -695,7 +695,7 @@
           "scope": "Foreign path alias returns contract 403; strict body rejects injected principal; 1 actual selected pass, 13 deliberate exclusions. Saved report verified on 1c19ec1fdefdebe57061287ad2737d0e24e862c2 without rerunning DB."
         }
       ],
-      "whatRemains": "كل مسارات الوثائق والشهادات والفواتير والـgraph بين طالبين، وليس فقط المسارات المختبرة.",
+      "whatRemains": "Document review HTTP denies leaked paths to unauthenticated/unprivileged identities and self review; validates exact student asset ownership before/after IO. Still full certificate/invoice/graph two-student matrix and the institutional tenant definition/contract.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -704,7 +704,9 @@
           "PRIVACY_AND_HTTP_COVERAGE"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery"
+      ]
     },
     {
       "caseId": "CD-030",
@@ -812,7 +814,7 @@
           "scope": "Real scholarship gateway and AssetReferencePolicy/Prisma asset storage back document attestations and HTTP reviewer. Verified/rejected, CAS two-reviewer race, revoked consent/owner/cycle/asset trust, duplicate queue exclusion and actual DB outbox rollback. Stored clean evidence is synthetic; real secure delivery absent refuses open. No already-delivered storage grant revocation claim."
         }
       ],
-      "whatRemains": "Six actual Defender/MuPDF/Prisma lifecycle cases remain valid preserved evidence. Still issued delivery-grant revocation, cross-student/tenant HTTP, concurrency and complete attestation lifecycle; production sanitization provider/licensing approval remains separate.",
+      "whatRemains": "Six actual PDF provider cases preserved; new authenticated issued-path revocation, HTTP permission/consent/owner IO races, byte integrity and attestation/consent preservation proven. Institutional tenant boundary is undefined (owner question pending); built-browser and production provider/licensing gates remain. No retroactive provider-URL revocation claim.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -824,7 +826,8 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/6e5e9691c6f5d51fb3b12a0ec7c311d1e45cff37/R06-real-pdf-20261018",
-        "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication"
+        "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication",
+        "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery"
       ]
     },
     {
@@ -847,7 +850,7 @@
           "scope": "Current canonical test version and language withdrawal affect next actual public request/list; no full multi-page parent/reference lifecycle matrix or snapshot/pagination consistency acceptance."
         }
       ],
-      "whatRemains": "Issued-grant revocation and remaining graph/cache/HTTP concurrency matrix; cross-request catalogue traversal is live immutable-ID paging, not a historic snapshot. Scholarship list/details internal snapshot consistency and deleted relation-anchor continuation are proven.",
+      "whatRemains": "Scholarship snapshot/cursor proof and document IO consent/permission/asset revocation races are complete for tested paths. Remaining graph/cache/HTTP matrix and institutional tenant contract remain; cross-request paging is live ID traversal.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -857,9 +860,10 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots"
+        "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
+        "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery"
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 42
+  "newDistinctThisR06OnlyTask": 52
 }
