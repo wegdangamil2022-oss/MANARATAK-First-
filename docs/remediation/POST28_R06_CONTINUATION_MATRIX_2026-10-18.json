@@ -573,7 +573,7 @@
           "scope": "Two-connection provider/native-key/language identity dedup and preserved IDs; domain allowlist, persisted synthetic redirect/history evidence, stale result rejection, controlled identity edit guard and raw source publication rejection. No external network check or end-to-end import approval."
         }
       ],
-      "whatRemains": "فحص شبكة ومصدر فعليان، redirect/provenance، دورة الاستيراد والمراجعة والنشر كاملة.",
+      "whatRemains": "Actual Node22 production source HTTPS checker repaired and verified with public HEAD 200; 295 course units and eight affected DB/HTTP regressions pass. Still prove the complete controlled import/source/review/publication owner HTTP chain and remaining source lineage cases.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -583,7 +583,9 @@
           "IMPLEMENTATION_OR_PROOF"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network"
+      ]
     },
     {
       "caseId": "CD-026",
@@ -695,7 +697,7 @@
           "scope": "Foreign path alias returns contract 403; strict body rejects injected principal; 1 actual selected pass, 13 deliberate exclusions. Saved report verified on 1c19ec1fdefdebe57061287ad2737d0e24e862c2 without rerunning DB."
         }
       ],
-      "whatRemains": "Document review HTTP denies leaked paths to unauthenticated/unprivileged identities and self review; validates exact student asset ownership before/after IO. Still full certificate/invoice/graph two-student matrix and the institutional tenant definition/contract.",
+      "whatRemains": "Owner clarified Cross-Tenant means existing student ownership isolation. Institutional tenant design is not required for this R06 scope. Still complete cross-student certificate/invoice/graph HTTP checks; document review ownership negatives remain preserved evidence.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -705,7 +707,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery"
+        "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
+        "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network"
       ]
     },
     {
