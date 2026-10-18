@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 394,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 396,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 111,
+  "newDistinctThisContinuation": 113,
   "rows": [
     {
       "caseId": "CD-001",
@@ -77,7 +77,7 @@
           "scope": "Explicit injection-reached assertion plus Prisma P2010/meta SQLSTATE22012; owner/approval and audit/outbox rollback. Two already counted cases, no new distinct count."
         }
       ],
-      "whatRemains": "Actual authenticated canonical program create/publication/public detail and major-filter count, explicit unpublish/archive/republish, foreign campus/faculty rejection, mismatched Major/degree rejection and one-winner owner revision HTTP concurrency proven. Major/Profile/Version are explicit synthetic historical fixtures, not independently authored/approved Major workflows. Dynamic reference withdrawal graph, broader workspace languages and owning-phase browser gates remain.",
+      "whatRemains": "Actual JWT canonical program author/review/publish/archive cycle and same-owner relationships proven. Current Major version withdrawal/foreign-owner pointer now hides programs consistently in detail, filtered university count, program/major graph and CMS, with explicit restoration. Geography and other parent/reference withdrawal plus browser gates remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -88,7 +88,8 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/9e9b09408bd1feb081ad94b37df4d4989e092e33/R06-university-author",
-        "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author"
+        "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author",
+        "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version"
       ]
     },
     {
@@ -108,7 +109,7 @@
           "scope": "Missing degree profile rejected in authoring. Public eligibility rejects foreign major/profile version, draft/superseded version and retired profile. Publication workflow concurrency not fully executed."
         }
       ],
-      "whatRemains": "Major withdrawal between precheck and actual University publication is now rejected atomically; reference locks and exact current version ownership are enforced. Full program author/review/publish HTTP lifecycle and remaining withdrawal matrix still required.",
+      "whatRemains": "Canonical program author/publication and same-owner active Major/Profile/current published Version proof now covered by actual HTTP and SQL graphs. Withdrawn/foreign current versions fail closed without changing the published University owner; restored same-owner version restores visibility. Broader geography/reference withdrawal and built-browser gates remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -119,7 +120,8 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
-        "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication"
+        "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication",
+        "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version"
       ]
     },
     {
@@ -545,7 +547,7 @@
           "scope": "Provider headquarters has no derived study country; active canonical language review, rejects inactive/deprecated reference; raw labels excluded, card/list/relationship HTTP and publication guard withdraw deprecated language. No teaching-market DEC-07 acceptance."
         }
       ],
-      "whatRemains": "Full University owner author/review/publish and built-browser parity; University program language query/facet and scholarship HTTP/list/count source/reference parity now proven.",
+      "whatRemains": "University root/campus/faculty/canonical program HTTP lifecycle is now proven; program-language8 repeats on this frozen source. Full language author/review workspace and built-browser parity remain; original external Course provider-headquarters versus course-study-country semantics are preserved, not replaced by program-language coverage.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -557,7 +559,8 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/48102fc653314f2bc49308b62301a21305a2bf2c/R06-languages",
-        "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots"
+        "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
+        "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version"
       ]
     },
     {
@@ -872,7 +875,7 @@
           "scope": "Current canonical test version and language withdrawal affect next actual public request/list; no full multi-page parent/reference lifecycle matrix or snapshot/pagination consistency acceptance."
         }
       ],
-      "whatRemains": "Command identity serializable conflicts now retry whole aborted transactions (five attempts max), preserving serializable isolation and durable replay. Actual same-owner HTTP revision race and same-key creation convergence pass. Full dynamic published parent withdrawal/detail/list/CMS and snapshot consistency matrix remain.",
+      "whatRemains": "Current Major version ownership/publication SQL now agrees with detail projection and CMS. Same-key HTTP and owner revision concurrency repeat successfully. Geography, remaining parent withdrawals and cross-query snapshot races remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -886,9 +889,10 @@
         "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
         "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
         "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source",
-        "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author"
+        "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author",
+        "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version"
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 98
+  "newDistinctThisR06OnlyTask": 100
 }

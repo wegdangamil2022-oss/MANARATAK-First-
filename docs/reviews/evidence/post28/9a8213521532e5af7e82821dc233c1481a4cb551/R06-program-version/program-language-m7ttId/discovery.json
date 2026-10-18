@@ -1,0 +1,34 @@
+[
+  {
+    "name": "CD018 actual program teaching languages > matches both canonical program languages and projects the same IDs through HTTP",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-program-language.database.spec.mjs"
+  },
+  {
+    "name": "CD018 actual program teaching languages > never infers a language for an empty program profile from the scholarship scalar",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-program-language.database.spec.mjs"
+  },
+  {
+    "name": "CD018 actual program teaching languages > requires verified program evidence rather than an unchecked language list",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-program-language.database.spec.mjs"
+  },
+  {
+    "name": "CD018 actual program teaching languages > withdraws inactive reference languages without substituting English or scalar labels",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-program-language.database.spec.mjs"
+  },
+  {
+    "name": "CD018 actual program teaching languages > matches the language, degree and major on the same funded program",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-program-language.database.spec.mjs"
+  },
+  {
+    "name": "CD018 actual program teaching languages > withdraws language eligibility when the program or owning university is withdrawn",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-program-language.database.spec.mjs"
+  },
+  {
+    "name": "CD018 actual program teaching languages > rejects broken source evidence and foreign university links despite valid language foreign keys",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-program-language.database.spec.mjs"
+  },
+  {
+    "name": "CD018 actual program teaching languages > owner program read contract and scholarship HTTP return the same canonical languages",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-program-language.database.spec.mjs"
+  }
+]
