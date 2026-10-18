@@ -48,6 +48,16 @@ async function completion(){
  await progress.enroll(id,student);await db.courseEnrollment.update({where:{courseId_studentReferenceId:{courseId:id,studentReferenceId:student}},data:{progressPercentage:100}});await progress.completeCourse(id,student);
  return db.transactionalOutboxRecord.findFirstOrThrow({where:{aggregateId:id+':'+student,eventType:'CourseCompleted'}});
 }
+// Materialized rendered bytes with synthetic historical ACTIVE trust only.
+// This fixture does not represent fresh EAP ingestion, scan or sanitization.
+async function renderedPdfFixture(cert){
+ const version=await repository.findTemplateVersionById(cert.templateVersionId),lab=path.dirname(process.env.POST28_TARGET_CONTRACT_FILE);
+ const rendered=await new ProviderNeutralCertificateRenderingService({resolve:async(id,hash)=>{const bytes=fs.readFileSync(path.join(lab,'certificate-synthetic-assets',id+'.png'));expect(createHash('sha256').update(bytes).digest('hex')).toBe(hash);return {bytes,mimeType:'image/png'};}}).render({certificate:cert,templateVersion:version});
+ const bytes=Buffer.from(rendered.artifacts.find(row=>row.kind==='PDF').bytes),id=fresh(),hash=createHash('sha256').update(bytes).digest('hex'),file=path.join(lab,'certificate-synthetic-assets',id+'.pdf');fs.writeFileSync(file,bytes,{flag:'wx'});
+ const locator=new AssetStorageLocator(AssetStorageZone.CLEAN,'post28-certificates','clean/'+id+'.pdf'),quarantine=new AssetStorageLocator(AssetStorageZone.QUARANTINE,'post28-certificates','uploads/'+id+'.pdf');
+ await new PrismaAssetRecordRepository(db).save(new AssetRecord({id:new AssetId(id),reference:new AssetReference('post28-render-fixture-'+id),owner:new AssetOwnerReference(cert.id,'Certificate'),locator,metadata:new AssetMetadata('synthetic-rendered.pdf','application/pdf','pdf',bytes.length),retention:new AssetRetentionMetadata(AssetRetentionCategory.PERMANENT),classification:AssetSecurityClassification.INTERNAL,state:AssetLifecycleState.ACTIVE,checksum:new AssetChecksum('sha256',hash),sanitization:new AssetSanitizationMetadata(true,new Date(),'Synthetic historical trust fixture; NOT fresh EAP processing'),malwareScan:{status:'PASSED',scannedAt:new Date().toISOString(),locator:quarantine.value},uploadVerification:{locator:quarantine.value,byteSize:bytes.length,verifiedMimeType:'application/pdf',checksumSha256:hash,verifiedAt:new Date().toISOString(),signatureVerified:true}}));
+ return {id,file,hash,bytes};
+}
 const consume=(event,facade=certificates)=>new CertificateCompletionEventConsumer(facade).consume(event);
 async function pathCompletion(){
  const completed=await completion(),{courseId,studentReferenceId}=completed.payload;
@@ -103,6 +113,23 @@ describe('Post28 actual synthetic certificate owner issuance and verification wo
   expect(Buffer.from(rendered.artifacts.find(row=>row.kind==='PDF').bytes).subarray(0,5).toString()).toBe('%PDF-');
   expect(Buffer.from(rendered.artifacts.find(row=>row.kind==='PREVIEW').bytes).toString()).toContain(cert.serialNumber);
   expect((await db.certificate.findUniqueOrThrow({where:{id:cert.id}})).certificatePdfAssetId).toBeNull();
+ });
+ it('attaches a real rendered PDF once and resolves only its actual student owner',async()=>{
+  const cert=await consume(await pathCompletion()),pdf=await renderedPdfFixture(cert),input={certificatePdfAssetId:pdf.id};
+  await certificates.attachRenderedArtifacts(cert.id,input,'synthetic-renderer');const attached=await repository.findById(cert.id);expect(attached.certificatePdfAssetId).toBe(pdf.id);
+  expect(await certificates.deliveryArtifact(cert.id,'pdf',cert.studentReferenceId)).toBe(pdf.id);await expect(certificates.deliveryArtifact(cert.id,'pdf',fresh())).rejects.toThrow('CERTIFICATE_NOT_FOUND');
+  expect(createHash('sha256').update(fs.readFileSync(pdf.file)).digest('hex')).toBe(pdf.hash);
+  const before=await db.certificateLedgerEntry.count({where:{certificateId:cert.id,action:'ARTIFACTS_ATTACHED'}});await certificates.attachRenderedArtifacts(cert.id,input,'synthetic-renderer');expect(await db.certificateLedgerEntry.count({where:{certificateId:cert.id,action:'ARTIFACTS_ATTACHED'}})).toBe(before);expect(before).toBe(1);
+  await certificates.revoke(cert.id,'Synthetic delivery withdrawal test',checker);await expect(certificates.deliveryArtifact(cert.id,'pdf',cert.studentReferenceId)).rejects.toThrow('CERTIFICATE_ARTIFACT_STATE_INVALID');expect((await repository.findById(cert.id)).certificatePdfAssetId).toBe(pdf.id);expect(fs.existsSync(pdf.file)).toBe(true);
+ });
+ it('serializes two connections attaching competing rendered PDFs without replacing the winning identity',async()=>{
+  const cert=await consume(await pathCompletion()),a=await renderedPdfFixture(cert),b=await renderedPdfFixture(cert);const results=await Promise.allSettled([certificates.attachRenderedArtifacts(cert.id,{certificatePdfAssetId:a.id},maker),otherCertificates.attachRenderedArtifacts(cert.id,{certificatePdfAssetId:b.id},checker)]);
+  expect(results.filter(row=>row.status==='fulfilled')).toHaveLength(1);const failure=results.find(row=>row.status==='rejected');expect(failure.reason.message).toContain('CERTIFICATE_ARTIFACT_IMMUTABLE');const stored=await repository.findById(cert.id);expect([a.id,b.id]).toContain(stored.certificatePdfAssetId);expect(await db.certificateLedgerEntry.count({where:{certificateId:cert.id,action:'ARTIFACTS_ATTACHED'}})).toBe(1);
+ });
+ it('rejects a foreign certificate asset and a revoked certificate attachment without changing either owner',async()=>{
+  const cert=await consume(await pathCompletion()),foreign=await consume(await pathCompletion()),pdf=await renderedPdfFixture(foreign),before=await db.certificate.findUniqueOrThrow({where:{id:cert.id}});
+  await expect(certificates.attachRenderedArtifacts(cert.id,{certificatePdfAssetId:pdf.id},maker)).rejects.toThrow('CERTIFICATE_ARTIFACT_OWNERSHIP_INVALID');expect(await db.certificate.findUniqueOrThrow({where:{id:cert.id}})).toEqual(before);
+  const owned=await renderedPdfFixture(cert);await certificates.revoke(cert.id,'Synthetic revoked attachment test',checker);const revoked=await db.certificate.findUniqueOrThrow({where:{id:cert.id}});await expect(certificates.attachRenderedArtifacts(cert.id,{certificatePdfAssetId:owned.id},maker)).rejects.toThrow('CERTIFICATE_ARTIFACT_STATE_INVALID');expect(await db.certificate.findUniqueOrThrow({where:{id:cert.id}})).toEqual(revoked);expect(await db.certificateLedgerEntry.count({where:{certificateId:cert.id,action:'ARTIFACTS_ATTACHED'}})).toBe(0);
  });
  it('serializes two actual path consumers and replay into one certificate and immutable enrollment identity',async()=>{
   const event=await pathCompletion(),results=await Promise.all([consume(event),consume(event,otherCertificates)]);expect(results[0].id).toBe(results[1].id);expect((await consume(event)).id).toBe(results[0].id);const f=await effects(event);expect(f.rows).toHaveLength(1);expect(f.inbox).toHaveLength(1);expect(f.ledgers).toHaveLength(1);expect(f.audit).toBe(1);

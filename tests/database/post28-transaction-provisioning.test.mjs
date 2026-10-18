@@ -157,7 +157,7 @@ test('optional certificate workflow scope is explicit and contains five owner ta
  assert.deepEqual(CERTIFICATE_FIXTURE_APPLICATION_TABLES,['CertificateIssuer','CertificateTemplate','CertificateTemplateVersion','CertificateIssuanceInbox','CertificateLedgerEntry']);
  const initializer=fs.readFileSync('scripts/database/initialize-post28-transactions.mjs','utf8');
  assert.ok(initializer.includes("process.argv[2]==='--certificate-fixtures'"));assert.ok(initializer.includes('if(certificateFixtures)await setup.$executeRawUnsafe'));
- const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('certificate-runtime').minimumCases,11);
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('certificate-runtime').minimumCases,14);
 });
 test('owner lock profile executes ten actual gateway contracts with one source budget fixture grant',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('owner-advisory-locks').minimumCases,10);assert.ok(TRANSACTION_APPLICATION_TABLES.includes('ImportRateBudget'));assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
