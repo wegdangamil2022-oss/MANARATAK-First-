@@ -1,4 +1,5 @@
 import type { ExternalCourseProviderDto } from './provider-registry';
+import type { AtomicPersistenceContext } from '../event-foundation/outbox/TransactionalOutbox';
 import type { UpdateCourseDto } from './contracts/ICourseRepository';
 
 export type ImportedCourseLinkHealth =
@@ -183,6 +184,7 @@ export interface ImportedCourseLinkCheckResult {
 }
 
 export interface IImportedCourseOperationsRepository {
+  withTransaction?(context: AtomicPersistenceContext): IImportedCourseOperationsRepository;
   listImportedCourses(filters: ImportedCourseAdminFilters): Promise<ImportedCoursePage>;
   getImportedCourseById(id: string): Promise<ImportedCourseAdminDetail | null>;
   getOverview(): Promise<ImportedCourseOverview>;

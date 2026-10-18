@@ -71,15 +71,17 @@ function pageSize(value: unknown, fallback: number): number {
 }
 
 export class PrismaImportedCourseOperationsRepository implements IImportedCourseOperationsRepository {
-  public constructor(private readonly prisma: PrismaClient) {}
+  public constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
   public withTransaction(context:AtomicPersistenceContext):IImportedCourseOperationsRepository {
     const tx=(context as AtomicPersistenceContext & {transactionClient?:unknown}).transactionClient;
     if(!context.boundaryId||!tx) throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
-    return new PrismaImportedCourseOperationsRepository(tx as PrismaClient);
+    return new PrismaImportedCourseOperationsRepository(tx as PrismaClient, true);
   }
   private async batch(queries:Prisma.PrismaPromise<unknown>[]):Promise<unknown[]> {
-    if(typeof this.prisma.$transaction==='function') return this.prisma.$transaction(queries);
-    return Promise.all(queries);
+    if(!this.transactionBound) return this.prisma.$transaction(queries);
+    const results: unknown[] = [];
+    for (const query of queries) results.push(await query);
+    return results;
   }
 
 
@@ -273,6 +275,20 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
     result: ImportedCourseLinkCheckResult,
     checkedUrl: string,
   ): Promise<void> {
+    if (!this.transactionBound) {
+      return this.prisma.$transaction(tx =>
+        new PrismaImportedCourseOperationsRepository(tx as PrismaClient, true)
+          .recordLinkCheck(courseId, result, checkedUrl));
+    }
+    // Serialize with the canonical owner before reading the URL. A checker may
+    // finish after a controlled import, or after a newer check of the same URL.
+    await this.prisma.$queryRaw`SELECT id FROM "Course"
+      WHERE id = ${courseId} OR "publicId" = ${courseId} OR slug = ${courseId}
+      ORDER BY id FOR UPDATE`;
+    await this.prisma.$queryRaw`SELECT identity.id FROM "CourseSourceIdentity" identity
+      JOIN "Course" owner ON owner.id = identity."courseId"
+      WHERE owner.id = ${courseId} OR owner."publicId" = ${courseId} OR owner.slug = ${courseId}
+      ORDER BY identity.id FOR UPDATE OF identity`;
     const context = await this.getVerificationContext(courseId);
     if (!context) throw new Error('IMPORTED_COURSE_NOT_FOUND');
     if (!context.sourceIdentityId) throw new Error('IMPORTED_COURSE_SOURCE_IDENTITY_REQUIRED');
@@ -291,6 +307,9 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
         },
       },
     });
+    if (existing?.checkedAt && existing.checkedAt.getTime() > result.checkedAt.getTime()) {
+      throw new Error('IMPORTED_COURSE_LINK_CHECK_STALE_RESULT');
+    }
 
     await this.batch([
       this.prisma.courseSourceUrlHistory.updateMany({

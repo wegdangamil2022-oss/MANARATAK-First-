@@ -1,0 +1,78 @@
+[
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > binds verified JWT identity to real student collection reads and ignores query impersonation",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects cross student collection updates with the authenticated principal",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects foreign student path aliases and injected body authority",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects missing and tampered JWT tokens before a student read",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > revalidates real session revocation on the next HTTP request",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > revalidates identity suspension and student role withdrawal from PostgreSQL",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > public university graph excludes both students private collections and invoice metadata",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > public graph rejects student identity query injection",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > consumes a bound two checker approval atomically with real FX activation",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects a foreign target approval without consuming it or activating the rate",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects pending approval and stale executor version without consuming approval",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > allows only one of two independent connections to execute one approval",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rolls approval consumption and activation back on a PostgreSQL outbox failure",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > blocks provider payment and automatic FX before any external call or payment write",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > isolates real issued invoice list and count by JWT student despite query impersonation",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > denies foreign invoice details and payment histories while allowing its actual owner",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects another student invoice before payment or wallet provider dispatch with unchanged records",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > lists only the JWT student certificates and strips private metadata with query impersonation rejected",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real HTTP principal and independent finance execution > rejects foreign certificate cursors and artifacts before storage delivery with unchanged certificate",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-http-finance.database.spec.mjs"
+  }
+]

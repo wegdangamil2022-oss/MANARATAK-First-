@@ -37,6 +37,8 @@ describe('approved editable certificate rendering', () => {
     expect(svg).toContain('قد أتم/ت بنجاح');
     expect(svg).not.toContain('قد أتمت');
     expect(svg).toContain('id="official-logo"');
+    expect(svg).toContain('data:image/jpeg;base64,');
+    expect(svg).not.toContain('data:image/png;base64,');
     expect(svg).toContain('x="586" y="51"');
     expect(svg).toContain('viewBox="130 200 600 620"');
     expect(svg).toContain('id="achievement-en"><text x="250" y="338"');

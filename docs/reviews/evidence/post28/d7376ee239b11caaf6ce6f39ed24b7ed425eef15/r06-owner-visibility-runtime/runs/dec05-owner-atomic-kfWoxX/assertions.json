@@ -1,0 +1,88 @@
+[
+  {
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs",
+    "title": "commits rejection derived invalidation owner version audit and outbox together",
+    "ancestors": [
+      "Post28 DEC05 owner command atomic lifecycle"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "TypeError: this.prisma.$transaction is not a function"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs",
+    "title": "rolls all owner and relation writes back on actual PostgreSQL failure in auditRecord",
+    "ancestors": [
+      "Post28 DEC05 owner command atomic lifecycle"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "Error: expected TypeError: this.prisma.$transaction is no… to match object { code: 'P2010', …(1) }"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs",
+    "title": "rolls all owner and relation writes back on actual PostgreSQL failure in transactionalOutboxRecord",
+    "ancestors": [
+      "Post28 DEC05 owner command atomic lifecycle"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "Error: expected TypeError: this.prisma.$transaction is no… to match object { code: 'P2010', …(1) }"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs",
+    "title": "serializes concurrent owner commands and rejects the stale version without duplicate effects",
+    "ancestors": [
+      "Post28 DEC05 owner command atomic lifecycle"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "AssertionError: expected [] to have a length of 1 but got +0"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs",
+    "title": "refuses stale command replay before any relation audit or outbox mutation",
+    "ancestors": [
+      "Post28 DEC05 owner command atomic lifecycle"
+    ],
+    "status": "passed",
+    "failureFirstLine": []
+  },
+  {
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs",
+    "title": "reconciles removed source terms through the owner transaction and preserves independent links",
+    "ancestors": [
+      "Post28 DEC05 owner command atomic lifecycle"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "TypeError: this.prisma.$transaction is not a function"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs",
+    "title": "requires unpublication before reviewing a published structure then performs actual unpublish and rejection",
+    "ancestors": [
+      "Post28 DEC05 owner command atomic lifecycle"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "TypeError: this.prisma.$transaction is not a function"
+    ]
+  },
+  {
+    "file": "tests/database/post28-dec05-owner-atomic.database.spec.mjs",
+    "title": "withdraws an approved taxonomy projection when its source provenance changes",
+    "ancestors": [
+      "Post28 DEC05 owner command atomic lifecycle"
+    ],
+    "status": "failed",
+    "failureFirstLine": [
+      "AssertionError: expected 'APPROVED' to be 'REVIEW_REQUIRED' // Object.is equality"
+    ]
+  }
+]

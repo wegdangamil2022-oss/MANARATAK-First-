@@ -1,0 +1,38 @@
+{
+  "kind": "POST28_R06_HANDOFF_PRECOMMIT_READ_ONLY_CHECKS",
+  "checkedAt": "2026-10-16T22:12:09.764455+00:00",
+  "sourceStateAtStart": "6429b6ee85018351f4e2d9c8006be92d2d706a17",
+  "checks": [
+    {
+      "check": "verify",
+      "exitCode": 0,
+      "privateLogSha256": "9e544b5522031ce3670d03c111d14ebe57327c35bbd7799297525985b18f381b",
+      "bytes": 116
+    },
+    {
+      "check": "organization",
+      "exitCode": 0,
+      "privateLogSha256": "6453fa6c4904e2666371d556ebaadc21619c075f87b4cc2ce7afd25f64bed129",
+      "bytes": 440
+    },
+    {
+      "check": "lint",
+      "exitCode": 0,
+      "privateLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "check": "secrets",
+      "exitCode": 0,
+      "privateLogSha256": "bed7af444dba96b150a6229e469faf0b4af2d50110b89d72c692fc8f841b7cd8",
+      "bytes": 40
+    }
+  ],
+  "databaseRuntimeExecuted": false,
+  "historicalIndexedJSONFiles": 631,
+  "requiredCases": 26,
+  "fullCasesAccepted": 0,
+  "distinctSuccessfulPostgresCases": 283,
+  "productCodeChangedSinceSourceState": false,
+  "postPushCommitAndRemoteEquality": "Verified read-only after final push and supplied in the delivery response; not embedded in its own commit."
+}

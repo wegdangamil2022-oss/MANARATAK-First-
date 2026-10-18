@@ -1,0 +1,10 @@
+{
+  "sourceSha": "2954ae593d75414399938458313ecadd3b988e14",
+  "nodeVersion": "v22.16.0",
+  "readOnlyGet": true,
+  "url": "https://cs50.harvard.edu/x/",
+  "phase": "red",
+  "fullImportAcceptance": false,
+  "error": "Invalid IP address: undefined",
+  "checkedAt": "2026-10-18T17:29:02.418Z"
+}

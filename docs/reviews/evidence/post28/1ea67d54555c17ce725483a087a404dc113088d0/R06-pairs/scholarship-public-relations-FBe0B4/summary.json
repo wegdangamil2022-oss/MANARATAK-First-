@@ -1,0 +1,33 @@
+{
+  "kind": "POST28_DATABASE_SUITE_EXECUTION",
+  "sourceSha": "1ea67d54555c17ce725483a087a404dc113088d0",
+  "suite": "scholarship-public-relations",
+  "caseExact": null,
+  "fullDiscoveryCases": 4,
+  "fullProfileAcceptance": true,
+  "authorization": {
+    "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY",
+    "R04": "PASS_LOCAL_MATCHING_SCHEMA",
+    "R05": "BLOCKED_USER_AUTHORIZED_SCOPED_R06",
+    "fullR06Acceptance": false,
+    "deploymentAuthorized": false
+  },
+  "targets": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698027865404622980",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "expected": 4,
+  "executed": 4,
+  "passed": 4,
+  "failed": 0,
+  "skipped": 0
+}

@@ -17,7 +17,8 @@ const program = () => ({
   major: {
     status: 'PUBLISHED',
     levelProfiles: [
-      { degreeLevelId: 'bachelor', status: 'PUBLISHED', currentPublishedVersionId: 'version' },
+      { id: 'profile', degreeLevelId: 'bachelor', status: 'PUBLISHED', currentPublishedVersionId: 'version',
+        currentPublishedVersion: { id: 'version', majorId: 'major', profileId: 'profile', status: 'PUBLISHED' } },
     ],
   },
 });
@@ -105,7 +106,7 @@ const mockDb = () => ({
   scholarship: published({ id: 's' }),
   internationalTest: published({ currentPublishedVersionId: 'v' }),
   internationalTestPublicationSnapshot: published({ id: 'v' }),
-  course: published({ id: 'c' }),
+  course: { ...published({ id: 'c' }), findMany: vi.fn().mockResolvedValue([]) },
   referenceCountry: published({ id: 'rc' }),
 });
 
@@ -128,7 +129,7 @@ describe('P16 canonical owner publication gateway', () => {
     expect(db.universityAcademicProgram.findFirst).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          university: { is: { status: 'PUBLISHED' } },
+          university: { is: expect.objectContaining({ status: 'PUBLISHED',countryReference:{is:{isActive:true,lifecycleState:'ACTIVE'}} }) },
           major: { is: { status: 'PUBLISHED' } },
         }),
       }),

@@ -1,0 +1,15 @@
+{
+  "sourceSha": "f29504b5ac830ba54df7c02c501118c6e78c402a",
+  "runId": "7ecd4db0-0af4-496b-b5dc-cae7b446f337",
+  "passedDatabaseCases": 47,
+  "newDistinctCases": 4,
+  "repeatedCases": 43,
+  "cumulativeDistinctAcrossShas": 329,
+  "allAtCurrentHead": false,
+  "R06Accepted": false,
+  "unitUiPassed": 27,
+  "broaderOwnerUnitsPassed": 306,
+  "broaderOwnerUnitsFailed": 2,
+  "schemaChanged": false,
+  "fundingCountryProposalApplied": false
+}

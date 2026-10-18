@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import { BookOpen, Building2, Calendar, DollarSign, FileText, GraduationCap, Globe, Languages, ShieldCheck, ExternalLink } from 'lucide-react';
 import type { Scholarship } from '../types';
 import { DetailSectionHeader } from './DetailUi';
+import { FundedProgramPairs } from './FundedProgramPairs';
 
 const benefitNames: Record<string, string> = { TUITION: "public_published_tuition_fees", TUITION_FEES: "public_published_tuition_fees", STIPEND: "public_published_stipend_or_allowance", ACCOMMODATION: "public_published_accommodation", HEALTH_INSURANCE: "public_published_health_insurance", TRAVEL: "public_published_travel", LIVING_ALLOWANCE: "public_published_living_allowance" };
 function Text({ value }: { value?: string | null }) {
@@ -47,12 +48,10 @@ export function PublishedScholarshipDetails({ scholarship, onOpenUniversity, onO
   const list = (items: string[]) => items.length ? <ul className="space-y-2">{items.map((item, index) => <li key={index} className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)]"><Text value={item} /></li>)}</ul> : <Text />;
   return <div className="px-1.5 sm:px-2 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3">
     {section('scholarship-donor', publicT('public_published_funding_organization'), Building2, <Text value={dto.providerName || dto.sponsorName} />)}
-    {section('scholarship-country', publicT('public_published_country_and_scholarship_scope'), Globe, <><Text value={dto.countrySourceLabel || dto.studyCountry} />{dto.countryScope && <Text value={dto.countryScope} />}</>)}
+    {section('scholarship-country', publicT('public_published_country_and_scholarship_scope'), Globe, <><Text value={dto.studyCountryLabel || dto.countrySourceLabel || dto.studyCountry} />{dto.countryScope && <Text value={dto.countryScope} />}</>)}
     {section('scholarship-overview', publicT('public_published_scholarship_overview'), BookOpen, <Text value={dto.description || scholarship.description} />)}
     {section('scholarship-degrees', publicT('public_published_target_degrees_and_majors'), GraduationCap, <>
-      {list(scholarship.degreeLevel)}
-      {list((dto.majorTargets || []).map(item => item.sourceLabel || '').filter(Boolean))}
-      {!dto.majorTargets?.length && dto.eligibleMajorsOrFields && <Text value={Array.isArray(dto.eligibleMajorsOrFields) ? dto.eligibleMajorsOrFields.join('، ') : dto.eligibleMajorsOrFields} />}
+      <FundedProgramPairs pairs={dto.fundedProgramPairs ?? []} language={language} />
     </>)}
     {section('scholarship-funding', publicT('public_published_funding_and_financial_coverage'), DollarSign, <>
       <p>{scholarship.fundingType}</p>
@@ -63,11 +62,11 @@ export function PublishedScholarshipDetails({ scholarship, onOpenUniversity, onO
       {canonicalAmount && <p>{canonicalAmount}</p>}
       {dto.duration && <Text value={dto.duration} />}
     </>)}
-    {section('scholarship-eligibility', publicT('public_published_eligibility_and_admission_requirements'), ShieldCheck, eligibility.length ? list(eligibility.map(item => [item.valueText || item.itemTypeCode,
+    {section('scholarship-eligibility', publicT('public_published_eligibility_and_admission_requirements'), ShieldCheck, eligibility.length ? list(eligibility.map(item => [item.valueText || item.itemTypeCode, item.countryLabel, item.countryLabel ? item.operatorCode : undefined,
       item.minimumValue != null ? publicT('public_minimum_value', { v0: item.minimumValue }) : '', item.maximumValue != null ? publicT('public_maximum_value', { v0: item.maximumValue }) : '',
       item.isRequired === false ? publicT('public_published_optional') : ''].filter(Boolean).join(' — '))) : <Text value={dto.eligibilityCriteria} />)}
     {section('scholarship-documents', publicT('public_published_required_documents'), FileText, documents.length ? list(documents.map(item => [item.displayName, item.description, item.isRequired === false ? publicT('public_published_optional') : ''].filter(Boolean).join(' — '))) : <Text value={dto.requiredDocuments} />)}
-    {section('scholarship-language', publicT('public_published_study_language'), Languages, <Text value={dto.studyLanguageSourceLabel || dto.studyLanguage} />)}
+    {section('scholarship-language', publicT('public_published_study_language'), Languages, list((dto.fundedProgramPairs ?? []).map(pair => `${pair.programName}: ${pair.studyLanguages?.map(item=>item.name).join('، ') || (language === 'ar' ? 'غير محددة' : 'Unspecified')}`)))}
     {section('scholarship-deadlines', publicT('public_published_deadlines_and_application_round'), Calendar, <>
       <Text value={scholarship.deadline || (dto.deadlineType === 'OPEN_ALL_YEAR' ? publicT('public_applications_accepted_throughout_the_year') : undefined)} />
       {dto.academicYear && <p>{publicT('public_academic_year')}{' '}{dto.academicYear}</p>}

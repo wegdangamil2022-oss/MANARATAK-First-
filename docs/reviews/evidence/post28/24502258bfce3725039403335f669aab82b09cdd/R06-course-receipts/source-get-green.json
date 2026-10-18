@@ -1,0 +1,14 @@
+{
+  "sourceSha": "14f0b4406bcfae081c97008dc4b937e89abc8a92",
+  "nodeVersion": "v22.16.0",
+  "readOnlyGet": true,
+  "url": "https://cs50.harvard.edu/x/",
+  "phase": "green",
+  "fullImportAcceptance": false,
+  "statusCode": 200,
+  "finalUrl": "https://cs50.harvard.edu/x/",
+  "byteSize": 20477,
+  "sha256": "725961a0a479ae7f0cd4fe796aba7a26ceb3db0a1c5b99dfd9b9542f1fe6cac2",
+  "fetchedAt": "2026-10-18T17:29:50.986Z",
+  "contentType": "text/html"
+}

@@ -84,7 +84,7 @@ describe('CertificateUseCases W10 trust model', () => {
       listByStudent: vi.fn(), list: vi.fn(), analytics: vi.fn(), revoke: vi.fn(), expireDue: vi.fn(), archive: vi.fn(), recordVerification: vi.fn(), listLedger: vi.fn(),
     };
     courses = { findById: vi.fn().mockResolvedValue(course) };
-    learningPaths = { findByVersion: vi.fn().mockResolvedValue({ id: 'path-1', title: 'AI Learning Path' }), findById: vi.fn().mockResolvedValue({ id: 'path-1', title: 'AI Learning Path' }) };
+    learningPaths = { findByVersion: vi.fn().mockResolvedValue({ id: 'path-1', title: 'AI Learning Path', status: 'PUBLISHED', certificateEligible: true }), findById: vi.fn().mockResolvedValue({ id: 'path-1', title: 'AI Learning Path', status: 'PUBLISHED', certificateEligible: true }) };
     useCases = new CertificateUseCases(repository, courses, undefined, {
       signingKeyReference: issuer.signingKeyReference,
       signingSecret: 'test-secret',

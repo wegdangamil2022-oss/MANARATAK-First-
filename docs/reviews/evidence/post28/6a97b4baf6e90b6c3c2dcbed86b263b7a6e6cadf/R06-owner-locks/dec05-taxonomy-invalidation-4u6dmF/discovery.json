@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Post28 DEC05 taxonomy rejection and dependent projection > withdraws only the rejected taxonomy derived major projection from the next public read",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 taxonomy rejection and dependent projection > preserves independent reviewed major links and all provenance rows",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 taxonomy rejection and dependent projection > does not silently approve withdrawn projections when the taxonomy is reapproved",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 taxonomy rejection and dependent projection > rejects a foreign course identity without modifying its link or projection",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 taxonomy rejection and dependent projection > repeated and concurrent rejection through two connections converges without deleting history",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC05 taxonomy rejection and dependent projection > rolls link resolution and projections back on a real PostgreSQL statement failure",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs"
+  }
+]

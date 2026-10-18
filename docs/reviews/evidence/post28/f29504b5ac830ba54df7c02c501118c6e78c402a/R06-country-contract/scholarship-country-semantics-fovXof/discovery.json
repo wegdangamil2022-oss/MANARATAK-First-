@@ -1,0 +1,46 @@
+[
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > uses the restricted application principal without schema or migration-ledger writes",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  },
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > destination filters and counts never match applicant nationality or funding provenance",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  },
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > keeps two evidenced nationality conditions separate from a single destination in HTTP details",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  },
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > funding-context changes preserve destination and original nationality rows",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  },
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > destination changes do not rewrite nationality conditions or sponsor source",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  },
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > does not infer missing study destination from applicant or sponsor countries",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  },
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > rejects unsupported funding-country filters rather than reinterpreting them as destination",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  },
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > filters explicit nationality inclusions independently of study destination and funding metadata",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  },
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > does not treat exclusion or unknown nationality conditions as a positive eligibility claim",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  },
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > requires resolved active nationality references and never reuses a residence condition",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  },
+  {
+    "name": "CD-009 dedicated partial country separation on real PostgreSQL and HTTP > projects canonical country labels separately from funding organization and ignores arbitrary funding-country metadata",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-country-semantics.database.spec.mjs"
+  }
+]

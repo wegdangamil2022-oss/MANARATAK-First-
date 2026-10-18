@@ -103,10 +103,11 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   private readonly normalizedInclude = {
+    primaryCountry:{select:{id:true,name:true,nameAr:true,isActive:true,lifecycleState:true}},
     benefits: { include: { currency: { select: { isoCode: true, nameAr: true, name: true } } } },
     degreeTargets: { include: { degreeLevel: { select: { canonicalCode: true, nameEn: true, nameAr: true } } } },
     majorTargets: { include: { major: { select: { status: true } } } },
-    eligibilityItems: { include: { major: { select: { status: true } },
+    eligibilityItems: { include: { country:{select:{id:true,name:true,nameAr:true,isActive:true,lifecycleState:true}}, major: { select: { status: true } },
         internationalTest: { select: { id: true, status: true, isPubliclyVisible: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, testId: true, status: true } } } },
       } },
     requiredDocuments: { include: { internationalTest: { select: { id: true, status: true, isPubliclyVisible: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, testId: true, status: true } } } } } },
@@ -142,8 +143,9 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   async findPublishedBySlug(slug: string): Promise<ScholarshipDto | null> {
+    if (!this.transactionBound) return this.readSnapshot(repository=>repository.findPublishedBySlug(slug));
     const record = await this.prisma.scholarship.findFirst({
-      where: { slug, status: ScholarshipStatus.PUBLISHED, publicationStatus: ScholarshipPublicationStatus.PUBLISHED, verificationStatus: ScholarshipVerificationStatus.VERIFIED, versions: { some: { status: 'PUBLISHED' } } },
+      where: { slug, status: ScholarshipStatus.PUBLISHED, publicationStatus: ScholarshipPublicationStatus.PUBLISHED, verificationStatus: ScholarshipVerificationStatus.VERIFIED, completenessStatus:ScholarshipCompletenessState.COMPLETE, versions: { some: { status: 'PUBLISHED' } } },
       include: this.normalizedInclude,
     });
     return record ? (await this.hydrateProgramOwners([this.mapToDto(record)]))[0] : null;
@@ -559,6 +561,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   async listPublished(filters: PublicScholarshipFilters): Promise<ScholarshipPage<ScholarshipDto>> {
+    if (!this.transactionBound) return this.readSnapshot(repository=>repository.listPublished(filters));
     const where: Prisma.ScholarshipWhereInput = {
       publicationStatus: ScholarshipPublicationStatus.PUBLISHED,
       status: ScholarshipStatus.PUBLISHED,
@@ -567,10 +570,15 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       completenessStatus: ScholarshipCompletenessState.COMPLETE,
     };
     const constraints: Prisma.ScholarshipWhereInput[] = [];
+    if (filters.nationalityCountryReferenceId) {
+      constraints.push({eligibilityItems:{some:{itemTypeCode:'NATIONALITY',operatorCode:'IN',countryReferenceId:filters.nationalityCountryReferenceId,resolutionStatus:'RESOLVED',country:{is:{isActive:true,lifecycleState:'ACTIVE'}}}}});
+      constraints.push({eligibilityItems:{none:{itemTypeCode:'NATIONALITY',operatorCode:'NOT_IN',countryReferenceId:filters.nationalityCountryReferenceId,resolutionStatus:'RESOLVED'}}});
+      constraints.push({eligibilityItems:{none:{itemTypeCode:'NATIONALITY',OR:[{resolutionStatus:{not:'RESOLVED'}},{countryReferenceId:null},{operatorCode:null},{operatorCode:{notIn:['IN','NOT_IN']}}]}}});
+    }
     if(filters.ownerId)where.id=filters.ownerId;
     if(filters.search)constraints.push({OR:[{displayName:{contains:filters.search,mode:'insensitive'}},{publicId:{contains:filters.search,mode:'insensitive'}}]});
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
-    if (filters.studyLanguageReferenceId) where.studyLanguageReferenceId = filters.studyLanguageReferenceId;
+
     if (filters.currencyReferenceId) constraints.push({ benefits: { some: { currencyReferenceId: filters.currencyReferenceId } } });
     // Independent target lists cannot prove a funded degree-major pair.
     const pairedProgramFilter = Boolean(filters.degreeLevelId && filters.majorId);
@@ -587,14 +595,14 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
                 resolutionStatus: 'RESOLVED', internationalTest: { is: { status: 'PUBLISHED', isPubliclyVisible: true, currentPublishedVersion: { is: { status: 'PUBLISHED', testId: filters.internationalTestId } } } },
               } } },
     ] });
-    if (filters.universityId || filters.academicProgramId || pairedProgramFilter) {
+    if (filters.universityId || filters.academicProgramId || pairedProgramFilter || filters.studyLanguageReferenceId) {
       // Filter exact owner/profile proof before both page and count. Oversized owner scope fails explicitly.
       const eligible = await this.programReads.findPublished({
         universityId: filters.universityId, academicProgramId: filters.academicProgramId,
-        degreeLevelId: filters.degreeLevelId, majorId: filters.majorId,
+        degreeLevelId: filters.degreeLevelId, majorId: filters.majorId, languageReferenceId:filters.studyLanguageReferenceId,
       });
       const edges: Prisma.ScholarshipUniversityLinkWhereInput[] = eligible.map(program => ({ academicProgramId: program.id, resolutionStatus: 'RESOLVED', OR: [{ universityId: null }, { universityId: program.universityId }] }));
-      if (filters.universityId && !filters.academicProgramId && !filters.degreeLevelId && !filters.majorId) edges.push({ universityId: filters.universityId, academicProgramId: null, resolutionStatus: 'RESOLVED', university: { is: { status: UniversityStatus.PUBLISHED } } });
+      if (filters.universityId && !filters.academicProgramId && !filters.degreeLevelId && !filters.majorId && !filters.studyLanguageReferenceId) edges.push({ universityId: filters.universityId, academicProgramId: null, resolutionStatus: 'RESOLVED', university: { is: { status: UniversityStatus.PUBLISHED } } });
       constraints.push({ universityLinks: { some: edges.length ? { OR: edges } : { id: { in: [] } } } });
     }
     if (filters.fundingType === 'FULL')
@@ -629,14 +637,25 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     return {...page, data: await this.hydrateProgramOwners(page.data)};
   }
 
+  private async readSnapshot<T>(work:(repository:PrismaScholarshipRepository)=>Promise<T>):Promise<T> {
+    return this.prisma.$transaction(async transactionClient=> {
+      const context={boundaryId:'scholarship-public-read-snapshot-v1',transactionClient};
+      return work(new PrismaScholarshipRepository(transactionClient as PrismaClient,true,this.programReads.withTransaction(context)));
+    },{isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead});
+  }
+
   private async hydrateProgramOwners(records: ScholarshipDto[]): Promise<ScholarshipDto[]> {
     const ids = [...new Set(records.flatMap(record => (record.universityLinks ?? []).map(link => link.academicProgramId).filter((id): id is string => Boolean(id))))];
-    if (!ids.length) return records;
+    if (!ids.length) return records.map(record => ({...record, fundedProgramPairs: []}));
     const refs: UniversityProgramReferenceV1[] = [];
     for (let offset = 0; offset < ids.length; offset += 500) {
       refs.push(...await this.programReads.findByIds(ids.slice(offset, offset + 500)));
     }
-    return records.map(record => ({...record, universityLinks: (record.universityLinks ?? []).map(link => {
+    return records.map(record => ({...record, fundedProgramPairs: (record.universityLinks ?? []).flatMap(link => {
+      const ref = refs.find(row => row.id === link.academicProgramId);
+      if (link.resolutionStatus !== 'RESOLVED' || !ref?.publiclyEligible || !ref.degreeLevelId || !ref.majorId || (link.universityId && link.universityId !== ref.universityId)) return [];
+      return [{linkKey:link.linkKey,universityId:ref.universityId,academicProgramId:ref.id,degreeLevelId:ref.degreeLevelId,majorId:ref.majorId,programName:ref.displayName,degreeLabel:ref.degreeLabel,majorLabel:ref.majorLabel,studyLanguages:ref.studyLanguages}];
+    }), universityLinks: (record.universityLinks ?? []).map(link => {
       if (!link.academicProgramId) return link;
       const ref = refs.find(row => row.id === link.academicProgramId);
       return {...link, academicProgram: ref ? {universityId:ref.universityId, ownerProof:ref} : null};
@@ -652,6 +671,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     return {
       ...compatibility,
       ...raw,
+      studyCountryLabel: (()=>{const country=raw.primaryCountry as {name:string;nameAr?:string;isActive:boolean;lifecycleState:string}|undefined;return country?.isActive && country.lifecycleState==='ACTIVE' ? country.nameAr || country.name : undefined;})(),
       optionalFields: this.sanitizeOptionalFields(legacy),
       verificationStatus: raw.verificationStatus ?? ScholarshipVerificationStatus.PENDING,
       publicationStatus: raw.publicationStatus ?? this.legacyPublicationStatus(raw.status),
@@ -732,7 +752,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     const copy = { ...(source as Record<string, unknown>) };
     const descriptions=this.asOptionalRecord(source.optionalFields).ownerLocalizedDescriptions;
     if(descriptions!==undefined) copy.ownerLocalizedDescriptions=descriptions;
-    delete copy.versions; delete copy.sponsorContext; delete copy.applicationCycles; delete copy.optionalFields;
+    delete copy.versions; delete copy.sponsorContext; delete copy.applicationCycles; delete copy.optionalFields; delete copy.fundedProgramPairs;
     return this.jsonSafe(copy) as Prisma.InputJsonObject;
   }
 
@@ -817,6 +837,10 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     delete copy.major;
     delete copy.university;
     delete copy.academicProgram;
+    delete copy.countryLabel;
+    delete copy.country;
+    delete copy.primaryCountry;
+    delete copy.studyCountryLabel;
     return copy;
   }
 }

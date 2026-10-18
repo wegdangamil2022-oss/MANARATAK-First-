@@ -1,0 +1,131 @@
+{
+  "sourceSha": "3d04e28ba209c38765e43fc553563e17669bce4f",
+  "runId": "0d62c693-d0f4-42c8-9ff3-c9bff1793893",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "targets.json",
+      "bytes": 667,
+      "sha256": "ac14ddbd1e2ec10cc754a985b9cf6ed4dc749080753b8ff677c1660e2e4ba22d"
+    },
+    {
+      "path": "target-preflight.log",
+      "bytes": 426,
+      "sha256": "71472f12cdb8298c49f2c9c3720599bbbc615774b380ddf7b9aa6801d0eaf4d7"
+    },
+    {
+      "path": "stage-initialize-setup.log",
+      "bytes": 3761,
+      "sha256": "395cec9c7e1b6f26fd7787cff035d4e373b0c6491a8812b2e61286734215cb86"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "cdcf6771065541db0439598efcead0dcbecaa8e8423b9d7f096e0aff502ace29"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 4659,
+      "sha256": "e88fc00930a39451b6d8f53ad73653fe40f2f7e51f92a87ddfc3900aaa3c5e88"
+    },
+    {
+      "path": "certificate-runtime-KgxbJ6/discovery.json",
+      "bytes": 3951,
+      "sha256": "30b85e6bcf795f304a85b495fad06b1c1a4362b95d7d2c9a881c5a600fe65708"
+    },
+    {
+      "path": "certificate-runtime-KgxbJ6/selection.json",
+      "bytes": 108,
+      "sha256": "b7b3bf2d92665a3b78eb85c0b3622bc7e9fac7f6f9bdcf4f9cf80cd5e3a7698f"
+    },
+    {
+      "path": "certificate-runtime-KgxbJ6/vitest.json",
+      "bytes": 6067,
+      "sha256": "766712aced3758029ac31f8373ba546f4016db997c8cfeeb3165af197869e111"
+    },
+    {
+      "path": "certificate-runtime-KgxbJ6/summary.json",
+      "bytes": 856,
+      "sha256": "c6a374a7481ad6ea4511dcc654a2bdc1a65ced4cd58f003f9e550df4640fb6e0"
+    },
+    {
+      "path": "render-units.json",
+      "bytes": 2954,
+      "sha256": "46583aa84197959a57db2f2377ce22fa30a3d2fb53cce1376877433acaae291c"
+    },
+    {
+      "path": "render-units.log",
+      "bytes": 250,
+      "sha256": "4e89ec58b633e8fd48e5ea6903175bf6e1cbf8c8518ed72723c234e064919a80"
+    },
+    {
+      "path": "provisioning.log",
+      "bytes": 16152,
+      "sha256": "e83e1a78a5be6109f170490b5ad58185f00a75c72b806e3f903d8d316b8b9c5d"
+    },
+    {
+      "path": "source-quality.log",
+      "bytes": 384,
+      "sha256": "eec55ba731573ad76875e3cff714bdc27a87514146f57511d67392efccd7ee81"
+    },
+    {
+      "path": "initial-render-units-failure.json",
+      "bytes": 4150,
+      "sha256": "b40c43dcf15e871c1b4b701a8e17092372a7edf5156b5f436d8acf7d8831c067"
+    },
+    {
+      "path": "rendered/pdf.pdf",
+      "bytes": 11275,
+      "sha256": "71d330ff33a51f31d5619d6b027749334a83ba8aa53b43aa01dd5df87977dadd"
+    },
+    {
+      "path": "rendered/preview.svg",
+      "bytes": 388340,
+      "sha256": "8977fbeb634a5f322cc898e2acb62d1da5b619d8cfb0554ddedb0a96f3dc1c7e"
+    },
+    {
+      "path": "rendered/qr.svg",
+      "bytes": 23819,
+      "sha256": "8e1a03f7506513c9be76f4078aac42f7de17689ac9f76acf7476fe86f3f59208"
+    },
+    {
+      "path": "failed/native-pg16-0oiOBn/certificate-runtime-QvEXGd/discovery.json",
+      "bytes": 3951,
+      "sha256": "30b85e6bcf795f304a85b495fad06b1c1a4362b95d7d2c9a881c5a600fe65708"
+    },
+    {
+      "path": "failed/native-pg16-0oiOBn/certificate-runtime-QvEXGd/selection.json",
+      "bytes": 108,
+      "sha256": "b7b3bf2d92665a3b78eb85c0b3622bc7e9fac7f6f9bdcf4f9cf80cd5e3a7698f"
+    },
+    {
+      "path": "failed/native-pg16-0oiOBn/certificate-runtime-QvEXGd/vitest.json",
+      "bytes": 6425,
+      "sha256": "d93b5036250f0dc782b701b340b704f42965bc6280587a6eaf19689848f60a91"
+    },
+    {
+      "path": "failed/native-pg16-GpTMta/certificate-runtime-3egzNL/discovery.json",
+      "bytes": 3951,
+      "sha256": "30b85e6bcf795f304a85b495fad06b1c1a4362b95d7d2c9a881c5a600fe65708"
+    },
+    {
+      "path": "failed/native-pg16-GpTMta/certificate-runtime-3egzNL/selection.json",
+      "bytes": 108,
+      "sha256": "b7b3bf2d92665a3b78eb85c0b3622bc7e9fac7f6f9bdcf4f9cf80cd5e3a7698f"
+    },
+    {
+      "path": "failed/native-pg16-GpTMta/certificate-runtime-3egzNL/vitest.json",
+      "bytes": 6436,
+      "sha256": "598721f2b7a494111aa6c444a1a704c92752f2fd7c995fb3ac4def21ebac853c"
+    },
+    {
+      "path": "result.json",
+      "bytes": 427,
+      "sha256": "b6151744efeed116c446352756c9acbc13d31035d005b31f5d16d80d3a3236db"
+    }
+  ]
+}

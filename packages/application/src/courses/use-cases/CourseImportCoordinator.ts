@@ -76,6 +76,7 @@ export class CourseImportCoordinator {
     if (!input.recordId.trim()) throw new Error('COURSE_IMPORT_RECORD_ID_REQUIRED');
     if (!input.actorId.trim()) throw new Error('COURSE_IMPORT_ACTOR_ID_REQUIRED');
     const transactionalCourseRepository = this.transactionalCourseRepository();
+    let persistedReceiptReplay = false;
 
     return this.atomicMutations.execute({
       domain: OWNER_DOMAIN,
@@ -101,6 +102,7 @@ export class CourseImportCoordinator {
         if (!receipt || receipt.recordId !== currentRecord.id || receipt.courseId !== already.id ||
             receipt.publicId !== already.publicId || typeof receipt.transferredAt !== 'string' ||
             !Number.isFinite(Date.parse(receipt.transferredAt))) throw new Error('COURSE_IMPORT_PROMOTION_LINK_CORRUPT');
+        persistedReceiptReplay = true;
         return { ...this.result(currentRecord.id, already, 'TRANSFERRED_UNCHANGED'), transferredAt: receipt.transferredAt };
       }
 
@@ -216,7 +218,7 @@ export class CourseImportCoordinator {
         transferredAt,
         publicationStatus: course.status === CourseStatus.INCOMPLETE ? 'INCOMPLETE' : 'IMPORTED',
       };
-    });
+    }, () => !persistedReceiptReplay);
   }
 
   private async buildPlan(

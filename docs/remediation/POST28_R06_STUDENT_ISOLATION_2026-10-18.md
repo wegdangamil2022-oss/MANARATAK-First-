@@ -1,0 +1,13 @@
+# R06 student ownership HTTP isolation — 2026-10-18
+
+Source be687e82df88317ab2aae10ce0cdb7689246c9c9; run 8553956d-0062-49b1-9623-a45bd4e5eef7; PostgreSQL postgres (PostgreSQL) 16.15, system 7698054901204626068.
+
+The project owner defined Cross-Tenant as the existing student's ownership boundary. Five new real PostgreSQL/HTTP scenarios use actual JWT identities, persisted sessions/roles, repositories and production StudentWorkspaceRouter. Issued invoices are created by the real finance owner commands. Tests prove list/count identity binding despite query impersonation, foreign path aliases 403, foreign invoice and payment history 404, and foreign payment/wallet attempts rejected before any provider call or financial record/command mutation.
+
+Certificate list tests use explicitly revoked, unsigned synthetic historical rows, not valid credential issuance. Own records are returned through the real CertificateReadModelService/Prisma repository; other student IDs, private metadata and verification hashes do not leak. Identity query injection is rejected, foreign owned cursors rejected and another student's artifact request returns CERTIFICATE_NOT_FOUND before rendering/storage. No actual issued file, signature trust, artifact readiness or legitimate delivery is inferred. An initial fixture referenced an absent Asset and PostgreSQL correctly rejected it; the immutable failed report is retained and the fictional reference was removed.
+
+Full final HTTP-finance suite 19/19 plus attestation closure 24/24 pass on one frozen source. The existing public University graph test asserts exclusion of both students' private identifiers/collections and invoice/document metadata; document consent/permission/owner IO races remain covered by the repeated 24. Related finance/certificate units 134/134 and provisioning 32/32 pass. The disposable lab grants one additional Certificate DML table for revoked read fixtures (89 total), while issuer/template/version and issuance inbox DML remain ungranted. No schema or deployment change.
+
+Still required: certificate authoritative issuance/inbox/signature/verification/revocation chain and genuine artifact ownership/delivery, wider graph surfaces and complete document student owner route coverage. This batch resolves the institutional definition question and adds concrete student boundary evidence; it does not declare all of CD-029 accepted.
+
+Evidence: docs/reviews/evidence/post28/be687e82df88317ab2aae10ce0cdb7689246c9c9/R06-student-isolation/evidence-index.json. Actual database cases: 43 passed, zero failed/skipped in final runs. New distinct 5; repeats 38; cumulative 353 across SHAs, not one current-head acceptance run. R06 remains 0/26 accepted.

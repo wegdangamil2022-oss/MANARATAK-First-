@@ -1,0 +1,126 @@
+{
+  "sourceSha": "6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf",
+  "runId": "bfa5b45f-eebe-499d-bd5c-018e892c8035",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "targets.json",
+      "bytes": 667,
+      "sha256": "b2fe0a692494db4758b76b6a11377312d35bc7d0c18cd242586f2157a6cb7aa5"
+    },
+    {
+      "path": "target-preflight.log",
+      "bytes": 426,
+      "sha256": "b0981a165714b35dc11ee6dd9e1b9ed2774ef4f758bb11b87705edd85972aa3f"
+    },
+    {
+      "path": "stage-initialize-setup.log",
+      "bytes": 3532,
+      "sha256": "017cb264d82ecec6cd9506a4368e9ad417cfc209c7b4a2dc6104a517356bf074"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "9c9b93faf3d4610183512dd910e0473de78cf802243be4ceca911a0fd6d713b1"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 4384,
+      "sha256": "b452de63b7cb56af71f4ef26e472c0794b98366d83736e216688e998c10796c0"
+    },
+    {
+      "path": "dec05-taxonomy-invalidation-4u6dmF/discovery.json",
+      "bytes": 1982,
+      "sha256": "ba5bbb83188263d7a39326e5fb2873c43d2795f6df0e3c1530e86fea35b75272"
+    },
+    {
+      "path": "dec05-taxonomy-invalidation-4u6dmF/selection.json",
+      "bytes": 106,
+      "sha256": "73b33df7108dcab5df710c0164cbb40c7d8d6f621663d0c85c051e6a13b19510"
+    },
+    {
+      "path": "dec05-taxonomy-invalidation-4u6dmF/vitest.json",
+      "bytes": 3213,
+      "sha256": "f9bd45bcdebdc9b9f3a81d2d7088900ced222d448a327dcbc159c67314001b6e"
+    },
+    {
+      "path": "dec05-taxonomy-invalidation-4u6dmF/summary.json",
+      "bytes": 860,
+      "sha256": "3d0beac70ca60e6590945b585bdd6a46a4f94f389e565b8b30a7019eb9db7b18"
+    },
+    {
+      "path": "owner-advisory-locks-u6cVWX/discovery.json",
+      "bytes": 3271,
+      "sha256": "d89bbd0b04b61b6ae919c58c8631bad6d4c512a27b4ae234f98cda508109afa5"
+    },
+    {
+      "path": "owner-advisory-locks-u6cVWX/selection.json",
+      "bytes": 108,
+      "sha256": "93ef22ebf97a3327b17174c423d9a554c907260d76a2d0bb857066f2897e3480"
+    },
+    {
+      "path": "owner-advisory-locks-u6cVWX/vitest.json",
+      "bytes": 4927,
+      "sha256": "d5df28d54fab5e20437301f16b01b9a682ffd2506e465df0f66961144a9979e8"
+    },
+    {
+      "path": "owner-advisory-locks-u6cVWX/summary.json",
+      "bytes": 857,
+      "sha256": "c1c10457cd10b13f572d7e2314671299ea12c36d93eb589235045b93245d655f"
+    },
+    {
+      "path": "reference-import-closure-8pRqOt/discovery.json",
+      "bytes": 6009,
+      "sha256": "8c24f903a35d5db262910a06dbe217519361f21fdcb9243ebdcb56b55e0a5645"
+    },
+    {
+      "path": "reference-import-closure-8pRqOt/selection.json",
+      "bytes": 108,
+      "sha256": "76854f0e9aad7b82edfdf40bf568f34cc1c345cfb14bb1e1c8c7939780660a33"
+    },
+    {
+      "path": "reference-import-closure-8pRqOt/vitest.json",
+      "bytes": 8379,
+      "sha256": "c2274ff4349d7cbfae3572837e08b738dee4a396a7470dbb22b3e2b8b19415e1"
+    },
+    {
+      "path": "reference-import-closure-8pRqOt/summary.json",
+      "bytes": 861,
+      "sha256": "eb9e8382934c5b50ddf2f6e066022c110ca5476c535a71aaae6c5d05a1e0b458"
+    },
+    {
+      "path": "owner-source-units.json",
+      "bytes": 151631,
+      "sha256": "241f9fc52ed1d25102ea8691c784150e0b965b2473ef86bcac619080f4cd8dd0"
+    },
+    {
+      "path": "provisioning-units.log",
+      "bytes": 15126,
+      "sha256": "6ea503199811b9c349879648395e65d41b03120461f1fc8f964eefb0204deab4"
+    },
+    {
+      "path": "failed/native-pg16-PnBwnt/owner-advisory-locks-o1HSMK/discovery.json",
+      "bytes": 3271,
+      "sha256": "d89bbd0b04b61b6ae919c58c8631bad6d4c512a27b4ae234f98cda508109afa5"
+    },
+    {
+      "path": "failed/native-pg16-PnBwnt/owner-advisory-locks-o1HSMK/selection.json",
+      "bytes": 108,
+      "sha256": "93ef22ebf97a3327b17174c423d9a554c907260d76a2d0bb857066f2897e3480"
+    },
+    {
+      "path": "failed/native-pg16-PnBwnt/owner-advisory-locks-o1HSMK/vitest.json",
+      "bytes": 21846,
+      "sha256": "e9e8aa7f3292591c4e52d3904beef0e3f21c1d7f1b5e373d8607bb86eee0e155"
+    },
+    {
+      "path": "result.json",
+      "bytes": 362,
+      "sha256": "09495b0e8a0ca80272970e2dc2b6b3028b75520178e79557a0da82f0aed4061a"
+    }
+  ]
+}

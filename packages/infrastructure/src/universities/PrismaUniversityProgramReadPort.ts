@@ -1,6 +1,8 @@
 import { Prisma, type PrismaClient } from '@prisma/client';
+import {publicUniversityEligibility,publicUniversityGeographySelect,isPublicUniversityGeography} from './UniversityPublicEligibility';
 import {
   isPublicUniversityProgram,
+  assertProgramEvidenceUrl,
   type AtomicPersistenceContext,
   type IUniversityProgramReadPort,
   type PublishedUniversityProgramQueryV1,
@@ -15,10 +17,13 @@ const proofSelect = {
   normalizedName: true,
   sourceProgramName: true,
   status: true,
+  degreeLevel: { select: { nameAr: true, nameEn: true, canonicalCode: true } },
+  studyProfile: {select:{verificationStatus:true,officialSourceUrl:true,languages:{select:{language:{select:{id:true,name:true,nameAr:true,isActive:true,lifecycleState:true}}}}}},
   majorMappingState: true,
-  university: { select: { status: true } },
+  university: { select: publicUniversityGeographySelect },
   major: {
     select: {
+      displayName: true,
       status: true,
       levelProfiles: {
         select: { id: true, degreeLevelId: true, status: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, majorId: true, profileId: true, status: true } } },
@@ -45,6 +50,8 @@ export class PrismaUniversityProgramReadPort implements IUniversityProgramReadPo
       throw new Error('UNIVERSITY_PROGRAM_READ_ID_INVALID');
   }
   private project(row: Proof): UniversityProgramReferenceV1 {
+    let verifiedStudy = row.studyProfile?.verificationStatus === 'VERIFIED';
+    if (verifiedStudy) try {assertProgramEvidenceUrl(row.studyProfile?.officialSourceUrl ?? '');} catch {verifiedStudy=false;}
     return {
       contractVersion: 1,
       id: row.id,
@@ -53,8 +60,11 @@ export class PrismaUniversityProgramReadPort implements IUniversityProgramReadPo
       majorId: row.majorId,
       canonicalName: row.normalizedName || row.sourceProgramName,
       displayName: row.sourceProgramName,
+      degreeLabel: row.degreeLevel?.nameAr || row.degreeLevel?.nameEn || row.degreeLevel?.canonicalCode,
+      majorLabel: row.major?.displayName,
+      studyLanguages: verifiedStudy ? (row.studyProfile?.languages ?? []).filter(link=>link.language.isActive && link.language.lifecycleState==='ACTIVE').map(link=>({id:link.language.id,name:link.language.nameAr || link.language.name})) : [],
       status: row.status,
-      publiclyEligible: row.university?.status === 'PUBLISHED' && isPublicUniversityProgram(row),
+      publiclyEligible: isPublicUniversityGeography(row.university) && isPublicUniversityProgram(row),
     };
   }
   async findByIds(ids: readonly string[]): Promise<UniversityProgramReferenceV1[]> {
@@ -76,7 +86,7 @@ export class PrismaUniversityProgramReadPort implements IUniversityProgramReadPo
   async findPublished(
     query: PublishedUniversityProgramQueryV1,
   ): Promise<UniversityProgramReferenceV1[]> {
-    const values = [query.universityId, query.academicProgramId, query.degreeLevelId, query.majorId].filter(
+    const values = [query.universityId, query.academicProgramId, query.degreeLevelId, query.majorId,query.languageReferenceId].filter(
       (id): id is string => id !== undefined,
     );
     if (!values.length) throw new Error('UNIVERSITY_PROGRAM_READ_SCOPE_REQUIRED');
@@ -87,9 +97,18 @@ export class PrismaUniversityProgramReadPort implements IUniversityProgramReadPo
         ...(query.academicProgramId ? { id: query.academicProgramId } : {}),
         ...(query.degreeLevelId ? { degreeLevelId: query.degreeLevelId } : {}),
         ...(query.majorId ? { majorId: query.majorId } : {}),
+        ...(query.languageReferenceId ? {
+          studyProfile: {is: {
+            verificationStatus: 'VERIFIED',
+            languages: {some: {
+              languageReferenceId: query.languageReferenceId,
+              language: {is: {isActive:true,lifecycleState:'ACTIVE'}},
+            }},
+          }},
+        } : {}),
         status: 'ACTIVE',
         majorMappingState: 'CANONICALLY_MAPPED',
-        university: { is: { status: 'PUBLISHED' } },
+        university: { is: publicUniversityEligibility() },
         major: { is: { status: 'PUBLISHED' } },
       },
       select: proofSelect,
@@ -102,6 +121,7 @@ export class PrismaUniversityProgramReadPort implements IUniversityProgramReadPo
       .filter(
         (row) =>
           row.publiclyEligible &&
+          (!query.languageReferenceId || row.studyLanguages?.some(language=>language.id===query.languageReferenceId)) &&
           (!query.universityId || row.universityId === query.universityId) &&
           (!query.academicProgramId || row.id === query.academicProgramId) &&
           (!query.degreeLevelId || row.degreeLevelId === query.degreeLevelId) &&

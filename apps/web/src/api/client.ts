@@ -159,6 +159,7 @@ export interface AcademicStandardMappingDto {
 }
 
 export interface ScholarshipFilters {
+  nationalityCountryReferenceId?: string;
   search?: string;
   countryReferenceId?: string;
   studyLanguageReferenceId?: string;
@@ -499,6 +500,7 @@ export interface PublicSearchResponseDto {
 }
 
 export interface PublicScholarshipDto {
+  studyCountryLabel?:string;
   providerName?: string | null;
   description?: string | null;
   notes?: string | null;
@@ -523,8 +525,9 @@ export interface PublicScholarshipDto {
   fundingTypeCode?: string | null;
   applicationUrl?: string | null;
   degreeTargets?: Array<{ degreeLevelId?: string | null; sourceLabel?: string | null; resolutionStatus?: string; degreeLevel?: { canonicalCode?: string; nameAr?: string; nameEn?: string } }>;
+  fundedProgramPairs?: Array<{ linkKey: string; universityId: string; academicProgramId: string; degreeLevelId: string; majorId: string; programName: string; degreeLabel?: string; majorLabel?: string; studyLanguages?: Array<{id:string;name:string}> }>;
   majorTargets?: Array<{ majorId?: string | null; sourceLabel?: string | null; resolutionStatus?: string }>;
-  eligibilityItems?: Array<{ itemTypeCode: string; minimumValue?: string | number | null; maximumValue?: string | number | null; isRequired?: boolean; valueText?: string | null; countryReferenceId?: string | null; degreeLevelId?: string | null; majorId?: string | null; internationalTestId?: string | null; resolutionStatus?: string }>;
+  eligibilityItems?: Array<{ itemTypeCode: string; countryLabel?: string; operatorCode?: string | null; minimumValue?: string | number | null; maximumValue?: string | number | null; isRequired?: boolean; valueText?: string | null; countryReferenceId?: string | null; degreeLevelId?: string | null; majorId?: string | null; internationalTestId?: string | null; resolutionStatus?: string }>;
   requiredDocumentItems?: Array<{ displayName: string; description?: string | null; isRequired?: boolean; internationalTestId?: string | null; resolutionStatus?: string }>;
   universityLinks?: Array<{ universityId?: string | null; academicProgramId?: string | null; sourceLabel?: string | null; resolutionStatus?: string }>;
   benefits?: Array<{ currency?: { isoCode?: string; nameAr?: string; name?: string }; isOptional?: boolean; isCovered?: boolean; notes?: string | null; durationText?: string | null; frequencyCode?: string | null; benefitTypeCode: string; valueText?: string | null; amount?: string | number | null; currencyReferenceId?: string | null }>;

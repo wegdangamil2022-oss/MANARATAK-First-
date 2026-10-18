@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import net from 'node:net';
+import {createNewTransactionTarget} from './post28-new-transaction-target.mjs';
 import {localLabProfile} from './post28-lab-profile.mjs';
 import {randomBytes,randomUUID} from 'node:crypto';
 import {execFileSync,spawnSync,spawn} from 'node:child_process';
@@ -23,6 +24,7 @@ const quote=value=>"'"+String(value).replaceAll("'","''")+"'";
 try {
   if(process.env.POST28_LOCAL_LAB_CREATE!=='YES' || !['test','development'].includes(process.env.NODE_ENV) ||
       Number(process.versions.node.split('.')[0])!==22)throw new Error('POST28_LOCAL_LAB_CREATION_NOT_AUTHORIZED');
+  if(process.env.POST28_LOCAL_LAB_PARENT_STATE){await createNewTransactionTarget(process.env.POST28_LOCAL_LAB_PARENT_STATE);process.exit(0);}
   const profile=localLabProfile(process.env.POST28_LOCAL_LAB_PROFILE??'greenfield');
   const memoryStorage=process.env.POST28_LOCAL_LAB_STORAGE==='tmpfs';
   if(process.env.POST28_LOCAL_LAB_STORAGE&&!['volume','tmpfs'].includes(process.env.POST28_LOCAL_LAB_STORAGE))throw new Error('POST28_LAB_STORAGE_INVALID');
@@ -44,7 +46,10 @@ try {
     const available=await new Promise(resolve=>{const server=net.createServer();server.once('error',()=>resolve(false));server.listen(port,'127.0.0.1',()=>server.close(()=>resolve(true)));});
     if(available)break;if(port>15532)throw new Error('POST28_LOCAL_PORT_UNAVAILABLE');
   }
-  run(['network','create','--internal','--label','codex.post28.run='+id,network]);
+  // A bounded explicit subnet avoids exhausting Docker's coarse default pools.
+  // Docker rejects overlaps; the network stays internal with no external route.
+  const subnet=`10.253.${Number.parseInt(suffix.slice(0,2),16)}.0/28`;
+  run(['network','create','--internal','--subnet',subnet,'--label','codex.post28.run='+id,network]);
   if(!memoryStorage)run(['volume','create','--label','codex.post28.run='+id,volume]);
   const containerId=run(['run','-d','--name',name,'--label','codex.post28.run='+id,'--label','codex.post28.scope=DISPOSABLE',
     '--network',network,'--memory','2g','--cpus','2','--pids-limit','256',
@@ -52,7 +57,7 @@ try {
     '-c','timezone=UTC','-c','max_connections=40']);
   if(!/^[0-9a-f]{64}$/.test(containerId))throw new Error('POST28_CONTAINER_ID_INVALID');
   const state={kind:'POST28_LOCAL_LAB',profile:profile.name,runId:id,sourceSha:sha,scope:'LOCAL_DEVELOPMENT_REHEARSAL',image:IMAGE,
-    containerId,containerName:name,network,volume:memoryStorage?null:volume,storage:memoryStorage?'tmpfs':'volume',port,directory,status:'BOOTSTRAPPING',createdAt:new Date().toISOString()};
+    containerId,containerName:name,network,subnet,volume:memoryStorage?null:volume,storage:memoryStorage?'tmpfs':'volume',port,directory,status:'BOOTSTRAPPING',createdAt:new Date().toISOString()};
   fs.writeFileSync(path.join(directory,'lab-state.json'),JSON.stringify(state,null,2)+'\n');
   let ready=false;
   for(let i=0;i<120;i++) {

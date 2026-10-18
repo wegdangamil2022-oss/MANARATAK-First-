@@ -1,0 +1,15 @@
+{
+  "initialCreationFailures": [
+    "Docker default address pools exhausted; no database created",
+    "Docker container creation ENOSPC; no database created"
+  ],
+  "initialOwnerSuiteDiscoveryFailure": {
+    "reason": "Vite attempted temp write through shared dependency symlink on full workspace",
+    "executed": 0,
+    "action": "copy unchanged project dependencies to temporary checkout, rerun same frozen source/target"
+  },
+  "solution": "Official creator creates a new random DB-T on verified pinned-image internal-network memory server; new run/SHA/OID/nonce/marker, no old target relabelled",
+  "previousDatabasesOrVolumesDeleted": false,
+  "newServerOrCrashRecoveryAcceptance": false,
+  "node22CacheRelocation": "same cached runtime moved intact to /tmp and original path retained as symlink; no version change"
+}

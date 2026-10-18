@@ -1,0 +1,19 @@
+{
+  "sourceSha": "24502258bfce3725039403335f669aab82b09cdd",
+  "runId": "b4f52574-4e0e-4cae-9a2c-ab63afb97a42",
+  "passedDatabaseCases": 23,
+  "newDistinctCases": 5,
+  "repeatedCases": 18,
+  "cumulativeDistinctAcrossShas": 378,
+  "allAtCurrentHead": false,
+  "R06Accepted": false,
+  "courseUnitPassed": 295,
+  "fullRawSourceImportAcceptance": false,
+  "schemaChanged": false,
+  "defaultFixtureDmlTables": 91,
+  "sourceGetUnitPassed": 240,
+  "explicitCourseFixtureDmlTables": [
+    "CourseImportAnalysis",
+    "CourseFieldProvenance"
+  ]
+}

@@ -83,3 +83,18 @@ describe('NodeSafeSourceHttpTransport hard resource ceilings', () => {
     ).rejects.toThrow('SOURCE_TIMEOUT_INVALID');
   });
 });
+
+describe('Node22 source GET pinned lookup callback shapes',()=>{
+ it.each([true,false])('keeps the validated IP pinned when Node requests all=%s',async all=>{
+  const factory=((url:URL,options:{lookup:Function;servername:string},respond:Function)=>{
+   expect(url.hostname).toBe('safe.example');expect(options.servername).toBe('safe.example');
+   const req=new EventEmitter() as EventEmitter & {setTimeout:()=>void;destroy:()=>void;end:()=>void};req.setTimeout=()=>undefined;req.destroy=()=>undefined;
+   req.end=()=>options.lookup('safe.example',{all},(error:unknown,address:unknown,family:unknown)=>{
+    expect(error).toBeNull();if(all)expect(address).toEqual([{address:'93.184.216.34',family:4}]);else{expect(address).toBe('93.184.216.34');expect(family).toBe(4);}
+    const response=Object.assign(new EventEmitter(),{statusCode:200,headers:{'content-type':'text/html'}});respond(response);response.emit('data',Buffer.from('source bytes'));response.emit('end');
+   });return req;
+  }) as unknown as typeof https.request;
+  const result=await new NodePinnedSourceRequestExecutor(factory).execute({url:new URL('https://safe.example/catalog/a'),pinnedAddress:'93.184.216.34',timeoutMs:100,maxBytes:1024});
+  expect(result.statusCode).toBe(200);expect(Buffer.from(result.rawBytes).toString()).toBe('source bytes');
+ });
+});

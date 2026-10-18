@@ -4,12 +4,13 @@ import { PrismaUniversityImportChangeExecutorGateway } from '../../src/universit
 describe('PrismaUniversityImportChangeExecutorGateway', () => {
   it('rejects a root University whose valid geography ids have incompatible parents', async () => {
     const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
       universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn(), update: vi.fn() },
       universityImportChange: { create: vi.fn() },
       university: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn() },
-      referenceCountry: { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE' }) },
+      referenceCountry: { findUnique: vi.fn().mockResolvedValue({ iso2Code: 'YE', isActive: true, lifecycleState: 'ACTIVE' }) },
       administrativeRegion: { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'SA', lifecycleState: 'ACTIVE' }) },
-      referenceCity: { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', administrativeRegionId: 'region-ye' }) },
+      referenceCity: { findUnique: vi.fn().mockResolvedValue({ countryIso2Code: 'YE', administrativeRegionId: 'region-ye', isActive: true, lifecycleState: 'ACTIVE' }) },
     };
     const prisma = { $transaction: vi.fn(async (work) => work(transaction)) };
     const gateway = new PrismaUniversityImportChangeExecutorGateway(prisma as never);
@@ -24,6 +25,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
 
   it('applies university, provenance, audit, and outbox in one transaction', async () => {
     const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
       universityImportChangeSet: {
         findUnique: vi.fn().mockResolvedValue(null),
         create: vi.fn(),
@@ -91,6 +93,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
 
   it('fails closed when immutable source provenance belongs to another University', async () => {
     const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
       universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn(), update: vi.fn() },
       universityImportChange: { create: vi.fn() },
       university: { findUnique: vi.fn().mockResolvedValue({ id: 'db-uni-1', publicId: 'INS-DZA-0001' }) },
@@ -111,6 +114,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
 
   it('keeps a program without canonical DegreeLevel in review instead of inferring from university-level degrees', async () => {
     const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
       universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn(), update: vi.fn() },
       universityImportChange: { create: vi.fn() },
       university: {
@@ -158,6 +162,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
 
   it('resolves tuition currency through canonical ReferenceCurrency while preserving source currencyCode', async () => {
     const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
       universityImportChangeSet: { findUnique: vi.fn().mockResolvedValue(null), create: vi.fn(), update: vi.fn() },
       universityImportChange: { create: vi.fn() },
       university: {
@@ -211,6 +216,7 @@ describe('PrismaUniversityImportChangeExecutorGateway', () => {
 
   it('rolls back created records in reverse order with audit and outbox evidence', async () => {
     const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
       universityImportChangeSet: {
         findUnique: vi.fn().mockResolvedValue({
           id: 'STAGE_1:artifact-1',

@@ -431,6 +431,7 @@ export class CertificateUseCases {
     if (!Number.isSafeInteger(payload.learningPathVersion) || payload.learningPathVersion! < 1 || !this.learningPathRepository.findByVersion) throw new Error('CERTIFICATE_LEARNING_PATH_VERSION_REQUIRED');
     const path = await this.learningPathRepository.findByVersion(payload.learningPathId, payload.learningPathVersion!);
     if (!path) throw new Error('LEARNING_PATH_NOT_FOUND');
+      if(path.status!=='PUBLISHED'||path.certificateEligible!==true)throw new Error('CERTIFICATE_LEARNING_PATH_VERSION_NOT_ELIGIBLE');
     const completionId = event.eventId;
     const existing = await this.certificateRepository.findByLearningPathCompletionId(completionId);
     if (existing) return existing;

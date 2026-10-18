@@ -1,0 +1,13 @@
+{
+  "sourceSha": "f250cb498327b3811e5b77d54ca3dc548e3a8cfc",
+  "runId": "016cbed2-90a4-4956-93f3-1aacafe782bb",
+  "suite": "course-major-visibility",
+  "discovered": 8,
+  "executed": 8,
+  "passed": 4,
+  "failed": 4,
+  "skipped": 0,
+  "fullProfilePassed": false,
+  "alreadyInBaselineDistinctCount": false,
+  "R06Accepted": false
+}

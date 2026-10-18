@@ -1,0 +1,18 @@
+[
+  {
+    "name": "CD040 actual two-connection University public read snapshots > keeps basic public card and count coherent when country withdraws after selection",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 actual two-connection University public read snapshots > keeps filtered public program card count and hydration coherent when its current version withdraws",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 actual two-connection University public read snapshots > keeps program graph rows and count coherent during independent Major withdrawal",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 actual two-connection University public read snapshots > keeps Major graph rows and count coherent during independent country withdrawal",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-read-concurrency.database.spec.mjs"
+  }
+]

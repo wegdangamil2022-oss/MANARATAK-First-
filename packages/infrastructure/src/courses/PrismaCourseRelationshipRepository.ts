@@ -1,4 +1,4 @@
-import { publicCourseLanguageProof } from './CoursePublicLanguageProof';
+import { currentPublicCourseEligibility } from './CoursePublicEligibility';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -32,12 +32,21 @@ function jsonArray(value: Prisma.JsonValue | null): string[] {
 }
 
 export class PrismaCourseRelationshipRepository implements ICourseRelationshipRepository {
-  public constructor(private readonly prisma: PrismaClient) {}
+  public constructor(private readonly prisma: PrismaClient, private readonly transactionBound = false) {}
+
+  private async commitOperations(operations: Prisma.PrismaPromise<unknown>[]): Promise<void> {
+    if (this.transactionBound) {
+      // The owner coordinator owns commit/rollback, including audit and outbox.
+      for (const operation of operations) await operation;
+    } else {
+      await this.prisma.$transaction(operations);
+    }
+  }
 
   public withTransaction(context: AtomicPersistenceContext): ICourseRelationshipRepository {
     const tx = (context as AtomicPersistenceContext & { transactionClient?: unknown }).transactionClient;
     if (!context.boundaryId || !tx) throw new Error('COURSE_ATOMIC_TRANSACTION_CONTEXT_REQUIRED');
-    return new PrismaCourseRelationshipRepository(tx as PrismaClient);
+    return new PrismaCourseRelationshipRepository(tx as PrismaClient, true);
   }
 
   public async getRelationshipSource(courseId: string): Promise<CourseRelationshipSourceDto | null> {
@@ -254,7 +263,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
     });
     const staleLinkIds = staleLinks.map((item) => item.id);
 
-    await this.prisma.$transaction([
+    await this.commitOperations([
       this.prisma.courseTaxonomyResolution.updateMany({
         where: { id: { in: resolutionIds } },
         data: { status: 'REVIEW_REQUIRED' },
@@ -334,7 +343,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         data: { projectionState: 'REVIEW_REQUIRED' },
       }));
     }
-    await this.prisma.$transaction(operations);
+    await this.commitOperations(operations);
     const record = await this.prisma.courseAcademicTaxonomyLink.findUniqueOrThrow({
       where: { id: input.linkId },
       include: { taxonomyNode: { select: { id: true, canonicalCode: true, canonicalName: true, nodeType: true } } },
@@ -544,6 +553,14 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       existing?.projectionState === 'REJECTED' ||
       existing?.projectionState === 'REVIEW_REQUIRED';
 
+    const sourceChanged = existing?.sourceType === 'TAXONOMY_MAPPING' && (
+      existing.profileId !== (input.profileId ?? null) ||
+      existing.taxonomyNodeId !== (input.taxonomyNodeId ?? null) ||
+      existing.sourceCourseTaxonomyLinkId !== (input.sourceCourseTaxonomyLinkId ?? null) ||
+      existing.sourceMajorClassificationMappingId !== (input.sourceMajorClassificationMappingId ?? null) ||
+      existing.sourceType !== input.sourceType ||
+      existing.relationshipType !== input.relationshipType
+    );
     const record = await this.prisma.courseMajorProjection.upsert({
       where: { projectionKey: input.projectionKey },
       update: {
@@ -553,7 +570,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         sourceMajorClassificationMappingId: input.sourceMajorClassificationMappingId ?? null,
         sourceType: input.sourceType,
         relationshipType: input.relationshipType,
-        projectionState: reviewLocked ? undefined : input.projectionState,
+        projectionState: sourceChanged ? 'REVIEW_REQUIRED' : reviewLocked ? undefined : input.projectionState,
         confidence: input.confidence ?? null,
       },
       create: {
@@ -754,20 +771,11 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
   public async listPublishedRelatedCourses(
     filters: CourseRelationshipPublicFilters,
   ): Promise<PaginatedCourseResult<CourseRelationshipPublicCourseDto>> {
-    const where: Prisma.CourseWhereInput = {
-      status: 'PUBLISHED',
-      completenessStatus: 'COMPLETE',
-      AND: [{
-        OR: [
-          { originType: { not: 'EXTERNAL_LINKED_COURSE' } },
-          {
-            originType: 'EXTERNAL_LINKED_COURSE',
-            accessType: { in: ['FREE_STUDY', 'FREE_STUDY_AND_CERTIFICATE'] },
-            isStudyFree: true,
-          },
-        ],
-      }, publicCourseLanguageProof()],
-    };
+    if (!this.transactionBound) return this.prisma.$transaction(
+      tx => new PrismaCourseRelationshipRepository(tx as unknown as PrismaClient, true).listPublishedRelatedCourses(filters),
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    );
+    const where: Prisma.CourseWhereInput = {};
 
     if (filters.accessType) where.accessType = filters.accessType;
     if (filters.originType) where.originType = filters.originType;
@@ -789,6 +797,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       where.majorProjections = {
         some: {
           majorId: filters.majorId,
+          major: { is: { status: 'PUBLISHED' } },
           projectionState: 'APPROVED',
         },
       };
@@ -816,7 +825,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       category: true, optionalFields: true,
     };
     return queryStableCursorPage({
-      delegate: this.prisma.course as any, where, select, cursor: filters.cursor, limit: filters.limit,
+      delegate: this.prisma.course as any, where: await currentPublicCourseEligibility(this.prisma, where), select, cursor: filters.cursor, limit: filters.limit,
       map: (row: any) => {
         const { id, optionalFields, ...record } = row;
         const optional = optionalFields && typeof optionalFields === 'object' && !Array.isArray(optionalFields)

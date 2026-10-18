@@ -1,0 +1,18 @@
+[
+  {
+    "name": "CD028 real LearningPath completion policy and durable event > completes a real authored path but preserves its current non-credential event policy",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-learning-path-completion.database.spec.mjs"
+  },
+  {
+    "name": "CD028 real LearningPath completion policy and durable event > does not create a completion event or certificate while required Course completion is absent",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-learning-path-completion.database.spec.mjs"
+  },
+  {
+    "name": "CD028 real LearningPath completion policy and durable event > emits eligible completion only for an explicitly opted-in published version and still requires a governed issuer",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-learning-path-completion.database.spec.mjs"
+  },
+  {
+    "name": "CD028 real LearningPath completion policy and durable event > completes against the enrolled immutable version after the current owner points to a new version",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-learning-path-completion.database.spec.mjs"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "syntheticOnly": true,
+  "readOnlyHead": true,
+  "url": "https://cs50.harvard.edu/x/",
+  "result": {
+    "state": "NEEDS_REVIEW",
+    "checkedAt": "2026-10-18T16:50:01.024Z",
+    "redirectTarget": null,
+    "detail": "COURSE_LINK_REQUEST_FAILED:Invalid IP address: undefined"
+  }
+}

@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import {
   assertAssetPublicRights,
   IAssetRecordRepository,
@@ -33,6 +34,45 @@ export class ProcessAssetLifecycleUseCase {
     private readonly malwareScannerGateway?: IAssetMalwareScannerGateway,
     private readonly sanitizationGateway?: IAssetSanitizationGateway
   ) {}
+
+  public assertAuthenticatedDeliveryConfigured(): void {
+    if (!this.storageGateway.openRead && !this.storageGateway.read)
+      throw new Error('ASSET_AUTHENTICATED_READ_NOT_CONFIGURED');
+  }
+
+  /** Private review reads never expose a storage capability to the caller. */
+  public async readAuthenticatedDelivery(assetId: string): Promise<{bytes: Uint8Array; mimeType: string; checksumSha256: string}> {
+    this.assertAuthenticatedDeliveryConfigured();
+    const id = new AssetId(assetId), record = await this.assetRepository.findById(id);
+    if (!record) throw new Error('ASSET_DELIVERY_UNAVAILABLE');
+    record.assertCanDeliver();
+    if (record.classification === 'PUBLIC') assertAssetPublicRights(record.metadata.extraMetadata?.rights);
+    const limit = 10 * 1024 * 1024;
+    if (!Number.isSafeInteger(record.metadata.byteSize) || record.metadata.byteSize < 1 || record.metadata.byteSize > limit ||
+        record.checksum?.algorithm.toUpperCase() !== 'SHA256') throw new Error('ASSET_DELIVERY_UNAVAILABLE');
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    const append = (chunk: Uint8Array) => {
+      size += chunk.byteLength;
+      if (size > limit || size > record.metadata.byteSize) throw new Error('ASSET_DELIVERY_SIZE_INVALID');
+      // Own each chunk: providers may reuse their streaming buffer.
+      chunks.push(Uint8Array.from(chunk));
+    };
+    if (this.storageGateway.openRead) {
+      for await (const chunk of this.storageGateway.openRead(record.locator, limit)) append(chunk);
+    } else append(await this.storageGateway.read!(record.locator, limit));
+    const bytes = Buffer.concat(chunks), digest = createHash('sha256').update(bytes).digest('hex');
+    if (size !== record.metadata.byteSize || digest !== record.checksum.hash.toLowerCase())
+      throw new Error('ASSET_DELIVERY_CHECKSUM_MISMATCH');
+    const current = await this.assetRepository.findById(id);
+    if (!current) throw new Error('ASSET_DELIVERY_UNAVAILABLE');
+    current.assertCanDeliver();
+    if (current.classification === 'PUBLIC') assertAssetPublicRights(current.metadata.extraMetadata?.rights);
+    if (current.locator.value !== record.locator.value || current.checksum?.hash.toLowerCase() !== digest ||
+        current.metadata.mimeType !== record.metadata.mimeType || current.metadata.byteSize !== size)
+      throw new Error('ASSET_DELIVERY_CHANGED');
+    return {bytes, mimeType: current.metadata.mimeType, checksumSha256: digest};
+  }
 
   /**
    * Marks a direct-to-quarantine upload as complete only after provider-owned verification.

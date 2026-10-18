@@ -12,14 +12,24 @@ export async function preflightTransactionProvisioning(contract,appUrl,setupUrl,
  if(setupLive.schemaCreate!==true)throw new Error('POST28_TRANSACTION_SETUP_DDL_REQUIRED');
  return {runtime,setup};
 }
+// Optional, explicit synthetic certificate owner workflow scope on a new DB-T only.
+export const CERTIFICATE_FIXTURE_APPLICATION_TABLES=Object.freeze(['CertificateIssuer','CertificateTemplate','CertificateTemplateVersion','CertificateIssuanceInbox','CertificateLedgerEntry']);
+export const COURSE_FIXTURE_APPLICATION_TABLES=Object.freeze(['CourseImportAnalysis','CourseFieldProvenance']);
+export const LEARNING_PATH_FIXTURE_APPLICATION_TABLES=Object.freeze(['LearningPath','LearningPathVersion','LearningPathCourse','LearningPathEnrollment']);
 export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
+ 'ImportRateBudget', // Synthetic distributed source acquisition reservation tests.
+ 'CertificateVerificationLog', // Actual verification analytics transaction test.
+ 'Certificate', // Explicit revoked synthetic read-isolation fixture; no template/issuer approval grants.
+ 'ImportBatch','ImportRecord','ImportScreeningReceipt',
+ 'UniversityImportChangeSet','UniversityImportChange',
+ 'UniversityProgramStudyProfile','UniversityProgramStudyLanguage',
  'BackgroundJobRecord','BackgroundJobExecutionRecord','BackgroundJobDeadLetterRecord','TransactionalOutboxRecord',
  'CmsContentNode','CmsPublishedContent','AssetRecord','StudentWorkspace','StudentApplicationTracker','StudentApplicationDocumentBinding',
  'FinanceInvoiceRecord','FinancePaymentRecord','FinanceCommandRecord',
  'AuditRecord','StudentTimelineEntry','StudentPrivacyConsentDecision','StudentSavedCollection','StudentSavedItem','StudentSearchHistory','StudentRecentlyViewed','StudentPersonalStatistics',
  'FinancialAccountRecord','FinancialTransactionRecord','FinancialLedgerEntryRecord','ReferenceCurrency',
  'FinanceApprovalRecord','FinanceApprovalDecisionRecord','FinanceAdjustmentCaseRecord',
- 'ScholarshipUniversityLink','ScholarshipSponsorContext','ScholarshipDegreeTarget','ScholarshipMajorTarget',
+ 'ScholarshipUniversityLink','ScholarshipSponsorContext','ScholarshipDegreeTarget','ScholarshipMajorTarget','ScholarshipEligibilityItem',
  'IdentityRecord','UserRecord','AccountRecord','RoleRecord','RoleAssignmentRecord','SessionRecord','ApiIdempotencyRecord','FinanceExchangeRateRecord',
  'ReferenceCountry','AdministrativeRegion','ReferenceCity',
  'ScholarshipRequiredDocument','Course','CourseVersion','CourseEnrollment','CourseCompletion',

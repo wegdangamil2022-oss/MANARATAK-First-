@@ -13,6 +13,7 @@ export class ScholarshipPublicRouter {
 
     const date = z.string().datetime({ offset: true }).transform((value) => new Date(value));
     const listQuerySchema = z.object({
+      nationalityCountryReferenceId:z.string().min(1).optional(),
       search:z.string().trim().max(200).optional(),
       countryReferenceId: z.string().min(1).optional(),
       studyLanguageReferenceId: z.string().min(1).optional(),

@@ -1,3 +1,4 @@
+import {syntheticUniversityCountry} from './fixtures/synthetic-university-country.mjs';
 import {randomUUID} from 'node:crypto';
 import {beforeAll,afterAll,describe,it,expect} from 'vitest';
 import {PrismaClient} from '@prisma/client';
@@ -11,7 +12,7 @@ const owner=id=>({id,publicId:id,slug:id,canonicalName:id,canonicalDedupKey:id,d
 let db,repo,reads,validator,scholarships;
 async function fixture(){
  const university=fresh(),major=fresh(),degree=fresh(),profile=fresh(),version=fresh(),campus=fresh(),unit=fresh();
- await db.university.create({data:owner(university)});await db.major.create({data:owner(major)});
+ await db.university.create({data:{...owner(university),countryReferenceId:await syntheticUniversityCountry(db)}});await db.major.create({data:owner(major)});
  await db.degreeLevel.create({data:{id:degree,canonicalCode:degree,nameEn:'Synthetic',nameAr:'تجريبي'}});
  await db.majorLevelProfile.create({data:{id:profile,majorId:major,degreeLevelId:degree,level:'BACHELOR',code:profile,status:'PUBLISHED',completenessStatus:'COMPLETE'}});
  await db.majorVersion.create({data:{id:version,majorId:major,profileId:profile,versionNumber:1,status:'PUBLISHED',publishedAt:new Date()}});

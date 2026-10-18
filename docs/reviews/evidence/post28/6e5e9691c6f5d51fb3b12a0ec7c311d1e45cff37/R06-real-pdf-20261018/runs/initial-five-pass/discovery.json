@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Real synthetic PDF storage Defender MuPDF and PostgreSQL lifecycle > executes real ingestion verification pre/post scan sanitization and digest-bound ACTIVE CLEAN activation",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-pdf-lifecycle.database.spec.mjs"
+  },
+  {
+    "name": "Real synthetic PDF storage Defender MuPDF and PostgreSQL lifecycle > refuses changed uploaded bytes after finalization without running a scan or activating",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-pdf-lifecycle.database.spec.mjs"
+  },
+  {
+    "name": "Real synthetic PDF storage Defender MuPDF and PostgreSQL lifecycle > rejects activation before real validation and sanitization",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-pdf-lifecycle.database.spec.mjs"
+  },
+  {
+    "name": "Real synthetic PDF storage Defender MuPDF and PostgreSQL lifecycle > recovers a real storage promotion after injected DB completion failure and retries idempotently",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-pdf-lifecycle.database.spec.mjs"
+  },
+  {
+    "name": "Real synthetic PDF storage Defender MuPDF and PostgreSQL lifecycle > honors retention expiry and a separate synthetic legal hold before purge",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-pdf-lifecycle.database.spec.mjs"
+  }
+]

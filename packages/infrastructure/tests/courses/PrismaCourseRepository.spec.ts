@@ -1,3 +1,4 @@
+import { publicCourseEligibility } from '../../src/courses/CoursePublicEligibility';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   CourseAccessType,
@@ -59,6 +60,7 @@ describe('PrismaCourseRepository', () => {
       courseQuestion: { findMany: vi.fn().mockResolvedValue([]) },
       courseVersion: { create: vi.fn().mockResolvedValue({}) },
     };
+    prisma.$transaction = vi.fn((work: (tx: unknown) => Promise<unknown>) => work(prisma));
     repository = new PrismaCourseRepository(prisma);
   });
 
@@ -261,43 +263,21 @@ describe('PrismaCourseRepository', () => {
   it('listPublished hard-requires PUBLISHED and supports public filters', async () => {
     prisma.course.findMany.mockResolvedValue([]);
     prisma.course.count.mockResolvedValue(0);
-
-    await repository.listPublished({
-      accessType: CourseAccessType.FREE_STUDY,
-      originType: CourseOriginType.EXTERNAL_LINKED_COURSE,
-      platformName: 'Example Platform',
-      category: 'Technology',
-      learningLanguage: 'English',
-      limit: 10,
-    });
-
-    expect(prisma.course.findMany).toHaveBeenCalledWith({
-      where: {
-        status: CourseStatus.PUBLISHED,
-        completenessStatus: CourseImportCompletenessState.COMPLETE,
-        accessType: CourseAccessType.FREE_STUDY,
-        originType: CourseOriginType.EXTERNAL_LINKED_COURSE,
-        platformName: {contains: 'Example Platform', mode: 'insensitive'},
-        category: 'Technology',
-        learningLanguage: 'English',
-        AND: [{ OR: [
-          { originType: { not: CourseOriginType.EXTERNAL_LINKED_COURSE } },
-          {
-            originType: CourseOriginType.EXTERNAL_LINKED_COURSE,
-            accessType: { in: [CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE] },
-            isStudyFree: true,
-          },
-        ] }, {OR: [
-          {learningLanguageReferenceId:null,AND:[{OR:[{learningLanguageRaw:null},{learningLanguageRaw:''}]},{OR:[{learningLanguage:null},{learningLanguage:''}]}]},
-          {learningLanguageResolutionState:'RESOLVED',learningLanguageReference:{is:{isActive:true,lifecycleState:'ACTIVE'}}},
-        ]}],
-      },
-      take: 11,
-      orderBy: { id: 'asc' },
-        include: {majorProjections: {where: {projectionState: 'APPROVED', major: {status: 'PUBLISHED'}},select: {major: {select: {id: true, displayName: true}}}}}
-    });
+    await repository.listPublished({accessType: CourseAccessType.FREE_STUDY,
+      originType: CourseOriginType.EXTERNAL_LINKED_COURSE, platformName: 'Example Platform',
+      category: 'Technology', learningLanguage: 'English', limit: 10});
+    const query = prisma.course.findMany.mock.calls.find(([args]) => args.take === 11)?.[0];
+    expect(query).toBeDefined();
+    expect(query.where).toMatchObject({status: CourseStatus.PUBLISHED,
+      completenessStatus: CourseImportCompletenessState.COMPLETE,
+      accessType: CourseAccessType.FREE_STUDY, originType: CourseOriginType.EXTERNAL_LINKED_COURSE,
+      platformName: {contains: 'Example Platform', mode: 'insensitive'},
+      category: 'Technology', learningLanguage: 'English'});
+    expect(query.where.AND[0]).toEqual(publicCourseEligibility());
+    expect(query.where.AND.at(-1)).toEqual({OR: [
+      {originType: {not: CourseOriginType.EXTERNAL_LINKED_COURSE}}, {id: {in: []}},
+    ]});
   });
-
   it('binds all repository operations to the supplied Prisma transaction client', async () => {
     const tx = {
       course: {

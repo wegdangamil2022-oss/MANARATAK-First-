@@ -1,0 +1,126 @@
+{
+  "sourceSha": "48102fc653314f2bc49308b62301a21305a2bf2c",
+  "runId": "d2a10a0a-24e6-47bd-815e-73a01968e397",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "targets.json",
+      "bytes": 667,
+      "sha256": "5979fe579da2acccbb1ee3aa32c2dcaac40b5f82df48b6076b4e10301dc9a015"
+    },
+    {
+      "path": "target-preflight.log",
+      "bytes": 426,
+      "sha256": "57b8155bc6a123d3d076df17f0809d3b26dc691302ed7f58bffe0857242f55d6"
+    },
+    {
+      "path": "stage-initialize-setup.log",
+      "bytes": 3294,
+      "sha256": "c842efbe21d634c9a24625d1b4fc4e1446b945cd711662f326a35779c37cb565"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "fb825d3caea61e57599b445024ec0af79580f8bbeeaae581845fcfdad81fb9b8"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 4095,
+      "sha256": "febe693f11512295cdfe4c54f0daa92925c07f1b8900ad2fb8c17742bd04c81b"
+    },
+    {
+      "path": "dec01-program-pairs-PQJ9aP/discovery.json",
+      "bytes": 4495,
+      "sha256": "a478d05e402da03db9089437862f2b8bc755c7692aafaaed85b71e01cc6d8e04"
+    },
+    {
+      "path": "dec01-program-pairs-PQJ9aP/selection.json",
+      "bytes": 108,
+      "sha256": "b260a2d0019d1a2a74a04788ba59349159d1e2a210b7ca285502f940c9d6d1fc"
+    },
+    {
+      "path": "dec01-program-pairs-PQJ9aP/vitest.json",
+      "bytes": 6456,
+      "sha256": "6e7d7452b552e49e55ddb31ff2295eedc7db1cb7f4c3996b6fc51d8a5c841701"
+    },
+    {
+      "path": "dec01-program-pairs-PQJ9aP/summary.json",
+      "bytes": 856,
+      "sha256": "dcf7d39720f75281e3425d9b04fbf53f1757aad492f1756b06e6adb9745f607a"
+    },
+    {
+      "path": "program-language-XWiAt5/discovery.json",
+      "bytes": 2420,
+      "sha256": "cf93dcc9c15b72bcf00a80bbd26b0060467da657acb206d04d23050547732225"
+    },
+    {
+      "path": "program-language-XWiAt5/selection.json",
+      "bytes": 106,
+      "sha256": "07e1b0e65dba2ffffaad3be2d2e3980639673b96dba2c8b49ce97511cbbc3b7e"
+    },
+    {
+      "path": "program-language-XWiAt5/vitest.json",
+      "bytes": 3750,
+      "sha256": "e2cd08f5440059e156c07caccbfdc5d237532bdf126e978b27f584e5b6889f9d"
+    },
+    {
+      "path": "program-language-XWiAt5/summary.json",
+      "bytes": 849,
+      "sha256": "028f2062676b28a20a9d5b6f1516c1ea66bdc426a8f5a51ba108d4dd6733ce27"
+    },
+    {
+      "path": "scholarship-country-semantics-9kND4e/discovery.json",
+      "bytes": 2465,
+      "sha256": "8c9fff6afd5eb55067502c78aba1db0395849ad9fb6e179ec7f257b8eb37711a"
+    },
+    {
+      "path": "scholarship-country-semantics-9kND4e/selection.json",
+      "bytes": 106,
+      "sha256": "355e83f494da9f75de244c5765f208065e2e6e00f0fbef27a6f306f68be1e944"
+    },
+    {
+      "path": "scholarship-country-semantics-9kND4e/vitest.json",
+      "bytes": 3903,
+      "sha256": "9f61cd0455998ad4322bd9c9acc4aeb02e5b98070add6d8ba3fe4abbab335882"
+    },
+    {
+      "path": "scholarship-country-semantics-9kND4e/summary.json",
+      "bytes": 862,
+      "sha256": "22e2c786081143dfb65a504d6df661604e54f8905a7514b157f8e59ee7d3f052"
+    },
+    {
+      "path": "unit-final.json",
+      "bytes": 7893,
+      "sha256": "303ebc50d0ec3465bf09ce88e5c6df5c1e8d727956f2f9739060393aac63e464"
+    },
+    {
+      "path": "unit-old-contract-failure.json",
+      "bytes": 8384,
+      "sha256": "3ec12ad5f6f10a965bee8e04897eee366886e3fd6df330b0b1291903eee73ad4"
+    },
+    {
+      "path": "failed/native-pg16-Wk4oVZ/program-language-TY53cC/discovery.json",
+      "bytes": 2420,
+      "sha256": "cf93dcc9c15b72bcf00a80bbd26b0060467da657acb206d04d23050547732225"
+    },
+    {
+      "path": "failed/native-pg16-Wk4oVZ/program-language-TY53cC/selection.json",
+      "bytes": 106,
+      "sha256": "07e1b0e65dba2ffffaad3be2d2e3980639673b96dba2c8b49ce97511cbbc3b7e"
+    },
+    {
+      "path": "failed/native-pg16-Wk4oVZ/program-language-TY53cC/vitest.json",
+      "bytes": 3522,
+      "sha256": "3296ca82f43ab62238b298b5414b243b81b3a3d6266d9566e5a703e89020a58c"
+    },
+    {
+      "path": "result.json",
+      "bytes": 434,
+      "sha256": "0a0c2a2bf96f93d6311a51fc3bee66807bcaaee65f7a2fdc9faeb06ea5681979"
+    }
+  ]
+}

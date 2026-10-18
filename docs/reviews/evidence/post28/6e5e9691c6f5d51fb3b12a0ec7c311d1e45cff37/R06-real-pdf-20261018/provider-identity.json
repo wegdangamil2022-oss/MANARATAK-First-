@@ -1,0 +1,15 @@
+{
+  "syntheticOnly": true,
+  "mupdfVersion": "1.28.1",
+  "mupdfModuleSha256": "5d237eadcb9640584e0050f6f958e547887b7a54d80a04043e12be9420931076",
+  "defenderExeSha256": "c0c9670d63a8a7de9c0ef5ba58231826b0abee03c2b3ba6f858114d96ea12315",
+  "defenderStatus": {
+    "AMProductVersion": "4.18.26090.9",
+    "AntivirusSignatureVersion": "1.461.88.0",
+    "AntivirusSignatureLastUpdated": "/Date(1792305076000)/",
+    "AntivirusEnabled": true,
+    "RealTimeProtectionEnabled": true
+  },
+  "productionProviderApproved": false,
+  "licenseReviewRequiredBeforeProductUse": true
+}

@@ -18,6 +18,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     actorId: string,
   ): Promise<{ changeSetId: string; appliedChanges: number }> {
     return this.prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${plan.changeSetId}, 0))`;
       const existing = await transaction.universityImportChangeSet.findUnique({
         where: { id: plan.changeSetId },
         include: { changes: true },
@@ -74,6 +75,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     actorId: string,
   ): Promise<{ changeSetId: string; revertedChanges: number }> {
     return this.prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${changeSetId}, 0))`;
       const changeSet = await transaction.universityImportChangeSet.findUnique({
         where: { id: changeSetId },
         include: { changes: { orderBy: { sequence: 'desc' } } },
@@ -108,10 +110,15 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     plan: UniversityImportChangePlan,
   ) {
     if (change.entityType === 'UNIVERSITY') return this.applyUniversity(transaction, change);
-    const university = await transaction.university.findUnique({
+    let university = await transaction.university.findUnique({
       where: { publicId: change.sourceReferenceId },
     });
     if (!university) throw new Error(`UNIVERSITY_IDENTITY_NOT_FOUND:${change.sourceReferenceId}`);
+    if (change.entityType === 'ADMISSION_REQUIREMENT') {
+      // Share the owner lock with admin CAS writers before reading the nullable identity.
+      await transaction.$queryRaw`SELECT id FROM "University" WHERE id = ${university.id} FOR UPDATE`;
+      university = await transaction.university.findUniqueOrThrow({ where: { id: university.id } });
+    }
     const after = change.afterState as JsonRecord;
     if (['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(university.status))
       throw new Error('UNIVERSITY_IMPORT_OWNER_LIFECYCLE_IMMUTABLE');
@@ -226,19 +233,24 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
           after.internationalTestId,
           'CANONICAL_INTERNATIONAL_TEST_REQUIRED',
         );
-        await new UniversityCanonicalRelationshipValidator(transaction).validateTest(
+        await new UniversityCanonicalRelationshipValidator(transaction).validateAdmissionRequirements([{
           internationalTestId,
-          this.string(after.testVariantId),
-          this.string(after.testVersionId),
-        );
-        const before = await transaction.universityProgramAdmissionRequirement.findFirst({
+          testVariantId: this.string(after.testVariantId),
+          testVersionId: this.string(after.testVersionId),
+          minimumScore: this.number(after.minimumScore),
+          status: this.string(after.status) ?? 'REVIEW_REQUIRED',
+        }]);
+        const matches = await transaction.universityProgramAdmissionRequirement.findMany({
           where: {
             academicProgramId,
             internationalTestId,
             testVariantId: this.string(after.testVariantId) ?? null,
             testVersionId: this.string(after.testVersionId) ?? null,
           },
+          take: 2,
         });
+        if (matches.length > 1) throw new Error('UNIVERSITY_ADMISSION_TEST_EXISTING_DUPLICATES');
+        const before = matches[0];
         const data = {
           academicProgramId,
           internationalTestId,
@@ -253,6 +265,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
               data,
             })
           : await transaction.universityProgramAdmissionRequirement.create({ data });
+        await this.advanceAdmissionOwner(transaction, university.id);
         return this.applied(university.id, record.id, before, record);
       }
       case 'TUITION': {
@@ -442,8 +455,22 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
       entityId: string;
       operation: string;
       beforeState: Prisma.JsonValue | null;
+      afterState: Prisma.JsonValue | null;
+      universityId: string | null;
     },
   ) {
+    if (change.entityType === 'ADMISSION_REQUIREMENT') {
+      if (!change.universityId) throw new Error('UNIVERSITY_IMPORT_ROLLBACK_OWNER_REQUIRED');
+      await transaction.$queryRaw`SELECT id FROM "University" WHERE id = ${change.universityId} FOR UPDATE`;
+      const owner = await transaction.university.findUniqueOrThrow({ where: { id: change.universityId } });
+      if (['PUBLISHED', 'ARCHIVED', 'REJECTED'].includes(owner.status))
+        throw new Error('UNIVERSITY_IMPORT_OWNER_LIFECYCLE_IMMUTABLE');
+      const current = await transaction.universityProgramAdmissionRequirement.findUnique({ where: { id: change.entityId } });
+      const canonical = (value: unknown): string => JSON.stringify(value, (_key, item) => item && typeof item === 'object' && !Array.isArray(item) ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b))) : item);
+      if (!current || canonical(current) !== canonical(change.afterState))
+        throw new Error('UNIVERSITY_IMPORT_ROLLBACK_CONFLICT');
+      await this.advanceAdmissionOwner(transaction, owner.id);
+    }
     if (change.operation === 'CREATE')
       return this.deleteEntity(transaction, change.entityType, change.entityId);
     const before = this.record(change.beforeState);
@@ -531,6 +558,14 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
       default:
         throw new Error(`UNSUPPORTED_UNIVERSITY_ROLLBACK_ENTITY:${entityType}`);
     }
+  }
+
+  private async advanceAdmissionOwner(transaction: Transaction, id: string): Promise<void> {
+    await transaction.$executeRaw`
+      UPDATE "University" SET
+        "updatedAt" = GREATEST(clock_timestamp(), "updatedAt" + interval '1 millisecond'),
+        status = CASE WHEN status = 'READY_TO_PUBLISH' THEN 'READY_TO_REVIEW' ELSE status END
+      WHERE id = ${id}`;
   }
 
   private async recordAuditAndOutbox(

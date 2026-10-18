@@ -60,3 +60,16 @@ loses the database; save safe runtime evidence first and do not use this mode to
 claim R05 backup/restore, crash durability, R10 recovery or production storage
 acceptance. Existing containers, databases and volumes are not removed to free
 space. Private contracts/logs remain outside Git.
+
+When Docker cannot create another container, transactions may request
+`POST28_LOCAL_LAB_PARENT_STATE=/absolute/private/lab-state.json` together with the
+explicit transactions/tmpfs creation flags. The official creator verifies a
+running, labelled, pinned-image, internal-network **memory-backed local lab**,
+then creates a **new random database** with a fresh OID, nonce, marker, run and
+frozen SHA. It preserves all prior databases, roles, contracts and markers.
+The existing limited app/migration roles are reused without changing privileges
+on any prior database. Live preflight must prove the new empty database and
+limited roles before setup. This is separate database isolation on a shared
+physical disposable server; it is not server-failure isolation or a new R03
+instance proof. Parent container label/run is recorded separately from the new
+target run. No remote host, protected restore or production adapter is provided.

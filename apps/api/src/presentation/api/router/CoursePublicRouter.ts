@@ -27,7 +27,7 @@ export class CoursePublicRouter {
       internationalTestId: z.string().trim().min(1).optional(),
       cursor: z.string().trim().min(1).max(2048).optional(),
       limit: z.coerce.number().int().min(1).max(100).default(20),
-    });
+    }).strict();
 
     router.get('/', asyncHandler(async (req: Request, res: Response) => {
       const locale = parseRequestLocale(req.query);

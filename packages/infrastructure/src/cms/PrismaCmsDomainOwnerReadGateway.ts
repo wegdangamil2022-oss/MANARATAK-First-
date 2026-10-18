@@ -1,3 +1,5 @@
+import { currentPublicCourseEligibility } from '../courses/CoursePublicEligibility';
+import { publicUniversityEligibility } from '../universities/UniversityPublicEligibility';
 import { Prisma } from '@prisma/client';
 import { CmsDomainTargetType, isPublicUniversityProgram } from '@manaratak/domain';
 import { StudyDestinationUseCases } from '@manaratak/application';
@@ -110,7 +112,7 @@ export class PrismaCmsDomainOwnerReadGateway {
     switch (targetType) {
       case CmsDomainTargetType.UNIVERSITY:
         found = await this.db.university.findFirst({
-          where: { id: targetId, status: 'PUBLISHED' },
+          where: { id: targetId, ...publicUniversityEligibility() },
           select: { id: true },
         });
         break;
@@ -123,7 +125,7 @@ export class PrismaCmsDomainOwnerReadGateway {
             majorId: { not: null },
             degreeLevelId: { not: null },
             major: { is: { status: 'PUBLISHED' } },
-            university: { is: { status: 'PUBLISHED' } },
+            university: { is: publicUniversityEligibility() },
           },
           select: {
             id: true,
@@ -188,20 +190,7 @@ export class PrismaCmsDomainOwnerReadGateway {
       }
       case CmsDomainTargetType.COURSE:
         found = await this.db.course.findFirst({
-          where: {
-            id: targetId,
-            status: 'PUBLISHED',
-            completenessStatus: 'COMPLETE',
-            OR: [
-              { originType: { not: 'EXTERNAL_LINKED_COURSE' } },
-              {
-                originType: 'EXTERNAL_LINKED_COURSE',
-                accessType: 'FREE_STUDY_AND_CERTIFICATE',
-                isStudyFree: true,
-                isFreeCertificate: true,
-              },
-            ],
-          },
+          where: await currentPublicCourseEligibility(this.db, { id: targetId }),
           select: { id: true },
         });
         break;

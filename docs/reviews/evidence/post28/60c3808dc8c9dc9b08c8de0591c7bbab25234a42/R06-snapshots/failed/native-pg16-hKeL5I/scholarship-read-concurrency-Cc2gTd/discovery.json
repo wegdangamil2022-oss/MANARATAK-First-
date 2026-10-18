@@ -1,0 +1,30 @@
+[
+  {
+    "name": "CD040 real two-connection scholarship read snapshots > keeps owner selection count and hydration in one snapshot while another connection withdraws the major",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 real two-connection scholarship read snapshots > keeps details and owner proof consistent during a concurrent program withdrawal",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 real two-connection scholarship read snapshots > returns a matching page and total when unpublication commits between their SQL reads",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 real two-connection scholarship read snapshots > continues by immutable ID when the previously issued cursor anchor is deleted",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 real two-connection scholarship read snapshots > does not expose incomplete published owner details when the public list rejects that owner",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 real two-connection scholarship read snapshots > uses exact current major-version ownership in the University program list and its degree facets",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 real two-connection scholarship read snapshots > requires valid program source evidence in University language queries and facets as in scholarship reads",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-scholarship-read-concurrency.database.spec.mjs"
+  }
+]

@@ -17,7 +17,7 @@ describe('PublicUniversityUseCases', () => {
       findByDedupKey: vi.fn(),
       findById: vi.fn(),
       findByPublicId: vi.fn(),
-      findBySlug: vi.fn(),
+      findPublishedBySlug: vi.fn(),
       updateStatus: vi.fn(),
       updateImportLink: vi.fn(),
       listByStatus: vi.fn(),
@@ -66,7 +66,7 @@ describe('PublicUniversityUseCases', () => {
   });
 
   it('getUniversity returns mapped DTO only if PUBLISHED', async () => {
-    mockRepo.findBySlug = vi.fn().mockResolvedValue({
+    mockRepo.findPublishedBySlug = vi.fn().mockResolvedValue({
       id: 'uni-1',
       publicId: 'pub-1',
       slug: 'qatar-university',
@@ -91,7 +91,7 @@ describe('PublicUniversityUseCases', () => {
   });
 
   it('getUniversity throws if not PUBLISHED', async () => {
-    mockRepo.findBySlug = vi.fn().mockResolvedValue({
+    mockRepo.findPublishedBySlug = vi.fn().mockResolvedValue({
       id: 'uni-1',
       slug: 'qatar-university',
       status: UniversityStatus.READY_TO_PUBLISH,

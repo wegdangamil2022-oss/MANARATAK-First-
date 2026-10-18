@@ -51,8 +51,13 @@ export class NodePinnedSourceRequestExecutor implements IPinnedSourceRequestExec
         {
           servername: url.hostname,
           headers,
-          lookup: (_host, _options, callback) =>
-            callback(null, pinnedAddress, pinnedAddress.includes(':') ? 6 : 4),
+          lookup: (_host: string, options: {all?: boolean}, callback: Function) => {
+            const family = pinnedAddress.includes(':') ? 6 : 4;
+            // Node 22 family autodetection requests an array with all=true.
+            // Reuse only the validated address, preserving DNS pinning and SNI.
+            if (options.all) callback(null, [{address: pinnedAddress, family}]);
+            else callback(null, pinnedAddress, family);
+          },
         },
         (res) => {
           const chunks: Buffer[] = [];

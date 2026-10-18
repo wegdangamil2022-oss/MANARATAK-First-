@@ -42,12 +42,11 @@ export async function queryStableCursorPage<TRecord, TOutput>(input: {
   const limit = boundedCursorLimit(input.limit);
   const afterId = decodeStableCursor(input.cursor);
   const query: any = {
-    where: input.where,
+    where: afterId ? {AND:[input.where,{id:{gt:afterId}}]} : input.where,
     take: limit + 1,
     orderBy: { id: 'asc' },
     ...(input.include === undefined ? {} : { include: input.include }),
     ...(input.select === undefined ? {} : { select: input.select }),
-    ...(afterId ? { cursor: { id: afterId }, skip: 1 } : {}),
   };
   const [candidateRows, total] = await Promise.all([
     input.delegate.findMany(query),

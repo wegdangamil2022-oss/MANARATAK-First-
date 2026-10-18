@@ -1,0 +1,91 @@
+{
+  "sourceSha": "a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5",
+  "runId": "0bbdc873-52e6-452f-8128-d0a8a91cbe2a",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "targets.json",
+      "bytes": 667,
+      "sha256": "47a11c759d9d9e0bb3e7e265a0c8e44a73fdb608de264a6cffee43f49217bc41"
+    },
+    {
+      "path": "target-preflight.log",
+      "bytes": 426,
+      "sha256": "e092bcffa80ef07a77b5cb9cf894e2e4c7769d0e917546269569b00fa9697b6f"
+    },
+    {
+      "path": "stage-initialize-setup.log",
+      "bytes": 3594,
+      "sha256": "9d39f8ed7f47d6392e7315a8121b8c839714d9d35ebea91f2af3b56d41a6ebfe"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "51010ede60be13f6bdcce79bf2beebbf7a3ea1754b76300daa7f98f55d007fb4"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 4456,
+      "sha256": "bae01c2bee2b5a34448c37d923dde1dea42796915b775f5c9858328bb19f0a8f"
+    },
+    {
+      "path": "certificate-runtime-ZnftZk/discovery.json",
+      "bytes": 2880,
+      "sha256": "66db386a7b1985156177e3e009fb893936f82ee758862c40c36851314053e250"
+    },
+    {
+      "path": "certificate-runtime-ZnftZk/selection.json",
+      "bytes": 106,
+      "sha256": "07e1b0e65dba2ffffaad3be2d2e3980639673b96dba2c8b49ce97511cbbc3b7e"
+    },
+    {
+      "path": "certificate-runtime-ZnftZk/vitest.json",
+      "bytes": 4615,
+      "sha256": "b43e8eab01eb21b50fc7bbc1a5087fd5211126c3fc04fc667ebd59748fcce960"
+    },
+    {
+      "path": "certificate-runtime-ZnftZk/summary.json",
+      "bytes": 852,
+      "sha256": "251a497d8e23a11014444f5af75c493c23fb45061024489b451e9f292c26487b"
+    },
+    {
+      "path": "http-finance-ftokJ8/discovery.json",
+      "bytes": 6033,
+      "sha256": "2e7e64bdb9e6554040024b8fcdb711b517f67d9c91e2f6bc2d6e8189c18401e6"
+    },
+    {
+      "path": "http-finance-ftokJ8/selection.json",
+      "bytes": 108,
+      "sha256": "c09d104461c1fbc8e8020efe2f3bbdb858a52d3affed8a60ff7809b316fbbde4"
+    },
+    {
+      "path": "http-finance-ftokJ8/vitest.json",
+      "bytes": 8619,
+      "sha256": "9812fb44d96b4ae03994a8a5b502d58903925b5fdda43a1c745a10a2ef2445ac"
+    },
+    {
+      "path": "http-finance-ftokJ8/summary.json",
+      "bytes": 849,
+      "sha256": "d3a34dbc68c5ce6181979f2e6a96402f2af61350effac2ddb3023109f5333d58"
+    },
+    {
+      "path": "lab-runner.mjs",
+      "bytes": 1797,
+      "sha256": "2e4b557b566e07aec27b5ed01e2a8c0b2bc10719b45a57bbf6a8e33be434577c"
+    },
+    {
+      "path": "provisioning-units.log",
+      "bytes": 14600,
+      "sha256": "0abd94c6f545c459310ca642b08d5ca2286a2f8209780e3f67964e8b027bf42a"
+    },
+    {
+      "path": "result.json",
+      "bytes": 461,
+      "sha256": "565312f075b781ce0e8d4268c10c861b33fde3da3ed4c9d48217d606e7aa210b"
+    }
+  ]
+}

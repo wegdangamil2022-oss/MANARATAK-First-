@@ -1,0 +1,131 @@
+{
+  "sourceSha": "13082808c616f4aefddecfc0d96893b3d3e6008a",
+  "runId": "88efb2e7-f095-482a-b9f2-cc8ee9104b81",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "targets.json",
+      "bytes": 667,
+      "sha256": "11717ce35cc1be934f6c9d50982c84dbd9652877da85d27271b951ce634e65fb"
+    },
+    {
+      "path": "target-preflight.log",
+      "bytes": 426,
+      "sha256": "e8a6645eca0403543998b24bd3c93accab9c45b092f52a998b6fc3372026357a"
+    },
+    {
+      "path": "stage-initialize-setup.log",
+      "bytes": 3562,
+      "sha256": "ee645877d2e9d13a1b41f79d59097272c83d746678ba8e64ad6934728f027106"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "73a505cd3ad9cb4ac90d3d776ece1772d76c9b0989cfa8967d775b6da026e3c8"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 4418,
+      "sha256": "e9fc850765e7e3cea1743f032aa84bf336684805c39a3d922c361bfbd14f98ba"
+    },
+    {
+      "path": "course-major-visibility-jHEOJR/discovery.json",
+      "bytes": 2629,
+      "sha256": "08b4610e8dda74a32a01a1f634e4cadadd2e34346d883deeaa90bcbab9252252"
+    },
+    {
+      "path": "course-major-visibility-jHEOJR/selection.json",
+      "bytes": 106,
+      "sha256": "07e1b0e65dba2ffffaad3be2d2e3980639673b96dba2c8b49ce97511cbbc3b7e"
+    },
+    {
+      "path": "course-major-visibility-jHEOJR/vitest.json",
+      "bytes": 4066,
+      "sha256": "d91c891f9bcc4b60d9360efe63691ec0255a879d12b97906b0687af810181946"
+    },
+    {
+      "path": "course-major-visibility-jHEOJR/summary.json",
+      "bytes": 856,
+      "sha256": "95dfcc1bf5b06d0b975d573661829b890ceb8cfe7cfed2f9cb8049997cf48522"
+    },
+    {
+      "path": "dec03-free-study-zV2cG2/discovery.json",
+      "bytes": 5108,
+      "sha256": "e1dd8b7530dc3d36b27d2964e3a371ee32483b76b936e57a9ae5dd78d214dc2d"
+    },
+    {
+      "path": "dec03-free-study-zV2cG2/selection.json",
+      "bytes": 108,
+      "sha256": "c53426a22e4599e45557cdfc71b2bfea84c06d7940fb3ccaaa8e5eb60e4c4aaf"
+    },
+    {
+      "path": "dec03-free-study-zV2cG2/vitest.json",
+      "bytes": 7312,
+      "sha256": "ed7c473fea0631269cd85966b3b21ad41865fb5c45151b016e93a05541463e3d"
+    },
+    {
+      "path": "dec03-free-study-zV2cG2/summary.json",
+      "bytes": 853,
+      "sha256": "6d0de433e5fea7b08b24478ba0cb80868211a21b50fc4fe98e4674338754c59e"
+    },
+    {
+      "path": "infrastructure-typescript.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "provisioning.log",
+      "bytes": 15602,
+      "sha256": "29c1931329425a536c9b4e83c174e212865fec9022614a5fb30251a03451a264"
+    },
+    {
+      "path": "application-typescript-stale-declarations.log",
+      "bytes": 2142,
+      "sha256": "7c66573aa62f7bb0fff09b9883c63d36983e9e706d9d85c14e34fb25edc5d945"
+    },
+    {
+      "path": "application-typescript-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "source-quality.log",
+      "bytes": 384,
+      "sha256": "eec55ba731573ad76875e3cff714bdc27a87514146f57511d67392efccd7ee81"
+    },
+    {
+      "path": "domain-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "course-units-final.json",
+      "bytes": 111509,
+      "sha256": "1a889489b1e145ed7e26eef0b702fe965d311425cb321a3b53aedb04b071c7ff"
+    },
+    {
+      "path": "failed/native-pg16-8WqzTs/dec03-free-study-vzpPCd/discovery.json",
+      "bytes": 3866,
+      "sha256": "34342aa0aea8a27b36155e0feb2b6c16f8e71b13c201b852cab816a819ed3bc6"
+    },
+    {
+      "path": "failed/native-pg16-8WqzTs/dec03-free-study-vzpPCd/selection.json",
+      "bytes": 108,
+      "sha256": "4a17741d7448de0b878a9a4d0132dc53c81c7cc0ebec54d5adca09730288bc43"
+    },
+    {
+      "path": "failed/native-pg16-8WqzTs/dec03-free-study-vzpPCd/vitest.json",
+      "bytes": 9416,
+      "sha256": "ce6ae59e78c98ebf0c75ae238254cfde4c9f1d8e1f5fe7e55f5940c52e6dcbcd"
+    },
+    {
+      "path": "result.json",
+      "bytes": 361,
+      "sha256": "36e5bff0639e08e05c9b11df16b0617a3327c9ae0afa23c8844f27d3208f503f"
+    }
+  ]
+}

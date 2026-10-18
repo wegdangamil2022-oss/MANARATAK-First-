@@ -1,0 +1,146 @@
+{
+  "sourceSha": "e9a94eac920552470a0e648c315bfae48f97669b",
+  "runId": "33b39e57-4baf-4e71-bca2-3c674718d831",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "R06-setup/0-validate.log",
+      "bytes": 144,
+      "sha256": "9bac6f2900d82077fd9ba3d76d872874f55c2b9bf30c910010cf33354fcf9dd6"
+    },
+    {
+      "path": "R06-setup/1-migrate.log",
+      "bytes": 16141,
+      "sha256": "451ede9903e747fa0da914d4ad08cbf2c3526f3f2391035f71c4b41b0ab95b2c"
+    },
+    {
+      "path": "R06-setup/2-migrate.log",
+      "bytes": 258,
+      "sha256": "6892892a0e5ca3718f0f6ae9e06cbd276098b58db8020433cfc9e806dcf8f392"
+    },
+    {
+      "path": "R06-setup/3-migrate.log",
+      "bytes": 25,
+      "sha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "59469317e27e4f79482ba26156623fc9f40ef3d2cfdf070c0ba4a1c3fd2d1067"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 4020,
+      "sha256": "c35df739a5e20641136187432f913e1472eac0ec53ead66c7f4b74cfd4cd9661"
+    },
+    {
+      "path": "result.json",
+      "bytes": 1083,
+      "sha256": "6261b5ff9a70f88ff8af1bf88c0a22d3e4e2c0495b7a2cddf1ebfc36e2f88887"
+    },
+    {
+      "path": "runs/final-pass/admission-import-concurrency-7oVTkp/discovery.json",
+      "bytes": 3275,
+      "sha256": "570d07089855d09e13ea640ac390a2de4326cf6a60cc8f93c6968575cd994d43"
+    },
+    {
+      "path": "runs/final-pass/admission-import-concurrency-7oVTkp/selection.json",
+      "bytes": 108,
+      "sha256": "93ef22ebf97a3327b17174c423d9a554c907260d76a2d0bb857066f2897e3480"
+    },
+    {
+      "path": "runs/final-pass/admission-import-concurrency-7oVTkp/summary.json",
+      "bytes": 865,
+      "sha256": "261a42eb57d3483ca7e23100e4c6af553d6fd1daf3683208f256ff4e00475100"
+    },
+    {
+      "path": "runs/final-pass/admission-import-concurrency-7oVTkp/vitest.json",
+      "bytes": 4782,
+      "sha256": "919d5c6dbe39490922437e3089a90b00f934f65aa73ad43083bf2ec18f56300c"
+    },
+    {
+      "path": "runs/final-pass/relation-commands-G3n5tu/discovery.json",
+      "bytes": 2559,
+      "sha256": "7a3427104253a1c06c3767a145ccb7e05ee1ece4c76715caf17ea84ce3c05a40"
+    },
+    {
+      "path": "runs/final-pass/relation-commands-G3n5tu/selection.json",
+      "bytes": 106,
+      "sha256": "07e1b0e65dba2ffffaad3be2d2e3980639673b96dba2c8b49ce97511cbbc3b7e"
+    },
+    {
+      "path": "runs/final-pass/relation-commands-G3n5tu/summary.json",
+      "bytes": 850,
+      "sha256": "9f9cec07646f4b6f0408a4f78440cde776ec1495b89d971e83a0c3de1eb48717"
+    },
+    {
+      "path": "runs/final-pass/relation-commands-G3n5tu/vitest.json",
+      "bytes": 4007,
+      "sha256": "c9bc290a3e5cb5a86d89b3aec67ac76a117c846ca2241ec5d5ee428c6c84baef"
+    },
+    {
+      "path": "runs/initial-required-fixture-field-failure/admission-import-concurrency-gBFvia/discovery.json",
+      "bytes": 3275,
+      "sha256": "570d07089855d09e13ea640ac390a2de4326cf6a60cc8f93c6968575cd994d43"
+    },
+    {
+      "path": "runs/initial-required-fixture-field-failure/admission-import-concurrency-gBFvia/selection.json",
+      "bytes": 108,
+      "sha256": "93ef22ebf97a3327b17174c423d9a554c907260d76a2d0bb857066f2897e3480"
+    },
+    {
+      "path": "runs/initial-required-fixture-field-failure/admission-import-concurrency-gBFvia/vitest.json",
+      "bytes": 23409,
+      "sha256": "4b7acedc8dd71b35273664faf3eae70b3e9eb775717bd741e9b039e4bab3b30d"
+    },
+    {
+      "path": "runs/prisma-void-lock-failure/admission-import-concurrency-I1dTXG/discovery.json",
+      "bytes": 3275,
+      "sha256": "570d07089855d09e13ea640ac390a2de4326cf6a60cc8f93c6968575cd994d43"
+    },
+    {
+      "path": "runs/prisma-void-lock-failure/admission-import-concurrency-I1dTXG/selection.json",
+      "bytes": 108,
+      "sha256": "93ef22ebf97a3327b17174c423d9a554c907260d76a2d0bb857066f2897e3480"
+    },
+    {
+      "path": "runs/prisma-void-lock-failure/admission-import-concurrency-I1dTXG/vitest.json",
+      "bytes": 17738,
+      "sha256": "2fe6dbc33dc51318f05ff1dae59c1bc49cbbba6c03b8a0383d1a7132d91ad3e3"
+    },
+    {
+      "path": "stage-initialize-setup.log",
+      "bytes": 3229,
+      "sha256": "060f4f6ee87f4ebb0f652fbac883e84bc30e092c99d076fa33d2ac512cb4a342"
+    },
+    {
+      "path": "stage-suite-admission-import-concurrency.log",
+      "bytes": 867,
+      "sha256": "ba062dfb9d20fdcedbd2d7d838fc61d68d8f59b07f9af93ac509136e8e5a6435"
+    },
+    {
+      "path": "stage-suite-relation-commands.log",
+      "bytes": 841,
+      "sha256": "1b10b88422400afc463b16a78cb31516e716d70abe55a1689b4ecf302267cb08"
+    },
+    {
+      "path": "target-preflight.log",
+      "bytes": 426,
+      "sha256": "1a626b3889ad4533ec6e25de8f59f1fdcbd7c239c86669e3806628fdb12cb5c1"
+    },
+    {
+      "path": "targets.json",
+      "bytes": 667,
+      "sha256": "cdf4b6023398b0cc2901e5ab85fc530bdd09c478eb65584c3f75950ad3be0f9f"
+    },
+    {
+      "path": "unit-tests.json",
+      "bytes": 3121,
+      "sha256": "b9523e774d9cde684717fd7071031aa053594366abe58a6274d22c15a038576a"
+    }
+  ]
+}

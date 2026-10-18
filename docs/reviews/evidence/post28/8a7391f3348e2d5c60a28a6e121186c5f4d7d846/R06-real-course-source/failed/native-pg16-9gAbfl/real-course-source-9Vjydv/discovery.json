@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Post28 actual public raw course source through controlled manual review and publication > materializes actual GET bytes with digest readback and separate certificate terms evidence",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-course-source.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual public raw course source through controlled manual review and publication > blocks unapproved source review and keeps imported owner hidden until publication",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-course-source.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual public raw course source through controlled manual review and publication > requires canonical language and source topic review before real HEAD check and explicit publication",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-course-source.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual public raw course source through controlled manual review and publication > withdraws published language-filtered page count and detail immediately when canonical language is deactivated",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-course-source.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual public raw course source through controlled manual review and publication > withdraws published owner after provider approval is removed and restores only the still-valid graph",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-course-source.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual public raw course source through controlled manual review and publication > preserves published canonical owner and transfer receipt on replay without reissuing audit events",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-course-source.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual public raw course source through controlled manual review and publication > fails closed for unregistered fetch-missing adapter instead of arbitrary crawling",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-real-course-source.database.spec.mjs"
+  }
+]

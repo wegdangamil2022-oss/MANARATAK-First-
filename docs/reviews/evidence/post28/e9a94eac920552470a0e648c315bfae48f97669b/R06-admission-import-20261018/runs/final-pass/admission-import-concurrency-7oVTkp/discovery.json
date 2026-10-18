@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Post28 real nullable admission import concurrency > serializes two real import connections at the owner before nullable identity lookup",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-admission-import-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real nullable admission import concurrency > reconciles concurrent same change-set replay exactly once with one audit and outbox",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-admission-import-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real nullable admission import concurrency > makes a pre-import admin CAS revision stale and preserves imported requirement",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-admission-import-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real nullable admission import concurrency > rolls imported requirements and revision back on a real SQL error at the outbox boundary",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-admission-import-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real nullable admission import concurrency > rejects invalid minimum score through the same validator used by admin",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-admission-import-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real nullable admission import concurrency > refuses ACTIVE import without actual published test proof and rolls all state back",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-admission-import-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real nullable admission import concurrency > refuses rollback of an earlier import after a later import changed the same row",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-admission-import-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real nullable admission import concurrency > reconciles concurrent rollback once and records the actual compensating audit and outbox",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-admission-import-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real nullable admission import concurrency > rejects an import over preexisting duplicate nullable identities without selecting an arbitrary winner",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-admission-import-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real nullable admission import concurrency > audits nullable duplicates read-only without hiding or deleting historical rows",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-admission-import-concurrency.database.spec.mjs"
+  }
+]

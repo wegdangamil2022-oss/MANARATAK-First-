@@ -18,7 +18,7 @@ export class PrismaImportGovernanceGateway implements IImportGovernanceGateway {
   private requireTransaction() { if (!this.bound) throw new Error('IMPORT_GOVERNANCE_TRANSACTION_REQUIRED'); }
   private async lock(key: string) {
     this.requireTransaction();
-    await this.prisma.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`import-governance:${key}`}, 0))`;
+    await this.prisma.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${`import-governance:${key}`}, 0))`;
   }
   async listProfiles(sourceId: string, ownerDomain: string) {
     return (await this.prisma.importMappingProfile.findMany({ where: { sourceId, ownerDomain }, orderBy: { version: 'desc' }, take: 50 })).map(profileDto);

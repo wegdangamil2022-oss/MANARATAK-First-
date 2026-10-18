@@ -1,3 +1,5 @@
+import {publicProgramMajorVersionProofSql} from './PublicProgramMajorProofSql';
+import {publicUniversityEligibility,publicUniversityGeographySql,publicUniversityGeographySelect,isPublicUniversityGeography} from './UniversityPublicEligibility';
 import { universityTranslationSourceSelect, universityTranslationSourceStatus } from './UniversityTranslationSourceEvidence';
 import {publicProgramTestMatchSql} from './PublicProgramTestSql';
 import { Prisma, PrismaClient } from '@prisma/client';
@@ -6,6 +8,7 @@ import {
   ITransactionalUniversityRepository,
   IUniversityRepository,
   PaginatedUniversityResult,
+  type PublishedAcademicProgramReadModel,
   PaginatedUniversityOrganizationUnitResult,
   PublicUniversityFilters,
   sanitizeUniversityOptionalFields,
@@ -21,8 +24,10 @@ import {
   UniversityLocalizedTextTargetType,
   UpdateUniversityDto,
   MajorStatus,
+  UniversityPublicationReadinessPolicy,
   isPublicUniversityProgram,
 } from '@manaratak/domain';
+import { lockUniversityPublicationReferences } from './UniversityPublicationReferenceLocks';
 import { UniversityCanonicalRelationshipValidator } from './UniversityCanonicalRelationshipValidator';
 
 import {
@@ -103,6 +108,13 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     );
   }
 
+  private async readSnapshot<T>(work:(repository:PrismaUniversityRepository)=>Promise<T>):Promise<T> {
+    return this.prisma.$transaction(
+      transaction=>work(new PrismaUniversityRepository(transaction as unknown as PrismaClient,this.legacyCountryTextFiltersEnabled,true)),
+      {isolationLevel:Prisma.TransactionIsolationLevel.RepeatableRead},
+    );
+  }
+
   async lockForRevision(id: string, expectedRevision: number): Promise<void> {
     if (!this.transactionBound) throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
     const rows = await this.prisma.$queryRaw<Array<{ revision: bigint; status: string }>>`
@@ -139,6 +151,12 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       include: universityDetails,
     });
     return record ? this.mapToDto(record) : null;
+  }
+
+  async findPublishedBySlug(slug: string): Promise<UniversityDto | null> {
+    if(!this.transactionBound)return this.readSnapshot(repository=>repository.findPublishedBySlug(slug));
+    const record=await this.prisma.university.findFirst({where:{slug,...publicUniversityEligibility()},include:universityDetails});
+    return record?this.mapToDto(record):null;
   }
 
   async findByDedupKey(key: string): Promise<UniversityDto | null> {
@@ -279,6 +297,25 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   }
 
   async updateStatus(id: string, status: UniversityStatus): Promise<void> {
+    if (status === UniversityStatus.READY_TO_PUBLISH || status === UniversityStatus.PUBLISHED) {
+      if (!this.transactionBound) throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+      await lockUniversityPublicationReferences(this.prisma, id);
+      const record = await this.prisma.university.findUnique({where: {id}, include: universityDetails});
+      if (!record) throw new Error('UNIVERSITY_NOT_FOUND');
+      const current = this.mapToDto(record);
+      const expected = status === UniversityStatus.PUBLISHED ? UniversityStatus.READY_TO_PUBLISH : UniversityStatus.READY_TO_REVIEW;
+      if (current.status !== expected) throw new Error('UNIVERSITY_INVALID_PUBLISHABLE_TRANSITION');
+      const validator = new UniversityCanonicalRelationshipValidator(this.prisma);
+      await validator.validateCampus({countryReferenceId: current.countryReferenceId ?? undefined, regionReferenceId: current.regionReferenceId ?? undefined, cityReferenceId: current.cityReferenceId ?? undefined});
+      for (const campus of record.campuses) {
+        if (campus.status === 'ACTIVE') await validator.validateCampus({countryReferenceId: campus.countryReferenceId ?? undefined, regionReferenceId: campus.regionReferenceId ?? undefined, cityReferenceId: campus.cityReferenceId ?? undefined});
+      }
+      for (const program of current.academicPrograms ?? []) {
+        if (program.status === 'ACTIVE') await validator.validateProgram(program.degreeLevelId!, program.majorId ?? undefined, program.majorMappingState);
+      }
+      const readiness = new UniversityPublicationReadinessPolicy().evaluate({...current, status: UniversityStatus.READY_TO_PUBLISH});
+      if (readiness.blockingIssues.length) throw new Error(readiness.blockingIssues.map(issue => issue.code).join(','));
+    }
     await this.prisma.university.update({
       where: { id },
       data: { status },
@@ -405,9 +442,10 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   async listPublished(
     filters: PublicUniversityFilters,
   ): Promise<PaginatedUniversityResult<UniversityDto>> {
+    if(!this.transactionBound)return this.readSnapshot(repository=>repository.listPublished(filters));
     if (filters.majorId || filters.internationalTestId)
       return this.listPublishedAcademicUniversityPage(filters);
-    const where: Prisma.UniversityWhereInput = { status: UniversityStatus.PUBLISHED };
+    const where: Prisma.UniversityWhereInput = publicUniversityEligibility();
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
     if (filters.regionReferenceId) where.regionReferenceId = filters.regionReferenceId;
     if (filters.cityReferenceId) where.cityReferenceId = filters.cityReferenceId;
@@ -434,7 +472,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   ): Promise<PaginatedUniversityResult<UniversityDto>> {
     const limit = boundedCursorLimit(filters.limit),
       after = decodeStableCursor(filters.cursor);
-    const conditions = [Prisma.sql`u.status='PUBLISHED'`];
+    const conditions = [Prisma.sql`u.status='PUBLISHED'`,publicUniversityGeographySql()];
     if (filters.countryReferenceId)
       conditions.push(Prisma.sql`u."countryReferenceId"=${filters.countryReferenceId}`);
     if (filters.regionReferenceId)
@@ -454,7 +492,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       Prisma.sql`p.status='ACTIVE'`,
       Prisma.sql`p."majorMappingState"='CANONICALLY_MAPPED'`,
       Prisma.sql`m.status='PUBLISHED'`,
-      Prisma.sql`EXISTS (SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)`,
+      publicProgramMajorVersionProofSql(),
     ];
     if (filters.majorId) programConditions.push(Prisma.sql`p."majorId"=${filters.majorId}`);
     if(filters.internationalTestId)programConditions.push(publicProgramTestMatchSql(filters.internationalTestId));
@@ -471,7 +509,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     const ids = selected.slice(0, limit).map((row) => row.id);
     const rows = ids.length
       ? await this.prisma.university.findMany({
-          where: { id: { in: ids }, status: UniversityStatus.PUBLISHED },
+          where: { id: { in: ids }, ...publicUniversityEligibility() },
           include: universityDetails,
         })
       : [];
@@ -492,13 +530,14 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     };
   }
 
-  async readProgramIntegrityReference(id:string){const row=await this.prisma.universityAcademicProgram.findUnique({where:{id},include:{university:{select:{status:true}},major:{select:{status:true,levelProfiles:{select:{id:true,degreeLevelId:true,status:true,currentPublishedVersionId:true,currentPublishedVersion:{select:{id:true,majorId:true,profileId:true,status:true}}}}}}}});return row?{id:row.id,universityId:row.universityId,publiclyEligible:row.university.status==='PUBLISHED'&&isPublicUniversityProgram(row)}:null;}
+  async readProgramIntegrityReference(id:string){const row=await this.prisma.universityAcademicProgram.findUnique({where:{id},include:{university:{select:publicUniversityGeographySelect},major:{select:{status:true,levelProfiles:{select:{id:true,degreeLevelId:true,status:true,currentPublishedVersionId:true,currentPublishedVersion:{select:{id:true,majorId:true,profileId:true,status:true}}}}}}}});return row?{id:row.id,universityId:row.universityId,publiclyEligible:isPublicUniversityGeography(row.university)&&isPublicUniversityProgram(row)}:null;}
 
-  async listPublishedMajorGraph(filters:{countryReferenceId:string;cursor?:string;limit?:number}) {
+  async listPublishedMajorGraph(filters:{countryReferenceId:string;cursor?:string;limit?:number}):Promise<{data:Array<{ownerId:string}>;total:number;hasMore:boolean;nextCursor:string|null}> {
+    if(!this.transactionBound)return this.readSnapshot(repository=>repository.listPublishedMajorGraph(filters));
     const limit=boundedCursorLimit(filters.limit,12,50),after=decodeStableCursor(filters.cursor);
     const base=Prisma.sql`FROM "UniversityAcademicProgram" p JOIN "University" u ON u.id=p."universityId" JOIN "Major" m ON m.id=p."majorId"
       WHERE u."countryReferenceId"=${filters.countryReferenceId} AND p.status='ACTIVE' AND p."majorMappingState"='CANONICALLY_MAPPED' AND u.status='PUBLISHED' AND m.status='PUBLISHED'
-      AND EXISTS(SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)`;
+      AND ${publicUniversityGeographySql()} AND ${publicProgramMajorVersionProofSql()}`;
     const [rows,counts]=await Promise.all([
       this.prisma.$queryRaw<Array<{ownerId:string}>>(Prisma.sql`SELECT DISTINCT m.id AS "ownerId" ${base} ${after?Prisma.sql`AND m.id>${after}`:Prisma.empty} ORDER BY m.id LIMIT ${limit+1}`),
       this.prisma.$queryRaw<Array<{total:bigint}>>(Prisma.sql`SELECT count(DISTINCT m.id) AS total ${base}`),
@@ -515,15 +554,17 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     degreeLevelId?: string;
     cursor?: string;
     limit?: number;
-  }) {
+  }):Promise<{data:PublishedAcademicProgramReadModel[];total:number;majorTotal:number;hasMore:boolean;nextCursor:string|null}> {
+    if(!this.transactionBound)return this.readSnapshot(repository=>repository.listPublishedProgramGraph(filters));
     const limit = boundedCursorLimit(filters.limit, 12, 50),
       after = decodeStableCursor(filters.cursor);
     const conditions = [
       Prisma.sql`p.status='ACTIVE'`,
       Prisma.sql`p."majorMappingState"='CANONICALLY_MAPPED'`,
       Prisma.sql`u.status='PUBLISHED'`,
+      publicUniversityGeographySql(),
       Prisma.sql`m.status='PUBLISHED'`,
-      Prisma.sql`EXISTS (SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)`,
+      publicProgramMajorVersionProofSql(),
     ];
     if (filters.countryReferenceId)
       conditions.push(Prisma.sql`u."countryReferenceId"=${filters.countryReferenceId}`);
@@ -562,7 +603,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   async findPublishedByPublicIds(publicIds: string[]): Promise<UniversityDto[]> {
     if (!publicIds.length) return [];
     const rows = await this.prisma.university.findMany({
-      where: { publicId: { in: [...new Set(publicIds)] }, status: UniversityStatus.PUBLISHED },
+      where: { publicId: { in: [...new Set(publicIds)] }, ...publicUniversityEligibility() },
       include: universityDetails,
     });
     return rows.map((row) => this.mapToDto(row));
@@ -571,7 +612,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   async findPublishedByIds(ids: string[]): Promise<UniversityDto[]> {
     if (!ids.length) return [];
     const rows = await this.prisma.university.findMany({
-      where: { id: { in: [...new Set(ids)] }, status: UniversityStatus.PUBLISHED },
+      where: { id: { in: [...new Set(ids)] }, ...publicUniversityEligibility() },
       include: universityDetails,
     });
     return rows.map((row) => this.mapToDto(row));
@@ -587,7 +628,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         majorId: { not: null },
         degreeLevelId: { not: null },
         major: { is: { status: MajorStatus.PUBLISHED } },
-        university: { is: { status: UniversityStatus.PUBLISHED } },
+        university: { is: publicUniversityEligibility() },
       },
       select: {
         id: true,

@@ -16,11 +16,18 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
     return test?.status === 'PUBLISHED' && test.isPubliclyVisible === true && Boolean(version) &&
       version?.status === 'PUBLISHED' && version.id === test.currentPublishedVersionId && version.testId === test.id;
   };
+  const country = (value:unknown) => (value as {country?:{id:string;name:string;nameAr?:string|null;isActive:boolean;lifecycleState:string}}).country;
   return {
     publicId: source.publicId, slug: source.slug, canonicalName: source.canonicalName,
     displayName, providerName: source.providerName,
+    fundedProgramPairs: (source.fundedProgramPairs ?? []).map(pair => ({
+      linkKey: pair.linkKey, universityId: pair.universityId, academicProgramId: pair.academicProgramId,
+      degreeLevelId: pair.degreeLevelId, majorId: pair.majorId, programName: pair.programName,
+      degreeLabel: pair.degreeLabel, majorLabel: pair.majorLabel,
+      studyLanguages:(pair.studyLanguages??[]).map(language=>({id:language.id,name:language.name})),
+    })),
     academicYear: source.academicYear, cycleName: source.cycleName,
-    countryReferenceId: source.countryReferenceId, countrySourceLabel: source.countrySourceLabel,
+    countryReferenceId: source.countryReferenceId, countrySourceLabel: source.countrySourceLabel,studyCountryLabel:source.studyCountryLabel,
     countryScope: source.countryScope, studyLanguageReferenceId: source.studyLanguageReferenceId,
     studyLanguageSourceLabel: source.studyLanguageSourceLabel, studyCountry: source.studyCountry,
     studyLanguage: source.studyLanguage, degreeLevel: source.degreeLevel,
@@ -47,6 +54,7 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
           (!e.internationalTestId || testPublished(e)),
       )
       .map((e) => ({itemKey:e.itemKey,itemTypeCode:e.itemTypeCode,operatorCode:e.operatorCode,
+        countryLabel:country(e)?.isActive && country(e)?.lifecycleState==='ACTIVE' ? country(e)?.nameAr || country(e)?.name : undefined,
         valueText:e.valueText,minimumValue:e.minimumValue,maximumValue:e.maximumValue,
         countryReferenceId:e.countryReferenceId,degreeLevelId:e.degreeLevelId,
         majorId:e.majorId,internationalTestId:e.internationalTestId,

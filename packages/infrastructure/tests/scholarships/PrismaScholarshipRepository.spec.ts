@@ -16,7 +16,9 @@ describe('PrismaScholarshipRepository', () => {
         count: vi.fn(),
       },
     };
+    mockPrisma.$transaction = vi.fn(async (work: (client: unknown)=>unknown)=>work(mockPrisma));
     programReads = {findByIds: vi.fn(async (ids: string[]) => ids.map(id => ({contractVersion:1 as const,id,universityId:'university-1',degreeLevelId:'degree-bachelor',majorId:'major-cs',status:'ACTIVE',publiclyEligible:true,canonicalName:id,displayName:id}))),findPublished:vi.fn(async (query: {academicProgramId?:string;universityId?:string;degreeLevelId?:string})=>[{contractVersion:1 as const,id:query.academicProgramId??'program-1',universityId:query.universityId??'university-1',degreeLevelId:query.degreeLevelId??'degree-bachelor',majorId:'major-cs',status:'ACTIVE',publiclyEligible:true,canonicalName:'program',displayName:'Program'}]),withTransaction:vi.fn()};
+    programReads.withTransaction.mockImplementation(()=>programReads);
     repository = new PrismaScholarshipRepository(mockPrisma as any, false, programReads);
   });
 
@@ -203,9 +205,9 @@ describe('PrismaScholarshipRepository', () => {
     const where = mockPrisma.scholarship.findMany.mock.calls[0][0].where;
     const serialized = JSON.stringify(where);
     expect(where.countryReferenceId).toBe('country-qa');
-    expect(where.studyLanguageReferenceId).toBe('language-en');
+    expect(where.studyLanguageReferenceId).toBeUndefined();
     expect(serialized).toContain('currencyReferenceId');
-    expect(programReads.findPublished).toHaveBeenCalledWith({universityId:'university-qu',academicProgramId:'program-cs-phd',degreeLevelId:'degree-phd',majorId:'major-cs'});
+    expect(programReads.findPublished).toHaveBeenCalledWith({universityId:'university-qu',academicProgramId:'program-cs-phd',degreeLevelId:'degree-phd',majorId:'major-cs',languageReferenceId:'language-en'});
     expect(serialized).not.toContain('degreeTargets');
     expect(serialized).not.toContain('majorTargets');
     expect(serialized).toContain('internationalTestId');

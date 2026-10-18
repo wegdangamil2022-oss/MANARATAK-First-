@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study true certificate true obeys owner free study rule",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study true certificate false obeys owner free study rule",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study false certificate true obeys owner free study rule",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > FX COURSE 01 study false certificate false obeys owner free study rule",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > keeps unknown certificate cost unknown on the actual API and UI while allowing free study",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > relationship filters return the same paid certificate free study owner",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > free classification does not bypass persisted link source verification",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > free paid certificate publication rolls owner version audit and outbox back on actual PostgreSQL failure",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > rejects provider withdrawal after publication precheck without owner audit or outbox changes",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > rejects language withdrawal after publication precheck without owner audit or outbox changes",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > rejects domain withdrawal after publication precheck without owner audit or outbox changes",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > rejects link withdrawal after publication precheck without owner audit or outbox changes",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > holds provider publication evidence until the owner transaction commits",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > holds language publication evidence until the owner transaction commits",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > holds domain publication evidence until the owner transaction commits",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  },
+  {
+    "name": "Post28 DEC03 actual free study publication and UI contract > holds link publication evidence until the owner transaction commits",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-dec03-free-study.database.spec.mjs"
+  }
+]
