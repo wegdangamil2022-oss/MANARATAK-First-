@@ -276,7 +276,7 @@ export class CrossDomainGraphReadService {
   }
 
   public async getUniversityGraphBySlug(slug: string, options: CrossDomainGraphReadOptions = {}): Promise<UniversityGraphReadModel> {
-    const university = await this.universityRepository.findBySlug(this.required(slug, 'UNIVERSITY_SLUG_REQUIRED'));
+    const university = await this.universityRepository.findPublishedBySlug(this.required(slug, 'UNIVERSITY_SLUG_REQUIRED'));
     if (!university || university.status !== UniversityStatus.PUBLISHED) throw new Error('University not found');
 
     const readScope = createGraphReadScope();

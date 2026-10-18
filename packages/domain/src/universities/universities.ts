@@ -344,6 +344,7 @@ export interface IUniversityRepository {
   updateStatus(id: string, status: UniversityStatus): Promise<void>;
   findById(id: string): Promise<UniversityDto | null>;
   findBySlug(slug: string): Promise<UniversityDto | null>;
+  findPublishedBySlug(slug: string): Promise<UniversityDto | null>;
   findByDedupKey(key: string): Promise<UniversityDto | null>;
   list(filters: UniversityFilters): Promise<PaginatedUniversityResult<UniversityDto>>;
   listPublished(

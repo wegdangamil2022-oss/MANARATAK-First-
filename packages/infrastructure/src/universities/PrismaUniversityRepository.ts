@@ -1,4 +1,5 @@
 import {publicProgramMajorVersionProofSql} from './PublicProgramMajorProofSql';
+import {publicUniversityEligibility,publicUniversityGeographySql,publicUniversityGeographySelect,isPublicUniversityGeography} from './UniversityPublicEligibility';
 import { universityTranslationSourceSelect, universityTranslationSourceStatus } from './UniversityTranslationSourceEvidence';
 import {publicProgramTestMatchSql} from './PublicProgramTestSql';
 import { Prisma, PrismaClient } from '@prisma/client';
@@ -142,6 +143,11 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       include: universityDetails,
     });
     return record ? this.mapToDto(record) : null;
+  }
+
+  async findPublishedBySlug(slug: string): Promise<UniversityDto | null> {
+    const record=await this.prisma.university.findFirst({where:{slug,...publicUniversityEligibility()},include:universityDetails});
+    return record?this.mapToDto(record):null;
   }
 
   async findByDedupKey(key: string): Promise<UniversityDto | null> {
@@ -429,7 +435,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   ): Promise<PaginatedUniversityResult<UniversityDto>> {
     if (filters.majorId || filters.internationalTestId)
       return this.listPublishedAcademicUniversityPage(filters);
-    const where: Prisma.UniversityWhereInput = { status: UniversityStatus.PUBLISHED };
+    const where: Prisma.UniversityWhereInput = publicUniversityEligibility();
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
     if (filters.regionReferenceId) where.regionReferenceId = filters.regionReferenceId;
     if (filters.cityReferenceId) where.cityReferenceId = filters.cityReferenceId;
@@ -456,7 +462,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   ): Promise<PaginatedUniversityResult<UniversityDto>> {
     const limit = boundedCursorLimit(filters.limit),
       after = decodeStableCursor(filters.cursor);
-    const conditions = [Prisma.sql`u.status='PUBLISHED'`];
+    const conditions = [Prisma.sql`u.status='PUBLISHED'`,publicUniversityGeographySql()];
     if (filters.countryReferenceId)
       conditions.push(Prisma.sql`u."countryReferenceId"=${filters.countryReferenceId}`);
     if (filters.regionReferenceId)
@@ -493,7 +499,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     const ids = selected.slice(0, limit).map((row) => row.id);
     const rows = ids.length
       ? await this.prisma.university.findMany({
-          where: { id: { in: ids }, status: UniversityStatus.PUBLISHED },
+          where: { id: { in: ids }, ...publicUniversityEligibility() },
           include: universityDetails,
         })
       : [];
@@ -514,13 +520,13 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     };
   }
 
-  async readProgramIntegrityReference(id:string){const row=await this.prisma.universityAcademicProgram.findUnique({where:{id},include:{university:{select:{status:true}},major:{select:{status:true,levelProfiles:{select:{id:true,degreeLevelId:true,status:true,currentPublishedVersionId:true,currentPublishedVersion:{select:{id:true,majorId:true,profileId:true,status:true}}}}}}}});return row?{id:row.id,universityId:row.universityId,publiclyEligible:row.university.status==='PUBLISHED'&&isPublicUniversityProgram(row)}:null;}
+  async readProgramIntegrityReference(id:string){const row=await this.prisma.universityAcademicProgram.findUnique({where:{id},include:{university:{select:publicUniversityGeographySelect},major:{select:{status:true,levelProfiles:{select:{id:true,degreeLevelId:true,status:true,currentPublishedVersionId:true,currentPublishedVersion:{select:{id:true,majorId:true,profileId:true,status:true}}}}}}}});return row?{id:row.id,universityId:row.universityId,publiclyEligible:isPublicUniversityGeography(row.university)&&isPublicUniversityProgram(row)}:null;}
 
   async listPublishedMajorGraph(filters:{countryReferenceId:string;cursor?:string;limit?:number}) {
     const limit=boundedCursorLimit(filters.limit,12,50),after=decodeStableCursor(filters.cursor);
     const base=Prisma.sql`FROM "UniversityAcademicProgram" p JOIN "University" u ON u.id=p."universityId" JOIN "Major" m ON m.id=p."majorId"
       WHERE u."countryReferenceId"=${filters.countryReferenceId} AND p.status='ACTIVE' AND p."majorMappingState"='CANONICALLY_MAPPED' AND u.status='PUBLISHED' AND m.status='PUBLISHED'
-      AND ${publicProgramMajorVersionProofSql()}`;
+      AND ${publicUniversityGeographySql()} AND ${publicProgramMajorVersionProofSql()}`;
     const [rows,counts]=await Promise.all([
       this.prisma.$queryRaw<Array<{ownerId:string}>>(Prisma.sql`SELECT DISTINCT m.id AS "ownerId" ${base} ${after?Prisma.sql`AND m.id>${after}`:Prisma.empty} ORDER BY m.id LIMIT ${limit+1}`),
       this.prisma.$queryRaw<Array<{total:bigint}>>(Prisma.sql`SELECT count(DISTINCT m.id) AS total ${base}`),
@@ -544,6 +550,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       Prisma.sql`p.status='ACTIVE'`,
       Prisma.sql`p."majorMappingState"='CANONICALLY_MAPPED'`,
       Prisma.sql`u.status='PUBLISHED'`,
+      publicUniversityGeographySql(),
       Prisma.sql`m.status='PUBLISHED'`,
       publicProgramMajorVersionProofSql(),
     ];
@@ -584,7 +591,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   async findPublishedByPublicIds(publicIds: string[]): Promise<UniversityDto[]> {
     if (!publicIds.length) return [];
     const rows = await this.prisma.university.findMany({
-      where: { publicId: { in: [...new Set(publicIds)] }, status: UniversityStatus.PUBLISHED },
+      where: { publicId: { in: [...new Set(publicIds)] }, ...publicUniversityEligibility() },
       include: universityDetails,
     });
     return rows.map((row) => this.mapToDto(row));
@@ -593,7 +600,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   async findPublishedByIds(ids: string[]): Promise<UniversityDto[]> {
     if (!ids.length) return [];
     const rows = await this.prisma.university.findMany({
-      where: { id: { in: [...new Set(ids)] }, status: UniversityStatus.PUBLISHED },
+      where: { id: { in: [...new Set(ids)] }, ...publicUniversityEligibility() },
       include: universityDetails,
     });
     return rows.map((row) => this.mapToDto(row));
@@ -609,7 +616,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
         majorId: { not: null },
         degreeLevelId: { not: null },
         major: { is: { status: MajorStatus.PUBLISHED } },
-        university: { is: { status: UniversityStatus.PUBLISHED } },
+        university: { is: publicUniversityEligibility() },
       },
       select: {
         id: true,

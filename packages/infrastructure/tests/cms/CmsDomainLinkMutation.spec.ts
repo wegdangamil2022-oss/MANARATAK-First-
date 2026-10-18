@@ -49,7 +49,7 @@ describe('CMS transaction-bound domain-link mutations', () => {
     await repository.replaceDomainLinks('node-1', [link], 'editor', 3);
     expect(tx.university.findFirst).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: link.targetId, status: 'PUBLISHED' },
+        where: expect.objectContaining({ id: link.targetId, status: 'PUBLISHED',countryReference:{is:{isActive:true,lifecycleState:'ACTIVE'}} }),
       }),
     );
     expect(tx.cmsContentNode.updateMany).toHaveBeenCalledWith({

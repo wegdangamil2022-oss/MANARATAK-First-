@@ -1,4 +1,5 @@
 import { publicCourseEligibility } from '../courses/CoursePublicEligibility';
+import { publicUniversityEligibility } from '../universities/UniversityPublicEligibility';
 import { Prisma } from '@prisma/client';
 import { CmsDomainTargetType, isPublicUniversityProgram } from '@manaratak/domain';
 import { StudyDestinationUseCases } from '@manaratak/application';
@@ -111,7 +112,7 @@ export class PrismaCmsDomainOwnerReadGateway {
     switch (targetType) {
       case CmsDomainTargetType.UNIVERSITY:
         found = await this.db.university.findFirst({
-          where: { id: targetId, status: 'PUBLISHED' },
+          where: { id: targetId, ...publicUniversityEligibility() },
           select: { id: true },
         });
         break;
@@ -124,7 +125,7 @@ export class PrismaCmsDomainOwnerReadGateway {
             majorId: { not: null },
             degreeLevelId: { not: null },
             major: { is: { status: 'PUBLISHED' } },
-            university: { is: { status: 'PUBLISHED' } },
+            university: { is: publicUniversityEligibility() },
           },
           select: {
             id: true,

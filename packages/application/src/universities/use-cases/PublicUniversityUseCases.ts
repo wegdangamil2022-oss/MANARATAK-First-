@@ -16,7 +16,7 @@ export class PublicUniversityUseCases {
   }
 
   public async getUniversity(slug: string): Promise<PublicUniversityDto> {
-    const university = await this.repository.findBySlug(slug);
+    const university = await this.repository.findPublishedBySlug(slug);
     if (!university || university.status !== UniversityStatus.PUBLISHED) {
       throw new Error('University not found');
     }

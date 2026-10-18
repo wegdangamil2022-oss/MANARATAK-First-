@@ -13,9 +13,11 @@ const university = {
         status: 'PUBLISHED',
         levelProfiles: [
           {
+            id: 'profile-1',
             degreeLevelId: 'degree-bachelor',
             status: 'PUBLISHED',
             currentPublishedVersionId: 'version-1',
+            currentPublishedVersion: {id:'version-1',majorId:'major-1',profileId:'profile-1',status:'PUBLISHED'},
           },
         ],
       },
@@ -41,7 +43,7 @@ function build() {
     findPublishedByIds: vi.fn().mockResolvedValue([major]),
   };
   const universityRepository = {
-    findBySlug: vi.fn().mockResolvedValue(university),
+    findPublishedBySlug: vi.fn().mockResolvedValue(university),
     listPublished: vi.fn().mockResolvedValue(page([university])),
     findPublishedByIds: vi.fn().mockResolvedValue([university]),
     listPublishedMajorGraph: vi.fn().mockResolvedValue({data:[{ownerId:'major-1'}],total:1,hasMore:false,nextCursor:null}),

@@ -129,7 +129,7 @@ describe('P16 canonical owner publication gateway', () => {
     expect(db.universityAcademicProgram.findFirst).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          university: { is: { status: 'PUBLISHED' } },
+          university: { is: expect.objectContaining({ status: 'PUBLISHED',countryReference:{is:{isActive:true,lifecycleState:'ACTIVE'}} }) },
           major: { is: { status: 'PUBLISHED' } },
         }),
       }),
