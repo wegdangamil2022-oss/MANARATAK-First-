@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 396,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 404,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 113,
+  "newDistinctThisContinuation": 121,
   "rows": [
     {
       "caseId": "CD-001",
@@ -366,7 +366,7 @@
           "scope": "DEC03 free-study policy implemented with independent paid/free/unknown certificate evidence. Real publication/audit/outbox, HTTP router and actual UI data adapter; no browser or real provider link check."
         }
       ],
-      "whatRemains": "Actual free-study/certificate publication, CMS eligibility, controlled manual review of acquired real source, actual HTTPS link check and public HTTP display now proven. Full admin JWT review route matrix and owning-phase built-browser parity still separate; formal R05 gate retained.",
+      "whatRemains": "Actual Course publication rechecks current provider/domain/link and canonical language inside locked owner transaction, preserving free-study policy; four before-transaction withdrawals and four independent-connection held-lock races proven. Full admin JWT route matrix and built-browser parity remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -378,7 +378,8 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts",
-        "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source"
+        "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source",
+        "docs/reviews/evidence/post28/13082808c616f4aefddecfc0d96893b3d3e6008a/R06-course-publication-races"
       ]
     },
     {
@@ -583,7 +584,7 @@
           "scope": "Two-connection provider/native-key/language identity dedup and preserved IDs; domain allowlist, persisted synthetic redirect/history evidence, stale result rejection, controlled identity edit guard and raw source publication rejection. No external network check or end-to-end import approval."
         }
       ],
-      "whatRemains": "Actual acquisition/snapshot/digest, explicit manual semantic review, canonical transfer/provenance, language/topic/link review, publication and public withdrawal proven. Still controlled URL/metadata refresh lineage, registered automatic provider adapter if required, domain-allowlist withdrawal, full admin JWT routes and owner worker crash-to-canonical handoff; production raw persistence readiness separate.",
+      "whatRemains": "Real source acquisition/manual reviewed transfer/publication proof preserved; publication now rechecks current provider/domain/link/language in the same transaction and holds evidence locks. Post-publication domain/source withdrawal read parity, controlled refresh lineage, registered provider adapter if required, full admin JWT and worker crash-to-canonical handoff remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -597,7 +598,8 @@
         "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network",
         "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
         "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts",
-        "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source"
+        "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source",
+        "docs/reviews/evidence/post28/13082808c616f4aefddecfc0d96893b3d3e6008a/R06-course-publication-races"
       ]
     },
     {
@@ -875,7 +877,7 @@
           "scope": "Current canonical test version and language withdrawal affect next actual public request/list; no full multi-page parent/reference lifecycle matrix or snapshot/pagination consistency acceptance."
         }
       ],
-      "whatRemains": "Current Major version ownership/publication SQL now agrees with detail projection and CMS. Same-key HTTP and owner revision concurrency repeat successfully. Geography, remaining parent withdrawals and cross-query snapshot races remain.",
+      "whatRemains": "Actual Course publication precheck-to-commit races fixed for provider/domain/link/language with bound revalidation and shared locks. University same-owner version SQL withdrawal and HTTP identity/revision races remain proven. Dynamic geography, post-publication domain/source reads, broader relationship-reference races and query snapshot matrix remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -890,9 +892,10 @@
         "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
         "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source",
         "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author",
-        "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version"
+        "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version",
+        "docs/reviews/evidence/post28/13082808c616f4aefddecfc0d96893b3d3e6008a/R06-course-publication-races"
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 100
+  "newDistinctThisR06OnlyTask": 108
 }
