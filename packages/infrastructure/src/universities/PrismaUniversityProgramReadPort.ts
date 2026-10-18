@@ -15,10 +15,12 @@ const proofSelect = {
   normalizedName: true,
   sourceProgramName: true,
   status: true,
+  degreeLevel: { select: { nameAr: true, nameEn: true, canonicalCode: true } },
   majorMappingState: true,
   university: { select: { status: true } },
   major: {
     select: {
+      displayName: true,
       status: true,
       levelProfiles: {
         select: { id: true, degreeLevelId: true, status: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, majorId: true, profileId: true, status: true } } },
@@ -53,6 +55,8 @@ export class PrismaUniversityProgramReadPort implements IUniversityProgramReadPo
       majorId: row.majorId,
       canonicalName: row.normalizedName || row.sourceProgramName,
       displayName: row.sourceProgramName,
+      degreeLabel: row.degreeLevel?.nameAr || row.degreeLevel?.nameEn || row.degreeLevel?.canonicalCode,
+      majorLabel: row.major?.displayName,
       status: row.status,
       publiclyEligible: row.university?.status === 'PUBLISHED' && isPublicUniversityProgram(row),
     };

@@ -4,7 +4,7 @@ export const DATABASE_SUITES = Object.freeze({
   'scholarship-country-semantics': {files: ['tests/database/post28-scholarship-country-semantics.database.spec.mjs'],minimumCases:7},
   'course-major-visibility': {files: ['tests/database/post28-course-major-visibility.database.spec.mjs'],minimumCases:8},
   'dec05-owner-atomic': {files: ['tests/database/post28-dec05-owner-atomic.database.spec.mjs'],minimumCases:8},
-  'dec01-program-pairs': {files: ['tests/database/post28-dec01-program-pairs.database.spec.mjs'],minimumCases:10},
+  'dec01-program-pairs': {files: ['tests/database/post28-dec01-program-pairs.database.spec.mjs'],minimumCases:14},
   'dec05-taxonomy-invalidation': {files: ['tests/database/post28-dec05-taxonomy-invalidation.database.spec.mjs'],minimumCases:6},
   'dec03-free-study': {files: ['tests/database/post28-dec03-free-study.database.spec.mjs'],minimumCases:8},
   'finance-local-closure': {files: ['tests/database/post28-finance-local-closure.database.spec.mjs'],minimumCases:14},

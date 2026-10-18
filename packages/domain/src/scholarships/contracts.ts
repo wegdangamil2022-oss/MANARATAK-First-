@@ -248,7 +248,20 @@ export interface ScholarshipApplicationCycleDto {
   metadata?: Record<string, unknown> | null;
 }
 
+export interface ScholarshipFundedProgramPairDto {
+  linkKey: string;
+  universityId: string;
+  academicProgramId: string;
+  degreeLevelId: string;
+  majorId: string;
+  programName: string;
+  degreeLabel?: string;
+  majorLabel?: string;
+}
+
 export interface ScholarshipDto extends CreateScholarshipDto {
+  /** Read-only owner projection, never a Cartesian product of target lists. */
+  fundedProgramPairs?: ScholarshipFundedProgramPairDto[];
   id: string;
   /** Monotonic owner revision for conditional writes. */
   revision?: number;

@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import { BookOpen, Building2, Calendar, DollarSign, FileText, GraduationCap, Globe, Languages, ShieldCheck, ExternalLink } from 'lucide-react';
 import type { Scholarship } from '../types';
 import { DetailSectionHeader } from './DetailUi';
+import { FundedProgramPairs } from './FundedProgramPairs';
 
 const benefitNames: Record<string, string> = { TUITION: "public_published_tuition_fees", TUITION_FEES: "public_published_tuition_fees", STIPEND: "public_published_stipend_or_allowance", ACCOMMODATION: "public_published_accommodation", HEALTH_INSURANCE: "public_published_health_insurance", TRAVEL: "public_published_travel", LIVING_ALLOWANCE: "public_published_living_allowance" };
 function Text({ value }: { value?: string | null }) {
@@ -50,9 +51,7 @@ export function PublishedScholarshipDetails({ scholarship, onOpenUniversity, onO
     {section('scholarship-country', publicT('public_published_country_and_scholarship_scope'), Globe, <><Text value={dto.countrySourceLabel || dto.studyCountry} />{dto.countryScope && <Text value={dto.countryScope} />}</>)}
     {section('scholarship-overview', publicT('public_published_scholarship_overview'), BookOpen, <Text value={dto.description || scholarship.description} />)}
     {section('scholarship-degrees', publicT('public_published_target_degrees_and_majors'), GraduationCap, <>
-      {list(scholarship.degreeLevel)}
-      {list((dto.majorTargets || []).map(item => item.sourceLabel || '').filter(Boolean))}
-      {!dto.majorTargets?.length && dto.eligibleMajorsOrFields && <Text value={Array.isArray(dto.eligibleMajorsOrFields) ? dto.eligibleMajorsOrFields.join('، ') : dto.eligibleMajorsOrFields} />}
+      <FundedProgramPairs pairs={dto.fundedProgramPairs ?? []} language={language} />
     </>)}
     {section('scholarship-funding', publicT('public_published_funding_and_financial_coverage'), DollarSign, <>
       <p>{scholarship.fundingType}</p>

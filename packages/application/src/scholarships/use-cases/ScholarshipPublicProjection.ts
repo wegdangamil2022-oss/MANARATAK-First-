@@ -19,6 +19,11 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
   return {
     publicId: source.publicId, slug: source.slug, canonicalName: source.canonicalName,
     displayName, providerName: source.providerName,
+    fundedProgramPairs: (source.fundedProgramPairs ?? []).map(pair => ({
+      linkKey: pair.linkKey, universityId: pair.universityId, academicProgramId: pair.academicProgramId,
+      degreeLevelId: pair.degreeLevelId, majorId: pair.majorId, programName: pair.programName,
+      degreeLabel: pair.degreeLabel, majorLabel: pair.majorLabel,
+    })),
     academicYear: source.academicYear, cycleName: source.cycleName,
     countryReferenceId: source.countryReferenceId, countrySourceLabel: source.countrySourceLabel,
     countryScope: source.countryScope, studyLanguageReferenceId: source.studyLanguageReferenceId,

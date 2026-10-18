@@ -523,6 +523,7 @@ export interface PublicScholarshipDto {
   fundingTypeCode?: string | null;
   applicationUrl?: string | null;
   degreeTargets?: Array<{ degreeLevelId?: string | null; sourceLabel?: string | null; resolutionStatus?: string; degreeLevel?: { canonicalCode?: string; nameAr?: string; nameEn?: string } }>;
+  fundedProgramPairs?: Array<{ linkKey: string; universityId: string; academicProgramId: string; degreeLevelId: string; majorId: string; programName: string; degreeLabel?: string; majorLabel?: string }>;
   majorTargets?: Array<{ majorId?: string | null; sourceLabel?: string | null; resolutionStatus?: string }>;
   eligibilityItems?: Array<{ itemTypeCode: string; minimumValue?: string | number | null; maximumValue?: string | number | null; isRequired?: boolean; valueText?: string | null; countryReferenceId?: string | null; degreeLevelId?: string | null; majorId?: string | null; internationalTestId?: string | null; resolutionStatus?: string }>;
   requiredDocumentItems?: Array<{ displayName: string; description?: string | null; isRequired?: boolean; internationalTestId?: string | null; resolutionStatus?: string }>;

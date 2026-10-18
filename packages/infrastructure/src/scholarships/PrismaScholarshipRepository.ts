@@ -631,12 +631,16 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
 
   private async hydrateProgramOwners(records: ScholarshipDto[]): Promise<ScholarshipDto[]> {
     const ids = [...new Set(records.flatMap(record => (record.universityLinks ?? []).map(link => link.academicProgramId).filter((id): id is string => Boolean(id))))];
-    if (!ids.length) return records;
+    if (!ids.length) return records.map(record => ({...record, fundedProgramPairs: []}));
     const refs: UniversityProgramReferenceV1[] = [];
     for (let offset = 0; offset < ids.length; offset += 500) {
       refs.push(...await this.programReads.findByIds(ids.slice(offset, offset + 500)));
     }
-    return records.map(record => ({...record, universityLinks: (record.universityLinks ?? []).map(link => {
+    return records.map(record => ({...record, fundedProgramPairs: (record.universityLinks ?? []).flatMap(link => {
+      const ref = refs.find(row => row.id === link.academicProgramId);
+      if (link.resolutionStatus !== 'RESOLVED' || !ref?.publiclyEligible || !ref.degreeLevelId || !ref.majorId || (link.universityId && link.universityId !== ref.universityId)) return [];
+      return [{linkKey:link.linkKey,universityId:ref.universityId,academicProgramId:ref.id,degreeLevelId:ref.degreeLevelId,majorId:ref.majorId,programName:ref.displayName,degreeLabel:ref.degreeLabel,majorLabel:ref.majorLabel}];
+    }), universityLinks: (record.universityLinks ?? []).map(link => {
       if (!link.academicProgramId) return link;
       const ref = refs.find(row => row.id === link.academicProgramId);
       return {...link, academicProgram: ref ? {universityId:ref.universityId, ownerProof:ref} : null};
@@ -732,7 +736,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     const copy = { ...(source as Record<string, unknown>) };
     const descriptions=this.asOptionalRecord(source.optionalFields).ownerLocalizedDescriptions;
     if(descriptions!==undefined) copy.ownerLocalizedDescriptions=descriptions;
-    delete copy.versions; delete copy.sponsorContext; delete copy.applicationCycles; delete copy.optionalFields;
+    delete copy.versions; delete copy.sponsorContext; delete copy.applicationCycles; delete copy.optionalFields; delete copy.fundedProgramPairs;
     return this.jsonSafe(copy) as Prisma.InputJsonObject;
   }
 

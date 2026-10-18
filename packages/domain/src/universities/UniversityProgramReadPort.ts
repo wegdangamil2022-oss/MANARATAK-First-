@@ -9,6 +9,8 @@ export interface UniversityProgramReferenceV1 {
   majorId: string | null;
   canonicalName: string;
   displayName: string;
+  degreeLabel?: string;
+  majorLabel?: string;
   status: string;
   publiclyEligible: boolean;
 }
