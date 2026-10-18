@@ -7,7 +7,7 @@ import ts from 'typescript';
 import request from 'supertest';
 import {beforeAll,afterAll,describe,it,expect} from 'vitest';
 import {PrismaClient} from '@prisma/client';
-import {AuthorizationEvaluatorService} from '@manaratak/domain';
+import {AuthorizationEvaluatorService,UniversityImportReadinessPolicy} from '@manaratak/domain';
 import {PrismaIdentityRepository} from '../../packages/infrastructure/src/identity/PrismaIdentityRepository.ts';
 import {IdentityPrincipalAccessValidator} from '../../packages/application/src/auth/IdentityPrincipalAccessValidator.ts';
 import {JwtTokenProvider,generateEphemeralJwtKeySet} from '../../packages/infrastructure/src/auth/JwtTokenProvider.ts';
@@ -71,7 +71,7 @@ describe('Post28 owner HTTP closure with current persisted authority',()=>{
  it('HTTP replays an authorized invoice issue using one owner receipt and one audit event',async()=>{const c=await invoice(),p=await principal(['admin:finance:manage','admin:finance:invoice:manage']),key=fresh(),a=await issue(p,c,{key}),b=await issue(p,c,{key});expect(a.status).toBe(200);expect(b.status).toBe(200);expect(b.body).toEqual(a.body);expect(await db.auditRecord.count({where:{targetId:c.id,action:'FINANCE_INVOICE_ISSUED'}})).toBe(1);expect((await db.financeInvoiceRecord.findUnique({where:{id:c.id}})).version).toBe(2);});
  it('HTTP session revocation prevents university cached replay',async()=>{const c=await fixture(),p=await principal(['admin:universities:manage']),key=fresh();expect((await uni(p,c,c.a.patch,{key})).status).toBe(200);await sessions.revokeAllSessions(p.id);expect((await uni(p,c,c.a.patch,{key})).status).toBe(401);});
  it('HTTP creates reviews publishes and withdraws a newly authored university with stable canonical campus and unit',async()=>{
-  const p=await principal(['admin:universities:manage']),c=await author(p);expect(c.response.status,c.response.text).toBe(201);const id=c.response.body.id,publicId=c.response.body.publicId,slug=c.response.body.slug;
+  const p=await principal(['admin:universities:manage']),c=await author(p);expect(c.response.status,c.response.text).toBe(201);const id=c.response.body.id,publicId=c.response.body.publicId,slug=c.response.body.slug;expect(UniversityImportReadinessPolicy.validateIdentity(publicId)).toBe(true);
   expect((await request(app).get('/universities/'+slug)).status).toBe(404);
   const changed=await mutate(p,'/universities/'+id,{institutionType:'UNIVERSITY',city:'Synthetic twin city',...c.a.patch},{revision:(await facts(id)).root.updatedAt.getTime()});expect(changed.status,changed.text).toBe(200);expect(changed.body.completenessStatus).toBe('COMPLETE');
   const details=await mutate(p,'/universities/'+id+'/normalized-details',{campuses:[{sourceReferenceId:'local-campus',name:'Synthetic authored campus',status:'ACTIVE',...c.a.patch}],organizationUnits:[{sourceReferenceId:'local-faculty',campusSourceReferenceId:'local-campus',unitType:'FACULTY',name:'Synthetic authored faculty',status:'ACTIVE'}]},{method:'put',revision:(await facts(id)).root.updatedAt.getTime()});expect(details.status,details.text).toBe(200);
