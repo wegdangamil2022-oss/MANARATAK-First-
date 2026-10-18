@@ -1,0 +1,49 @@
+[
+  {
+    "args": [
+      "validate",
+      "--schema=packages/infrastructure/prisma/schema.prisma"
+    ],
+    "startedAt": "2026-10-18T19:17:33.529Z",
+    "finishedAt": "2026-10-18T19:17:34.212Z",
+    "exitCode": 0,
+    "logSha256": "9bac6f2900d82077fd9ba3d76d872874f55c2b9bf30c910010cf33354fcf9dd6"
+  },
+  {
+    "args": [
+      "migrate",
+      "deploy",
+      "--schema=packages/infrastructure/prisma/schema.prisma"
+    ],
+    "startedAt": "2026-10-18T19:17:34.214Z",
+    "finishedAt": "2026-10-18T19:17:39.415Z",
+    "exitCode": 0,
+    "logSha256": "b4b89672ebe852317ffd3c820f3df54898900eea5404476cac82f8491c738a86"
+  },
+  {
+    "args": [
+      "migrate",
+      "status",
+      "--schema=packages/infrastructure/prisma/schema.prisma"
+    ],
+    "startedAt": "2026-10-18T19:17:39.425Z",
+    "finishedAt": "2026-10-18T19:17:40.215Z",
+    "exitCode": 0,
+    "logSha256": "9dbb3b7c85e63319ebfda89a88c04c93cf096189df9f5947beca6af2b67266ed"
+  },
+  {
+    "args": [
+      "migrate",
+      "diff",
+      "--from-schema-datasource",
+      "packages/infrastructure/prisma/schema.prisma",
+      "--to-schema-datamodel",
+      "packages/infrastructure/prisma/schema.prisma",
+      "--exit-code"
+    ],
+    "startedAt": "2026-10-18T19:17:40.224Z",
+    "finishedAt": "2026-10-18T19:17:41.410Z",
+    "exitCode": 0,
+    "logSha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed"
+  }
+]
