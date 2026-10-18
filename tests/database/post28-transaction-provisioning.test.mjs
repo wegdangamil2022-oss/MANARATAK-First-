@@ -151,3 +151,11 @@ test('independent local finance requires fourteen cases and only three additiona
 });
 
 test('real worker crash profile grants three import fixture tables only',async()=>{const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('import-worker-crash').minimumCases,5);for(const table of ['ImportBatch','ImportRecord','ImportScreeningReceipt'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);});
+
+test('optional certificate workflow scope is explicit and contains five owner tables only',async()=>{
+ const {CERTIFICATE_FIXTURE_APPLICATION_TABLES}=await import('../../scripts/database/post28-transaction-provisioning.mjs');
+ assert.deepEqual(CERTIFICATE_FIXTURE_APPLICATION_TABLES,['CertificateIssuer','CertificateTemplate','CertificateTemplateVersion','CertificateIssuanceInbox','CertificateLedgerEntry']);
+ const initializer=fs.readFileSync('scripts/database/initialize-post28-transactions.mjs','utf8');
+ assert.ok(initializer.includes("process.argv[2]==='--certificate-fixtures'"));assert.ok(initializer.includes('if(certificateFixtures)await setup.$executeRawUnsafe'));
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('certificate-runtime').minimumCases,8);
+});

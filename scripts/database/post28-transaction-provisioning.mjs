@@ -12,6 +12,8 @@ export async function preflightTransactionProvisioning(contract,appUrl,setupUrl,
  if(setupLive.schemaCreate!==true)throw new Error('POST28_TRANSACTION_SETUP_DDL_REQUIRED');
  return {runtime,setup};
 }
+// Optional, explicit synthetic certificate owner workflow scope on a new DB-T only.
+export const CERTIFICATE_FIXTURE_APPLICATION_TABLES=Object.freeze(['CertificateIssuer','CertificateTemplate','CertificateTemplateVersion','CertificateIssuanceInbox','CertificateLedgerEntry']);
 export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
  'CertificateVerificationLog', // Actual verification analytics transaction test.
  'Certificate', // Explicit revoked synthetic read-isolation fixture; no template/issuer approval grants.
