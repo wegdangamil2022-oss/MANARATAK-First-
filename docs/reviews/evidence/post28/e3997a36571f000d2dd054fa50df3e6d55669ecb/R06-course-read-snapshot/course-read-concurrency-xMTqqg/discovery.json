@@ -1,0 +1,18 @@
+[
+  {
+    "name": "CD040 actual two-connection Course public read snapshots > keeps owner public card and count coherent when provider withdraws after selection",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-course-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 actual two-connection Course public read snapshots > keeps owner public card and count coherent when language withdraws after selection",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-course-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 actual two-connection Course public read snapshots > keeps relationships public card and count coherent when provider withdraws after selection",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-course-read-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD040 actual two-connection Course public read snapshots > keeps relationships public card and count coherent when language withdraws after selection",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-course-read-concurrency.database.spec.mjs"
+  }
+]
