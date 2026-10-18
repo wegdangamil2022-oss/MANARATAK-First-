@@ -171,3 +171,12 @@ test('course receipt and real source profiles require explicit two-table fixture
  assert.ok(initializer.includes("process.argv[2]==='--course-fixtures'"));assert.ok(initializer.includes('if(courseFixtures)await setup.$executeRawUnsafe'));
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('course-import-receipt').minimumCases,5);assert.equal(databaseSuite('real-course-source').minimumCases,7);
 });
+
+test('learning-path fixture grants are optional four-owner-table scope without certificate issuance writes',async()=>{
+ const {LEARNING_PATH_FIXTURE_APPLICATION_TABLES}=await import('../../scripts/database/post28-transaction-provisioning.mjs');
+ assert.deepEqual(LEARNING_PATH_FIXTURE_APPLICATION_TABLES,['LearningPath','LearningPathVersion','LearningPathCourse','LearningPathEnrollment']);
+ assert.ok(LEARNING_PATH_FIXTURE_APPLICATION_TABLES.every(table=>!TRANSACTION_APPLICATION_TABLES.includes(table)));
+ const initializer=fs.readFileSync('scripts/database/initialize-post28-transactions.mjs','utf8');
+ assert.ok(initializer.includes("process.argv[2]==='--learning-path-fixtures'"));assert.ok(initializer.includes('if(learningPathFixtures)await setup.$executeRawUnsafe'));
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('learning-path-completion').minimumCases,3);
+});
