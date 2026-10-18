@@ -47,6 +47,7 @@ const units = [
   ],
   ...['web','admin'].map(unit=>[unit,[`apps/${unit}/dist`,
     'scripts/release/serve-static-artifact.mjs',
+    'scripts/release/serve-artifact-gateway.mjs',
     'scripts/release/lib/StaticBuildPolicy.mjs',
     'scripts/release/lib/StaticScriptPolicy.mjs',
     'scripts/release/lib/ReleaseContracts.mjs']]),
