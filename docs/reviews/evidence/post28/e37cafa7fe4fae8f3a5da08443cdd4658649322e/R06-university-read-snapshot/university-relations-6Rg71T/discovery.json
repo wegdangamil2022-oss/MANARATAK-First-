@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Post28 real university program owner reference relations > resolves a published program only through its matching degree profile and actual owner relations",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university program owner reference relations > enforces exact university program and degree scope without returning a foreign owner",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university program owner reference relations > stops public eligibility immediately when either university or major is unpublished",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university program owner reference relations > refuses a different degree profile and a missing published version pointer",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university program owner reference relations > excludes archived and unmapped programs even with valid foreign keys",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university program owner reference relations > enforces university major and degree foreign keys on real PostgreSQL without leaving an invalid update",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-relations.database.spec.mjs"
+  },
+  {
+    "name": "Post28 real university program owner reference relations > reads owner publication inside the actual transaction and rolls an unpublished state back",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-university-relations.database.spec.mjs"
+  }
+]
