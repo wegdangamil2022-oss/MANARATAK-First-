@@ -21,8 +21,10 @@ import {
   UniversityLocalizedTextTargetType,
   UpdateUniversityDto,
   MajorStatus,
+  UniversityPublicationReadinessPolicy,
   isPublicUniversityProgram,
 } from '@manaratak/domain';
+import { lockUniversityPublicationReferences } from './UniversityPublicationReferenceLocks';
 import { UniversityCanonicalRelationshipValidator } from './UniversityCanonicalRelationshipValidator';
 
 import {
@@ -279,6 +281,25 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
   }
 
   async updateStatus(id: string, status: UniversityStatus): Promise<void> {
+    if (status === UniversityStatus.READY_TO_PUBLISH || status === UniversityStatus.PUBLISHED) {
+      if (!this.transactionBound) throw new Error('UNIVERSITY_TRANSACTIONAL_PERSISTENCE_REQUIRED');
+      await lockUniversityPublicationReferences(this.prisma, id);
+      const record = await this.prisma.university.findUnique({where: {id}, include: universityDetails});
+      if (!record) throw new Error('UNIVERSITY_NOT_FOUND');
+      const current = this.mapToDto(record);
+      const expected = status === UniversityStatus.PUBLISHED ? UniversityStatus.READY_TO_PUBLISH : UniversityStatus.READY_TO_REVIEW;
+      if (current.status !== expected) throw new Error('UNIVERSITY_INVALID_PUBLISHABLE_TRANSITION');
+      const validator = new UniversityCanonicalRelationshipValidator(this.prisma);
+      await validator.validateCampus({countryReferenceId: current.countryReferenceId ?? undefined, regionReferenceId: current.regionReferenceId ?? undefined, cityReferenceId: current.cityReferenceId ?? undefined});
+      for (const campus of record.campuses) {
+        if (campus.status === 'ACTIVE') await validator.validateCampus({countryReferenceId: campus.countryReferenceId ?? undefined, regionReferenceId: campus.regionReferenceId ?? undefined, cityReferenceId: campus.cityReferenceId ?? undefined});
+      }
+      for (const program of current.academicPrograms ?? []) {
+        if (program.status === 'ACTIVE') await validator.validateProgram(program.degreeLevelId!, program.majorId ?? undefined, program.majorMappingState);
+      }
+      const readiness = new UniversityPublicationReadinessPolicy().evaluate({...current, status: UniversityStatus.READY_TO_PUBLISH});
+      if (readiness.blockingIssues.length) throw new Error(readiness.blockingIssues.map(issue => issue.code).join(','));
+    }
     await this.prisma.university.update({
       where: { id },
       data: { status },
