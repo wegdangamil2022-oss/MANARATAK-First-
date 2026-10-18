@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {databaseSuite} from '../../config/testing/post28-database-suites.mjs';
 import {selectedDiscovery,verifySuiteResults} from '../../scripts/database/post28-suite-policy.mjs';
 const root='/project',file=root+'/tests/database/post28-http-finance.database.spec.mjs';
-const rows=Array.from({length:14},(_,i)=>({file,name:'suite > case '+i}));
-const report=()=>({success:true,numFailedTestSuites:0,numPendingTestSuites:0,numTotalTests:14,numPassedTests:1,numPendingTests:13,numFailedTests:0,numTodoTests:0,testResults:[{name:file,status:'passed',assertionResults:rows.map((_,i)=>({title:'case '+i,ancestorTitles:['suite'],fullName:'suite case '+i,status:i===0?'passed':'skipped'}))}]});
+const count=databaseSuite('http-finance').minimumCases;
+const rows=Array.from({length:count},(_,i)=>({file,name:'suite > case '+i}));
+const report=()=>({success:true,numFailedTestSuites:0,numPendingTestSuites:0,numTotalTests:count,numPassedTests:1,numPendingTests:count-1,numFailedTests:0,numTodoTests:0,testResults:[{name:file,status:'passed',assertionResults:rows.map((_,i)=>({title:'case '+i,ancestorTitles:['suite'],fullName:'suite case '+i,status:i===0?'passed':'skipped'}))}]});
 test('exact selection still requires the complete mandatory discovery',()=>{
  assert.equal(selectedDiscovery('http-finance',rows,rows[0].name,root).length,1);
  assert.throws(()=>selectedDiscovery('http-finance',rows.slice(0,1),rows[0].name,root));
