@@ -122,7 +122,7 @@ test('R06 country, import and program language profiles add only five named DML 
 
 test('university geography declares eighteen cases and explicitly grants only three new reference fixture tables',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
- assert.equal(databaseSuite('university-geography').minimumCases,18);
+ assert.equal(databaseSuite('university-geography').minimumCases,21);
  for(const table of ['ReferenceCountry','AdministrativeRegion','ReferenceCity'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
  assert.equal(TRANSACTION_APPLICATION_TABLES.filter(t=>!['ScholarshipEligibilityItem','UniversityImportChangeSet','UniversityImportChange','UniversityProgramStudyProfile','UniversityProgramStudyLanguage'].includes(t)).length,80);
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
