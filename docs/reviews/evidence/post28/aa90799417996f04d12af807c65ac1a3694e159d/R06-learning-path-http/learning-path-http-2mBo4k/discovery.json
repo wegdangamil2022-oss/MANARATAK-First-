@@ -1,0 +1,22 @@
+[
+  {
+    "name": "CD028 actual authenticated path opt-in author commands > persists explicit opt-in only through authenticated create review and publication versions",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-learning-path-http.database.spec.mjs"
+  },
+  {
+    "name": "CD028 actual authenticated path opt-in author commands > defaults omitted eligibility to false without inferring Course policy",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-learning-path-http.database.spec.mjs"
+  },
+  {
+    "name": "CD028 actual authenticated path opt-in author commands > rejects revoked permissions on an already issued JWT without appending policy history",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-learning-path-http.database.spec.mjs"
+  },
+  {
+    "name": "CD028 actual authenticated path opt-in author commands > rejects stale draft policy edits without updating any prior version",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-learning-path-http.database.spec.mjs"
+  },
+  {
+    "name": "CD028 actual authenticated path opt-in author commands > rejects published policy editing and preserves every historical snapshot",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-learning-path-http.database.spec.mjs"
+  }
+]

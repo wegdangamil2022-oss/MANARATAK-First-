@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 442,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 447,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 159,
+  "newDistinctThisContinuation": 164,
   "rows": [
     {
       "caseId": "CD-001",
@@ -690,7 +690,7 @@
           "scope": "Real CourseProgressUseCases enrollment/completion audit/outbox commit, retry/concurrency and SQLSTATE22012 rollback. External-linked enrollment/completion and certificate claims refused. P14 real consumer/gateway/worker acknowledges noncredential event and retries native eligible events lacking approved template; no certificate issued or inbox invented."
         }
       ],
-      "whatRemains": "Actual opted-in authored/reviewed/published/enrolled path completion now issues a locally signed certificate under synthetic maker/checker issuer/template authority; public verification strips student identity. Two independent consumers and replay persist one certificate/inbox/ledger/audit. Existing Course issuance8 repeats. Real rendered artifact attachment, student delivery and recovery, owner-policy UI/HTTP opt-in proof and production signer/renderer approvals remain.",
+      "whatRemains": "Optional certificate policy is exposed in admin authoring, defaults false, and is preserved through actual authenticated create/review/publish. Revoked role, stale version and published edits are rejected without mutations. Actual rendered artifact attachment/student delivery/recovery, visual browser verification and production signer/provider approvals remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -705,7 +705,8 @@
         "docs/reviews/evidence/post28/a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5/R06-certificate-runtime",
         "docs/reviews/evidence/post28/51b0e139c0356c318121a25b72232c7663cfce59/R06-learning-path-completion",
         "docs/reviews/evidence/post28/20f8b6560cb359ec1f7a23e95aa81fdea7eee80b/R06-path-certificate-eligibility",
-        "docs/reviews/evidence/post28/0f81149fd46344b14b5e932be5828e1e6de952cc/R06-path-certificate-issuance"
+        "docs/reviews/evidence/post28/0f81149fd46344b14b5e932be5828e1e6de952cc/R06-path-certificate-issuance",
+        "docs/reviews/evidence/post28/aa90799417996f04d12af807c65ac1a3694e159d/R06-learning-path-http"
       ]
     },
     {
@@ -915,5 +916,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 146
+  "newDistinctThisR06OnlyTask": 151
 }
