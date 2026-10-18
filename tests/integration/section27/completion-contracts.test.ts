@@ -700,8 +700,8 @@ test('private review delivery: grant is capped by both consent and original asse
 import { UniversityStudentSavedItemHydrationGateway } from '../../../packages/infrastructure/src/students/StudentSavedItemHydrationGateways';
 test('saved owner lifecycle: reuse of an old slug cannot silently move private history to another canonical owner', async () => {
   const gateway = new UniversityStudentSavedItemHydrationGateway({
-      findById: async () => null,
-      findBySlug: async () => ({
+      findPublishedByIds: async () => [],
+      findPublishedBySlug: async () => ({
         id: 'new-owner',
         publicId: 'new-public',
         slug: 'old-slug',

@@ -204,6 +204,7 @@ describe('CrossDomainGraphReadService P4 canonical projections', () => {
                     status: 'PUBLISHED',
                     currentPublishedVersion: {
                       id: 'test-version',
+                      testId: 'test-1',
                       status: 'PUBLISHED',
                       scoreScales: [{ overallMinimum: 0, overallMaximum: 9 }],
                     },
