@@ -216,8 +216,12 @@ export class SafeImportedCourseLinkChecker implements IImportedCourseLinkChecker
         headers: method === 'GET'
           ? { Range: 'bytes=0-0', 'User-Agent': 'MANARATAK-LinkVerifier/1.0' }
           : { 'User-Agent': 'MANARATAK-LinkVerifier/1.0' },
-        lookup: (_hostname: string, _options: unknown, callback: Function) => {
-          callback(null, resolved.address, resolved.family);
+        lookup: (_hostname: string, options: {all?: boolean}, callback: Function) => {
+          // Node 22 autoSelectFamily requests all=true. Return only the already
+          // validated/pinned address in either DNS callback shape; never resolve again.
+          // https://nodejs.org/docs/latest-v22.x/api/net.html#socketconnectoptions-connectlistener
+          if (options.all) callback(null, [resolved]);
+          else callback(null, resolved.address, resolved.family);
         },
       }, (response) => {
         const locationHeader = response.headers.location;
