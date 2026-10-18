@@ -1,3 +1,4 @@
+import {publicProgramMajorVersionProofSql} from './PublicProgramMajorProofSql';
 import { universityTranslationSourceSelect, universityTranslationSourceStatus } from './UniversityTranslationSourceEvidence';
 import {publicProgramTestMatchSql} from './PublicProgramTestSql';
 import { Prisma, PrismaClient } from '@prisma/client';
@@ -475,7 +476,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       Prisma.sql`p.status='ACTIVE'`,
       Prisma.sql`p."majorMappingState"='CANONICALLY_MAPPED'`,
       Prisma.sql`m.status='PUBLISHED'`,
-      Prisma.sql`EXISTS (SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)`,
+      publicProgramMajorVersionProofSql(),
     ];
     if (filters.majorId) programConditions.push(Prisma.sql`p."majorId"=${filters.majorId}`);
     if(filters.internationalTestId)programConditions.push(publicProgramTestMatchSql(filters.internationalTestId));
@@ -519,7 +520,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     const limit=boundedCursorLimit(filters.limit,12,50),after=decodeStableCursor(filters.cursor);
     const base=Prisma.sql`FROM "UniversityAcademicProgram" p JOIN "University" u ON u.id=p."universityId" JOIN "Major" m ON m.id=p."majorId"
       WHERE u."countryReferenceId"=${filters.countryReferenceId} AND p.status='ACTIVE' AND p."majorMappingState"='CANONICALLY_MAPPED' AND u.status='PUBLISHED' AND m.status='PUBLISHED'
-      AND EXISTS(SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)`;
+      AND ${publicProgramMajorVersionProofSql()}`;
     const [rows,counts]=await Promise.all([
       this.prisma.$queryRaw<Array<{ownerId:string}>>(Prisma.sql`SELECT DISTINCT m.id AS "ownerId" ${base} ${after?Prisma.sql`AND m.id>${after}`:Prisma.empty} ORDER BY m.id LIMIT ${limit+1}`),
       this.prisma.$queryRaw<Array<{total:bigint}>>(Prisma.sql`SELECT count(DISTINCT m.id) AS total ${base}`),
@@ -544,7 +545,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
       Prisma.sql`p."majorMappingState"='CANONICALLY_MAPPED'`,
       Prisma.sql`u.status='PUBLISHED'`,
       Prisma.sql`m.status='PUBLISHED'`,
-      Prisma.sql`EXISTS (SELECT 1 FROM "MajorLevelProfile" lp WHERE lp."majorId"=p."majorId" AND lp."degreeLevelId"=p."degreeLevelId" AND lp.status='PUBLISHED' AND lp."currentPublishedVersionId" IS NOT NULL)`,
+      publicProgramMajorVersionProofSql(),
     ];
     if (filters.countryReferenceId)
       conditions.push(Prisma.sql`u."countryReferenceId"=${filters.countryReferenceId}`);
