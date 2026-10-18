@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 373,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 378,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 90,
+  "newDistinctThisContinuation": 95,
   "rows": [
     {
       "caseId": "CD-001",
@@ -360,7 +360,7 @@
           "scope": "DEC03 free-study policy implemented with independent paid/free/unknown certificate evidence. Real publication/audit/outbox, HTTP router and actual UI data adapter; no browser or real provider link check."
         }
       ],
-      "whatRemains": "import→owner approval→publish→built browser بمصدر وفحص رابط فعليين؛ لا تعويض synthetic link proof بالمزود.",
+      "whatRemains": "DEC03 eight PostgreSQL cases repeat successfully with canonical receipt fix. Still complete controlled real-source staged import through actual review/check/publication and HTTP display.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -370,7 +370,9 @@
           "REAL_SOURCE_SERVICE"
         ]
       },
-      "newEvidence": []
+      "newEvidence": [
+        "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts"
+      ]
     },
     {
       "caseId": "CD-013",
@@ -573,7 +575,7 @@
           "scope": "Two-connection provider/native-key/language identity dedup and preserved IDs; domain allowlist, persisted synthetic redirect/history evidence, stale result rejection, controlled identity edit guard and raw source publication rejection. No external network check or end-to-end import approval."
         }
       ],
-      "whatRemains": "Actual source HTTPS checker and ten owner/source lock defects repaired; absent-source gates, source budget concurrency, source identity and import regressions proven. Still complete real source raw acquisition, controlled analysis/promotion/review/publication HTTP chain and lineage change matrix.",
+      "whatRemains": "Actual public raw GET and pinned Node22 DNS contract repaired; five canonical receipt concurrency/rollback cases pass. Still complete source acquisition materialization/analysis/change review/publication chain and lineage change matrix.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -585,7 +587,8 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network",
-        "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks"
+        "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
+        "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts"
       ]
     },
     {
@@ -784,7 +787,7 @@
           "scope": "Real persisted completion worker dispatch with retries and provider/native/language identity concurrent dedup; not full import-to-owner crash/ack recovery."
         }
       ],
-      "whatRemains": "Actual worker/handler/Prisma screening pipeline, killed process before/after receipt and acknowledgment, recovery, no-repeat screening and conflict rejection now proven. Canonical owner mapping with transactionally coupled owner receipt plus explicit reconciliation/replay workflow still requires implementation/proof; screening receipts are not canonical-write receipts.",
+      "whatRemains": "Actual generic worker process crash proof and canonical Course receipt replay/concurrency now exist; full owner worker crash-to-canonical handoff mapping and other owner receipts remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -795,7 +798,8 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/e9a94eac920552470a0e648c315bfae48f97669b/R06-admission-import-20261018",
-        "docs/reviews/evidence/post28/4e0549faab38ad9e40d42af6540f96157730aa22/R06-worker-crash"
+        "docs/reviews/evidence/post28/4e0549faab38ad9e40d42af6540f96157730aa22/R06-worker-crash",
+        "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts"
       ]
     },
     {
@@ -878,5 +882,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 77
+  "newDistinctThisR06OnlyTask": 82
 }
