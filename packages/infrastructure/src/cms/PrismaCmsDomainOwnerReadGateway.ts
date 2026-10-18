@@ -1,4 +1,4 @@
-import { publicCourseEligibility } from '../courses/CoursePublicEligibility';
+import { currentPublicCourseEligibility } from '../courses/CoursePublicEligibility';
 import { publicUniversityEligibility } from '../universities/UniversityPublicEligibility';
 import { Prisma } from '@prisma/client';
 import { CmsDomainTargetType, isPublicUniversityProgram } from '@manaratak/domain';
@@ -190,7 +190,7 @@ export class PrismaCmsDomainOwnerReadGateway {
       }
       case CmsDomainTargetType.COURSE:
         found = await this.db.course.findFirst({
-          where: { id: targetId, ...publicCourseEligibility() },
+          where: await currentPublicCourseEligibility(this.db, { id: targetId }),
           select: { id: true },
         });
         break;

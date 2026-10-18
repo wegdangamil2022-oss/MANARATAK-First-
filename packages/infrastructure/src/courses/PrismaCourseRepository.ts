@@ -1,4 +1,4 @@
-import { publicCourseEligibility } from './CoursePublicEligibility';
+import { currentPublicCourseEligibility } from './CoursePublicEligibility';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   AtomicPersistenceContext,
@@ -360,8 +360,8 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     return this.listPage(where, page, pageSize);
   }
 
-  private publishedWhere(): Prisma.CourseWhereInput {
-    return publicCourseEligibility();
+  private publishedWhere(scope: Prisma.CourseWhereInput = {}): Promise<Prisma.CourseWhereInput> {
+    return currentPublicCourseEligibility(this.prisma, scope);
   }
 
   public async findPublishedBySlug(slug: string): Promise<CourseDto | null> {
@@ -369,7 +369,7 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
       tx => new PrismaCourseRepository(tx as unknown as PrismaClient, true).findPublishedBySlug(slug),
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
     );
-    const record = await this.prisma.course.findFirst({ where: { ...this.publishedWhere(), slug },
+    const record = await this.prisma.course.findFirst({ where: await this.publishedWhere({ slug }),
       include: {majorProjections:{where:{projectionState:'APPROVED',major:{status:'PUBLISHED'}},select:{major:{select:{id:true,displayName:true}}}}},
     });
     return record ? this.mapToDto(record) : null;
@@ -380,13 +380,14 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
       tx => new PrismaCourseRepository(tx as unknown as PrismaClient, true).listPublished(filters),
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
     );
-    const where = this.publishedWhere();
+    const filtersWhere: Prisma.CourseWhereInput = {};
 
-    if (filters.accessType) where.accessType = filters.accessType;
-    if (filters.originType) where.originType = filters.originType;
-    if (filters.platformName) where.platformName = {contains:filters.platformName,mode:"insensitive"};
-    if (filters.category) where.category = filters.category;
-    if (filters.learningLanguage) where.learningLanguage = filters.learningLanguage;
+    if (filters.accessType) filtersWhere.accessType = filters.accessType;
+    if (filters.originType) filtersWhere.originType = filters.originType;
+    if (filters.platformName) filtersWhere.platformName = {contains:filters.platformName,mode:"insensitive"};
+    if (filters.category) filtersWhere.category = filters.category;
+    if (filters.learningLanguage) filtersWhere.learningLanguage = filters.learningLanguage;
+    const where = await this.publishedWhere(filtersWhere);
 
     return queryStableCursorPage({
       delegate: this.prisma.course as any, where, cursor: filters.cursor, limit: filters.limit,

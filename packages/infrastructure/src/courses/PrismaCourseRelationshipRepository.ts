@@ -1,4 +1,4 @@
-import { publicCourseEligibility } from './CoursePublicEligibility';
+import { currentPublicCourseEligibility } from './CoursePublicEligibility';
 import type { AtomicPersistenceContext } from '@manaratak/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -775,7 +775,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       tx => new PrismaCourseRelationshipRepository(tx as unknown as PrismaClient, true).listPublishedRelatedCourses(filters),
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
     );
-    const where: Prisma.CourseWhereInput = publicCourseEligibility();
+    const where: Prisma.CourseWhereInput = {};
 
     if (filters.accessType) where.accessType = filters.accessType;
     if (filters.originType) where.originType = filters.originType;
@@ -825,7 +825,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
       category: true, optionalFields: true,
     };
     return queryStableCursorPage({
-      delegate: this.prisma.course as any, where, select, cursor: filters.cursor, limit: filters.limit,
+      delegate: this.prisma.course as any, where: await currentPublicCourseEligibility(this.prisma, where), select, cursor: filters.cursor, limit: filters.limit,
       map: (row: any) => {
         const { id, optionalFields, ...record } = row;
         const optional = optionalFields && typeof optionalFields === 'object' && !Array.isArray(optionalFields)

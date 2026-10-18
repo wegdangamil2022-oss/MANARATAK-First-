@@ -106,7 +106,7 @@ const mockDb = () => ({
   scholarship: published({ id: 's' }),
   internationalTest: published({ currentPublishedVersionId: 'v' }),
   internationalTestPublicationSnapshot: published({ id: 'v' }),
-  course: published({ id: 'c' }),
+  course: { ...published({ id: 'c' }), findMany: vi.fn().mockResolvedValue([]) },
   referenceCountry: published({ id: 'rc' }),
 });
 
