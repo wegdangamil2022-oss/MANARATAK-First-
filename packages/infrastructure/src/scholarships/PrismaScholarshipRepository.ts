@@ -103,10 +103,11 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
   }
 
   private readonly normalizedInclude = {
+    primaryCountry:{select:{id:true,name:true,nameAr:true,isActive:true,lifecycleState:true}},
     benefits: { include: { currency: { select: { isoCode: true, nameAr: true, name: true } } } },
     degreeTargets: { include: { degreeLevel: { select: { canonicalCode: true, nameEn: true, nameAr: true } } } },
     majorTargets: { include: { major: { select: { status: true } } } },
-    eligibilityItems: { include: { major: { select: { status: true } },
+    eligibilityItems: { include: { country:{select:{id:true,name:true,nameAr:true,isActive:true,lifecycleState:true}}, major: { select: { status: true } },
         internationalTest: { select: { id: true, status: true, isPubliclyVisible: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, testId: true, status: true } } } },
       } },
     requiredDocuments: { include: { internationalTest: { select: { id: true, status: true, isPubliclyVisible: true, currentPublishedVersionId: true, currentPublishedVersion: { select: { id: true, testId: true, status: true } } } } } },
@@ -569,6 +570,11 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
       completenessStatus: ScholarshipCompletenessState.COMPLETE,
     };
     const constraints: Prisma.ScholarshipWhereInput[] = [];
+    if (filters.nationalityCountryReferenceId) {
+      constraints.push({eligibilityItems:{some:{itemTypeCode:'NATIONALITY',operatorCode:'IN',countryReferenceId:filters.nationalityCountryReferenceId,resolutionStatus:'RESOLVED',country:{is:{isActive:true,lifecycleState:'ACTIVE'}}}}});
+      constraints.push({eligibilityItems:{none:{itemTypeCode:'NATIONALITY',operatorCode:'NOT_IN',countryReferenceId:filters.nationalityCountryReferenceId,resolutionStatus:'RESOLVED'}}});
+      constraints.push({eligibilityItems:{none:{itemTypeCode:'NATIONALITY',OR:[{resolutionStatus:{not:'RESOLVED'}},{countryReferenceId:null},{operatorCode:null},{operatorCode:{notIn:['IN','NOT_IN']}}]}}});
+    }
     if(filters.ownerId)where.id=filters.ownerId;
     if(filters.search)constraints.push({OR:[{displayName:{contains:filters.search,mode:'insensitive'}},{publicId:{contains:filters.search,mode:'insensitive'}}]});
     if (filters.countryReferenceId) where.countryReferenceId = filters.countryReferenceId;
@@ -665,6 +671,7 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     return {
       ...compatibility,
       ...raw,
+      studyCountryLabel: (()=>{const country=raw.primaryCountry as {name:string;nameAr?:string;isActive:boolean;lifecycleState:string}|undefined;return country?.isActive && country.lifecycleState==='ACTIVE' ? country.nameAr || country.name : undefined;})(),
       optionalFields: this.sanitizeOptionalFields(legacy),
       verificationStatus: raw.verificationStatus ?? ScholarshipVerificationStatus.PENDING,
       publicationStatus: raw.publicationStatus ?? this.legacyPublicationStatus(raw.status),
@@ -830,6 +837,10 @@ export class PrismaScholarshipRepository implements ITransactionalScholarshipRep
     delete copy.major;
     delete copy.university;
     delete copy.academicProgram;
+    delete copy.countryLabel;
+    delete copy.country;
+    delete copy.primaryCountry;
+    delete copy.studyCountryLabel;
     return copy;
   }
 }
