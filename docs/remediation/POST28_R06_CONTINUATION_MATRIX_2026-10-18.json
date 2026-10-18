@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 437,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 440,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 154,
+  "newDistinctThisContinuation": 157,
   "rows": [
     {
       "caseId": "CD-001",
@@ -690,7 +690,7 @@
           "scope": "Real CourseProgressUseCases enrollment/completion audit/outbox commit, retry/concurrency and SQLSTATE22012 rollback. External-linked enrollment/completion and certificate claims refused. P14 real consumer/gateway/worker acknowledges noncredential event and retries native eligible events lacking approved template; no certificate issued or inbox invented."
         }
       ],
-      "whatRemains": "Actual path create/review/publish/enroll/native Course completion now yields one pinned-version LearningPathCompleted event and deliberate no-op Certificate consumer replay because producer hardcodes eligibleForCertificate:false. Partial progress emits no completion. Successful credential-bearing path issuance needs explicit owner eligibility policy and any reviewed schema gates, not blanket true or rewritten historical events. Course issuance8 remains proven; rendered artifact attachment/delivery/recovery and production signer/renderer approvals remain.",
+      "whatRemains": "Owner explicitly approved opt-in certificate eligibility for new approved versions. Existing version JSON snapshot now carries schemaVersion1 enabled policy, default false; emitter and Certificate consumer require the pinned PUBLISHED eligible version. Actual six PG cases and394 units pass; absent/unknown policy stays false and missing governed template still denies issuance. Successful actual path credential issuance/concurrent inbox proof, rendered artifact delivery/recovery and production signer/renderer approvals remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -703,7 +703,8 @@
       "newEvidence": [
         "docs/reviews/evidence/post28/6ad9dc526147315bcacb57a54892a6e7199b5713/R06-certificate-locks",
         "docs/reviews/evidence/post28/a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5/R06-certificate-runtime",
-        "docs/reviews/evidence/post28/51b0e139c0356c318121a25b72232c7663cfce59/R06-learning-path-completion"
+        "docs/reviews/evidence/post28/51b0e139c0356c318121a25b72232c7663cfce59/R06-learning-path-completion",
+        "docs/reviews/evidence/post28/20f8b6560cb359ec1f7a23e95aa81fdea7eee80b/R06-path-certificate-eligibility"
       ]
     },
     {
@@ -913,5 +914,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 141
+  "newDistinctThisR06OnlyTask": 144
 }
