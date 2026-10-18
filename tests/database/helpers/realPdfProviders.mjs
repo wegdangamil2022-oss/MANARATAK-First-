@@ -1,0 +1,29 @@
+// Laboratory adapters only. Not wired into application runtime or approved for production.
+import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} from 'node:url';import {createHash,randomUUID} from 'node:crypto';import {spawnSync} from 'node:child_process';import {deflateSync} from 'node:zlib';
+import {AssetSanitizationMetadata,AssetStorageLocator,AssetStorageZone} from '@manaratak/domain';
+export const sha256=b=>createHash('sha256').update(b).digest('hex');
+export const canonicalSourceSha='7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7';
+export async function realPdfProviders(lab,storage){
+ const config=JSON.parse(fs.readFileSync(path.join(lab,'real-pdf-provider.json'),'utf8'));
+ if(process.platform!=='win32'||config.syntheticOnly!==true||!fs.realpathSync(config.storageRoot).startsWith(fs.realpathSync(lab)+path.sep)||sha256(fs.readFileSync(config.mupdfModule))!==config.mupdfModuleSha256||sha256(fs.readFileSync(config.defenderExe))!==config.defenderExeSha256)throw Error('REAL_PDF_PROVIDER_IDENTITY_REQUIRED');
+ const mupdf=await import(/* @vite-ignore */ pathToFileURL(config.mupdfModule).href);
+ const source=fs.readFileSync(config.sourcePdf);if(sha256(source)!==canonicalSourceSha)throw Error('ONLY_CANONICAL_SYNTHETIC_PDF_ALLOWED');
+ const proofs=path.join(lab,'real-pdf-proof');fs.mkdirSync(proofs,{recursive:true});
+ const journal=[];const record=row=>{journal.push(row);const fd=fs.openSync(path.join(proofs,'operations.jsonl'),'a');try{fs.writeSync(fd,JSON.stringify(row)+'\n');fs.fsyncSync(fd);}finally{fs.closeSync(fd);}};
+ const resolve=locator=>{if(locator.bucketName!==config.bucket)throw Error('LAB_BUCKET_REQUIRED');const base=path.resolve(config.storageRoot,config.bucket),file=path.resolve(base,locator.pathKey);if(!file.startsWith(base+path.sep))throw Error('LAB_PATH_ESCAPE');return file;};
+ const scanner={async scan(locator){const file=resolve(locator),before=sha256(fs.readFileSync(file));const r=spawnSync(config.defenderExe,['-Scan','-ScanType','3','-File',file,'-DisableRemediation'],{encoding:'utf8',windowsHide:true,timeout:120000,maxBuffer:1024*1024});const after=sha256(fs.readFileSync(file)),output=(r.stdout??'')+(r.stderr??'');const clean=r.status===0&&/found no threats\./i.test(output)&&before===after;record({kind:'DEFENDER_SCAN',locator:locator.value,sha256:before,digestUnchanged:before===after,exitCode:r.status,output,clean});if(!clean)throw Error('REAL_DEFENDER_SCAN_NOT_CLEAN');return {clean:true};}};
+ const sanitizer={async sanitize(locator){const bytes=await storage.read(locator,10*1024*1024);if(sha256(bytes)!==canonicalSourceSha)throw Error('ONLY_CANONICAL_SYNTHETIC_PDF_ALLOWED');const doc=mupdf.Document.openDocument(bytes,'application/pdf');let page,pix,cleanDoc,cleanPage,cleanPix;
+  try{if(doc.countPages()!==1)throw Error('SYNTHETIC_SINGLE_PAGE_REQUIRED');page=doc.loadPage(0);if(JSON.stringify(page.getBounds())!=='[0,0,600,200]')throw Error('CANONICAL_BOUNDS_REQUIRED');pix=page.toPixmap(mupdf.Matrix.scale(2,2),mupdf.ColorSpace.DeviceRGB,false,true);const pixels=Buffer.from(pix.getPixels()),w=pix.getWidth(),h=pix.getHeight();if(w!==1200||h!==400||pix.getNumberOfComponents()!==3||pixels.length!==w*h*3)throw Error('RASTER_LAYOUT_UNEXPECTED');
+   const stream=(dictionary,data)=>Buffer.concat([Buffer.from(`<< ${dictionary} /Length ${data.length} >>\nstream\n`),data,Buffer.from('\nendstream')]);
+   const objects=[Buffer.from('<< /Type /Catalog /Pages 2 0 R >>'),Buffer.from('<< /Type /Pages /Kids [3 0 R] /Count 1 >>'),Buffer.from('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 600 200] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>'),stream(`/Type /XObject /Subtype /Image /Width ${w} /Height ${h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode`,deflateSync(pixels)),stream('',Buffer.from('q 600 0 0 200 0 0 cm /Im0 Do Q\n'))];let chunks=[Buffer.from('%PDF-1.4\n')],offsets=[],length=chunks[0].length;
+   for(const [i,object] of objects.entries()){offsets.push(length);const b=Buffer.concat([Buffer.from(`${i+1} 0 obj\n`),object,Buffer.from('\nendobj\n')]);chunks.push(b);length+=b.length;}
+   chunks.push(Buffer.from('xref\n0 6\n0000000000 65535 f \n'+offsets.map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${length}\n%%EOF\n`));const sanitized=Buffer.concat(chunks);
+   cleanDoc=mupdf.Document.openDocument(sanitized,'application/pdf');cleanPage=cleanDoc.loadPage(0);cleanPix=cleanPage.toPixmap(mupdf.Matrix.scale(2,2),mupdf.ColorSpace.DeviceRGB,false,true);if(sha256(Buffer.from(cleanPix.getPixels()))!==sha256(pixels))throw Error('RASTER_PIXEL_MISMATCH');
+   const id=randomUUID(),target=new AssetStorageLocator(AssetStorageZone.QUARANTINE,config.bucket,'uploads/sanitized-'+id+'.pdf'),file=resolve(target);fs.mkdirSync(path.dirname(file),{recursive:true});const fd=fs.openSync(file,'wx');try{fs.writeFileSync(fd,sanitized);fs.fsyncSync(fd);}finally{fs.closeSync(fd);}if(sha256(fs.readFileSync(file))!==sha256(sanitized))throw Error('SANITIZED_WRITE_READBACK_FAILED');
+   fs.writeFileSync(path.join(proofs,id+'-source.png'),pix.asPNG());fs.writeFileSync(path.join(proofs,id+'-sanitized.png'),cleanPix.asPNG());
+   record({kind:'MUPDF_RASTER_SANITIZATION',sourceSha256:sha256(bytes),sanitizedSha256:sha256(sanitized),sourceBytes:bytes.length,sanitizedBytes:sanitized.length,originalObjectsCopied:0,pixelsMatched:true,sourceLocator:locator.value,sanitizedLocator:target.value,searchableTextAndInteractiveFeaturesDiscarded:true});
+   return {sanitizedLocator:target,metadata:new AssetSanitizationMetadata(true,new Date(),'Synthetic-only MuPDF 1.28.1 raster reconstruction; image-only, text/forms/signatures discarded')};
+  }finally{cleanPix?.destroy();cleanPage?.destroy();cleanDoc?.destroy();pix?.destroy();page?.destroy();doc.destroy();}
+ }};
+ return {config,source,scanner,sanitizer,resolve,journal,proofs};
+}
