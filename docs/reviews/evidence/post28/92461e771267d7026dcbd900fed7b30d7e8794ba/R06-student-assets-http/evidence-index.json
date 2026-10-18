@@ -1,0 +1,61 @@
+{
+  "sourceSha": "92461e771267d7026dcbd900fed7b30d7e8794ba",
+  "runId": "f549e0ae-8b37-40a1-a89a-e3aaf564aaa9",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "targets.json",
+      "bytes": 667,
+      "sha256": "15327e51f54a6b7b71e07f9c21d54729bb0777b0918aa4835182c2c2d6bfd1d2"
+    },
+    {
+      "path": "target-preflight.log",
+      "bytes": 426,
+      "sha256": "69d73396bdb0cf390412c7efeca298351a4eda0ec97e3a37922d78d6283d70c7"
+    },
+    {
+      "path": "stage-initialize-setup.log",
+      "bytes": 3562,
+      "sha256": "45dc3bd651ba66e85081bede13a8cd3a7d2e4e341169abeef56934535b6f432f"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "4d3dd1b0126ceea7b0b998fef160f8cb0ac8c78031d2b09849841f5c266f85b7"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 4418,
+      "sha256": "da8aed94115d4021aa3873493c6229fe543f3a5b2ee7b5b17872ef86ee9b7706"
+    },
+    {
+      "path": "student-document-http-gRXdLL/discovery.json",
+      "bytes": 5551,
+      "sha256": "3611eded9c0dc299418be611cd82a7088dc83dc7f87b1b5a287c7cbaf72b07ff"
+    },
+    {
+      "path": "student-document-http-gRXdLL/selection.json",
+      "bytes": 108,
+      "sha256": "76854f0e9aad7b82edfdf40bf568f34cc1c345cfb14bb1e1c8c7939780660a33"
+    },
+    {
+      "path": "student-document-http-gRXdLL/vitest.json",
+      "bytes": 7552,
+      "sha256": "e37dd0b6cbc7792d8e7487b4f1d2aadc3f48d9e2f268b3f4e1f11ecb43df5876"
+    },
+    {
+      "path": "student-document-http-gRXdLL/summary.json",
+      "bytes": 858,
+      "sha256": "9dc07e971c6d44b0879f8aef36d2f9ff4a8491c1664ca18750c8aefeef51eb56"
+    },
+    {
+      "path": "result.json",
+      "bytes": 342,
+      "sha256": "f5d7ab25741f22440f587f4b00620058a471cec0e89ce6ba6ac1348b70e02180"
+    }
+  ]
+}

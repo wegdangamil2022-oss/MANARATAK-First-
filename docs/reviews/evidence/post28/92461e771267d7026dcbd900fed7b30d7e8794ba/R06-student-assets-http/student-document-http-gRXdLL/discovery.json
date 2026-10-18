@@ -1,0 +1,74 @@
+[
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > rejects foreign read without changing binding consent or owner events",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > rejects foreign bind without changing binding consent or owner events",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > rejects foreign unbind without changing binding consent or owner events",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > rejects foreign withdraw without changing binding consent or owner events",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > reads own readiness without creating consent or owner events",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > rejects a foreign asset on an owned tracker without replacing original binding",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > withdraws only own review consent and preserves original binding and initial consent",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > rejects stale own deletion without changing binding or consent",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > rejects revoked student role using an already issued JWT",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > rejects mutation without CSRF before changing review consent",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > rebinds own asset only on explicit consent and never grants review consent automatically",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > unlinks own synthetic document once with one revision and event",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > replays successful own binding without a second revision or fresh consent",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > commits only one of two concurrent own unlinks at the same revision",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > lists only JWT student PDF assets despite a foreign owner query",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > denies a foreign PDF delivery grant before reaching the unconfigured storage provider",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > denies completion of another student asset before any storage processing",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  },
+  {
+    "name": "CD029 CD036 actual student document HTTP ownership > rejects upload allocation without explicit consent and creates no asset",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-student-document-http.database.spec.mjs"
+  }
+]

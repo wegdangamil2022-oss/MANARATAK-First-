@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 430,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 434,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 147,
+  "newDistinctThisContinuation": 151,
   "rows": [
     {
       "caseId": "CD-001",
@@ -723,7 +723,7 @@
           "scope": "Foreign path alias returns contract 403; strict body rejects injected principal; 1 actual selected pass, 13 deliberate exclusions. Saved report verified on 1c19ec1fdefdebe57061287ad2737d0e24e862c2 without rerunning DB."
         }
       ],
-      "whatRemains": "Current-student ownership now proven through actual JWT HTTP document readiness/bind/unbind/review-consent routes, including foreign asset rejection, role withdrawal, stale revision and replay/concurrent unlink. Invoice/certificate ownership proof preserved. Asset upload/delivery/list route matrix and actual issued certificate artifact delivery remain.",
+      "whatRemains": "Actual student document HTTP18 now covers PDF asset list scoping, foreign delivery and upload-completion denial, and allocation consent rejection as well as binding/readiness/consent/replay/concurrent unlink. Invoice/certificate ownership remains proven. Successful issued artifact delivery and wider graph coverage remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -737,7 +737,8 @@
         "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network",
         "docs/reviews/evidence/post28/be687e82df88317ab2aae10ce0cdb7689246c9c9/R06-student-isolation",
         "docs/reviews/evidence/post28/a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5/R06-certificate-runtime",
-        "docs/reviews/evidence/post28/741b324c6f4f2ac1a43f7a2ab23a0523befa7a26/R06-student-document-http"
+        "docs/reviews/evidence/post28/741b324c6f4f2ac1a43f7a2ab23a0523befa7a26/R06-student-document-http",
+        "docs/reviews/evidence/post28/92461e771267d7026dcbd900fed7b30d7e8794ba/R06-student-assets-http"
       ]
     },
     {
@@ -849,7 +850,7 @@
           "scope": "Real scholarship gateway and AssetReferencePolicy/Prisma asset storage back document attestations and HTTP reviewer. Verified/rejected, CAS two-reviewer race, revoked consent/owner/cycle/asset trust, duplicate queue exclusion and actual DB outbox rollback. Stored clean evidence is synthetic; real secure delivery absent refuses open. No already-delivered storage grant revocation claim."
         }
       ],
-      "whatRemains": "Fourteen actual student document HTTP identities prove foreign read/bind/unbind/consent denial, own readiness, explicit rebind without automatic review consent, withdrawal preserving original binding/initial consent, stale deletion, durable replay, concurrent unlink, current role and CSRF. Attestation24/consent10 repeat; six actual PDF provider proofs remain unchanged. Asset upload/delivery route matrix and owning-phase browser/provider production licensing gates remain.",
+      "whatRemains": "Student document HTTP18 proves own asset listing despite foreign owner query, foreign delivery404, foreign upload completion denied before processing and missing explicit upload consent rejected before asset creation. Earlier binding14/consent10/attestation24 and actual PDF6 proofs preserved. Successful fresh student upload-to-delivery owner workflow, owning-phase browser and production provider licensing remain.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -864,7 +865,8 @@
         "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication",
         "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
         "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
-        "docs/reviews/evidence/post28/741b324c6f4f2ac1a43f7a2ab23a0523befa7a26/R06-student-document-http"
+        "docs/reviews/evidence/post28/741b324c6f4f2ac1a43f7a2ab23a0523befa7a26/R06-student-document-http",
+        "docs/reviews/evidence/post28/92461e771267d7026dcbd900fed7b30d7e8794ba/R06-student-assets-http"
       ]
     },
     {
@@ -910,5 +912,5 @@
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 134
+  "newDistinctThisR06OnlyTask": 138
 }
