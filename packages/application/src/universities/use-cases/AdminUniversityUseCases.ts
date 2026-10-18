@@ -51,7 +51,7 @@ export class AdminUniversityUseCases {
     return this.atomicMutations.execute({domain:'UNIVERSITIES',aggregateType:'UNIVERSITY',aggregateId:id,action:'UNIVERSITY_DRAFT_CREATED',context,auditMetadata:{reason:context.reason,source:'ADMIN_ENTRY'}},async transaction=>{
       const tx=repository.withTransaction!(transaction);
       if(await tx.findByDedupKey(key)) throw new Error('UNIVERSITY_DUPLICATE_IDENTITY');
-      return tx.create({id,publicId:`uni-${id}`,slug:`university-${id}`,canonicalName:name,canonicalDedupKey:key,displayName:name,officialWebsite:input.officialWebsite,officialSourceUrl:input.sourceUri,country:input.country,countryReferenceId:input.countryReferenceId,status:UniversityStatus.READY_TO_REVIEW,completenessStatus:UniversityImportCompletenessState.NEEDS_REVIEW,optionalFields:{creationSource:'ADMIN_ENTRY',createdBy:context.actorId,sourceHash:input.sourceHash}});
+      return tx.create({id,publicId:`INS-${id}`,slug:`university-${id}`,canonicalName:name,canonicalDedupKey:key,displayName:name,officialWebsite:input.officialWebsite,officialSourceUrl:input.sourceUri,country:input.country,countryReferenceId:input.countryReferenceId,status:UniversityStatus.READY_TO_REVIEW,completenessStatus:UniversityImportCompletenessState.NEEDS_REVIEW,optionalFields:{creationSource:'ADMIN_ENTRY',createdBy:context.actorId,sourceHash:input.sourceHash}});
     });
   }
 
