@@ -135,7 +135,7 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
         })
       : null;
 
-    const sourceIdentity = (record as any).sourceIdentities?.[0] ?? null;
+    const sourceIdentity = this.ownedSourceIdentity(record);
     mapped.provider = record.externalProvider
       ? this.mapProvider(record.externalProvider)
       : null;
@@ -256,8 +256,7 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
         sourceIdentities: {
           where: { status: 'ACTIVE' },
           orderBy: { updatedAt: 'desc' },
-          take: 1,
-          select: { id: true },
+          select: { id: true, providerId: true },
         },
       },
     });
@@ -266,7 +265,7 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
       courseId: course.id,
       directCourseUrl: course.directCourseUrl,
       providerId: course.externalProviderId,
-      sourceIdentityId: course.sourceIdentities[0]?.id ?? null,
+      sourceIdentityId: this.ownedSourceIdentity(course)?.id ?? null,
     };
   }
 
@@ -656,7 +655,6 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
       sourceIdentities: {
         where: { status: 'ACTIVE' },
         orderBy: { updatedAt: 'desc' },
-        take: 1,
         include: {
           urlHistory: {
             where: { isCurrent: true },
@@ -670,7 +668,7 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
 
   private mapCourse(record: any): ImportedCourseAdminRecord {
     const provider = record.externalProvider ?? null;
-    const sourceIdentity = record.sourceIdentities?.[0] ?? null;
+    const sourceIdentity = this.ownedSourceIdentity(record);
     const urlState = sourceIdentity?.urlHistory?.[0] ?? null;
     const sourceVerified = this.sourceVerified(record.directCourseUrl, provider);
     const missingFields = this.missingFields(record);
@@ -713,6 +711,13 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     };
+  }
+
+  private ownedSourceIdentity(record: any): any | null {
+    // Identity/provider equality cannot be expressed by a cross-model Prisma
+    // relation field reference. Preserve newest-first order within the owner.
+    if (!record.externalProviderId) return null;
+    return record.sourceIdentities?.find((identity: any) => identity.providerId === record.externalProviderId) ?? null;
   }
 
   private sourceVerified(url: string, provider: any): boolean {
