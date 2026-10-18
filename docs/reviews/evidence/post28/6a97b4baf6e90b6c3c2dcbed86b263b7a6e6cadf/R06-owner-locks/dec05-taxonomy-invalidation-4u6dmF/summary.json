@@ -1,0 +1,33 @@
+{
+  "kind": "POST28_DATABASE_SUITE_EXECUTION",
+  "sourceSha": "6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf",
+  "suite": "dec05-taxonomy-invalidation",
+  "caseExact": null,
+  "fullDiscoveryCases": 6,
+  "fullProfileAcceptance": true,
+  "authorization": {
+    "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY",
+    "R04": "PASS_LOCAL_MATCHING_SCHEMA",
+    "R05": "BLOCKED_USER_AUTHORIZED_SCOPED_R06",
+    "fullR06Acceptance": false,
+    "deploymentAuthorized": false
+  },
+  "targets": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698059553268370824",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "expected": 6,
+  "executed": 6,
+  "passed": 6,
+  "failed": 0,
+  "skipped": 0
+}

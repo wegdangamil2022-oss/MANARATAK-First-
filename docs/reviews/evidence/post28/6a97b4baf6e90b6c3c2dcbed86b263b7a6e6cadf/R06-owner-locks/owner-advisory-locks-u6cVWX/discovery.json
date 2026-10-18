@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Post28 actual owner import and source advisory lock contracts > holds major owner review lock through commit and rejects unbound use",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-advisory-locks.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual owner import and source advisory lock contracts > executes major identity inspection under canonical reference service and dedup lock",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-advisory-locks.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual owner import and source advisory lock contracts > executes taxonomy import lock in its real owner transaction",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-advisory-locks.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual owner import and source advisory lock contracts > runs actual serializable taxonomy boundary with graph governance lock held",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-advisory-locks.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual owner import and source advisory lock contracts > reads historical unassigned import lease only after its owner lock is acquired",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-advisory-locks.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual owner import and source advisory lock contracts > reaches actual mapping source conflict instead of failing its lock result",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-advisory-locks.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual owner import and source advisory lock contracts > refuses remembered snapshot for an absent current source after its observation lock",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-advisory-locks.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual owner import and source advisory lock contracts > refuses shape observation without a source baseline after its observation lock",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-advisory-locks.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual owner import and source advisory lock contracts > reaches study destination canonical missing country gate while retaining transaction requirement",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-advisory-locks.database.spec.mjs"
+  },
+  {
+    "name": "Post28 actual owner import and source advisory lock contracts > serializes actual distributed fleet origin and source budget reservations across two connections",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r06-runtime/tests/database/post28-owner-advisory-locks.database.spec.mjs"
+  }
+]

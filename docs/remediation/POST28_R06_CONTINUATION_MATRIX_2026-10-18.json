@@ -4,9 +4,9 @@
   "required": 26,
   "accepted": 0,
   "partial": 26,
-  "distinctSuccessfulDatabaseCasesAcrossSources": 363,
+  "distinctSuccessfulDatabaseCasesAcrossSources": 373,
   "all296ExecutedAtCurrentHead": false,
-  "newDistinctThisContinuation": 80,
+  "newDistinctThisContinuation": 90,
   "rows": [
     {
       "caseId": "CD-001",
@@ -573,7 +573,7 @@
           "scope": "Two-connection provider/native-key/language identity dedup and preserved IDs; domain allowlist, persisted synthetic redirect/history evidence, stale result rejection, controlled identity edit guard and raw source publication rejection. No external network check or end-to-end import approval."
         }
       ],
-      "whatRemains": "Actual Node22 production source HTTPS checker repaired and verified with public HEAD 200; 295 course units and eight affected DB/HTTP regressions pass. Still prove the complete controlled import/source/review/publication owner HTTP chain and remaining source lineage cases.",
+      "whatRemains": "Actual source HTTPS checker and ten owner/source lock defects repaired; absent-source gates, source budget concurrency, source identity and import regressions proven. Still complete real source raw acquisition, controlled analysis/promotion/review/publication HTTP chain and lineage change matrix.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -584,7 +584,8 @@
         ]
       },
       "newEvidence": [
-        "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network"
+        "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network",
+        "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks"
       ]
     },
     {
@@ -824,7 +825,7 @@
           "scope": "Real scholarship gateway and AssetReferencePolicy/Prisma asset storage back document attestations and HTTP reviewer. Verified/rejected, CAS two-reviewer race, revoked consent/owner/cycle/asset trust, duplicate queue exclusion and actual DB outbox rollback. Stored clean evidence is synthetic; real secure delivery absent refuses open. No already-delivered storage grant revocation claim."
         }
       ],
-      "whatRemains": "Six actual PDF provider cases preserved; new authenticated issued-path revocation, HTTP permission/consent/owner IO races, byte integrity and attestation/consent preservation proven. Institutional tenant boundary is undefined (owner question pending); built-browser and production provider/licensing gates remain. No retroactive provider-URL revocation claim.",
+      "whatRemains": "Six actual PDF provider cases preserved; issued authenticated path revocation, HTTP permission/consent/owner IO races, integrity and attestation preservation proven. Owner defines tenant as current student ownership, so institutional question is resolved. Still verify complete student document owner route matrix and built-browser/provider production licensing gates; no historical provider URL retroactive revocation claimed.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -837,7 +838,8 @@
       "newEvidence": [
         "docs/reviews/evidence/post28/6e5e9691c6f5d51fb3b12a0ec7c311d1e45cff37/R06-real-pdf-20261018",
         "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication",
-        "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery"
+        "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
+        "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks"
       ]
     },
     {
@@ -860,7 +862,7 @@
           "scope": "Current canonical test version and language withdrawal affect next actual public request/list; no full multi-page parent/reference lifecycle matrix or snapshot/pagination consistency acceptance."
         }
       ],
-      "whatRemains": "Scholarship snapshot/cursor proof and document IO consent/permission/asset revocation races are complete for tested paths. Remaining graph/cache/HTTP matrix and institutional tenant contract remain; cross-request paging is live ID traversal.",
+      "whatRemains": "Scholarship snapshot/live cursor, document IO revocation and owner/source lock concurrency proven for tested paths. Student ownership definition resolved; remaining graph/cache/HTTP withdrawal matrix still requires tests.",
       "acceptanceBlockers": {
         "global": [
           "R05_NOT_ACCEPTED_NO_GLOBAL_R06_CLOSURE"
@@ -871,9 +873,10 @@
       },
       "newEvidence": [
         "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
-        "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery"
+        "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
+        "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks"
       ]
     }
   ],
-  "newDistinctThisR06OnlyTask": 67
+  "newDistinctThisR06OnlyTask": 77
 }
