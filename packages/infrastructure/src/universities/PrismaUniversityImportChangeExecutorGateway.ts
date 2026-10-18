@@ -18,7 +18,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     actorId: string,
   ): Promise<{ changeSetId: string; appliedChanges: number }> {
     return this.prisma.$transaction(async (transaction) => {
-      await transaction.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${plan.changeSetId}, 0))`;
+      await transaction.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${plan.changeSetId}, 0))`;
       const existing = await transaction.universityImportChangeSet.findUnique({
         where: { id: plan.changeSetId },
         include: { changes: true },
@@ -75,7 +75,7 @@ export class PrismaUniversityImportChangeExecutorGateway implements UniversityIm
     actorId: string,
   ): Promise<{ changeSetId: string; revertedChanges: number }> {
     return this.prisma.$transaction(async (transaction) => {
-      await transaction.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${changeSetId}, 0))`;
+      await transaction.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${changeSetId}, 0))`;
       const changeSet = await transaction.universityImportChangeSet.findUnique({
         where: { id: changeSetId },
         include: { changes: { orderBy: { sequence: 'desc' } } },
