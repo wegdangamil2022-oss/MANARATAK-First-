@@ -111,7 +111,7 @@ test('scholarship Admin runtime declares eighteen cases without widening applica
 test('R06 country, import and program language profiles and worker profiles add only eight named DML tables to the previous eighty',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
  assert.equal(databaseSuite('scholarship-public-relations').minimumCases,4);
- assert.equal(TRANSACTION_APPLICATION_TABLES.length,90);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.length,91);
  assert.ok(TRANSACTION_APPLICATION_TABLES.includes('ScholarshipEligibilityItem'));
  assert.ok(TRANSACTION_APPLICATION_TABLES.includes('UniversityImportChangeSet'));
  assert.ok(TRANSACTION_APPLICATION_TABLES.includes('UniversityImportChange'));
@@ -124,7 +124,7 @@ test('university geography declares twenty-two cases and explicitly grants only 
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
  assert.equal(databaseSuite('university-geography').minimumCases,22);
  for(const table of ['ReferenceCountry','AdministrativeRegion','ReferenceCity'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
- assert.equal(TRANSACTION_APPLICATION_TABLES.filter(t=>!['CertificateVerificationLog','Certificate','ImportBatch','ImportRecord','ImportScreeningReceipt','ScholarshipEligibilityItem','UniversityImportChangeSet','UniversityImportChange','UniversityProgramStudyProfile','UniversityProgramStudyLanguage'].includes(t)).length,80);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.filter(t=>!['ImportRateBudget','CertificateVerificationLog','Certificate','ImportBatch','ImportRecord','ImportScreeningReceipt','ScholarshipEligibilityItem','UniversityImportChangeSet','UniversityImportChange','UniversityProgramStudyProfile','UniversityProgramStudyLanguage'].includes(t)).length,80);
  assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });
 
@@ -141,13 +141,13 @@ test('reference/import and unavailable finance providers have explicit profiles 
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');
  assert.equal(databaseSuite('reference-import-closure').minimumCases,18);assert.equal(databaseSuite('finance-provider-safety').minimumCases,6);
  for(const table of ['ReferenceLanguage','ExternalCourseProvider','ExternalCourseProviderDomain','CourseSourceIdentity','CourseSourceUrlHistory','FinanceRefundRecord','FinanceWalletRecord','FinanceTransferRecord'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
- assert.equal(TRANSACTION_APPLICATION_TABLES.filter(t=>!['CertificateVerificationLog','Certificate','ImportBatch','ImportRecord','ImportScreeningReceipt','ScholarshipEligibilityItem','UniversityImportChangeSet','UniversityImportChange','UniversityProgramStudyProfile','UniversityProgramStudyLanguage'].includes(t)).length,80);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.filter(t=>!['ImportRateBudget','CertificateVerificationLog','Certificate','ImportBatch','ImportRecord','ImportScreeningReceipt','ScholarshipEligibilityItem','UniversityImportChangeSet','UniversityImportChange','UniversityProgramStudyProfile','UniversityProgramStudyLanguage'].includes(t)).length,80);
 });
 
 test('independent local finance requires fourteen cases and only three additional owner tables',async()=>{
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('finance-local-closure').minimumCases,14);
  for(const table of ['FinanceDocumentRecord','FinanceInstallmentPlanRecord','FinanceWalletHoldRecord'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));
- assert.equal(TRANSACTION_APPLICATION_TABLES.filter(t=>!['CertificateVerificationLog','Certificate','ImportBatch','ImportRecord','ImportScreeningReceipt','ScholarshipEligibilityItem','UniversityImportChangeSet','UniversityImportChange','UniversityProgramStudyProfile','UniversityProgramStudyLanguage'].includes(t)).length,80);
+ assert.equal(TRANSACTION_APPLICATION_TABLES.filter(t=>!['ImportRateBudget','CertificateVerificationLog','Certificate','ImportBatch','ImportRecord','ImportScreeningReceipt','ScholarshipEligibilityItem','UniversityImportChangeSet','UniversityImportChange','UniversityProgramStudyProfile','UniversityProgramStudyLanguage'].includes(t)).length,80);
 });
 
 test('real worker crash profile grants three import fixture tables only',async()=>{const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('import-worker-crash').minimumCases,5);for(const table of ['ImportBatch','ImportRecord','ImportScreeningReceipt'])assert.ok(TRANSACTION_APPLICATION_TABLES.includes(table));assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);});
@@ -158,4 +158,7 @@ test('optional certificate workflow scope is explicit and contains five owner ta
  const initializer=fs.readFileSync('scripts/database/initialize-post28-transactions.mjs','utf8');
  assert.ok(initializer.includes("process.argv[2]==='--certificate-fixtures'"));assert.ok(initializer.includes('if(certificateFixtures)await setup.$executeRawUnsafe'));
  const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('certificate-runtime').minimumCases,8);
+});
+test('owner lock profile executes ten actual gateway contracts with one source budget fixture grant',async()=>{
+ const {databaseSuite}=await import('../../config/testing/post28-database-suites.mjs');assert.equal(databaseSuite('owner-advisory-locks').minimumCases,10);assert.ok(TRANSACTION_APPLICATION_TABLES.includes('ImportRateBudget'));assert.equal(TRANSACTION_APPLICATION_TABLES.includes('_prisma_migrations'),false);
 });

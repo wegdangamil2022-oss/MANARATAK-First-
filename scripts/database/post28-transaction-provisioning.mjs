@@ -15,6 +15,7 @@ export async function preflightTransactionProvisioning(contract,appUrl,setupUrl,
 // Optional, explicit synthetic certificate owner workflow scope on a new DB-T only.
 export const CERTIFICATE_FIXTURE_APPLICATION_TABLES=Object.freeze(['CertificateIssuer','CertificateTemplate','CertificateTemplateVersion','CertificateIssuanceInbox','CertificateLedgerEntry']);
 export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
+ 'ImportRateBudget', // Synthetic distributed source acquisition reservation tests.
  'CertificateVerificationLog', // Actual verification analytics transaction test.
  'Certificate', // Explicit revoked synthetic read-isolation fixture; no template/issuer approval grants.
  'ImportBatch','ImportRecord','ImportScreeningReceipt',
