@@ -13,6 +13,7 @@ export async function preflightTransactionProvisioning(contract,appUrl,setupUrl,
  return {runtime,setup};
 }
 export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
+ 'Certificate', // Explicit revoked synthetic read-isolation fixture; no template/issuer approval grants.
  'ImportBatch','ImportRecord','ImportScreeningReceipt',
  'UniversityImportChangeSet','UniversityImportChange',
  'UniversityProgramStudyProfile','UniversityProgramStudyLanguage',

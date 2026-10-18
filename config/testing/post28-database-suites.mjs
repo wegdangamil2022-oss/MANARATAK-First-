@@ -20,7 +20,7 @@ export const DATABASE_SUITES = Object.freeze({
   'scholarship-public-relations': {files: ['tests/database/post28-scholarship-public-relations.database.spec.mjs'],minimumCases:4},
   'scholarship-admin': {files: ['tests/database/post28-scholarship-admin.database.spec.mjs'],minimumCases:18},
   'relation-commands': {files: ['tests/database/post28-relation-commands.database.spec.mjs'],minimumCases:8},
-  'http-finance': {files: ['tests/database/post28-http-finance.database.spec.mjs'],minimumCases:17},
+  'http-finance': {files: ['tests/database/post28-http-finance.database.spec.mjs'],minimumCases:19},
   'owner-relations': {files: ['tests/database/post28-owner-relations.database.spec.mjs'],minimumCases:20},
   'university-relations': {files: ['tests/database/post28-university-relations.database.spec.mjs'],minimumCases:7},
   'document-consent': {files: ['tests/database/post28-document-consent.database.spec.mjs'],minimumCases:10},
