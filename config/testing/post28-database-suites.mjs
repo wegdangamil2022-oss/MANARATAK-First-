@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'admission-import-concurrency': {files: ['tests/database/post28-admission-import-concurrency.database.spec.mjs'],minimumCases:10},
   'real-pdf-lifecycle': {files: ['tests/database/post28-real-pdf-lifecycle.database.spec.mjs'],minimumCases:6},
   'scholarship-country-semantics': {files: ['tests/database/post28-scholarship-country-semantics.database.spec.mjs'],minimumCases:7},
   'course-major-visibility': {files: ['tests/database/post28-course-major-visibility.database.spec.mjs'],minimumCases:8},

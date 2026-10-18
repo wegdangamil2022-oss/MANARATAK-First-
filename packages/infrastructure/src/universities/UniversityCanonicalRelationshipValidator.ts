@@ -143,7 +143,7 @@ export class UniversityCanonicalRelationshipValidator {
     await this.validateAdmissionRequirements(input.admissionRequirements ?? []);
   }
 
-  private async validateAdmissionRequirements(
+  async validateAdmissionRequirements(
     requirements: NonNullable<UniversityAcademicProgramAuthoringInput['admissionRequirements']>,
   ): Promise<void> {
     const requirementKeys = new Set<string>();
