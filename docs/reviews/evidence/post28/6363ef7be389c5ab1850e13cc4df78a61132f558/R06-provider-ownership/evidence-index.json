@@ -1,0 +1,25 @@
+{
+  "sourceSha": "6363ef7be389c5ab1850e13cc4df78a61132f558",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "before-fix.json",
+      "bytes": 5220,
+      "sha256": "d775cdfba451db5de9b76f3e0815ef2b4cedeffde100d7d870570a71b7547606"
+    },
+    {
+      "path": "after-fix.json",
+      "bytes": 2857,
+      "sha256": "d039e2523d79e7e7e2d74bbcfd3ee2fb9da547082772abf5dd43d43857094c07"
+    },
+    {
+      "path": "types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}
