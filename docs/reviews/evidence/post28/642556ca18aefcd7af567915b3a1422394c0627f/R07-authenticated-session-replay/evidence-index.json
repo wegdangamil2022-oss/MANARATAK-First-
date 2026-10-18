@@ -1,0 +1,155 @@
+{
+  "sourceSha": "642556ca18aefcd7af567915b3a1422394c0627f",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "checks.json",
+      "bytes": 3175,
+      "sha256": "b873090140dea524a75acb1b39335a689cc8a97731df4e6dec94401c89fd2179"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 1376,
+      "sha256": "a9d020e43cee7de792389459d203b14d43f3a24c906b92e74e1a81d6c9c6ad58"
+    },
+    {
+      "path": "runtime-layer.json",
+      "bytes": 2162,
+      "sha256": "59605151ea1eec847b8389405ae48e9815c6c64c2b96477653b736e25ea5451d"
+    },
+    {
+      "path": "auth-session.json",
+      "bytes": 4369,
+      "sha256": "ba5ab6cb2cad7080e9a33b211c4484288a812238b1498dcd76b89e4889a7d9ed"
+    },
+    {
+      "path": "auth-session-api.log",
+      "bytes": 8104,
+      "sha256": "7d7e713f6a309594d06051365ba22f32cda9e93f473e0c8f95821a0b87111dd8"
+    },
+    {
+      "path": "auth-session-gateway.log",
+      "bytes": 136,
+      "sha256": "4a247579df0ad40bf51d13a31ffc041eb64c6858d864bf5c47beca33c1876473"
+    },
+    {
+      "path": "api-build.log",
+      "bytes": 861,
+      "sha256": "4738d765286d3a7e1df6f5e4e57d5a593e68814449991ad75519e744f5deb3b3"
+    },
+    {
+      "path": "web-build.log",
+      "bytes": 789,
+      "sha256": "fb70504046ac77cf42ec59fd50d947c6ea3c8d837b763b1ee250b365f133a103"
+    },
+    {
+      "path": "admin-build.log",
+      "bytes": 1426,
+      "sha256": "d9a9cc1babbf170c17c8e6db871b9bd16403f702d5349fcfb2690129d90905a6"
+    },
+    {
+      "path": "package.log",
+      "bytes": 83,
+      "sha256": "b4a4e4814f2be970c581ad2dc2d7d9df36ea75ea968d66d40a1c4c2fa05843f9"
+    },
+    {
+      "path": "runtime-install.log",
+      "bytes": 611,
+      "sha256": "595e33d4ad9bfcb686e39c71b5716c4bcfe8cdb024ecaf28a7de126bd950ee8f"
+    },
+    {
+      "path": "artifacts/release-manifest.json",
+      "bytes": 1923,
+      "sha256": "793d70e13a653280b8a36368a6a73731dcd3a04b097ed46b122790a91be11f05"
+    },
+    {
+      "path": "artifacts/release-sbom.cdx.json",
+      "bytes": 113384,
+      "sha256": "40d097fb2e05d7bdc56ed4176e89977fee716e66a99e8711330ed915cf9fa74e"
+    },
+    {
+      "path": "artifacts/SHA256SUMS",
+      "bytes": 465,
+      "sha256": "3633e62d54dc040ded1e1e192c3c03337532bdde92d65944fe26bf2ce2d28411"
+    },
+    {
+      "path": "prior-source/auth-session.json",
+      "bytes": 3754,
+      "sha256": "49885cd53b300af18a3325a99a03568a2fe75848cbf56657ae5daa7d72768a33"
+    },
+    {
+      "path": "prior-source/auth-session-baseline-success.json",
+      "bytes": 3558,
+      "sha256": "952944cf22951bc986cf4f45b9a4e580aa79ec4e41448298abcdc8377b295262"
+    },
+    {
+      "path": "prior-source/auth-session-audit-grant-failure.json",
+      "bytes": 2468,
+      "sha256": "b8afe340b5cab369245dfb2e9bb18f2cf47cf7488e1e0073adba6da2f7d8d69b"
+    },
+    {
+      "path": "prior-source/auth-session-audit-grant-failure-api.log",
+      "bytes": 6662,
+      "sha256": "e60afd836b9b520c44bc4dccd3d06e751ba2c364c97f0acd4759c0c920e70297"
+    },
+    {
+      "path": "lab/targets.json",
+      "bytes": 667,
+      "sha256": "5cbf143ff8161fa94b19d812a314883bc11102e74acde0959bc11bdd7f408e3a"
+    },
+    {
+      "path": "lab/target-preflight.log",
+      "bytes": 426,
+      "sha256": "ef5133b94797dba9b5568b32c797a8a55ca709777408c8711995b83866fc3a86"
+    },
+    {
+      "path": "lab/R07-setup/checks.json",
+      "bytes": 688,
+      "sha256": "bd1db4e50eb50193c3708c692ef3fc8b32c5b7d5c6264391be7757cc0588cc1c"
+    },
+    {
+      "path": "lab/R07-setup/result.json",
+      "bytes": 973,
+      "sha256": "7a4a00d538dff2d6d45b7f6c151fb96f9730a785de950bdd9765dc83186fe4de"
+    },
+    {
+      "path": "r07-auth-replay-red.json",
+      "bytes": 4210,
+      "sha256": "8c65c7177bcb13ec597c66804e7884afe9d96c9ae53c119d5a4ab2a10ef7d505"
+    },
+    {
+      "path": "r07-auth-replay-green.json",
+      "bytes": 3751,
+      "sha256": "0257d2b47b89eeecbc8a291e4db6308f78fa3ce9c322afc1f82521bb24187e29"
+    },
+    {
+      "path": "r07-auth-replay-eslint.log",
+      "bytes": 554,
+      "sha256": "27b79d8baed663e92f9025049f6644e2c346b3ce4c2b7caacc3eff7e0cfb8d7d"
+    },
+    {
+      "path": "r07-auth-replay-quality.log",
+      "bytes": 384,
+      "sha256": "eec55ba731573ad76875e3cff714bdc27a87514146f57511d67392efccd7ee81"
+    },
+    {
+      "path": "r07-auth-replay-scope-integration.mjs",
+      "bytes": 13281,
+      "sha256": "f773a903a0838323db94fadeedde0f078f8d63c753144d2c75d50cadb0f1c004"
+    },
+    {
+      "path": "r07-auth-replay-integration.mjs",
+      "bytes": 12124,
+      "sha256": "dae601ac02d9bc5c80dfb756302a7f9385f365a3c328b7be6a98a5254938c405"
+    },
+    {
+      "path": "r07-auth-session-integration.mjs",
+      "bytes": 11063,
+      "sha256": "b54f5f12fefbf6cf524c86d929e9092e81b30933a9460ed10e1c4a34c6c4765f"
+    }
+  ]
+}
