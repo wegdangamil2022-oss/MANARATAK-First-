@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'import-worker-crash': {files: ['tests/database/post28-import-worker-crash.database.spec.mjs'],minimumCases:5},
   'scholarship-read-concurrency': {files: ['tests/database/post28-scholarship-read-concurrency.database.spec.mjs'],minimumCases:7},
   'program-language': {files: ['tests/database/post28-program-language.database.spec.mjs'],minimumCases:8},
   'admission-import-concurrency': {files: ['tests/database/post28-admission-import-concurrency.database.spec.mjs'],minimumCases:10},
