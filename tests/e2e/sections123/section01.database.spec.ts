@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { Role, PermissionReference, AuthorizationEvaluatorService, Policy } from '@manaratak/domain';
-import { AssignRoleUseCase, AtomicDomainMutationCoordinator, AtomicAuditedOutboxMutationExecutor } from '@manaratak/application';
+import { Role, PermissionReference, AuthorizationEvaluatorService, Policy } from '@absheer/domain';
+import { AssignRoleUseCase, AtomicDomainMutationCoordinator, AtomicAuditedOutboxMutationExecutor } from '@absheer/application';
 import { PrismaRoleRepository } from '../../../packages/infrastructure/src/authorization/PrismaRoleRepository';
 import { PrismaRoleAssignmentRepository } from '../../../packages/infrastructure/src/authorization/PrismaRoleAssignmentRepository';
 import { PrismaIdentityRepository } from '../../../packages/infrastructure/src/identity/PrismaIdentityRepository';

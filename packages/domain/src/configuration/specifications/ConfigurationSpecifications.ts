@@ -1,5 +1,5 @@
 import { Configuration } from '../aggregates/Configuration';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 
 export class ConfigurationReferenceSpecification implements ISpecification<Configuration> {
   constructor(private readonly referenceValue: string) {}

@@ -2,11 +2,11 @@ import type { Express } from 'express';
 import type { PrismaClient } from '@prisma/client';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { asValue } from '@manaratak-vendor/awilix-core';
+import { asValue } from '@absheer-vendor/awilix-core';
 import { createApiApp } from '../../../src/app';
 import { container } from '../../../src/infrastructure/di/container';
-import { PrismaSearchRequestRepository } from '@manaratak/infrastructure';
-import { SearchResult } from '@manaratak/domain';
+import { PrismaSearchRequestRepository } from '@absheer/infrastructure';
+import { SearchResult } from '@absheer/domain';
 
 describe('B01 real API mount with isolated persistence and credentials',()=>{
  let app:Express;

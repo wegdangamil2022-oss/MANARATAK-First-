@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: reference
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: reference
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- SOURCE ONLY: not applied in this review.
 CREATE TABLE "ReferenceOwnerImportReview" (
  "id" TEXT PRIMARY KEY, "receiptId" TEXT NOT NULL UNIQUE, "sourceHash" TEXT NOT NULL,

@@ -36,25 +36,25 @@ describe('CMS progressive HTML and owner SEO', () => {
     ).toThrow('CMS_APP_ENTRY_MISSING');
   });
   it('retains noindex and never invents unpublished English alternate', () => {
-    const result = cmsArticleSeoProjection(article(), 'https://manaratak.example');
+    const result = cmsArticleSeoProjection(article(), 'https://absheer.example');
     expect(result?.robots).toBe('noindex,nofollow');
     expect(result?.alternates).toEqual([
-      { locale: 'ar', href: 'https://manaratak.example/ar/news/news' },
+      { locale: 'ar', href: 'https://absheer.example/ar/news/news' },
     ]);
   });
   it('uses distinct published translated slugs and rejects canonical mismatch', () => {
     const item = article();
     item.cmsSeo!.availableLocales.push({ locale: 'en', slug: 'english-news' });
-    expect(cmsArticleSeoProjection(item, 'https://manaratak.example')?.alternates).toEqual([
-      {locale:'ar',href:'https://manaratak.example/ar/news/news'},
+    expect(cmsArticleSeoProjection(item, 'https://absheer.example')?.alternates).toEqual([
+      {locale:'ar',href:'https://absheer.example/ar/news/news'},
     ]);
     item.canonicalUrl = '/ar/news/old';
-    expect(cmsArticleSeoProjection(item, 'https://manaratak.example')).toBeNull();
+    expect(cmsArticleSeoProjection(item, 'https://absheer.example')).toBeNull();
   });
   it('never indexes a gated English CMS page even with a published owner locale',()=>{
     const item=article();item.cmsSeo!.locale='en';item.cmsSeo!.noIndex=false;
     item.canonicalUrl='/en/news/news';
-    expect(cmsArticleSeoProjection(item,'https://manaratak.example')?.robots).toBe('noindex,nofollow');
+    expect(cmsArticleSeoProjection(item,'https://absheer.example')?.robots).toBe('noindex,nofollow');
   });
 
 });

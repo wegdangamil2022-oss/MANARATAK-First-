@@ -9,11 +9,11 @@
 
 ## 1. Purpose
 
-The purpose of this standard is to establish an unambiguous, enterprise-wide taxonomy for defining structural components within MANARATAK 2.0. It eliminates subjective interpretations of terminology such as Platform, Module, Widget, Capability, and Service, ensuring absolute consistency in architectural design, domain modeling, and technical reviews.
+The purpose of this standard is to establish an unambiguous, enterprise-wide taxonomy for defining structural components within ABSHEER 2.0. It eliminates subjective interpretations of terminology such as Platform, Module, Widget, Capability, and Service, ensuring absolute consistency in architectural design, domain modeling, and technical reviews.
 
 ## 2. Scope
 
-This standard applies to all present and future architectural designs, domain models, implementation blueprints, and technical documentation across the entire MANARATAK 2.0 ecosystem. It dictates how boundaries are classified and named.
+This standard applies to all present and future architectural designs, domain models, implementation blueprints, and technical documentation across the entire ABSHEER 2.0 ecosystem. It dictates how boundaries are classified and named.
 
 ## 3. Definitions
 
@@ -167,7 +167,7 @@ To ensure strict adherence to this standard across the enterprise, the following
 *   **Review Standard:** Every architecture review must use STD-ARC-003 to validate component classification.
 *   **Phase Compliance:** Every new phase must comply with this standard. Non-compliant proposals will be rejected.
 *   **Conflict Resolution:** Any classification conflicts between teams or domains must be resolved using this document as the supreme authority.
-*   **SSoT:** This document is the Single Source of Truth (SSoT) for structural classification across MANARATAK 2.0.
+*   **SSoT:** This document is the Single Source of Truth (SSoT) for structural classification across ABSHEER 2.0.
 *   **Naming Convention:** Source code repositories and architecture documents must use the classified term in their nomenclature (e.g., `Enterprise Finance Platform`, not `Enterprise Finance System`).
 
 ## 16. Examples

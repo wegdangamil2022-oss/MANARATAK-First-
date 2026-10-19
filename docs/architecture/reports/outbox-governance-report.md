@@ -1,9 +1,9 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-4 Transactional Outbox Strategy
 # Documentation Governance & Baseline Adoption
 
 ## 1. Governance Summary
-The Enterprise Transactional Outbox Program has successfully passed Final ARB Validation. All governance activities required for official architectural adoption are complete. The Transactional Outbox strategy is now an official part of the MANARATAK 2.0 Enterprise Architecture Baseline, resolving the Dual-Write Problem.
+The Enterprise Transactional Outbox Program has successfully passed Final ARB Validation. All governance activities required for official architectural adoption are complete. The Transactional Outbox strategy is now an official part of the ABSHEER 2.0 Enterprise Architecture Baseline, resolving the Dual-Write Problem.
 
 ## 2. Documentation Registration Report
 All documents have been assigned formal IDs and registered in the Enterprise Documentation Index:
@@ -69,4 +69,4 @@ The governance review is successful. All compliance criteria have been met.
 
 The Enterprise Transactional Outbox Program is officially closed.
 
-P0-4 Transactional Outbox Strategy is completed and permanently adopted as part of the MANARATAK 2.0 Enterprise Architecture Baseline.
+P0-4 Transactional Outbox Strategy is completed and permanently adopted as part of the ABSHEER 2.0 Enterprise Architecture Baseline.

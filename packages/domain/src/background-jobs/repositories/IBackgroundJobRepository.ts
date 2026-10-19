@@ -1,5 +1,5 @@
 import { BackgroundJob } from '../aggregates/BackgroundJob';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 
 export interface IBackgroundJobRepository {
   save(job: BackgroundJob): Promise<void>;

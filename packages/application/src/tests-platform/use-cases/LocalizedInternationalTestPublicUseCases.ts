@@ -3,9 +3,9 @@ import {
   InternationalTestDto,
   InternationalTestFilters,
   PaginatedInternationalTestResult,
-} from '@manaratak/domain';
-import { publicInternationalTest } from '@manaratak/domain';
-import { DEFAULT_LOCALE, type SupportedLocale } from '@manaratak/shared';
+} from '@absheer/domain';
+import { publicInternationalTest } from '@absheer/domain';
+import { DEFAULT_LOCALE, type SupportedLocale } from '@absheer/shared';
 import { ApplicationLocaleProjectionService } from '../../localization/ApplicationLocaleProjectionService';
 
 export class LocalizedInternationalTestPublicUseCases {

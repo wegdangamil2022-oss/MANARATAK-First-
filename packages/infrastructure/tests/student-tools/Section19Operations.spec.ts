@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { PrismaStudentToolRegistryRepository } from '../../src/student-tools/PrismaStudentToolRegistryRepository';
 import { PrismaStudentPrivateResultRetentionGateway } from '../../src/students/PrismaStudentPrivateResultRetentionGateway';
-import { RetentionDisposition, RetentionOwner } from '@manaratak/domain';
+import { RetentionDisposition, RetentionOwner } from '@absheer/domain';
 
 describe('Section 19 truthful operations and bounded retention', () => {
   it('separates blocked and running from terminal rates and student from test traffic', async () => {

@@ -18,7 +18,7 @@ describe('Step 8.10 University Integration Contract Tests', () => {
   // B. canonical Major reference is preferred over Major text
   it('Rule B: prefers canonical Major reference over Major text for MATCHED status', () => {
     const validProgram: AcademicProgramIntegrationDto = {
-      universityRefId: 'uni-manaratak-001',
+      universityRefId: 'uni-absheer-001',
       sourceProgramName: 'BSc in Software Engineering',
       degreeLevelCanonicalCode: 'BACHELOR',
       majorId: 'maj-cs-001',
@@ -26,7 +26,7 @@ describe('Step 8.10 University Integration Contract Tests', () => {
     };
 
     const invalidProgram: AcademicProgramIntegrationDto = {
-      universityRefId: 'uni-manaratak-001',
+      universityRefId: 'uni-absheer-001',
       sourceProgramName: 'BSc in Software Engineering',
       degreeLevelCanonicalCode: 'BACHELOR',
       status: ProgramIntegrationStatus.MATCHED
@@ -41,28 +41,28 @@ describe('Step 8.10 University Integration Contract Tests', () => {
   // C. university reference ID is preserved
   it('Rule C: preserves original stable source university reference ID', () => {
     const payload: UniversityIntegrationPayload = {
-      universityRefId: 'uni-manaratak-100',
-      displayName: 'Manaratak University of Excellence'
+      universityRefId: 'uni-absheer-100',
+      displayName: 'Absheer University of Excellence'
     };
 
     const result = UniversityIntegrationContract.resolveUniversityIdentity(payload, []);
     expect(result.isPreserved).toBe(true);
-    expect(result.canonicalId).toBe('uni-manaratak-100');
+    expect(result.canonicalId).toBe('uni-absheer-100');
   });
 
   // D. repeated same university reference resolves to same canonical identity contract
   it('Rule D: resolves repeated same university reference ID to the same canonical identity', () => {
     const payload: UniversityIntegrationPayload = {
-      universityRefId: 'uni-manaratak-200',
-      displayName: 'Manaratak Technical University'
+      universityRefId: 'uni-absheer-200',
+      displayName: 'Absheer Technical University'
     };
 
     const existingDb = [
-      { id: 'uuid-manaratak-200', publicId: 'uni-manaratak-200' }
+      { id: 'uuid-absheer-200', publicId: 'uni-absheer-200' }
     ];
 
     const result = UniversityIntegrationContract.resolveUniversityIdentity(payload, existingDb);
-    expect(result.canonicalId).toBe('uuid-manaratak-200');
+    expect(result.canonicalId).toBe('uuid-absheer-200');
     expect(result.isPreserved).toBe(true);
   });
 
@@ -76,7 +76,7 @@ describe('Step 8.10 University Integration Contract Tests', () => {
   // F. unresolved program remains valid
   it('Rule F: ensures unresolved programs remain valid for later review', () => {
     const program: AcademicProgramIntegrationDto = {
-      universityRefId: 'uni-manaratak-001',
+      universityRefId: 'uni-absheer-001',
       sourceProgramName: 'Interdisciplinary Future Tech',
       degreeLevelCanonicalCode: 'BACHELOR',
       status: ProgramIntegrationStatus.UNMAPPED
@@ -89,7 +89,7 @@ describe('Step 8.10 University Integration Contract Tests', () => {
   // G. no fake Major is automatically created
   it('Rule G: ensures no fake Major is automatically created for unresolved programs', () => {
     const program: AcademicProgramIntegrationDto = {
-      universityRefId: 'uni-manaratak-001',
+      universityRefId: 'uni-absheer-001',
       sourceProgramName: 'Unknown Specialization X',
       degreeLevelCanonicalCode: 'MASTER',
       status: ProgramIntegrationStatus.MAJOR_REVIEW_REQUIRED
@@ -102,7 +102,7 @@ describe('Step 8.10 University Integration Contract Tests', () => {
   // H. no fake taxonomy node is automatically created
   it('Rule H: ensures no fake taxonomy node is automatically created for unresolved programs', () => {
     const program: AcademicProgramIntegrationDto = {
-      universityRefId: 'uni-manaratak-001',
+      universityRefId: 'uni-absheer-001',
       sourceProgramName: 'Unknown Specialization Y',
       degreeLevelCanonicalCode: 'MASTER',
       status: ProgramIntegrationStatus.MAJOR_REVIEW_REQUIRED
@@ -115,7 +115,7 @@ describe('Step 8.10 University Integration Contract Tests', () => {
   // I. University integration can represent optional campus/faculty/department
   it('Rule I: ensures optionality of campus, faculty, and department in the hierarchy is respected', () => {
     const minimalProgram: AcademicProgramIntegrationDto = {
-      universityRefId: 'uni-manaratak-001',
+      universityRefId: 'uni-absheer-001',
       sourceProgramName: 'BSc in Chemistry',
       degreeLevelCanonicalCode: 'BACHELOR',
       status: ProgramIntegrationStatus.UNMAPPED
@@ -129,7 +129,7 @@ describe('Step 8.10 University Integration Contract Tests', () => {
   // J. multi-campus requirement is not structurally blocked
   it('Rule J: ensures multi-campus mapping is supported and not structurally blocked', () => {
     const multiCampusProgram: AcademicProgramIntegrationDto = {
-      universityRefId: 'uni-manaratak-001',
+      universityRefId: 'uni-absheer-001',
       sourceProgramName: 'MBA',
       degreeLevelCanonicalCode: 'MASTER',
       campusIds: ['campus-main', 'campus-north', 'campus-south'],

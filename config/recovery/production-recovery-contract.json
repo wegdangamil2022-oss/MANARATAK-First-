@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "kind": "MANARATAK_PRODUCTION_RECOVERY_CONTRACT",
-  "authority": "MANARATAK-2.0-Master-Blueprint",
+  "kind": "ABSHEER_PRODUCTION_RECOVERY_CONTRACT",
+  "authority": "ABSHEER-2.0-Master-Blueprint",
   "objectives": {
     "regionalLossRpoMinutes": 5,
     "regionalLossRtoMinutes": 60,
@@ -39,8 +39,8 @@
     "signedIndependentAssertion": true,
     "distinctApprovers": 2,
     "databaseSideSentinelRequired": true,
-    "restoreRole": "manaratak_restore_runner",
-    "namespace": "manaratak_restore_<32 lowercase hex>",
+    "restoreRole": "absheer_restore_runner",
+    "namespace": "absheer_restore_<32 lowercase hex>",
     "mutationExecutionDefault": "DENIED"
   }
 }

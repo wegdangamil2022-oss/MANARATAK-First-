@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { EvaluateAccessUseCase } from '@manaratak/application';
+import { EvaluateAccessUseCase } from '@absheer/application';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { authorizationEvaluateSchema, parseStrict } from '../../validation/StrictControlPlaneSchemas.js';
 

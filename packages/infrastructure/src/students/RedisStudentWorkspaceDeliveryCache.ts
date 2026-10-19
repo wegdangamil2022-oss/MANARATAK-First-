@@ -1,4 +1,4 @@
-import { IStudentWorkspaceDeliveryCache, StudentDashboardSummaryDto } from '@manaratak/domain';
+import { IStudentWorkspaceDeliveryCache, StudentDashboardSummaryDto } from '@absheer/domain';
 
 interface RedisWorkspaceClient {
   isReady: boolean;

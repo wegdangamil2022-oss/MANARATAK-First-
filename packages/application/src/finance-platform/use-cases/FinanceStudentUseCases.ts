@@ -4,7 +4,7 @@ import {
   IFinanceRepository,
   InvoiceStatus,
   PaginatedFinanceResult,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class FinanceStudentUseCases {
   constructor(private readonly repository: IFinanceRepository) {}

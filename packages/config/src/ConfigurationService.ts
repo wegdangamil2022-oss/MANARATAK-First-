@@ -2,7 +2,7 @@ import {
   IConfigurationService, 
   MissingConfigurationException, 
   InvalidConfigurationException 
-} from '@manaratak/core';
+} from '@absheer/core';
 
 export class ConfigurationService implements IConfigurationService {
   private readonly config: Map<string, unknown>;

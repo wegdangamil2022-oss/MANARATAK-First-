@@ -33,23 +33,23 @@ export const FeaturedUniversities: React.FC<FeaturedUniversitiesProps> = ({
   const getRankBadge = (rankIndex: number) => {
     if (rankIndex === 0) {
       return {
-        bg: 'bg-gradient-to-br from-[var(--mn-accent)] via-[var(--mn-accent-soft)] to-[var(--mn-accent)] text-[var(--mn-on-accent)] font-bold mn-gold ',
+        bg: 'bg-gradient-to-br from-[var(--ab-accent)] via-[var(--ab-accent-soft)] to-[var(--ab-accent)] text-[var(--ab-on-accent)] font-bold ab-gold ',
       };
     }
     if (rankIndex === 1) {
       return {
-        bg: 'bg-gradient-to-br from-[var(--mn-surface-muted)] via-[var(--mn-surface-muted)] to-[var(--mn-primary)] text-[var(--mn-heading)] font-bold mn-panel ',
+        bg: 'bg-gradient-to-br from-[var(--ab-surface-muted)] via-[var(--ab-surface-muted)] to-[var(--ab-primary)] text-[var(--ab-heading)] font-bold ab-panel ',
       };
     }
     return {
-      bg: 'bg-gradient-to-br from-[var(--mn-accent)] via-[var(--mn-accent)] to-[var(--mn-gold-surface)] text-[var(--mn-accent-soft)] font-bold mn-gold ',
+      bg: 'bg-gradient-to-br from-[var(--ab-accent)] via-[var(--ab-accent)] to-[var(--ab-gold-surface)] text-[var(--ab-accent-soft)] font-bold ab-gold ',
     };
   };
 
   return (
     <section id="featured-universities-section" className="px-0 py-3 w-full">
       {/* Standard Framed Container with top accent border only */}
-      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-sm overflow-hidden mn-panel ">
+      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--ab-surface)] to-[var(--ab-page)]/80 border border-[var(--ab-border)] shadow-sm overflow-hidden ab-panel ">
         {/* Elegant top gradient border line */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
         
@@ -66,7 +66,7 @@ export const FeaturedUniversities: React.FC<FeaturedUniversitiesProps> = ({
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_explore_universities_around_the_world_and_discover_their')}</p>
+            <p className="text-[11px] sm:text-xs text-[var(--ab-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_explore_universities_around_the_world_and_discover_their')}</p>
           </div>
 
           {/* Leaderboard Ranking Cards List */}
@@ -88,7 +88,7 @@ export const FeaturedUniversities: React.FC<FeaturedUniversitiesProps> = ({
                     }
                   }}
                   onClick={() => onSelectUniversity(uni)}
-                  className="group relative flex items-center justify-between p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-[var(--mn-surface)] border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] shadow-xs hover:shadow-sm transition-all duration-300 cursor-pointer active:scale-[0.99] mn-panel "
+                  className="group relative flex items-center justify-between p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-[var(--ab-surface)] border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] shadow-xs hover:shadow-sm transition-all duration-300 cursor-pointer active:scale-[0.99] ab-panel "
                 >
                   {/* Right Side: Rank Medal + University Crest/Image + Names */}
                   <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
@@ -100,27 +100,27 @@ export const FeaturedUniversities: React.FC<FeaturedUniversitiesProps> = ({
                     </div>
 
                     {/* University Campus Thumbnail */}
-                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl overflow-hidden shrink-0 border border-[var(--mn-border)] bg-[var(--mn-primary)] mn-inverse ">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl overflow-hidden shrink-0 border border-[var(--ab-border)] bg-[var(--ab-primary)] ab-inverse ">
                       <FeaturedCatalogImage src={uni.imageUrl} alt={uni.name} kind="universities" />
                     </div>
 
                     {/* Name & Location Info */}
                     <div className="min-w-0 flex-1 text-start rtl:text-start">
-                      <h4 className="font-bold text-[11.5px] sm:text-xs text-[var(--mn-heading)] group-hover:text-[var(--mn-heading)] transition-colors truncate">
+                      <h4 className="font-bold text-[11.5px] sm:text-xs text-[var(--ab-heading)] group-hover:text-[var(--ab-heading)] transition-colors truncate">
                         {uni.name}{' '}
-                        <span className="text-[var(--mn-text-muted)] font-semibold text-[9px] sm:text-[10px] mr-1">
+                        <span className="text-[var(--ab-text-muted)] font-semibold text-[9px] sm:text-[10px] mr-1">
                           ({uni.nameEn.replace('University of ', '').replace(' University', '')})
                         </span>
                       </h4>
 
-                      <div className="flex items-center gap-1.5 text-[9.5px] sm:text-[10px] text-[var(--mn-text-muted)] flex-wrap mt-0.5">
-                        <span className="inline-flex items-center gap-1 font-semibold text-[var(--mn-text)]">
+                      <div className="flex items-center gap-1.5 text-[9.5px] sm:text-[10px] text-[var(--ab-text-muted)] flex-wrap mt-0.5">
+                        <span className="inline-flex items-center gap-1 font-semibold text-[var(--ab-text)]">
                           <span>{uni.countryFlag}</span>
                           <span>{uni.country}</span>
                         </span>
-                        <span className="text-[var(--mn-text-muted)]">•</span>
-                        <span className="inline-flex items-center gap-1 text-[var(--mn-heading)] font-bold">
-                          <GraduationCap className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[var(--mn-accent-text)]" />
+                        <span className="text-[var(--ab-text-muted)]">•</span>
+                        <span className="inline-flex items-center gap-1 text-[var(--ab-heading)] font-bold">
+                          <GraduationCap className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[var(--ab-accent-text)]" />
                           <span>{uni.scholarshipCount == null ? publicT('public_scholarships_unavailable') : publicT('public_scholarship_count', { v0: uni.scholarshipCount })}</span>
                         </span>
                       </div>
@@ -129,10 +129,10 @@ export const FeaturedUniversities: React.FC<FeaturedUniversitiesProps> = ({
 
                   {/* Left Side: QS Global Badge & Navigation Arrow */}
                   <div className="flex flex-col items-end justify-center shrink-0 pl-1">
-                    <span className="px-1.5 py-0.5 rounded-md bg-[var(--mn-accent)]/15 text-[var(--mn-accent-text)] font-bold text-[9.5px] sm:text-[10px] border border-[var(--mn-accent)]/30 mb-0.5">
+                    <span className="px-1.5 py-0.5 rounded-md bg-[var(--ab-accent)]/15 text-[var(--ab-accent-text)] font-bold text-[9.5px] sm:text-[10px] border border-[var(--ab-accent)]/30 mb-0.5">
                       {uni.globalRank == null ? publicT('public_ranking_unavailable') : publicT('public_rank_number', { v0: uni.globalRank })}
                     </span>
-                    <span className="text-[9px] sm:text-[9.5px] font-bold text-[var(--mn-heading)] group-hover:text-[var(--mn-accent-text)] flex items-center gap-0.5 transition-colors">
+                    <span className="text-[9px] sm:text-[9.5px] font-bold text-[var(--ab-heading)] group-hover:text-[var(--ab-accent-text)] flex items-center gap-0.5 transition-colors">
                       <span>{publicT('public_details')}</span>
                       <ChevronLeft className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:-translate-x-0.5 transition-transform" />
                     </span>
@@ -148,7 +148,7 @@ export const FeaturedUniversities: React.FC<FeaturedUniversitiesProps> = ({
               id="btn-view-all-universities"
               type="button"
               onClick={onViewAllClick}
-              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
+              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--ab-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
             >
               <span className="text-[12px] sm:text-sm font-bold">{publicT('public_view_the_full_university_directory')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />

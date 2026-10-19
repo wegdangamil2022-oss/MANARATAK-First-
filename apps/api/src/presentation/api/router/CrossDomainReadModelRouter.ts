@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { CrossDomainGraphReadService } from '@manaratak/application';
+import { CrossDomainGraphReadService } from '@absheer/application';
 
 export class CrossDomainReadModelRouter {
   public static create(cradle: { crossDomainGraphReadService: CrossDomainGraphReadService }): Router {

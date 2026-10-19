@@ -1,6 +1,6 @@
 import {
   isPublicAdmissionRequirement,
-  UniversityAcademicProgramAuthoringInput, UniversityNormalizedDetailsUpdate } from '@manaratak/domain';
+  UniversityAcademicProgramAuthoringInput, UniversityNormalizedDetailsUpdate } from '@absheer/domain';
 import type { PrismaClient } from '@prisma/client';
 
 export type UniversityRelationshipValidationClient = Pick<PrismaClient,

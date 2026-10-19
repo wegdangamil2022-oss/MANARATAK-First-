@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { CourseAccessType, CourseImportCompletenessState, CourseOriginType, CourseStatus, type CourseDto, type ICourseRepository, type ICourseRelationshipRepository, type IImportedCourseOperationsRepository } from '@manaratak/domain';
+import { CourseAccessType, CourseImportCompletenessState, CourseOriginType, CourseStatus, type CourseDto, type ICourseRepository, type ICourseRelationshipRepository, type IImportedCourseOperationsRepository } from '@absheer/domain';
 import { CoursePublicationService } from '../../src/courses/services/CoursePublicationService';
 
 describe('M10-14 course source publication gate', () => {
@@ -44,7 +44,7 @@ describe('M10-14 course source publication gate', () => {
     await expect(new CoursePublicationService({} as ICourseRepository).assertPublicationReady(course)).rejects.toThrow('IMPORTED_COURSE_RELATIONSHIP_EVIDENCE_NOT_CONFIGURED');
   });
   it('keeps Native and Paid courses separate from the imported free certificate rule', async () => {
-    for (const originType of [CourseOriginType.NATIVE_MANARATAK_COURSE, CourseOriginType.PAID_COURSE]) {
+    for (const originType of [CourseOriginType.NATIVE_ABSHEER_COURSE, CourseOriginType.PAID_COURSE]) {
       await expect(new CoursePublicationService({} as ICourseRepository).assertPublicationReady({ ...course, originType, accessType: CourseAccessType.PAID, isStudyFree: false, isFreeCertificate: false })).resolves.toBeUndefined();
     }
     const f = fixture();

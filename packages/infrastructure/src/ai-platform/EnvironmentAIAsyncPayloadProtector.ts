@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
-import { IAIAsyncPayloadProtector } from '@manaratak/domain';
+import { IAIAsyncPayloadProtector } from '@absheer/domain';
 
 /** Encrypts durable async payloads with a runtime-only secret; the key is never persisted. */
 export class EnvironmentAIAsyncPayloadProtector implements IAIAsyncPayloadProtector {

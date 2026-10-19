@@ -6,7 +6,7 @@ import test from 'node:test';
 const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
-test('MNT-AUD-0076 lifecycle denial revokes sessions and is enforced at authentication boundaries', () => {
+test('ABSH-AUD-0076 lifecycle denial revokes sessions and is enforced at authentication boundaries', () => {
   for (const file of [
     'packages/application/src/identity/SuspendIdentityUseCase.ts',
     'packages/application/src/identity/ArchiveIdentityUseCase.ts',
@@ -30,7 +30,7 @@ test('MNT-AUD-0076 lifecycle denial revokes sessions and is enforced at authenti
   assert.match(authRouter, /principalAccessValidator\.isAuthenticationAllowed\(payload\.userId\)/);
 });
 
-test('MNT-AUD-0065 compatibility control plane uses the same strict session and lifecycle boundary', () => {
+test('ABSH-AUD-0065 compatibility control plane uses the same strict session and lifecycle boundary', () => {
   const app = read('apps/api/src/app.ts');
   assert.match(app, /const protectControlPlane = [\s\S]*createAdminGuard\(\{ mode: adminAuthMode, tokenProvider: adminTokenProvider, sessionManager: adminSessionManager, principalAccessValidator \}\)/);
 
@@ -41,7 +41,7 @@ test('MNT-AUD-0065 compatibility control plane uses the same strict session and 
   assert.doesNotMatch(guard, /Legacy bearer clients can remain usable until their access token expires/);
 });
 
-test('MNT-AUD-0062 AI operator gateway is reachable only through authenticated privileged composition', () => {
+test('ABSH-AUD-0062 AI operator gateway is reachable only through authenticated privileged composition', () => {
   const app = read('apps/api/src/app.ts');
   assert.match(app, /v1Router\.use\('\/admin\/ai\/operator', requireAdminPermission\('admin:ai:execute'\), lazyRouter\('aiGatewayRouter'\)\)/);
   assert.match(app, /v1Router\.use\('\/ai', \.\.\.protectControlPlane\('admin:ai:execute', 'aiGatewayRouter'\)\)/);

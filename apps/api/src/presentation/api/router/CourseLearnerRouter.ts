@@ -1,13 +1,13 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@manaratak/core';
-import { CourseProgressUseCases, LearningPathUseCases, ProcessAssetLifecycleUseCase } from '@manaratak/application';
-import { CourseProgressStatus } from '@manaratak/domain';
+import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@absheer/core';
+import { CourseProgressUseCases, LearningPathUseCases, ProcessAssetLifecycleUseCase } from '@absheer/application';
+import { CourseProgressStatus } from '@absheer/domain';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
 import { createStudentRoleGuard } from '../../security/StudentRoleGuard.js';
-import type { IRoleAssignmentRepository } from '@manaratak/domain';
+import type { IRoleAssignmentRepository } from '@absheer/domain';
 import { createCanonicalIdempotencyMiddleware } from '../../middleware/CanonicalIdempotencyMiddleware.js';
-import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
+import type { PrismaApiIdempotencyStore } from '@absheer/infrastructure';
 
 export class CourseLearnerRouter {
   public static create(cradle: { processAssetLifecycleUseCase: ProcessAssetLifecycleUseCase; roleAssignmentRepository: IRoleAssignmentRepository; courseProgressUseCases: CourseProgressUseCases; learningPathUseCases: LearningPathUseCases; tokenProvider: ITokenProvider; sessionManager: ISessionManager; principalAccessValidator: IPrincipalAccessValidator; apiIdempotencyStore: PrismaApiIdempotencyStore }): Router {

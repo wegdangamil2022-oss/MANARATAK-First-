@@ -5,7 +5,7 @@ import {
   type IUniversityProgramReadPort,
   type PublishedUniversityProgramQueryV1,
   type UniversityProgramReferenceV1,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const proofSelect = {
   id: true,

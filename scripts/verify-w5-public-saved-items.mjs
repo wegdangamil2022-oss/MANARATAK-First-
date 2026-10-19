@@ -7,7 +7,7 @@ ok('current-student create/remove owner API',router.includes("'/saved-items'")&&
 ok('web create/remove methods',client.includes('createMyStudentSavedItem')&&client.includes('removeMyStudentSavedItem'));
 ok('live hydrates from Phase15 saved items',app.includes('listMyHydratedStudentSavedItems')&&app.includes('favoriteKindFromSavedType'));
 ok('live toggle calls owner API',app.includes('ApiClient.createMyStudentSavedItem')&&app.includes('ApiClient.removeMyStudentSavedItem'));
-ok('prototype localStorage remains gated',app.includes("publicDataMode !== 'prototype'")&&app.includes("manaratak_favorites_v2"));
+ok('prototype localStorage remains gated',app.includes("publicDataMode !== 'prototype'")&&app.includes("absheer_favorites_v2"));
 ok('anonymous save preserves deterministic action',intent.includes('PendingPostLoginAction')&&app.includes('preservePostLoginAction'));
 ok('post-login completes pending save',app.includes('consumePostLoginAction')&&app.includes("source: 'public-discovery-auth-handoff'"));
 ok('core public entity mappings covered',['SCHOLARSHIP','UNIVERSITY','MAJOR','COURSE','CMS_CONTENT','SERVICE'].every(x=>app.includes(x)));

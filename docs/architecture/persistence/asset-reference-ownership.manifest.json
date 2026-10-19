@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "authority": "MNT-AUD-0030/MNT-AUD-0050",
+  "authority": "ABSH-AUD-0030/ABSH-AUD-0050",
   "policy": "Every persisted AssetId reference must resolve through P05 before authoring/publish/use. Purge usage is derived from authoritative persistence, never from a second writable registry.",
   "directReferences": [
     {

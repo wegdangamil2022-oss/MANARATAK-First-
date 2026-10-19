@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { IOutboxDeliveryGateway, ITransactionalOutboxStore, OutboxProcessingState, TransactionalOutboxEntry } from '@manaratak/domain';
+import { IOutboxDeliveryGateway, ITransactionalOutboxStore, OutboxProcessingState, TransactionalOutboxEntry } from '@absheer/domain';
 import { TransactionalOutboxDispatcher } from '../../src/event-foundation/use-cases/TransactionalOutboxDispatcher';
 
 const lease = { workerId: 'worker-1', leaseToken: 'lease-1', claimUntil: new Date('2026-08-13T01:05:00Z') };

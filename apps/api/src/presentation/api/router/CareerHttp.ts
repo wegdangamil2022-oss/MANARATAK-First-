@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { safeCareerUrl } from '@manaratak/application';
+import { safeCareerUrl } from '@absheer/application';
 export const careerUrl = z.string().trim().max(2048).refine(value => { try { safeCareerUrl(value); return true; } catch { return false; } }, 'A public HTTPS destination is required');
 export const careerPaging = { page: z.coerce.number().int().min(1).max(10000).default(1), pageSize: z.coerce.number().int().min(1).max(50).default(20) };
 export const careerMetadata = z.object({

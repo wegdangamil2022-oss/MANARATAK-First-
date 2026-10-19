@@ -1,4 +1,4 @@
-import { RetentionCategory, SecurityClassification } from '@manaratak/domain';
+import { RetentionCategory, SecurityClassification } from '@absheer/domain';
 
 export interface RegisterFileInput {
   fileId: string;

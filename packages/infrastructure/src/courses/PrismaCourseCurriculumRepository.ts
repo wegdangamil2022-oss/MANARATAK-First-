@@ -1,4 +1,4 @@
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CourseContentStatus,
@@ -28,7 +28,7 @@ import {
   UpdateCourseQuestionBankDto,
   UpdateCourseQuestionDto,
   UpdateCourseQuizDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const json = (value: unknown): Prisma.InputJsonValue | undefined =>
   value === undefined ? undefined : (JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue);

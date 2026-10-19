@@ -2,8 +2,8 @@ import {PrismaMajorTranslationOwnerPort} from '../majors/PrismaMajorTranslationO
 import { majorTranslationSource, assertMajorTranslationWorkingVersion, translationRecord } from '../majors/MajorTranslationEvidence';
 import { universityTranslationSourceSelect, universityTranslationSourceDigest, universityTranslationValueDigest } from '../universities/UniversityTranslationSourceEvidence';
 import { createHash, randomUUID } from 'node:crypto';
-import { assertTranslationContentAuthoringEnabled } from '@manaratak/shared';
-import type { AtomicPersistenceContext, AuthorizationEvaluatorService } from '@manaratak/domain';
+import { assertTranslationContentAuthoringEnabled } from '@absheer/shared';
+import type { AtomicPersistenceContext, AuthorizationEvaluatorService } from '@absheer/domain';
 import { PrismaGovernanceApprovalGateway } from '../authorization/PrismaGovernanceApprovalGateway';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
@@ -13,7 +13,7 @@ import {
   TranslationTargetSnapshot,
   TranslationTransferApproval,
   TranslationTransferResult,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 type TranslationPrismaClient = PrismaClient | Prisma.TransactionClient;
 

@@ -2,7 +2,7 @@ import {
   IOutboxDeliveryGateway,
   OutboxDeliveryContext,
   TransactionalOutboxEntry,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CertificateCompletionEventConsumer } from './CertificateCompletionEventConsumer';
 
 /**

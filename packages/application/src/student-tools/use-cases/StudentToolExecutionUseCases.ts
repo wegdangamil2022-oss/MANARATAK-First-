@@ -16,7 +16,7 @@ import {
   assertBoundedStudentToolInput,
   StudentToolExecutionType,
   StudentToolAIExecutionError,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const TRANSIENT_RESULT_TTL_MS = 15 * 60_000;
 const hash = (value?: string) =>

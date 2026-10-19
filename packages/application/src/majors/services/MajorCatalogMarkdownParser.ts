@@ -1,4 +1,4 @@
-import { ImportTargetDomain } from '@manaratak/domain';
+import { ImportTargetDomain } from '@absheer/domain';
 
 export type MajorCatalogKind = 'BACHELOR' | 'MASTER' | 'DOCTORATE' | 'FELLOWSHIP';
 
@@ -12,7 +12,7 @@ export interface MajorCatalogRow {
     en?: string;
   };
   degreeLevel?: 'Bachelor' | 'Master' | 'Doctorate';
-  sourceClassificationSystem: 'MANARATAK_PHASE_10_CATALOG';
+  sourceClassificationSystem: 'ABSHEER_PHASE_10_CATALOG';
   classificationCode: string;
   academicFieldOrDiscipline?: string;
   collegeOrFaculty?: string;
@@ -99,7 +99,7 @@ export class MajorCatalogMarkdownParser {
           en: englishName || undefined,
         },
         degreeLevel: DEGREE_BY_KIND[catalogKind],
-        sourceClassificationSystem: 'MANARATAK_PHASE_10_CATALOG',
+        sourceClassificationSystem: 'ABSHEER_PHASE_10_CATALOG',
         classificationCode: code,
         academicFieldOrDiscipline: this.extractAcademicField(currentHeading),
         collegeOrFaculty: catalogKind === 'BACHELOR' ? this.extractCollegeContext(currentHeading) : undefined,

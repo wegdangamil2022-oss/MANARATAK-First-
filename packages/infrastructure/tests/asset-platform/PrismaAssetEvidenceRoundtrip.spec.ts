@@ -3,7 +3,7 @@ import {
   AssetRecord, AssetId, AssetReference, AssetOwnerReference, AssetStorageLocator,
   AssetMetadata, AssetRetentionMetadata, AssetRetentionCategory,
   AssetSecurityClassification, AssetLifecycleState, AssetStorageZone, AssetSanitizationMetadata,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAssetRecordRepository';
 
 describe('EAP persisted upload and malware evidence', () => {

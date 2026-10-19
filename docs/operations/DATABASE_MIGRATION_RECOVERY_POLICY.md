@@ -1,6 +1,6 @@
 # Database Migration Recovery Policy
 
-Status: ACTIVE SOURCE AUTHORITY — MNT-AUD-0079
+Status: ACTIVE SOURCE AUTHORITY — ABSH-AUD-0079
 
 Every checked-in Prisma migration must be listed in `scripts/database/migration-recovery.manifest.json` and classified as exactly one of:
 

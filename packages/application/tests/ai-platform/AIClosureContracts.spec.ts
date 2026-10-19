@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AIExecutionStatus, AIRequestPurpose } from '@manaratak/domain';
+import { AIExecutionStatus, AIRequestPurpose } from '@absheer/domain';
 import {
   AIExecutionOrchestrator,
   AIKnowledgeUseCases,
@@ -405,7 +405,7 @@ describe('P17 canonical knowledge source contracts', () => {
     const getBySlug = vi.fn().mockResolvedValue({
       slug: 'article',
       locale: 'ar',
-      siteIdentifier: 'manaratak',
+      siteIdentifier: 'absheer',
       publicId: 'content',
       versionNumber: 1,
       publishedAt: new Date(),

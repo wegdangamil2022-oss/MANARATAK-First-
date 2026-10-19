@@ -1,6 +1,6 @@
-import type { AtomicPersistenceContext, ReferenceOwnerReview, ReferenceSnapshotRecord } from '@manaratak/domain';
+import type { AtomicPersistenceContext, ReferenceOwnerReview, ReferenceSnapshotRecord } from '@absheer/domain';
 import type { P7ScreeningDecision } from './ReferenceDataScreeningHandoffConsumer';
-export type { ReferenceOwnerReview, ReferenceSnapshotRecord } from '@manaratak/domain';
+export type { ReferenceOwnerReview, ReferenceSnapshotRecord } from '@absheer/domain';
 export interface IReferenceOwnerReviewGateway {
   withTransaction(context: AtomicPersistenceContext): IReferenceOwnerReviewGateway;
   lock(key: string): Promise<void>;

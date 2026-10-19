@@ -7,24 +7,24 @@ import {
 describe('localized public sitemap', () => {
   it('contains only released locales for every static indexable path', () => {
     const sitemap = generateLocalizedPublicSitemap(
-      'https://manaratak.example',
+      'https://absheer.example',
     );
 
     for (const path of STATIC_INDEXABLE_PUBLIC_PATHS) {
       const suffix = path === '/' ? '' : path;
 
       expect(sitemap).toContain(
-        `https://manaratak.example/ar${suffix}`,
+        `https://absheer.example/ar${suffix}`,
       );
       expect(sitemap).not.toContain(
-        `https://manaratak.example/en${suffix}`,
+        `https://absheer.example/en${suffix}`,
       );
     }
   });
 
   it('emits only released hreflang alternates', () => {
     const sitemap = generateLocalizedPublicSitemap(
-      'https://manaratak.example',
+      'https://absheer.example',
     );
 
     expect(sitemap).toContain('hreflang="ar"');
@@ -34,7 +34,7 @@ describe('localized public sitemap', () => {
 
   it('does not invent dynamic entity URLs', () => {
     const sitemap = generateLocalizedPublicSitemap(
-      'https://manaratak.example',
+      'https://absheer.example',
     );
 
     expect(sitemap).not.toContain(':slug');

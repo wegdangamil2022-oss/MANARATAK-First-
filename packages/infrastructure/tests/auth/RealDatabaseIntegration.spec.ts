@@ -3,8 +3,8 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaSessionManager } from '../../src/auth/PrismaSessionManager';
 import { PrismaCredentialVerifier } from '../../src/auth/PrismaCredentialVerifier';
 import { PasswordHasher } from '../../src/auth/PasswordHasher';
-import { LifeStatus } from '@manaratak/domain';
-import { AccountAccessState } from '@manaratak/domain';
+import { LifeStatus } from '@absheer/domain';
+import { AccountAccessState } from '@absheer/domain';
 import * as crypto from 'crypto';
 
 function getDatabaseUrl(): string {

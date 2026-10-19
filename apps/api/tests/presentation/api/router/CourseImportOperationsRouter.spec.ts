@@ -1,12 +1,12 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { ImportAdminUseCases } from '@manaratak/application';
+import { ImportAdminUseCases } from '@absheer/application';
 import type {
   IImportedCourseLinkChecker,
   IImportedCourseOperationsRepository,
-} from '@manaratak/domain';
-import { PrismaImportRepository } from '@manaratak/infrastructure';
+} from '@absheer/domain';
+import { PrismaImportRepository } from '@absheer/infrastructure';
 import { CourseImportOperationsRouter } from '../../../../src/presentation/api/router/CourseImportOperationsRouter';
 
 function fixture() {

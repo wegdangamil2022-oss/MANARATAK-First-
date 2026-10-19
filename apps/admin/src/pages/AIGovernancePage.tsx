@@ -223,7 +223,7 @@ export function AIGovernancePage() {
                 </span>
               </div>
               <h1 className="text-3xl font-black leading-tight sm:text-4xl text-white tracking-tight">
-                {language === 'en' ? 'MANARATAK AI Center' : copy('مركز منارتك للذكاء الاصطناعي')}
+                {language === 'en' ? 'ABSHEER AI Center' : copy('مركز أبشر للذكاء الاصطناعي')}
               </h1>
               <p className="mt-3 max-w-3xl text-sm font-medium leading-7 text-cyan-50/90">
                 {language === 'en'

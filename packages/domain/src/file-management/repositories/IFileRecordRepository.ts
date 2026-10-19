@@ -1,5 +1,5 @@
 import { FileRecord } from '../aggregates/FileRecord';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 
 export interface IFileRecordRepository {
   save(record: FileRecord): Promise<void>;

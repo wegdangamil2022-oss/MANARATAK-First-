@@ -1,4 +1,4 @@
-import { Identity, IdentityType, TechnicalMetadataProps } from '@manaratak/domain';
+import { Identity, IdentityType, TechnicalMetadataProps } from '@absheer/domain';
 import { IdentityDto } from './dtos';
 
 function mapTechnicalMetadata(metadata: TechnicalMetadataProps): IdentityDto['technicalMetadata'] {

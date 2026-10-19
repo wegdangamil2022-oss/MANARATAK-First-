@@ -9,13 +9,13 @@
 - **Owner:** Chief Enterprise Software Architect
 - **Approval Authority:** Architecture Review Board (ARB)
 - **Artifact Type:** Enterprise Logical Architecture Model
-- **Authority:** `docs/governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md`
+- **Authority:** `docs/governance/roadmap/ABSHEER-2.0-Roadmap-v6.0.md`
 
 > **P13 Final Source Alignment — 2026-09-03:** Re-audited against Roadmap v6.0 and the final source implementation. Ownership and dependency direction remain authoritative. Student Workspace composes P10/P11/P12 saved-item owner reads plus P13 learning and P14 certificate reads through application contracts; P24 live composition consumes P15 session/API state. Runtime/DB/E2E proof remains explicitly pending and is not certified by this document.
 
 ## 2. Purpose
 
-This document is the authoritative logical dependency model for MANARATAK 2.0. It defines dependency direction and cross-phase ownership without redefining domain truth. Roadmap v6.0 controls phase numbering and ownership. Domain consumers may use owner APIs, read models, and events, but must not duplicate ownership or query another domain's persistence directly.
+This document is the authoritative logical dependency model for ABSHEER 2.0. It defines dependency direction and cross-phase ownership without redefining domain truth. Roadmap v6.0 controls phase numbering and ownership. Domain consumers may use owner APIs, read models, and events, but must not duplicate ownership or query another domain's persistence directly.
 
 ## 3. Roadmap v6.0 Phase Map
 

@@ -12,7 +12,7 @@ function harness() {
     {id:'auto',quizId:'q',questionType:'TRUE_FALSE',correctAnswer:true,points:2,status:'PUBLISHED',prompt:'Automatic'},
     {id:'essay',quizId:'q',questionType:'ESSAY',points:3,status:'PUBLISHED',prompt:'Explain'},
   ];
-  const course:any = {id:'c',status:'PUBLISHED',originType:'NATIVE_MANARATAK_COURSE',optionalFields:{completionCriteria:{assessmentRequired:true}}};
+  const course:any = {id:'c',status:'PUBLISHED',originType:'NATIVE_ABSHEER_COURSE',optionalFields:{completionCriteria:{assessmentRequired:true}}};
   const courses:any = {findById:async()=>course};
   const curriculum:any = {getCurriculumSnapshot:async()=>({quizzes:[{id:'q',passingScore:60,status:'PUBLISHED'}],questions,modules:[],lessons:[],assets:[]})};
   curriculum.getLearningVersion = async()=>({course, curriculum: await curriculum.getCurriculumSnapshot()});

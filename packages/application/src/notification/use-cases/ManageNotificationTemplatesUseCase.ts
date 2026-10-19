@@ -1,8 +1,8 @@
-import { INotificationTemplateRepository, NotificationTemplateSummary } from '@manaratak/domain';
-import { NotificationTemplate } from '@manaratak/domain';
-import { TemplateId } from '@manaratak/domain';
-import { NotificationChannel } from '@manaratak/domain';
-import { NotificationLocaleReference } from '@manaratak/domain';
+import { INotificationTemplateRepository, NotificationTemplateSummary } from '@absheer/domain';
+import { NotificationTemplate } from '@absheer/domain';
+import { TemplateId } from '@absheer/domain';
+import { NotificationChannel } from '@absheer/domain';
+import { NotificationLocaleReference } from '@absheer/domain';
 import { CreateTemplateDto } from '../dtos/NotificationDtos';
 
 export class ManageNotificationTemplatesUseCase {

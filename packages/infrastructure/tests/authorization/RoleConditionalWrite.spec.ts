@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
-import { Role, PermissionReference } from '@manaratak/domain';
+import { Role, PermissionReference } from '@absheer/domain';
 import { PrismaRoleRepository } from '../../src/authorization/PrismaRoleRepository';
 
 describe('role persistence compare-and-swap', () => {

@@ -1,15 +1,15 @@
 import { Router, type ErrorRequestHandler } from 'express';
 import { z } from 'zod';
-import type { AuthorizationEvaluatorService } from '@manaratak/domain';
+import type { AuthorizationEvaluatorService } from '@absheer/domain';
 import {
   assertTranslationContentAuthoringEnabled,
   TRANSLATION_OWNER_CAPABILITIES,
   TranslationContentMutationDisabledError,
-} from '@manaratak/shared';
+} from '@absheer/shared';
 import type {
   ITranslationWorkspaceReadGateway,
   TranslationOwnerPublisher,
-} from '@manaratak/application';
+} from '@absheer/application';
 const fieldKeySchema=z.string().refine(value=>value==='displayName'||value==='description'||/^section:[a-zA-Z0-9_-]+$/.test(value));
 const grants = {
   UNIVERSITY: 'admin:universities:manage',

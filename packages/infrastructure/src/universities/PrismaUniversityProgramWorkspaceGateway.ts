@@ -1,18 +1,18 @@
 import { publicProgramTestMatchSql } from './PublicProgramTestSql';
-import { isPublicAdmissionRequirement } from '@manaratak/domain';
+import { isPublicAdmissionRequirement } from '@absheer/domain';
 import { Prisma, type PrismaClient } from '@prisma/client';
 import {
   type IUniversityProgramWorkspaceGateway,
   type ProgramQuery,
   type UniversityMutationContext,
-} from '@manaratak/application';
+} from '@absheer/application';
 import {
   type AtomicPersistenceContext,
   type ProgramStudy,
   type ProgramIntake,
   intakeWindow,
   assertProgramEvidenceUrl,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { PrismaUniversityRepository } from './PrismaUniversityRepository';
 export class PrismaUniversityProgramWorkspaceGateway implements IUniversityProgramWorkspaceGateway {
   constructor(private readonly db: PrismaClient) {}

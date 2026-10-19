@@ -13,7 +13,7 @@ import {
   StudentToolPublicAccessPolicy,
   StudentToolTransientResultWrite,
   StudentToolVersionSnapshot,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 const json = (value: unknown): Prisma.InputJsonValue =>
   JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 type Db = Record<string, any>;

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import type { AuthorizationEvaluatorService } from '@manaratak/domain';
-import type { StudentDocumentReviewUseCases } from '@manaratak/application';
+import type { AuthorizationEvaluatorService } from '@absheer/domain';
+import type { StudentDocumentReviewUseCases } from '@absheer/application';
 export class StudentDocumentReviewRouter {
   static create(cradle: {
     studentDocumentReviewUseCases: StudentDocumentReviewUseCases;

@@ -1,4 +1,4 @@
-import { IDomainEvent } from '@manaratak/core';
+import { IDomainEvent } from '@absheer/core';
 import { LifeStatus } from '../enums/LifeStatus';
 
 export class IdentityStatusChangedEvent implements IDomainEvent {

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaIdentityRepository } from '../packages/infrastructure/src/students/../identity/PrismaIdentityRepository';
 import { IdentityPrincipalAccessValidator } from '../packages/application/src/auth/IdentityPrincipalAccessValidator';
-import { LifeStatus, AccountAccessState } from '@manaratak/domain';
+import { LifeStatus, AccountAccessState } from '@absheer/domain';
 
 async function main() {
   const prisma = new PrismaClient();

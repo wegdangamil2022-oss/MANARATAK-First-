@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: reference
--- MANARATAK_MIGRATION_SCOPE: cross_context_approved
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: reference
+-- ABSHEER_MIGRATION_SCOPE: cross_context_approved
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- M10-07 source only: UNAPPLIED. Approval/recovery/connected proof are required.
 -- Cross-context scope is limited to enforcing existing canonical region FKs.
 ALTER TABLE "AdministrativeRegion"
@@ -24,7 +24,7 @@ FROM "AdministrativeRegion" r;
 
 -- Serialize relation assignment with lifecycle changes, including non-API writes.
 -- Existing links may survive deprecation, but new links require an ACTIVE region.
-CREATE FUNCTION manaratak_require_active_region_relation() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE FUNCTION absheer_require_active_region_relation() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE region_id TEXT; previous_id TEXT; region_country TEXT; region_state TEXT; relation_country TEXT;
 BEGIN
   region_id := to_jsonb(NEW) ->> TG_ARGV[0];
@@ -50,13 +50,13 @@ BEGIN
   RETURN NEW;
 END $$;
 CREATE TRIGGER "ReferenceCity_active_region" BEFORE INSERT OR UPDATE OF "administrativeRegionId", "countryIso2Code"
-  ON "ReferenceCity" FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_region_relation('administrativeRegionId', 'countryIso2Code');
+  ON "ReferenceCity" FOR EACH ROW EXECUTE FUNCTION absheer_require_active_region_relation('administrativeRegionId', 'countryIso2Code');
 CREATE TRIGGER "University_active_region" BEFORE INSERT OR UPDATE OF "regionReferenceId", "countryReferenceId"
-  ON "University" FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_region_relation('regionReferenceId', 'countryReferenceId');
+  ON "University" FOR EACH ROW EXECUTE FUNCTION absheer_require_active_region_relation('regionReferenceId', 'countryReferenceId');
 CREATE TRIGGER "UniversityCampus_active_region" BEFORE INSERT OR UPDATE OF "regionReferenceId", "countryReferenceId"
-  ON "UniversityCampus" FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_region_relation('regionReferenceId', 'countryReferenceId');
+  ON "UniversityCampus" FOR EACH ROW EXECUTE FUNCTION absheer_require_active_region_relation('regionReferenceId', 'countryReferenceId');
 
-CREATE FUNCTION manaratak_protect_region_dependencies() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE FUNCTION absheer_protect_region_dependencies() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   IF TG_OP = 'DELETE' THEN RAISE EXCEPTION 'REGION_DELETE_FORBIDDEN_USE_LIFECYCLE' USING ERRCODE = '23514'; END IF;
   IF NEW."id" <> OLD."id" OR NEW."countryIso2Code" <> OLD."countryIso2Code" OR NEW."regionCode" <> OLD."regionCode" THEN
@@ -72,4 +72,4 @@ BEGIN
   RETURN NEW;
 END $$;
 CREATE TRIGGER "AdministrativeRegion_protect_dependencies" BEFORE UPDATE OR DELETE
-  ON "AdministrativeRegion" FOR EACH ROW EXECUTE FUNCTION manaratak_protect_region_dependencies();
+  ON "AdministrativeRegion" FOR EACH ROW EXECUTE FUNCTION absheer_protect_region_dependencies();

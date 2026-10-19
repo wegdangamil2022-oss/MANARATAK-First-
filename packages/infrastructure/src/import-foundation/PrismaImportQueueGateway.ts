@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
-import { ImportCheckpoint, ImportJobStatus } from '@manaratak/domain';
+import { ImportCheckpoint, ImportJobStatus } from '@absheer/domain';
 import type {
   CancelImportJobCommand,
   DeadLetterImportRecordDto,
@@ -12,7 +12,7 @@ import type {
   ImportJobLease,
   FailImportJobCommand,
   ResumeImportJobCommand,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 export class PrismaImportQueueGateway implements IImportQueueGateway {
   public readonly persistenceClassification = 'DURABLE' as const;

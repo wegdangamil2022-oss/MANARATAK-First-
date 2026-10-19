@@ -34,7 +34,7 @@ import {
   UpsertInternationalTestAcademicTaxonomyRelationshipDto,
   UpsertInternationalTestDegreeRelationshipReference,
   UpsertInternationalTestReferenceRelationshipDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { toOptionalPrismaJson, toRequiredPrismaJson } from '../prisma/PrismaJsonValue';
 
 export const INTERNATIONAL_TEST_OPTIONAL_FIELDS_RESERVED_KEYS = new Set([

@@ -1,6 +1,6 @@
 import { taxonomyRevisionHash as hash } from '../services/TaxonomyRevisionHash';
 import { normalizeAcademicTaxonomyAlias, AcademicTaxonomyValidationService, IAcademicTaxonomyRepository, UpsertAcademicTaxonomyNodeDto,
-  UpsertAcademicTaxonomyEdgeDto, UpsertAcademicTaxonomyAliasDto, UpsertAcademicStandardMappingDto } from '@manaratak/domain';
+  UpsertAcademicTaxonomyEdgeDto, UpsertAcademicTaxonomyAliasDto, UpsertAcademicStandardMappingDto } from '@absheer/domain';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { AcademicImportReview, IAcademicTaxonomyImportGateway } from '../services/IAcademicTaxonomyImportGateway';
 import { AcademicImportRecord, parseAcademicImportRecord } from '../services/AcademicTaxonomyScreeningConsumer';

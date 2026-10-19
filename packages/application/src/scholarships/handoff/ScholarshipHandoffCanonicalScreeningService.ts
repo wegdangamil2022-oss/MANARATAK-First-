@@ -1,4 +1,4 @@
-import type { ScholarshipImportPayload } from '@manaratak/domain';
+import type { ScholarshipImportPayload } from '@absheer/domain';
 import {
   ScholarshipCanonicalResolutionService,
   type ScholarshipCanonicalResolutionRequest,

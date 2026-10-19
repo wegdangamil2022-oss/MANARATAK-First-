@@ -1,4 +1,4 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-3 Prevent Reimplementation of Core Foundations
 # Phase 1 — Discovery & Inventory
 
@@ -34,7 +34,7 @@ The ARB explicitly protects the following business logic components from being e
 - **Domain Identifiers**: The logic specifying *when* and *how* a Major ID is generated remains in the Phase 10 Command Handler. Only the generation mechanism is shared.
 
 ## 5. Risk Assessment
-- **Missing Centralization**: By allowing domains (especially foundational ones like Phase 7 and Phase 13) to dictate enterprise-wide technical contracts (like CQRS, Events, and Specifications), MANARATAK 2.0 risks severe architectural divergence. Downstream domains will either tightly couple themselves to Phase 7/13 or reimplement these contracts entirely, resulting in integration failures across the Event Bus and Data Layers. 
+- **Missing Centralization**: By allowing domains (especially foundational ones like Phase 7 and Phase 13) to dictate enterprise-wide technical contracts (like CQRS, Events, and Specifications), ABSHEER 2.0 risks severe architectural divergence. Downstream domains will either tightly couple themselves to Phase 7/13 or reimplement these contracts entirely, resulting in integration failures across the Event Bus and Data Layers. 
 - **Identifier Pollution**: Tying enterprise identifier generators to specific domains (`GenerateMajorIdentifier`) violates the Open/Closed Principle and creates an unsustainable bottleneck for the infrastructure teams whenever a new domain is introduced.
 
 ## 6. Initial Recommendations

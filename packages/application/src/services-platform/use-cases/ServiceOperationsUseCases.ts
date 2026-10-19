@@ -27,7 +27,7 @@ import {
   ServiceWorkflowDefinitionStatus,
   ServiceWorkflowExecutionDto,
   ServiceWorkflowExecutionStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   AssetReferencePolicy,
   assertAssetReferenceUsable,

@@ -2,7 +2,7 @@ import type {
   ScholarshipCompletenessState,
   ScholarshipImportPayload,
   UniversalImportHandoff,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import type { ScholarshipCanonicalResolutionResult } from '../resolution';
 
 export type ScholarshipImportStagingState =

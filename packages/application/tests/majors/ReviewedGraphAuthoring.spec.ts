@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { AuditRecord, AtomicPersistenceContext, ITransactionalAuditRecordRepository, ITransactionalOutboxStore, TransactionalOutboxEntry, IMajorRepository, IInternationalTestRepository, IAcademicTaxonomyRepository, IDegreeLevelRepository, IReferenceResolver } from '@manaratak/domain';
+import type { AuditRecord, AtomicPersistenceContext, ITransactionalAuditRecordRepository, ITransactionalOutboxStore, TransactionalOutboxEntry, IMajorRepository, IInternationalTestRepository, IAcademicTaxonomyRepository, IDegreeLevelRepository, IReferenceResolver } from '@absheer/domain';
 import { AdminMajorUseCases } from '../../src/majors/use-cases/AdminMajorUseCases';
 import { AdminAcademicTaxonomyUseCases } from '../../src/academic-taxonomy/use-cases/AdminAcademicTaxonomyUseCases';
 import { InternationalTestAdminUseCases } from '../../src/tests-platform/use-cases/InternationalTestUseCases';

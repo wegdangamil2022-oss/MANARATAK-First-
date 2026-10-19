@@ -1,5 +1,5 @@
 
-import type { IImportHandoffConsumer, UniversalImportHandoff } from '@manaratak/domain';
+import type { IImportHandoffConsumer, UniversalImportHandoff } from '@absheer/domain';
 import { createHash } from 'node:crypto';
 import { ReferenceDataImportHandoffService } from './ReferenceDataImportHandoffService';
 

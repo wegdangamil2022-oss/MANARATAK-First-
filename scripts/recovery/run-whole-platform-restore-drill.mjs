@@ -97,7 +97,7 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
             '-v',
             'ON_ERROR_STOP=1',
             '-c',
-            `SELECT json_build_object('serverIdentity',(SELECT system_identifier::text FROM pg_control_system()),'database',current_database(),'role',current_user,'superuser',r.rolsuper,'createRole',r.rolcreaterole,'createDatabase',r.rolcreatedb,'targetFingerprint',g.target_fingerprint,'disposableInstanceId',g.disposable_instance_id,'sentinelOwnedByRestoreRole',pg_get_userbyid(c.relowner)=current_user,'sentinelWritableByRestoreRole',has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE')) FROM pg_roles r JOIN manaratak_recovery_control.disposable_guard g ON g.guard_key='restore-target' JOIN pg_class c ON c.oid='manaratak_recovery_control.disposable_guard'::regclass WHERE r.rolname=current_user;`,
+            `SELECT json_build_object('serverIdentity',(SELECT system_identifier::text FROM pg_control_system()),'database',current_database(),'role',current_user,'superuser',r.rolsuper,'createRole',r.rolcreaterole,'createDatabase',r.rolcreatedb,'targetFingerprint',g.target_fingerprint,'disposableInstanceId',g.disposable_instance_id,'sentinelOwnedByRestoreRole',pg_get_userbyid(c.relowner)=current_user,'sentinelWritableByRestoreRole',has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE')) FROM pg_roles r JOIN absheer_recovery_control.disposable_guard g ON g.guard_key='restore-target' JOIN pg_class c ON c.oid='absheer_recovery_control.disposable_guard'::regclass WHERE r.rolname=current_user;`,
           ],
           target,
           { encoding: 'utf8' },
@@ -127,7 +127,7 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
         env: {
           ...connection(target),
           DATABASE_URL: input.databaseUrl,
-          MANARATAK_DATABASE_INTEGRATION_ENABLED: 'true',
+          ABSHEER_DATABASE_INTEGRATION_ENABLED: 'true',
         },
       });
       const checked = JSON.parse(
@@ -139,7 +139,7 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
             '-v',
             'ON_ERROR_STOP=1',
             '-c',
-            `SELECT json_build_object('snapshotId',snapshot_id,'assetReferencesMatched',asset_references_matched) FROM manaratak_recovery_snapshot WHERE snapshot_id='${proof.snapshotId}';`,
+            `SELECT json_build_object('snapshotId',snapshot_id,'assetReferencesMatched',asset_references_matched) FROM absheer_recovery_snapshot WHERE snapshot_id='${proof.snapshotId}';`,
           ],
           target,
           { encoding: 'utf8' },

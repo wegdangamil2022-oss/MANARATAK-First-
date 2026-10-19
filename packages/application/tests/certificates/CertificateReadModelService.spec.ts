@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { CertificateStatus } from '@manaratak/domain';
+import { CertificateStatus } from '@absheer/domain';
 import { CertificateReadModelService } from '../../src/certificates/use-cases/CertificateReadModelService';
 
 describe('P6 certificate read models', () => {

@@ -23,8 +23,8 @@ export const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
   return (
   <div className="w-full relative z-20">
-    <div className="mn-search-control flex items-center border border-[var(--mn-border)] focus-within:border-[var(--mn-accent)]/70 focus-within:ring-2 focus-within:ring-[var(--mn-primary)]/10 shadow-2xs overflow-hidden transition-all mn-panel ">
-      <div className="p-3 text-[var(--mn-text-muted)] flex items-center justify-center">
+    <div className="ab-search-control flex items-center border border-[var(--ab-border)] focus-within:border-[var(--ab-accent)]/70 focus-within:ring-2 focus-within:ring-[var(--ab-primary)]/10 shadow-2xs overflow-hidden transition-all ab-panel ">
+      <div className="p-3 text-[var(--ab-text-muted)] flex items-center justify-center">
         <Search className="w-4 h-4" />
       </div>
       <input
@@ -33,11 +33,11 @@ export const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
         value={searchQuery}
         onChange={(event) => onSearchChange(event.target.value)}
         placeholder={publicT('public_search_within_this_section')}
-        className="min-w-0 w-full px-1 text-xs sm:text-sm text-[var(--mn-text)] placeholder-[var(--mn-text-muted)] bg-transparent focus:outline-hidden font-medium text-start font-['Cairo',sans-serif]"
+        className="min-w-0 w-full px-1 text-xs sm:text-sm text-[var(--ab-text)] placeholder-[var(--ab-text-muted)] bg-transparent focus:outline-hidden font-medium text-start font-['Cairo',sans-serif]"
         dir={publicDir}
       />
       {searchQuery && (
-        <button onClick={() => onSearchChange('')} className="p-2 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] cursor-pointer" aria-label={publicT('public_clear_search')}>
+        <button onClick={() => onSearchChange('')} className="p-2 text-[var(--ab-text-muted)] hover:text-[var(--ab-text)] cursor-pointer" aria-label={publicT('public_clear_search')}>
           <X className="w-4 h-4" />
         </button>
       )}

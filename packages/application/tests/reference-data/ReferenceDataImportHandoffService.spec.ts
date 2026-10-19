@@ -3,7 +3,7 @@ import {
   ReferenceDataImportHandoffService,
   ReferenceDataImportHandoffCommand
 } from '../../src';
-import { ReferenceDataSeedStatus } from '@manaratak/domain';
+import { ReferenceDataSeedStatus } from '@absheer/domain';
 
 describe('ReferenceDataImportHandoffService', () => {
   let service: ReferenceDataImportHandoffService;

@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { UniversityStatus } from '@manaratak/domain';
+import { UniversityStatus } from '@absheer/domain';
 import { UniversityAdminRouter } from '../../../../src/presentation/api/router/UniversityAdminRouter';
 
 describe('UniversityAdminRouter', () => {

@@ -1,4 +1,4 @@
-import { ConfigurationScope } from '@manaratak/domain';
+import { ConfigurationScope } from '@absheer/domain';
 
 export interface CreateConfigurationDto {
   reference: string;

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { studyDestinationFingerprint } from '@manaratak/application';
+import { studyDestinationFingerprint } from '@absheer/application';
 import { Prisma } from '@prisma/client';
-import { CmsDomainTargetType } from '@manaratak/domain';
+import { CmsDomainTargetType } from '@absheer/domain';
 import { PrismaCmsDomainOwnerReadGateway } from '../../src/cms/PrismaCmsDomainOwnerReadGateway';
 
 const published = (value: unknown) => ({

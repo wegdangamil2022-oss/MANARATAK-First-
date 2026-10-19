@@ -14,7 +14,7 @@ export function assertDisposableDatabaseUrl(databaseUrl: string | undefined = pr
 }
 
 export function databaseIntegrationEnabled(): boolean {
-  return process.env.MANARATAK_DATABASE_INTEGRATION_ENABLED === 'true' && Boolean(process.env.DATABASE_URL);
+  return process.env.ABSHEER_DATABASE_INTEGRATION_ENABLED === 'true' && Boolean(process.env.DATABASE_URL);
 }
 
 export async function withDisposablePrisma<T>(run: (prisma: PrismaClient) => Promise<T>): Promise<T> {

@@ -1,4 +1,4 @@
-import { Localization } from '@manaratak/domain';
+import { Localization } from '@absheer/domain';
 
 /**
  * Interface for communicating with physical localization execution infrastructure.

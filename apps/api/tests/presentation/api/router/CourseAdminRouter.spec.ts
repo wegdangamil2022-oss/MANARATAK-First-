@@ -6,7 +6,7 @@ import {
   CourseLessonType,
   CourseStatus,
   LessonAssetType,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseAdminRouter } from '../../../../src/presentation/api/router/CourseAdminRouter';
 
 describe('CourseAdminRouter', () => {
@@ -168,7 +168,7 @@ describe('CourseAdminRouter', () => {
     const nativeUseCases = createMockNativeUseCases();
     nativeUseCases.create.mockResolvedValue({
       id: 'persisted-course',
-      originType: 'NATIVE_MANARATAK_COURSE',
+      originType: 'NATIVE_ABSHEER_COURSE',
       status: 'DRAFT',
     });
     const app = createApp(useCases, createMockCurriculumUseCases(), nativeUseCases);
@@ -190,7 +190,7 @@ describe('CourseAdminRouter', () => {
 
   it('uses server readiness and rejects an unready Native publish', async () => {
     const useCases = createMockUseCases();
-    useCases.getCourse.mockResolvedValue({ originType: 'NATIVE_MANARATAK_COURSE' });
+    useCases.getCourse.mockResolvedValue({ originType: 'NATIVE_ABSHEER_COURSE' });
     const nativeUseCases = createMockNativeUseCases();
     nativeUseCases.getReadiness.mockResolvedValue({ ready: false, percentage: 25, checks: [] });
     nativeUseCases.publish.mockRejectedValue(new Error('NATIVE_COURSE_NOT_READY'));
@@ -332,7 +332,7 @@ describe('CourseAdminRouter', () => {
       .send({
         quizId: 'quiz-1',
         questionType: 'MULTIPLE_CHOICE',
-        prompt: 'What is MANARATAK?',
+        prompt: 'What is ABSHEER?',
         choices: ['A', 'B'],
         correctAnswer: 'A',
         position: 1,

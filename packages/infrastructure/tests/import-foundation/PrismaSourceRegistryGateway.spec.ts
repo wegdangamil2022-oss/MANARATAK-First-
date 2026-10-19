@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   ImportSourceDefinition, SourceAccessClassification,
   SourceConnectorCategory, SourceStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { PrismaSourceRegistryGateway } from '../../src/import-foundation/PrismaSourceRegistryGateway';
 
 const timestamp = new Date('2026-10-09T18:00:00.000Z');

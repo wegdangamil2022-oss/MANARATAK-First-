@@ -1,4 +1,4 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 
 # P0-2 Enterprise Lifecycle Framework
 
@@ -6,7 +6,7 @@
 
 ## 1. Executive Summary
 
-This blueprint defines the canonical Enterprise Lifecycle Framework for MANARATAK 2.0. Based on the findings from the Discovery phase, this document establishes a unified, domain-driven governance model that standardizes system-level lifecycles while empowering individual bounded contexts to own their specific business workflows. The blueprint resolves state fragmentation, standardizes transitions, and enforces a cohesive ownership model without artificially compressing all enterprise states into a single enum.
+This blueprint defines the canonical Enterprise Lifecycle Framework for ABSHEER 2.0. Based on the findings from the Discovery phase, this document establishes a unified, domain-driven governance model that standardizes system-level lifecycles while empowering individual bounded contexts to own their specific business workflows. The blueprint resolves state fragmentation, standardizes transitions, and enforces a cohesive ownership model without artificially compressing all enterprise states into a single enum.
 
 ## 2. Enterprise Lifecycle Principles
 
@@ -114,6 +114,6 @@ The architecture is structured in a tiered manner:
 
 **Decision**: APPROVED.
 
-The blueprint effectively establishes the canonical patterns, ownership rules, and transition governance needed for MANARATAK 2.0 without introducing immediate breaking changes.
+The blueprint effectively establishes the canonical patterns, ownership rules, and transition governance needed for ABSHEER 2.0 without introducing immediate breaking changes.
 
 GO to Phase 3 (Enterprise Lifecycle Framework Specification)

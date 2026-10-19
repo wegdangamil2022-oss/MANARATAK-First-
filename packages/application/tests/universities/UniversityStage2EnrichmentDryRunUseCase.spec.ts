@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { UniversalImportHandoff } from '@manaratak/domain';
+import type { UniversalImportHandoff } from '@absheer/domain';
 import { UniversityStage2EnrichmentDryRunUseCase } from '../../src/universities/use-cases/UniversityStage2EnrichmentDryRunUseCase';
 
 function handoff(overrides: Record<string, unknown> = {}): UniversalImportHandoff {

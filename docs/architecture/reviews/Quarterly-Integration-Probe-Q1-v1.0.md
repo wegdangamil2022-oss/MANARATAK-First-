@@ -133,4 +133,4 @@ The following actions are required to solidify the integration architecture befo
 * **Review Status:** Finalized - Integration Architecture Validated
 
 ## 12. Revision History
-* **Initial Version (1.0.0):** Official Q1 Enterprise Integration Probe conducted for the MANARATAK 2.0 Foundation Architecture.
+* **Initial Version (1.0.0):** Official Q1 Enterprise Integration Probe conducted for the ABSHEER 2.0 Foundation Architecture.

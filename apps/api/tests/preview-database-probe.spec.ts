@@ -21,7 +21,7 @@ import { createPreviewAvailabilityApp } from '../src/infrastructure/runtime/Prev
 // Load the mocked resource authority during suite setup, not inside the first timed query test.
 import '../src/infrastructure/runtime/RuntimeResourceRegistry.js';
 
-const env = { VERCEL: '1', VERCEL_ENV: 'preview', MANARATAK_PREVIEW_DATABASE_PROBE: 'true',
+const env = { VERCEL: '1', VERCEL_ENV: 'preview', ABSHEER_PREVIEW_DATABASE_PROBE: 'true',
   DATABASE_URL: 'postgresql://user:private-test-password@database.invalid:6543/test',
   DIRECT_URL: 'postgresql://direct-user:direct-private-password@direct.invalid:5432/direct-test' };
 beforeEach(() => {
@@ -66,9 +66,9 @@ describe('Preview direct connection and schema inventory', () => {
     inventory([], exists);
     expect(await probePreviewDatabaseSchema(env)).toMatchObject({
       status: 'UP', publicSchemaExists: exists, prismaMigrationsTableExists: false,
-      migrationCount: 0, publicTableCount: 0, manaratakTableCount: 0,
-      expectedManaratakTableCount: expectedNames.length,
-      missingManaratakTableCount: expectedNames.length, manaratakSchemaProvisioned: false,
+      migrationCount: 0, publicTableCount: 0, absheerTableCount: 0,
+      expectedAbsheerTableCount: expectedNames.length,
+      missingAbsheerTableCount: expectedNames.length, absheerSchemaProvisioned: false,
     });
     expect(mocks.query).toHaveBeenCalledTimes(2);
     expect(JSON.stringify(mocks.query.mock.calls)).not.toContain('FROM public.');
@@ -80,8 +80,8 @@ describe('Preview direct connection and schema inventory', () => {
     const result = await probePreviewDatabaseSchema(env);
     expect(result).toMatchObject({
       status: 'UP', prismaMigrationsTableExists: true, migrationCount: 17,
-      publicTableCount: expectedNames.length + 1, manaratakTableCount: expectedNames.length,
-      missingManaratakTableCount: 0, manaratakSchemaProvisioned: true,
+      publicTableCount: expectedNames.length + 1, absheerTableCount: expectedNames.length,
+      missingAbsheerTableCount: 0, absheerSchemaProvisioned: true,
     });
     expect(mocks.query).toHaveBeenCalledTimes(3);
     expect([...mocks.query.mock.calls[2][0]].join('').trim()).toBe(
@@ -91,11 +91,11 @@ describe('Preview direct connection and schema inventory', () => {
     expect(JSON.stringify(result)).not.toContain('_prisma_migrations');
   });
 
-  it('distinguishes partial MANARATAK tables from unrelated tables', async () => {
+  it('distinguishes partial ABSHEER tables from unrelated tables', async () => {
     inventory([expectedNames[0], 'unrelated_table']);
     expect(await probePreviewDatabaseSchema(env)).toMatchObject({
-      status: 'UP', publicTableCount: 2, manaratakTableCount: 1,
-      missingManaratakTableCount: expectedNames.length - 1, manaratakSchemaProvisioned: false,
+      status: 'UP', publicTableCount: 2, absheerTableCount: 1,
+      missingAbsheerTableCount: expectedNames.length - 1, absheerSchemaProvisioned: false,
     });
   });
 
@@ -125,8 +125,8 @@ describe('Preview direct connection and schema inventory', () => {
 
   it.each([
     { ...env, VERCEL_ENV: 'production' }, { ...env, VERCEL_ENV: 'development' },
-    { ...env, VERCEL: undefined }, { ...env, MANARATAK_PREVIEW_DATABASE_PROBE: undefined },
-    { ...env, MANARATAK_PREVIEW_DATABASE_PROBE: 'false' },
+    { ...env, VERCEL: undefined }, { ...env, ABSHEER_PREVIEW_DATABASE_PROBE: undefined },
+    { ...env, ABSHEER_PREVIEW_DATABASE_PROBE: 'false' },
   ])('blocks every probe at HTTP and function boundaries when gates are closed', async (input) => {
     for (const probe of probes) expect(await probe(input)).toMatchObject({ error: 'PREVIEW_DATABASE_PROBE_DISABLED' });
     for (const [key, value] of Object.entries(input)) vi.stubEnv(key, value);
@@ -184,9 +184,9 @@ describe('Preview database probe', () => {
     { ...env, VERCEL_ENV: 'production' },
     { ...env, VERCEL_ENV: 'development' },
     { ...env, VERCEL: undefined },
-    { ...env, MANARATAK_PREVIEW_DATABASE_PROBE: undefined },
-    { ...env, MANARATAK_PREVIEW_DATABASE_PROBE: 'false' },
-    { ...env, MANARATAK_PREVIEW_DATABASE_PROBE: 'TRUE' },
+    { ...env, ABSHEER_PREVIEW_DATABASE_PROBE: undefined },
+    { ...env, ABSHEER_PREVIEW_DATABASE_PROBE: 'false' },
+    { ...env, ABSHEER_PREVIEW_DATABASE_PROBE: 'TRUE' },
   ])('does not construct Prisma unless both gates are satisfied', async (input) => {
     expect(await probePreviewDatabase(input)).toMatchObject({ error: 'PREVIEW_DATABASE_PROBE_DISABLED' });
     expect(mocks.construct).not.toHaveBeenCalled();
@@ -243,7 +243,7 @@ describe('Preview database probe', () => {
     await request(app).get('/api/v1/admin/users').expect(503);
     await request(app).get('/api/v1/monitoring/health/readiness').expect(503);
     expect(mocks.construct).not.toHaveBeenCalled();
-    vi.stubEnv('MANARATAK_PREVIEW_DATABASE_PROBE', 'false');
+    vi.stubEnv('ABSHEER_PREVIEW_DATABASE_PROBE', 'false');
     await request(app).get('/api/v1/monitoring/health/database').expect(503);
     expect(mocks.construct).not.toHaveBeenCalled();
   });

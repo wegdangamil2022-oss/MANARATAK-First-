@@ -2,7 +2,7 @@ import {
   IAssetSanitizationGateway,
   AssetStorageLocator,
   SanitizationResult
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class NoopAssetSanitizationGateway implements IAssetSanitizationGateway {
   public readonly capabilityStatus = 'UNAVAILABLE' as const;

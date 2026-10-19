@@ -8,8 +8,8 @@ import {
   useParams,
 } from 'react-router-dom';
 import { readStoredLocale } from '../i18n/browserStorage';
-import { isPublicTemplateLocaleEnabled } from '@manaratak/shared';
-import { isSupportedLocale } from '@manaratak/shared';
+import { isPublicTemplateLocaleEnabled } from '@absheer/shared';
+import { isSupportedLocale } from '@absheer/shared';
 import { useTranslation } from '../i18n/I18nProvider';
 import { localizeLocation, resolveLegacyPublicLocale } from '../i18n/localeRouting';
 import PublicTemplateApp from '../features/public-template/PublicTemplateApp';
@@ -30,8 +30,8 @@ const CourseLearnerPage = React.lazy(() =>
 const PageLoadingFallback = () => {
   const { t } = useTranslation();
   return (
-    <div className="mn-page-shell flex min-h-40 items-center justify-center gap-2 py-20 text-center font-medium text-[var(--mn-text-muted)]">
-      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--mn-primary)] border-t-transparent" />
+    <div className="ab-page-shell flex min-h-40 items-center justify-center gap-2 py-20 text-center font-medium text-[var(--ab-text-muted)]">
+      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--ab-primary)] border-t-transparent" />
       <span>{t('loading')}</span>
     </div>
   );
@@ -266,9 +266,9 @@ function CanonicalAdminUnavailable() {
   const { t } = useTranslation();
   return (
     <div className="mx-auto max-w-2xl py-12 text-center">
-      <div className="mn-card rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-8">
-        <h1 className="text-xl font-bold text-[var(--mn-heading)]">{t('admin_unavailable_title')}</h1>
-        <p className="mt-3 text-sm text-[var(--mn-text-muted)]">{t('admin_unavailable_desc')}</p>
+      <div className="ab-card rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-8">
+        <h1 className="text-xl font-bold text-[var(--ab-heading)]">{t('admin_unavailable_title')}</h1>
+        <p className="mt-3 text-sm text-[var(--ab-text-muted)]">{t('admin_unavailable_desc')}</p>
       </div>
     </div>
   );

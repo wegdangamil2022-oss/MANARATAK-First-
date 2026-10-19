@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { AcademicLifecycleDecision, CanonicalAcademicUsageSummary } from '@manaratak/domain';
+import type { AcademicLifecycleDecision, CanonicalAcademicUsageSummary } from '@absheer/domain';
 import { adminApiClient } from '../../api/client';
 
 const labels: Record<string, [string, string]> = {

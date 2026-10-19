@@ -11,7 +11,7 @@ import {
   ICourseImportAnalysisRepository,
   IExternalCourseProviderRepository,
   ImportRecordStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseProviderNativeKeyAdapters } from '../services/CourseProviderNativeKeyAdapters';
 
 interface StagedCourseRecord {

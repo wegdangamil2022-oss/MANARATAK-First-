@@ -1,10 +1,10 @@
-# MANARATAK Google AI Studio workspace
+# ABSHEER Google AI Studio workspace
 
-This repository is **wegdangamil2022-oss/MANARATAK-First-**, branch **main**.
+This repository is **wegdangamil2022-oss/ABSHEER-First-**, branch **main**.
 Its initial functional baseline is the complete source tree of
-MANARATAK_FINAL/fix/vercel-typescript-config-context at
+ABSHEER_FINAL/fix/vercel-typescript-config-context at
 818de64b3c9b26056070812865659a84bbf61819. The former repository must not be pushed or edited.
-MANARATAK-First- is now the official source repository; see [adoption record](OFFICIAL_REPOSITORY.md).
+ABSHEER-First- is now the official source repository; see [adoption record](OFFICIAL_REPOSITORY.md).
 All apps, packages, data sets, tests and architecture documents are retained.
 
 ## Install and start
@@ -21,7 +21,7 @@ npm run dev
 ```
 
 The root launcher starts Public Web at **0.0.0.0:3000**, automatically setting
-MANARATAK_GOOGLE_AI_STUDIO=true and MANARATAK_RUNTIME_PROFILE=google-ai-studio.
+ABSHEER_GOOGLE_AI_STUDIO=true and ABSHEER_RUNTIME_PROFILE=google-ai-studio.
 No backend secrets are required. Installation generates the Prisma *client files*
 only; it does not connect to PostgreSQL or run migrations.
 The monorepo must be imported in full; keep the root package.json and package-lock.json.
@@ -49,8 +49,8 @@ The complete names, requirements, classifications and source links are in
 
 | Variable | Web preview |
 |---|---|
-| MANARATAK_GOOGLE_AI_STUDIO | Set automatically to true |
-| MANARATAK_RUNTIME_PROFILE | Set automatically to google-ai-studio |
+| ABSHEER_GOOGLE_AI_STUDIO | Set automatically to true |
+| ABSHEER_RUNTIME_PROFILE | Set automatically to google-ai-studio |
 | VITE_API_URL | Optional; independent experimental API base, e.g. https://api.example.invalid/api/v1 |
 | VITE_API_BASE_URL | Optional Admin API base, same format |
 | VITE_PUBLIC_WEB_URL | Optional actual experimental Web origin for links |
@@ -115,13 +115,13 @@ server environment; do not set allowedHosts=true. No secret is involved.
 ```sh
 npm run verify:aistudio
 npm run build:aistudio
-npm run build -w @manaratak/web
-npm run build -w @manaratak/admin
-npm run typecheck -w @manaratak/api
-npm run build -w @manaratak/api
+npm run build -w @absheer/web
+npm run build -w @absheer/admin
+npm run typecheck -w @absheer/api
+npm run build -w @absheer/api
 npm run typecheck
 npm run vercel:typecheck
-npm run runtime:verify -w @manaratak/api
+npm run runtime:verify -w @absheer/api
 node scripts/aistudio/environment.mjs --check
 ```
 

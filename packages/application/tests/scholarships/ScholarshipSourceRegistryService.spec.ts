@@ -4,7 +4,7 @@ import {
   SourceConnectorCategory,
   SourceStatus,
   type ImportSourceDefinition,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import type { ISourceRegistryGateway } from '../../src/import-foundation/contracts/ISourceRegistryGateway';
 import {
   ScholarshipSourceRegistryService,

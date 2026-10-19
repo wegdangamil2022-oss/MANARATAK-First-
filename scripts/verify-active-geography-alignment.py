@@ -39,7 +39,7 @@ def verify(snapshot=None):
     def read(path):
         return subprocess.check_output(['git', 'show', snapshot + ':' + str(path.relative_to(ROOT))], cwd=ROOT) if snapshot else path.read_bytes()
     summary = json.loads((REPORT / 'summary.json').read_text())
-    country_workbook = openpyxl.load_workbook(io.BytesIO(read(ROOT / 'workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx')), read_only=True, data_only=True)
+    country_workbook = openpyxl.load_workbook(io.BytesIO(read(ROOT / 'workspace/reference-data/countries/ABSHEER_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx')), read_only=True, data_only=True)
     country_rows = iter(country_workbook['Countries'].values)
     country_headers = next(country_rows)
     countries = {row[country_headers.index('iso_alpha3')]: row[country_headers.index('iso_alpha2')] for row in country_rows if row[country_headers.index('iso_alpha3')]}

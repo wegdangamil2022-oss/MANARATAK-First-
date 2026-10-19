@@ -1,9 +1,9 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-4 Transactional Outbox Strategy
 # Phase 2 — Enterprise Transactional Outbox Blueprint
 
 ## 1. Executive Summary
-The Enterprise Transactional Outbox Blueprint establishes the canonical architecture for guaranteed, consistent event publishing across MANARATAK 2.0. By decoupling database state mutations from message broker dispatching, this blueprint systematically eliminates the "Dual-Write Problem" identified during Phase 1. The Transactional Outbox is designed as a foundational Enterprise Capability—owned by no single domain—ensuring strict Domain-Driven Design (DDD) isolation while providing at-least-once delivery, retry resilience, and asynchronous dispatching for all enterprise events.
+The Enterprise Transactional Outbox Blueprint establishes the canonical architecture for guaranteed, consistent event publishing across ABSHEER 2.0. By decoupling database state mutations from message broker dispatching, this blueprint systematically eliminates the "Dual-Write Problem" identified during Phase 1. The Transactional Outbox is designed as a foundational Enterprise Capability—owned by no single domain—ensuring strict Domain-Driven Design (DDD) isolation while providing at-least-once delivery, retry resilience, and asynchronous dispatching for all enterprise events.
 
 ## 2. Enterprise Outbox Blueprint
 The Outbox architecture introduces a reliable intermediary between domain state changes and enterprise event broadcasting. 

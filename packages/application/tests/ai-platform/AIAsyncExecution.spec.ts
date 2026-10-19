@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AIExecutionOrchestrator } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
-import { AIExecutionStatus, AIRequestPurpose } from '@manaratak/domain';
+import { AIExecutionStatus, AIRequestPurpose } from '@absheer/domain';
 
 const request = {
   purpose: AIRequestPurpose.TOOL_ASSISTANCE,

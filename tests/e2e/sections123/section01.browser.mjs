@@ -6,7 +6,7 @@ const summary = [];
 try {
   for (const language of ['en', 'ar']) {
     const context = await browser.newContext({ bypassCSP: true });
-    await context.addInitScript(lang => localStorage.setItem('manaratak_admin_lang', lang), language);
+    await context.addInitScript(lang => localStorage.setItem('absheer_admin_lang', lang), language);
     const page = await context.newPage();
     page.setDefaultTimeout(10000);
     const errors = [], calls = [];

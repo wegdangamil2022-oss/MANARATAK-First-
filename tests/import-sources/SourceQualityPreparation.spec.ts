@@ -31,7 +31,7 @@ describe('M10 offline source quality preparation', () => {
     expect(scholarshipRows.some(row => row.canonicalQueue.some((item: { canonicalId: string | null }) => item.canonicalId !== null))).toBe(false);
   }, 90_000);
   it('detects edited output and never rewrites it in check mode', () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'manaratak-source-qc-'));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'absheer-source-qc-'));
     try {
       fs.mkdirSync(path.join(root, 'workspace/import-sources'), { recursive: true });
       const output = { 'summary.json': '{"databaseWrites":0}\n' };

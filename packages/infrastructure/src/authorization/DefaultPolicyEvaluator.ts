@@ -1,5 +1,5 @@
 import { isIP } from 'node:net';
-import { Policy, IPolicyEvaluator, EvaluationContext, AccessDecision } from '@manaratak/domain';
+import { Policy, IPolicyEvaluator, EvaluationContext, AccessDecision } from '@absheer/domain';
 
 type TimeRule = {
   start: string;

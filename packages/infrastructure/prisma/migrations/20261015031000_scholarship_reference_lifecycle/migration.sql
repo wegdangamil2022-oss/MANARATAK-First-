@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: scholarships
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: scholarships
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- Source only; not applied. Retirement replaces physical deletion, preserving immutable owner identities.
 BEGIN;
 CREATE TABLE "ScholarshipReferenceTransition" (
@@ -13,13 +13,13 @@ CREATE TABLE "ScholarshipReferenceTransition" (
 CREATE UNIQUE INDEX "ScholarshipReference_source_revision_key" ON "ScholarshipReferenceTransition"("sourceOwnerId","sourceRevision");
 CREATE INDEX "ScholarshipReference_source_revision_idx" ON "ScholarshipReferenceTransition"("sourceOwnerId","status","sourceRevision");
 CREATE INDEX "ScholarshipReference_source_slug_idx" ON "ScholarshipReferenceTransition"("sourceSlug","status");
-CREATE FUNCTION manaratak_preserve_scholarship_identity() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'SCHOLARSHIP_IMMUTABLE_REFERENCE_ARCHIVE_REQUIRED' USING ERRCODE='23514'; END; $$;
-CREATE TRIGGER "scholarship_identity_no_delete" BEFORE DELETE ON "Scholarship" FOR EACH ROW EXECUTE FUNCTION manaratak_preserve_scholarship_identity();
-CREATE FUNCTION manaratak_preserve_scholarship_reference_history() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE FUNCTION absheer_preserve_scholarship_identity() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'SCHOLARSHIP_IMMUTABLE_REFERENCE_ARCHIVE_REQUIRED' USING ERRCODE='23514'; END; $$;
+CREATE TRIGGER "scholarship_identity_no_delete" BEFORE DELETE ON "Scholarship" FOR EACH ROW EXECUTE FUNCTION absheer_preserve_scholarship_identity();
+CREATE FUNCTION absheer_preserve_scholarship_reference_history() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
  IF OLD."status"='APPROVED' THEN RAISE EXCEPTION 'SCHOLARSHIP_REFERENCE_HISTORY_IMMUTABLE' USING ERRCODE='23514'; END IF;
  IF TG_OP='DELETE' THEN RETURN OLD; END IF;
  RETURN NEW;
 END; $$;
-CREATE TRIGGER "scholarship_reference_history_immutable" BEFORE UPDATE OR DELETE ON "ScholarshipReferenceTransition" FOR EACH ROW EXECUTE FUNCTION manaratak_preserve_scholarship_reference_history();
+CREATE TRIGGER "scholarship_reference_history_immutable" BEFORE UPDATE OR DELETE ON "ScholarshipReferenceTransition" FOR EACH ROW EXECUTE FUNCTION absheer_preserve_scholarship_reference_history();
 COMMIT;

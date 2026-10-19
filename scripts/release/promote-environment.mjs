@@ -67,8 +67,8 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
   if (verdict.decision !== 'GO' || !evidence.authority.approvedEnvironments.includes(environment))
     throw new Error('PROMOTION_EVIDENCE_BLOCKED');
   const result = await reconcilePromotion({
-    endpoint: required('MANARATAK_DEPLOYMENT_CONTROL_PLANE_URL'),
-    token: required('MANARATAK_DEPLOYMENT_CONTROL_PLANE_TOKEN'),
+    endpoint: required('ABSHEER_DEPLOYMENT_CONTROL_PLANE_URL'),
+    token: required('ABSHEER_DEPLOYMENT_CONTROL_PLANE_TOKEN'),
     environment,
     manifest,
     evidence: JSON.parse(required('RELEASE_EVIDENCE_BUNDLE_JSON')),

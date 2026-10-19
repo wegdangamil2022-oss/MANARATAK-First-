@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import { ScholarshipAdminRouter } from '../../../../src/presentation/api/router/ScholarshipAdminRouter';
-import { ScholarshipStatus } from '@manaratak/domain';
+import { ScholarshipStatus } from '@absheer/domain';
 
 describe('ScholarshipAdminRouter', () => {
   const createMockUseCases = () => ({

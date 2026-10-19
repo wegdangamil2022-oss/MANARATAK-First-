@@ -23,19 +23,19 @@ export function FeaturedCatalogStateCards({ kind, status, onRetry }: Props) {
       <div className="space-y-2 w-full" aria-busy={loading}>
         {[0, 1, 2].map(slot => (
           <div key={slot} data-catalog-slot={kind} aria-hidden="true"
-            className="flex min-h-[76px] min-w-0 items-center gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 sm:p-2.5 mn-panel">
-            <div className={`relative h-12 w-14 sm:h-14 sm:w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--mn-primary)] ${loading ? 'animate-pulse motion-reduce:animate-none' : ''}`}>
+            className="flex min-h-[76px] min-w-0 items-center gap-2.5 rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-2 sm:p-2.5 ab-panel">
+            <div className={`relative h-12 w-14 sm:h-14 sm:w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--ab-primary)] ${loading ? 'animate-pulse motion-reduce:animate-none' : ''}`}>
               <img src={imageUrl} alt="" loading="lazy" decoding="async" aria-hidden="true" className="h-full w-full object-cover" />
             </div>
             {loading ? (
               <div className="min-w-0 flex-1 space-y-2 animate-pulse motion-reduce:animate-none">
-                <div className="h-3 w-3/4 rounded bg-[var(--mn-surface-muted)]" />
-                <div className="h-2 w-1/2 rounded bg-[var(--mn-surface-muted)]" />
+                <div className="h-3 w-3/4 rounded bg-[var(--ab-surface-muted)]" />
+                <div className="h-2 w-1/2 rounded bg-[var(--ab-surface-muted)]" />
               </div>
             ) : (
               <div className="min-w-0 flex-1 text-start">
-                <p className="text-xs font-bold leading-relaxed text-[var(--mn-heading)]">{message}</p>
-                <p className="mt-0.5 text-[10px] leading-relaxed text-[var(--mn-text-muted)]">
+                <p className="text-xs font-bold leading-relaxed text-[var(--ab-heading)]">{message}</p>
+                <p className="mt-0.5 text-[10px] leading-relaxed text-[var(--ab-text-muted)]">
                   {t(status === 'empty' ? 'public_home_catalog_published_only' : 'public_home_catalog_retry_hint')}
                 </p>
               </div>
@@ -45,7 +45,7 @@ export function FeaturedCatalogStateCards({ kind, status, onRetry }: Props) {
       </div>
       {status === 'unavailable' && onRetry && (
         <button type="button" onClick={onRetry}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[var(--mn-border)] px-3 py-2 text-xs font-bold text-[var(--mn-heading)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+          className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[var(--ab-border)] px-3 py-2 text-xs font-bold text-[var(--ab-heading)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
           <RefreshCw aria-hidden="true" className="h-3.5 w-3.5" />{t('public_home_catalog_retry')}
         </button>
       )}

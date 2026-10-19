@@ -28,7 +28,7 @@ function disableHmrPlugin(): Plugin {
 function expressApiPlugin(studio = false): Plugin {
   let cachedApp: any = null;
   return {
-    name: studio ? 'manaratak-studio-express-api' : 'express-api-plugin',
+    name: studio ? 'absheer-studio-express-api' : 'express-api-plugin',
     configureServer(server) {
       server.httpServer?.on('close', async () => {
         try {
@@ -62,7 +62,7 @@ function expressApiPlugin(studio = false): Plugin {
               cachedApp = await apiModule.createApiApp({ resetCache: false });
               try {
                 const containerModule = await server.ssrLoadModule(path.resolve(__dirname, '../api/src/infrastructure/di/container.ts'));
-                const configModule = await server.ssrLoadModule('@manaratak/config');
+                const configModule = await server.ssrLoadModule('@absheer/config');
                 const workerModule = await server.ssrLoadModule(path.resolve(__dirname, '../api/src/infrastructure/workers/PollingWorkerRuntime.ts'));
                 const envProvider = new configModule.EnvironmentConfigurationProvider();
                 const loader = new configModule.EnvironmentLoader([envProvider]);
@@ -97,7 +97,7 @@ function expressApiPlugin(studio = false): Plugin {
 
 export default defineConfig(({ mode, command }) => {
   const rootDir = path.resolve(__dirname, '../..');
-  const studioEnv = { ...loadEnv(mode, rootDir, ['MANARATAK_', 'VITE_']), ...process.env };
+  const studioEnv = { ...loadEnv(mode, rootDir, ['ABSHEER_', 'VITE_']), ...process.env };
   const studio = isGoogleAiStudio(studioEnv);
   const disableHmr = process.env.DISABLE_HMR === 'true';
   process.env.PRISMA_TELEMETRY_DISABLED = '1';
@@ -112,7 +112,7 @@ export default defineConfig(({ mode, command }) => {
     root: __dirname,
     envDir: studio ? rootDir : __dirname,
     define: {
-      '__MANARATAK_PROTOTYPE_DATA_ENABLED__': JSON.stringify(allowPrototypeData),
+      '__ABSHEER_PROTOTYPE_DATA_ENABLED__': JSON.stringify(allowPrototypeData),
       'import.meta.env.VITE_GOOGLE_AI_STUDIO': JSON.stringify(studio ? 'true' : 'false'),
       ...(studio ? { 'import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE': JSON.stringify(studioDataMode) } : {}),
     },
@@ -121,14 +121,14 @@ export default defineConfig(({ mode, command }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        '@manaratak/application': path.resolve(rootDir, 'packages/application/src/index.ts'),
-        '@manaratak/config': path.resolve(rootDir, 'packages/config/src/index.ts'),
-        '@manaratak/core': path.resolve(rootDir, 'packages/core/src/index.ts'),
-        '@manaratak/domain': path.resolve(rootDir, 'packages/domain/src/index.ts'),
-        '@manaratak/infrastructure': path.resolve(rootDir, 'packages/infrastructure/src/index.ts'),
-        '@manaratak/shared': path.resolve(rootDir, 'packages/shared/src/index.ts'),
-        '@manaratak/types': path.resolve(rootDir, 'packages/types/src/index.ts'),
-        '@manaratak/ui': path.resolve(rootDir, 'packages/ui/src/index.tsx'),
+        '@absheer/application': path.resolve(rootDir, 'packages/application/src/index.ts'),
+        '@absheer/config': path.resolve(rootDir, 'packages/config/src/index.ts'),
+        '@absheer/core': path.resolve(rootDir, 'packages/core/src/index.ts'),
+        '@absheer/domain': path.resolve(rootDir, 'packages/domain/src/index.ts'),
+        '@absheer/infrastructure': path.resolve(rootDir, 'packages/infrastructure/src/index.ts'),
+        '@absheer/shared': path.resolve(rootDir, 'packages/shared/src/index.ts'),
+        '@absheer/types': path.resolve(rootDir, 'packages/types/src/index.ts'),
+        '@absheer/ui': path.resolve(rootDir, 'packages/ui/src/index.tsx'),
       },
     },
     build: {

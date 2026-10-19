@@ -58,7 +58,7 @@ for (const critical of ['apps/admin/src/App.tsx', 'apps/api/src/app.ts', 'packag
 ensure('apps/web/src/router/index.tsx', x => /index:\s*true,\s*element:\s*<EmptyStudentHomepage\s*\/>/.test(x), 'LEGACY_HOME_ROUTE');
 ensure('apps/web/src/features/handoff/EmptyStudentHomepage.tsx', x => x.includes('data-absheer-home-slot="empty"'), 'MISSING_EMPTY_HOME');
 ensure('apps/web/src/features/public-template/PublicTemplateApp.tsx', x => !/<HeroBanner\b/.test(x) && !/<HomeShowcaseFrame\b/.test(x), 'LEGACY_HOMEPAGE_MARKUP');
-ensure('scripts/bootstrap-admin.ts', x => !x.includes('admin@manaratak.org') && x.includes('ADMIN_BOOTSTRAP_EMAIL must be set'), 'LEGACY_ADMIN_BOOTSTRAP');
+ensure('scripts/bootstrap-admin.ts', x => !x.includes('admin@absheer.org') && x.includes('ADMIN_BOOTSTRAP_EMAIL must be set'), 'LEGACY_ADMIN_BOOTSTRAP');
 for (const file of [
   'apps/web/src/features/public-template/data/mockData.ts',
   'apps/web/src/features/public-template/data/articleData.ts',

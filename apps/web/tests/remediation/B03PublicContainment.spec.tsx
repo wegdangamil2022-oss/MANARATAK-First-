@@ -31,7 +31,7 @@ vi.mock('../../src/features/public-template/components/CourseStudyRoomView', () 
 }));
 const noop = () => {};
 const markup = (element: React.ReactElement) => renderToStaticMarkup(element);
-const course = (ownerId: string, originType = 'NATIVE_MANARATAK_COURSE') =>
+const course = (ownerId: string, originType = 'NATIVE_ABSHEER_COURSE') =>
   ({
     id: 'public-slug',
     ownerId,
@@ -133,7 +133,7 @@ describe('B03 public cards and canonical learner navigation', () => {
     expect(JSON.stringify(view.toJSON())).not.toContain('TOEFL');
     act(() => view.unmount());
   });
-  it.each(['NATIVE_MANARATAK_COURSE', 'PAID_COURSE'])(
+  it.each(['NATIVE_ABSHEER_COURSE', 'PAID_COURSE'])(
     'routes %s by owner and locale and ignores prototype callbacks in api',
     (origin) => {
       for (const owner of ['owner-a', 'owner-b']) {

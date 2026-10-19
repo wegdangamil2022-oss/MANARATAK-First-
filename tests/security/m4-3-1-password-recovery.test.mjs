@@ -4,13 +4,13 @@ import { createHash, randomUUID } from 'node:crypto';
 import {
   ForgotPasswordUseCase,
   ResetPasswordUseCase,
-} from '@manaratak/application';
+} from '@absheer/application';
 import {
   InMemoryIdentityRepository,
   InMemoryPasswordResetTokenRepository,
   CapturedEmailDeliveryGateway,
   PasswordHasher,
-} from '@manaratak/infrastructure';
+} from '@absheer/infrastructure';
 import {
   Identity,
   User,
@@ -20,7 +20,7 @@ import {
   TechnicalMetadata,
   IdentityType,
   LifeStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 // Helper to construct a test identity matching domain contracts
 function createTestIdentity({ email, isEmailVerified = false, status = LifeStatus.PROVISIONED }) {

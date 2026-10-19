@@ -27,7 +27,7 @@ expect(publicRouter.includes("'/related'"), 'public related-content API present'
 expect(graph.includes('editorialContent') && graph.includes('CmsDomainTargetType.MAJOR') && graph.includes('CmsDomainTargetType.UNIVERSITY') && graph.includes('CmsDomainTargetType.SCHOLARSHIP'), 'cross-domain graph projects related editorial content');
 expect(!operations.includes('locale=ar') && !operations.includes("locale: 'ar'"), 'site operations are locale-aware rather than Arabic-hardcoded');
 expect(!operations.includes('/admin/cms/block-schemas\', { method: \'POST\''), 'technical block-schema creation removed from ordinary editor UI');
-expect(adminPage.includes('DomainLinksPanel') && adminPage.includes('#142B5F') && adminPage.includes('#0E7C86'), 'admin CMS exposes canonical linking and current MANARATAK brand tokens');
+expect(adminPage.includes('DomainLinksPanel') && adminPage.includes('#142B5F') && adminPage.includes('#0E7C86'), 'admin CMS exposes canonical linking and current ABSHEER brand tokens');
 expect(!adminPage.includes("'ANNOUNCEMENT',") && !adminPage.includes("'CONTENT_BLOCK',"), 'editorial create form does not duplicate site-operation types');
 expect(!read('packages/domain/src/cms/enums/CmsDomainTargetType.ts').includes('STUDY_DESTINATION'), 'study destinations reuse canonical ReferenceCountry ownership rather than a duplicate CMS target type');
 expect(cmsUseCases.includes('CMS_DOMAIN_TARGET_OWNER_ID_REQUIRED') && adminRouter.includes('targetId: z.string().trim().uuid()') && publicRouter.includes('targetId: z.string().trim().uuid()'), 'CMS domain links accept canonical owner UUIDs only across admin and public boundaries');
@@ -41,7 +41,7 @@ expect(
   'fake-data CMS local preview CRUD surfaces removed in favor of canonical admin control plane',
 );
 
-expect(existsSync('docs/implementation-status/MANARATAK_CMS_DEEP_RESTRUCTURE_SOURCE_CLOSURE_2026-09-05.md'), 'CMS deep-restructure closure report is present');
+expect(existsSync('docs/implementation-status/ABSHEER_CMS_DEEP_RESTRUCTURE_SOURCE_CLOSURE_2026-09-05.md'), 'CMS deep-restructure closure report is present');
 expect(scheduledHandler.includes('processDueSchedules') && apiServer.includes('CMS_SCHEDULED_PUBLISH_JOB_TYPE'), 'CMS due schedules execute through the canonical durable background worker');
 expect(appConfig.includes('BACKGROUND_CMS_CRON must be explicitly configured in production/staging'), 'CMS worker cadence is explicit in production configuration');
 

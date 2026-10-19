@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
-import type { InternationalTestDto, InternationalTestVersionDto } from '@manaratak/domain';
+import type { InternationalTestDto, InternationalTestVersionDto } from '@absheer/domain';
 
 type Kind='SESSION'|'CENTER'|'REQUIREMENT'|'POLICY'|'EQUIVALENCY';
 const fields:Record<Kind,string[]>={SESSION:['versionId','title','sessionCode','registrationOpensAt','registrationClosesAt','startsAt','endsAt','timezone','status'],CENTER:['displayName','centerCode','countryIso2Code','cityName','address','officialUrl','status'],REQUIREMENT:['versionId','requirementType','title','description','isMandatory'],POLICY:['versionId','policyType','title','description','sourceUrl','effectiveFrom','effectiveTo'],EQUIVALENCY:['sourceScale','sourceValue','targetScale','targetValue','confidence']};

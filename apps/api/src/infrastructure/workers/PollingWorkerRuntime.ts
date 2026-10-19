@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import type { AwilixContainer } from '@manaratak-vendor/awilix-core';
-import type { IConfigurationService } from '@manaratak/core';
+import type { AwilixContainer } from '@absheer-vendor/awilix-core';
+import type { IConfigurationService } from '@absheer/core';
 
 export interface PollingWorkerHandle {
   stop: () => Promise<void>;

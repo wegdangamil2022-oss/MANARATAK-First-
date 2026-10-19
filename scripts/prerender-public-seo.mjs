@@ -2,18 +2,18 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 
 const STATIC_ROUTES = [
-  ['/', 'MANARATAK', 'Discover scholarships, universities, majors, courses, services, international tests and student tools.', 'website'],
+  ['/', 'ABSHEER', 'Discover scholarships, universities, majors, courses, services, international tests and student tools.', 'website'],
   ['/scholarships', 'Scholarships', 'Discover verified scholarship opportunities.', 'CollectionPage'],
   ['/universities', 'Universities', 'Explore universities and study destinations.', 'CollectionPage'],
   ['/countries', 'Study destinations', 'Explore countries and study destinations.', 'CollectionPage'],
   ['/majors', 'Majors', 'Explore academic majors and study paths.', 'CollectionPage'],
-  ['/courses', 'Courses', 'Explore MANARATAK and global learning opportunities.', 'CollectionPage'],
+  ['/courses', 'Courses', 'Explore ABSHEER and global learning opportunities.', 'CollectionPage'],
   ['/international-tests', 'International tests', 'Explore international admissions and language tests.', 'CollectionPage'],
   ['/articles', 'Articles', 'Read verified student and study guidance.', 'CollectionPage'],
-  ['/services', 'Student services', 'Explore governed MANARATAK student services.', 'CollectionPage'],
+  ['/services', 'Student services', 'Explore governed ABSHEER student services.', 'CollectionPage'],
   ['/careers', 'Careers', 'Explore career opportunities and guidance.', 'CollectionPage'],
-  ['/tools', 'Student tools', 'Explore MANARATAK student tools and planning utilities.', 'CollectionPage'],
-  ['/certificates/verify', 'Verify certificate', 'Verify a MANARATAK certificate.', 'WebPage'],
+  ['/tools', 'Student tools', 'Explore ABSHEER student tools and planning utilities.', 'CollectionPage'],
+  ['/certificates/verify', 'Verify certificate', 'Verify a ABSHEER certificate.', 'WebPage'],
 ];
 
 const CMS_ROUTES = {
@@ -66,7 +66,7 @@ function titleOf(item, locale) {
   const preferred = locale === 'ar'
     ? [item.titleAr, item.nameAr, item.canonicalNameAr, item.title, item.name, item.canonicalName]
     : [item.titleEn, item.nameEn, item.canonicalNameEn, item.title, item.name, item.canonicalName];
-  return preferred.find((value) => typeof value === 'string' && value.trim())?.trim() || String(item.slug || item.publicId || item.id || 'MANARATAK');
+  return preferred.find((value) => typeof value === 'string' && value.trim())?.trim() || String(item.slug || item.publicId || item.id || 'ABSHEER');
 }
 
 function descriptionOf(item, locale, fallback) {
@@ -79,14 +79,14 @@ function descriptionOf(item, locale, fallback) {
 function inject(html, meta) {
   const robots = meta.noIndex ? 'noindex,nofollow' : 'index,follow';
   const jsonLd = JSON.stringify(meta.jsonLd).replaceAll('<', '\\u003c');
-  const tags = `\n    <title>${escapeHtml(meta.title)} | MANARATAK</title>\n` +
+  const tags = `\n    <title>${escapeHtml(meta.title)} | ABSHEER</title>\n` +
     `    <meta name="description" content="${escapeHtml(meta.description)}" />\n` +
     `    <meta name="robots" content="${robots}" />\n` +
     `    <link rel="canonical" href="${escapeHtml(meta.canonical)}" />\n` +
     (meta.ar ? `    <link rel="alternate" hreflang="ar" href="${escapeHtml(meta.ar)}" />\n` : '') +
     (meta.en ? `    <link rel="alternate" hreflang="en" href="${escapeHtml(meta.en)}" />\n` : '') +
     (meta.ar ? `    <link rel="alternate" hreflang="x-default" href="${escapeHtml(meta.ar)}" />\n` : '') +
-    `    <meta property="og:title" content="${escapeHtml(meta.title)} | MANARATAK" />\n` +
+    `    <meta property="og:title" content="${escapeHtml(meta.title)} | ABSHEER" />\n` +
     `    <meta property="og:description" content="${escapeHtml(meta.description)}" />\n` +
     `    <meta property="og:type" content="website" />\n` +
     `    <meta property="og:url" content="${escapeHtml(meta.canonical)}" />\n` +
@@ -127,7 +127,7 @@ async function fetchCmsPublished(apiBase, locale) {
   for (let page = 1; page <= 500; page += 1) {
     const url = new URL(`${apiBase}/public/cms/content`);
     url.searchParams.set('locale', locale);
-    url.searchParams.set('siteIdentifier', 'manaratak');
+    url.searchParams.set('siteIdentifier', 'absheer');
     url.searchParams.set('page', String(page));
     url.searchParams.set('pageSize', '50');
     const response = await fetch(url, { headers: { accept: 'application/json' } });
@@ -239,7 +239,7 @@ async function main() {
     for (const locale of releaseLocales) {
       const items = await fetchCmsPublished(apiBase, locale);
       for (const item of items) {
-        if (!item || item.siteIdentifier !== 'manaratak' || item.locale !== locale ||
+        if (!item || item.siteIdentifier !== 'absheer' || item.locale !== locale ||
             item.seoMetadata?.noIndex === true) continue;
         const segment = CMS_ROUTES[item.contentType];
         if (!segment || typeof item.slug !== 'string' ||

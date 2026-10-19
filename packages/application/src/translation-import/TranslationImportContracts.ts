@@ -1,5 +1,5 @@
-import type { UniversalImportHandoff } from '@manaratak/domain';
-import type { SupportedLocale } from '@manaratak/shared';
+import type { UniversalImportHandoff } from '@absheer/domain';
+import type { SupportedLocale } from '@absheer/shared';
 
 export type TranslationCanonicalEntityKind = 'UNIVERSITY' | 'MAJOR';
 export type TranslationImportReviewStatus = 'NEEDS_REVIEW' | 'APPROVED';

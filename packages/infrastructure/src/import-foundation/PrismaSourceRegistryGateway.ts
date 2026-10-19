@@ -1,11 +1,11 @@
 import type { PrismaClient, Prisma } from '@prisma/client';
-import type { ISourceRegistryGateway } from '@manaratak/application';
-import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
+import type { ISourceRegistryGateway } from '@absheer/application';
+import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@absheer/domain';
 
 export class PrismaSourceRegistryGateway implements ISourceRegistryGateway {
   public readonly persistenceClassification = 'DURABLE' as const;
   constructor(private readonly prisma: PrismaClient) {}
-  withTransaction(context: import('@manaratak/domain').AtomicPersistenceContext): ISourceRegistryGateway {
+  withTransaction(context: import('@absheer/domain').AtomicPersistenceContext): ISourceRegistryGateway {
     const tx = (context as unknown as { transactionClient?: Prisma.TransactionClient }).transactionClient;
     if (!context.boundaryId || !tx) throw new Error('IMPORT_SOURCE_TRANSACTION_REQUIRED');
     return new PrismaSourceRegistryGateway(tx as unknown as PrismaClient);

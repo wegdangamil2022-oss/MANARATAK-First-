@@ -8,7 +8,7 @@ import {
   assertAcademicLifecycleDecision,
   ICanonicalAcademicUsageGateway,
   IDegreeLevelRepository
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface UpdateDegreeLevelCommand {
   expectedUpdatedAt: string;

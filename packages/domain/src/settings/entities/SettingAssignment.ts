@@ -3,7 +3,7 @@ import { NamespacedKey } from '../value-objects/NamespacedKey';
 import { ScopeIdentifier } from '../value-objects/ScopeIdentifier';
 import { SettingValueData } from '../value-objects/SettingValueData';
 import { SettingVersion } from '../value-objects/SettingVersion';
-import { IDomainEvent } from '@manaratak/core';
+import { IDomainEvent } from '@absheer/core';
 import { SettingValueAssignedEvent } from '../events/SettingValueAssignedEvent';
 import { SettingValueUpdatedEvent } from '../events/SettingValueUpdatedEvent';
 import { SettingValueRolledBackEvent } from '../events/SettingValueRolledBackEvent';

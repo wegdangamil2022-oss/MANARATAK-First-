@@ -5,7 +5,7 @@ import {
   CourseImportCompletenessState,
   CourseOriginType,
   CourseStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { PrismaCourseRepository } from '../../src/courses/PrismaCourseRepository';
 import { destructiveDatabaseTestsEnabled } from './disposableDatabaseGuard';
 

@@ -6,8 +6,8 @@ import {
   RoleAssignment,
   StudentSavedItemType,
   StudentWorkspaceStatus,
-} from '@manaratak/domain';
-import type { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@manaratak/core';
+} from '@absheer/domain';
+import type { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@absheer/core';
 import {
   CareerEngagementUseCases,
   CertificateReadModelService,
@@ -19,8 +19,8 @@ import {
   StudentSavedItemHydrationService,
   StudentServiceRequestUseCases,
   StudentWorkspaceUseCases,
-} from '@manaratak/application';
-import { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
+} from '@absheer/application';
+import { PrismaApiIdempotencyStore } from '@absheer/infrastructure';
 import { StudentWorkspaceRouter } from '../../../../src/presentation/api/router/StudentWorkspaceRouter';
 
 function classDouble<T extends object>(prototype: T, overrides: Partial<T> = {}): T {

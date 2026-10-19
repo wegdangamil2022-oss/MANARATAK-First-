@@ -1,6 +1,6 @@
 import {MajorTranslationPublicationPanel} from './MajorTranslationPublicationPanel';
 import {useEffect,useRef,useState} from 'react';
-import {MAJOR_REVIEW_TEMPLATE,type MajorDto,type MajorContentSectionDto,type MajorVersionDto} from '@manaratak/domain';
+import {MAJOR_REVIEW_TEMPLATE,type MajorDto,type MajorContentSectionDto,type MajorVersionDto} from '@absheer/domain';
 import {adminApiClient} from '../api/client';
 import {canonicalPickerApi} from '../api/canonicalPickers';
 import {CanonicalPicker} from './CanonicalPicker';

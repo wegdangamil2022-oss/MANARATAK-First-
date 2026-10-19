@@ -1,7 +1,7 @@
 /**
  * Canonical Unicode identity rules for owner-domain names/titles.
  *
- * Authority: MNT-AUD-0091.
+ * Authority: ABSH-AUD-0091.
  * - NFKC compatibility normalization.
  * - Locale-independent Unicode lower-casing.
  * - Arabic tatweel and combining-mark removal.

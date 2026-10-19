@@ -22,7 +22,7 @@ function normalizeApiMajor(item: Record<string, unknown>): any[] {
   if (profiles.length > 0) {
     return profiles.map((p: any) => {
       const pMetadata = getObject(p.metadata);
-      const isDetailDossier = pMetadata.sourceClassificationSystem === 'MANARATAK_PHASE_10_DETAIL_DOSSIER' || getString(optionalFields.sourceClassificationSystem) === 'MANARATAK_PHASE_10_DETAIL_DOSSIER';
+      const isDetailDossier = pMetadata.sourceClassificationSystem === 'ABSHEER_PHASE_10_DETAIL_DOSSIER' || getString(optionalFields.sourceClassificationSystem) === 'ABSHEER_PHASE_10_DETAIL_DOSSIER';
       
       const rawLevel = String(p.level).toUpperCase();
       let degreeLevel = 'Bachelor';
@@ -60,7 +60,7 @@ function normalizeApiMajor(item: Record<string, unknown>): any[] {
   const classificationCode = getString(item.classificationCode) ?? getString(optionalFields.classificationCode);
   const sample = phase10MajorSamples.find((major: any) => major.code === classificationCode || major.id === classificationCode);
   const isPhase10Sample = !!sample;
-  const isDetailDossier = getString(optionalFields.sourceClassificationSystem) === 'MANARATAK_PHASE_10_DETAIL_DOSSIER';
+  const isDetailDossier = getString(optionalFields.sourceClassificationSystem) === 'ABSHEER_PHASE_10_DETAIL_DOSSIER';
 
   return [{
     id: String(item.id ?? item.publicId ?? item.slug ?? ''),

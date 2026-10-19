@@ -200,7 +200,7 @@ export function CourseListPage() {
     let active = true;
     const load = async () => {
       const totals = await Promise.allSettled(
-        ['', '&status=PUBLISHED', '&originType=NATIVE_MANARATAK_COURSE', '&accessType=PAID'].map(
+        ['', '&status=PUBLISHED', '&originType=NATIVE_ABSHEER_COURSE', '&accessType=PAID'].map(
           (filter) =>
             adminApiClient.request<PaginatedResponse>(`/admin/courses?page=1&pageSize=1${filter}`),
         ),
@@ -309,8 +309,8 @@ export function CourseListPage() {
                 <option value="" className="text-slate-900">
                   {t('all_origins')}
                 </option>
-                <option value="NATIVE_MANARATAK_COURSE" className="text-slate-900">
-                  {t('native_manaratak')}
+                <option value="NATIVE_ABSHEER_COURSE" className="text-slate-900">
+                  {t('native_absheer')}
                 </option>
                 <option value="EXTERNAL_LINKED_COURSE" className="text-slate-900">
                   {t('external_linked')}
@@ -483,7 +483,7 @@ export function CourseListPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-black text-[#142B5F]">Create native MANARATAK course</h3>
+              <h3 className="font-black text-[#142B5F]">Create native ABSHEER course</h3>
               <p className="text-xs text-gray-500">
                 Creates a DRAFT native course and opens its canonical editor.
               </p>
@@ -579,7 +579,7 @@ export function CourseListPage() {
                       <td className="px-6 py-4">
                         <div className="font-medium text-gray-900">{course.displayName}</div>
                         <div className="text-gray-500 text-xs mt-1">
-                          {course.platformName || course.learningLanguage || 'MANARATAK'}
+                          {course.platformName || course.learningLanguage || 'ABSHEER'}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-gray-600">

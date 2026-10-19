@@ -22,11 +22,11 @@ describe('authoritative CMS sitemap discovery', () => {
         seoMetadata: { noIndex: true },
       },
     ]);
-    expect(await repo.listIndexableSitemapEntries('manaratak')).toEqual([
+    expect(await repo.listIndexableSitemapEntries('absheer')).toEqual([
       { contentId: 'cms-1', locale: 'ar', canonicalPath: '/ar/study-guides/arabic-guide' },
     ]);
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { siteIdentifier: 'manaratak', status: 'PUBLISHED' },
+      where: { siteIdentifier: 'absheer', status: 'PUBLISHED' },
       select: expect.objectContaining({ seoMetadata: true, canonicalUrl: true }),
       take: 50_001,
     }));
@@ -38,7 +38,7 @@ describe('authoritative CMS sitemap discovery', () => {
       contentType: 'NEWS', canonicalUrl: '/ar/news/different',
       seoMetadata: { noIndex: false },
     }]);
-    await expect(repo.listIndexableSitemapEntries('manaratak'))
+    await expect(repo.listIndexableSitemapEntries('absheer'))
       .rejects.toThrow('CMS_SITEMAP_CANONICAL_MISMATCH');
   });
 
@@ -48,7 +48,7 @@ describe('authoritative CMS sitemap discovery', () => {
       .rejects.toThrow('CMS_SITE_SCOPE_UNSUPPORTED');
     expect(findMany).not.toHaveBeenCalled();
     const huge = fake(Array(50_001).fill({}));
-    await expect(huge.repo.listIndexableSitemapEntries('manaratak'))
+    await expect(huge.repo.listIndexableSitemapEntries('absheer'))
       .rejects.toThrow('CMS_SITEMAP_SPLIT_REQUIRED');
   });
 });

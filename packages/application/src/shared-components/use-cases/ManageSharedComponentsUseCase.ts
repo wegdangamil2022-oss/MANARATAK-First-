@@ -18,7 +18,7 @@ import {
   ComponentVersionPublishedEvent,
   SharedComponentDeprecatedEvent,
   SharedComponentArchivedEvent
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   CreateSharedComponentDto,
   PublishComponentVersionDto,

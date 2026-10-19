@@ -6,13 +6,13 @@ import {
   CourseImportCompletenessState,
   CourseOriginType,
   CourseStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CertificateUseCases } from '../../src/certificates/use-cases/CertificateUseCases';
 
 const issuer = {
-  id: 'issuer-1', publicId: 'issuer-public-1', code: 'MNR', name: 'MANARATAK',
-  issuerType: 'MANARATAK', status: 'ACTIVE', issuerLogoAssetId: 'asset-logo-1',
-  signingKeyReference: 'kms://manaratak/certificate-signing', metadata: null,
+  id: 'issuer-1', publicId: 'issuer-public-1', code: 'MNR', name: 'ABSHEER',
+  issuerType: 'ABSHEER', status: 'ACTIVE', issuerLogoAssetId: 'asset-logo-1',
+  signingKeyReference: 'kms://absheer/certificate-signing', metadata: null,
   createdAt: new Date(), updatedAt: new Date(),
 } as const;
 
@@ -28,7 +28,7 @@ const version = {
 
 const template = {
   id: 'template-1', publicId: 'template-public-1', code: 'MNR-SIGNATURE',
-  name: 'MANARATAK Signature Certificate', nameAr: 'قالب', nameEn: 'Template',
+  name: 'ABSHEER Signature Certificate', nameAr: 'قالب', nameEn: 'Template',
   templateVersion: '1.0.0', status: CertificateTemplateStatus.ACTIVE, issuerId: issuer.id,
   issuerName: issuer.name, issuerReferenceId: issuer.publicId,
   language: version.language, layout: version.layout, accentColor: version.accentColor,
@@ -43,7 +43,7 @@ const template = {
 const course = {
   id: 'course-1', version: 3, publicId: 'course-public-1', slug: 'native-course', canonicalName: 'Native Course',
   canonicalDedupKey: 'native-course', displayName: 'Native Course', accessType: CourseAccessType.FREE_CERTIFICATE,
-  originType: CourseOriginType.NATIVE_MANARATAK_COURSE, directCourseUrl: '/courses/native-course',
+  originType: CourseOriginType.NATIVE_ABSHEER_COURSE, directCourseUrl: '/courses/native-course',
   status: CourseStatus.PUBLISHED, completenessStatus: CourseImportCompletenessState.COMPLETE,
   certificateAvailable: true, createdAt: new Date(), updatedAt: new Date(),
 };

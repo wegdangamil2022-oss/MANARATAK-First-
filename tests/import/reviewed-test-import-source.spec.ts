@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, readFile, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { internationalTestSourceHash } from '@manaratak/application';
+import { internationalTestSourceHash } from '@absheer/application';
 import { prepareReviewedTestImport, verifyReviewedTestSources } from '../../scripts/import/reviewed-test-import-source';
 import { runReviewedTestImport } from '../../scripts/import_unified_tests_v2';
 import { reviewBody } from '../../packages/application/tests/tests-platform/fixtures/reviewedTestImport';
@@ -13,7 +13,7 @@ afterEach(() => { vi.restoreAllMocks(); clientConstructor.mockClear(); });
 
 async function fixture() {
   // Keep ephemeral fixtures in the OS temp directory; no repository data changes.
-  const root = await mkdtemp(join(tmpdir(), 'manaratak-tests-import-'));
+  const root = await mkdtemp(join(tmpdir(), 'absheer-tests-import-'));
   const manifestFile = join(root, 'workspace/import-sources/international-tests/reconciliation/final_matching_data.json');
   const sourceRoot = join(root, 'workspace/import-sources/international-tests/unified-56');
   await mkdir(join(root, 'workspace/import-sources/international-tests/reconciliation'), { recursive: true });
@@ -52,7 +52,7 @@ describe('locked source loader and offline CLI', () => {
     await expect(prepareReviewedTestImport(f.review, f.root)).rejects.toThrow('SOURCE_ENCODING_INVALID');
   });
   it('rejects a directory junction/symlink escaping the approved source tree', async () => {
-    const f = await fixture(); const external = await mkdtemp(join(tmpdir(), 'manaratak-source-outside-'));
+    const f = await fixture(); const external = await mkdtemp(join(tmpdir(), 'absheer-source-outside-'));
     await writeFile(join(external, 'Test_2026.md'), f.rawContent);
     await symlink(external, join(f.sourceRoot, 'outside'), process.platform === 'win32' ? 'junction' : 'dir');
     const manifest = JSON.stringify({ matching_rows: [{ folder: 'outside', filename: 'Test_2026.md', classification: 'NEW_TEST' }] });

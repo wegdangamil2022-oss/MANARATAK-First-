@@ -118,7 +118,7 @@
       "access": "isolated-read-write",
       "environment": [
         "CERTIFICATE_RUNTIME_ISOLATED=1",
-        "DATABASE_URL local manaratak_certificate_verification",
+        "DATABASE_URL local absheer_certificate_verification",
         "DIRECT_URL equals DATABASE_URL"
       ],
       "gate": "Reject existing tables and nonisolated targets before migrate deploy",

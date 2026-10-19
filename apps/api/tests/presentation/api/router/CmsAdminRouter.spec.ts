@@ -1,8 +1,8 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { AdminCmsUseCases } from '@manaratak/application';
-import { AuthorizationEvaluatorService } from '@manaratak/domain';
+import { AdminCmsUseCases } from '@absheer/application';
+import { AuthorizationEvaluatorService } from '@absheer/domain';
 import { CmsAdminRouter } from '../../../../src/presentation/api/router/CmsAdminRouter';
 
 describe('Phase 16 CMS admin router', () => {
@@ -183,7 +183,7 @@ describe('Phase 16 CMS admin router', () => {
   it('requires viewer permission and restricts redirect search to site-scoped bounded filters', async () => {
     const cms = useCases();
     const query =
-      '/cms/redirects?siteIdentifier=manaratak&locale=en&q=guide&active=false&page=2&pageSize=10';
+      '/cms/redirects?siteIdentifier=absheer&locale=en&q=guide&active=false&page=2&pageSize=10';
     const denied = await request(app(cms, 'editor', ['admin:cms:author'])).get(query);
     expect(denied.status).toBe(403);
     expect(cms.searchRedirects).not.toHaveBeenCalled();
@@ -197,7 +197,7 @@ describe('Phase 16 CMS admin router', () => {
     const allowed = await request(app(cms, 'viewer', ['admin:cms:view'])).get(query);
     expect(allowed.status).toBe(200);
     expect(cms.searchRedirects).toHaveBeenCalledWith({
-      siteIdentifier: 'manaratak',
+      siteIdentifier: 'absheer',
       locale: 'en',
       q: 'guide',
       active: false,
@@ -324,7 +324,7 @@ describe('Phase 16 CMS admin router', () => {
       .send({ slug: 'arabic-guide', title: 'دليل عربي', contentType: 'ARTICLE' });
     expect(response.status).toBe(201);
     expect(cms.createContent).toHaveBeenCalledWith(
-      expect.objectContaining({ primaryLocale: 'ar', siteIdentifier: 'manaratak' }),
+      expect.objectContaining({ primaryLocale: 'ar', siteIdentifier: 'absheer' }),
       'editor-1',
     );
   });

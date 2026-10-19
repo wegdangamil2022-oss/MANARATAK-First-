@@ -33,11 +33,11 @@ describe('CMS related published selection', () => {
     // targets the owner selection boundary without a database or live provider.
     (owner as any).availableLocales = vi.fn().mockResolvedValue(new Map([['content-1', [{ locale: 'en', slug: 'guide' }]]]));
     (owner as any).publicContent = vi.fn((row: { contentId: string }) => ({ contentId: row.contentId }));
-    const results = await owner.listPublishedByDomainTarget('UNIVERSITY', 'target-1', 'en', 'manaratak', 6);
+    const results = await owner.listPublishedByDomainTarget('UNIVERSITY', 'target-1', 'en', 'absheer', 6);
     expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
     expect(prisma.cmsPublishedContent.findMany).toHaveBeenCalledWith(expect.objectContaining({
       where: {
-        contentId: { in: ['content-1'] }, siteIdentifier: 'manaratak',
+        contentId: { in: ['content-1'] }, siteIdentifier: 'absheer',
         locale: 'en', status: 'PUBLISHED',
       },
     }));
@@ -51,7 +51,7 @@ describe('CMS related published selection', () => {
       cmsPublishedContent: { findMany: vi.fn() },
     };
     const owner = new PrismaCmsRepository(prisma as unknown as PrismaClient);
-    expect(await owner.listPublishedByDomainTarget('COURSE', 'missing', 'ar', 'manaratak', 6)).toEqual([]);
+    expect(await owner.listPublishedByDomainTarget('COURSE', 'missing', 'ar', 'absheer', 6)).toEqual([]);
     expect(prisma.cmsPublishedContent.findMany).not.toHaveBeenCalled();
     expect(prisma.$queryRaw).not.toHaveBeenCalled();
   });

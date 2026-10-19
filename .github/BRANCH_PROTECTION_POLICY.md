@@ -1,7 +1,7 @@
-# MANARATAK `main` Branch Protection Policy
+# ABSHEER `main` Branch Protection Policy
 
 **Status:** REQUIRED EXTERNAL REPOSITORY CONFIGURATION  
-**Finding:** `MNT-AUD-0005`  
+**Finding:** `ABSH-AUD-0005`  
 **Source date:** 2026-09-06
 
 This file defines the repository setting that must be enforced on the actual GitHub `main` branch. It does not claim that branch protection is enabled merely because this file exists.
@@ -26,7 +26,7 @@ Use only status checks that actually exist and have been observed on the target 
 - `architecture-guards` / the Source Architecture Guards workflow;
 - `secret-scan` from the Security Gates workflow.
 
-Do not invent required-check names. Do not disable branch protection to bypass a broken verifier. `MNT-AUD-0048` owns expansion/correction of the full verifier set before final production handoff.
+Do not invent required-check names. Do not disable branch protection to bypass a broken verifier. `ABSH-AUD-0048` owns expansion/correction of the full verifier set before final production handoff.
 
 ## Emergency recovery
 
@@ -34,7 +34,7 @@ Repository-owner emergency recovery must remain possible through an explicit aud
 
 ## Closure evidence
 
-`MNT-AUD-0005` remains `BLOCKED_EXTERNAL` until evidence from the real repository shows:
+`ABSH-AUD-0005` remains `BLOCKED_EXTERNAL` until evidence from the real repository shows:
 
 - `main` protected/ruleset active;
 - required checks configured with exact existing contexts;

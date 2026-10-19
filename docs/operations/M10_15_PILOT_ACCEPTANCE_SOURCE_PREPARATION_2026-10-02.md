@@ -18,7 +18,7 @@ The 17 required cases and their expectations are defined in `scripts/import/M10P
 
 ```sh
 # On a clean checkout, compile the required source packages first:
-npm run build -w @manaratak/application
+npm run build -w @absheer/application
 
 # Offline: show a fresh template on stdout; keep operator evidence outside Git.
 npm run pilot:m10:template

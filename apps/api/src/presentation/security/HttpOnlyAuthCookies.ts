@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { AuthTokens } from '@manaratak/core';
+import { AuthTokens } from '@absheer/core';
 
-export const ACCESS_COOKIE_NAME = 'manaratak_access';
-export const REFRESH_COOKIE_NAME = 'manaratak_refresh';
-export const REMEMBER_ME_COOKIE_NAME = 'manaratak_remember';
+export const ACCESS_COOKIE_NAME = 'absheer_access';
+export const REFRESH_COOKIE_NAME = 'absheer_refresh';
+export const REMEMBER_ME_COOKIE_NAME = 'absheer_remember';
 
 type RuntimeEnv = Record<string, string | undefined>;
 
@@ -13,7 +13,7 @@ function isProductionLike(env: RuntimeEnv): boolean {
 
 function cookieOptions(env: RuntimeEnv) {
   const studioPreview = !isProductionLike(env) &&
-    (env.MANARATAK_RUNTIME_PROFILE === 'google-ai-studio' || env.MANARATAK_GOOGLE_AI_STUDIO === 'true');
+    (env.ABSHEER_RUNTIME_PROFILE === 'google-ai-studio' || env.ABSHEER_GOOGLE_AI_STUDIO === 'true');
   if (studioPreview) {
     // The explicit development iframe profile requires secure, partitioned cookies.
     return { httpOnly: true, secure: true, sameSite: 'none' as const, path: '/', partitioned: true };

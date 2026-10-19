@@ -1105,7 +1105,7 @@ export function ImportAdminPage({ fixedDomain }: { fixedDomain?: Exclude<DomainK
       const href = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = href;
-      link.download = `manaratak-import-errors-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.download = `absheer-import-errors-${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(link);
       link.click();
       link.remove();

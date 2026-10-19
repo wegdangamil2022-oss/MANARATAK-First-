@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-Centralized, searchable repository of all enterprise interfaces and API boundaries for MANARATAK 2.0.
+Centralized, searchable repository of all enterprise interfaces and API boundaries for ABSHEER 2.0.
 
 ## 2. Structure
 

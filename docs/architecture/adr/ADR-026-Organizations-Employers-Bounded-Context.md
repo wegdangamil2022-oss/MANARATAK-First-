@@ -39,7 +39,7 @@ An audit of Phase 07 (`phase-07-01-architectural-baseline.md`, `phase-07-02-doma
 
 Phase 07 holds zero business capability for managing B2B corporate profiles, employer verification workflows, sponsor agreements, organizational hierarchies, B2B multi-tenant memberships, or recruitment agency accounts.
 
-This creates a fundamental Data Ownership gap in the MANARATAK 2.0 Master Blueprint: business domain specifications depend on an "Organization Bounded Context" that lacks a dedicated, top-level Phase definition.
+This creates a fundamental Data Ownership gap in the ABSHEER 2.0 Master Blueprint: business domain specifications depend on an "Organization Bounded Context" that lacks a dedicated, top-level Phase definition.
 
 ---
 
@@ -66,7 +66,7 @@ Phase 07 is strictly confirmed as a **Pure Infrastructure Reference Layer**. Its
 
 ### 5.2 Formal Establishment of "Organizations & Employers Platform" Bounded Context
 
-The **Organizations & Employers Platform** is formally established as a sovereign Bounded Context and future Phase within the MANARATAK 2.0 Master Blueprint (designated as **Phase 18 / Bounded Context: Organizations & Employers**).
+The **Organizations & Employers Platform** is formally established as a sovereign Bounded Context and future Phase within the ABSHEER 2.0 Master Blueprint (designated as **Phase 18 / Bounded Context: Organizations & Employers**).
 
 The Organizations & Employers Platform shall serve as the sole Single Source of Truth (SSoT) for:
 

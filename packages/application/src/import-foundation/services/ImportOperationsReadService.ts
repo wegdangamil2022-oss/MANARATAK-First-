@@ -3,7 +3,7 @@ import {
   SourceStatus,
   DriftSeverity,
   MergeProposalStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { IImportOperationsReadService } from '../contracts/IImportOperationsReadService';
 import {
   ImportOperationsSummaryDto,

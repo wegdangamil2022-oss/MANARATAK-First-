@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ManageWorkflowsUseCase } from '@manaratak/application';
+import { ManageWorkflowsUseCase } from '@absheer/application';
 import {
   parseStrict,
   referenceParamSchema,

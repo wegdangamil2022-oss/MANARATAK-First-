@@ -2,7 +2,7 @@ import type {
   IReferenceDataRepository,
   IReferenceDataValidationService,
   ReferenceDataSeedBatch,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 /**
  * DELIBERATELY DISABLED (06.20 / 06.21).

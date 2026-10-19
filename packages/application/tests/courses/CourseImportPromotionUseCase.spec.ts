@@ -3,7 +3,7 @@ import {
   ICourseRepository,
   ImportRecordDto,
   ImportRecordStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseImportPromotionUseCase } from '../../src/courses/use-cases/CourseImportPromotionUseCase';
 
 describe('CourseImportPromotionUseCase', () => {

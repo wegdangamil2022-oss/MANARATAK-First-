@@ -5,7 +5,7 @@ import {
   UniversityStage2EnrichmentPayload,
   UniversityStage2Readiness,
   UniversalImportHandoff,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import type {
   UniversityStage1CountryResolver,
   UniversityStage1IdentityLookup,

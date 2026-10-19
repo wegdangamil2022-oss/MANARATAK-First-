@@ -30,7 +30,7 @@ import {
   FinancialAccountDto,
   WalletOperationsDto,
   normalizeFinancialAccountFilters,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 type Db = any;
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -2599,7 +2599,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
       return issues;
     });
   }
-  async getFinanceOverview(): Promise<import('@manaratak/domain').FinanceOverviewDto> {
+  async getFinanceOverview(): Promise<import('@absheer/domain').FinanceOverviewDto> {
     const [pendingPayments, pendingTransfers, pendingApprovals, snapshot] = await Promise.all([
       this.db.financePaymentRecord.count({ where: { status: { in: ['PENDING', 'AUTHORIZED'] } } }),
       this.db.financeTransferRecord.count({
@@ -2629,7 +2629,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
       attention: snapshot.issues,
     };
   }
-  async getFinancialReport(): Promise<import('@manaratak/domain').FinancialReportDto> {
+  async getFinancialReport(): Promise<import('@absheer/domain').FinancialReportDto> {
     return this.tx(async (tx) => {
       const aggregate = async (sql: string): Promise<Record<string, string>> =>
         Object.fromEntries(
@@ -2687,7 +2687,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
 
   async getStudentFinancialReadModel(
     studentReferenceId: string,
-  ): Promise<import('@manaratak/domain').StudentFinancialReadModelDto> {
+  ): Promise<import('@absheer/domain').StudentFinancialReadModelDto> {
     const summaryRows = await this.db
       .$queryRaw`SELECT COUNT(*)::int AS count, "currencyCode", SUM("dueMinorUnits"::numeric)::text AS units FROM "FinanceInvoiceRecord" WHERE "studentReferenceId"=${studentReferenceId} AND status NOT IN ('DRAFT','VOIDED') GROUP BY "currencyCode"`;
     const [invoiceRows, walletRows] = await Promise.all([

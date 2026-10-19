@@ -6,7 +6,7 @@ import {
   ScholarshipNamingService,
   type IImportHandoffConsumer,
   type UniversalImportHandoff,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import type {
   IScholarshipHandoffCanonicalScreening,
   IScholarshipHandoffDuplicateLookup,

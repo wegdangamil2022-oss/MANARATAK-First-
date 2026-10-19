@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ImportCheckpoint, ImportJobStatus, ImportTargetDomain, ImportRetryPolicy } from '@manaratak/domain';
+import { ImportCheckpoint, ImportJobStatus, ImportTargetDomain, ImportRetryPolicy } from '@absheer/domain';
 import { InMemoryImportQueueGateway } from '../../src/import-foundation/InMemoryImportQueueGateway';
 
 describe('InMemoryImportQueueGateway', () => {

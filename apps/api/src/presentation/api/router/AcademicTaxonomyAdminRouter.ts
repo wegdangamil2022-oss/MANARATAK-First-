@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { AdminAcademicTaxonomyUseCases, AdminMajorUseCases, DegreeLevelUseCases, AcademicTaxonomyOwnerImportUseCases, TAXONOMY_DIAGNOSTIC_CODES } from '@manaratak/application';
+import { AdminAcademicTaxonomyUseCases, AdminMajorUseCases, DegreeLevelUseCases, AcademicTaxonomyOwnerImportUseCases, TAXONOMY_DIAGNOSTIC_CODES } from '@absheer/application';
 import {
   AcademicTaxonomyNodeType,
   AcademicTaxonomyStatus,
@@ -8,7 +8,7 @@ import {
   AcademicMappingStrength,
   DegreeLevelStatus,
   IAuditRecordRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 
 export class AcademicTaxonomyAdminRouter {

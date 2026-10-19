@@ -1,7 +1,7 @@
 import { describe,it,expect,vi,afterEach } from 'vitest';
 import { PrismaInternationalTestRepository } from '../../src/international-tests/PrismaInternationalTestRepository';
 import { InternationalTestGovernancePersistence,internationalTestCandidateHash } from '../../src/international-tests/InternationalTestGovernancePersistence';
-import { InternationalTestPublicationReadinessPolicy } from '@manaratak/domain';
+import { InternationalTestPublicationReadinessPolicy } from '@absheer/domain';
 afterEach(()=>vi.restoreAllMocks());
 describe('P9 durable release boundary',()=>{
  it.each([['Variant','upsertVariant',{variantName:'v'}],['Section','upsertSection',{sectionName:'s'}],['FeeMetadata','upsertFeeMetadata',{amount:10}],['OfficialLink','upsertOfficialLink',{url:'https://official.test'}],['PreparationMaterial','upsertPreparationMaterial',{title:'Guide'}]])('cannot update another parent’s %s',async(model,method,data)=>{const update=vi.fn(async(args)=>{if(args.where.testId!=='B')throw new Error('OWNER_NOT_FOUND');return {};});const db:any={['internationalTest'+model]:{update}};const repo:any=new PrismaInternationalTestRepository(db,true);await expect(repo[method]('A',{...data,id:'child-B'})).rejects.toThrow('OWNER_NOT_FOUND');expect(update.mock.calls[0][0].where).toEqual({id:'child-B',testId:'A'});});

@@ -58,9 +58,9 @@ describe('RuntimeDependencyPolicy', () => {
   it('composes production-capable signed HTTP asset providers when all credentials are configured', () => {
     const env = {
       NODE_ENV: 'production',
-      MANARATAK_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.internal/api/',
-      MANARATAK_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
-      MANARATAK_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
+      ABSHEER_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.internal/api/',
+      ABSHEER_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
+      ABSHEER_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
     };
     const storage = createAssetStorageGatewayForRuntime(env) as any;
     const malwareScanner = createAssetMalwareScannerGatewayForRuntime(env) as any;
@@ -76,10 +76,10 @@ describe('RuntimeDependencyPolicy', () => {
   it('never permits insecure HTTP provider transport in production', () => {
     expect(() => createAssetStorageGatewayForRuntime({
       NODE_ENV: 'production',
-      MANARATAK_ASSET_PROVIDER_BASE_URL: 'http://asset-provider.internal/',
-      MANARATAK_ASSET_PROVIDER_API_KEY: 'key',
-      MANARATAK_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
-      MANARATAK_ASSET_PROVIDER_ALLOW_INSECURE_HTTP: 'true',
+      ABSHEER_ASSET_PROVIDER_BASE_URL: 'http://asset-provider.internal/',
+      ABSHEER_ASSET_PROVIDER_API_KEY: 'key',
+      ABSHEER_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
+      ABSHEER_ASSET_PROVIDER_ALLOW_INSECURE_HTTP: 'true',
     })).toThrow(/PROVIDER_HTTPS_REQUIRED/);
   });
 
@@ -93,10 +93,10 @@ describe('RuntimeDependencyPolicy', () => {
 
     const env = {
       NODE_ENV: 'production',
-      MANARATAK_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.internal/api/',
-      MANARATAK_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
-      MANARATAK_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
-      MANARATAK_IMPORT_RAW_RETENTION_DAYS: '365',
+      ABSHEER_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.internal/api/',
+      ABSHEER_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
+      ABSHEER_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
+      ABSHEER_IMPORT_RAW_RETENTION_DAYS: '365',
     };
     const productionStore = createImportRawSnapshotStoreForRuntime(env) as any;
     expect(productionStore.persistenceClassification).toBe('DURABLE');

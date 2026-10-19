@@ -64,5 +64,5 @@ if (fs.existsSync(path.join(distPath, 'index.html'))) {
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[MANARATAK Production Server] running on http://0.0.0.0:${PORT}`);
+  console.log(`[ABSHEER Production Server] running on http://0.0.0.0:${PORT}`);
 });

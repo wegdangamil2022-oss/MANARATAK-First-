@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { StudentDashboardSummaryDto } from '@manaratak/domain';
+import type { StudentDashboardSummaryDto } from '@absheer/domain';
 import { StudentDashboardHydrationService } from '../../src/students/use-cases/StudentDashboardHydrationService';
 import type { StudentWorkspaceUseCases } from '../../src/students/use-cases/StudentWorkspaceUseCases';
 

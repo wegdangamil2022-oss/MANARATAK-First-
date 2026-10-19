@@ -7,7 +7,7 @@ import {
   type IImportHandoffConsumer,
   type IUniversityRepository,
   type UniversalImportHandoff,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const ALLOWED_OWNER_DOMAINS = new Set(['UNIVERSITY', 'UNIVERSITIES']);
 

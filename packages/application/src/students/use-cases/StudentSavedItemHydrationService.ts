@@ -2,7 +2,7 @@ import {
   HydratedStudentSavedItemDto,
   IStudentSavedItemHydrationGateway,
   IStudentWorkspaceRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class StudentSavedItemHydrationService {
   constructor(

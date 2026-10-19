@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
-import { AIExecutionStatus, AuthorizationEvaluatorService } from '@manaratak/domain';
+import { AIExecutionStatus, AuthorizationEvaluatorService } from '@absheer/domain';
 import {
   AIExecutionOrchestrator,
   AIKnowledgeUseCases,
   AIPlatformAdminUseCases,
   AIEvaluationUseCases,
   AIWorkflowUseCases,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 const resourceSchema = z.enum([
   'providers',

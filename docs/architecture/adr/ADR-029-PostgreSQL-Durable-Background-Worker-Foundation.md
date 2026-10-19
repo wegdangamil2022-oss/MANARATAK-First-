@@ -6,13 +6,13 @@
 - **Title:** PostgreSQL Durable Background Worker Foundation
 - **Status:** Accepted
 - **Date:** 2026-09-06
-- **Decision Owner:** MANARATAK Architecture / Platform Workers
-- **Remediation Authority:** MNT-AUD-0007, MNT-AUD-0068
+- **Decision Owner:** ABSHEER Architecture / Platform Workers
+- **Remediation Authority:** ABSH-AUD-0007, ABSH-AUD-0068
 - **Related persistence authority:** ADR-028
 
 ## 2. Decision
 
-MANARATAK adopts a PostgreSQL-backed durable background-job queue as the canonical cross-cutting worker foundation for the modular monolith. This decision **supersedes only the BullMQ-specific task-queue line in ADR-025**. Redis remains part of the approved stack for capabilities that explicitly require it; BullMQ may be introduced later only through a new ADR for a demonstrated workload that benefits from a separate Redis queue authority.
+ABSHEER adopts a PostgreSQL-backed durable background-job queue as the canonical cross-cutting worker foundation for the modular monolith. This decision **supersedes only the BullMQ-specific task-queue line in ADR-025**. Redis remains part of the approved stack for capabilities that explicitly require it; BullMQ may be introduced later only through a new ADR for a demonstrated workload that benefits from a separate Redis queue authority.
 
 The canonical worker foundation owns job execution lifecycle. HTTP/operator control planes may enqueue, schedule, inspect and cancel jobs, but they may not directly mark a job started, completed or failed.
 

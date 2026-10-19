@@ -1,4 +1,4 @@
-import { ImportJobStatus, ImportTargetDomain } from '@manaratak/domain';
+import { ImportJobStatus, ImportTargetDomain } from '@absheer/domain';
 
 export interface EnqueueImportJobCommand {
   batchId: string;
@@ -44,7 +44,7 @@ export interface FailImportJobCommand {
   lease: ImportJobLease;
   reason: string;
   errorCode?: string;
-  retryPolicy: import('@manaratak/domain').ImportRetryPolicy;
+  retryPolicy: import('@absheer/domain').ImportRetryPolicy;
   now?: Date;
 }
 

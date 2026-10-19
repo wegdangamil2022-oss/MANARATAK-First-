@@ -42,12 +42,12 @@ for (const file of new Set(files)) {
   }
 }
 for (const name of required) add(name, 'packages/config/src/AppConfig.ts');
-for (const name of ['MANARATAK_GOOGLE_AI_STUDIO', 'MANARATAK_RUNTIME_PROFILE', 'VITE_API_URL',
+for (const name of ['ABSHEER_GOOGLE_AI_STUDIO', 'ABSHEER_RUNTIME_PROFILE', 'VITE_API_URL',
   'VITE_API_BASE_URL', 'VITE_PUBLIC_WEB_URL', 'VITE_ADMIN_URL', 'DIRECT_URL', 'DISABLE_HMR']) {
   add(name, 'docs/operations/GOOGLE_AI_STUDIO.md');
 }
 const defaults = {
-  MANARATAK_GOOGLE_AI_STUDIO: 'true', MANARATAK_RUNTIME_PROFILE: 'google-ai-studio',
+  ABSHEER_GOOGLE_AI_STUDIO: 'true', ABSHEER_RUNTIME_PROFILE: 'google-ai-studio',
   VITE_API_URL: '', VITE_API_BASE_URL: '', VITE_PUBLIC_WEB_URL: '', VITE_ADMIN_URL: '',
   VITE_PUBLIC_TEMPLATE_DATA_MODE: 'api', VITE_LOCAL_ADMIN_READ_ONLY: 'false',
   DISABLE_HMR: 'false',

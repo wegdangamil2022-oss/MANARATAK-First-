@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { Router, Request } from 'express';
 import { z } from 'zod';
-import { CareerEngagementUseCases } from '@manaratak/application';
-import { AlumniProfileVisibility, CareerProfileVisibility } from '@manaratak/domain';
+import { CareerEngagementUseCases } from '@absheer/application';
+import { AlumniProfileVisibility, CareerProfileVisibility } from '@absheer/domain';
 import { careerPaging, careerExpected, careerHandler, careerError } from './CareerHttp.js';
 /** Mounted only inside the authenticated, student-role, idempotent workspace router. */
 export function careerStudentRouter(useCases: CareerEngagementUseCases) {

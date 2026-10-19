@@ -13,7 +13,7 @@ describe('B08 bounded locale snapshots', () => {
     for (const name of ['getScholarships','getUniversities','getMajors','getServices','getCareerJobs']) expect(api[name]).toHaveBeenCalledOnce();
     expect(api.getScholarships).toHaveBeenCalledWith({ cursor: undefined, limit: 20 }, 'en');
     expect(api.getCourses).toHaveBeenCalledTimes(3);
-    for (const originType of ['EXTERNAL_LINKED_COURSE', 'NATIVE_MANARATAK_COURSE', 'PAID_COURSE']) expect(api.getCourses).toHaveBeenCalledWith({ originType, limit: 3 }, 'en');
+    for (const originType of ['EXTERNAL_LINKED_COURSE', 'NATIVE_ABSHEER_COURSE', 'PAID_COURSE']) expect(api.getCourses).toHaveBeenCalledWith({ originType, limit: 3 }, 'en');
     expect(api.getServices).toHaveBeenCalledWith({ limit: 20, locale: 'en' });
     expect(api.getCareerJobs).toHaveBeenCalledWith({ limit: 20, locale: 'en' });
     expect(api.getStudyDestinations).toHaveBeenCalledTimes(2);

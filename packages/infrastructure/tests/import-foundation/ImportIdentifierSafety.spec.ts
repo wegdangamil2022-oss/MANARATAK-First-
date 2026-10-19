@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PrismaImportRepository } from '../../src/import-foundation/PrismaImportRepository';
-import { ImportAdminUseCases } from '@manaratak/application';
+import { ImportAdminUseCases } from '@absheer/application';
 
 const fullId = /^(?:batch|rec)-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 

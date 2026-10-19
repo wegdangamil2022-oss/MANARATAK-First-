@@ -4,9 +4,9 @@ import express, { Express } from 'express';
 import {
   InMemoryAuditRecordRepository,
   InMemoryEmergencyAccessRepository,
-} from '@manaratak/infrastructure';
-import { ManageEmergencyAccessUseCase } from '@manaratak/application';
-import { AuditRecord, LifeStatus } from '@manaratak/domain';
+} from '@absheer/infrastructure';
+import { ManageEmergencyAccessUseCase } from '@absheer/application';
+import { AuditRecord, LifeStatus } from '@absheer/domain';
 import { AuthorizationAdminRouter } from '../../../src/presentation/api/router/AuthorizationAdminRouter';
 import { SettingsAdminRouter } from '../../../src/presentation/api/router/SettingsAdminRouter';
 import { IdentityRouter } from '../../../src/presentation/api/router/IdentityRouter';

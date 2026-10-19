@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
+import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@absheer/domain';
 import { AcquireImportSourceUseCase, SourceConnectorRegistry, type IImportRawSnapshotStore, type ISourceConnector, SourceHttpError } from '../../src';
 const source = new ImportSourceDefinition({ sourceId: 's1', displayName: 'S1', baseUrl: 'https://example.com/data', category: SourceConnectorCategory.OFFICIAL_API, accessClassification: SourceAccessClassification.PUBLIC_ALLOWED, status: SourceStatus.ACTIVE, connectorId: 'official-api', connectorVersion: '2.0.0' });
 describe('AcquireImportSourceUseCase', () => {

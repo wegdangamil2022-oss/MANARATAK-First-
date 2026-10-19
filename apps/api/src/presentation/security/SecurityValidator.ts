@@ -1,4 +1,4 @@
-import { ISecurityService, IRateLimiter } from '@manaratak/core';
+import { ISecurityService, IRateLimiter } from '@absheer/core';
 
 export class SecurityValidator {
   public static isRealRateLimiter(rateLimiter?: IRateLimiter | null): boolean {

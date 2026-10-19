@@ -1,4 +1,4 @@
-import { RetentionCandidate, RetentionDecision, RetentionDisposition, RetentionOwner, decideRetention } from '@manaratak/domain';
+import { RetentionCandidate, RetentionDecision, RetentionDisposition, RetentionOwner, decideRetention } from '@absheer/domain';
 
 export interface IRetentionOwnerGateway {
   readonly owner: RetentionOwner;

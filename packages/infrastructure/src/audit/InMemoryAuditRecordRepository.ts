@@ -1,5 +1,5 @@
-import { ISpecification } from '@manaratak/core';
-import { IAuditRecordRepository, AuditRecord, ContextMetadata, AuditRecordPageQuery, AuditRecordPage, AuditIntegrityReport, AuditIntegrityQuery } from '@manaratak/domain';
+import { ISpecification } from '@absheer/core';
+import { IAuditRecordRepository, AuditRecord, ContextMetadata, AuditRecordPageQuery, AuditRecordPage, AuditIntegrityReport, AuditIntegrityQuery } from '@absheer/domain';
 import { AuditSecretSanitizer } from './AuditSecretSanitizer';
 
 export class InMemoryAuditRecordRepository implements IAuditRecordRepository {

@@ -15,7 +15,7 @@ function loadTsModule(relPath, requireMap = {}) {
   const js = ts.transpileModule(read(relPath), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   const module = { exports: {} };
   const wrapper = vm.runInThisContext(`(function(require,exports,module){${js}\n})`, { filename: relPath });
-  wrapper((id) => { if(id in requireMap) return requireMap[id]; if(id.startsWith('node:') || id==='@manaratak/application') return require(id); if(id.startsWith('.')) return loadTsModule(path.relative(root,path.resolve(root,path.dirname(relPath),id+'.ts')),requireMap); throw new Error(`UNEXPECTED_REQUIRE:${id}`); }, module.exports, module);
+  wrapper((id) => { if(id in requireMap) return requireMap[id]; if(id.startsWith('node:') || id==='@absheer/application') return require(id); if(id.startsWith('.')) return loadTsModule(path.relative(root,path.resolve(root,path.dirname(relPath),id+'.ts')),requireMap); throw new Error(`UNEXPECTED_REQUIRE:${id}`); }, module.exports, module);
   return module.exports;
 }
 
@@ -35,9 +35,9 @@ function createTxMock(models) {
   return client;
 }
 
-test('MNT-AUD-0096 service catalog/request mutations use id+version CAS and increment monotonically', async () => {
+test('ABSH-AUD-0096 service catalog/request mutations use id+version CAS and increment monotonically', async () => {
   const { PrismaServicePlatformRepository } = loadTsModule('packages/infrastructure/src/services-platform/PrismaServicePlatformRepository.ts', {
-    '@manaratak/domain': serviceDomain, '@prisma/client': {Prisma:{DbNull:{mockDbNull:true}}}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
+    '@absheer/domain': serviceDomain, '@prisma/client': {Prisma:{DbNull:{mockDbNull:true}}}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
   });
   const calls = [];
   const catalog = {
@@ -56,9 +56,9 @@ test('MNT-AUD-0096 service catalog/request mutations use id+version CAS and incr
   assert.equal(svc.version, 5); assert.equal(req.version, 8);
 });
 
-test('MNT-AUD-0096 service stale writes fail with canonical version conflict', async () => {
+test('ABSH-AUD-0096 service stale writes fail with canonical version conflict', async () => {
   const { PrismaServicePlatformRepository } = loadTsModule('packages/infrastructure/src/services-platform/PrismaServicePlatformRepository.ts', {
-    '@manaratak/domain': serviceDomain, '@prisma/client': {Prisma:{DbNull:{mockDbNull:true}}}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
+    '@absheer/domain': serviceDomain, '@prisma/client': {Prisma:{DbNull:{mockDbNull:true}}}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
   });
   const stale = Object.assign(new Error('not found'), { code:'P2025' });
   const repo = new PrismaServicePlatformRepository(createTxMock({ serviceCatalogRecord:{ update:async()=>{throw stale;} }, serviceProviderRecord:{findUnique:async()=>({status:'QUALIFIED',capacity:1})}, serviceRequestRecord:{count:async()=>0, update:async()=>{throw stale;} } }));
@@ -66,10 +66,10 @@ test('MNT-AUD-0096 service stale writes fail with canonical version conflict', a
   await assert.rejects(repo.assignProvider('req','provider',1), /SERVICE_REQUEST_VERSION_CONFLICT/);
 });
 
-test('MNT-AUD-0096 career employer/job mutations use id+version CAS and stale writes fail closed', async () => {
+test('ABSH-AUD-0096 career employer/job mutations use id+version CAS and stale writes fail closed', async () => {
   const careerDomain = { CareerEmployerStatus:{VERIFIED:'VERIFIED'}, CareerJobStatus:{ARCHIVED:'ARCHIVED',PUBLISHED:'PUBLISHED'} };
   const { PrismaCareerRepository } = loadTsModule('packages/infrastructure/src/career-alumni/PrismaCareerRepository.ts', {
-    '@manaratak/domain': careerDomain, '@prisma/client': {Prisma:{DbNull:{mockDbNull:true}}}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
+    '@absheer/domain': careerDomain, '@prisma/client': {Prisma:{DbNull:{mockDbNull:true}}}, 'node:crypto': { randomUUID }, '../api-foundation/StableCursor': stableCursorModule,
   });
   const seen=[];
   const employer={findUnique:async()=>({id:'e',version:2,metadata:{_career:{makerActorId:'maker'}}}), update:async(args)=>{seen.push(args); return {id:'e',version:3,publicId:'ep',slug:'e',canonicalName:'e',canonicalDedupKey:'e',displayName:'E',employerType:'X',verificationStatus:'VERIFIED',createdAt:new Date(),updatedAt:new Date()};} };
@@ -85,7 +85,7 @@ test('MNT-AUD-0096 career employer/job mutations use id+version CAS and stale wr
   await assert.rejects(repo.updateJobStatus('j','ARCHIVED',5),/CAREER_JOB_VERSION_CONFLICT/);
 });
 
-test('MNT-AUD-0096 HTTP/Admin boundaries require expectedVersion and display current version', () => {
+test('ABSH-AUD-0096 HTTP/Admin boundaries require expectedVersion and display current version', () => {
   const serviceRouter=read('apps/api/src/presentation/api/router/ServiceAdminRouter.ts');
   const careerRouter=read('apps/api/src/presentation/api/router/CareerAdminRouter.ts');
   const servicePage=read('apps/admin/src/pages/ServicesAdminPage.tsx');

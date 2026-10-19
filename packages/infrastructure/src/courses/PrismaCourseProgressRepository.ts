@@ -20,7 +20,7 @@ import {
   ITransactionalCourseProgressRepository,
   StudentCourseProgressSnapshotDto,
   UpsertLessonProgressDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 interface CourseProgressTransactionContext extends AtomicPersistenceContext {
   readonly transactionClient: Prisma.TransactionClient;

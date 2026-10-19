@@ -1,5 +1,5 @@
-import type { IImportHandoffConsumer, UniversalImportHandoff } from '@manaratak/domain';
-import { isSupportedLocale } from '@manaratak/shared';
+import type { IImportHandoffConsumer, UniversalImportHandoff } from '@absheer/domain';
+import { isSupportedLocale } from '@absheer/shared';
 import {
   ITranslationImportGateway,
   TranslationCanonicalEntityKind,

@@ -9,14 +9,14 @@ function installed() {
   return [
     {
       tableName: 'AssetRecord', triggerName:'eap_asset_lifecycle_student_document',enabled:'O',type:27,
-      functionName:'manaratak_guard_student_document_asset_lifecycle',argumentsHex:'',columns:['id','lifecycleState'],replicationRole:'origin',
+      functionName:'absheer_guard_student_document_asset_lifecycle',argumentsHex:'',columns:['id','lifecycleState'],replicationRole:'origin',
     },
     {
       tableName: 'AssetRecord',
       triggerName: 'eap_asset_lifecycle_certificate_delegation',
       enabled: 'O',
       type: 27,
-      functionName: 'manaratak_guard_certificate_delegation_evidence_lifecycle',
+      functionName: 'absheer_guard_certificate_delegation_evidence_lifecycle',
       argumentsHex: '',
       columns: ['lifecycleState'],
       replicationRole: 'origin',
@@ -26,7 +26,7 @@ function installed() {
       triggerName: 'eap_asset_reference_lifecycle',
       enabled: 'O',
       type: 27,
-      functionName: 'manaratak_protect_asset_references',
+      functionName: 'absheer_protect_asset_references',
       argumentsHex: '',
       columns: [],
       replicationRole: 'origin',
@@ -36,7 +36,7 @@ function installed() {
       triggerName: 'eap_asset_restore_barrier',
       enabled: 'O',
       type: 27,
-      functionName: 'manaratak_protect_pending_asset_restore',
+      functionName: 'absheer_protect_pending_asset_restore',
       argumentsHex: '',
       columns: [],
       replicationRole: 'origin',
@@ -46,7 +46,7 @@ function installed() {
       triggerName: 'eap_asset_archive_barrier',
       enabled: 'O',
       type: 27,
-      functionName: 'manaratak_protect_pending_asset_archive',
+      functionName: 'absheer_protect_pending_asset_archive',
       argumentsHex: '',
       columns: [],
       replicationRole: 'origin',
@@ -56,7 +56,7 @@ function installed() {
       triggerName: 'eap_asset_reference_owner',
       enabled: 'O',
       type: 23,
-      functionName: 'manaratak_require_active_asset_reference',
+      functionName: 'absheer_require_active_asset_reference',
       argumentsHex: Buffer.from(
         [
           owner.fields.join(','),

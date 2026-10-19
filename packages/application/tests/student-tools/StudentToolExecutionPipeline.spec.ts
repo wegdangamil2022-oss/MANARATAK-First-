@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
-import { StudentToolExecutionStatus } from '@manaratak/domain';
+import { StudentToolExecutionStatus } from '@absheer/domain';
 import { OFFICIAL_STUDENT_TOOLS } from '../../src/student-tools/OfficialStudentToolRegistry';
 import { StudentToolExecutionUseCases } from '../../src/student-tools/use-cases/StudentToolExecutionUseCases';
 

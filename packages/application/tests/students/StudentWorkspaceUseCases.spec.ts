@@ -3,7 +3,7 @@ import {
   IStudentWorkspaceRepository,
   StudentSavedItemType,
   StudentWorkspaceStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { StudentWorkspaceUseCases } from '../../src/students/use-cases/StudentWorkspaceUseCases';
 
 describe('StudentWorkspaceUseCases', () => {

@@ -40,7 +40,7 @@ async function runLinkage() {
   const isDryRun = args.includes('--dry-run') || !args.includes('--execute');
 
   console.log('================================================================');
-  console.log('MANARATAK STEP 8.7 - MAJOR <-> TAXONOMY SAFE LINKAGE & BACKFILL');
+  console.log('ABSHEER STEP 8.7 - MAJOR <-> TAXONOMY SAFE LINKAGE & BACKFILL');
   console.log(`Mode: ${isDryRun ? 'DRY-RUN (No DB updates)' : 'LIVE EXECUTION'}`);
   console.log('================================================================\n');
 
@@ -246,7 +246,7 @@ async function runLinkage() {
   console.log(`Database Status: ${dbStatus}\n`);
 
   // 5. Generate Markdown Report
-  const reportContent = `# MANARATAK — PHASE 8 STEP 8.7
+  const reportContent = `# ABSHEER — PHASE 8 STEP 8.7
 ## MAJOR ↔ TAXONOMY SAFE LINKAGE & DEGREE LEVEL BACKFILL AUDIT REPORT
 
 **Date:** ${new Date().toISOString()}  
@@ -257,7 +257,7 @@ async function runLinkage() {
 
 ### 1. EXECUTIVE SUMMARY
 
-Step 8.7 successfully executed the canonical **Degree Level Backfill** and the **Taxonomy Resolution Service** audit across all 3,402 catalog items and 3,083 MajorLevelProfiles in the MANARATAK catalog index.
+Step 8.7 successfully executed the canonical **Degree Level Backfill** and the **Taxonomy Resolution Service** audit across all 3,402 catalog items and 3,083 MajorLevelProfiles in the ABSHEER catalog index.
 
 #### Core Results:
 1. **Degree Level Backfill Success Rate:** **100%** (3,083 / 3,083 existing profiles mapped to canonical DegreeLevel entities: \`BACHELOR\`, \`MASTER\`, \`DOCTORATE\`, \`FELLOWSHIP\`).

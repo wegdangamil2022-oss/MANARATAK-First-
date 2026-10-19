@@ -1,5 +1,5 @@
 import type { HomeCatalogStatus, HomeCoursePreviews } from './homeCatalogState';
-import { mapInternationalTestToExam } from '@manaratak/ui';
+import { mapInternationalTestToExam } from '@absheer/ui';
 import {
   ApiClient,
   type PublicCareerJobDto,
@@ -211,7 +211,7 @@ export function classifyCourseTrack(
   dto: Pick<PublicCourseDto, 'originType' | 'accessType'>,
 ): PublicCourseTrack {
   if (dto.accessType === 'PAID') return 'paid';
-  if (dto.originType === 'NATIVE_MANARATAK_COURSE') return 'native';
+  if (dto.originType === 'NATIVE_ABSHEER_COURSE') return 'native';
   return 'imported';
 }
 
@@ -230,7 +230,7 @@ export function mapCourse(dto: PublicCourseDto): {
         : /all|جميع/.test(levelRaw)
           ? 'جميع المستويات'
           : 'غير محدد رسميًا';
-  const provider = dto.providerName ?? dto.platformName ?? 'منارتك';
+  const provider = dto.providerName ?? dto.platformName ?? 'أبشر';
   const track = classifyCourseTrack(dto);
   const course: Course = {
     id: dto.slug,
@@ -425,7 +425,7 @@ export function mapArticle(dto: PublicCmsContentDto): PublicArticle {
     contentType,
     contentTypeLabelAr: contentType === 'NEWS' ? 'خبر' : contentType === 'STUDY_GUIDE' ? 'دليل دراسي' : contentType === 'CHECKLIST' ? 'قائمة تحقق' : contentType === 'FAQ' ? 'أسئلة شائعة' : contentType === 'STATIC_PAGE' ? 'صفحة ثابتة' : contentType === 'LANDING_PAGE' ? 'صفحة هبوط' : 'مقال',
     categoryAr: dto.categorySlug ?? 'محتوى',
-    author: 'منارتك',
+    author: 'أبشر',
     updatedAt: dto.publishedAt,
     readingTime: dto.localizedPayload?.readingTimeMinutes ? `${dto.localizedPayload.readingTimeMinutes} دقائق` : undefined,
     excerptAr: dto.summary ?? plain.slice(0, 220),
@@ -616,7 +616,7 @@ export async function loadPublishedCourses(locale: PublicLiveLocale = 'ar'): Pro
   importedCourses: ImportedCourse[];
   homeCoursePreviews: HomeCoursePreviews;
 }> {
-  const origins = ['EXTERNAL_LINKED_COURSE', 'NATIVE_MANARATAK_COURSE', 'PAID_COURSE'] as const;
+  const origins = ['EXTERNAL_LINKED_COURSE', 'NATIVE_ABSHEER_COURSE', 'PAID_COURSE'] as const;
   const results = await Promise.allSettled(origins.map(async originType => {
     const page = await ApiClient.getCourses({ originType, limit: 3 }, locale);
     return page.data.filter(dto => dto.originType === originType).map(mapCourse);

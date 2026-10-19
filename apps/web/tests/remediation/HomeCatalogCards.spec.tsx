@@ -58,11 +58,11 @@ describe('home catalog design survives owner states', () => {
     locale.value = language; const dict = language === 'ar' ? ar : en;
     const html = render(<FeaturedCourses courses={[]} status="empty" onViewAllClick={noop} />);
     expect(html).toContain('featured-courses-section'); expect(html).toContain('btn-view-all-courses');
-    expect(html).toContain(dict.public_global_platforms); expect(html).toContain(dict.public_manaratak_courses);
+    expect(html).toContain(dict.public_global_platforms); expect(html).toContain(dict.public_absheer_courses);
     expect(html.match(/data-catalog-slot="courses"/g)).toHaveLength(3); expect(html).toContain('/preview-art/courses.svg');
   });
   it('keeps global failure independent of native published records and native empty independent of global records', async () => {
-    const select = vi.fn(); const native = course('NATIVE_MANARATAK_COURSE'); const global = course();
+    const select = vi.fn(); const native = course('NATIVE_ABSHEER_COURSE'); const global = course();
     const view = await mount(<FeaturedCourses courses={[]} previews={{ global: { status: 'unavailable', courses: [] }, native: { status: 'ready', courses: [native] } }} onRetry={noop} onSelectCourse={select} onViewAllClick={noop} />);
     expect(JSON.stringify(view.toJSON())).toContain(ar.public_home_catalog_unavailable);
     const nativeTab = () => view.root.findAllByType('button').find(n => n.props['aria-controls'] === 'home-course-cards' && n.props['aria-pressed'] === false)!;

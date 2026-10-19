@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { PrismaAcademicTaxonomyRepository } from '../../src/academic-taxonomy/PrismaAcademicTaxonomyRepository';
-import { AcademicStandardType, AcademicTaxonomyNodeType, AcademicTaxonomyStatus } from '@manaratak/domain';
+import { AcademicStandardType, AcademicTaxonomyNodeType, AcademicTaxonomyStatus } from '@absheer/domain';
 const revision = '2026-10-09T00:00:00.000Z';
 const data = { nodeType: AcademicTaxonomyNodeType.ACADEMIC_FIELD, canonicalCode: '06', canonicalName: 'ICT',
   standardType: AcademicStandardType.ISCED, status: AcademicTaxonomyStatus.ACTIVE };

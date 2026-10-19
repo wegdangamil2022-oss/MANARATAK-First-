@@ -9,8 +9,8 @@ import {
   Role,
   PermissionReference,
   RoleAssignment,
-} from '@manaratak/domain';
-import { ListIdentitiesUseCase } from '@manaratak/application';
+} from '@absheer/domain';
+import { ListIdentitiesUseCase } from '@absheer/application';
 import { InMemoryIdentityRepository } from '../../src/identity/InMemoryIdentityRepository';
 import { PrismaIdentityRepository } from '../../src/identity/PrismaIdentityRepository';
 import { InMemoryRoleRepository } from '../../src/authorization/InMemoryRoleRepository';

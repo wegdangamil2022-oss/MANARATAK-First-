@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import type { GovernedReferenceEntityType } from '@manaratak/domain';
+import type { GovernedReferenceEntityType } from '@absheer/domain';
 /** Reviewed scalar-code inventory. No fuzzy names, JSON inference or ID rewrites.
  * Counts exclude matching FK-backed relations when that FK is present.
  */

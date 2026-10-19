@@ -4,7 +4,7 @@ import {
   StudentToolExecutionContext,
   StudentToolExecutionStatus,
   StudentToolHandlerRegistry,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   GpaCalculatorHandler,
   MotivationLetterGeneratorHandler,

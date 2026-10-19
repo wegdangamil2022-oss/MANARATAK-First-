@@ -22,7 +22,7 @@ import {
   UpdateUniversityDto,
   MajorStatus,
   isPublicUniversityProgram,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { UniversityCanonicalRelationshipValidator } from './UniversityCanonicalRelationshipValidator';
 
 import {
@@ -534,7 +534,7 @@ export class PrismaUniversityRepository implements ITransactionalUniversityRepos
     const base = Prisma.sql`FROM "UniversityAcademicProgram" p JOIN "University" u ON u.id=p."universityId" JOIN "Major" m ON m.id=p."majorId" WHERE ${Prisma.join(conditions, ' AND ')}`;
     const [rows, counts] = await Promise.all([
       this.prisma.$queryRaw<
-        Array<import('@manaratak/domain').PublishedAcademicProgramReadModel>
+        Array<import('@absheer/domain').PublishedAcademicProgramReadModel>
       >(Prisma.sql`
         SELECT p.id AS "ownerId", p."sourceProgramName", p."degreeLevelId", p."majorId", p."majorMappingState", p.status,
           u.id AS "universityOwnerId", u."publicId" AS "universityPublicId", u.slug AS "universitySlug", u."displayName" AS "universityDisplayName",

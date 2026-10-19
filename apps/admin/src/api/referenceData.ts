@@ -6,7 +6,7 @@ import type {
   AdministrativeRegionDto, UpsertAdministrativeRegionDto, ReferenceLifecycleState, ReferenceVersionDto,
   ReferenceGovernanceDetails, ReferenceRelationshipDto, ReferenceCityQualityCounters, GovernedReferenceEntityType, ReferenceDependencyImpact,
   ReferenceImportScreeningReviewPage, ReferenceHistoryPage,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { adminApiClient, type AdminRequestOptions } from './client';
 
 const base = '/admin/reference-data';

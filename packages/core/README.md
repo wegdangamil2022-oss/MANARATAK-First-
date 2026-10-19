@@ -1,8 +1,8 @@
-# @manaratak/core
+# @absheer/core
 
 ## Core Architectural Foundation
 
-**Purpose**: Provides the fundamental structural scaffolding, architectural patterns, and foundational interfaces required to build a MANARATAK application. It represents the "framework" level of the platform.
+**Purpose**: Provides the fundamental structural scaffolding, architectural patterns, and foundational interfaces required to build a ABSHEER application. It represents the "framework" level of the platform.
 
 ### Allowed Contents
 - Architectural Base Classes (`Entity`, `ValueObject`, `AggregateRoot`).
@@ -17,6 +17,6 @@
 
 ### Dependency Rules
 - Sits at the absolute bottom of the dependency graph.
-- **MUST NOT** depend on `@manaratak/shared` or any bounded context.
+- **MUST NOT** depend on `@absheer/shared` or any bounded context.
 
 *For the complete specification, see `docs/architecture/standards/std-arc-002-core-vs-shared-boundaries.md`.*

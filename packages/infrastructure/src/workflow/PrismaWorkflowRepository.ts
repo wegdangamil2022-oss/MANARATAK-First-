@@ -13,7 +13,7 @@ import {
   WorkflowStateDefinition,
   WorkflowTransitionDefinition,
   WorkflowVersion,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 type WorkflowSnapshot = {
   id: string;

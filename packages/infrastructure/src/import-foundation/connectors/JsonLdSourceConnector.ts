@@ -1,4 +1,4 @@
-import { SourceConnectorCategory } from '@manaratak/domain';
+import { SourceConnectorCategory } from '@absheer/domain';
 import { BaseSourceConnector } from './BaseSourceConnector';
 
 export class JsonLdSourceConnector extends BaseSourceConnector {

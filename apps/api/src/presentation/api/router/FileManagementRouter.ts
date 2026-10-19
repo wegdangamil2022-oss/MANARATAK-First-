@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { ManageFilesUseCase } from '@manaratak/application';
+import { ManageFilesUseCase } from '@absheer/application';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import {
   fileActivateSchema,

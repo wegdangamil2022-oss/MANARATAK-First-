@@ -1,4 +1,4 @@
-import type { ImportSourceDefinition } from '@manaratak/domain';
+import type { ImportSourceDefinition } from '@absheer/domain';
 
 export type ScholarshipSourceStatus = 'ACTIVE' | 'DISABLED' | 'NOT_CONFIGURED';
 

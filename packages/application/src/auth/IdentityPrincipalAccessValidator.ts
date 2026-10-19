@@ -1,5 +1,5 @@
-import { IPrincipalAccessValidator } from '@manaratak/core';
-import { AccountAccessState, IIdentityRepository, IPasswordCredentialRepository, LifeStatus } from '@manaratak/domain';
+import { IPrincipalAccessValidator } from '@absheer/core';
+import { AccountAccessState, IIdentityRepository, IPasswordCredentialRepository, LifeStatus } from '@absheer/domain';
 
 /**
  * Canonical authentication eligibility policy for human/service identities.

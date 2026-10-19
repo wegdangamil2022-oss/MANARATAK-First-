@@ -1,4 +1,4 @@
-import type { AtomicPersistenceContext, UniversalImportHandoff } from '@manaratak/domain';
+import type { AtomicPersistenceContext, UniversalImportHandoff } from '@absheer/domain';
 export interface ImportMappingField { target: string; aliases: string[]; type: 'string' | 'number' | 'boolean'; required: boolean; }
 export interface ImportMappingDefinition { fields: ImportMappingField[]; }
 export interface ImportMappingProfileDto { id: string; sourceId: string; ownerDomain: string; version: number;

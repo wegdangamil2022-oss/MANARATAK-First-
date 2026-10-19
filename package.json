@@ -1,5 +1,5 @@
 {
-  "name": "manaratak-2.0-monorepo",
+  "name": "absheer-2.0-monorepo",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,7 +8,7 @@
     "dev": "node scripts/aistudio/run.mjs web dev",
     "dev:aistudio": "node scripts/aistudio/run.mjs web dev",
     "dev:admin": "node scripts/aistudio/run.mjs admin dev",
-    "dev:full": "npm run dev -w @manaratak/web",
+    "dev:full": "npm run dev -w @absheer/web",
     "build:aistudio": "node scripts/aistudio/run.mjs web build",
     "verify:aistudio": "node scripts/aistudio/verify.mjs",
     "build": "npm run build --workspaces --if-present",

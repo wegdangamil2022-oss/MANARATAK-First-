@@ -21,10 +21,10 @@ test('canonical preflight headers include idempotency and correlation contracts'
 
 test('canonical origins include distinct public and admin applications and deduplicate', () => {
   const origins = buildCanonicalCorsOrigins({
-    corsOrigin: 'https://app.manaratak.org',
-    publicWebUrl: 'https://app.manaratak.org',
-    adminWebUrl: 'https://admin.manaratak.org',
-    additionalOrigins: 'https://partner.example, https://admin.manaratak.org',
+    corsOrigin: 'https://app.absheer.org',
+    publicWebUrl: 'https://app.absheer.org',
+    adminWebUrl: 'https://admin.absheer.org',
+    additionalOrigins: 'https://partner.example, https://admin.absheer.org',
   });
-  assert.deepEqual([...origins], ['https://app.manaratak.org', 'https://admin.manaratak.org', 'https://partner.example']);
+  assert.deepEqual([...origins], ['https://app.absheer.org', 'https://admin.absheer.org', 'https://partner.example']);
 });

@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import type { IMajorConsumerReadGateway, MajorConsumerPage, MajorConsumerQuery } from '@manaratak/domain';
+import type { IMajorConsumerReadGateway, MajorConsumerPage, MajorConsumerQuery } from '@absheer/domain';
 /** P12-owned read model of explicit targets and eligibility. Unresolved labels are never inferred matches. */
 export class PrismaMajorScholarshipUsageGateway implements IMajorConsumerReadGateway {
   constructor(private readonly prisma: PrismaClient) {}

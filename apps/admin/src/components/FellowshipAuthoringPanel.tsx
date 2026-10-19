@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import type {MajorDto, MajorContentSectionDto} from '@manaratak/domain';
+import type {MajorDto, MajorContentSectionDto} from '@absheer/domain';
 import {adminApiClient} from '../api/client';
 import {canonicalPickerApi} from '../api/canonicalPickers';
 import {CanonicalPicker} from './CanonicalPicker';

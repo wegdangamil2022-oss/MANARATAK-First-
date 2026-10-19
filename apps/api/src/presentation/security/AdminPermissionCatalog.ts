@@ -1,1 +1,1 @@
-export { KNOWN_ADMIN_PERMISSIONS } from '@manaratak/shared';
+export { KNOWN_ADMIN_PERMISSIONS } from '@absheer/shared';

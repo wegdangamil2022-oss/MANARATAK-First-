@@ -1,11 +1,11 @@
-import type { MfaUseCases } from '@manaratak/application';
+import type { MfaUseCases } from '@absheer/application';
 import { Request, Response, NextFunction } from 'express';
 import {
   IPrincipalAccessValidator,
   ISessionManager,
   ITokenProvider,
   UnauthorizedException,
-} from '@manaratak/core';
+} from '@absheer/core';
 import { readAccessCookie } from '../security/HttpOnlyAuthCookies.js';
 
 // Extend Express Request

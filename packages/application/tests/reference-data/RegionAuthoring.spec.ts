@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ReferenceLifecycleState } from '@manaratak/domain';
+import { ReferenceLifecycleState } from '@absheer/domain';
 import { ReferenceDataUseCases } from '../../src/reference-data/use-cases/ReferenceDataUseCases';
 import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
 

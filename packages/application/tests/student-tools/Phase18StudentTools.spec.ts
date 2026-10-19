@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { GpaCalculatorHandler, MotivationLetterGeneratorHandler, OFFICIAL_STUDENT_TOOLS, ScholarshipRecommendationHandler, UniversityComparisonHandler } from '../../src/student-tools';
-import { StudentToolExecutionContext } from '@manaratak/domain';
+import { StudentToolExecutionContext } from '@absheer/domain';
 
 const context: StudentToolExecutionContext = {
   executionId: 'stx_test',

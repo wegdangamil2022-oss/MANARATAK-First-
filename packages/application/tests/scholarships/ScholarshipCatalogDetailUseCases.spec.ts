@@ -8,7 +8,7 @@ import {
   ScholarshipVerificationStatus,
   type IScholarshipRepository,
   type ScholarshipDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AdminScholarshipUseCases } from '../../src/scholarships/use-cases/AdminScholarshipUseCases';
 
 const mutationContext = { actorId: 'reviewer-1', reason: 'Reviewed catalog correction', expectedRevision: 1 };

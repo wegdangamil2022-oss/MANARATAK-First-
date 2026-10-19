@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AdminAcademicTaxonomyUseCases } from '../../src/academic-taxonomy/use-cases/AdminAcademicTaxonomyUseCases';
-import { AcademicStandardType, AcademicTaxonomyNodeType, AcademicTaxonomyStatus } from '@manaratak/domain';
+import { AcademicStandardType, AcademicTaxonomyNodeType, AcademicTaxonomyStatus } from '@absheer/domain';
 const revision = '2026-10-09T00:00:00.000Z';
 const node = { nodeId: 'stable', canonicalCode: '06', nodeType: AcademicTaxonomyNodeType.ACADEMIC_FIELD,
   standardType: AcademicStandardType.ISCED, standardCode: '06', canonicalName: 'ICT', status: AcademicTaxonomyStatus.ACTIVE,

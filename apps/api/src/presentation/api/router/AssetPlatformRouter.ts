@@ -7,7 +7,7 @@ import {
   AssetRetentionCategory,
   IAuditRecordRepository,
   IAssetUsageRegistryGateway
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   AssetGovernanceUseCases,
   IngestAssetUseCase,
@@ -15,7 +15,7 @@ import {
   RequestAssetUploadLocatorDto,
   RegisterQuarantinedAssetDto,
   AssetRecordDto
-} from '@manaratak/application';
+} from '@absheer/application';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 
 export interface AssetPlatformRouterCradle {
@@ -155,7 +155,7 @@ export class AssetPlatformRouter {
         res.status(503).json({ error: 'ASSET_USAGE_REGISTRY_UNAVAILABLE' });
         return;
       }
-      const { AssetId } = await import('@manaratak/domain');
+      const { AssetId } = await import('@absheer/domain');
       const assetId = new AssetId(req.params.assetId);
       const asset = await assetRecordRepository.findById(assetId);
       if (!asset) { res.status(404).json({ error: 'ASSET_NOT_FOUND' }); return; }
@@ -169,7 +169,7 @@ export class AssetPlatformRouter {
 
     router.get('/:assetId', asyncHandler(async (req: Request, res: Response) => {
       if (!assetRecordRepository?.findAdminDetails) throw new Error('ASSET_ADMIN_READ_MODEL_UNAVAILABLE');
-      const { AssetId } = await import('@manaratak/domain');
+      const { AssetId } = await import('@absheer/domain');
       const details = await assetRecordRepository.findAdminDetails(new AssetId(req.params.assetId));
       if (!details) return void res.status(404).json({ error: 'ASSET_NOT_FOUND' });
       const { asset, governance } = details;
@@ -462,7 +462,7 @@ export class AssetPlatformRouter {
       const assetId = req.params.assetId;
       const payload = assetSelectionAuditSchema.parse(req.body ?? {});
       if (!assetRecordRepository) throw new Error('ASSET_ADMIN_READ_MODEL_UNAVAILABLE');
-      const { AssetId, AssetLifecycleState } = await import('@manaratak/domain');
+      const { AssetId, AssetLifecycleState } = await import('@absheer/domain');
       const asset = await assetRecordRepository.findById(new AssetId(assetId));
       if (!asset) return void res.status(404).json({ error: 'ASSET_NOT_FOUND' });
       if (asset.state !== AssetLifecycleState.ACTIVE) return void res.status(409).json({ error: 'ASSET_NOT_ACTIVE' });

@@ -14,9 +14,9 @@ test('Studio exports retain real configuration, runtime contracts and source dat
     'packages/domain/src/academic-taxonomy/validation.ts',
     'packages/domain/src/academic-taxonomy/isced-f-baseline.ts',
     'workspace/reconciliation/majors/snapshot-500.json',
-    'workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv',
-    'workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx',
-    'workspace/phase-10-major-catalogs/MANARATAK_Master_Specializations_By_Academic_Fields_v1.0.md',
+    'workspace/reference-data/cities/asia/ABSHEER_Asia_Cities_All_Combined.csv',
+    'workspace/reference-data/countries/ABSHEER_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx',
+    'workspace/phase-10-major-catalogs/ABSHEER_Master_Specializations_By_Academic_Fields_v1.0.md',
   ]) assert.ok(existsSync(new URL(`../../${file}`, import.meta.url)), file);
   assert.match(read('packages/config/src/index.ts'), /export \* from '\.\/ProductionReadinessValidator'/);
   assert.match(read('packages/core/src/index.ts'), /export \* from '\.\/domain\/IdentifierGenerator'/);
@@ -41,7 +41,7 @@ test('npm workspace manifests keep API runtime guards and full build orchestrati
   for (const app of ['api', 'admin', 'web']) {
     const manifest = JSON.parse(read(`apps/${app}/package.json`));
     for (const [name, version] of Object.entries(manifest.dependencies)) {
-      if (name.startsWith('@manaratak/')) assert.equal(version, '*', `${app}: ${name}`);
+      if (name.startsWith('@absheer/')) assert.equal(version, '*', `${app}: ${name}`);
     }
   }
 });

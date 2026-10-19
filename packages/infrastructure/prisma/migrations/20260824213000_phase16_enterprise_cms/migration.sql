@@ -2,7 +2,7 @@ CREATE TABLE "CmsContentNode" (
     "id" TEXT NOT NULL,
     "publicId" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "siteIdentifier" TEXT NOT NULL DEFAULT 'MANARATAK',
+    "siteIdentifier" TEXT NOT NULL DEFAULT 'ABSHEER',
     "primaryLocale" TEXT NOT NULL DEFAULT 'ar',
     "contentType" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'DRAFT',

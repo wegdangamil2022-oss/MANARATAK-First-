@@ -2,12 +2,12 @@ import { access, mkdtemp, mkdir, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
-import { AssetStorageLocator, AssetStorageZone } from '@manaratak/domain';
+import { AssetStorageLocator, AssetStorageZone } from '@absheer/domain';
 import { LocalAssetStorageGateway } from '../../src/asset-platform/LocalAssetStorageGateway';
 
 describe('LocalAssetStorageGateway course artifact read', () => {
   it('reads only within configured bucket and respects byte cap', async () => {
-    const root = await mkdtemp(path.join(tmpdir(), 'manaratak-assets-'));
+    const root = await mkdtemp(path.join(tmpdir(), 'absheer-assets-'));
     const bucket = 'local-test';
     await mkdir(path.join(root, bucket, 'clean'), { recursive: true });
     await writeFile(path.join(root, bucket, 'clean', 'courses.csv'), Buffer.from('a,b\n1,2'));
@@ -33,7 +33,7 @@ describe('LocalAssetStorageGateway course artifact read', () => {
   });
 
   it('physically moves, archives, restores and deletes local assets', async () => {
-    const root = await mkdtemp(path.join(tmpdir(), 'manaratak-assets-lifecycle-'));
+    const root = await mkdtemp(path.join(tmpdir(), 'absheer-assets-lifecycle-'));
     const bucket = 'local-test';
     await mkdir(path.join(root, bucket, 'uploads'), { recursive: true });
     await writeFile(path.join(root, bucket, 'uploads', 'asset.bin'), 'safe');

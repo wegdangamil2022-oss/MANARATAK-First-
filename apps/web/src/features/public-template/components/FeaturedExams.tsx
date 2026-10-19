@@ -204,7 +204,7 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
       className="px-0 py-3 w-full font-['Cairo',sans-serif]"
     >
       {/* Standard Framed Container with top accent border only */}
-      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-xs overflow-hidden mn-panel">
+      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--ab-surface)] to-[var(--ab-page)]/80 border border-[var(--ab-border)] shadow-xs overflow-hidden ab-panel">
         {/* Elegant top gradient border line */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
         
@@ -221,7 +221,7 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_explore_language_academic_and_professional_admission_requirements')}</p>
+            <p className="text-[11px] sm:text-xs text-[var(--ab-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_explore_language_academic_and_professional_admission_requirements')}</p>
           </div>
 
           {cards.length === 0 && <HomeSectionEmptyCards kind="exams" status={displayStatus === 'ready' ? 'empty' : displayStatus} onRetry={onRetry} />}
@@ -247,12 +247,12 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
                     onClick={() => handleExamClick(exam)}
                     className="flex flex-col items-center gap-1.5 w-16 sm:w-20 shrink-0 cursor-pointer group"
                   >
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[var(--mn-surface)] border border-[var(--mn-border)] shadow-2xs overflow-hidden p-[2px] transition-all group-hover:-translate-y-1 group-hover:border-[#142B5F]/50 dark:group-hover:border-[#D6A43B]/50 group-hover:shadow-xs">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[var(--ab-surface)] border border-[var(--ab-border)] shadow-2xs overflow-hidden p-[2px] transition-all group-hover:-translate-y-1 group-hover:border-[#142B5F]/50 dark:group-hover:border-[#D6A43B]/50 group-hover:shadow-xs">
                       <div className="w-full h-full rounded-xl overflow-hidden bg-transparent relative flex justify-center items-center">
                         <ExamVectorLogo name={exam.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                       </div>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-bold text-[var(--mn-heading)] text-center uppercase tracking-wider group-hover:text-[#142B5F] dark:group-hover:text-[#D6A43B] transition-colors line-clamp-1 font-['Cairo',sans-serif]">
+                    <span className="text-[10px] sm:text-xs font-bold text-[var(--ab-heading)] text-center uppercase tracking-wider group-hover:text-[#142B5F] dark:group-hover:text-[#D6A43B] transition-colors line-clamp-1 font-['Cairo',sans-serif]">
                       {exam.name}
                     </span>
                   </div>
@@ -275,12 +275,12 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
                     onClick={() => handleExamClick(exam)}
                     className="flex flex-col items-center gap-1.5 w-16 sm:w-20 shrink-0 cursor-pointer group"
                   >
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[var(--mn-surface)] border border-[var(--mn-border)] shadow-2xs overflow-hidden p-[2px] transition-all group-hover:-translate-y-1 group-hover:border-[#142B5F]/50 dark:group-hover:border-[#D6A43B]/50 group-hover:shadow-xs">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[var(--ab-surface)] border border-[var(--ab-border)] shadow-2xs overflow-hidden p-[2px] transition-all group-hover:-translate-y-1 group-hover:border-[#142B5F]/50 dark:group-hover:border-[#D6A43B]/50 group-hover:shadow-xs">
                       <div className="w-full h-full rounded-xl overflow-hidden bg-transparent relative flex justify-center items-center">
                         <ExamVectorLogo name={exam.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                       </div>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-bold text-[var(--mn-heading)] text-center uppercase tracking-wider group-hover:text-[#142B5F] dark:group-hover:text-[#D6A43B] transition-colors line-clamp-1 font-['Cairo',sans-serif]">
+                    <span className="text-[10px] sm:text-xs font-bold text-[var(--ab-heading)] text-center uppercase tracking-wider group-hover:text-[#142B5F] dark:group-hover:text-[#D6A43B] transition-colors line-clamp-1 font-['Cairo',sans-serif]">
                       {exam.name}
                     </span>
                   </div>
@@ -294,7 +294,7 @@ export const FeaturedExams: React.FC<FeaturedExamsProps> = ({
             <button
               id="btn-view-all-exams"
               onClick={onViewAllClick}
-              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs"
+              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--ab-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs"
             >
               <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_all_international_exams')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />

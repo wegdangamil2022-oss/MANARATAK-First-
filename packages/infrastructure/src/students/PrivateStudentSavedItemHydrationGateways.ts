@@ -4,7 +4,7 @@ import {
   type StudentSavedItemDto,
   type ICertificateRepository,
   type IStudentWorkspaceRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 export class CertificateStudentSavedItemHydrationGateway implements IStudentSavedItemHydrationGateway {
   constructor(private readonly certificates: ICertificateRepository) {}
   supports(type: StudentSavedItemType) {

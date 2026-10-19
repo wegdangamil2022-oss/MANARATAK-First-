@@ -2,8 +2,8 @@
 export const DEVELOPMENT_CSRF_SECRET = 'dev-csrf-secret-at-least-32-chars-long';
 const INSECURE_PATTERNS = [
   'dev-secret', 'dev-csrf-secret', 'at-least-32-chars-long',
-  'manaratak-local-development', 'manaratak-session-secret', 'manaratak-default-csrf-secret',
-  'manaratak-admin-bearer-token', 'change-me', 'placeholder', '12345678',
+  'absheer-local-development', 'absheer-session-secret', 'absheer-default-csrf-secret',
+  'absheer-admin-bearer-token', 'change-me', 'placeholder', '12345678',
   'default-secret', 'short-secret', 'password', 'local-env', 'demo-token',
 ];
 export function isStrongRuntimeSecret(value: unknown): value is string {

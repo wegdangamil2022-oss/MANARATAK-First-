@@ -1,4 +1,4 @@
-import { IDomainEvent } from '@manaratak/core';
+import { IDomainEvent } from '@absheer/core';
 
 export class SettingDefinitionUpdatedEvent implements IDomainEvent {
   public readonly dateTimeOccurred: Date = new Date();

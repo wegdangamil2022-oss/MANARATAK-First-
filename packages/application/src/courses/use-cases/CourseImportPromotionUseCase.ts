@@ -1,4 +1,4 @@
-import type { ImportRecordDto } from '@manaratak/domain';
+import type { ImportRecordDto } from '@absheer/domain';
 
 export type CoursePromotionResult =
   | { type: 'CREATED'; courseId: string }

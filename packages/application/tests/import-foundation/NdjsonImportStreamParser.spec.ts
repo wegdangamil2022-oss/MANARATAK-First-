@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { NdjsonImportStreamParser } from '../../src/import-foundation/parsers/NdjsonImportStreamParser';
-import { ParsedImportRow, ImportParseError } from '@manaratak/domain';
+import { ParsedImportRow, ImportParseError } from '@absheer/domain';
 
 describe('NdjsonImportStreamParser', () => {
   const parser = new NdjsonImportStreamParser();

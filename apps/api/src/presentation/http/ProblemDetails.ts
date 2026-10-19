@@ -1,4 +1,4 @@
-export interface ManaratakProblemDetails {
+export interface AbsheerProblemDetails {
   type: string;
   title: string;
   status: number;
@@ -34,11 +34,11 @@ export function problemDetails(input: {
   type?: string;
   title?: string;
   issues?: unknown;
-}): ManaratakProblemDetails {
+}): AbsheerProblemDetails {
   const status = Number.isInteger(input.status) ? input.status : 500;
   const code = input.code?.trim() || `HTTP_${status}`;
   return {
-    type: input.type?.trim() || `https://api.manaratak.local/problems/${code.toLowerCase().replace(/_/g, '-')}`,
+    type: input.type?.trim() || `https://api.absheer.local/problems/${code.toLowerCase().replace(/_/g, '-')}`,
     title: input.title?.trim() || statusTitles[status] || 'Request Error',
     status,
     detail: input.detail?.trim() || statusTitles[status] || 'The request could not be completed.',
@@ -49,7 +49,7 @@ export function problemDetails(input: {
   };
 }
 
-export function isProblemDetails(value: unknown): value is ManaratakProblemDetails {
+export function isProblemDetails(value: unknown): value is AbsheerProblemDetails {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as Record<string, unknown>;
   return typeof candidate.type === 'string'
@@ -66,7 +66,7 @@ export function legacyErrorToProblem(input: {
   status: number;
   instance: string;
   traceId: string;
-}): ManaratakProblemDetails {
+}): AbsheerProblemDetails {
   if (isProblemDetails(input.body)) return input.body;
 
   const body = input.body && typeof input.body === 'object'

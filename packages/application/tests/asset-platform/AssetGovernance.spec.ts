@@ -15,7 +15,7 @@ import {
   AssetSecurityClassification,
   assertAssetPublicRights,
   assetRightsStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AssetGovernanceUseCases } from '../../src/asset-platform/use-cases/AssetGovernanceUseCases';
 import {
   RecoverAssetLifecycleUseCase,

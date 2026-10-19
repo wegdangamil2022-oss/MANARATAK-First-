@@ -4,7 +4,7 @@ import { PrismaCmsRepository } from '../../src/cms/PrismaCmsRepository';
 
 const ownerId = '683a90d4-abab-4f77-9f32-5a44d8288928';
 const baseMenu = () => ({
-  id: 'menu-1', siteIdentifier: 'manaratak', locale: 'ar',
+  id: 'menu-1', siteIdentifier: 'absheer', locale: 'ar',
   locationKey: 'HEADER', status: 'DRAFT', version: 2, updatedBy: 'author',
   nodes: [{
     id: 'node-1', parentNodeId: null, displayText: 'الجامعات',

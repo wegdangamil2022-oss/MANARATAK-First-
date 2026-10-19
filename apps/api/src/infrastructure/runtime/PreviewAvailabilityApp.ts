@@ -13,7 +13,7 @@ export function createPreviewAvailabilityApp() {
   app.use(helmet());
   app.use((_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
   app.get('/', (_req, res) => {
-    res.json({ service: 'manaratak-api', mode: 'preview-provisioning', ready: false,
+    res.json({ service: 'absheer-api', mode: 'preview-provisioning', ready: false,
       message: 'HTTP runtime available; business API disabled pending secure service provisioning.' });
   });
   app.get('/api/v1/monitoring/health/liveness', (_req, res) => {

@@ -21,7 +21,7 @@
 ---
 
 ## 1. Purpose
-The purpose of the Documentation Folder Structure Standard is to design and mandate a uniform, logical, and scalable directory hierarchy for all documentation within the MANARATAK 2.0 repository. This standard ensures that every document has a single authoritative location, facilitating predictable navigation, effective governance, and automated discovery.
+The purpose of the Documentation Folder Structure Standard is to design and mandate a uniform, logical, and scalable directory hierarchy for all documentation within the ABSHEER 2.0 repository. This standard ensures that every document has a single authoritative location, facilitating predictable navigation, effective governance, and automated discovery.
 
 ## 2. Scope
 This standard governs the organization of all markdown documents, diagrams, assets, and templates housed within the central `/docs` directory of the project repository. It applies to all engineering, architectural, operational, and project-management documentation maintained by the enterprise.
@@ -127,7 +127,7 @@ Before merging documentation structure changes, ensure:
 │   ├── ADR-001-Architecture-Version.md
 │   └── ADR-015-Message-Broker.md
 ├── architecture/
-├── MANARATAK-2.0-Master-Blueprint.md
+├── ABSHEER-2.0-Master-Blueprint.md
 
 │   └── standards/
 │       ├── DOC-GOV-001-Documentation-Lifecycle.md
@@ -146,7 +146,7 @@ Before merging documentation structure changes, ensure:
 ├── Architecture/           # Violation: Uppercase folder name
 ├── ADRs/                   # Violation: Uppercase and plural (should be `adr`)
 ├── meeting-notes/          # Violation: Unauthorized top-level folder
-└── MANARATAK-Design.md     # Violation: Orphan file in the root of /docs/
+└── ABSHEER-Design.md     # Violation: Orphan file in the root of /docs/
 ```
 
 ## 14. Glossary

@@ -71,8 +71,8 @@ for(const f of ['docs/architecture/models/Enterprise-Dependency-Graph-v1.0.md','
 }
 check('P13-HIST WP8 superseded',read('docs/remediation/wp8/WP8_INTEGRATION_MATRIX.md').startsWith('> **HISTORICAL / SUPERSEDED'));
 check('P13-HIST P11 audit superseded',read('docs/remediation/wp10/PHASE_11_UNIVERSITY_RELATIONSHIP_CLOSURE_AUDIT_2026-08-14.md').startsWith('> **HISTORICAL / SUPERSEDED'));
-check('P13-HIST Roadmap v5 superseded',read('docs/governance/roadmap/MANARATAK-2.0-Roadmap-v5.0.md').slice(0,500).includes('SUPERSEDED'));
-check('P13-HIST Roadmap v4.1 superseded',read('docs/governance/roadmap/MANARATAK-2.0-Roadmap-v4.1.md').startsWith('> **HISTORICAL / SUPERSEDED'));
+check('P13-HIST Roadmap v5 superseded',read('docs/governance/roadmap/ABSHEER-2.0-Roadmap-v5.0.md').slice(0,500).includes('SUPERSEDED'));
+check('P13-HIST Roadmap v4.1 superseded',read('docs/governance/roadmap/ABSHEER-2.0-Roadmap-v4.1.md').startsWith('> **HISTORICAL / SUPERSEDED'));
 
 for(const m of ['FINAL SOURCE CLOSURE — RUNTIME PENDING','68 total; 1 Source Closed; 67 Runtime Pending; 0 Partial; 0 Missing','Runtime Pending Register','not declared fully runtime-certified']) check(`P13-REPORT ${m}`,has(report,m));
 for(const m of ['Locked dependency CI execution','Database migration rehearsal','Authenticated browser E2E','P15 owner-read hydration runtime','External integrations']) check(`P13-PENDING ${m}`,has(pending,m));

@@ -8,7 +8,7 @@ import {
   type AcademicTaxonomyCompletenessReport,
   iscedFBaselineEdges,
   iscedFBaselineNodes,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { useTranslation } from '../i18n/I18nProvider';
 import {
   Loader2,

@@ -1,7 +1,7 @@
 # Enterprise Threat Models (STRIDE) v1.0
 
 ## 1. Overview
-Documents formalized STRIDE threat models for MANARATAK 2.0 API Gateways and public boundaries.
+Documents formalized STRIDE threat models for ABSHEER 2.0 API Gateways and public boundaries.
 
 ## 2. STRIDE Analysis
 - **Spoofing**: Mitigated via strict OAuth2 and JWT validation at the API Gateway.

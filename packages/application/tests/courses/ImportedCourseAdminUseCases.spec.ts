@@ -3,7 +3,7 @@ import {
   CourseOriginType,
   ExternalCourseProviderImportStrategy,
   ExternalCourseProviderStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { ImportedCourseAdminUseCases } from '../../src/courses/use-cases/ImportedCourseAdminUseCases';
 
 function imported(overrides: Record<string, unknown> = {}) {
@@ -170,7 +170,7 @@ describe('ImportedCourseAdminUseCases', () => {
   it('forbids changing an imported course to another origin type', async () => {
     const f = createFixture();
     await expect(f.useCases.update('course-1', {
-      originType: CourseOriginType.NATIVE_MANARATAK_COURSE,
+      originType: CourseOriginType.NATIVE_ABSHEER_COURSE,
     } as any)).rejects.toThrow('IMPORTED_COURSE_ORIGIN_CHANGE_FORBIDDEN');
   });
 });

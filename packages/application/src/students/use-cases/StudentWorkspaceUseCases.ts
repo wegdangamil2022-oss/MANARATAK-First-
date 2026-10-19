@@ -24,7 +24,7 @@ import {
   StudentWorkspaceSnapshotDto,
   StudentWorkspaceStatus,
   UpsertStudentWorkspaceDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class StudentWorkspaceUseCases {
   constructor(

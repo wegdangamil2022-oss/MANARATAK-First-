@@ -7,7 +7,7 @@ import {
   MajorDto,
   MajorImportPayload,
   PublicationReadinessIssue,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AcademicTaxonomyResolver, TaxonomyResolutionResult } from './AcademicTaxonomyResolver';
 
 /** Resolves and validates Major references against the canonical Phase 8 stores. */

@@ -18,7 +18,7 @@ import {
   LogVersionPublishedEvent,
   LogEntryDeprecatedEvent,
   LogEntryArchivedEvent
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   CreateLogEntryDto,
   UpdateLogDefinitionDto,

@@ -1,7 +1,7 @@
 import {
   IAssetUsageRegistryGateway,
   AssetId
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class InMemoryAssetUsageRegistryGateway implements IAssetUsageRegistryGateway {
   private readonly usages = new Map<string, Set<string>>();

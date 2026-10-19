@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { randomUUID } from 'crypto';
-import { IAuditRecordRepository } from '@manaratak/domain';
-import { createAuditRecordFromDto } from '@manaratak/application';
+import { IAuditRecordRepository } from '@absheer/domain';
+import { createAuditRecordFromDto } from '@absheer/application';
 import { getAuthenticatedPrincipal } from '../security/AuthenticatedPrincipal.js';
 
 export interface AuditRecordParams {

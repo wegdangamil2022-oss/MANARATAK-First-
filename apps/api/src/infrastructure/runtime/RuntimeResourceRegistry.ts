@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { RedisClientFactory } from '@manaratak/infrastructure';
+import { RedisClientFactory } from '@absheer/infrastructure';
 
 /** Separate, short-lived diagnostic resource. The Preview gate and finally-disconnect belong to its caller. */
 export function createPreviewProbeClient(url: string) {

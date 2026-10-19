@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TaxonomyDiagnosticsService } from '../../src/academic-taxonomy/services/TaxonomyDiagnosticsService';
 import { AdminAcademicTaxonomyUseCases } from '../../src/academic-taxonomy/use-cases/AdminAcademicTaxonomyUseCases';
-import { classifyTaxonomyCrosswalk } from '@manaratak/domain';
+import { classifyTaxonomyCrosswalk } from '@absheer/domain';
 const revision = '2026-10-10T01:00:00.000Z';
 const node = (id: string, type = 'DISCIPLINE', extra: any = {}): any => ({ nodeId: id, nodeType: type, canonicalCode: id, canonicalName: id, standardType: 'ISCED', status: 'ACTIVE', createdAt: new Date(revision), updatedAt: new Date(revision), ...extra });
 const edge = (from: string, to: string, primary = false): any => ({ edgeId: `${from}-${to}`, parentNodeId: from, childNodeId: to, isPrimary: primary, createdAt: new Date(revision) });

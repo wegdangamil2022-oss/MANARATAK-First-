@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AssetStorageLocator, AssetStorageZone } from '@manaratak/domain';
+import { AssetStorageLocator, AssetStorageZone } from '@absheer/domain';
 import {
   HttpAssetMalwareScannerGateway,
   HttpAssetSanitizationGateway,
@@ -21,15 +21,15 @@ const options = (fetchImpl: typeof fetch) => ({
   now: () => new Date('2026-09-07T00:00:00.000Z'),
 });
 
-describe('W3 MNT-AUD-0011 production asset provider adapters', () => {
+describe('W3 ABSH-AUD-0011 production asset provider adapters', () => {
   it('signs provider requests, preserves the configured base path, and does not send the signing secret', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = new URL(String(input));
       expect(url.href).toBe('https://asset-provider.internal/api/v1/ping');
       const headers = new Headers(init?.headers);
-      expect(headers.get('x-manaratak-provider-key')).toBe('asset-key');
-      expect(headers.get('x-manaratak-signature')).toMatch(/^[a-f0-9]{64}$/);
-      expect(headers.get('x-manaratak-content-sha256')).toMatch(/^[a-f0-9]{64}$/);
+      expect(headers.get('x-absheer-provider-key')).toBe('asset-key');
+      expect(headers.get('x-absheer-signature')).toMatch(/^[a-f0-9]{64}$/);
+      expect(headers.get('x-absheer-content-sha256')).toMatch(/^[a-f0-9]{64}$/);
       expect(JSON.stringify(init?.headers)).not.toContain(secret);
       return jsonResponse({ ok: true });
     });
@@ -209,7 +209,7 @@ describe('bounded signed provider streaming', () => {
     const cancel = vi.fn();
     const fetchMock = vi.fn(async (_url: any, init: any) => {
       expect(init.redirect).toBe('error');
-      expect(new Headers(init.headers).get('x-manaratak-signature')).toMatch(/^[a-f0-9]{64}$/);
+      expect(new Headers(init.headers).get('x-absheer-signature')).toMatch(/^[a-f0-9]{64}$/);
       return new Response(new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(5)); }, cancel }));
     });
     const client = new SignedProviderHttpClient({ ...options(fetchMock as any), maxResponseBytes: 4 });

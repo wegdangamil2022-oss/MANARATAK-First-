@@ -5,7 +5,7 @@ import type {
   ICertificateRepository,
   IUniversityRepository,
   ICertificateAuthorityDirectory,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 /** Current governance is descriptive only; it cannot invalidate or rewrite signed historical issuance. */
 export class CertificateAffiliationReadService implements ICertificateAffiliationReadGateway {
   constructor(
@@ -18,7 +18,7 @@ export class CertificateAffiliationReadService implements ICertificateAffiliatio
     issuerType: string | undefined,
     snapshot: CertificateAffiliationSnapshot | undefined,
   ): Promise<CertificateCurrentAffiliation> {
-    if (issuerType === 'MANARATAK') return { state: 'NOT_APPLICABLE' };
+    if (issuerType === 'ABSHEER') return { state: 'NOT_APPLICABLE' };
     if (!snapshot) return { state: 'LEGACY_UNVERIFIED' };
     try {
       const issuer = await this.issuers.findIssuerById(issuerId);

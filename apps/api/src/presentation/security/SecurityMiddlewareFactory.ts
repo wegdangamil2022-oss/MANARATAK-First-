@@ -1,9 +1,9 @@
-import type { MfaUseCases } from '@manaratak/application';
+import type { MfaUseCases } from '@absheer/application';
 import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import { IPrincipalAccessValidator, ISecurityService, ISessionManager, ITokenProvider } from '@manaratak/core';
-import { AuthorizationEvaluatorService } from '@manaratak/domain';
+import { IPrincipalAccessValidator, ISecurityService, ISessionManager, ITokenProvider } from '@absheer/core';
+import { AuthorizationEvaluatorService } from '@absheer/domain';
 import { container } from '../../infrastructure/di/container.js';
 import { readAccessCookie, readRefreshCookie } from './HttpOnlyAuthCookies.js';
 import { CANONICAL_API_EXPOSED_HEADERS, CANONICAL_API_REQUEST_HEADERS } from './CanonicalApiCorsPolicy.js';

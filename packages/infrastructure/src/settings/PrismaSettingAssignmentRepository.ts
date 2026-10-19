@@ -18,7 +18,7 @@ import {
   SettingDefinition,
   ConfigurationValidationService,
   SettingValidationRules
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface SettingVersionRecordRow {
   id: string;

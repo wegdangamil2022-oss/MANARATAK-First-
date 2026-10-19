@@ -84,7 +84,7 @@ function build() {
       ownerId: 'course-1', publicId: 'CRS-0001', slug: 'intro-cs', displayName: 'Intro CS', accessType: 'FREE_CERTIFICATE', originType: 'EXTERNAL_LINKED_COURSE', directCourseUrl: 'https://example.test/course', providerName: 'Provider', category: 'Computing',
     }])),
     listPublishedCoursesForInternationalTest: vi.fn().mockResolvedValue(page([{
-      ownerId: 'course-test-1', publicId: 'CRS-0100', slug: 'ielts-preparation', displayName: 'IELTS Preparation', accessType: 'FREE_STUDY_AND_CERTIFICATE', originType: 'NATIVE_MANARATAK_COURSE', directCourseUrl: '/courses/ielts-preparation', providerName: 'MANARATAK', category: 'Languages',
+      ownerId: 'course-test-1', publicId: 'CRS-0100', slug: 'ielts-preparation', displayName: 'IELTS Preparation', accessType: 'FREE_STUDY_AND_CERTIFICATE', originType: 'NATIVE_ABSHEER_COURSE', directCourseUrl: '/courses/ielts-preparation', providerName: 'ABSHEER', category: 'Languages',
     }])),
     listPublishedRelatedCourses: vi.fn().mockResolvedValue(page([{
       ownerId: 'course-1', publicId: 'CRS-0001', slug: 'intro-cs', displayName: 'Intro CS', accessType: 'FREE_CERTIFICATE', originType: 'EXTERNAL_LINKED_COURSE', directCourseUrl: 'https://example.test/course', providerName: 'Provider', category: 'Computing',

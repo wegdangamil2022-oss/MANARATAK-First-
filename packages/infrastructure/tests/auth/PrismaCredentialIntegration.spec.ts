@@ -5,7 +5,7 @@ import { PrismaCredentialVerifier } from '../../src/auth/PrismaCredentialVerifie
 
 describe('PrismaCredential Integration & Client Validation', () => {
   it('verifies credential schema logic under client-level queries', async () => {
-    let url = process.env.DATABASE_URL || 'postgresql://user:password@postgres-host:5432/manaratak_db';
+    let url = process.env.DATABASE_URL || 'postgresql://user:password@postgres-host:5432/absheer_db';
     if (url.includes('postgres-host') || url.includes('placeholder')) {
       const { SQL_USER, SQL_PASSWORD, SQL_HOST, SQL_DB_NAME } = process.env;
       if (SQL_USER && SQL_PASSWORD && SQL_HOST && SQL_DB_NAME) {

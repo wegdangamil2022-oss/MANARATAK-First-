@@ -41,7 +41,7 @@ import {
   normalizeReferenceIdentityToken,
   referenceCityScopeKey,
   classifyReferenceImportTriage
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 interface DbCountry {
   id: string;

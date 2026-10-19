@@ -2,7 +2,7 @@ import { useTranslation } from '../i18n/I18nProvider';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { AssetLifecycleActions } from '../components/AssetLifecycleActions';
-import { AssetLifecycleState, AssetSecurityClassification, AssetRetentionCategory } from '@manaratak/domain';
+import { AssetLifecycleState, AssetSecurityClassification, AssetRetentionCategory } from '@absheer/domain';
 import { AssetGovernancePanel, type AssetGovernanceSnapshot } from '../components/AssetGovernancePanel';
 import { AssetUploadWizard } from '../components/AssetUploadWizard';
 import { FolderGit2, RefreshCw, Filter, FileText } from 'lucide-react';

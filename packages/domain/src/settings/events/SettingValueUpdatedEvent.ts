@@ -1,4 +1,4 @@
-import { IDomainEvent } from '@manaratak/core';
+import { IDomainEvent } from '@absheer/core';
 import { ScopeIdentifier } from '../value-objects/ScopeIdentifier';
 
 export class SettingValueUpdatedEvent implements IDomainEvent {

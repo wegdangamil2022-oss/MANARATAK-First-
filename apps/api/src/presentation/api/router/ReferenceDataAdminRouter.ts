@@ -7,8 +7,8 @@ import {
   ReferenceDataUseCases,
   ReferenceOwnerReviewUseCases,
   ReferenceDataValidationError,
-} from '@manaratak/application';
-import { REFERENCE_QUALITY_ISSUES, ReferenceLifecycleState, ReferenceRegionCommandError, type GovernedReferenceEntityType } from '@manaratak/domain';
+} from '@absheer/application';
+import { REFERENCE_QUALITY_ISSUES, ReferenceLifecycleState, ReferenceRegionCommandError, type GovernedReferenceEntityType } from '@absheer/domain';
 
 export class ReferenceDataAdminRouter {
   public static create(cradle: { referenceDataUseCases: ReferenceDataUseCases; referenceOwnerReviewUseCases?: ReferenceOwnerReviewUseCases }): Router {

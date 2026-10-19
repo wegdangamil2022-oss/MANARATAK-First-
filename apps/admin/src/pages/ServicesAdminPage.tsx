@@ -19,7 +19,7 @@ import {
   ServiceFulfillmentType,
   ServiceStatus,
   type ServiceCatalogItemDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 type ServiceCatalogItem = ServiceCatalogItemDto;
 
@@ -50,7 +50,7 @@ const emptyForm = {
   serviceAvailabilityStatus: ServiceAvailabilityStatus.AVAILABLE,
   requiredInputsOrDocuments: '',
   deliveryMode: ServiceDeliveryMode.ONLINE,
-  responsibleServiceOwnerType: 'MANARATAK_TEAM',
+  responsibleServiceOwnerType: 'ABSHEER_TEAM',
   providerName: '',
   estimatedDeliveryTime: '',
   appointmentRequired: false,
@@ -960,7 +960,7 @@ export function ServicesAdminPage() {
                   label={t('responsible_owner_type')}
                   value={form.responsibleServiceOwnerType}
                   onChange={(value) => setForm({ ...form, responsibleServiceOwnerType: value })}
-                  placeholder="MANARATAK_TEAM"
+                  placeholder="ABSHEER_TEAM"
                 />
                 <Field
                   label={t('estimated_delivery_time')}

@@ -1,12 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@manaratak/shared';
+import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@absheer/shared';
 import { CountryImportPreviewService } from '../packages/application/src/reference-data/services/CountryImportPreviewService';
 import { CountryDerivedReferencePreviewService } from '../packages/application/src/reference-data/services/CountryDerivedReferencePreviewService';
 
 const sourcePath = path.resolve(
-  process.argv[2] ?? 'workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx',
+  process.argv[2] ?? 'workspace/reference-data/countries/ABSHEER_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx',
 );
 const bytes = fs.readFileSync(sourcePath);
 const workbook = await readXlsxWorkbook(bytes);

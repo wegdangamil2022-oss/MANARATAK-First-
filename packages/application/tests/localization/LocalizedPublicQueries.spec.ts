@@ -7,7 +7,7 @@ import {
   type IInternationalTestRepository,
   type IMajorRepository,
   type IUniversityRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { LocalizedPublicUniversityUseCases } from '../../src/universities/use-cases/LocalizedPublicUniversityUseCases';
 import { LocalizedPublicMajorUseCases } from '../../src/majors/use-cases/LocalizedPublicMajorUseCases';
 import { LocalizedInternationalTestPublicUseCases } from '../../src/tests-platform/use-cases/LocalizedInternationalTestPublicUseCases';

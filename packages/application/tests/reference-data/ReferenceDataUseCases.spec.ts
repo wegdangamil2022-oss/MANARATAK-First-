@@ -13,7 +13,7 @@ import {
   ReferenceDataFilters,
   AdministrativeRegionDto,
   ReferenceLifecycleState,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 class MockReferenceDataRepository implements IReferenceDataRepository {
   public listCountries = vi.fn<[ReferenceDataFilters], Promise<ReferenceCountryDto[]>>();

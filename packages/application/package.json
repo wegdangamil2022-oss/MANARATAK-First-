@@ -1,5 +1,5 @@
 {
-  "name": "@manaratak/application",
+  "name": "@absheer/application",
   "version": "1.0.0",
   "type": "module",
   "main": "dist/index.js",
@@ -12,11 +12,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@manaratak/core": "*",
-    "@manaratak/domain": "*",
+    "@absheer/core": "*",
+    "@absheer/domain": "*",
     "@types/uuid": "^10.0.0",
     "uuid": "^14.0.1",
-    "@manaratak/shared": "*"
+    "@absheer/shared": "*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0"

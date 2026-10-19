@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { AtomicPersistenceContext, OutboxProcessingState } from '@manaratak/domain';
+import { AtomicPersistenceContext, OutboxProcessingState } from '@absheer/domain';
 import { AtomicAuditedOutboxMutationExecutor } from './AtomicAuditedOutboxMutationExecutor';
 
 export interface AtomicMutationRequestContext {

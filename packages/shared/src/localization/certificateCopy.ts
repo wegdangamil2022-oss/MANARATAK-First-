@@ -36,8 +36,8 @@ const english: Readonly<Record<string, string>> = {
     'Delegation requires private evidence of legal ownership and certificate issuing authority; an issuer name or directory listing is insufficient.',
 
   'تصميم الشهادة': 'Certificate design',
-  'قالب منارتك المعتمد — عربي / English':
-    'Approved MANARATAK bilingual template',
+  'قالب أبشر المعتمد — عربي / English':
+    'Approved ABSHEER bilingual template',
   'القالب السابق': 'Previous template',
   'مرجع مفتاح التوقيع': 'Signing key reference',
   'أصل الشعار': 'Logo asset',
@@ -124,20 +124,20 @@ const english: Readonly<Record<string, string>> = {
   'عرض المزيد': 'Show more',
   'تعذر تحميل الشهادات': 'Could not load certificates',
   الشهادات: 'Certificates',
-  'تظهر شهادة منارتك للدورات المؤهلة بعد إتمام المتطلبات وانتهاء عملية إصدار الشهادة.':
-    'Your MANARATAK certificate appears after completing an eligible course and finishing certificate issuance.',
+  'تظهر شهادة أبشر للدورات المؤهلة بعد إتمام المتطلبات وانتهاء عملية إصدار الشهادة.':
+    'Your ABSHEER certificate appears after completing an eligible course and finishing certificate issuance.',
   'تحتاج الشهادة إلى إعادة تحقق معتمدة قبل استخدامها.':
     'The certificate requires approved revalidation before use.',
   'تعذر إثبات سلامة الشهادة؛ لم تُعرض بياناتها.':
     'Certificate integrity could not be established; its claims are hidden.',
   'تعديل جهة الإصدار': 'Edit issuer',
-  'قالب منارتك الرسمي': 'MANARATAK official template',
+  'قالب أبشر الرسمي': 'ABSHEER official template',
   'شهادة إتمام': 'Certificate of Completion',
-  'تشهد منصة منارتك بأن المتعلم قد أتم بنجاح متطلبات هذه الدورة واستحق شهادة الإتمام الرقمية القابلة للتحقق.':
-    'MANARATAK certifies that this learner completed the course requirements and earned a verifiable digital certificate.',
-  'إدارة الشهادات — منارتك': 'MANARATAK Certificates Office',
+  'تشهد منصة أبشر بأن المتعلم قد أتم بنجاح متطلبات هذه الدورة واستحق شهادة الإتمام الرقمية القابلة للتحقق.':
+    'ABSHEER certifies that this learner completed the course requirements and earned a verifiable digital certificate.',
+  'إدارة الشهادات — أبشر': 'ABSHEER Certificates Office',
   'توقيع الإصدار الرقمي': 'Digital issuance signature',
-  'MANARATAK — منارتك': 'MANARATAK',
+  'ABSHEER — أبشر': 'ABSHEER',
   'تعذر تحميل مركز الشهادات.': 'Could not load the certificate center.',
   'تم إنشاء نسخة جديدة من القالب مع الحفاظ على النسخة التاريخية.':
     'A new template version was created; the historical version was preserved.',
@@ -146,13 +146,13 @@ const english: Readonly<Record<string, string>> = {
   'تعذر حفظ القالب.': 'Could not save the template.',
   'تعذر تغيير حالة القالب.': 'Could not change template status.',
   'أنشئ جهة إصدار نشطة أولًا.': 'Create an active issuer first.',
-  'تم إنشاء مسودة قالب منارتك الرسمي.':
-    'MANARATAK official template draft created.',
+  'تم إنشاء مسودة قالب أبشر الرسمي.':
+    'ABSHEER official template draft created.',
   'تعذر إنشاء القالب الافتراضي.': 'Could not create the default template.',
   'تم حفظ جهة الإصدار؛ الاعتماد يحتاج مراجعًا مستقلًا.':
     'Issuer saved; independent approval is required.',
   'تعذر إنشاء جهة الإصدار.': 'Could not create the issuer.',
-  'مركز شهادات منارتك': 'MANARATAK Certificate Center',
+  'مركز شهادات أبشر': 'ABSHEER Certificate Center',
   'الإصدار، القوالب، التحقق والحوكمة':
     'Issuance, templates, verification and governance',
   'الإصدار الأولي لا يتم يدويًا من هذه الصفحة. الشهادة تُنشأ فقط بعد حدث إكمال موثوق من نظام الدورات، ثم يمتلك هذا القسم دورة حياتها والتحقق العام منها.':
@@ -204,7 +204,7 @@ const english: Readonly<Record<string, string>> = {
   'قالب جديد': 'New template',
   'معاينة كبيرة': 'Large preview',
   'نسخة تعديل': 'Edit version',
-  'لا يوجد قالب. ابدأ بجهة إصدار ثم أنشئ قالب منارتك الرسمي.':
+  'لا يوجد قالب. ابدأ بجهة إصدار ثم أنشئ قالب أبشر الرسمي.':
     'No template. Create an issuer, then the official template.',
   'الجهة والمفتاح والأصل المرئي جزء من سلطة إصدار الشهادة.':
     'Issuer, signing key and visual assets form the certificate authority.',
@@ -222,8 +222,8 @@ const english: Readonly<Record<string, string>> = {
   'قواعد الثقة': 'Trust rules',
   '• الإصدار الأولي من حدث CourseCompleted/LearningPathCompleted موثوق فقط.':
     '• Initial issuance accepts only trusted CourseCompleted/LearningPathCompleted events.',
-  '• شهادة منارتك هي Certificate of Completion وليست اعتمادًا أكاديميًا أو ترخيصًا مهنيًا.':
-    '• MANARATAK certificates prove completion; they do not confer academic accreditation or professional licensing.',
+  '• شهادة أبشر هي Certificate of Completion وليست اعتمادًا أكاديميًا أو ترخيصًا مهنيًا.':
+    '• ABSHEER certificates prove completion; they do not confer academic accreditation or professional licensing.',
   '• لكل Completion هوية إصدار واحدة؛ replay لن ينشئ نسخة مكررة.':
     '• Each completion has one initial issuance; replay cannot duplicate it.',
   '• QR يفتح صفحة التحقق العامة وليس API JSON.':
@@ -289,8 +289,8 @@ const english: Readonly<Record<string, string>> = {
   الاسم: 'Name',
   'جهة اعتماد خارجية': 'External authority',
   'مرجع الاعتماد الخارجي': 'External accreditation reference',
-  'لجهة MANARATAK لا نكتب اعتمادًا خارجيًا ما لم يوجد أساس قانوني حقيقي. الشهادة الافتراضية توصف كشهادة إتمام رقمية من المنصة.':
-    'MANARATAK certificates describe platform completion. External accreditation requires independent legal evidence.',
+  'لجهة ABSHEER لا نكتب اعتمادًا خارجيًا ما لم يوجد أساس قانوني حقيقي. الشهادة الافتراضية توصف كشهادة إتمام رقمية من المنصة.':
+    'ABSHEER certificates describe platform completion. External accreditation requires independent legal evidence.',
   إنشاء: 'Create',
   'معاينة القالب': 'Template preview',
   '— اختياري': '— optional',
@@ -369,8 +369,8 @@ const english: Readonly<Record<string, string>> = {
   'تعذر إثبات بيانات الشهادة؛ لا تُعرض ادعاءات غير موثوقة.':
     'Certificate claims could not be verified and are withheld.',
   هذه: 'This is a',
-  'شهادة إتمام رقمية صادرة من منصة منارتك':
-    'MANARATAK digital completion certificate',
+  'شهادة إتمام رقمية صادرة من منصة أبشر':
+    'ABSHEER digital completion certificate',
   'لإثبات إكمال متطلبات التعلم المحددة. لا تمثل درجة جامعية أو اعتمادًا مهنيًا خارجيًا ما لم تظهر جهة اعتماد مستقلة صراحة ضمن بيانات الشهادة.':
     'proving completion of the specified learning requirements. It is not a university degree or external professional accreditation unless a verified independent authority is explicitly stated.',
   'الختم الرقمي سليم': 'Digital signature verified',
@@ -429,7 +429,7 @@ const arabicKeys: Readonly<Record<string, string>> = {
   CERTIFICATE_ISSUER_UPDATED: 'تحديث جهة الإصدار',
 };
 const enumCopy: Readonly<Record<string, readonly [string, string]>> = {
-  MANARATAK: ['منارتك', 'MANARATAK'],
+  ABSHEER: ['أبشر', 'ABSHEER'],
   UNIVERSITY: ['جامعة', 'University'],
   EDUCATIONAL_INSTITUTION: ['مؤسسة تعليمية', 'Educational institution'],
   GOVERNMENT: ['جهة حكومية', 'Government'],

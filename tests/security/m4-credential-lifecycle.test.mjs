@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DisablePasswordCredentialUseCase, IdentityPrincipalAccessValidator } from '@manaratak/application';
-import { PrismaPasswordCredentialRepository, PrismaCredentialVerifier } from '@manaratak/infrastructure';
+import { DisablePasswordCredentialUseCase, IdentityPrincipalAccessValidator } from '@absheer/application';
+import { PrismaPasswordCredentialRepository, PrismaCredentialVerifier } from '@absheer/infrastructure';
 import express from 'express';
 import request from 'supertest';
 import { AuthRouter } from '../../apps/api/dist/presentation/api/router/AuthRouter.js';
@@ -19,9 +19,9 @@ test('credential disable HTTP boundary authenticates actor, checks permission an
   }));
   assert.equal((await request(app).post('/auth/credentials/target/disable').send({ changeId: 'CHANGE-123' })).status, 401);
   assert.equal((await request(app).post('/auth/credentials/target/disable').set('Authorization', 'Bearer student').send({ changeId: 'CHANGE-123' })).status, 403);
-  assert.equal((await request(app).post('/auth/credentials/target/disable').set('Cookie', 'manaratak_access=admin; manaratak_refresh=refresh').send({ changeId: 'CHANGE-123' })).status, 403);
+  assert.equal((await request(app).post('/auth/credentials/target/disable').set('Cookie', 'absheer_access=admin; absheer_refresh=refresh').send({ changeId: 'CHANGE-123' })).status, 403);
   assert.equal(writes.length, 0);
-  assert.equal((await request(app).post('/auth/credentials/target/disable').set('Cookie', 'manaratak_access=admin; manaratak_refresh=refresh')
+  assert.equal((await request(app).post('/auth/credentials/target/disable').set('Cookie', 'absheer_access=admin; absheer_refresh=refresh')
     .set('X-CSRF-Token', 'valid-csrf').send({ changeId: 'CHANGE-123' })).status, 200);
   assert.deepEqual(writes, [['target', 'admin', 'CHANGE-123']]);
 });

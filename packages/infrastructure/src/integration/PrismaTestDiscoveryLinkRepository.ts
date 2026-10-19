@@ -4,7 +4,7 @@ import type {
   ITestDiscoveryLinkRepository,
   TestDiscoveryOwner,
   TestDiscoveryLink,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 export abstract class PrismaTestDiscoveryLinkRepository implements ITestDiscoveryLinkRepository {
   constructor(protected readonly prisma: PrismaClient) {}
   abstract readonly ownerDomain: TestDiscoveryOwner;

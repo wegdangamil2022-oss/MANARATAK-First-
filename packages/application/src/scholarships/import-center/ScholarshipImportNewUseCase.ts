@@ -2,7 +2,7 @@ import { CsvImportStreamParser } from '../../import-foundation/parsers/CsvImport
 import { NdjsonImportStreamParser } from '../../import-foundation/parsers/NdjsonImportStreamParser';
 import { InlineDataParser } from '../../import-foundation/parsers/InlineDataParser';
 import type { IImportRawSnapshotStore, ISourceRegistryGateway, AcquireImportSourceUseCase, ImportAdminUseCases } from '../../index.js';
-import { ImportParseError, ParsedImportRow, type ImportSourceDefinition } from '@manaratak/domain';
+import { ImportParseError, ParsedImportRow, type ImportSourceDefinition } from '@absheer/domain';
 import type { ScholarshipAcquisitionPlanner } from '../source-registry/ScholarshipAcquisitionPlanner';
 import type { ScholarshipSourceConfiguration } from '../source-registry/ScholarshipSourceRegistryContracts';
 

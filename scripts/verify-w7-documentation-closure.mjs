@@ -20,19 +20,19 @@ const topDocDirs = fs.readdirSync(path.join(root, 'docs'), { withFileTypes: true
 const phaseRoots = fs.readdirSync(path.join(root, 'docs/phases'), { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
 const matrix = read('docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md');
 const p23p24Trace = read('docs/remediation/P23_P24_REBASELINE_TRACEABILITY.md');
-check('MNT-AUD-0003', topDocDirs.every((name) => docsReadme.includes(`\`${name}/\``)) && phaseRoots.every((name) => docsReadme.includes(`\`${name}\``)), `topDirs=${topDocDirs.length} phases=${phaseRoots.length}`);
-check('MNT-AUD-0031_DEP', matrix.includes('ACTIVE — SOURCE_REBASELINED / RUNTIME_EVIDENCE_PENDING') && !hasRebaselineOpenStatusRows(matrix) && !matrix.includes('**Status:** ACTIVE — REBASELINE_REQUIRED') && p23p24Trace.includes('P23_P24_SOURCE_REBASELINE = CLOSED'));
+check('ABSH-AUD-0003', topDocDirs.every((name) => docsReadme.includes(`\`${name}/\``)) && phaseRoots.every((name) => docsReadme.includes(`\`${name}\``)), `topDirs=${topDocDirs.length} phases=${phaseRoots.length}`);
+check('ABSH-AUD-0031_DEP', matrix.includes('ACTIVE — SOURCE_REBASELINED / RUNTIME_EVIDENCE_PENDING') && !hasRebaselineOpenStatusRows(matrix) && !matrix.includes('**Status:** ACTIVE — REBASELINE_REQUIRED') && p23p24Trace.includes('P23_P24_SOURCE_REBASELINE = CLOSED'));
 
 // 105: lifecycle truth, with a semantic status-line guard rather than broad word banning.
 const lifecycle = read('docs/governance/COMPLETION_STATUS_LIFECYCLE.md');
 const phaseEntries = walk(path.join(root, 'docs/phases')).filter((p) => p.endsWith('.md')).map((p) => ({ file: path.relative(root, p), text: fs.readFileSync(p, 'utf8') }));
 const readinessFindings = findProductionReadyStatusClaims(phaseEntries);
-check('MNT-AUD-0019', readinessFindings.length === 0 && ['SOURCE_COMPLETE','RUNTIME_VERIFIED','PRODUCTION_READY','PENDING_NON_BLOCKING'].every((token) => lifecycle.includes(token)), readinessFindings.map((f) => `${f.file}:${f.line}`).join(','));
+check('ABSH-AUD-0019', readinessFindings.length === 0 && ['SOURCE_COMPLETE','RUNTIME_VERIFIED','PRODUCTION_READY','PENDING_NON_BLOCKING'].every((token) => lifecycle.includes(token)), readinessFindings.map((f) => `${f.file}:${f.line}`).join(','));
 
 // 106: active brand authority follows semantic tokens; old emerald brand anchor is gone.
 const p24 = read('docs/phases/phase-24-enterprise-public-platform/phase-24-03-enterprise-public-platform-public-pages-user-experience.md');
 const css = read('apps/web/src/features/public-template/template.css').toLowerCase();
-check('MNT-AUD-0023', ['#142b5f','#0e7c86','#d6a43b','#f2cd78'].every((token) => css.includes(token)) && ['#142B5F','#0E7C86','#D6A43B','#F2CD78'].every((token) => p24.includes(token)) && !p24.includes('**Emerald Green:** Primary brand anchor'));
+check('ABSH-AUD-0023', ['#142b5f','#0e7c86','#d6a43b','#f2cd78'].every((token) => css.includes(token)) && ['#142B5F','#0E7C86','#D6A43B','#F2CD78'].every((token) => p24.includes(token)) && !p24.includes('**Emerald Green:** Primary brand anchor'));
 
 // 107: Phase 05 matrix is code-aligned and source-checked against critical DI bindings.
 const p05 = read('docs/phases/phase-05-core-implementation/phase-05-traceability-matrix.md');
@@ -43,7 +43,7 @@ const criticalDi = [
   'new PrismaEnterpriseEventRepository', 'new PrismaWorkflowRepository', 'new PrismaSearchRequestRepository',
   'new PrismaApiServiceRepository', 'new PrismaSharedComponentRepository', "createUnavailableCapability('cachePersistence')",
 ];
-check('MNT-AUD-0051', p05Rows.length === 20 && criticalDi.every((token) => di.includes(token)) && p05.includes('PrismaTransactionalOutboxStore') && !p05.includes('No transaction outbox table exist in the DB'), `classified=${p05Rows.length}/20`);
+check('ABSH-AUD-0051', p05Rows.length === 20 && criticalDi.every((token) => di.includes(token)) && p05.includes('PrismaTransactionalOutboxStore') && !p05.includes('No transaction outbox table exist in the DB'), `classified=${p05Rows.length}/20`);
 
 // 108: operational docs only claim executable topology/paths.
 const manual = read('docs/operations/containerization-and-ci.md');
@@ -52,12 +52,12 @@ const actualServices = parseComposeServiceNames(compose);
 const claimedServices = extractDeclaredComposeServices(manual);
 const missingPaths = extractOperationalPaths(manual).filter((rel) => !exists(rel));
 const ci = read('.github/workflows/ci.yml');
-check('MNT-AUD-0052', JSON.stringify(actualServices) === JSON.stringify(claimedServices) && missingPaths.length === 0 && !manual.includes('local-compose-up.sh') && !manual.includes('local-compose-down.sh') && !/playwright/i.test(ci) && exists('.github/workflows/release-promotion.yml'), `services=${actualServices.join(',')} missingPaths=${missingPaths.join(',')}`);
+check('ABSH-AUD-0052', JSON.stringify(actualServices) === JSON.stringify(claimedServices) && missingPaths.length === 0 && !manual.includes('local-compose-up.sh') && !manual.includes('local-compose-down.sh') && !/playwright/i.test(ci) && exists('.github/workflows/release-promotion.yml'), `services=${actualServices.join(',')} missingPaths=${missingPaths.join(',')}`);
 
 // 109: root layout matches actual packages.
 const rootReadme = read('README.md');
 const packageDirs = fs.readdirSync(path.join(root, 'packages'), { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
-check('MNT-AUD-0004', !rootReadme.includes('packages/utils') && packageDirs.every((name) => rootReadme.includes(`packages/${name}`)), `packages=${packageDirs.length}`);
+check('ABSH-AUD-0004', !rootReadme.includes('packages/utils') && packageDirs.every((name) => rootReadme.includes(`packages/${name}`)), `packages=${packageDirs.length}`);
 
 // W7 final authority synchronization.
 const authorityDocs = [

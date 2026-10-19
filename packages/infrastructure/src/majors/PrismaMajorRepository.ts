@@ -29,7 +29,7 @@ import {
   publicMajorProjection,
   assertMajorReviewCoverage,
   MajorNamingService,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 import { decodeStableCursor, encodeStableCursor, boundedCursorLimit } from '../api-foundation/StableCursor';
 

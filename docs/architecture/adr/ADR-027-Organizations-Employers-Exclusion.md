@@ -4,13 +4,13 @@
 **Title:** Exclusion of the Organizations & Employers Platform from the Finalized Architecture
 **Status:** Approved & Baselined
 **Context:**
-An early architecture review finding indicated the absence of a dedicated "Organizations & Employers Platform" responsible for centralizing Sponsors, Employers, Educational Partners, Recruitment Agencies, and Institutional Partners. A prior, draft-level decision (ADR-026) briefly considered formalizing this as Phase 18. However, the MANARATAK 2.0 enterprise architecture is now fully finalized across all 24 phases. Phase 18 has been permanently allocated to the Enterprise Student Tools Platform. The ARB was tasked with conducting a final impact assessment on whether a dedicated Organizations Platform is required.
+An early architecture review finding indicated the absence of a dedicated "Organizations & Employers Platform" responsible for centralizing Sponsors, Employers, Educational Partners, Recruitment Agencies, and Institutional Partners. A prior, draft-level decision (ADR-026) briefly considered formalizing this as Phase 18. However, the ABSHEER 2.0 enterprise architecture is now fully finalized across all 24 phases. Phase 18 has been permanently allocated to the Enterprise Student Tools Platform. The ARB was tasked with conducting a final impact assessment on whether a dedicated Organizations Platform is required.
 
 **Problem Statement:**
 Creating a single, monolithic "Organizations & Employers Platform" attempts to group disparate business entities based purely on their structural identity (being a B2B organization) rather than their behavioral domain contexts. This risks creating an anemic, highly coupled generic data service rather than a cohesive business platform.
 
 **Decision:**
-The Architecture Review Board (ARB) has decided to **intentionally exclude** the Organizations & Employers Platform from the final MANARATAK 2.0 architecture.
+The Architecture Review Board (ARB) has decided to **intentionally exclude** the Organizations & Employers Platform from the final ABSHEER 2.0 architecture.
 
 - This is an intentional architectural decision rather than an omission.
 - Future architectural reviews must treat this issue as **CLOSED**.
@@ -19,7 +19,7 @@ The Architecture Review Board (ARB) has decided to **intentionally exclude** the
 - The roadmap remains fixed at 24 phases.
 
 **Architectural Principle:**
-MANARATAK 2.0 does not centralize entities solely because they are organizations. Entities are modeled according to their business behavior, lifecycle, ownership, and bounded context. Sharing the same structural identity (being an organization) is NOT sufficient justification for creating a Platform. This principle becomes part of the enterprise architectural doctrine.
+ABSHEER 2.0 does not centralize entities solely because they are organizations. Entities are modeled according to their business behavior, lifecycle, ownership, and bounded context. Sharing the same structural identity (being an organization) is NOT sufficient justification for creating a Platform. This principle becomes part of the enterprise architectural doctrine.
 
 **Rationale:**
 
@@ -50,4 +50,4 @@ MANARATAK 2.0 does not centralize entities solely because they are organizations
 - This ADR serves as the definitive ruling on organizational entities. Any future attempts to centralize B2B organizations must challenge this ADR explicitly.
 
 **Final ARB Decision:**
-APPROVED - The Organizations & Employers Platform is permanently excluded from MANARATAK 2.0.
+APPROVED - The Organizations & Employers Platform is permanently excluded from ABSHEER 2.0.

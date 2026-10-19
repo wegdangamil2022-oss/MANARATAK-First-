@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const security = vi.hoisted(() => ({ fetchWithCsrf: vi.fn(), clearToken: vi.fn() }));
-vi.mock('@manaratak/shared', () => ({ CsrfClientManager: { getInstance: () => security } }));
+vi.mock('@absheer/shared', () => ({ CsrfClientManager: { getInstance: () => security } }));
 
 beforeEach(() => {
   vi.resetModules(); security.fetchWithCsrf.mockReset(); security.clearToken.mockReset();
@@ -71,7 +71,7 @@ describe('Admin session refresh and command retry', () => {
     else security.fetchWithCsrf.mockRejectedValueOnce(new Error('Network offline'));
     await expect(adminApiClient.request('/admin/a', { method: 'PUT' })).rejects.toThrow('[401]');
     expect(security.fetchWithCsrf).toHaveBeenCalledTimes(2);
-    expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'manaratak-admin-session-expired' }));
+    expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'absheer-admin-session-expired' }));
     await expect(adminApiClient.request('/admin/b')).rejects.toThrow('ADMIN_AUTH_GUARD');
     expect(security.fetchWithCsrf).toHaveBeenCalledTimes(2);
   });

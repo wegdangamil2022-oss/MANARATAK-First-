@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ConfigurationValidationService, NamespacedKey, ScopeIdentifier, ScopeLevel, SettingDefinition, SettingVersion, StringValue, ValueType } from '@manaratak/domain';
+import { ConfigurationValidationService, NamespacedKey, ScopeIdentifier, ScopeLevel, SettingDefinition, SettingVersion, StringValue, ValueType } from '@absheer/domain';
 import { ManageSettingsUseCase } from '../../src/settings/use-cases/ManageSettingsUseCase';
 const def = (key: string, isSecret = false, isDeprecated = false) => new SettingDefinition({ id: key, key: new NamespacedKey(key), valueType: ValueType.String, isSecret, isDeprecated, revision: '2026-10-09T00:00:00Z' });
 const row = (key: string) => ({ id: key, key, scope: new ScopeIdentifier('GLOBAL'), versionCount: 100,

@@ -26,9 +26,9 @@ class AssetId { constructor(value) { this.value = value; } }
 const AssetLifecycleState = { ACTIVE: 'ACTIVE', QUARANTINED: 'QUARANTINED', ARCHIVED: 'ARCHIVED', DELETED: 'DELETED', PURGED: 'PURGED' };
 const AssetSecurityClassification = { PUBLIC: 'PUBLIC', INTERNAL: 'INTERNAL', RESTRICTED: 'RESTRICTED', CONFIDENTIAL: 'CONFIDENTIAL' };
 
-test('MNT-AUD-0026 AssetReferencePolicy enforces owner, lifecycle, classification and MIME role', async () => {
+test('ABSH-AUD-0026 AssetReferencePolicy enforces owner, lifecycle, classification and MIME role', async () => {
   const { AssetReferencePolicy } = loadTsModule('packages/application/src/asset-platform/AssetReferencePolicy.ts', {
-    '@manaratak/domain': { AssetId, AssetLifecycleState, AssetSecurityClassification },
+    '@absheer/domain': { AssetId, AssetLifecycleState, AssetSecurityClassification },
   });
   const records = new Map([
     ['img', { assertCanDeliver() {}, state: 'ACTIVE', classification: 'PUBLIC', owner: { ownerId: 'student-1', ownerType: 'STUDENT' }, metadata: { mimeType: 'image/png' } }],
@@ -39,7 +39,7 @@ test('MNT-AUD-0026 AssetReferencePolicy enforces owner, lifecycle, classificatio
   await assert.rejects(policy.assertUsable('pdf', { purpose: 'STUDENT_AVATAR', expectedOwnerId: 'student-1', allowedOwnerTypes: ['STUDENT'], allowedMimeTypePrefixes: ['image/'] }), /ASSET_MIME_NOT_ALLOWED/);
 });
 
-test('MNT-AUD-0026 Admin Asset Center exposes governed query/detail/picker/preview/audit surfaces', () => {
+test('ABSH-AUD-0026 Admin Asset Center exposes governed query/detail/picker/preview/audit surfaces', () => {
   const repo = read('packages/infrastructure/src/asset-platform/PrismaAssetRecordRepository.ts');
   const router = read('apps/api/src/presentation/api/router/AssetPlatformRouter.ts');
   const picker = read('apps/admin/src/components/AssetPicker.tsx');
@@ -59,7 +59,7 @@ test('MNT-AUD-0026 Admin Asset Center exposes governed query/detail/picker/previ
   assert.match(app, /admin\/assets'.*admin:assets:manage/s);
 });
 
-test('MNT-AUD-0026 shared governed selection is wired to Course, CMS, Certificate and Student avatar workflows', () => {
+test('ABSH-AUD-0026 shared governed selection is wired to Course, CMS, Certificate and Student avatar workflows', () => {
   const course = read('apps/admin/src/pages/CourseDetailPage.tsx');
   const cms = read('apps/admin/src/pages/CmsAdminPage.tsx');
   const certificate = read('apps/admin/src/pages/CertificateAdminPage.tsx');
@@ -73,7 +73,7 @@ test('MNT-AUD-0026 shared governed selection is wired to Course, CMS, Certificat
   assert.match(student, /listMyActiveStudentAssets\('image\/'\)/);
 });
 
-test('MNT-AUD-0027 canonical Admin can create a native course and hand off to authoritative editor', () => {
+test('ABSH-AUD-0027 canonical Admin can create a native course and hand off to authoritative editor', () => {
   const ui = read('apps/admin/src/pages/CourseListPage.tsx');
   const router = read('apps/api/src/presentation/api/router/CourseAdminRouter.ts');
   const app = read('apps/api/src/app.ts');
@@ -88,7 +88,7 @@ test('MNT-AUD-0027 canonical Admin can create a native course and hand off to au
   assert.match(app, /new MutationAuditMiddleware\(auditRecordRepository, 'ADMIN'\)/);
 });
 
-test('MNT-AUD-0033 public composition has no duplicate P23 visibility authority', () => {
+test('ABSH-AUD-0033 public composition has no duplicate P23 visibility authority', () => {
   const p24 = read('docs/phases/phase-24-enterprise-public-platform/phase-24-02-enterprise-public-platform-structure-contracts.md');
   const p23 = read('docs/phases/phase-23-enterprise-administration-portal/phase-23-02-enterprise-administration-portal-structure-contracts.md');
   const matrix = read('docs/remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md');

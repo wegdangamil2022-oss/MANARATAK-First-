@@ -1,9 +1,9 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-3 Prevent Reimplementation of Core Foundations
 # Phase 3 — Enterprise Foundation Specification
 
 ## 1. Executive Summary
-The Enterprise Foundation Specification serves as the definitive architectural reference for all shared technical capabilities within the MANARATAK 2.0 platform. Building upon the approved Phase 2 Blueprint, this specification rigorously untangles **Architectural Ownership** (the architectural area accountable for the capability's design and evolution) from **Canonical Location** (the physical package or module where the code resides). By establishing these strict definitions, the specification ensures that enterprise foundations are implemented exactly once, governed appropriately, and safely consumed by isolated Domain-Driven Design (DDD) bounded contexts without introducing lateral coupling.
+The Enterprise Foundation Specification serves as the definitive architectural reference for all shared technical capabilities within the ABSHEER 2.0 platform. Building upon the approved Phase 2 Blueprint, this specification rigorously untangles **Architectural Ownership** (the architectural area accountable for the capability's design and evolution) from **Canonical Location** (the physical package or module where the code resides). By establishing these strict definitions, the specification ensures that enterprise foundations are implemented exactly once, governed appropriately, and safely consumed by isolated Domain-Driven Design (DDD) bounded contexts without introducing lateral coupling.
 
 ## 2. Enterprise Foundation Specification
 This specification dictates the canonical behavior and boundaries of the enterprise technical foundations. It enforces the principle that business logic remains exclusively within the domain, while infrastructural and cross-cutting concerns are elevated to universally accessible, strictly governed layers.

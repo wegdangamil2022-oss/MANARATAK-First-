@@ -1,6 +1,6 @@
-import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
+import { ADMIN_PERMISSION_CATALOG } from '@absheer/shared';
 import { createHash, randomUUID } from 'node:crypto';
-import { Identity, IIdentityRepository, ListIdentitiesCriteria } from '@manaratak/domain';
+import { Identity, IIdentityRepository, ListIdentitiesCriteria } from '@absheer/domain';
 import { IdentityMapper } from './IdentityMapper';
 
 export class PrismaIdentityRepository implements IIdentityRepository {

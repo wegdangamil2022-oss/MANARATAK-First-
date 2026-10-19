@@ -1,6 +1,6 @@
 import { Award, CheckCircle2, ShieldCheck } from 'lucide-react';
-import { createQrMatrix } from '@manaratak/shared';
-import { APPROVED_CERTIFICATE_DESIGN } from '@manaratak/shared';
+import { createQrMatrix } from '@absheer/shared';
+import { APPROVED_CERTIFICATE_DESIGN } from '@absheer/shared';
 import { ApprovedCertificatePreview } from './ApprovedCertificatePreview';
 
 export interface CertificateTemplatePreviewModel {
@@ -127,7 +127,7 @@ export function CertificatePreview({
   const code = certificate?.verificationCode || 'MNR-PREVIEW-VERIFY';
   const verificationUrl =
     certificate?.verificationUrl ||
-    `https://app.manaratak.org/certificates/verify?code=${encodeURIComponent(code)}`;
+    `https://app.absheer.org/certificates/verify?code=${encodeURIComponent(code)}`;
   const issuedAt = certificate?.issuedAt ? new Date(certificate.issuedAt) : new Date();
 
   if (template.metadata?.designId === APPROVED_CERTIFICATE_DESIGN)
@@ -148,7 +148,7 @@ export function CertificatePreview({
           serial: certificate?.serialNumber || '',
           issuedAt: certificate?.issuedAt ? issuedAt.toISOString().slice(0, 10) : '',
           verificationUrl,
-          issuerName: certificate?.issuerName || template.issuerName || 'MANARATAK',
+          issuerName: certificate?.issuerName || template.issuerName || 'ABSHEER',
         }}
       />
     );
@@ -176,7 +176,7 @@ export function CertificatePreview({
               <Award className={`h-6 w-6 ${theme.goldText}`} />
               <strong className={`text-lg ${theme.accentText}`}>مـنـارتـك</strong>
             </div>
-            <p className="text-[9px] font-bold tracking-[0.28em] text-slate-500">MANARATAK</p>
+            <p className="text-[9px] font-bold tracking-[0.28em] text-slate-500">ABSHEER</p>
           </div>
           <div className={`rounded-full border-2 p-2.5 ${theme.goldBorder} ${theme.accentText}`}>
             <ShieldCheck className="h-6 w-6" />
@@ -207,7 +207,7 @@ export function CertificatePreview({
           </h2>
           <p className="mx-auto max-w-2xl text-[10px] leading-5 text-slate-600">
             {template.bodyAr ||
-              'تشهد منصة منارتك بأن المتعلم قد أتم بنجاح متطلبات هذه الدورة واستحق شهادة الإتمام الرقمية القابلة للتحقق.'}
+              'تشهد منصة أبشر بأن المتعلم قد أتم بنجاح متطلبات هذه الدورة واستحق شهادة الإتمام الرقمية القابلة للتحقق.'}
           </p>
           <h3 className={`${compact ? 'text-sm' : 'text-lg'} font-black text-slate-900`}>
             {achievement}
@@ -215,7 +215,7 @@ export function CertificatePreview({
           {!compact ? (
             <p className="mx-auto max-w-xl text-[9px] leading-4 text-slate-500" dir="ltr">
               {template.bodyEn ||
-                'MANARATAK confirms successful completion of the course requirements and issuance of this digitally verifiable certificate of completion.'}
+                'ABSHEER confirms successful completion of the course requirements and issuance of this digitally verifiable certificate of completion.'}
             </p>
           ) : null}
         </section>
@@ -225,7 +225,7 @@ export function CertificatePreview({
         >
           <div>
             <div className={`mx-auto mb-1 w-24 border-b pb-1 font-bold ${theme.accentBorder}`}>
-              {template.signatoryNameAr || 'إدارة الشهادات — منارتك'}
+              {template.signatoryNameAr || 'إدارة الشهادات — أبشر'}
             </div>
             <span className="text-slate-500">
               {template.signatoryTitleAr || 'توقيع الإصدار الرقمي'}
@@ -245,7 +245,7 @@ export function CertificatePreview({
           </div>
           <div>
             <strong className={theme.accentText}>
-              {certificate?.issuerName || template.issuerName || 'MANARATAK'}
+              {certificate?.issuerName || template.issuerName || 'ABSHEER'}
             </strong>
             <p className="text-slate-500">تاريخ الإصدار: {issuedAt.toLocaleDateString('ar')}</p>
             <p className="font-mono text-slate-400" dir="ltr">

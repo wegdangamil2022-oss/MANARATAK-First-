@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ReferenceLifecycleState } from '@manaratak/domain';
-import type { AdministrativeRegionDto, ReferenceAliasInput, ReferenceDataPage, ReferenceVersionDto } from '@manaratak/domain';
+import { ReferenceLifecycleState } from '@absheer/domain';
+import type { AdministrativeRegionDto, ReferenceAliasInput, ReferenceDataPage, ReferenceVersionDto } from '@absheer/domain';
 import { getReferenceDataPage, referenceDataAdminApi } from '../api/referenceData';
 import { canonicalPickerApi } from '../api/canonicalPickers';
 import { CanonicalPicker } from '../components/CanonicalPicker';

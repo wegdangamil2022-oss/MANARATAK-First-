@@ -1,4 +1,4 @@
-import type { UpsertReferenceCountryDto } from '@manaratak/domain';
+import type { UpsertReferenceCountryDto } from '@absheer/domain';
 import { ReferenceDataImportHandoffService } from './ReferenceDataImportHandoffService';
 
 export interface CountrySourceRecord extends Record<string, unknown> {

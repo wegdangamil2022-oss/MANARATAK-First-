@@ -11,10 +11,10 @@ CREATE TABLE "AssetRenditionRecord" (
 CREATE UNIQUE INDEX "AssetRenditionRecord_assetId_variantKey_key" ON "AssetRenditionRecord"("assetId","variantKey");
 CREATE INDEX "AssetRenditionRecord_generatedAssetId_idx" ON "AssetRenditionRecord"("generatedAssetId");
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "assetId", "generatedAssetId" ON "AssetRenditionRecord"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('assetId,generatedAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('assetId,generatedAssetId', 'false', 'false');
 
 -- Extend the existing physical lifecycle guard with the new owner-derived reference.
-CREATE OR REPLACE FUNCTION manaratak_protect_asset_references() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE OR REPLACE FUNCTION absheer_protect_asset_references() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE used boolean;
 BEGIN
   IF TG_OP = 'UPDATE' THEN

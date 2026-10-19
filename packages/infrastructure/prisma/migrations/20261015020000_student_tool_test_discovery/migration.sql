@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: student_tools
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: student_tools
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- Source only: no migration was applied.
 BEGIN;
 -- CreateTable

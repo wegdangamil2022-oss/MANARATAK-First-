@@ -1,4 +1,4 @@
-import { ImportRetryPolicy } from '@manaratak/domain';
+import { ImportRetryPolicy } from '@absheer/domain';
 import { IImportQueueGateway } from '../gateways/IImportQueueGateway';
 import { ImportJobLease } from '../dtos/ImportQueueDtos';
 

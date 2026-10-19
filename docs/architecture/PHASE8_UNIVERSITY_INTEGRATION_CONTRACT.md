@@ -1,9 +1,9 @@
 # Phase 8 — University Integration Contract
-## Document Reference: MANARATAK-P8-U001-CONTRACT
+## Document Reference: ABSHEER-P8-U001-CONTRACT
 
 This document establishes the canonical integration contract and architectural specifications between the Phase 8 Academic Taxonomy / Degree Levels platform, the Phase 10 Majors platform, and the future University & Academic Program platform. 
 
-This contract is designed to make the MANARATAK platform fully **university-ready** in a robust, idempotent, and relational manner, completely avoiding historical pitfalls of data duplication, unstable identifiers, and unstructured metadata.
+This contract is designed to make the ABSHEER platform fully **university-ready** in a robust, idempotent, and relational manner, completely avoiding historical pitfalls of data duplication, unstable identifiers, and unstructured metadata.
 
 ---
 
@@ -13,7 +13,7 @@ The purpose of this contract is to establish stable boundary references, strict 
 
 By formalizing this contract prior to bulk import, we ensure:
 * **Zero duplication** of University and Academic Program entities upon repeated imports.
-* **100% preservation** of stable, official MANARATAK Institutional Reference IDs.
+* **100% preservation** of stable, official ABSHEER Institutional Reference IDs.
 * **Typographic and conceptual integrity** where university offerings are mapped directly to canonical `Major` and `DegreeLevel` entities rather than loose, unvalidated free-text.
 * **Complete flexibility** in representing modern university hierarchies, organizational structures, and campus offerings.
 
@@ -131,7 +131,7 @@ An `AcademicProgram`'s taxonomic classification (e.g. *ISCED-F broad, narrow, de
 This is the most critical operational safety mandate. Generating random UUIDs on raw imports during re-import cycles destroys database relational integrity and leads to orphan records.
 
 ### ID Preservation Rules
-1. **Immutable Reference ID**: Enriched university datasets contain stable institutional identifiers (e.g. `uni-manaratak-001`). This ID **MUST** be mapped directly to the `publicId` or `id` in the database.
+1. **Immutable Reference ID**: Enriched university datasets contain stable institutional identifiers (e.g. `uni-absheer-001`). This ID **MUST** be mapped directly to the `publicId` or `id` in the database.
 2. **No Volatile UUIDs**: Generating volatile random IDs (`uuidv4()`, `nanoid()`, etc.) at runtime for raw source records is **STRICTLY PROHIBITED**.
 3. **Idempotent Matching Strategy**: Repeated imports of the same institution must resolve directly by its stable canonical reference ID, performing an **upsert** (update existing fields, preserve identifiers and relationships) rather than deleting and recreating.
 4. **Name-Based Matching Fallback**: Matching primarily by name or website URL is prohibited for canonical identification. These fields can only be used to validate, flag, or assist in deduplication.
@@ -207,7 +207,7 @@ A thorough audit of the active codebase has identified multiple critical safety 
 The next-generation importer must strictly satisfy this checklist:
 
 ```yaml
-Import Source: "manaratak-enriched-universities.json"
+Import Source: "absheer-enriched-universities.json"
 Handoff Rules:
   - Verify University File Reference ID exists -> Set as canonical publicId/id.
   - Verify Country ID matches ReferenceCountry -> Establish relation, do not insert raw text names.

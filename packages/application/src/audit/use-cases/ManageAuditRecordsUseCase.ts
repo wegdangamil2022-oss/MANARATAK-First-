@@ -3,7 +3,7 @@ import {
   IAuditRecordRepository,
   AuditRecordPageQuery,
   AuditIntegrityQuery,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AuditRecordQueryDto } from '../dtos/AuditDtos';
 
 /**

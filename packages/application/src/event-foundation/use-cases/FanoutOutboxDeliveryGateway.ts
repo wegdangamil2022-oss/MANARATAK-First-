@@ -1,4 +1,4 @@
-import { IOutboxDeliveryGateway, OutboxDeliveryContext, TransactionalOutboxEntry } from '@manaratak/domain';
+import { IOutboxDeliveryGateway, OutboxDeliveryContext, TransactionalOutboxEntry } from '@absheer/domain';
 
 /**
  * Delivers one claimed outbox fact to every required idempotent consumer before

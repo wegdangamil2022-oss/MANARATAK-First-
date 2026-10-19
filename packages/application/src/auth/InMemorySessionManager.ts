@@ -1,4 +1,4 @@
-import { ISessionManager, RefreshSession } from '@manaratak/core';
+import { ISessionManager, RefreshSession } from '@absheer/core';
 import * as crypto from 'node:crypto';
 
 interface MemorySessionRecord {

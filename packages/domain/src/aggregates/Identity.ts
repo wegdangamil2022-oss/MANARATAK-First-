@@ -1,4 +1,4 @@
-import { AggregateRoot, Identifier, generateOpaqueIdentifier } from '@manaratak/core';
+import { AggregateRoot, Identifier, generateOpaqueIdentifier } from '@absheer/core';
 import { IdentityType } from '../enums/IdentityType';
 import { LifeStatus } from '../enums/LifeStatus';
 import { User } from '../entities/User';
@@ -135,7 +135,7 @@ export class Identity extends AggregateRoot<IdentityProps> {
         timeZone: 'UTC'
       });
       this.props.user.updateProfile(anonymizedProfile);
-      this.props.user.contactRegistry.updateEmail('deleted@manaratak.local');
+      this.props.user.contactRegistry.updateEmail('deleted@absheer.local');
       this.props.user.contactRegistry.updatePhone(undefined);
     }
 

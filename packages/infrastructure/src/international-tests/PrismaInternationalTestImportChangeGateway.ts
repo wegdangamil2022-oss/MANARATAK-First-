@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { AuthorizationEvaluatorService, InternationalTestDeduplicationService, OutboxProcessingState } from '@manaratak/domain';
+import { AuthorizationEvaluatorService, InternationalTestDeduplicationService, OutboxProcessingState } from '@absheer/domain';
 import {
   AtomicAuditedOutboxMutationExecutor, internationalTestImportHash, InternationalTestMarkdownParser,
   type InternationalTestImportApproval, type InternationalTestImportChangeGateway,
   type InternationalTestImportPlan, type InternationalTestImportPreview, type InternationalTestImportResult,
-} from '@manaratak/application';
+} from '@absheer/application';
 import { PrismaInternationalTestRepository } from './PrismaInternationalTestRepository';
 import { PrismaAuditRecordRepository } from '../audit/PrismaAuditRecordRepository';
 import { PrismaTransactionalOutboxStore } from '../event-foundation/PrismaTransactionalOutboxStore';

@@ -26,12 +26,12 @@ export function DetailSectionHeader({
 }) {
   const Heading = level === 2 ? 'h2' : level === 3 ? 'h3' : 'h4';
   return (
-    <div id={id} className={`mn-detail-section-header scroll-mt-28 flex flex-col items-center text-center ${className}`}>
+    <div id={id} className={`ab-detail-section-header scroll-mt-28 flex flex-col items-center text-center ${className}`}>
       <div className="flex items-center justify-center gap-2">
-        <span className={`mn-detail-section-icon shrink-0 ${iconClassName}`} aria-hidden="true">{Icon ? <Icon className="h-4 w-4" /> : iconNode}</span>
-        <Heading className={`mn-detail-section-title ${titleClassName}`}>{title}</Heading>
+        <span className={`ab-detail-section-icon shrink-0 ${iconClassName}`} aria-hidden="true">{Icon ? <Icon className="h-4 w-4" /> : iconNode}</span>
+        <Heading className={`ab-detail-section-title ${titleClassName}`}>{title}</Heading>
       </div>
-      {subtitle ? <p className="mt-1 text-[11px] font-medium leading-5 text-[var(--mn-text-muted)] max-w-xl mx-auto text-center">{subtitle}</p> : null}
+      {subtitle ? <p className="mt-1 text-[11px] font-medium leading-5 text-[var(--ab-text-muted)] max-w-xl mx-auto text-center">{subtitle}</p> : null}
     </div>
   );
 }
@@ -51,7 +51,7 @@ export function DetailBackButton({
     <button
       type="button"
       onClick={onBack}
-      className={`mn-detail-close ${className}`}
+      className={`ab-detail-close ${className}`}
       aria-label={mode === 'close' ? publicT('public_close') : publicT('public_back')}
       title={mode === 'close' ? publicT('public_close') : publicT('public_back')}
     >
@@ -72,7 +72,7 @@ export function useDetailSearchTarget(anchor?: string, searchTerm?: string) {
       if (!target) return;
       const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
       target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
-      target.classList.add('mn-search-highlight');
+      target.classList.add('ab-search-highlight');
       target.setAttribute('data-search-match', searchTerm || 'true');
 
       const needle = searchTerm?.trim();
@@ -93,14 +93,14 @@ export function useDetailSearchTarget(anchor?: string, searchTerm?: string) {
             range.setStart(textNode, at);
             range.setEnd(textNode, at + needle.length);
             marked = document.createElement('mark');
-            marked.className = 'mn-search-term-mark';
+            marked.className = 'ab-search-term-mark';
             range.surroundContents(marked);
           }
         }
       }
 
       timer = window.setTimeout(() => {
-        target?.classList.remove('mn-search-highlight');
+        target?.classList.remove('ab-search-highlight');
         target?.removeAttribute('data-search-match');
         if (marked?.parentNode) marked.replaceWith(document.createTextNode(marked.textContent || ''));
       }, 1900);
@@ -108,7 +108,7 @@ export function useDetailSearchTarget(anchor?: string, searchTerm?: string) {
     return () => {
       cancelAnimationFrame(frame);
       if (timer !== undefined) window.clearTimeout(timer);
-      target?.classList.remove('mn-search-highlight');
+      target?.classList.remove('ab-search-highlight');
       target?.removeAttribute('data-search-match');
       if (marked?.parentNode) marked.replaceWith(document.createTextNode(marked.textContent || ''));
     };

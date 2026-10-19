@@ -4,7 +4,7 @@ import {
   DegreeLevelDto,
   DegreeLevelStatus,
   IDegreeLevelRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('DegreeLevelUseCases', () => {
   const existing: DegreeLevelDto = {

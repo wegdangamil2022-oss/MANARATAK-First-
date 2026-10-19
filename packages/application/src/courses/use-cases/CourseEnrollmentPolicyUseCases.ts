@@ -3,7 +3,7 @@ import {
   ICourseEnrollmentPolicyRepository,
   ICourseRepository,
   UpsertCourseEnrollmentPolicyDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class CourseEnrollmentPolicyUseCases {
   public constructor(

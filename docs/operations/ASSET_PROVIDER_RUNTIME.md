@@ -1,6 +1,6 @@
 # Phase 05 Enterprise Asset Provider Runtime Contract
 
-**Finding:** `MNT-AUD-0011`  
+**Finding:** `ABSH-AUD-0011`  
 **Source status:** production-capable transport implemented; provider sandbox execution remains external-runtime evidence.
 
 ## Runtime authority
@@ -15,9 +15,9 @@ Production and staging compose the Phase 05 Enterprise Asset Platform through th
 
 The three mandatory runtime settings are:
 
-- `MANARATAK_ASSET_PROVIDER_BASE_URL`
-- `MANARATAK_ASSET_PROVIDER_API_KEY`
-- `MANARATAK_ASSET_PROVIDER_SIGNING_SECRET` (minimum 32 bytes)
+- `ABSHEER_ASSET_PROVIDER_BASE_URL`
+- `ABSHEER_ASSET_PROVIDER_API_KEY`
+- `ABSHEER_ASSET_PROVIDER_SIGNING_SECRET` (minimum 32 bytes)
 
 Configuration is fail-closed. Partial provider configuration is rejected. Production/staging require HTTPS even if the development-only insecure-HTTP flag is supplied.
 
@@ -83,7 +83,7 @@ Source verification is not provider verification. Runtime closure still requires
 - timeout, non-2xx, invalid signature/replay and provider-unavailable behavior;
 - redacted logs containing no signing secret, object credentials or presigned query material.
 
-Until those tests are executed against a real configured provider, `MNT-AUD-0011` must remain `SOURCE_VERIFIED / PROVIDER_RUNTIME_PENDING` rather than production-closed.
+Until those tests are executed against a real configured provider, `ABSH-AUD-0011` must remain `SOURCE_VERIFIED / PROVIDER_RUNTIME_PENDING` rather than production-closed.
 
 ## Current restore/archive integrity and durable uncertainty contract — 2026-10-12
 

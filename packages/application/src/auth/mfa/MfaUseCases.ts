@@ -1,8 +1,8 @@
 import type { IGovernanceApprovalGateway } from '../../authorization/use-cases/GovernanceApprovalUseCases';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import type { AtomicDomainMutationCoordinator } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import type { ICredentialVerifier } from '../ICredentialVerifier';
-import type { ISessionManager } from '@manaratak/core';
+import type { ISessionManager } from '@absheer/core';
 export interface MfaProof {
   enrollmentId: string;
   verifiedAt: string;

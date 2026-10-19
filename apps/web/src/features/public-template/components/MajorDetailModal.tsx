@@ -250,7 +250,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto pt-0 pb-12 text-start font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--mn-page)] min-h-screen relative ">
+    <div className="w-full max-w-md mx-auto pt-0 pb-12 text-start font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--ab-page)] min-h-screen relative ">
       {/* 1. TOP HERO CONTAINER */}
       <div className="relative w-full overflow-hidden">
         {/* Close & Favorite Buttons Side-by-Side on Top-Left */}
@@ -263,7 +263,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                 event.stopPropagation();
                 onToggleFavorite(major.id);
               }}
-              className="bg-[var(--mn-surface)]/95 shadow-2xs"
+              className="bg-[var(--ab-surface)]/95 shadow-2xs"
             />
           )}
         </div>
@@ -276,37 +276,37 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           >
             <defs>
               <linearGradient id="heroGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="var(--mn-primary)" />
-                <stop offset="50%" stopColor="var(--mn-primary)" />
-                <stop offset="100%" stopColor="var(--mn-primary)" />
+                <stop offset="0%" stopColor="var(--ab-primary)" />
+                <stop offset="50%" stopColor="var(--ab-primary)" />
+                <stop offset="100%" stopColor="var(--ab-primary)" />
               </linearGradient>
             </defs>
             <path d="M 0,0 L 500,0 L 500,90 Q 250,112 0,90 Z" fill="url(#heroGreenGrad)" />
             <g opacity="0.25">
               <path
                 d="M -50,30 Q 120,-10 260,35 T 550,20"
-                stroke="var(--mn-accent)"
+                stroke="var(--ab-accent)"
                 strokeWidth="1.5"
                 fill="none"
               />
               <path
                 d="M -30,60 Q 150,20 320,55 T 560,35"
-                stroke="var(--mn-accent)"
+                stroke="var(--ab-accent)"
                 strokeWidth="1"
                 fill="none"
               />
 
-              <circle cx="35" cy="25" r="1.5" fill="var(--mn-accent)" />
-              <circle cx="50" cy="18" r="1" fill="var(--mn-accent)" />
-              <circle cx="42" cy="38" r="1.2" fill="var(--mn-accent)" />
-              <circle cx="445" cy="22" r="1.5" fill="var(--mn-accent)" />
-              <circle cx="460" cy="35" r="1" fill="var(--mn-accent)" />
-              <circle cx="430" cy="42" r="1.2" fill="var(--mn-accent)" />
+              <circle cx="35" cy="25" r="1.5" fill="var(--ab-accent)" />
+              <circle cx="50" cy="18" r="1" fill="var(--ab-accent)" />
+              <circle cx="42" cy="38" r="1.2" fill="var(--ab-accent)" />
+              <circle cx="445" cy="22" r="1.5" fill="var(--ab-accent)" />
+              <circle cx="460" cy="35" r="1" fill="var(--ab-accent)" />
+              <circle cx="430" cy="42" r="1.2" fill="var(--ab-accent)" />
             </g>
             <path
               d="M 0,90 Q 250,112 500,90"
               fill="none"
-              stroke="var(--mn-accent)"
+              stroke="var(--ab-accent)"
               strokeWidth="2.2"
               strokeLinecap="round"
             />
@@ -318,20 +318,20 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           >
             {/* Right Side: Glowing Gold Graduation Badge + Arrow + Title & Tag */}
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-[var(--mn-accent)] flex items-center justify-center p-1.5 shadow-[0_0_12px_rgba(214,164,59,0.5)] bg-gradient-to-br from-[var(--mn-primary)] to-[var(--mn-primary)] shrink-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-[var(--ab-accent)] flex items-center justify-center p-1.5 shadow-[0_0_12px_rgba(214,164,59,0.5)] bg-gradient-to-br from-[var(--ab-primary)] to-[var(--ab-primary)] shrink-0">
                 {(dataMode === 'api' || major.contentSections) ? (
         <PublishedMajorSections sections={major.contentSections ?? []} level={major.degreeLevelName} />
       ) : isFellowship ? (
-                  <HeartPulse className="w-6 h-6 text-[var(--mn-danger-text)] drop-shadow-[0_0_4px_rgba(214,164,59,0.7)]" />
+                  <HeartPulse className="w-6 h-6 text-[var(--ab-danger-text)] drop-shadow-[0_0_4px_rgba(214,164,59,0.7)]" />
                 ) : isDoctorate || isMaster ? (
-                  <Microscope className="w-6 h-6 text-[var(--mn-accent-soft)] drop-shadow-[0_0_4px_rgba(214,164,59,0.7)]" />
+                  <Microscope className="w-6 h-6 text-[var(--ab-accent-soft)] drop-shadow-[0_0_4px_rgba(214,164,59,0.7)]" />
                 ) : (
                   <svg viewBox="0 0 40 40" className="w-full h-full">
                     <defs>
                       <linearGradient id="goldCapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="var(--mn-accent-soft)" />
-                        <stop offset="45%" stopColor="var(--mn-accent-soft)" />
-                        <stop offset="100%" stopColor="var(--mn-accent)" />
+                        <stop offset="0%" stopColor="var(--ab-accent-soft)" />
+                        <stop offset="45%" stopColor="var(--ab-accent-soft)" />
+                        <stop offset="100%" stopColor="var(--ab-accent)" />
                       </linearGradient>
                       <filter id="goldShine" x="-30%" y="-30%" width="160%" height="160%">
                         <feGaussianBlur stdDeviation="1" result="blur" />
@@ -361,7 +361,7 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                   </svg>
                 )}
               </div>
-              <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-accent-text)] shrink-0 opacity-90 drop-shadow-[0_0_4px_rgba(214,164,59,0.4)]" />
+              <ArrowLeft className="w-3.5 h-3.5 text-[var(--ab-accent-text)] shrink-0 opacity-90 drop-shadow-[0_0_4px_rgba(214,164,59,0.4)]" />
 
               {/* Title (e.g. الطب والجراحة) and underneath: Degree Tag (e.g. برنامج بكالوريوس طبي) */}
               <div className="flex flex-col text-start min-w-0 flex-1 pr-1 pl-18 sm:pl-20">
@@ -389,9 +389,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
         /* MAIN CONTENT WRAPPER (Bordered full-width cards touching side edges) */
         <div className="px-0 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3" dir={publicDir}>
           {/* 1. BASIC MAJOR INFORMATION CARD */}
-          <div className="relative w-full bg-[var(--mn-surface)] rounded-none border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
+          <div className="relative w-full bg-[var(--ab-surface)] rounded-none border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
             {/* Top Green Accent Line */}
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent z-10" />
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent z-10" />
 
             <DetailSectionHeader
               id="major-requirements"
@@ -401,44 +401,44 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             />
 
             {/* Table Header Row */}
-            <div className="grid grid-cols-12 bg-[var(--mn-surface-muted)] border-y border-[var(--mn-border)] py-2.5 px-3.5 sm:px-4 items-center">
-              <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] text-start">{publicT('public_item')}</div>
-              <div className="col-span-8 text-[12px] font-bold text-[var(--mn-heading)] text-start">{publicT('public_details_2')}</div>
+            <div className="grid grid-cols-12 bg-[var(--ab-surface-muted)] border-y border-[var(--ab-border)] py-2.5 px-3.5 sm:px-4 items-center">
+              <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)] text-start">{publicT('public_item')}</div>
+              <div className="col-span-8 text-[12px] font-bold text-[var(--ab-heading)] text-start">{publicT('public_details_2')}</div>
             </div>
 
             {/* Table Body Rows */}
-            <div className="divide-y divide-[var(--mn-border)] bg-[var(--mn-surface)] ">
+            <div className="divide-y divide-[var(--ab-border)] bg-[var(--ab-surface)] ">
               {/* Reference Code */}
               {major.code && (
-                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_reference_code')}</div>
-                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-text)] font-mono tracking-wider">
+                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)]">{publicT('public_reference_code')}</div>
+                  <div className="col-span-8 text-[11px] font-bold text-[var(--ab-text)] font-mono tracking-wider">
                     {major.code}
                   </div>
                 </div>
               )}
 
               {/* Arabic Name */}
-              <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_arabic_name')}</div>
-                <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)]">{major.name}</div>
+              <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)]">{publicT('public_arabic_name')}</div>
+                <div className="col-span-8 text-[11px] font-bold text-[var(--ab-heading)]">{major.name}</div>
               </div>
 
               {/* Name in English */}
-              <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_english_name')}</div>
-                <div className="col-span-8 text-[11px] font-bold text-[var(--mn-accent-text)] font-['Cairo',sans-serif] tracking-wide">
+              <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center bg-[var(--ab-page)] hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)]">{publicT('public_english_name')}</div>
+                <div className="col-span-8 text-[11px] font-bold text-[var(--ab-accent-text)] font-['Cairo',sans-serif] tracking-wide">
                   {major.nameEn}
                 </div>
               </div>
 
               {/* Associated Major */}
               {major.associatedMajor && (
-                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
+                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)] pt-0.5">
                     {isDoctorate ? publicT('public_related_primary_major') : publicT('public_related_major')}
                   </div>
-                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
+                  <div className="col-span-8 text-[11px] font-bold text-[var(--ab-heading)] leading-relaxed">
                     {major.associatedMajor}
                   </div>
                 </div>
@@ -446,35 +446,35 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
               {/* Master Majoring Links for PhD */}
               {isDoctorate && (
-                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_related_masters_specializations')}</div>
-                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">{publicT('public_mas_0001_medical_sciences_with_potential_links_to')}</div>
+                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)] pt-0.5">{publicT('public_related_masters_specializations')}</div>
+                  <div className="col-span-8 text-[11px] font-bold text-[var(--ab-heading)] leading-relaxed">{publicT('public_mas_0001_medical_sciences_with_potential_links_to')}</div>
                 </div>
               )}
 
               {/* College / Academic Field */}
-              <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_academic_domain')}</div>
-                <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)]">
+              <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)]">{publicT('public_academic_domain')}</div>
+                <div className="col-span-8 text-[11px] font-bold text-[var(--ab-heading)]">
                   {major.academicField || major.category}
                 </div>
               </div>
 
               {/* Degree Level */}
-              <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)]">{publicT('public_degree_level')}</div>
-                <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)]">
+              <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-center hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)]">{publicT('public_degree_level')}</div>
+                <div className="col-span-8 text-[11px] font-bold text-[var(--ab-heading)]">
                   {major.degreeLevelName || major.degreeLevels?.join('، ')}
                 </div>
               </div>
 
               {/* Program Type / Doctorate Type */}
               {major.programTypes && (
-                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
+                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)] pt-0.5">
                     {isDoctorate ? publicT('public_doctorate_type') : publicT('public_program_type')}
                   </div>
-                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
+                  <div className="col-span-8 text-[11px] font-bold text-[var(--ab-heading)] leading-relaxed">
                     {major.programTypes}
                   </div>
                 </div>
@@ -482,9 +482,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
               {/* Common Degrees */}
               {(major.commonDegrees || (major.degreeLevels && major.degreeLevels.length > 0)) && (
-                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_common_degree_names')}</div>
-                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
+                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)] pt-0.5">{publicT('public_common_degree_names')}</div>
+                  <div className="col-span-8 text-[11px] font-bold text-[var(--ab-heading)] leading-relaxed">
                     {major.commonDegrees || major.degreeLevels?.join('، ')}
                   </div>
                 </div>
@@ -492,9 +492,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
               {/* Common Duration */}
               {major.duration && (
-                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_typical_duration')}</div>
-                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
+                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)] pt-0.5">{publicT('public_typical_duration')}</div>
+                  <div className="col-span-8 text-[11px] font-bold text-[var(--ab-heading)] leading-relaxed">
                     {major.duration}
                   </div>
                 </div>
@@ -502,11 +502,11 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
               {/* Study Modes / Common Entry Path */}
               {major.studyModes && (
-                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">
+                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)] pt-0.5">
                     {isDoctorate ? publicT('public_common_entry_path') : publicT('public_study_arrangements_2')}
                   </div>
-                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
+                  <div className="col-span-8 text-[11px] font-bold text-[var(--ab-heading)] leading-relaxed">
                     {major.studyModes}
                   </div>
                 </div>
@@ -514,9 +514,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
               {/* Availability Nature */}
               {major.availabilityNature && (
-                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_availability_2')}</div>
-                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed">
+                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)] pt-0.5">{publicT('public_availability_2')}</div>
+                  <div className="col-span-8 text-[11px] font-bold text-[var(--ab-heading)] leading-relaxed">
                     {major.availabilityNature}
                   </div>
                 </div>
@@ -524,9 +524,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
               {/* Short Description */}
               {major.description && (
-                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start bg-[var(--mn-page)] hover:bg-[var(--mn-surface-muted)]/50 transition-colors">
-                  <div className="col-span-4 text-[12px] font-bold text-[var(--mn-heading)] pt-0.5">{publicT('public_brief_description')}</div>
-                  <div className="col-span-8 text-[11px] font-bold text-[var(--mn-text)] leading-relaxed">
+                <div className="grid grid-cols-12 py-2.5 px-3.5 sm:px-4 items-start bg-[var(--ab-page)] hover:bg-[var(--ab-surface-muted)]/50 transition-colors">
+                  <div className="col-span-4 text-[12px] font-bold text-[var(--ab-heading)] pt-0.5">{publicT('public_brief_description')}</div>
+                  <div className="col-span-8 text-[11px] font-bold text-[var(--ab-text)] leading-relaxed">
                     {major.description}
                   </div>
                 </div>
@@ -535,9 +535,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           </div>
 
           {/* 2. NATURE AND OBJECTIVE OF DOCTORATE / OVERVIEW */}
-          <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
+          <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
             {/* Top Green Accent Line */}
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
             <DetailSectionHeader
               id="major-about"
@@ -549,27 +549,27 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             {/* Section Content */}
             <div className="space-y-2.5">
               {/* Main Overview Paragraph */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start space-y-2 ">
-                <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--ab-page)] border border-[var(--ab-border)] text-start space-y-2 ">
+                <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-text)] leading-[2] text-justify">
                   {isDoctorate
                     ? publicT('public_a_medical_sciences_doctorate_trains_researchers_to_produce')
                     : major.aboutMajor ||
                       publicT('public_an_advanced_academic_program_providing_comprehensive_scientific_knowledge')}
                 </p>
                 {isDoctorate && (
-                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify pt-1 border-t border-[var(--mn-border)]">{publicT('public_at_doctoral_level_students_lead_independent_research_address')}</p>
+                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-text)] leading-[2] text-justify pt-1 border-t border-[var(--ab-border)]">{publicT('public_at_doctoral_level_students_lead_independent_research_address')}</p>
                 )}
               </div>
 
               {/* Note / Highlight Box */}
               {major.aboutMajorNote && !isDoctorate && (
-                <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)] relative overflow-hidden mn-panel">
-                  <div className="w-6 h-6 rounded-full bg-[var(--mn-primary)]/8 border border-[var(--mn-border)] flex items-center justify-center shrink-0 mt-0.5">
-                    <Info className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
+                <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-[var(--ab-surface-muted)] border border-[var(--ab-border)] relative overflow-hidden ab-panel">
+                  <div className="w-6 h-6 rounded-full bg-[var(--ab-primary)]/8 border border-[var(--ab-border)] flex items-center justify-center shrink-0 mt-0.5">
+                    <Info className="w-3.5 h-3.5 text-[var(--ab-accent-text)]" />
                   </div>
                   <div className="flex-1 min-w-0 pr-1 text-start">
-                    <span className="block text-[11px] font-bold text-[var(--mn-heading)] mb-0.5">{publicT('public_important_clarification')}</span>
-                    <p className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-text-muted)] leading-[1.85]">
+                    <span className="block text-[11px] font-bold text-[var(--ab-heading)] mb-0.5">{publicT('public_important_clarification')}</span>
+                    <p className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-text-muted)] leading-[1.85]">
                       {major.aboutMajorNote}
                     </p>
                   </div>
@@ -580,21 +580,21 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
           {/* 3. COMMON TYPES OF DOCTORATE (For PhD) */}
           {isDoctorate && major.doctorateTypes && (
-            <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+            <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
               <DetailSectionHeader id="major-doctorate-types" icon={Layers} className="mb-3" title={publicT('public_3_common_types_of_doctorate')} />
 
-              <div className="mn-detail-small-grid pt-0.5 text-start">
+              <div className="ab-detail-small-grid pt-0.5 text-start">
                 {major.doctorateTypes.map((typeItem, tIdx) => (
                   <div
                     key={tIdx}
-                    className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
+                    className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
                   >
-                    <div className="w-5 h-5 rounded-lg bg-[var(--mn-primary)]/10 text-[var(--mn-primary)] dark:bg-[var(--mn-accent)]/15 dark:text-[var(--mn-accent)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px] group-hover:bg-[var(--mn-primary)] group-hover:text-white dark:group-hover:bg-[var(--mn-accent)] dark:group-hover:text-[var(--mn-primary)] transition-colors">
+                    <div className="w-5 h-5 rounded-lg bg-[var(--ab-primary)]/10 text-[var(--ab-primary)] dark:bg-[var(--ab-accent)]/15 dark:text-[var(--ab-accent)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px] group-hover:bg-[var(--ab-primary)] group-hover:text-white dark:group-hover:bg-[var(--ab-accent)] dark:group-hover:text-[var(--ab-primary)] transition-colors">
                       <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                     </div>
-                    <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors">
+                    <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-snug group-hover:text-[var(--ab-heading)] transition-colors">
                       {typeItem}
                     </span>
                   </div>
@@ -608,26 +608,26 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
           {/* 3. TARGET ACADEMIC BACKGROUNDS (For Master's) */}
           {isMaster && major.targetBackgrounds && major.targetBackgrounds.length > 0 && (
-            <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+            <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
               <DetailSectionHeader id="major-target-backgrounds" icon={Users} className="mb-3" title={publicT('public_3_target_academic_backgrounds_for_admission')} />
 
               <div className="space-y-3 text-start">
-                <div className="p-3 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start ">
-                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.9]">{publicT('public_this_masters_program_is_intended_for_qualified_graduates')}</p>
+                <div className="p-3 rounded-2xl bg-[var(--ab-page)] border border-[var(--ab-border)] text-start ">
+                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-text)] leading-[1.9]">{publicT('public_this_masters_program_is_intended_for_qualified_graduates')}</p>
                 </div>
 
-                <div className="mn-detail-small-grid pt-0.5">
+                <div className="ab-detail-small-grid pt-0.5">
                   {major.targetBackgrounds.map((bg, idx) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
+                      className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
                     >
-                      <div className="w-5 h-5 rounded-lg bg-[var(--mn-primary)]/10 text-[var(--mn-primary)] dark:bg-[var(--mn-accent)]/15 dark:text-[var(--mn-accent)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px] group-hover:bg-[var(--mn-primary)] group-hover:text-white dark:group-hover:bg-[var(--mn-accent)] dark:group-hover:text-[var(--mn-primary)] transition-colors">
+                      <div className="w-5 h-5 rounded-lg bg-[var(--ab-primary)]/10 text-[var(--ab-primary)] dark:bg-[var(--ab-accent)]/15 dark:text-[var(--ab-accent)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px] group-hover:bg-[var(--ab-primary)] group-hover:text-white dark:group-hover:bg-[var(--ab-accent)] dark:group-hover:text-[var(--ab-primary)] transition-colors">
                         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                       </div>
-                      <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors">
+                      <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-snug group-hover:text-[var(--ab-heading)] transition-colors">
                         {bg}
                       </span>
                     </div>
@@ -639,8 +639,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
           {/* 5. PH.D. PROGRAM STAGES (مراحل برنامج الدكتوراه) */}
           {isDoctorate && major.programStages && (
-            <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+            <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
               <DetailSectionHeader id="major-program-stages" icon={ListChecks} className="mb-3" title={publicT('public_5_doctoral_program_stages')} />
 
@@ -650,10 +650,10 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                   return (
                     <div
                       key={sIdx}
-                      className="flex flex-row items-start gap-2 sm:gap-2.5 p-2 sm:p-2.5 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-200 group text-start h-full "
+                      className="flex flex-row items-start gap-2 sm:gap-2.5 p-2 sm:p-2.5 rounded-lg bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] transition-all duration-200 group text-start h-full "
                     >
-                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] group-hover:bg-[var(--mn-accent)] dark:group-hover:bg-[var(--mn-primary)] shrink-0 mt-1.5 shadow-sm transition-colors" />
-                      <span className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors flex-1">
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[var(--ab-primary)] dark:bg-[var(--ab-accent)] group-hover:bg-[var(--ab-accent)] dark:group-hover:bg-[var(--ab-primary)] shrink-0 mt-1.5 shadow-sm transition-colors" />
+                      <span className="text-[10px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-snug group-hover:text-[var(--ab-heading)] transition-colors flex-1">
                         {cleanText}
                       </span>
                     </div>
@@ -665,8 +665,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
           {/* 6. ADVANCED KNOWLEDGE & COURSES (For PhD) */}
           {isDoctorate && (
-            <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+            <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
               <DetailSectionHeader id="major-study" icon={GraduationCap} className="mb-3" title={publicT('public_6_advanced_knowledge_and_coursework')} />
 
@@ -675,17 +675,17 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                 {major.advancedTheory && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-1.5">
-                      <BookOpen className="w-4 h-4 text-[var(--mn-heading)]" />
-                      <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_advanced_theoretical_knowledge')}</h3>
+                      <BookOpen className="w-4 h-4 text-[var(--ab-heading)]" />
+                      <h3 className="text-[11.5px] font-bold text-[var(--ab-heading)]">{publicT('public_advanced_theoretical_knowledge')}</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {major.advancedTheory.map((item, idx) => (
                         <div
                           key={idx}
-                          className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-colors "
+                          className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] transition-colors "
                         >
-                          <div className="w-1.5 h-1.5 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] shrink-0 mt-1.5 " />
-                          <span className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-relaxed">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[var(--ab-primary)] dark:bg-[var(--ab-accent)] shrink-0 mt-1.5 " />
+                          <span className="text-[10.5px] font-bold text-[var(--ab-heading)] leading-relaxed">
                             {item}
                           </span>
                         </div>
@@ -696,19 +696,19 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
                 {/* Block 2: مناهج البحث والتحليل */}
                 {major.researchMethodologies && (
-                  <div className="space-y-2 pt-2 border-t border-[var(--mn-border)]">
+                  <div className="space-y-2 pt-2 border-t border-[var(--ab-border)]">
                     <div className="flex items-center gap-1.5">
-                      <FlaskConical className="w-4 h-4 text-[var(--mn-accent-text)]" />
-                      <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_research_and_analytical_methods')}</h3>
+                      <FlaskConical className="w-4 h-4 text-[var(--ab-accent-text)]" />
+                      <h3 className="text-[11.5px] font-bold text-[var(--ab-heading)]">{publicT('public_research_and_analytical_methods')}</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {major.researchMethodologies.map((item, idx) => (
                         <div
                           key={idx}
-                          className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-colors "
+                          className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] transition-colors "
                         >
-                          <div className="w-1.5 h-1.5 rounded-full bg-[var(--mn-accent)] shrink-0 mt-1.5 " />
-                          <span className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-relaxed">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[var(--ab-accent)] shrink-0 mt-1.5 " />
+                          <span className="text-[10.5px] font-bold text-[var(--ab-heading)] leading-relaxed">
                             {item}
                           </span>
                         </div>
@@ -719,19 +719,19 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
                 {/* Block 3: الأخلاقيات والنزاهة العلمية */}
                 {major.ethicsAndIntegrity && (
-                  <div className="space-y-2 pt-2 border-t border-[var(--mn-border)]">
+                  <div className="space-y-2 pt-2 border-t border-[var(--ab-border)]">
                     <div className="flex items-center gap-1.5">
-                      <Scale className="w-4 h-4 text-[var(--mn-heading)]" />
-                      <h3 className="text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_ethics_and_academic_integrity')}</h3>
+                      <Scale className="w-4 h-4 text-[var(--ab-heading)]" />
+                      <h3 className="text-[11.5px] font-bold text-[var(--ab-heading)]">{publicT('public_ethics_and_academic_integrity')}</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {major.ethicsAndIntegrity.map((item, idx) => (
                         <div
                           key={idx}
-                          className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-colors"
+                          className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] transition-colors"
                         >
-                          <ShieldCheck className="w-3.5 h-3.5 text-[var(--mn-primary)] dark:text-[var(--mn-accent)] shrink-0 mt-0.5" />
-                          <span className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-relaxed">
+                          <ShieldCheck className="w-3.5 h-3.5 text-[var(--ab-primary)] dark:text-[var(--ab-accent)] shrink-0 mt-0.5" />
+                          <span className="text-[10.5px] font-bold text-[var(--ab-heading)] leading-relaxed">
                             {item}
                           </span>
                         </div>
@@ -744,8 +744,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           )}
 
           {/* 7. RESEARCH FIELDS & CONCENTRATIONS */}
-          <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+          <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
             <DetailSectionHeader id="major-tracks" icon={Compass} className="mb-3" title={isDoctorate
                     ? publicT('public_7_research_areas_and_subspecialties')
@@ -758,10 +758,10 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                 {tracksList.map((track, index) => (
                   <div
                     key={index}
-                    className="flex items-center p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start overflow-hidden relative min-h-[44px] "
+                    className="flex items-center p-2.5 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start overflow-hidden relative min-h-[44px] "
                   >
-                    <div className="absolute right-0 top-0 bottom-0 w-1 bg-[var(--mn-primary)]/80 dark:bg-[var(--mn-accent)]/80 group-hover:bg-[var(--mn-primary)] dark:group-hover:bg-[var(--mn-accent)] transition-colors" />
-                    <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors pr-2">
+                    <div className="absolute right-0 top-0 bottom-0 w-1 bg-[var(--ab-primary)]/80 dark:bg-[var(--ab-accent)]/80 group-hover:bg-[var(--ab-primary)] dark:group-hover:bg-[var(--ab-accent)] transition-colors" />
+                    <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-snug group-hover:text-[var(--ab-heading)] transition-colors pr-2">
                       {track}
                     </span>
                   </div>
@@ -772,13 +772,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
           {/* 8. QUALIFYING OR COMPREHENSIVE EXAM (For PhD) */}
           {isDoctorate && major.qualifyingExamInfo && (
-            <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+            <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
               <DetailSectionHeader id="major-qualifying-exam" icon={Award} className="mb-3" title={publicT('public_8_qualifying_or_comprehensive_exam_where_applicable')} />
 
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start ">
-                <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--ab-page)] border border-[var(--ab-border)] text-start ">
+                <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-text)] leading-[2] text-justify">
                   {major.qualifyingExamInfo}
                 </p>
               </div>
@@ -787,13 +787,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
           {/* 9. RESEARCH PROPOSAL & CANDIDACY (For PhD) */}
           {isDoctorate && major.researchProposalInfo && (
-            <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+            <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
               <DetailSectionHeader id="major-research-proposal" icon={Target} className="mb-3" title={publicT('public_9_research_proposal_and_candidacy')} />
 
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start ">
-                <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--ab-page)] border border-[var(--ab-border)] text-start ">
+                <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-text)] leading-[2] text-justify">
                   {major.researchProposalInfo}
                 </p>
               </div>
@@ -802,13 +802,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
           {/* 10. THESIS & ORIGINAL CONTRIBUTION (For PhD) */}
           {isDoctorate && major.originalContributionInfo && (
-            <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+            <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
               <DetailSectionHeader id="major-original-contribution" icon={Sparkles} className="mb-3" title={publicT('public_10_dissertation_and_original_contribution')} />
 
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start ">
-                <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-text)] leading-[2] text-justify">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--ab-page)] border border-[var(--ab-border)] text-start ">
+                <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-text)] leading-[2] text-justify">
                   {major.originalContributionInfo}
                 </p>
               </div>
@@ -817,8 +817,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
           {/* 11. SUPERVISION & RESEARCH ENVIRONMENT (For PhD) */}
           {isDoctorate && major.supervisionEnvironment && (
-            <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+            <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
               <DetailSectionHeader id="major-supervision" icon={Building} className="mb-3" title={publicT('public_11_supervision_and_research_environment')} />
 
@@ -826,11 +826,11 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                 {major.supervisionEnvironment.map((item, sIdx) => (
                   <div
                     key={sIdx}
-                    className="flex flex-col justify-center p-2.5 sm:p-3 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-300 group text-start h-full relative overflow-hidden"
+                    className="flex flex-col justify-center p-2.5 sm:p-3 rounded-lg bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] transition-all duration-300 group text-start h-full relative overflow-hidden"
                   >
                     <div className="relative z-10 flex items-start gap-2">
-                      <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-primary)] dark:text-[var(--mn-accent)] opacity-70 group-hover:text-[var(--mn-accent-text)] shrink-0 mt-0.5 transition-colors" />
-                      <span className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors">
+                      <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--ab-primary)] dark:text-[var(--ab-accent)] opacity-70 group-hover:text-[var(--ab-accent-text)] shrink-0 mt-0.5 transition-colors" />
+                      <span className="text-[10px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-snug group-hover:text-[var(--ab-heading)] transition-colors">
                         {item}
                       </span>
                     </div>
@@ -842,8 +842,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
           {/* 12. RESEARCH, PUBLISHING & TEACHING REQUIREMENTS (For PhD) */}
           {isDoctorate && major.researchPublishingTeaching && (
-            <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+            <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
               <DetailSectionHeader id="major-research-publishing" icon={Library} className="mb-3" title={publicT('public_12_research_publication_and_teaching_requirements')} />
 
@@ -851,10 +851,10 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                 {major.researchPublishingTeaching.map((item, pIdx) => (
                   <div
                     key={pIdx}
-                    className="flex items-start gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-all duration-300 group text-start h-full "
+                    className="flex items-start gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-lg bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] transition-all duration-300 group text-start h-full "
                   >
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-sm bg-[var(--mn-accent)] group-hover:bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] shrink-0 mt-1.5 shadow-sm transition-colors rotate-45" />
-                    <span className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors flex-1">
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-sm bg-[var(--ab-accent)] group-hover:bg-[var(--ab-primary)] dark:bg-[var(--ab-accent)] shrink-0 mt-1.5 shadow-sm transition-colors rotate-45" />
+                    <span className="text-[10px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-snug group-hover:text-[var(--ab-heading)] transition-colors flex-1">
                       {item}
                     </span>
                   </div>
@@ -864,8 +864,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           )}
 
           {/* 13. ADVANCED RESEARCH & PROFESSIONAL SKILLS */}
-          <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+          <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
             <DetailSectionHeader
               id="major-skills"
@@ -879,10 +879,10 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                 {skillsList.map((skill, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
+                    className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
                   >
-                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--mn-primary)] dark:bg-[var(--mn-accent)] group-hover:bg-[var(--mn-accent)] dark:group-hover:bg-[var(--mn-primary)] transition-all shrink-0 mt-1.5 shadow-2xs" />
-                    <span className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--ab-primary)] dark:bg-[var(--ab-accent)] group-hover:bg-[var(--ab-accent)] dark:group-hover:bg-[var(--ab-primary)] transition-all shrink-0 mt-1.5 shadow-2xs" />
+                    <span className="text-[10.5px] font-bold text-[var(--ab-heading)] leading-snug group-hover:text-[var(--ab-heading)] transition-colors">
                       {skill}
                     </span>
                   </div>
@@ -892,8 +892,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           </div>
 
           {/* 14. FIELDS OF WORK AFTER GRADUATION */}
-          <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+          <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
             <DetailSectionHeader
               id="major-careers"
@@ -906,10 +906,10 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               {workFieldsList.map((job, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
+                  className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
                 >
-                  <div className="w-2 h-[2.5px] bg-[var(--mn-primary)]/80 dark:bg-[var(--mn-accent)]/80 group-hover:bg-[var(--mn-primary)] dark:group-hover:bg-[var(--mn-accent)] group-hover:w-3.5 transition-all duration-300 shrink-0 mt-1.5 rounded-full" />
-                  <span className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors">
+                  <div className="w-2 h-[2.5px] bg-[var(--ab-primary)]/80 dark:bg-[var(--ab-accent)]/80 group-hover:bg-[var(--ab-primary)] dark:group-hover:bg-[var(--ab-accent)] group-hover:w-3.5 transition-all duration-300 shrink-0 mt-1.5 rounded-full" />
+                  <span className="text-[10.5px] font-bold text-[var(--ab-heading)] leading-snug group-hover:text-[var(--ab-heading)] transition-colors">
                     {job}
                   </span>
                 </div>
@@ -918,8 +918,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           </div>
 
           {/* 15. RELATED CAREERS / JOBS TABLE */}
-          <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+          <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
             <DetailSectionHeader id="major-related-jobs" icon={UserCheck} className="mb-4" title={isDoctorate
                     ? publicT('public_15_key_related_jobs')
@@ -927,29 +927,29 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                       ? publicT('public_7_key_jobs_related_to_the_degree')
                       : publicT('public_6_key_related_jobs')} />
 
-            <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-[var(--mn-border)] shadow-2xs bg-[var(--mn-surface)] ">
+            <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-[var(--ab-border)] shadow-2xs bg-[var(--ab-surface)] ">
               <table className="w-full text-start border-collapse min-w-[480px]">
                 <thead>
-                  <tr className="bg-[var(--mn-surface-muted)] border-b border-[var(--mn-border)]">
-                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[30%] whitespace-nowrap">{publicT('public_job')}</th>
-                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[25%] whitespace-nowrap">{publicT('public_degree_suitability')}</th>
-                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[45%]">{publicT('public_note')}</th>
+                  <tr className="bg-[var(--ab-surface-muted)] border-b border-[var(--ab-border)]">
+                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)] w-[30%] whitespace-nowrap">{publicT('public_job')}</th>
+                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)] w-[25%] whitespace-nowrap">{publicT('public_degree_suitability')}</th>
+                    <th className="py-3 px-3.5 text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)] w-[45%]">{publicT('public_note')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--mn-border)]">
+                <tbody className="divide-y divide-[var(--ab-border)]">
                   {relatedJobsList.map((row, index) => {
                     const matchText = row.matchRate || (row.entry && row.entry.length <= 15 ? row.entry : 'مناسبة');
                     const notesText = row.notes || (row.entry && row.entry !== matchText ? row.entry : 'ـ');
 
                     return (
-                      <tr key={index} className="hover:bg-[var(--mn-surface-muted)]/50 transition-colors group">
-                        <td className="py-2.5 px-3.5 text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] border-l border-[var(--mn-border)] align-middle">
+                      <tr key={index} className="hover:bg-[var(--ab-surface-muted)]/50 transition-colors group">
+                        <td className="py-2.5 px-3.5 text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] border-l border-[var(--ab-border)] align-middle">
                           {row.job}
                         </td>
-                        <td className="py-2.5 px-3.5 text-[10.5px] sm:text-[11px] font-semibold text-[var(--mn-heading)] border-l border-[var(--mn-border)] align-middle">
+                        <td className="py-2.5 px-3.5 text-[10.5px] sm:text-[11px] font-semibold text-[var(--ab-heading)] border-l border-[var(--ab-border)] align-middle">
                           {matchText}
                         </td>
-                        <td className="py-2.5 px-3.5 text-[10.5px] sm:text-[11px] font-normal text-[var(--mn-text)] leading-relaxed align-middle">
+                        <td className="py-2.5 px-3.5 text-[10.5px] sm:text-[11px] font-normal text-[var(--ab-text)] leading-relaxed align-middle">
                           {notesText}
                         </td>
                       </tr>
@@ -961,8 +961,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           </div>
 
           {/* 16. POST-DOCTORATE & FUTURE PATHWAYS */}
-          <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+          <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
             <DetailSectionHeader
               id="major-postgraduate"
@@ -976,10 +976,10 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                 {postgradList.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
+                    className="flex items-start gap-2 p-2.5 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] hover:shadow-2xs transition-all duration-200 group text-start "
                   >
-                    <div className="w-1.5 h-1.5 bg-[var(--mn-primary)]/80 dark:bg-[var(--mn-accent)]/80 rounded-sm shrink-0 group-hover:scale-110 group-hover:bg-[var(--mn-primary)] dark:group-hover:bg-[var(--mn-accent)] transition-all rotate-45 mt-1.5" />
-                    <span className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-snug group-hover:text-[var(--mn-heading)] transition-colors">
+                    <div className="w-1.5 h-1.5 bg-[var(--ab-primary)]/80 dark:bg-[var(--ab-accent)]/80 rounded-sm shrink-0 group-hover:scale-110 group-hover:bg-[var(--ab-primary)] dark:group-hover:bg-[var(--ab-accent)] transition-all rotate-45 mt-1.5" />
+                    <span className="text-[10.5px] font-bold text-[var(--ab-heading)] leading-snug group-hover:text-[var(--ab-heading)] transition-colors">
                       {item}
                     </span>
                   </div>
@@ -989,8 +989,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           </div>
 
           {/* 17. SIMILAR MAJORS & DIFFERENCES */}
-          <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+          <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
             <DetailSectionHeader
               id="major-similar"
@@ -1005,36 +1005,36 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               }
             />
 
-            <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-[var(--mn-border)] shadow-2xs bg-[var(--mn-surface)] ">
+            <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-[var(--ab-border)] shadow-2xs bg-[var(--ab-surface)] ">
               <table className="w-full text-start border-collapse min-w-[500px]">
                 <thead>
-                  <tr className="bg-[var(--mn-surface-muted)] border-b border-[var(--mn-border)]">
-                    <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[35%] whitespace-nowrap">
+                  <tr className="bg-[var(--ab-surface-muted)] border-b border-[var(--ab-border)]">
+                    <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)] w-[35%] whitespace-nowrap">
                       {isDoctorate ? publicT('public_similar_major_or_degree') : publicT('public_major_2')}
                     </th>
-                    <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] w-[65%]">
+                    <th className="py-3 px-4 text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)] w-[65%]">
                       {isDoctorate ? publicT('public_brief_distinction') : publicT('public_key_difference')}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--mn-border)]">
+                <tbody className="divide-y divide-[var(--ab-border)]">
                   {similarMajorsList.map((row, index) => (
-                    <tr key={index} className="hover:bg-[var(--mn-surface-muted)]/50 transition-colors group">
-                      <td className="py-2.5 px-4 text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] border-l border-[var(--mn-border)] align-middle group-hover:text-[var(--mn-heading)] transition-colors">
+                    <tr key={index} className="hover:bg-[var(--ab-surface-muted)]/50 transition-colors group">
+                      <td className="py-2.5 px-4 text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] border-l border-[var(--ab-border)] align-middle group-hover:text-[var(--ab-heading)] transition-colors">
                         {relationshipDemo.similarMajorLinks[row.name] ? (
                           <button
                             type="button"
                             onClick={() => onOpenMajor?.(relationshipDemo.similarMajorLinks[row.name])}
-                            className="inline-flex items-center gap-1.5 font-bold text-[var(--mn-heading)] hover:text-[var(--mn-primary)] transition-colors"
+                            className="inline-flex items-center gap-1.5 font-bold text-[var(--ab-heading)] hover:text-[var(--ab-primary)] transition-colors"
                           >
                             {row.name}
-                            <ArrowLeft className="w-3 h-3 text-[var(--mn-accent)]" />
+                            <ArrowLeft className="w-3 h-3 text-[var(--ab-accent)]" />
                           </button>
                         ) : (
                           row.name
                         )}
                       </td>
-                      <td className="py-2.5 px-4 text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-relaxed align-middle">
+                      <td className="py-2.5 px-4 text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-relaxed align-middle">
                         {row.difference}
                       </td>
                     </tr>
@@ -1045,8 +1045,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           </div>
 
           {/* 18. ACADEMIC & PROFESSIONAL ALERT */}
-          <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+          <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
             <DetailSectionHeader
               id="major-alert"
@@ -1063,29 +1063,29 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
             <div className="space-y-2 text-start">
               {isDoctorate ? (
-                <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--mn-page)] border border-[var(--mn-border)] text-start relative overflow-hidden">
-                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] leading-[1.9]">{publicT('public_a_doctorate_is_a_research_degree_and_does')}</p>
+                <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--ab-page)] border border-[var(--ab-border)] text-start relative overflow-hidden">
+                  <p className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)] leading-[1.9]">{publicT('public_a_doctorate_is_a_research_degree_and_does')}</p>
                 </div>
               ) : (
                 alertPoints.map((point, pIdx) => (
                   <div
                     key={pIdx}
-                    className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:bg-[var(--mn-surface-muted)] transition-colors"
+                    className="flex items-start gap-2.5 p-2.5 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:bg-[var(--ab-surface-muted)] transition-colors"
                   >
                     <div
                       className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px] ${
                         pIdx === 0
-                          ? 'bg-[var(--mn-primary)]/10 text-[var(--mn-primary)] dark:bg-[var(--mn-accent)]/15 dark:text-[var(--mn-accent)]'
-                          : 'bg-[var(--mn-surface-muted)] text-[var(--mn-heading)] border border-[var(--mn-border)]'
+                          ? 'bg-[var(--ab-primary)]/10 text-[var(--ab-primary)] dark:bg-[var(--ab-accent)]/15 dark:text-[var(--ab-accent)]'
+                          : 'bg-[var(--ab-surface-muted)] text-[var(--ab-heading)] border border-[var(--ab-border)]'
                       }`}
                     >
                       {point.num || pIdx + 1}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-[11px] font-bold text-[var(--mn-heading)] mb-0.5">
+                      <h4 className="text-[11px] font-bold text-[var(--ab-heading)] mb-0.5">
                         {point.title}
                       </h4>
-                      <p className="text-[10.5px] sm:text-[11px] font-medium text-[var(--mn-text)] leading-relaxed">
+                      <p className="text-[10.5px] sm:text-[11px] font-medium text-[var(--ab-text)] leading-relaxed">
                         {point.desc}
                       </p>
                     </div>
@@ -1096,8 +1096,8 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
           </div>
 
           {/* 19. RELATIONSHIP HUB & OPPORTUNITIES (LAST SECTION) */}
-          <div className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden ">
-            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-accent)] to-transparent" />
+          <div className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ">
+            <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-accent)] to-transparent" />
 
             <DetailSectionHeader
               id="major-related-opportunities"
@@ -1114,17 +1114,17 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
             />
 
             {relationshipGraphStatus === 'loading' && (
-              <div className="mb-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-text-muted)]">{publicT('public_loading_published_relationships')}</div>
+              <div className="mb-3 rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] px-3 py-2 text-center text-[10px] font-bold text-[var(--ab-text-muted)]">{publicT('public_loading_published_relationships')}</div>
             )}
             {relationshipGraphStatus === 'unavailable' && (
-              <div className="mb-3 rounded-xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-danger-text)]">{publicT('public_could_not_load_the_live_relationship_graph_no')}</div>
+              <div className="mb-3 rounded-xl border border-[var(--ab-danger-border)] bg-[var(--ab-danger-soft)] px-3 py-2 text-center text-[10px] font-bold text-[var(--ab-danger-text)]">{publicT('public_could_not_load_the_live_relationship_graph_no')}</div>
             )}
             <div className="grid grid-cols-1 gap-3">
               {/* Universities Section */}
-              <div className="rounded-2xl border border-[var(--mn-border-brand)] bg-gradient-to-l from-[var(--mn-primary)]/5 to-[var(--mn-surface)] p-3 shadow-2xs">
+              <div className="rounded-2xl border border-[var(--ab-border-brand)] bg-gradient-to-l from-[var(--ab-primary)]/5 to-[var(--ab-surface)] p-3 shadow-2xs">
                 <div className="mb-2.5 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full border-2 border-[var(--mn-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--mn-primary)]">
+                    <div className="w-8 h-8 rounded-full border-2 border-[var(--ab-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--ab-primary)]">
                       <img
                         src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=150&auto=format&fit=crop&q=80"
                         alt={publicT('public_universities')}
@@ -1132,21 +1132,21 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                       />
                     </div>
                     <div>
-                      <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_universities_and_programs_offering_this_major')}</h3>
-                      <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">{publicT('public_related_published_university_programs')}</p>
+                      <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)]">{publicT('public_universities_and_programs_offering_this_major')}</h3>
+                      <p className="text-[9px] font-bold text-[var(--ab-text-muted)] mt-0.5">{publicT('public_related_published_university_programs')}</p>
                     </div>
                   </div>
                 </div>
-                <div className="mn-detail-small-grid">
+                <div className="ab-detail-small-grid">
                   {relationshipDemo.universities.map((item, idx) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => onOpenUniversity?.(item.id)}
-                      className="group w-full text-start rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
+                      className="group w-full text-start rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--ab-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div className="w-7 h-7 rounded-full border border-[var(--mn-accent)]/50 overflow-hidden shrink-0 bg-[var(--mn-primary)]/10 shadow-2xs">
+                        <div className="w-7 h-7 rounded-full border border-[var(--ab-accent)]/50 overflow-hidden shrink-0 bg-[var(--ab-primary)]/10 shadow-2xs">
                           <img
                             src={[
                               "https://images.unsplash.com/photo-1562774053-701939374585?w=100&auto=format&fit=crop&q=80",
@@ -1158,13 +1158,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] truncate">{item.name}</div>
-                          <div className="mt-0.5 text-[9px] font-bold text-[var(--mn-text-muted)]">{item.meta}</div>
+                          <div className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] truncate">{item.name}</div>
+                          <div className="mt-0.5 text-[9px] font-bold text-[var(--ab-text-muted)]">{item.meta}</div>
                         </div>
                       </div>
                       {/* Glowing Yellow Navigation Arrow */}
-                      <div className="w-7 h-7 rounded-full bg-[var(--mn-accent)]/15 border border-[var(--mn-accent)]/40 flex items-center justify-center shrink-0 group-hover:bg-[var(--mn-accent)] transition-all shadow-[0_0_8px_rgba(214,164,59,0.35)]">
-                        <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-accent-soft)] group-hover:text-black drop-shadow-[0_0_5px_rgba(214,164,59,0.8)] group-hover:-translate-x-0.5 transition-transform" />
+                      <div className="w-7 h-7 rounded-full bg-[var(--ab-accent)]/15 border border-[var(--ab-accent)]/40 flex items-center justify-center shrink-0 group-hover:bg-[var(--ab-accent)] transition-all shadow-[0_0_8px_rgba(214,164,59,0.35)]">
+                        <ArrowLeft className="w-3.5 h-3.5 text-[var(--ab-accent-soft)] group-hover:text-black drop-shadow-[0_0_5px_rgba(214,164,59,0.8)] group-hover:-translate-x-0.5 transition-transform" />
                       </div>
                     </button>
                   ))}
@@ -1172,9 +1172,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               </div>
 
               {/* Scholarships Section */}
-              <div className="rounded-2xl border border-[var(--mn-border-brand)] bg-gradient-to-l from-[var(--mn-accent)]/5 to-[var(--mn-surface)] p-3 shadow-2xs">
+              <div className="rounded-2xl border border-[var(--ab-border-brand)] bg-gradient-to-l from-[var(--ab-accent)]/5 to-[var(--ab-surface)] p-3 shadow-2xs">
                 <div className="mb-2.5 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full border-2 border-[var(--mn-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--mn-accent)]/10">
+                  <div className="w-8 h-8 rounded-full border-2 border-[var(--ab-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--ab-accent)]/10">
                     <img
                       src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=150&auto=format&fit=crop&q=80"
                       alt={publicT('public_scholarships_4')}
@@ -1182,20 +1182,20 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                     />
                   </div>
                   <div>
-                    <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_scholarships_available_for_this_major')}</h3>
-                    <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">{publicT('public_opens_the_scholarship_page_directly')}</p>
+                    <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)]">{publicT('public_scholarships_available_for_this_major')}</h3>
+                    <p className="text-[9px] font-bold text-[var(--ab-text-muted)] mt-0.5">{publicT('public_opens_the_scholarship_page_directly')}</p>
                   </div>
                 </div>
-                <div className="mn-detail-small-grid">
+                <div className="ab-detail-small-grid">
                   {relationshipDemo.scholarships.map((item, idx) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => onOpenScholarship?.(item.id)}
-                      className="group w-full text-start rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
+                      className="group w-full text-start rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--ab-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div className="w-7 h-7 rounded-full border border-[var(--mn-accent)]/50 overflow-hidden shrink-0 bg-[var(--mn-accent)]/10 shadow-2xs">
+                        <div className="w-7 h-7 rounded-full border border-[var(--ab-accent)]/50 overflow-hidden shrink-0 bg-[var(--ab-accent)]/10 shadow-2xs">
                           <img
                             src={[
                               "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=100&auto=format&fit=crop&q=80",
@@ -1207,13 +1207,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] line-clamp-1">{item.name}</div>
-                          <div className="mt-0.5 text-[9px] font-bold text-[var(--mn-text-muted)]">{item.meta}</div>
+                          <div className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] line-clamp-1">{item.name}</div>
+                          <div className="mt-0.5 text-[9px] font-bold text-[var(--ab-text-muted)]">{item.meta}</div>
                         </div>
                       </div>
                       {/* Glowing Yellow Navigation Arrow */}
-                      <div className="w-7 h-7 rounded-full bg-[var(--mn-accent)]/15 border border-[var(--mn-accent)]/40 flex items-center justify-center shrink-0 group-hover:bg-[var(--mn-accent)] transition-all shadow-[0_0_8px_rgba(214,164,59,0.35)]">
-                        <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-accent-soft)] group-hover:text-black drop-shadow-[0_0_5px_rgba(214,164,59,0.8)] group-hover:-translate-x-0.5 transition-transform" />
+                      <div className="w-7 h-7 rounded-full bg-[var(--ab-accent)]/15 border border-[var(--ab-accent)]/40 flex items-center justify-center shrink-0 group-hover:bg-[var(--ab-accent)] transition-all shadow-[0_0_8px_rgba(214,164,59,0.35)]">
+                        <ArrowLeft className="w-3.5 h-3.5 text-[var(--ab-accent-soft)] group-hover:text-black drop-shadow-[0_0_5px_rgba(214,164,59,0.8)] group-hover:-translate-x-0.5 transition-transform" />
                       </div>
                     </button>
                   ))}
@@ -1221,9 +1221,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
               </div>
 
               {/* Courses Section */}
-              <div className="rounded-2xl border border-[var(--mn-border-brand)] bg-gradient-to-l from-[var(--mn-primary)]/5 to-[var(--mn-surface)] p-3 shadow-2xs">
+              <div className="rounded-2xl border border-[var(--ab-border-brand)] bg-gradient-to-l from-[var(--ab-primary)]/5 to-[var(--ab-surface)] p-3 shadow-2xs">
                 <div className="mb-2.5 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full border-2 border-[var(--mn-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--mn-primary)]/10">
+                  <div className="w-8 h-8 rounded-full border-2 border-[var(--ab-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--ab-primary)]/10">
                     <img
                       src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&auto=format&fit=crop&q=80"
                       alt={publicT('public_courses_2')}
@@ -1231,20 +1231,20 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                     />
                   </div>
                   <div>
-                    <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_courses_related_to_this_major')}</h3>
-                    <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">{publicT('public_the_course_opens_its_details_more_opens_the')}</p>
+                    <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)]">{publicT('public_courses_related_to_this_major')}</h3>
+                    <p className="text-[9px] font-bold text-[var(--ab-text-muted)] mt-0.5">{publicT('public_the_course_opens_its_details_more_opens_the')}</p>
                   </div>
                 </div>
-                <div className="mn-detail-small-grid">
+                <div className="ab-detail-small-grid">
                   {relationshipDemo.courses.map((item, idx) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => onOpenCourse?.(item.id)}
-                      className="group w-full text-start rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
+                      className="group w-full text-start rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface)] px-3 py-2.5 shadow-2xs hover:border-[var(--ab-accent)]/60 hover:shadow-sm transition-all flex items-center justify-between gap-2"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div className="w-7 h-7 rounded-full border border-[var(--mn-accent)]/50 overflow-hidden shrink-0 bg-[var(--mn-primary)]/10 shadow-2xs">
+                        <div className="w-7 h-7 rounded-full border border-[var(--ab-accent)]/50 overflow-hidden shrink-0 bg-[var(--ab-primary)]/10 shadow-2xs">
                           <img
                             src={[
                               "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=100&auto=format&fit=crop&q=80",
@@ -1256,13 +1256,13 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] truncate">{item.name}</div>
-                          <div className="mt-0.5 text-[9px] font-bold text-[var(--mn-text-muted)]">{item.meta}</div>
+                          <div className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] truncate">{item.name}</div>
+                          <div className="mt-0.5 text-[9px] font-bold text-[var(--ab-text-muted)]">{item.meta}</div>
                         </div>
                       </div>
                       {/* Glowing Yellow Navigation Arrow */}
-                      <div className="w-7 h-7 rounded-full bg-[var(--mn-accent)]/15 border border-[var(--mn-accent)]/40 flex items-center justify-center shrink-0 group-hover:bg-[var(--mn-accent)] transition-all shadow-[0_0_8px_rgba(214,164,59,0.35)]">
-                        <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-accent-soft)] group-hover:text-black drop-shadow-[0_0_5px_rgba(214,164,59,0.8)] group-hover:-translate-x-0.5 transition-transform" />
+                      <div className="w-7 h-7 rounded-full bg-[var(--ab-accent)]/15 border border-[var(--ab-accent)]/40 flex items-center justify-center shrink-0 group-hover:bg-[var(--ab-accent)] transition-all shadow-[0_0_8px_rgba(214,164,59,0.35)]">
+                        <ArrowLeft className="w-3.5 h-3.5 text-[var(--ab-accent-soft)] group-hover:text-black drop-shadow-[0_0_5px_rgba(214,164,59,0.8)] group-hover:-translate-x-0.5 transition-transform" />
                       </div>
                     </button>
                   ))}
@@ -1271,9 +1271,9 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
 
               {/* Academic Extension Section */}
               {relationshipDemo.academicPath.length > 0 && (
-                <div className="rounded-2xl border border-[var(--mn-border-brand)] bg-gradient-to-l from-[var(--mn-primary)]/5 to-[var(--mn-surface)] p-3 shadow-2xs">
+                <div className="rounded-2xl border border-[var(--ab-border-brand)] bg-gradient-to-l from-[var(--ab-primary)]/5 to-[var(--ab-surface)] p-3 shadow-2xs">
                   <div className="mb-2.5 flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full border-2 border-[var(--mn-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--mn-primary)]/10">
+                    <div className="w-8 h-8 rounded-full border-2 border-[var(--ab-accent)] overflow-hidden shrink-0 shadow-xs bg-[var(--ab-primary)]/10">
                       <img
                         src="https://images.unsplash.com/photo-1532012197267-da84d127e765?w=150&auto=format&fit=crop&q=80"
                         alt={publicT('public_academic_progression')}
@@ -1281,28 +1281,28 @@ export const MajorDetailModal: React.FC<MajorDetailModalProps> = ({
                       />
                     </div>
                     <div>
-                      <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)]">{publicT('public_academic_progression_for_this_major')}</h3>
-                      <p className="text-[9px] font-bold text-[var(--mn-text-muted)] mt-0.5">{publicT('public_related_advanced_or_specialist_paths')}</p>
+                      <h3 className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)]">{publicT('public_academic_progression_for_this_major')}</h3>
+                      <p className="text-[9px] font-bold text-[var(--ab-text-muted)] mt-0.5">{publicT('public_related_advanced_or_specialist_paths')}</p>
                     </div>
                   </div>
-                  <div className="mn-detail-small-grid">
+                  <div className="ab-detail-small-grid">
                     {relationshipDemo.academicPath.map((item) => (
                       <button
                         key={item.id}
                         type="button"
                         onClick={() => onOpenMajor?.(item.id)}
-                        className="group text-start rounded-xl border border-[var(--mn-border-brand)] bg-gradient-to-b from-[var(--mn-primary)]/5 to-[var(--mn-surface)] p-3 hover:border-[var(--mn-accent)]/60 hover:shadow-sm transition-all flex flex-col justify-between"
+                        className="group text-start rounded-xl border border-[var(--ab-border-brand)] bg-gradient-to-b from-[var(--ab-primary)]/5 to-[var(--ab-surface)] p-3 hover:border-[var(--ab-accent)]/60 hover:shadow-sm transition-all flex flex-col justify-between"
                       >
                         <div>
-                          <div className="inline-flex rounded-full bg-[var(--mn-accent)]/12 px-2 py-0.5 text-[8.5px] font-bold text-[var(--mn-heading)] border border-[var(--mn-accent)]/25">
+                          <div className="inline-flex rounded-full bg-[var(--ab-accent)]/12 px-2 py-0.5 text-[8.5px] font-bold text-[var(--ab-heading)] border border-[var(--ab-accent)]/25">
                             {item.degree}
                           </div>
-                          <div className="mt-2 text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-5">{item.name}</div>
-                          <div className="mt-1 text-[9px] font-bold text-[var(--mn-text-muted)] leading-4">{item.meta}</div>
+                          <div className="mt-2 text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-5">{item.name}</div>
+                          <div className="mt-1 text-[9px] font-bold text-[var(--ab-text-muted)] leading-4">{item.meta}</div>
                         </div>
                         <div className="mt-3 flex justify-end">
-                          <div className="w-7 h-7 rounded-full bg-[var(--mn-accent)]/15 border border-[var(--mn-accent)]/40 flex items-center justify-center shrink-0 group-hover:bg-[var(--mn-accent)] transition-all shadow-[0_0_8px_rgba(214,164,59,0.35)]">
-                            <ArrowLeft className="w-3.5 h-3.5 text-[var(--mn-accent-soft)] group-hover:text-black drop-shadow-[0_0_5px_rgba(214,164,59,0.8)] group-hover:-translate-x-0.5 transition-transform" />
+                          <div className="w-7 h-7 rounded-full bg-[var(--ab-accent)]/15 border border-[var(--ab-accent)]/40 flex items-center justify-center shrink-0 group-hover:bg-[var(--ab-accent)] transition-all shadow-[0_0_8px_rgba(214,164,59,0.35)]">
+                            <ArrowLeft className="w-3.5 h-3.5 text-[var(--ab-accent-soft)] group-hover:text-black drop-shadow-[0_0_5px_rgba(214,164,59,0.8)] group-hover:-translate-x-0.5 transition-transform" />
                           </div>
                         </div>
                       </button>

@@ -10,7 +10,7 @@ const input: any = {
     recipientDisplayName: 'محمد أحمد',
     studentReferenceId: 'PRIVATE-STUDENT-ID',
     achievementDisplayName: 'Course',
-    issuerName: 'MANARATAK',
+    issuerName: 'ABSHEER',
     issuedAt: new Date('2026-10-10T00:00:00Z'),
   },
   templateVersion: {

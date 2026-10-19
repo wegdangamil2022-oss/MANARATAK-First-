@@ -14,7 +14,7 @@ import {
   IAssetStorageGateway,
   MalwareScanResult,
   SanitizationResult,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { SignedProviderHttpClient, SignedProviderHttpClientOptions } from '../provider-http/SignedProviderHttpClient';
 
 export interface HttpAssetProviderOptions extends SignedProviderHttpClientOptions {}

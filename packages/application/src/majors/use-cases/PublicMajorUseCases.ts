@@ -6,7 +6,7 @@ import {
   PaginatedMajorResult,
   PublicMajorDto,
   PublicMajorFilters
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class PublicMajorUseCases {
   constructor(private readonly repository: IMajorRepository) {}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { EventEmitter } from 'node:events';
 import type https from 'node:https';
-import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
+import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@absheer/domain';
 import { NodePinnedSourceRequestExecutor, NodeSafeSourceHttpTransport, type IPinnedSourceRequestExecutor, type PinnedSourceRequest, type PinnedSourceResponse } from '../../src/import-foundation/network/NodeSafeSourceHttpTransport'; import { SourceNetworkSecurityPolicy } from '../../src/import-foundation/network/SourceNetworkSecurityPolicy';
 const source = new ImportSourceDefinition({ sourceId: 's', displayName: 'S', baseUrl: 'https://safe.example/catalog/', category: SourceConnectorCategory.OFFICIAL_API, accessClassification: SourceAccessClassification.PUBLIC_ALLOWED, status: SourceStatus.ACTIVE, connectorId: 'official-api', connectorVersion: '2.0.0', metadata: { allowedUrlScope: { allowedOrigins: ['https://safe.example'], allowedPathPrefixes: ['/catalog/'] } } });
 class FakeExecutor implements IPinnedSourceRequestExecutor { calls: PinnedSourceRequest[] = []; constructor(private readonly responses: Array<PinnedSourceResponse | Error>) {} async execute(request: PinnedSourceRequest) { this.calls.push(request); const value = this.responses.shift(); if (value instanceof Error) throw value; if (!value) throw new Error('NO_FIXTURE'); return value; } }

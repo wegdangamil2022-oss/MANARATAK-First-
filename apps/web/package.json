@@ -1,5 +1,5 @@
 {
-  "name": "@manaratak/web",
+  "name": "@absheer/web",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -12,9 +12,9 @@
     "build:production": "npm run build && npm run prerender"
   },
   "dependencies": {
-    "@manaratak/shared": "*",
-    "@manaratak/types": "*",
-    "@manaratak/ui": "*",
+    "@absheer/shared": "*",
+    "@absheer/types": "*",
+    "@absheer/ui": "*",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "react-markdown": "^10.1.0",

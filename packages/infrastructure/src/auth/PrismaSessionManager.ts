@@ -1,4 +1,4 @@
-import { ISessionManager, RefreshSession } from '@manaratak/core';
+import { ISessionManager, RefreshSession } from '@absheer/core';
 import { PrismaClient } from '@prisma/client';
 import * as crypto from 'node:crypto';
 

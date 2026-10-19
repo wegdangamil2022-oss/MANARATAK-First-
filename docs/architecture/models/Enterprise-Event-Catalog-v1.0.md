@@ -9,13 +9,13 @@
 - **Owner:** Chief Enterprise Software Architect
 - **Approval Authority:** Architecture Review Board (ARB)
 - **Artifact Type:** Enterprise Architecture Model
-- **Authority:** `docs/governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md`
+- **Authority:** `docs/governance/roadmap/ABSHEER-2.0-Roadmap-v6.0.md`
 
 > **P13 Final Source Alignment — 2026-09-03:** Re-audited against Roadmap v6.0 and the final source implementation. Ownership and dependency direction remain authoritative. Student Workspace composes P10/P11/P12 saved-item owner reads plus P13 learning and P14 certificate reads through application contracts; P24 live composition consumes P15 session/API state. Runtime/DB/E2E proof remains explicitly pending and is not certified by this document.
 
 ## 2. Purpose
 
-This document serves as the official catalog of all enterprise events within the MANARATAK 2.0 architecture. Its purpose is to provide a single source of truth for asynchronous communication, prevent duplicated events, support Event-Driven Architecture (EDA) governance, and strictly enforce Domain-Driven Design (DDD) boundaries across all bounded contexts.
+This document serves as the official catalog of all enterprise events within the ABSHEER 2.0 architecture. Its purpose is to provide a single source of truth for asynchronous communication, prevent duplicated events, support Event-Driven Architecture (EDA) governance, and strictly enforce Domain-Driven Design (DDD) boundaries across all bounded contexts.
 
 ## 3. Event Governance
 
@@ -300,5 +300,5 @@ The ARB has validated this catalog against the following criteria:
 
 ## 13. Revision History
 
-- **Initial Version (1.0.0):** Official Enterprise Event Catalog established for MANARATAK 2.0.
+- **Initial Version (1.0.0):** Official Enterprise Event Catalog established for ABSHEER 2.0.
 - **1.0.1 (2026-09-03):** P1 authority alignment removed unapproved P12/P15 broad-application ownership and froze P13→P14 to completion events with P14 as certificate authority.

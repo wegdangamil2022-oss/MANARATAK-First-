@@ -38,6 +38,6 @@ describe('public platform route smoke coverage', () => {
   it('keeps the default public SEO shell metadata', () => {
     expect(htmlSource).toContain('name="description"');
     expect(htmlSource).toContain('property="og:title"');
-    expect(htmlSource).toContain('<title>MANARATAK</title>');
+    expect(htmlSource).toContain('<title>ABSHEER</title>');
   });
 });

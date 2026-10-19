@@ -1,7 +1,7 @@
-# MANARATAK Retention Lifecycle Policy
+# ABSHEER Retention Lifecycle Policy
 
-**Authority:** MNT-AUD-0081 / W2 source remediation  
-**Runtime scheduler:** W3 PostgreSQL durable background-worker foundation (`MNT-AUD-0007`) — source-composed; PostgreSQL runtime proof remains pending.
+**Authority:** ABSH-AUD-0081 / W2 source remediation  
+**Runtime scheduler:** W3 PostgreSQL durable background-worker foundation (`ABSH-AUD-0007`) — source-composed; PostgreSQL runtime proof remains pending.
 
 ## Owner policy
 

@@ -39,7 +39,7 @@ for (const step of inspection.steps.filter((item) => item.required)) {
   const result = spawnSync(process.execPath, [tsxCli, script], {
     cwd: root,
     stdio: 'inherit',
-    env: { ...process.env, MANARATAK_SEED_STEP_ID: step.id, MANARATAK_SEED_SET_VERSION: manifest.seedSetVersion },
+    env: { ...process.env, ABSHEER_SEED_STEP_ID: step.id, ABSHEER_SEED_SET_VERSION: manifest.seedSetVersion },
   });
   if (result.status !== 0) fail(`SEED_STEP_FAILED:${step.id}`);
   console.log(`SEED_STEP_PASS=${step.id}`);

@@ -6,7 +6,7 @@ import {
   OutboxDispatchResult,
   OutboxLeaseOwnership,
   SanitizedOutboxFailure,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class TransactionalOutboxDispatcher implements ITransactionalOutboxDispatcher {
   public constructor(

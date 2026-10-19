@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { ApiService } from '@manaratak/domain';
-import { IApiExposureGateway } from '@manaratak/application';
+import { ApiService } from '@absheer/domain';
+import { IApiExposureGateway } from '@absheer/application';
 
 export class PrismaApiExposureGateway implements IApiExposureGateway {
   constructor(private readonly prisma: PrismaClient) {}

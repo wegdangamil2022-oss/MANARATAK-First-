@@ -1,7 +1,7 @@
 import { AuthorizationGovernancePanel } from '../components/AuthorizationGovernancePanel';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
-import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
+import { ADMIN_PERMISSION_CATALOG } from '@absheer/shared';
 import { useTranslation } from '../i18n/I18nProvider';
 import { Link } from 'react-router-dom';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';

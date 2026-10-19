@@ -3,7 +3,7 @@ import { PrismaDutyGuard } from '../../src/authorization/PrismaDutyGuard';
 import { PrismaRoleAssignmentRepository } from '../../src/authorization/PrismaRoleAssignmentRepository';
 import { PrismaRoleRepository } from '../../src/authorization/PrismaRoleRepository';
 import { PrismaEmergencyAccessRepository } from '../../src/authorization/PrismaEmergencyAccessRepository';
-import { RoleAssignment, Role, PermissionReference } from '@manaratak/domain';
+import { RoleAssignment, Role, PermissionReference } from '@absheer/domain';
 const pair = {
   id: 'pair',
   first: 'admin:finance:invoice:manage',

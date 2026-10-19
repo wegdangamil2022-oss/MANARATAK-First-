@@ -8,7 +8,7 @@ import {
   type CertificateIssuerDto,
   type CertificateMutationContext,
   type ICertificateAuthorityDirectory,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import type { CertificateAuthorityEvidence } from './HttpCertificateAuthorityResolver';
 /** P14 owns the delegation register; P11 retains university identity ownership.
  * For other issuers the canonical legal registry identity is explicitly attested
@@ -113,7 +113,7 @@ export class PrismaCertificateAuthorityDirectory implements ICertificateAuthorit
     const issuer = await this.db.certificateIssuer.findUnique({
       where: { id: issuerId },
     });
-    if (!issuer || issuer.issuerType === 'MANARATAK')
+    if (!issuer || issuer.issuerType === 'ABSHEER')
       throw new Error('CERTIFICATE_EXTERNAL_ISSUER_REQUIRED');
     const canonicalOwnerType =
         issuer.issuerType === 'UNIVERSITY' ? 'UNIVERSITY' : 'ORGANIZATION',

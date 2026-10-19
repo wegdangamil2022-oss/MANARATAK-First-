@@ -12,7 +12,7 @@ vi.mock('../../src/security/AdminAuthorizationContext', () => ({
 vi.mock('../../src/i18n/I18nProvider', () => ({
   useTranslation: () => ({ language: state.language }),
 }));
-vi.mock('@manaratak/ui', () => ({
+vi.mock('@absheer/ui', () => ({
   CmsRichText: ({ body }: { body: string }) => <div>{body}</div>,
 }));
 vi.mock('../../src/components/AssetPicker', () => ({ AssetPicker: () => <div>Asset picker</div> }));

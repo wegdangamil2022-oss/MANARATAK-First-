@@ -8,7 +8,7 @@ import {
   ScopeIdentifier,
   ConfigurationValidationService,
   ValueType
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { ManageSettingsUseCase } from '../../src/settings/use-cases/ManageSettingsUseCase';
 
 class InMemoryDefinitionRepository implements ISettingDefinitionRepository {

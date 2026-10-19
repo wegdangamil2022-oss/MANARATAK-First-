@@ -1,7 +1,7 @@
 import { assertCertificateVisualImage } from './CertificateVisualImagePolicy';
 import { createHash } from 'node:crypto';
-import { AssetId, AssetLifecycleState, IAssetRecordRepository } from '@manaratak/domain';
-import { ProcessAssetLifecycleUseCase } from '@manaratak/application';
+import { AssetId, AssetLifecycleState, IAssetRecordRepository } from '@absheer/domain';
+import { ProcessAssetLifecycleUseCase } from '@absheer/application';
 
 export class EapCertificateVisualAssetResolver {
   constructor(

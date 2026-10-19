@@ -1,4 +1,4 @@
-import { AUDIT_QUERY_CATALOG, auditCodeLabel } from '@manaratak/shared';
+import { AUDIT_QUERY_CATALOG, auditCodeLabel } from '@absheer/shared';
 import { useEffect, useRef, useState } from 'react';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';

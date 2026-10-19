@@ -4,7 +4,7 @@ import {
   IUniversityRepository,
   UniversityImportCompletenessState,
   UniversityStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('PublicUniversityUseCases', () => {
   let mockRepo: IUniversityRepository;

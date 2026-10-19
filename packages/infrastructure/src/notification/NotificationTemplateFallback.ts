@@ -1,4 +1,4 @@
-import type { NotificationContents } from '@manaratak/domain';
+import type { NotificationContents } from '@absheer/domain';
 /** Compatibility content, captured once into the intent; never defer rendering to a mutable provider template. */
 export function notificationTemplateFallback(
   templateId: string,
@@ -18,9 +18,9 @@ export function notificationTemplateFallback(
       en: { subject: '{{title}}', body: '{{message}}' },
     }; // Historical single-language operator text is preserved; new authoring requires explicit AR/EN contents.
   return {
-    ar: { subject: 'تحديث في حساب منارتك', body: 'يوجد تحديث في حسابك. راجع التفاصيل من حسابك.' },
+    ar: { subject: 'تحديث في حساب أبشر', body: 'يوجد تحديث في حسابك. راجع التفاصيل من حسابك.' },
     en: {
-      subject: 'MANARATAK account update',
+      subject: 'ABSHEER account update',
       body: 'There is an update in your account. Open your account to view the details.',
     },
   };

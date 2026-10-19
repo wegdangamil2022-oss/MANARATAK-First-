@@ -1,5 +1,5 @@
 import { ApiService } from '../aggregates/ApiService';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 
 export class ApiServiceSpecification implements ISpecification<ApiService> {
   constructor(

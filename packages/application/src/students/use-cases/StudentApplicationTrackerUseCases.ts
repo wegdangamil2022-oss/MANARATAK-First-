@@ -1,16 +1,16 @@
 import {catalogReferenceReadStamp} from '../../integration/CatalogLifecycleReadPolicy';
-import {studentDocumentAttestationState} from '@manaratak/domain';
+import {studentDocumentAttestationState} from '@absheer/domain';
 import {
   AssetReferencePolicy,
   assertAssetReferenceUsable,
 } from '../../asset-platform/AssetReferencePolicy';
-import { AssetSecurityClassification } from '@manaratak/domain';
+import { AssetSecurityClassification } from '@absheer/domain';
 import {
   CreateStudentApplicationTrackerDto,
   IStudentApplicationScholarshipGateway,
   IStudentApplicationTrackerRepository,
   UpdateStudentApplicationTrackerDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 /** Reminder intents are now exclusively driven by the tracker's transactional P15 outbox. */
 export class StudentApplicationTrackerUseCases {

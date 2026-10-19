@@ -1,7 +1,7 @@
 # Type Safety Policy & Audit
 
 ## 1. Executive Summary
-This document establishes the official Type Safety Standard for the MANARATAK monorepo. Type safety is critical for preventing runtime errors, ensuring domain integrity, and documenting developer intent. This standard defines strict rules for type assertions, utility types, and dynamic typing fallbacks. An automated audit of the codebase has been conducted to quantify existing violations and define a prioritized migration strategy based on architectural boundaries.
+This document establishes the official Type Safety Standard for the ABSHEER monorepo. Type safety is critical for preventing runtime errors, ensuring domain integrity, and documenting developer intent. This standard defines strict rules for type assertions, utility types, and dynamic typing fallbacks. An automated audit of the codebase has been conducted to quantify existing violations and define a prioritized migration strategy based on architectural boundaries.
 
 ## 2. Type Safety Standard
 
@@ -61,7 +61,7 @@ Every occurrence of `any` must be classified into one of the following categorie
 
 ## 3. Type Safety Audit Report
 
-An automated static analysis audit of the MANARATAK monorepo (excluding `node_modules` and `dist`) was conducted to evaluate compliance with this standard.
+An automated static analysis audit of the ABSHEER monorepo (excluding `node_modules` and `dist`) was conducted to evaluate compliance with this standard.
 
 ### 3.1 Audit Findings
 
@@ -84,12 +84,12 @@ To bring the monorepo into full compliance with the Type Safety Standard, remedi
 2.  **Baseline Exclusions:** Introduce an ESLint override file or inline comments (`eslint-disable-next-line`) for the existing 241 `any` violations and 1 non-null assertion to allow the CI pipeline to pass while preventing new violations.
 
 ### Phase 2: Critical Layer Remediation (Highest Priority)
-1.  **Domain Layer:** Eliminate 100% of `any` usages in `@manaratak/domain`. The domain must be perfectly type-safe.
-2.  **Application Layer:** Eliminate 100% of `any` usages in `@manaratak/application`. Replace with explicit DTOs, generics, or `unknown` combined with Zod validation.
+1.  **Domain Layer:** Eliminate 100% of `any` usages in `@absheer/domain`. The domain must be perfectly type-safe.
+2.  **Application Layer:** Eliminate 100% of `any` usages in `@absheer/application`. Replace with explicit DTOs, generics, or `unknown` combined with Zod validation.
 3.  **Remove Non-null Assertions:** Refactor the single occurrence of the non-null assertion by implementing a runtime check or throwing a domain-specific exception.
 
 ### Phase 3: Infrastructure and External Integration (Lower Priority)
 1.  **Audit Type Assertions (`as`):** Review the 70 type assertions. Replace unnecessary assertions with type guards, generic instantiations, or structural interface alignment.
-2.  **Infrastructure Boundary Review:** Review `any` occurrences in `@manaratak/infrastructure` and `apps/*`. Document exceptions for framework boundaries and external libraries. Where possible, replace `any` used in database mappers and external API clients with `unknown` or specific types.
+2.  **Infrastructure Boundary Review:** Review `any` occurrences in `@absheer/infrastructure` and `apps/*`. Document exceptions for framework boundaries and external libraries. Where possible, replace `any` used in database mappers and external API clients with `unknown` or specific types.
 3.  **Review Global Declarations:** Document and formally approve the 1 existing `declare global` usage.
 4.  **Continuous Monitoring:** Rely on CI/CD strict type checking (`tsc --noEmit`) and ESLint to ensure no future regressions occur.

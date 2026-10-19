@@ -10,7 +10,7 @@ import {
   UpsertExternalCourseProviderSeedInput,
   AtomicPersistenceContext, CourseProviderRegistryError, CourseProviderRegistryFilters,
   ICourseProviderRegistryRepository, UpdateCourseProviderMappings,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class PrismaExternalCourseProviderRepository implements IExternalCourseProviderRepository, ICourseProviderRegistryRepository {
   public constructor(private readonly prisma: PrismaClient, private readonly inTransaction = false) {}

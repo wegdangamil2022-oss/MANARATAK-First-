@@ -3,7 +3,7 @@ import { Prisma, type PrismaClient } from '@prisma/client';
 import type {
   ScholarshipReferenceState,
   ScholarshipReferenceTransitionDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 /** P12 writes only its own rows. Caller supplies the owner's already-bound atomic transaction. */
 export class ScholarshipReferenceLifecycle {
   constructor(

@@ -1,8 +1,8 @@
-import {approvedOwnerDescriptions, assertOwnerDescriptionsCurrent, ownerDescriptionSource} from '@manaratak/application';
-import {admissionPublicationScales,assertAdmissionScoreProfiles} from '@manaratak/domain';
+import {approvedOwnerDescriptions, assertOwnerDescriptionsCurrent, ownerDescriptionSource} from '@absheer/application';
+import {admissionPublicationScales,assertAdmissionScoreProfiles} from '@absheer/domain';
 import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { InternationalTestDto, InternationalTestPublicationReadinessPolicy, publicInternationalTest, assertOfficialTestUrl } from '@manaratak/domain';
+import { InternationalTestDto, InternationalTestPublicationReadinessPolicy, publicInternationalTest, assertOfficialTestUrl } from '@absheer/domain';
 
 const stable = (value: unknown): unknown => Array.isArray(value) ? value.map(stable) : value && typeof value === 'object' && !(value instanceof Date) ? Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,stable(v)])) : value;
 export const internationalTestCandidateHash = (value: unknown): string => createHash('sha256').update(JSON.stringify(stable(value))).digest('hex');

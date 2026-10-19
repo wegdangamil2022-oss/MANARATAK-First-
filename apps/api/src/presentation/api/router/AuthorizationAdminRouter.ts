@@ -1,8 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { IPrincipalAccessValidator } from '@manaratak/core';
+import { IPrincipalAccessValidator } from '@absheer/core';
 import { sendAuthorizationError } from '../../security/AuthorizationErrorResponse.js';
 import { z } from 'zod';
-import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
+import { ADMIN_PERMISSION_CATALOG } from '@absheer/shared';
 import {
   ManageRolesUseCase,
   AuthorizationGovernanceUseCases,
@@ -13,7 +13,7 @@ import {
   ManageEmergencyAccessUseCase,
   GetIdentityUseCase,
   ListIdentitiesUseCase,
-} from '@manaratak/application';
+} from '@absheer/application';
 import {
   AuthorizationEvaluatorService,
   IAuditRecordRepository,
@@ -22,10 +22,10 @@ import {
   Role,
   ResourceUrn,
   Action,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { AuditHelper } from '../../audit/AuditHelper.js';
-import type { AdminBootstrapVerifier } from '@manaratak/infrastructure';
+import type { AdminBootstrapVerifier } from '@absheer/infrastructure';
 import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
 import { authorizationRoleAssignmentSchema, authorizationRoleCreateSchema, parseStrict } from '../../validation/StrictControlPlaneSchemas.js';
 import { KNOWN_ADMIN_PERMISSIONS } from '../../security/AdminPermissionCatalog.js';
@@ -451,7 +451,7 @@ export class AuthorizationAdminRouter {
           .strict(),
       })
       .strict();
-    const policyDto = (policy: import('@manaratak/domain').Policy) => ({
+    const policyDto = (policy: import('@absheer/domain').Policy) => ({
       id: policy.id,
       name: policy.name,
       description: policy.description,

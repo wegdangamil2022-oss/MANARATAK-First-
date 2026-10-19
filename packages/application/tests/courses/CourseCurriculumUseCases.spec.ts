@@ -10,7 +10,7 @@ import {
   ICourseCurriculumRepository,
   ICourseRepository,
   LessonAssetType,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseCurriculumUseCases } from '../../src/courses/use-cases/CourseCurriculumUseCases';
 
 describe('CourseCurriculumUseCases', () => {
@@ -74,7 +74,7 @@ describe('CourseCurriculumUseCases', () => {
     canonicalDedupKey: 'native-course',
     displayName: 'Native Course',
     accessType: CourseAccessType.FREE_CERTIFICATE,
-    originType: CourseOriginType.NATIVE_MANARATAK_COURSE,
+    originType: CourseOriginType.NATIVE_ABSHEER_COURSE,
     directCourseUrl: '/courses/native-course',
     status: CourseStatus.READY_TO_REVIEW,
     completenessStatus: CourseImportCompletenessState.COMPLETE,

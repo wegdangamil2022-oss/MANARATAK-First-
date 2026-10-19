@@ -26,7 +26,7 @@ export function HomeSectionEmptyCards({ kind, status, onRetry }: Props) {
   const imageUrl = `/preview-art/${kind}.svg`;
   const loading = status === 'loading';
   const pulse = loading ? 'animate-pulse motion-reduce:animate-none' : '';
-  const bar = 'bg-[var(--mn-surface-muted)]';
+  const bar = 'bg-[var(--ab-surface-muted)]';
   const message = loading ? t('public_home_catalog_loading')
     : status === 'unavailable' ? t('public_home_catalog_unavailable')
     : t(({
@@ -39,15 +39,15 @@ export function HomeSectionEmptyCards({ kind, status, onRetry }: Props) {
       <div className={layouts[kind].className} aria-hidden="true">
         {Array.from({ length: layouts[kind].count }, (_, index) => (
           <div key={index} data-home-empty-slot={kind} className={
-            kind === 'scholarships' ? 'relative aspect-square rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-primary)] p-3 text-white flex flex-col justify-between'
+            kind === 'scholarships' ? 'relative aspect-square rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-primary)] p-3 text-white flex flex-col justify-between'
             : kind === 'countries' ? 'flex min-w-0 flex-col items-center gap-2'
             : kind === 'exams' ? 'flex w-16 sm:w-20 shrink-0 flex-col items-center gap-1.5'
-            : kind === 'articles' ? 'flex w-[155px] sm:w-[180px] shrink-0 flex-col overflow-hidden rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)]'
-            : 'flex w-full min-h-[66px] items-center gap-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3'
+            : kind === 'articles' ? 'flex w-[155px] sm:w-[180px] shrink-0 flex-col overflow-hidden rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface)]'
+            : 'flex w-full min-h-[66px] items-center gap-3 rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3'
           }>
             {kind === 'countries' ? (
               <>
-                <span className="flex h-[66px] w-[66px] sm:h-[78px] sm:w-[78px] items-center justify-center overflow-hidden rounded-full border-2 border-[#142B5F] dark:border-[#D6A43B] bg-[var(--mn-surface-muted)]"><img src={imageUrl} alt="" decoding="async" loading="lazy" className="h-full w-full object-cover" /></span>
+                <span className="flex h-[66px] w-[66px] sm:h-[78px] sm:w-[78px] items-center justify-center overflow-hidden rounded-full border-2 border-[#142B5F] dark:border-[#D6A43B] bg-[var(--ab-surface-muted)]"><img src={imageUrl} alt="" decoding="async" loading="lazy" className="h-full w-full object-cover" /></span>
                 <span className={'h-2 w-12 rounded-full ' + bar + ' ' + pulse} />
               </>
             ) : kind === 'scholarships' ? (
@@ -58,12 +58,12 @@ export function HomeSectionEmptyCards({ kind, status, onRetry }: Props) {
               </>
             ) : kind === 'exams' ? (
               <>
-                <span className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface-muted)]"><img src={imageUrl} alt="" decoding="async" loading="lazy" className="h-full w-full object-cover" /></span>
+                <span className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center overflow-hidden rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface-muted)]"><img src={imageUrl} alt="" decoding="async" loading="lazy" className="h-full w-full object-cover" /></span>
                 <span className={'h-2 w-12 rounded-full ' + bar + ' ' + pulse} />
               </>
             ) : kind === 'articles' ? (
               <>
-                <span className="flex h-20 sm:h-24 items-center justify-center overflow-hidden bg-[var(--mn-surface-muted)]"><img src={imageUrl} alt="" decoding="async" loading="lazy" className="h-full w-full object-cover" /></span>
+                <span className="flex h-20 sm:h-24 items-center justify-center overflow-hidden bg-[var(--ab-surface-muted)]"><img src={imageUrl} alt="" decoding="async" loading="lazy" className="h-full w-full object-cover" /></span>
                 <span className="flex flex-col gap-2 p-2.5"><span className={'h-3 w-full rounded ' + bar + ' ' + pulse} /><span className={'h-2 w-2/3 rounded ' + bar + ' ' + pulse} /></span>
               </>
             ) : (
@@ -75,9 +75,9 @@ export function HomeSectionEmptyCards({ kind, status, onRetry }: Props) {
           </div>
         ))}
       </div>
-      <p role="status" aria-live="polite" className="mt-3 text-center text-xs font-medium text-[var(--mn-text-muted)]">{message}</p>
+      <p role="status" aria-live="polite" className="mt-3 text-center text-xs font-medium text-[var(--ab-text-muted)]">{message}</p>
       {status === 'unavailable' && onRetry && (
-        <button type="button" onClick={onRetry} className="mx-auto mt-2 flex items-center gap-1.5 rounded-xl border border-[var(--mn-border)] px-3 py-2 text-xs font-bold text-[var(--mn-heading)] focus-visible:outline focus-visible:outline-2">
+        <button type="button" onClick={onRetry} className="mx-auto mt-2 flex items-center gap-1.5 rounded-xl border border-[var(--ab-border)] px-3 py-2 text-xs font-bold text-[var(--ab-heading)] focus-visible:outline focus-visible:outline-2">
           <RefreshCw aria-hidden="true" className="h-3.5 w-3.5" />{t('public_home_catalog_retry')}
         </button>
       )}

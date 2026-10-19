@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { ManageSharedComponentsUseCase } from '@manaratak/application';
+import { ManageSharedComponentsUseCase } from '@absheer/application';
 import {
   parseStrict,
   sharedComponentCreateSchema,

@@ -1,4 +1,4 @@
-import type { IScholarshipRepository } from '@manaratak/domain';
+import type { IScholarshipRepository } from '@absheer/domain';
 import type {
   UniversityProgramWorkspaceUseCases,
   ProgramQuery,

@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { AssetId, type AtomicPersistenceContext } from '@manaratak/domain';
+import { AssetId, type AtomicPersistenceContext } from '@absheer/domain';
 import { PrismaAssetRecordRepository } from '../asset-platform/PrismaAssetRecordRepository';
-import type { AcademicImportReview, IAcademicTaxonomyImportGateway } from '@manaratak/application';
+import type { AcademicImportReview, IAcademicTaxonomyImportGateway } from '@absheer/application';
 export class PrismaAcademicTaxonomyImportGateway implements IAcademicTaxonomyImportGateway {
   constructor(private readonly prisma: PrismaClient, private readonly bound = false) {}
   withTransaction(context: AtomicPersistenceContext): IAcademicTaxonomyImportGateway {

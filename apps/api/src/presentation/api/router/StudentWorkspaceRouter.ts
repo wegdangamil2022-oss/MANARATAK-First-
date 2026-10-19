@@ -1,16 +1,16 @@
-import type {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases} from '@manaratak/application';
+import type {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases} from '@absheer/application';
 import { Router, Request, Response, NextFunction } from 'express';
 import { careerStudentRouter } from './CareerStudentRouter.js';
-import { CareerEngagementUseCases } from '@manaratak/application';
+import { CareerEngagementUseCases } from '@absheer/application';
 import { z } from 'zod';
-import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@manaratak/core';
-import { ServiceOperationsUseCases, FinancePlatformUseCases, FinanceStudentUseCases, StudentWorkspaceUseCases, StudentApplicationTrackerUseCases, StudentSavedItemHydrationService, StudentDashboardHydrationService, StudentServiceRequestUseCases, ProcessAssetLifecycleUseCase, CertificateReadModelService } from '@manaratak/application';
-import { AssetId, AssetLifecycleState, IAssetRecordRepository, ServiceRequestStatus, StudentSavedItemType } from '@manaratak/domain';
+import { IPrincipalAccessValidator, ISessionManager, ITokenProvider } from '@absheer/core';
+import { ServiceOperationsUseCases, FinancePlatformUseCases, FinanceStudentUseCases, StudentWorkspaceUseCases, StudentApplicationTrackerUseCases, StudentSavedItemHydrationService, StudentDashboardHydrationService, StudentServiceRequestUseCases, ProcessAssetLifecycleUseCase, CertificateReadModelService } from '@absheer/application';
+import { AssetId, AssetLifecycleState, IAssetRecordRepository, ServiceRequestStatus, StudentSavedItemType } from '@absheer/domain';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
 import { createStudentRoleGuard } from '../../security/StudentRoleGuard.js';
-import type { IRoleAssignmentRepository } from '@manaratak/domain';
+import type { IRoleAssignmentRepository } from '@absheer/domain';
 import { createCanonicalIdempotencyMiddleware } from '../../middleware/CanonicalIdempotencyMiddleware.js';
-import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
+import type { PrismaApiIdempotencyStore } from '@absheer/infrastructure';
 
 export class StudentWorkspaceRouter {
   public static create(cradle: {

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
-import type { ImportSourceDefinition } from '@manaratak/domain';
-import type { IImportSourceObservationGateway, StoredImportRawSnapshot } from '@manaratak/application';
+import type { ImportSourceDefinition } from '@absheer/domain';
+import type { IImportSourceObservationGateway, StoredImportRawSnapshot } from '@absheer/application';
 export class PrismaImportSourceObservationGateway implements IImportSourceObservationGateway {
   constructor(private readonly prisma: PrismaClient) {}
   async cached(source: ImportSourceDefinition) {

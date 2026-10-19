@@ -16,7 +16,7 @@ const checks = [
   ['identity-derived dashboard route', 'apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts', (s) => hasRoute(s, 'get', '/dashboard')],
   ['privacy consent route', 'apps/api/src/presentation/api/router/StudentWorkspaceRouter.ts', (s) => hasRoute(s, 'put', '/privacy-consent')],
   ['distributed cache and realtime invalidation', 'packages/infrastructure/src/students/RedisStudentWorkspaceDeliveryCache.ts', (s) => s.includes('StudentWorkspaceInvalidated')],
-  ['runtime runbook', 'docs/implementation-status/MANARATAK-Phase15-Student-Platform-Source-Closure-and-Google-Studio-Runbook.md', (s) => s.includes('SOURCE_COMPLETE_RUNTIME_PENDING')],
+  ['runtime runbook', 'docs/implementation-status/ABSHEER-Phase15-Student-Platform-Source-Closure-and-Google-Studio-Runbook.md', (s) => s.includes('SOURCE_COMPLETE_RUNTIME_PENDING')],
 ];
 let failures = 0;
 for (const [name, path, predicate] of checks) {

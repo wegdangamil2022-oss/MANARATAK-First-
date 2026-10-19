@@ -33,7 +33,7 @@ test('B05 source-only expansion adds the missing child FK and serializes both si
   );
   assert.match(sql, /ON DELETE RESTRICT ON UPDATE RESTRICT NOT VALID/);
   assert.match(sql, /BEFORE INSERT OR UPDATE OF "assetId"/);
-  assert.match(sql, /manaratak_require_active_asset_reference\('assetId'/);
+  assert.match(sql, /absheer_require_active_asset_reference\('assetId'/);
   assert.match(sql, /BEFORE DELETE OR UPDATE OF "lifecycleState", "id"/);
   assert.match(sql, /transaction_isolation.*<> 'read committed'/);
   assert.match(sql, /FROM %I\."StudentApplicationDocumentBinding" WHERE "assetId" = \$1/);

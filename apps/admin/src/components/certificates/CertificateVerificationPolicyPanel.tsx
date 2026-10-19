@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { certificateCopy } from '@manaratak/shared';
+import { certificateCopy } from '@absheer/shared';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { useAdminAuthorization } from '../../security/AdminAuthorizationContext';
 import { adminApiClient } from '../../api/client';

@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-Baseline SRE runbooks for MANARATAK 2.0 infrastructure deployment and operations.
+Baseline SRE runbooks for ABSHEER 2.0 infrastructure deployment and operations.
 
 ## 2. API Startup/Shutdown
 

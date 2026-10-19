@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ILogContext, IRequestLogger } from '@manaratak/core';
+import { ILogContext, IRequestLogger } from '@absheer/core';
 import crypto from 'crypto';
 
 export class LoggingMiddleware {

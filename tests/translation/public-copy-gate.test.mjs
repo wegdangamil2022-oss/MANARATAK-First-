@@ -7,7 +7,7 @@ test('a deep untranslated interactive control fails copy inspection with file an
  assert.equal(results.length,2);assert.deepEqual(results[0],{file:'Deep.tsx',line:1});
 });
 test('dictionary copy and non-rendered proper nouns do not fabricate missing UI text',()=>{
- assert.deepEqual(untranslatedPublicCopy("const brand='منارتك'; function Deep(){return <button aria-label={t('close')}>{t('action')}</button>}"),[]);
+ assert.deepEqual(untranslatedPublicCopy("const brand='أبشر'; function Deep(){return <button aria-label={t('close')}>{t('action')}</button>}"),[]);
 });
 test('rendered expressions, fallback prose and template accessible names are inspected',()=>{
  const source="function Deep(){return <button aria-label={`فتح ${title}`}>{ready ? 'جاهز' : value ?? 'غير متاح'}</button>}";

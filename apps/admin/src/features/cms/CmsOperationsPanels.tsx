@@ -126,9 +126,9 @@ export function CmsOperationsPanels({
 
   const load = useCallback(
     async (only?: Panel) => {
-      const suffix = `siteIdentifier=manaratak&locale=${locale}`;
+      const suffix = `siteIdentifier=absheer&locale=${locale}`;
       const query = new URLSearchParams({
-        siteIdentifier: 'manaratak',
+        siteIdentifier: 'absheer',
         locale,
         page: String(redirectPage),
         pageSize: '20',
@@ -249,7 +249,7 @@ export function CmsOperationsPanels({
     const current = ++failedSequence.current;
     setError(null);
     try {
-      const params = new URLSearchParams({ siteIdentifier: 'manaratak', locale, limit: '50' });
+      const params = new URLSearchParams({ siteIdentifier: 'absheer', locale, limit: '50' });
       const result = await adminApiClient.request<List<FailedSchedule>>(
         '/admin/cms/operations/failed-schedules?' + params,
       );
@@ -299,7 +299,7 @@ export function CmsOperationsPanels({
         adminApiClient.request('/admin/cms/redirects', {
           method: 'POST',
           body: JSON.stringify({
-            siteIdentifier: 'manaratak',
+            siteIdentifier: 'absheer',
             locale,
             sourcePath: form.get('sourcePath'),
             destinationPath: form.get('destinationPath'),
@@ -368,7 +368,7 @@ export function CmsOperationsPanels({
           body: JSON.stringify({
             id: existing?.id,
             expectedVersion: existing?.version,
-            siteIdentifier: 'manaratak',
+            siteIdentifier: 'absheer',
             locale,
             locationKey,
             nodes: [...preservedNodes, newNode],
@@ -385,7 +385,7 @@ export function CmsOperationsPanels({
         adminApiClient.request('/admin/cms/announcements', {
           method: 'PUT',
           body: JSON.stringify({
-            siteIdentifier: 'manaratak',
+            siteIdentifier: 'absheer',
             locale,
             title: form.get('title'),
             body: form.get('body'),
@@ -736,7 +736,7 @@ export function CmsOperationsPanels({
                       method: 'PUT',
                       body: JSON.stringify({
                         ...data,
-                        siteIdentifier: 'manaratak',
+                        siteIdentifier: 'absheer',
                         locale,
                         status: 'DRAFT',
                       }),

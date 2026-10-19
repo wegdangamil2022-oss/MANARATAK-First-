@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ExtractorType, ExtractionCandidateStatus } from '@manaratak/domain';
+import { ExtractorType, ExtractionCandidateStatus } from '@absheer/domain';
 import {
   RuleBasedFieldExtractionGateway,
   ExtractFieldsCommand,

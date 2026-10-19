@@ -1,8 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { AuditRecord, type AuthorizationEvaluatorService } from '@manaratak/domain';
+import { AuditRecord, type AuthorizationEvaluatorService } from '@absheer/domain';
 import { dashboardActivityProjection } from '../../dashboard/DashboardActivityProjection.js';
-import { ManageAuditRecordsUseCase } from '@manaratak/application';
+import { ManageAuditRecordsUseCase } from '@absheer/application';
 import { problemDetails } from '../../http/ProblemDetails.js';
 
 const querySchema = z
@@ -188,7 +188,7 @@ export class AuditRouter {
         res.setHeader('Cache-Control', 'no-store');
         res.setHeader(
           'Content-Disposition',
-          `attachment; filename="manaratak-audit-export.${query.format}"`,
+          `attachment; filename="absheer-audit-export.${query.format}"`,
         );
         if (query.format === 'csv') {
           res.setHeader('X-Audit-Export-Scope', 'BOUNDED_PAGE');

@@ -2,7 +2,7 @@ import { generateKeyPairSync, sign, verify, createHash } from 'node:crypto';
 import { beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { VaultTransitCertificateSignatureService } from '../../src/certificates/VaultTransitCertificateSignatureService';
 import { HttpCertificateAuthorityResolver } from '../../src/certificates/HttpCertificateAuthorityResolver';
-import type { CertificateIssuerDto } from '@manaratak/domain';
+import type { CertificateIssuerDto } from '@absheer/domain';
 describe.skipIf(process.env.CERTIFICATE_RUNTIME_ISOLATED !== '1')(
   'deferred opaque signer and directory protocol fixtures',
   () => {
@@ -60,13 +60,13 @@ describe.skipIf(process.env.CERTIFICATE_RUNTIME_ISOLATED !== '1')(
         token: 'isolated-fixture-token',
         keys: {
           current: {
-            issuerCode: 'MANARATAK',
+            issuerCode: 'ABSHEER',
             keyName: 'issuer',
             version: 2,
             canSign: true,
           },
           historical: {
-            issuerCode: 'MANARATAK',
+            issuerCode: 'ABSHEER',
             keyName: 'issuer',
             version: 1,
             canSign: false,
@@ -76,7 +76,7 @@ describe.skipIf(process.env.CERTIFICATE_RUNTIME_ISOLATED !== '1')(
     }
     it('pins issuer scope and preserves historical verification while retiring signing', async () => {
       const signer = provider();
-      await signer.assertIssuerKeyForIssuer('current', 'MANARATAK');
+      await signer.assertIssuerKeyForIssuer('current', 'ABSHEER');
       await expect(
         signer.assertIssuerKeyForIssuer('current', 'OTHER'),
       ).rejects.toThrow('SCOPE_INVALID');

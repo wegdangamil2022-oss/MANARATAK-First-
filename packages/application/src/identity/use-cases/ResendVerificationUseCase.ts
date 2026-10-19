@@ -4,7 +4,7 @@ import {
   IEmailVerificationTokenRepository,
   IEmailDeliveryGateway,
   LifeStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface ResendVerificationInput {
   email: string;

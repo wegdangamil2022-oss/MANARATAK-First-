@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { APPROVED_CERTIFICATE_DESIGN, approvedCertificateCopy } from '@manaratak/shared';
-import type { CertificateRenderInput } from '@manaratak/domain';
+import { APPROVED_CERTIFICATE_DESIGN, approvedCertificateCopy } from '@absheer/shared';
+import type { CertificateRenderInput } from '@absheer/domain';
 import { ProviderNeutralCertificateRenderingService } from '../../packages/infrastructure/src/certificates/ProviderNeutralCertificateRenderingService';
 
 /** Exports editable reference artifacts only. Never creates an issued certificate or mutates DB. */
@@ -13,7 +13,7 @@ const input = {
     recipientDisplayName: 'اسم المتعلم الكامل',
     achievementDisplayName: 'اسم الدورة أو المسار التعليمي',
     issuedAt: new Date('2026-10-10T00:00:00Z'),
-    issuerName: 'MANARATAK',
+    issuerName: 'ABSHEER',
     verificationUrl: 'https://example.org/certificates/verify?code=PREVIEW',
   },
   templateVersion: {
@@ -24,8 +24,8 @@ const input = {
     accentColor: '#142B5F',
     secondaryColor: '#D6A43B',
     ...approvedCertificateCopy,
-    signatoryNameAr: 'إدارة منصة منارتك',
-    signatoryNameEn: 'MANARATAK Management',
+    signatoryNameAr: 'إدارة منصة أبشر',
+    signatoryNameEn: 'ABSHEER Management',
     metadata: { designId: APPROVED_CERTIFICATE_DESIGN },
   },
 } as unknown as CertificateRenderInput;
@@ -35,7 +35,7 @@ const result = await new ProviderNeutralCertificateRenderingService().render(inp
 for (const artifact of result.artifacts.filter((row) => row.kind !== 'QR')) {
   const path = resolve(
     destination,
-    artifact.kind === 'PDF' ? 'manaratak-approved-preview.pdf' : 'manaratak-approved-editable.svg',
+    artifact.kind === 'PDF' ? 'absheer-approved-preview.pdf' : 'absheer-approved-editable.svg',
   );
   await writeFile(path, artifact.bytes);
   console.log(path);

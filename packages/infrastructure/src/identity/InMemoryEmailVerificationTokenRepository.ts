@@ -1,4 +1,4 @@
-import { IEmailVerificationTokenRepository, EmailVerificationTokenRecord } from '@manaratak/domain';
+import { IEmailVerificationTokenRepository, EmailVerificationTokenRecord } from '@absheer/domain';
 
 export class InMemoryEmailVerificationTokenRepository implements IEmailVerificationTokenRepository {
   private readonly tokens = new Map<string, EmailVerificationTokenRecord>();

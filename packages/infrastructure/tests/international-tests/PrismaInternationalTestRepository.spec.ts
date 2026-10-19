@@ -5,7 +5,7 @@ import {
   InternationalTestStatus, 
   InternationalTestDeliveryMode,
   InternationalTestSourceTrustLevel
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('PrismaInternationalTestRepository', () => {
   let mockPrisma: any;

@@ -1,5 +1,5 @@
 import {prepareOwnerDescription, assertNoForgedOwnerDescriptions, assertOwnerDescriptionsCurrent, type OwnerDescriptionInput} from '../../localization/OwnerLocalizedDescription';
-import { assertUniversityProgramParent } from '@manaratak/domain';
+import { assertUniversityProgramParent } from '@absheer/domain';
 import { 
   IScholarshipRepository, 
   ITransactionalScholarshipRepository,
@@ -20,10 +20,10 @@ import {
   ScholarshipEligibilityItemDto,
   ScholarshipRequiredDocumentDto,
   ScholarshipUniversityLinkDto,
-} from '@manaratak/domain';
-import { generateOpaqueIdentifier } from '@manaratak/core';
+} from '@absheer/domain';
+import { generateOpaqueIdentifier } from '@absheer/core';
 import type { IScholarshipCanonicalLookupGateway, ScholarshipCanonicalLookupTarget } from '../resolution';
-import { assertNoTranslationPayloadFields } from '@manaratak/shared';
+import { assertNoTranslationPayloadFields } from '@absheer/shared';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 
 export interface ScholarshipMutationContext extends AtomicMutationRequestContext {

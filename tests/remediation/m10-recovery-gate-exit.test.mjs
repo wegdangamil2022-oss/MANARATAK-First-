@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const repo = fileURLToPath(new URL('../../', import.meta.url));
 
 test('source recovery gate uses portable paths, fails closed and never connects to a database', () => {
-  const fixture = mkdtempSync(path.join(tmpdir(), 'manaratak-recovery-test-'));
+  const fixture = mkdtempSync(path.join(tmpdir(), 'absheer-recovery-test-'));
   const schemaDir = path.join(fixture, 'packages/infrastructure/prisma');
   const migrationDir = path.join(schemaDir, 'migrations/fixture');
   try {

@@ -1,7 +1,7 @@
--- MANARATAK_MIGRATION_OWNER: notifications
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
--- MNT-AUD-0034: durable notification templates, intents, leases and delivery receipts.
+-- ABSHEER_MIGRATION_OWNER: notifications
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
+-- ABSH-AUD-0034: durable notification templates, intents, leases and delivery receipts.
 -- Source migration only. Apply only through approved database remediation/provisioning gates.
 CREATE TABLE "NotificationTemplateRecord" (
   "id" TEXT NOT NULL,

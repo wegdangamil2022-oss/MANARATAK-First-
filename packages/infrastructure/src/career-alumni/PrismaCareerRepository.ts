@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { assertCareerReady, careerGovernance, careerPublicMetadata, publishedCareerJob } from '@manaratak/application';
+import { assertCareerReady, careerGovernance, careerPublicMetadata, publishedCareerJob } from '@absheer/application';
 import {
   CareerEmployerDto,
   CareerEmployerFilters,
@@ -14,7 +14,7 @@ import {
   PaginatedCareerResult,
   UpdateCareerEmployerDto,
   CareerJobRepositoryUpdateDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 import { boundedCursorLimit, decodeStableCursor, encodeStableCursor } from '../api-foundation/StableCursor';
 

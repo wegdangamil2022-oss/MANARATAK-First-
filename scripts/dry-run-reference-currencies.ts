@@ -7,7 +7,7 @@ import { ReferenceDataValidationService } from '../packages/domain/src/reference
 import { ReferenceDataSeedStatus } from '../packages/domain/src/reference-data/seed/ReferenceDataSeedTypes';
 
 const sourcePath = path.resolve(
-  process.argv[2] ?? 'workspace/reference-data/currencies/MANARATAK_ISO4217_Currencies_CLEAN_IMPORT_READY.csv',
+  process.argv[2] ?? 'workspace/reference-data/currencies/ABSHEER_ISO4217_Currencies_CLEAN_IMPORT_READY.csv',
 );
 
 if (!fs.existsSync(sourcePath)) {

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { CareerPublicUseCases } from '@manaratak/application';
-import { CareerOpportunityType, EmploymentType, ICareerEngagementRepository } from '@manaratak/domain';
+import { CareerPublicUseCases } from '@absheer/application';
+import { CareerOpportunityType, EmploymentType, ICareerEngagementRepository } from '@absheer/domain';
 import { careerPaging, careerHandler, careerError } from './CareerHttp.js';
 export class CareerPublicRouter {
   static create(cradle: { careerPublicUseCases: CareerPublicUseCases; careerEngagementRepository: ICareerEngagementRepository }) {

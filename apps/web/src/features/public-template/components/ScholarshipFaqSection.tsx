@@ -41,41 +41,41 @@ export function ScholarshipFaqSection() {
   }, [searchQuery]);
 
   return (
-    <div className="relative w-full bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[var(--mn-border)] shadow-xs space-y-3 text-start font-['Cairo',sans-serif]">
-      <p className="text-xs text-[var(--mn-text-muted)]">{language === 'en' ? 'General guidance and examples. Check the provider’s current published conditions and deadlines.' : 'إرشادات وأمثلة عامة؛ راجع الشروط والمواعيد الحالية المنشورة لدى الجهة المانحة.'}</p>
+    <div className="relative w-full bg-[var(--ab-surface)] rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-[var(--ab-border)] shadow-xs space-y-3 text-start font-['Cairo',sans-serif]">
+      <p className="text-xs text-[var(--ab-text-muted)]">{language === 'en' ? 'General guidance and examples. Check the provider’s current published conditions and deadlines.' : 'إرشادات وأمثلة عامة؛ راجع الشروط والمواعيد الحالية المنشورة لدى الجهة المانحة.'}</p>
       {/* Top Accent Line */}
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-b border-[var(--mn-border)] pb-2.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-b border-[var(--ab-border)] pb-2.5">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-md bg-[#142B5F]/10 dark:bg-[#F2CD78]/15 text-[#142B5F] dark:text-[#F2CD78] flex items-center justify-center shrink-0">
             <HelpCircle className="w-3.5 h-3.5 text-[#D6A43B]" />
           </div>
           <div>
             <h3 className="text-[13px] sm:text-[13.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-tight">{publicT('public_scholarship_frequently_asked_questions')}</h3>
-            <p className="text-[11px] font-bold text-[var(--mn-text-muted)] mt-0.5">{publicT('public_detailed_answers_with_real_examples_to_the_40')}</p>
+            <p className="text-[11px] font-bold text-[var(--ab-text-muted)] mt-0.5">{publicT('public_detailed_answers_with_real_examples_to_the_40')}</p>
           </div>
         </div>
       </div>
 
       {/* Search and Action Bar (Compact) */}
-      <div className="p-2 sm:p-2.5 rounded-lg bg-[var(--mn-page)] border border-[var(--mn-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="p-2 sm:p-2.5 rounded-lg bg-[var(--ab-page)] border border-[var(--ab-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         {/* Search Box */}
         <div className="relative w-full sm:w-72">
-          <Search className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--mn-text-muted)] pointer-events-none" />
+          <Search className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--ab-text-muted)] pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={publicT('public_search_questions_or_answers')}
-            className="w-full pr-7 pl-2.5 py-1 text-[11.5px] font-bold rounded-md bg-[var(--mn-surface)] border border-[var(--mn-border)] text-[var(--mn-text)] placeholder:text-[var(--mn-text-muted)] focus:outline-none focus:border-[#D6A43B] transition-colors"
+            className="w-full pr-7 pl-2.5 py-1 text-[11.5px] font-bold rounded-md bg-[var(--ab-surface)] border border-[var(--ab-border)] text-[var(--ab-text)] placeholder:text-[var(--ab-text-muted)] focus:outline-none focus:border-[#D6A43B] transition-colors"
           />
         </div>
 
         {/* Action Controls */}
         <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
-          <span className="text-[10.5px] font-bold text-[var(--mn-text-muted)] hidden md:inline-block ml-1">
+          <span className="text-[10.5px] font-bold text-[var(--ab-text-muted)] hidden md:inline-block ml-1">
             {filteredFaqs.length}{' '}{publicT('public_question')}</span>
           <button
             type="button"
@@ -85,7 +85,7 @@ export function ScholarshipFaqSection() {
           <button
             type="button"
             onClick={collapseAll}
-            className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-border)] text-[var(--mn-text-muted)] border border-[var(--mn-border)] transition-colors cursor-pointer"
+            className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--ab-surface-muted)] hover:bg-[var(--ab-border)] text-[var(--ab-text-muted)] border border-[var(--ab-border)] transition-colors cursor-pointer"
           >{publicT('public_collapse_all')}</button>
         </div>
       </div>
@@ -97,10 +97,10 @@ export function ScholarshipFaqSection() {
           return (
             <div
               key={faq.id}
-              className={`rounded-lg bg-[var(--mn-page)] border transition-all overflow-hidden ${
+              className={`rounded-lg bg-[var(--ab-page)] border transition-all overflow-hidden ${
                 isOpen
                   ? "border-[#142B5F]/40 dark:border-[#F2CD78]/40 shadow-2xs"
-                  : "border-[var(--mn-border)] hover:border-[#142B5F]/25"
+                  : "border-[var(--ab-border)] hover:border-[#142B5F]/25"
               }`}
             >
               {/* Accordion Question Header Button */}
@@ -110,7 +110,7 @@ export function ScholarshipFaqSection() {
                 className={`w-full px-2.5 py-2 sm:px-3 sm:py-2.5 flex items-center justify-between gap-2.5 text-start cursor-pointer transition-colors select-none ${
                   isOpen
                     ? "bg-[#142B5F]/5 dark:bg-[#F2CD78]/5"
-                    : "hover:bg-[var(--mn-surface-muted)]/50"
+                    : "hover:bg-[var(--ab-surface-muted)]/50"
                 }`}
                 aria-expanded={isOpen}
               >
@@ -129,16 +129,16 @@ export function ScholarshipFaqSection() {
                 {/* Chevron Indicator */}
                 <ChevronDown
                   className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
-                    isOpen ? "rotate-180 text-[#D6A43B]" : "text-[var(--mn-text-muted)]"
+                    isOpen ? "rotate-180 text-[#D6A43B]" : "text-[var(--ab-text-muted)]"
                   }`}
                 />
               </button>
 
               {/* Accordion Answer Body */}
               {isOpen && (
-                <div className="px-3 pb-2.5 pt-1.5 space-y-2 border-t border-[var(--mn-border)] bg-[var(--mn-surface)]/60">
+                <div className="px-3 pb-2.5 pt-1.5 space-y-2 border-t border-[var(--ab-border)] bg-[var(--ab-surface)]/60">
                   {/* Answer Text */}
-                  <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">
+                  <p className="text-[11.5px] font-bold text-[var(--ab-text)] leading-[1.8] text-justify">
                     {faq.answer}
                   </p>
 
@@ -149,7 +149,7 @@ export function ScholarshipFaqSection() {
                         <Lightbulb className="w-3.5 h-3.5" />
                         <span className="font-bold text-[#142B5F] dark:text-[#F2CD78]">{publicT('public_example')}</span>
                       </div>
-                      <span className="font-bold text-[var(--mn-text)] text-justify">
+                      <span className="font-bold text-[var(--ab-text)] text-justify">
                         {faq.example}
                       </span>
                     </div>
@@ -169,7 +169,7 @@ export function ScholarshipFaqSection() {
           </div>
           <h4 className="text-[12px] font-bold text-[#142B5F] dark:text-[#F2CD78]">{publicT('public_important_principle')}</h4>
         </div>
-        <p className="text-[11.5px] font-bold text-[var(--mn-text)] leading-[1.8] text-justify">{publicT('public_do_not_apply_one_rule_to_every_scholarship')}</p>
+        <p className="text-[11.5px] font-bold text-[var(--ab-text)] leading-[1.8] text-justify">{publicT('public_do_not_apply_one_rule_to_every_scholarship')}</p>
         <p className="text-[11.5px] font-bold text-[#142B5F] dark:text-[#F2CD78] leading-[1.8] text-justify">{publicT('public_always_use_the_requirements_of_the_scholarships_current')}</p>
       </div>
     </div>

@@ -13,7 +13,7 @@ import {
   type ScholarshipDto,
   type ScholarshipImportPayload,
   type UpdateScholarshipDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AtomicDomainMutationCoordinator } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { ScholarshipImportScreeningReader } from './ScholarshipImportScreeningReader';
 import type {

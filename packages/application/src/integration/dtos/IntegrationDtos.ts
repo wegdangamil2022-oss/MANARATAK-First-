@@ -1,4 +1,4 @@
-import { IntegrationScopeType, IntegrationCategory } from '@manaratak/domain';
+import { IntegrationScopeType, IntegrationCategory } from '@absheer/domain';
 
 export interface CreateIntegrationDto {
   reference: string;

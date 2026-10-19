@@ -19,7 +19,7 @@ import {
   MajorStatus,
   resolveMajorSourceIdentity,
   ITransactionalMajorRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   AcademicTaxonomyResolver,
   TaxonomyResolutionOutcome,

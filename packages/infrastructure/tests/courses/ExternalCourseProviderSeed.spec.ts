@@ -5,7 +5,7 @@ import {
   IMPORTED_COURSE_MASTER_COLUMNS,
   normalizeExternalCourseProviderDomain,
   normalizeExternalCourseProviderName,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { EXTERNAL_COURSE_PROVIDER_SEED } from '../../src/courses/ExternalCourseProviderSeed';
 
 describe('WP-IC-02 external course provider seed contract', () => {

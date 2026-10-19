@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ManageBackgroundJobsUseCase } from '@manaratak/application';
+import { ManageBackgroundJobsUseCase } from '@absheer/application';
 import { backgroundJobEnqueueSchema, jobReferenceParamSchema, parseStrict } from '../../validation/StrictControlPlaneSchemas.js';
 
 /**

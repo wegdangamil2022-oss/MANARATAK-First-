@@ -1,4 +1,4 @@
-import { ErrorCode, SerializedError, ApiResponse, ApiError } from '@manaratak/core';
+import { ErrorCode, SerializedError, ApiResponse, ApiError } from '@absheer/core';
 
 export class PresentationErrorTranslator {
   public static translateToStatusCode(code: string): number {

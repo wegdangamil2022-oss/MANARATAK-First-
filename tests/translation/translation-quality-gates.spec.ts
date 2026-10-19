@@ -51,7 +51,7 @@ describe('translation quality gates', () => {
       localizedNameAr: 'علوم الحاسب',
       localizedNameEn: 'Computer Science',
       degreeLevel: 'Bachelor',
-      sourceClassificationSystem: 'MANARATAK',
+      sourceClassificationSystem: 'ABSHEER',
       status: 'PUBLISHED',
       completenessStatus: 'COMPLETE',
       optionalFields: {},
@@ -86,13 +86,13 @@ describe('translation quality gates', () => {
 
   it('keeps locale route, canonical, hreflang and metadata language consistent', () => {
     const links = buildLocalizedSeoLinks({
-      baseUrl: 'https://manaratak.example',
+      baseUrl: 'https://absheer.example',
       pathname: '/ar/universities/example-university',
       locale: 'ar',
     });
 
-    expect(links.canonical).toBe('https://manaratak.example/ar/universities/example-university');
-    expect(links.alternates.ar).toBe('https://manaratak.example/ar/universities/example-university');
+    expect(links.canonical).toBe('https://absheer.example/ar/universities/example-university');
+    expect(links.alternates.ar).toBe('https://absheer.example/ar/universities/example-university');
     expect(links.alternates.en).toBeUndefined();
     expect(links.indexable).toBe(true);
     expect(links.xDefault).toBe(links.alternates.ar);

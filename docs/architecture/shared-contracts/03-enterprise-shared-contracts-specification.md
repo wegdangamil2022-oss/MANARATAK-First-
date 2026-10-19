@@ -4,14 +4,14 @@ Document Status: APPROVED
 Architecture Program: Enterprise Shared Contracts Consolidation Program
 Version: 1.0
 Owner: Architecture Review Board (ARB)
-Project: MANARATAK 2.0
+Project: ABSHEER 2.0
 Last Updated: 2026-07-21
 ---
 
 # Enterprise Shared Contracts Specification
 
 ## 1. Purpose
-This specification establishes the permanent architectural source of truth for all enterprise shared contracts across MANARATAK 2.0.
+This specification establishes the permanent architectural source of truth for all enterprise shared contracts across ABSHEER 2.0.
 
 ## 2. Scope
 This specification governs cross-cutting abstractions, base classes, marker interfaces, and shared enterprise logic utilized by all business domains.
@@ -41,7 +41,7 @@ This specification governs cross-cutting abstractions, base classes, marker inte
 - **Circular Prevention**: Imposed through strict layer linting.
 
 ## 6. Ownership Rules
-- **Canonical Namespace (Docs)**: `MANARATAK.ReferenceData.Domain.Foundation.Contracts`
+- **Canonical Namespace (Docs)**: `ABSHEER.ReferenceData.Domain.Foundation.Contracts`
 - **Canonical Module (Runtime)**: `packages/core`
 - **Versioning Policy**: Semantic Versioning. Breaking changes require ARB approval.
 

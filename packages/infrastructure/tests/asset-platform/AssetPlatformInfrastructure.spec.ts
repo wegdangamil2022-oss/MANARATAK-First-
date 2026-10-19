@@ -7,7 +7,7 @@ import {
   AssetStorageLocator,
   AssetStorageZone,
   AssetId
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   LocalAssetStorageGateway,
   NoopAssetMalwareScannerGateway,
@@ -27,7 +27,7 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
     });
 
     it('verifies real bytes in the local quarantine file and rejects mismatched declared metadata', async () => {
-      const root = await mkdtemp(path.join(tmpdir(), 'manaratak-asset-verification-'));
+      const root = await mkdtemp(path.join(tmpdir(), 'absheer-asset-verification-'));
       try {
         await mkdir(path.join(root, 'test-bucket', 'uploads'), { recursive: true });
         const bytes = Buffer.from('%PDF-1.7\\nminimal fixture', 'utf8');
@@ -52,7 +52,7 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
     });
 
     it('moves locator from quarantine to clean zone', async () => {
-      const root = await mkdtemp(path.join(tmpdir(), 'manaratak-asset-move-'));
+      const root = await mkdtemp(path.join(tmpdir(), 'absheer-asset-move-'));
       await mkdir(path.join(root, 'test-bucket', 'uploads'), { recursive: true });
       await writeFile(path.join(root, 'test-bucket', 'uploads', '123-file.tmp'), 'safe');
       const gateway = new LocalAssetStorageGateway('test-bucket', root);
@@ -113,7 +113,7 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
   });
   describe('local checksum fence', () => {
     it('refuses a changed quarantine payload before promotion', async () => {
-      const root = await mkdtemp(path.join(tmpdir(), 'manaratak-asset-digest-'));
+      const root = await mkdtemp(path.join(tmpdir(), 'absheer-asset-digest-'));
       try {
         await mkdir(path.join(root, 'test-bucket', 'uploads'), { recursive: true });
         await writeFile(path.join(root, 'test-bucket', 'uploads', 'entry.pdf'), 'changed-bytes');
@@ -129,7 +129,7 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
   });
 
   it('replays a completed local promotion by verifying existing CLEAN bytes, including sanitized paths', async () => {
-    const root = await mkdtemp(path.join(tmpdir(), 'manaratak-promotion-retry-'));
+    const root = await mkdtemp(path.join(tmpdir(), 'absheer-promotion-retry-'));
     try {
       await mkdir(path.join(root, 'bucket', 'sanitized', 'uploads'), { recursive: true });
       const bytes = '%PDF-1.7 sanitized';
@@ -146,7 +146,7 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
   });
 
   it('handles archive and restore retries and restoration of never-archived files safely', async () => {
-    const root = await mkdtemp(path.join(tmpdir(), 'manaratak-archive-recovery-'));
+    const root = await mkdtemp(path.join(tmpdir(), 'absheer-archive-recovery-'));
     try {
       await mkdir(path.join(root, 'bucket', 'clean'), { recursive: true });
       const gateway = new LocalAssetStorageGateway('bucket', root);
@@ -166,7 +166,7 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
   });
 
   it('rejects ambiguous duplicated archive and active copies instead of overwriting either', async () => {
-    const root = await mkdtemp(path.join(tmpdir(), 'manaratak-archive-duplicates-'));
+    const root = await mkdtemp(path.join(tmpdir(), 'absheer-archive-duplicates-'));
     try {
       await mkdir(path.join(root, 'bucket', 'clean'), { recursive: true });
       const filename = path.join(root, 'bucket', 'clean', 'asset.pdf');
@@ -182,7 +182,7 @@ describe('Phase 05 EAP Infrastructure - Slice 2C', () => {
   });
 
   it('verifies restored CLEAN bytes by size and SHA-256 and fails for tampered copies', async () => {
-    const root = await mkdtemp(path.join(tmpdir(), 'manaratak-clean-restore-proof-'));
+    const root = await mkdtemp(path.join(tmpdir(), 'absheer-clean-restore-proof-'));
     try {
       await mkdir(path.join(root, 'bucket', 'clean'), { recursive: true });
       const filename = path.join(root, 'bucket', 'clean', 'recovered.pdf');

@@ -6,7 +6,7 @@ const nav=read('apps/web/src/features/public-template/usePublicNavigation.ts');
 const track=read('apps/web/src/features/public-template/components/CourseTrackPreview.tsx');
 const detail=read('apps/web/src/features/public-template/components/OwnerCourseDetail.tsx');
 const checks=[];
-checks.push(['authoritative-classifier', data.includes("dto.accessType === 'PAID'") && data.includes("dto.originType === 'NATIVE_MANARATAK_COURSE'")]);
+checks.push(['authoritative-classifier', data.includes("dto.accessType === 'PAID'") && data.includes("dto.originType === 'NATIVE_ABSHEER_COURSE'")]);
 checks.push(['native-not-imported', data.includes("const imported: ImportedCourse | null = track === 'imported'")]);
 checks.push(['separate-native-paid-imported-collections', data.includes("track === 'native'") && data.includes("track === 'paid'") && data.includes('paidCourses')]);
 checks.push(['deep-link-classifies', app.includes('mapped.track') && app.includes("selectedCourseTrack: mapped.track")]);

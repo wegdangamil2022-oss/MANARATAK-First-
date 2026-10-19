@@ -1,44 +1,44 @@
-import { PrismaUniversityProgramReadPort } from '@manaratak/infrastructure';
+import { PrismaUniversityProgramReadPort } from '@absheer/infrastructure';
 import { createHmac } from 'node:crypto';
-import { DEVELOPMENT_CSRF_SECRET, isStrongRuntimeSecret } from '@manaratak/config';
-import {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases} from '@manaratak/application';
+import { DEVELOPMENT_CSRF_SECRET, isStrongRuntimeSecret } from '@absheer/config';
+import {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases} from '@absheer/application';
 import {StudentDocumentReviewRouter} from '../../presentation/api/router/StudentDocumentReviewRouter.js';
-import {AcademicProgramExplorerUseCases} from '@manaratak/application';
+import {AcademicProgramExplorerUseCases} from '@absheer/application';
 import {AcademicProgramExplorerRouter} from '../../presentation/api/router/AcademicProgramExplorerRouter.js';
-import {CertificateStudentSavedItemHydrationGateway,StudentToolPrivateSavedItemHydrationGateway} from '@manaratak/infrastructure';
-import {CertificateAffiliationReadService} from '@manaratak/application';
-import { TestDiscoveryOwnerUseCases } from '@manaratak/application';
-import { PrismaStudentToolTestDiscoveryLinkRepository, PrismaServiceTestDiscoveryLinkRepository, StudentToolTestDiscoveryOwnerGateway, ServiceTestDiscoveryOwnerGateway } from '@manaratak/infrastructure';
-import { CrossModuleIntegrityUseCase } from '@manaratak/application';
+import {CertificateStudentSavedItemHydrationGateway,StudentToolPrivateSavedItemHydrationGateway} from '@absheer/infrastructure';
+import {CertificateAffiliationReadService} from '@absheer/application';
+import { TestDiscoveryOwnerUseCases } from '@absheer/application';
+import { PrismaStudentToolTestDiscoveryLinkRepository, PrismaServiceTestDiscoveryLinkRepository, StudentToolTestDiscoveryOwnerGateway, ServiceTestDiscoveryOwnerGateway } from '@absheer/infrastructure';
+import { CrossModuleIntegrityUseCase } from '@absheer/application';
 import { CrossModuleIntegrityRouter } from '../../presentation/api/router/CrossModuleIntegrityRouter.js';
-import { CertificateVerificationPolicy, VaultTransitCertificateSignatureService, HttpCertificateAuthorityResolver, CertificateArtifactReadinessProbe, CertificateArtifactRecovery, PrismaCertificateAuthorityDirectory } from '@manaratak/infrastructure';
-import { UniversityProgramWorkspaceUseCases } from '@manaratak/application';
-import { PrismaUniversityProgramWorkspaceGateway } from '@manaratak/infrastructure';
+import { CertificateVerificationPolicy, VaultTransitCertificateSignatureService, HttpCertificateAuthorityResolver, CertificateArtifactReadinessProbe, CertificateArtifactRecovery, PrismaCertificateAuthorityDirectory } from '@absheer/infrastructure';
+import { UniversityProgramWorkspaceUseCases } from '@absheer/application';
+import { PrismaUniversityProgramWorkspaceGateway } from '@absheer/infrastructure';
 import { UniversityProgramWorkspaceRouter } from '../../presentation/api/router/UniversityProgramWorkspaceRouter';
-import { SettingsGovernanceUseCases } from '@manaratak/application';
-import { PrismaSettingsGovernanceGateway } from '@manaratak/infrastructure';
-import { GovernanceApprovalUseCases } from '@manaratak/application';
-import { PrismaGovernanceApprovalGateway } from '@manaratak/infrastructure';
-import { AuditAdministratorRecipientGateway } from '@manaratak/application';
-import { RecoverAssetLifecycleUseCase, AssetLifecycleRecoveryBackgroundJobHandler } from '@manaratak/application';
-import { PrismaAssetLifecycleRecoveryGateway } from '@manaratak/infrastructure';
-import { AssetGovernanceUseCases } from '@manaratak/application';
-import { PrismaAssetGovernanceGateway } from '@manaratak/infrastructure';
-import { AuditWorkspaceUseCases, AuditAlertEvaluation, AuditAlertEvaluationBackgroundJobHandler } from '@manaratak/application';
-import { PrismaAuditWorkspaceGateway, PrismaConfiguredAuditRetention, PrismaAuditAlertEvaluationGateway } from '@manaratak/infrastructure';
+import { SettingsGovernanceUseCases } from '@absheer/application';
+import { PrismaSettingsGovernanceGateway } from '@absheer/infrastructure';
+import { GovernanceApprovalUseCases } from '@absheer/application';
+import { PrismaGovernanceApprovalGateway } from '@absheer/infrastructure';
+import { AuditAdministratorRecipientGateway } from '@absheer/application';
+import { RecoverAssetLifecycleUseCase, AssetLifecycleRecoveryBackgroundJobHandler } from '@absheer/application';
+import { PrismaAssetLifecycleRecoveryGateway } from '@absheer/infrastructure';
+import { AssetGovernanceUseCases } from '@absheer/application';
+import { PrismaAssetGovernanceGateway } from '@absheer/infrastructure';
+import { AuditWorkspaceUseCases, AuditAlertEvaluation, AuditAlertEvaluationBackgroundJobHandler } from '@absheer/application';
+import { PrismaAuditWorkspaceGateway, PrismaConfiguredAuditRetention, PrismaAuditAlertEvaluationGateway } from '@absheer/infrastructure';
 import { AuditWorkspaceRouter } from '../../presentation/api/router/AuditWorkspaceRouter.js';
-import { MfaUseCases } from '@manaratak/application';
-import { PrismaMfaGateway } from '@manaratak/infrastructure';
-import { AuthorizationGovernanceUseCases } from '@manaratak/application';
-import { PrismaAuthorizationGovernanceGateway, PrismaDutyGuard } from '@manaratak/infrastructure';
+import { MfaUseCases } from '@absheer/application';
+import { PrismaMfaGateway } from '@absheer/infrastructure';
+import { AuthorizationGovernanceUseCases } from '@absheer/application';
+import { PrismaAuthorizationGovernanceGateway, PrismaDutyGuard } from '@absheer/infrastructure';
 import { WorkerHealthObservation } from '../runtime/WorkerHealthObservation.js';
 import {
   PrismaStudentPrivateResultRetentionGateway,
   StudentPrivateResultProtector,
-} from '@manaratak/infrastructure';
-import { EapCertificateVisualAssetResolver } from '@manaratak/infrastructure';
-import { PrismaInternationalTestConsumerReadGateway, PrismaMajorProgramUsageGateway, PrismaMajorScholarshipUsageGateway } from '@manaratak/infrastructure';
-import { ImportGovernanceUseCases } from '@manaratak/application';
+} from '@absheer/infrastructure';
+import { EapCertificateVisualAssetResolver } from '@absheer/infrastructure';
+import { PrismaInternationalTestConsumerReadGateway, PrismaMajorProgramUsageGateway, PrismaMajorScholarshipUsageGateway } from '@absheer/infrastructure';
+import { ImportGovernanceUseCases } from '@absheer/application';
 import {
   sweepOrphanImportSpools,
   PrismaImportGovernanceGateway,
@@ -46,7 +46,7 @@ import {
   PrismaImportSourceObservationGateway,
   PrismaSourceAcquisitionLimiter,
   SignedSourceAccessAuthority,
-} from '@manaratak/infrastructure';
+} from '@absheer/infrastructure';
 import {
   ImportArtifactUseCase,
   ImportSourceControlUseCases,
@@ -54,7 +54,7 @@ import {
   CsvImportStreamParser,
   NdjsonImportStreamParser,
   JsonImportStreamParser,
-} from '@manaratak/application';
+} from '@absheer/application';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -64,7 +64,7 @@ import {
   ReferenceDataValidationService,
   ConfigurationResolutionService,
   ImportRetryPolicy,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 import {
   createContainer,
@@ -72,8 +72,8 @@ import {
   asClass,
   asValue,
   asFunction,
-} from '@manaratak-vendor/awilix-core';
-import { ConfigurationRegistry } from '@manaratak/config';
+} from '@absheer-vendor/awilix-core';
+import { ConfigurationRegistry } from '@absheer/config';
 import { RuntimeResourceRegistry } from '../runtime/RuntimeResourceRegistry.js';
 import {
   createAssetMalwareScannerGatewayForRuntime,
@@ -225,7 +225,7 @@ import {
   PrismaNotificationTemplateRepository,
   PrismaStudentNotificationPreferenceGateway,
   ProviderNotificationDeliveryGateway,
-} from '@manaratak/infrastructure';
+} from '@absheer/infrastructure';
 
 // UseCases
 import {
@@ -368,10 +368,10 @@ import {
   BackgroundJobHandlerRegistry,
   DurableBackgroundWorker,
   BackgroundWorkerRuntimeState,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 // These are directly from src instead of index for some reason
-import { ManageNotificationTemplatesUseCase } from '@manaratak/application';
+import { ManageNotificationTemplatesUseCase } from '@absheer/application';
 import {
   SourceConnectorRegistry,
   AcquireImportSourceUseCase,
@@ -379,9 +379,9 @@ import {
   ScholarshipAcquisitionPlanner,
   ScholarshipImportNewUseCase,
   ScholarshipImportDecisionUseCases,
-} from '@manaratak/application';
-import { ManageNotificationIntentsUseCase } from '@manaratak/application';
-import { ManageAuditRecordsUseCase } from '@manaratak/application';
+} from '@absheer/application';
+import { ManageNotificationIntentsUseCase } from '@absheer/application';
+import { ManageAuditRecordsUseCase } from '@absheer/application';
 
 // Domain Services
 import {
@@ -391,7 +391,7 @@ import {
   StudentToolHandlerRegistry,
   StudentToolActivationReadinessService,
   StudentToolHealthService,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 // Routers
 import { IdentityRouter } from '../../presentation/api/router/IdentityRouter.js';
@@ -405,7 +405,7 @@ import {
   ResetPasswordUseCase,
   ChangePasswordUseCase,
   DisablePasswordCredentialUseCase,
-} from '@manaratak/application';
+} from '@absheer/application';
 import {
   PrismaEmailVerificationTokenRepository,
   PrismaPasswordResetTokenRepository,
@@ -415,7 +415,7 @@ import {
   CapturedEmailDeliveryGateway,
   SmtpEmailDeliveryGateway,
   PasswordHasher,
-} from '@manaratak/infrastructure';
+} from '@absheer/infrastructure';
 import { AuthorizationAdminRouter } from '../../presentation/api/router/AuthorizationAdminRouter.js';
 import { AuthorizationRuntimeRouter } from '../../presentation/api/router/AuthorizationRuntimeRouter.js';
 import { SettingsAdminRouter } from '../../presentation/api/router/SettingsAdminRouter.js';
@@ -473,7 +473,7 @@ const container = createContainer({
   injectionMode: InjectionMode.PROXY,
 });
 
-// MNT-AUD-0109: the obsolete in-memory Prisma shadow runtime was removed.
+// ABSH-AUD-0109: the obsolete in-memory Prisma shadow runtime was removed.
 // Production composition has one database authority: RuntimeResourceRegistry/PrismaClient.
 
 export function registerDependencies(
@@ -493,20 +493,20 @@ export function registerDependencies(
   }
 
   const productionLike = effectiveEnvironment.NODE_ENV === 'production' || effectiveEnvironment.NODE_ENV === 'staging';
-  const authProductionLike = productionLike || ['production', 'staging'].includes(effectiveEnvironment.MANARATAK_RUNTIME_PROFILE ?? '');
+  const authProductionLike = productionLike || ['production', 'staging'].includes(effectiveEnvironment.ABSHEER_RUNTIME_PROFILE ?? '');
   const readConfig = <T = string>(key: string): T | undefined =>
     runtimeConfiguration?.getOptional?.<T>(key) ?? (effectiveEnvironment[key] as T | undefined);
   const databaseUrl = readConfig<string>('DATABASE_URL')?.trim();
   const isPrisma = Boolean(databaseUrl);
   const assetProviderRuntimeEnvironment: Record<string, string | undefined> = { ...effectiveEnvironment };
   for (const key of [
-    'MANARATAK_ASSET_PROVIDER_BASE_URL',
-    'MANARATAK_ASSET_PROVIDER_API_KEY',
-    'MANARATAK_ASSET_PROVIDER_SIGNING_SECRET',
-    'MANARATAK_ASSET_PROVIDER_TIMEOUT_MS',
-    'MANARATAK_ASSET_PROVIDER_MAX_RESPONSE_BYTES',
-    'MANARATAK_ASSET_PROVIDER_ALLOW_INSECURE_HTTP',
-    'MANARATAK_IMPORT_RAW_RETENTION_DAYS',
+    'ABSHEER_ASSET_PROVIDER_BASE_URL',
+    'ABSHEER_ASSET_PROVIDER_API_KEY',
+    'ABSHEER_ASSET_PROVIDER_SIGNING_SECRET',
+    'ABSHEER_ASSET_PROVIDER_TIMEOUT_MS',
+    'ABSHEER_ASSET_PROVIDER_MAX_RESPONSE_BYTES',
+    'ABSHEER_ASSET_PROVIDER_ALLOW_INSECURE_HTTP',
+    'ABSHEER_IMPORT_RAW_RETENTION_DAYS',
   ]) {
     const configured = readConfig<string>(key);
     if (configured !== undefined) assetProviderRuntimeEnvironment[key] = configured;
@@ -562,10 +562,10 @@ export function registerDependencies(
     universityProgramReadPort: asFunction(({ prisma }) => new PrismaUniversityProgramReadPort(prisma)).singleton(),
     scholarshipRepository: asFunction(({ prisma, universityProgramReadPort }) => new PrismaScholarshipRepository(prisma, false, universityProgramReadPort)).singleton(),
     scholarshipCanonicalLookupGateway: asFunction(({ prisma, universityProgramReadPort }) => new PrismaScholarshipCanonicalLookupGateway(prisma, universityProgramReadPort)).singleton(),
-    universityRepository: asFunction(({ prisma }) => new PrismaUniversityRepository(prisma, readConfig<string>('MANARATAK_UNIVERSITY_LEGACY_COUNTRY_FILTERS') === 'true')).singleton(),
-    majorRepository: asFunction(({ prisma }) => new PrismaMajorRepository(prisma, readConfig<string>('MANARATAK_MAJOR_LEGACY_OPTIONAL_FILTERS') === 'true')).singleton(),
+    universityRepository: asFunction(({ prisma }) => new PrismaUniversityRepository(prisma, readConfig<string>('ABSHEER_UNIVERSITY_LEGACY_COUNTRY_FILTERS') === 'true')).singleton(),
+    majorRepository: asFunction(({ prisma }) => new PrismaMajorRepository(prisma, readConfig<string>('ABSHEER_MAJOR_LEGACY_OPTIONAL_FILTERS') === 'true')).singleton(),
     newMajorCandidateRepository: asFunction(({ prisma }) => new PrismaNewMajorCandidateRepository(prisma)).singleton(),
-    phase10CatalogRepository: asFunction(({ prisma }) => new Phase10CatalogRepository(prisma, { catalogPath: readConfig<string>('MANARATAK_PHASE10_CATALOG_PATH'), productionLike })).singleton(),
+    phase10CatalogRepository: asFunction(({ prisma }) => new Phase10CatalogRepository(prisma, { catalogPath: readConfig<string>('ABSHEER_PHASE10_CATALOG_PATH'), productionLike })).singleton(),
     courseRepository: asFunction(({ prisma }) => new PrismaCourseRepository(prisma)).singleton(),
     courseRelationshipRepository: asFunction(({ prisma }) => new PrismaCourseRelationshipRepository(prisma)).singleton(),
     externalCourseProviderRepository: asFunction(({ prisma }) => new PrismaExternalCourseProviderRepository(prisma)).singleton(),
@@ -579,7 +579,7 @@ export function registerDependencies(
     courseFinancialClearanceGateway: asFunction(({ financePlatformUseCases }) => new Phase19CourseFinancialClearanceGateway(financePlatformUseCases)).singleton(),
     learningPathRepository: asFunction(({ prisma }) => new PrismaLearningPathRepository(prisma)).singleton(),
     certificateVerificationPolicy: asFunction(({configurationResolutionService})=>new CertificateVerificationPolicy(configurationResolutionService)).singleton(),
-    certificateVerificationRateLimiter: asFunction(({redisClient})=>redisClient ? new RedisRateLimiter(redisClient,'manaratak:certificates:verification:') : null).singleton(),
+    certificateVerificationRateLimiter: asFunction(({redisClient})=>redisClient ? new RedisRateLimiter(redisClient,'absheer:certificates:verification:') : null).singleton(),
     certificateVerificationDistributedRequired: asValue(productionLike),
     certificateRepository: asFunction(({ prisma,certificateVerificationPolicy }) => new PrismaCertificateRepository(prisma,certificateVerificationPolicy)).singleton(),
     studentWorkspaceRepository: asFunction(
@@ -623,7 +623,7 @@ export function registerDependencies(
       if (!productionLike) return new DefaultRateLimiter();
       const redisClient = runtimeResources.getRedisClient();
       if (!redisClient) throw new Error('STUDENT_TOOL_QUOTA_STORE_UNAVAILABLE');
-      const namespace = readConfig<string>('REDIS_NAMESPACE')?.trim() || 'manaratak:';
+      const namespace = readConfig<string>('REDIS_NAMESPACE')?.trim() || 'absheer:';
       return new RedisRateLimiter(redisClient, `${namespace}student-tools:quota:`);
     }).singleton(),
     studentToolRateLimitGateway: asFunction(({ studentToolRateLimiter }) => new StudentToolRateLimitGateway(studentToolRateLimiter)).singleton(),
@@ -1271,7 +1271,7 @@ export function registerDependencies(
     // Others
     auditWorkspaceGateway: asFunction(({ prisma, notificationRecipientGateway, notificationTemplateRepo }) => new PrismaAuditWorkspaceGateway(prisma, async (identityId, templateId) => {
       await notificationRecipientGateway.assertEligible(identityId);
-      const { TemplateId } = await import('@manaratak/domain');
+      const { TemplateId } = await import('@absheer/domain');
       const template = await notificationTemplateRepo.findById(TemplateId.create(templateId));
       if (!template || template.requiredVariables.some((name: string) => !['ruleName','matchedCount','actionUrl'].includes(name))) throw new Error('AUDIT_ALERT_TEMPLATE_INVALID');
     })).scoped(),
@@ -1402,8 +1402,8 @@ export function registerDependencies(
       const accessTokenTtl = Number(readConfig<number | string>('ACCESS_TOKEN_TTL_SECONDS') ?? 900);
       return new JwtTokenProvider({ activeKeyId, privateKeyPem, publicKeys }, {
         accessTokenTtl,
-        issuer: readConfig<string>('JWT_ISSUER') || 'manaratak-api',
-        audience: readConfig<string>('JWT_AUDIENCE') || 'manaratak-browser',
+        issuer: readConfig<string>('JWT_ISSUER') || 'absheer-api',
+        audience: readConfig<string>('JWT_AUDIENCE') || 'absheer-browser',
       });
     }).singleton(),
     sessionManager: asFunction(({ prisma }) => {
@@ -1411,7 +1411,7 @@ export function registerDependencies(
       return new PrismaSessionManager(prisma, ttl);
     }).singleton(),
     principalAccessValidator: asFunction(({ identityRepository, passwordCredentialRepository }) => new IdentityPrincipalAccessValidator(identityRepository, passwordCredentialRepository)).singleton(),
-    mfaGateway: asFunction(({ prisma }) => isPrisma ? new PrismaMfaGateway(prisma, readConfig<string>('MANARATAK_MFA_ENCRYPTION_KEY')) : createUnavailableCapability('mfaGateway')).scoped(),
+    mfaGateway: asFunction(({ prisma }) => isPrisma ? new PrismaMfaGateway(prisma, readConfig<string>('ABSHEER_MFA_ENCRYPTION_KEY')) : createUnavailableCapability('mfaGateway')).scoped(),
     mfaUseCases: asFunction(({ mfaGateway, credentialVerifier, atomicDomainMutationCoordinator, sessionManager, governanceApprovalGateway }) => new MfaUseCases(mfaGateway, credentialVerifier, atomicDomainMutationCoordinator, sessionManager, governanceApprovalGateway)).scoped(),
     authService: asFunction(({ tokenProvider, sessionManager, credentialVerifier, principalAccessValidator, mfaUseCases }) => new AuthService(tokenProvider, sessionManager, principalAccessValidator, credentialVerifier, mfaUseCases)).singleton(),
     credentialVerifier: asFunction(({ prisma }) => new PrismaCredentialVerifier(prisma)).singleton(),

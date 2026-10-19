@@ -1,4 +1,4 @@
-import { Entity, Identifier } from '@manaratak/core';
+import { Entity, Identifier } from '@absheer/core';
 import { Profile } from '../value-objects/Profile';
 import { ContactRegistry } from './ContactRegistry';
 

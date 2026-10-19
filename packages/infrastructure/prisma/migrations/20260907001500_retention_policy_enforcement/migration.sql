@@ -1,7 +1,7 @@
--- MANARATAK_MIGRATION_OWNER: platform-retention
--- MANARATAK_MIGRATION_SCOPE: cross_context_approved
--- MANARATAK_ARCH_DECISION: ADR-028
--- MNT-AUD-0081: canonical retention state, legal-hold metadata and immutable decision evidence.
+-- ABSHEER_MIGRATION_OWNER: platform-retention
+-- ABSHEER_MIGRATION_SCOPE: cross_context_approved
+-- ABSHEER_ARCH_DECISION: ADR-028
+-- ABSH-AUD-0081: canonical retention state, legal-hold metadata and immutable decision evidence.
 
 ALTER TABLE "ImportRecord" ADD COLUMN "legalHoldUntil" TIMESTAMP(3), ADD COLUMN "retentionProcessedAt" TIMESTAMP(3), ADD COLUMN "retentionState" TEXT NOT NULL DEFAULT 'PENDING', ADD COLUMN "retentionClaimUntil" TIMESTAMP(3), ADD COLUMN "retentionClaimToken" TEXT;
 ALTER TABLE "AuditRecord" ADD COLUMN "legalHoldUntil" TIMESTAMP(3), ADD COLUMN "retentionProcessedAt" TIMESTAMP(3), ADD COLUMN "retentionClaimUntil" TIMESTAMP(3), ADD COLUMN "retentionClaimToken" TEXT;

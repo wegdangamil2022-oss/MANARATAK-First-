@@ -15,7 +15,7 @@ export type CertificateType =
   | 'HONOR';
 
 export type CertificateIssuerType =
-  | 'MANARATAK'
+  | 'ABSHEER'
   | 'UNIVERSITY'
   | 'EDUCATIONAL_INSTITUTION'
   | 'GOVERNMENT'

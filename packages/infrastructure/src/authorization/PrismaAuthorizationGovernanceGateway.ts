@@ -5,8 +5,8 @@ import {
   type AtomicPersistenceContext,
   type DutyPolicy,
   type DutyException,
-} from '@manaratak/domain';
-import type { AccessReview, IAuthorizationGovernanceGateway } from '@manaratak/application';
+} from '@absheer/domain';
+import type { AccessReview, IAuthorizationGovernanceGateway } from '@absheer/application';
 import { DUTY_POLICY_ID, PrismaDutyGuard } from './PrismaDutyGuard';
 
 export class PrismaAuthorizationGovernanceGateway implements IAuthorizationGovernanceGateway {

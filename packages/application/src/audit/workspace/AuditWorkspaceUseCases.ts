@@ -1,5 +1,5 @@
-import { AUDIT_QUERY_CATALOG } from '@manaratak/shared';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import { AUDIT_QUERY_CATALOG } from '@absheer/shared';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import type {
   AtomicDomainMutationCoordinator,
   AtomicMutationRequestContext,

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ManageSearchUseCase, type SearchActorContext } from '../../src/search/use-cases/ManageSearchUseCase';
-import { LogicalOperator, SearchCriteria, SearchPagination, SearchReference, SearchRequest, SearchRequestId, SearchResult, SearchScope } from '@manaratak/domain';
+import { LogicalOperator, SearchCriteria, SearchPagination, SearchReference, SearchRequest, SearchRequestId, SearchResult, SearchScope } from '@absheer/domain';
 
 function row(actorReferenceId?: string, scope='PUBLIC_CATALOG', reference='shared-reference') {
   return SearchRequest.create(SearchRequestId.create(`id-${actorReferenceId ?? 'legacy'}-${scope}-${reference}`),SearchReference.create(reference),SearchScope.create(scope),SearchCriteria.create('private query',[],LogicalOperator.AND),SearchPagination.create(1,20),undefined,actorReferenceId);

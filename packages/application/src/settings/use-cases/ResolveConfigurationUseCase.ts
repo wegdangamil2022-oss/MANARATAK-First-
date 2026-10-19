@@ -1,4 +1,4 @@
-import { ConfigurationResolutionContext, IResolvedSettingsReader, ResolvedSetting, ResolutionOptions } from '@manaratak/domain';
+import { ConfigurationResolutionContext, IResolvedSettingsReader, ResolvedSetting, ResolutionOptions } from '@absheer/domain';
 
 export class ResolveConfigurationUseCase {
   constructor(private readonly resolutionService: IResolvedSettingsReader) {}

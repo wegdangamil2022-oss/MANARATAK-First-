@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: cross_context
--- MANARATAK_MIGRATION_SCOPE: cross_context_approved
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: cross_context
+-- ABSHEER_MIGRATION_SCOPE: cross_context_approved
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- B05 SOURCE ONLY, NOT APPLIED. Owners: student binding / assets lifecycle.
 -- Before deploy: verify actual migration/checksum state, inspect existing constraints,
 -- inventory orphans, drain competing writers, and rehearse both lock orderings.
@@ -15,10 +15,10 @@ CREATE INDEX "StudentApplicationDocumentBinding_assetId_idx" ON "StudentApplicat
 
 CREATE TRIGGER "eap_asset_reference_owner"
   BEFORE INSERT OR UPDATE OF "assetId" ON "StudentApplicationDocumentBinding"
-  FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('assetId', 'false', 'false');
+  FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('assetId', 'false', 'false');
 
 -- Add a guard for this owner without replacing the existing consumer/lifecycle functions.
-CREATE FUNCTION manaratak_guard_student_document_asset_lifecycle() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE FUNCTION absheer_guard_student_document_asset_lifecycle() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE used boolean;
 BEGIN
   IF TG_OP = 'UPDATE' THEN
@@ -37,5 +37,5 @@ END;
 $$;
 CREATE TRIGGER "eap_asset_lifecycle_student_document"
   BEFORE DELETE OR UPDATE OF "lifecycleState", "id" ON "AssetRecord"
-  FOR EACH ROW EXECUTE FUNCTION manaratak_guard_student_document_asset_lifecycle();
+  FOR EACH ROW EXECUTE FUNCTION absheer_guard_student_document_asset_lifecycle();
 COMMIT;

@@ -50,7 +50,7 @@ import { AdminAuthorizationProvider, RequireAdminPermission } from './security/A
 import { I18nProvider, useTranslation } from './i18n/I18nProvider';
 import { AdminNavigation } from './components/AdminNavigation';
 import { Languages, LockKeyhole, ArrowLeftRight, Loader2 } from 'lucide-react';
-import { firstAllowedAdminPath } from '@manaratak/shared';
+import { firstAllowedAdminPath } from '@absheer/shared';
 import { AdminLoginPage, loginDestination } from './pages/AdminLoginPage';
 
 function AdminLayout() {
@@ -109,8 +109,8 @@ function AdminLayout() {
       setAdminPermissions([]);
       setAdminAccess('unauthorized');
     };
-    window.addEventListener('manaratak-admin-session-expired', onExpired);
-    return () => window.removeEventListener('manaratak-admin-session-expired', onExpired);
+    window.addEventListener('absheer-admin-session-expired', onExpired);
+    return () => window.removeEventListener('absheer-admin-session-expired', onExpired);
   }, []);
 
   useEffect(() => {
@@ -119,8 +119,8 @@ function AdminLayout() {
       setAdminAccess('loading');
       void checkSession();
     };
-    window.addEventListener('manaratak-admin-permission-changed', onPermissionChanged);
-    return () => window.removeEventListener('manaratak-admin-permission-changed', onPermissionChanged);
+    window.addEventListener('absheer-admin-permission-changed', onPermissionChanged);
+    return () => window.removeEventListener('absheer-admin-permission-changed', onPermissionChanged);
   }, []);
 
   const lockAdmin = async () => {
@@ -357,18 +357,18 @@ function AdminPermissionNotice() {
 
 function clearAdminSession() {
   try {
-    sessionStorage.removeItem('manaratak_admin_bearer_token');
-    sessionStorage.removeItem('manaratak_access_token');
-    sessionStorage.removeItem('manaratak_refresh_token');
-    sessionStorage.removeItem('manaratak_admin_bearer');
+    sessionStorage.removeItem('absheer_admin_bearer_token');
+    sessionStorage.removeItem('absheer_access_token');
+    sessionStorage.removeItem('absheer_refresh_token');
+    sessionStorage.removeItem('absheer_admin_bearer');
   } catch {}
   try {
-    localStorage.removeItem('manaratak_admin_access');
-    localStorage.removeItem('manaratak_admin_bearer');
-    localStorage.removeItem('manaratak_admin_bearer_token');
-    localStorage.removeItem('manaratak_access_token');
-    localStorage.removeItem('manaratak_refresh_token');
-    localStorage.removeItem('manaratak_admin_permissions');
+    localStorage.removeItem('absheer_admin_access');
+    localStorage.removeItem('absheer_admin_bearer');
+    localStorage.removeItem('absheer_admin_bearer_token');
+    localStorage.removeItem('absheer_access_token');
+    localStorage.removeItem('absheer_refresh_token');
+    localStorage.removeItem('absheer_admin_permissions');
   } catch {}
 }
 

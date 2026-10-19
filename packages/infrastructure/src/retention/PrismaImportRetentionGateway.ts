@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { IRetentionOwnerGateway } from '@manaratak/application';
-import { RetentionCandidate, RetentionDecision, RetentionDisposition, RetentionOwner } from '@manaratak/domain';
+import { IRetentionOwnerGateway } from '@absheer/application';
+import { RetentionCandidate, RetentionDecision, RetentionDisposition, RetentionOwner } from '@absheer/domain';
 
 const TERMINAL_BATCHES = ['COMPLETED', 'PARTIALLY_COMPLETED', 'FAILED_PERMANENT', 'DLQ', 'CANCELLED'];
 const PRESERVED_STATES = ['NEEDS_REVIEW', 'STAGING_PENDING', 'STAGING_INVALID', 'CHECKPOINT'];

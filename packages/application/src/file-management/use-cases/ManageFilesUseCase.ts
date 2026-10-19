@@ -10,7 +10,7 @@ import {
   RetentionMetadata,
   OwnerReference,
   FileIntegrityValidationService
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   RegisterFileInput,
   ActivateFileInput,

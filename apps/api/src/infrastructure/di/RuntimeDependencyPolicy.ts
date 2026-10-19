@@ -1,6 +1,6 @@
-import { IRateLimiter } from '@manaratak/core';
-import { IAssetMalwareScannerGateway, IAssetSanitizationGateway, IAssetStorageGateway } from '@manaratak/domain';
-import type { IImportRawSnapshotStore } from '@manaratak/application';
+import { IRateLimiter } from '@absheer/core';
+import { IAssetMalwareScannerGateway, IAssetSanitizationGateway, IAssetStorageGateway } from '@absheer/domain';
+import type { IImportRawSnapshotStore } from '@absheer/application';
 import {
   DefaultRateLimiter,
   HttpAssetMalwareScannerGateway,
@@ -14,7 +14,7 @@ import {
   RedisClientFactory,
   RedisRateLimiter,
   createUnavailableCapability,
-} from '@manaratak/infrastructure';
+} from '@absheer/infrastructure';
 
 export type RuntimeEnvironment = Readonly<Record<string, string | undefined>>;
 
@@ -39,9 +39,9 @@ const positiveInt = (value: string | undefined, fallback: number, key: string): 
 };
 
 const assetProviderConfig = (env: RuntimeEnvironment) => {
-  const baseUrl = env.MANARATAK_ASSET_PROVIDER_BASE_URL?.trim();
-  const apiKey = env.MANARATAK_ASSET_PROVIDER_API_KEY?.trim();
-  const signingSecret = env.MANARATAK_ASSET_PROVIDER_SIGNING_SECRET;
+  const baseUrl = env.ABSHEER_ASSET_PROVIDER_BASE_URL?.trim();
+  const apiKey = env.ABSHEER_ASSET_PROVIDER_API_KEY?.trim();
+  const signingSecret = env.ABSHEER_ASSET_PROVIDER_SIGNING_SECRET;
   const supplied = Boolean(baseUrl || apiKey || signingSecret);
   const complete = Boolean(baseUrl && apiKey && signingSecret);
   if (supplied && !complete) throw new Error('ASSET_PROVIDER_CONFIGURATION_INCOMPLETE');
@@ -50,9 +50,9 @@ const assetProviderConfig = (env: RuntimeEnvironment) => {
     baseUrl: baseUrl!,
     apiKey: apiKey!,
     signingSecret: signingSecret!,
-    timeoutMs: positiveInt(env.MANARATAK_ASSET_PROVIDER_TIMEOUT_MS, 10_000, 'MANARATAK_ASSET_PROVIDER_TIMEOUT_MS'),
-    maxResponseBytes: positiveInt(env.MANARATAK_ASSET_PROVIDER_MAX_RESPONSE_BYTES, 64 * 1024 * 1024, 'MANARATAK_ASSET_PROVIDER_MAX_RESPONSE_BYTES'),
-    allowInsecureHttp: !productionLike(env) && env.MANARATAK_ASSET_PROVIDER_ALLOW_INSECURE_HTTP === 'true',
+    timeoutMs: positiveInt(env.ABSHEER_ASSET_PROVIDER_TIMEOUT_MS, 10_000, 'ABSHEER_ASSET_PROVIDER_TIMEOUT_MS'),
+    maxResponseBytes: positiveInt(env.ABSHEER_ASSET_PROVIDER_MAX_RESPONSE_BYTES, 64 * 1024 * 1024, 'ABSHEER_ASSET_PROVIDER_MAX_RESPONSE_BYTES'),
+    allowInsecureHttp: !productionLike(env) && env.ABSHEER_ASSET_PROVIDER_ALLOW_INSECURE_HTTP === 'true',
   };
 };
 
@@ -64,7 +64,7 @@ export function createAssetStorageGatewayForRuntime(env: RuntimeEnvironment): IA
   const provider = assetProviderConfig(env);
   if (provider) return new HttpAssetStorageGateway(provider);
   if (productionLike(env)) return createUnavailableCapability('assetStorageGateway') as IAssetStorageGateway;
-  return new LocalAssetStorageGateway('local-dev-bucket', env.MANARATAK_LOCAL_ASSET_ROOT || undefined, false);
+  return new LocalAssetStorageGateway('local-dev-bucket', env.ABSHEER_LOCAL_ASSET_ROOT || undefined, false);
 }
 
 export function createAssetMalwareScannerGatewayForRuntime(env: RuntimeEnvironment): IAssetMalwareScannerGateway {
@@ -113,7 +113,7 @@ export function createImportRawSnapshotStoreForRuntime(
   if (provider) {
     return new HttpImportRawSnapshotStore({
       ...provider,
-      retentionDays: positiveInt(env.MANARATAK_IMPORT_RAW_RETENTION_DAYS, 365, 'MANARATAK_IMPORT_RAW_RETENTION_DAYS'),
+      retentionDays: positiveInt(env.ABSHEER_IMPORT_RAW_RETENTION_DAYS, 365, 'ABSHEER_IMPORT_RAW_RETENTION_DAYS'),
     });
   }
   if (productionLike(env)) {
@@ -152,6 +152,6 @@ export function createRateLimiterForRuntime(
   );
   const keyPrefix = typeof (client as any).buildKey === 'function'
     ? `${(client as any).buildKey('rate-limit', '')}`
-    : 'manaratak:rate-limit:';
+    : 'absheer:rate-limit:';
   return new RedisRateLimiter(client as any, keyPrefix);
 }

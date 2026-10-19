@@ -9,13 +9,13 @@
 - **Owner:** Chief Enterprise Software Architect
 - **Approval Authority:** Architecture Review Board (ARB)
 - **Artifact Type:** Enterprise Architecture Model
-- **Authority:** `docs/governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md`
+- **Authority:** `docs/governance/roadmap/ABSHEER-2.0-Roadmap-v6.0.md`
 
 > **P13 Final Source Alignment — 2026-09-03:** Re-audited against Roadmap v6.0 and the final source implementation. Ownership and dependency direction remain authoritative. Student Workspace composes P10/P11/P12 saved-item owner reads plus P13 learning and P14 certificate reads through application contracts; P24 live composition consumes P15 session/API state. Runtime/DB/E2E proof remains explicitly pending and is not certified by this document.
 
 ## 2. Purpose
 
-This document serves as the single authoritative registry for all enterprise APIs and service contracts within the MANARATAK 2.0 architecture. Its primary purposes are to ensure enterprise-wide discoverability, prevent the duplication of APIs, enforce architectural consistency, and support rigorous enterprise governance. This is a logical architecture artifact guiding future physical implementation; it does not dictate specific URLs, endpoints, or data payloads.
+This document serves as the single authoritative registry for all enterprise APIs and service contracts within the ABSHEER 2.0 architecture. Its primary purposes are to ensure enterprise-wide discoverability, prevent the duplication of APIs, enforce architectural consistency, and support rigorous enterprise governance. This is a logical architecture artifact guiding future physical implementation; it does not dictate specific URLs, endpoints, or data payloads.
 
 ## 3. API Governance
 
@@ -104,7 +104,7 @@ The following architectural rules govern the design and evolution of all enterpr
 - **Purpose:** Manage authenticated student profile/workspace state, dashboard hydration, collections/saved references, recently viewed/history, and privacy/preferences.
 - **Business Capability:** Student Workspace & Personalization
 - **API Style:** REST
-- **Primary Consumers:** Authenticated MANARATAK web/mobile surfaces and approved internal read-model consumers
+- **Primary Consumers:** Authenticated ABSHEER web/mobile surfaces and approved internal read-model consumers
 - **Upstream Dependencies:** Owner read models from Phases 11–14 and other approved domain references as needed
 - **Downstream Dependencies:** None for business-domain ownership; workspace references remain local personal state
 - **Authentication Requirement:** Required
@@ -400,5 +400,5 @@ The ARB has validated this registry against the following standards:
 
 ## 12. Revision History
 
-- **Initial Version (1.0.0):** Official Enterprise API Registry established for MANARATAK 2.0.
+- **Initial Version (1.0.0):** Official Enterprise API Registry established for ABSHEER 2.0.
 - **1.0.1 (2026-09-03):** Replaced the historical P15 Student Application API with the Student Workspace API; removed synchronous P13→P14 certificate generation and documented P14 certificate authority.

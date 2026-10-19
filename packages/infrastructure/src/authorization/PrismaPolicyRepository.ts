@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { Policy, IPolicyRepository } from '@manaratak/domain';
-import { ISpecification } from '@manaratak/core';
+import { Policy, IPolicyRepository } from '@absheer/domain';
+import { ISpecification } from '@absheer/core';
 
 export interface PolicyRecordRow {
   id: string;
@@ -33,7 +33,7 @@ export class PrismaPolicyRepository implements IPolicyRepository {
   private reserved(id: string): boolean { return /^(authorization-governance:|duty-exception:|access-review:|governance-approval:)/.test(id); }
   private assertOrdinary(id: string): void { if (this.reserved(id)) throw new Error('SYSTEM_POLICY_PROTECTED'); }
   withTransaction(
-    context: import('@manaratak/domain').AtomicPersistenceContext,
+    context: import('@absheer/domain').AtomicPersistenceContext,
   ): IPolicyRepository {
     const client = (context as unknown as { transactionClient?: Prisma.TransactionClient })
       .transactionClient;

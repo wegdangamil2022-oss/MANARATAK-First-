@@ -4,7 +4,7 @@ import {
   PublicUniversityDto,
   PublicUniversityFilters,
   UniversityStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { projectPublicUniversity } from './UniversityPublicProjection';
 
 export class PublicUniversityUseCases {

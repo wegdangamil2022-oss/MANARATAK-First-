@@ -1,4 +1,4 @@
-import { IEmailDeliveryGateway, SendVerificationEmailInput, SendPasswordResetEmailInput } from '@manaratak/domain';
+import { IEmailDeliveryGateway, SendVerificationEmailInput, SendPasswordResetEmailInput } from '@absheer/domain';
 
 export class CapturedEmailDeliveryGateway implements IEmailDeliveryGateway {
   private dispatchedEmails: SendVerificationEmailInput[] = [];

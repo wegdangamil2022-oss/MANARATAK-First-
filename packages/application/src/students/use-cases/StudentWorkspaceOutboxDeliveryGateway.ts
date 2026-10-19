@@ -7,7 +7,7 @@ import {
   IIdentityRepository,
   IStudentLearningReadGateway,
   IStudentCertificateReadGateway,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { StudentWorkspaceUseCases } from './StudentWorkspaceUseCases';
 
 /**

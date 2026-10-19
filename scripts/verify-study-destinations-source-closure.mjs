@@ -99,7 +99,7 @@ check('Country graph includes CMS editorial relationship', graph.includes('CmsDo
 check('Admin list uses Study Destination API rather than public Reference Data API', adminList.includes('/admin/study-destinations') && !adminList.includes("const API_BASE = '/reference-data'"));
 check('Admin list does not read legacy study-destination metadata', !adminList.includes('studyDestinationCandidate') && !adminList.includes('destinationReviewStatus') && !adminList.includes('publicStatus'));
 check('Admin list has one profile status filter', (adminList.match(/value=\{status\}/g) || []).length === 1);
-check('Admin list uses MANARATAK primary navy', adminList.includes('#142B5F'));
+check('Admin list uses ABSHEER primary navy', adminList.includes('#142B5F'));
 check('Admin detail has seven coherent workflow tabs', ['overview','study','visa','living','relations','sources','publish'].every((x) => adminDetail.includes(`'${x}'`)));
 check('Admin detail removed Pending panels', !adminDetail.includes('PendingPanel'));
 check('Admin detail edits visa data', adminDetail.includes('visaOfficialUrl') && adminDetail.includes('visaRequirementsAr'));
@@ -108,7 +108,7 @@ check('Admin detail edits canonical study languages', adminDetail.includes('stud
 check('Admin detail edits official links and evidence', adminDetail.includes('officialLinks') && adminDetail.includes('evidenceSources'));
 check('Admin detail exposes owner-domain relationship counts', ['universities','academicPrograms','majors','scholarships','internationalTests','services','careerJobs'].every((x) => adminDetail.includes(x)));
 check('Admin detail labels provider-HQ courses as not study-country semantics', adminDetail.includes('ليست «دورات للدراسة في الدولة»'));
-check('Admin detail uses MANARATAK navy and gold', adminDetail.includes('#142B5F') && adminDetail.includes('#D6A43B'));
+check('Admin detail uses ABSHEER navy and gold', adminDetail.includes('#142B5F') && adminDetail.includes('#D6A43B'));
 check('Country relations link each university to University Domain detail', adminDetail.includes('detailBasePath="/universities"') && adminDetail.includes('encodeURIComponent(item.ownerId)'));
 check('Country relations expose a canonical all-universities country filter', adminDetail.includes('/universities?countryReferenceId=') && adminDetail.includes('country.id'));
 check('Academic program rows deep-link to owning university', adminDetail.includes('/universities/${encodeURIComponent(p.universityOwnerId)}'));

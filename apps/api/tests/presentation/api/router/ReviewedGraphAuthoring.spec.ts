@@ -1,9 +1,9 @@
-import { asValue } from '@manaratak-vendor/awilix-core';
+import { asValue } from '@absheer-vendor/awilix-core';
 import { container } from '../../../../src/infrastructure/di/container';
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import type { AdminMajorUseCases, CrossDomainGraphReadService, InternationalTestAdminUseCases } from '@manaratak/application';
+import type { AdminMajorUseCases, CrossDomainGraphReadService, InternationalTestAdminUseCases } from '@absheer/application';
 import { MajorAdminRouter } from '../../../../src/presentation/api/router/MajorAdminRouter';
 import { InternationalTestAdminRouter } from '../../../../src/presentation/api/router/InternationalTestAdminRouter';
 import { SecurityMiddlewareFactory } from '../../../../src/presentation/security/SecurityMiddlewareFactory';
@@ -30,7 +30,7 @@ function fixture(domain: 'major' | 'test', granted = true, authenticated = true)
   app.use(root, SecurityMiddlewareFactory.createAdminPermissionGuard(permission, { evaluatePermission: vi.fn().mockResolvedValue({ isGranted: granted }) } as never), createCanonicalIdempotencyMiddleware({ store: store as never, requireKey: true }), router);
   const path = `${root}/${owner}/${domain === 'major' ? 'classification-mappings' : 'canonical-relationships'}`;
   const body = domain === 'major' ? { taxonomyNodeId: reference, ...review } : { kind: 'TAXONOMY', referenceId: reference, ...review };
-  const command = () => request(app).post(path).set('If-Match', '1').set('X-Review-Reason', 'Reviewed source').set('Cookie', 'manaratak_refresh=' + session).set('X-CSRF-Token', csrf).set('Idempotency-Key', 'reviewed-graph');
+  const command = () => request(app).post(path).set('If-Match', '1').set('X-Review-Reason', 'Reviewed source').set('Cookie', 'absheer_refresh=' + session).set('X-CSRF-Token', csrf).set('Idempotency-Key', 'reviewed-graph');
   return { app, path, root, body, command, write, store, session, csrf, list };
 }
 describe.each(['major', 'test'] as const)('M10-10 %s graph API security and command contracts', domain => {
@@ -52,9 +52,9 @@ describe.each(['major', 'test'] as const)('M10-10 %s graph API security and comm
   });
   it('requires session-bound CSRF and an idempotency key', async () => {
     const f = fixture(domain);
-    expect((await request(f.app).post(f.path).set('Cookie', 'manaratak_refresh=' + f.session).send(f.body)).status).toBe(403);
-    expect((await f.command().set('Cookie', 'manaratak_refresh=foreign-session').send(f.body)).status).toBe(403);
-    expect((await request(f.app).post(f.path).set('Cookie', 'manaratak_refresh=' + f.session).set('X-CSRF-Token', f.csrf).send(f.body)).status).toBe(400);
+    expect((await request(f.app).post(f.path).set('Cookie', 'absheer_refresh=' + f.session).send(f.body)).status).toBe(403);
+    expect((await f.command().set('Cookie', 'absheer_refresh=foreign-session').send(f.body)).status).toBe(403);
+    expect((await request(f.app).post(f.path).set('Cookie', 'absheer_refresh=' + f.session).set('X-CSRF-Token', f.csrf).send(f.body)).status).toBe(400);
     expect(f.write).not.toHaveBeenCalled();
   });
   it('replays a completed command, and refuses changed payload under the same key', async () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ImportRetryPolicy } from '@manaratak/domain';
-import { InMemoryImportQueueGateway } from '@manaratak/infrastructure';
-import { ImportAdminUseCases, ImportWorkerProtocol, ImportHandoffDispatcher } from '@manaratak/application';
+import { ImportRetryPolicy } from '@absheer/domain';
+import { InMemoryImportQueueGateway } from '@absheer/infrastructure';
+import { ImportAdminUseCases, ImportWorkerProtocol, ImportHandoffDispatcher } from '@absheer/application';
 
 function statefulImportRepository() {
   const batches = new Map<string, any>();

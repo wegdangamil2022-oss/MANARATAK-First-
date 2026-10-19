@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminApiClient } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
-import type { AdmissionScoreProfile } from '@manaratak/domain';
+import type { AdmissionScoreProfile } from '@absheer/domain';
 type Owner = {
   id: string;
   optionalFields?: Record<string, unknown>;

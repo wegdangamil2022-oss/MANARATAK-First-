@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "kind": "MANARATAK_SOURCE_CLOSURE_MANIFEST",
+  "kind": "ABSHEER_SOURCE_CLOSURE_MANIFEST",
   "runtimePolicy": "PENDING_NON_BLOCKING",
   "gates": [
     {
       "id": "m10-source-qc",
       "classification": "SOURCE",
-      "command": "npm run build -w @manaratak/application && npm run imports:qc:verify && npm run imports:qc:test"
+      "command": "npm run build -w @absheer/application && npm run imports:qc:verify && npm run imports:qc:test"
     },
     {
       "id": "architecture",

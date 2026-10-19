@@ -2,7 +2,7 @@ import {
   AIKnowledgeOwnerRequest,
   AIVerifiedKnowledgeSource,
   IAIKnowledgeOwnerGateway,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { PublicCmsUseCases } from '../../cms/use-cases/CmsUseCases';
 
 /** No CMS tables or admin drafts are read through the AI boundary. */
@@ -17,12 +17,12 @@ export class CmsAIKnowledgeOwnerGateway implements IAIKnowledgeOwnerGateway {
       const content = await this.publicCms.getBySlug(
         request.sourceReferenceId,
         locale,
-        'manaratak',
+        'absheer',
       );
       if (
         content.slug !== request.sourceReferenceId ||
         content.locale !== locale ||
-        content.siteIdentifier !== 'manaratak'
+        content.siteIdentifier !== 'absheer'
       )
         return null;
       return {

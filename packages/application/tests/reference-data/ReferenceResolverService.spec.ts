@@ -8,7 +8,7 @@ import {
   ReferenceLanguageDto,
   ReferenceCurrencyDto,
   ReferenceLifecycleState,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { ReferenceResolverService } from '../../src/reference-data/services/ReferenceResolverService';
 
 describe('ReferenceResolverService canonical contract', () => {

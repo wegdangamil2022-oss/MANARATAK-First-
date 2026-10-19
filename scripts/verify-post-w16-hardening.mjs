@@ -27,7 +27,7 @@ const checks = [
   ['remediation runner executes W0 through W16', runner.includes('Array.from({ length: 16 }') && runner.includes('verify-w16-final-closure.mjs') && runner.includes('spawnSync')],
   ['CI invokes remediation gate', ci.includes('npm run remediation:verify')],
   ['accessibility debt removed after semantic button', scholarshipUi.includes('<button\n            type="button"') && !baseline.includes('a11y-click-keyboard')],
-  ['package cycle debt removed', !baseline.includes('package-cycle:@manaratak/application <-> @manaratak/infrastructure')],
+  ['package cycle debt removed', !baseline.includes('package-cycle:@absheer/application <-> @absheer/infrastructure')],
   ['runtime boundary preserved', handoff.includes('PENDING_GOOGLE_STUDIO')],
 ];
 let failures = 0;

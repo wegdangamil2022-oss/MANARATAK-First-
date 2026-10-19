@@ -449,9 +449,9 @@
     "20260906194500_session_refresh_rotation_lineage"
   ],
   "newMigrationHeader": {
-    "owner": "-- MANARATAK_MIGRATION_OWNER: <domain-owner|cross_context>",
-    "scope": "-- MANARATAK_MIGRATION_SCOPE: owner_only|cross_context_approved",
-    "decision": "-- MANARATAK_ARCH_DECISION: ADR-028"
+    "owner": "-- ABSHEER_MIGRATION_OWNER: <domain-owner|cross_context>",
+    "scope": "-- ABSHEER_MIGRATION_SCOPE: owner_only|cross_context_approved",
+    "decision": "-- ABSHEER_ARCH_DECISION: ADR-028"
   },
   "historicalMigrationMetadataExceptions": {
     "20260907030000_m7_batch_a2_structural_reconciliation": {

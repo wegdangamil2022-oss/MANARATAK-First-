@@ -3,7 +3,7 @@ import {
   ITransactionalRoleRepository,
   Role,
   PermissionReference,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CreateRoleInput } from '../dtos/AuthorizationDtos';
 import {
   AtomicDomainMutationCoordinator,

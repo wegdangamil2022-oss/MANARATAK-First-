@@ -28,7 +28,7 @@ const sandbox = {
   module: { exports: {} }, exports: {}, console,
   require(specifier) {
     if (specifier === '@prisma/client') return { PrismaClient };
-    if (specifier === '@manaratak/infrastructure') {
+    if (specifier === '@absheer/infrastructure') {
       return { RedisClientFactory: { createClient() { redisConstructed += 1; return redisClient; } } };
     }
     throw new Error(`unexpected require: ${specifier}`);

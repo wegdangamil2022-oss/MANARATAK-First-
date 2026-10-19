@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import type {
   AtomicDomainMutationCoordinator,
   AtomicMutationRequestContext,

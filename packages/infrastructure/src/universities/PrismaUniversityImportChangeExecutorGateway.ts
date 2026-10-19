@@ -4,7 +4,7 @@ import type {
   UniversityImportChangeExecutorGateway,
   UniversityImportChangePlan,
   UniversityImportPlannedChange,
-} from '@manaratak/application';
+} from '@absheer/application';
 import { randomUUID } from 'node:crypto';
 
 type Transaction = Prisma.TransactionClient;

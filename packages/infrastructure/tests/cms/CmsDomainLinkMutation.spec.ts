@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { CmsDomainRelationType, CmsDomainTargetType } from '@manaratak/domain';
+import { CmsDomainRelationType, CmsDomainTargetType } from '@absheer/domain';
 import { describe, expect, it, vi } from 'vitest';
 import { PrismaCmsRepository } from '../../src/cms/PrismaCmsRepository';
 
@@ -16,7 +16,7 @@ function fixture(
     cmsContentNode: {
       findUnique: vi
         .fn()
-        .mockResolvedValue({ id: 'node-1', version: 3, siteIdentifier: 'manaratak' }),
+        .mockResolvedValue({ id: 'node-1', version: 3, siteIdentifier: 'absheer' }),
       updateMany: vi.fn().mockResolvedValue({ count: options.versionCAS === false ? 0 : 1 }),
     },
     cmsLocalizedContent: {

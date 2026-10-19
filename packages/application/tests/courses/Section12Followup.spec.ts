@@ -10,12 +10,12 @@ describe('P13 follow-up integrity',()=>{
   await repo.reorderModules('c1',[{id:'m1',position:1}]);expect(tx.courseModule.update).toHaveBeenCalledTimes(2);
  });
  it('rejects duplicate reorder IDs before changing positions',async()=>{
-  const courses:any={findById:async()=>({id:'c1',originType:'NATIVE_MANARATAK_COURSE',status:'DRAFT'})};
+  const courses:any={findById:async()=>({id:'c1',originType:'NATIVE_ABSHEER_COURSE',status:'DRAFT'})};
   const curriculum:any={getCurriculumSnapshot:async()=>({modules:[{id:'m1'}]}),reorderModules:vi.fn()};
   await expect(new CourseCurriculumUseCases(courses,curriculum).reorderModules('c1',[{id:'m1',position:1},{id:'m1',position:2}])).rejects.toThrow('COURSE_MODULE_REORDER_MUST_INCLUDE_ALL_MODULES');expect(curriculum.reorderModules).not.toHaveBeenCalled();
  });
  it('does not count a student-forged COMPLETED label at 10 percent',async()=>{
-  let stored:any;const courses:any={findById:async()=>({id:'c1',originType:'NATIVE_MANARATAK_COURSE',status:'PUBLISHED'})};
+  let stored:any;const courses:any={findById:async()=>({id:'c1',originType:'NATIVE_ABSHEER_COURSE',status:'PUBLISHED'})};
   const curriculum:any={getCurriculumSnapshot:async()=>({modules:[{id:'m1',status:'PUBLISHED'}],lessons:[{id:'l1',moduleId:'m1',lessonType:'VIDEO',status:'PUBLISHED'}]})};
   curriculum.getLearningVersion=async()=>({course:await courses.findById(),curriculum:await curriculum.getCurriculumSnapshot()});
   const progress:any={findEnrollment:async()=>({id:'enrollment',status:'ACTIVE',progressPercentage:0}),withTransaction:()=>progress,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { ReferenceImportScreeningReviewPage } from '@manaratak/domain';
+import type { ReferenceImportScreeningReviewPage } from '@absheer/domain';
 import { referenceDataAdminApi } from '../api/referenceData';
 
 /** P7 triage only: a screening receipt is NEVER operator approval.

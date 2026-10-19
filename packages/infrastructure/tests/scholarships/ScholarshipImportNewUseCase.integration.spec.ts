@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { InMemoryImportRawSnapshotStore, InMemorySourceRegistryGateway } from '@manaratak/infrastructure';
-import { SourceConnectorCategory } from '@manaratak/domain';
-import { AcquireImportSourceUseCase, ScholarshipAcquisitionPlanner, ScholarshipImportNewUseCase, ScholarshipSourceRegistryService, SourceConnectorRegistry, type ISourceConnector } from '@manaratak/application';
+import { InMemoryImportRawSnapshotStore, InMemorySourceRegistryGateway } from '@absheer/infrastructure';
+import { SourceConnectorCategory } from '@absheer/domain';
+import { AcquireImportSourceUseCase, ScholarshipAcquisitionPlanner, ScholarshipImportNewUseCase, ScholarshipSourceRegistryService, SourceConnectorRegistry, type ISourceConnector } from '@absheer/application';
 
 async function setup() {
   const gateway = new InMemorySourceRegistryGateway(); const sources = new ScholarshipSourceRegistryService(gateway);

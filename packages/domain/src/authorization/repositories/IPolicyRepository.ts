@@ -1,5 +1,5 @@
 import { Policy } from '../aggregates/Policy';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 
 export interface IPolicyRepository {
   queryPage?(input: {

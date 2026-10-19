@@ -1,7 +1,7 @@
 import { createConnection } from 'node:net';
 import { connect as connectTls } from 'node:tls';
 import { createInterface } from 'node:readline';
-import type { IEmailDeliveryGateway, SendVerificationEmailInput, SendPasswordResetEmailInput } from '@manaratak/domain';
+import type { IEmailDeliveryGateway, SendVerificationEmailInput, SendPasswordResetEmailInput } from '@absheer/domain';
 
 export interface SmtpEmailConfig { host: string; port: number; secure: boolean; from: string; username?: string; password?: string; publicWebUrl?: string; }
 
@@ -27,12 +27,12 @@ export class SmtpEmailDeliveryGateway implements IEmailDeliveryGateway {
       ? `\nVerification link (click to verify directly):\n${verificationUrl}\n`
       : '';
     const body = `Hello ${input.displayName},\n\n` +
-      `Thank you for registering with MANARATAK.\n\n` +
+      `Thank you for registering with ABSHEER.\n\n` +
       `Verification token:\n${input.token}\n` +
       linkSection +
       `\nYou can also verify your account by visiting the verification page and entering your token:\n` +
       `${baseUrl ? `${baseUrl}/verify-email` : '/verify-email'}\n`;
-    return this.deliver(input.email, 'Verify your MANARATAK email', body);
+    return this.deliver(input.email, 'Verify your ABSHEER email', body);
   }
 
   sendPasswordResetEmail(input: SendPasswordResetEmailInput): Promise<void> {
@@ -45,7 +45,7 @@ export class SmtpEmailDeliveryGateway implements IEmailDeliveryGateway {
     const body = `Hello ${input.displayName},\n\n` +
       `Password reset token:\n${input.token}\n` +
       linkSection;
-    return this.deliver(input.email, 'Reset your MANARATAK password', body);
+    return this.deliver(input.email, 'Reset your ABSHEER password', body);
   }
 
   private async deliver(to: string, subject: string, body: string): Promise<void> {
@@ -72,7 +72,7 @@ export class SmtpEmailDeliveryGateway implements IEmailDeliveryGateway {
       };
       const command = async (value: string, expected: number) => { socket.write(`${value}\r\n`); await response(expected); };
       await response(220);
-      await command('EHLO manaratak.local', 250);
+      await command('EHLO absheer.local', 250);
       if (this.config.username && this.config.password) {
         const credential = Buffer.from(`\0${this.config.username}\0${this.config.password}`, 'utf8').toString('base64');
         await command(`AUTH PLAIN ${credential}`, 235);

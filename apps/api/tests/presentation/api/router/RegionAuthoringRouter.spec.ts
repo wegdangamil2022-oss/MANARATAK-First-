@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { ReferenceRegionCommandError } from '@manaratak/domain';
+import { ReferenceRegionCommandError } from '@absheer/domain';
 import { ReferenceDataAdminRouter } from '../../../../src/presentation/api/router/ReferenceDataAdminRouter';
 import { SecurityMiddlewareFactory } from '../../../../src/presentation/security/SecurityMiddlewareFactory';
 import { SecurityService } from '../../../../../../packages/infrastructure/src/security/SecurityService';
@@ -27,7 +27,7 @@ function fixture(granted = true, authenticated = true) {
     } as any, requireKey: true }),
     ReferenceDataAdminRouter.create({ referenceDataUseCases: cases as any }));
   const command = (path = '/regions', method: 'post' | 'put' = 'post') => request(app)[method]('/admin/reference-data' + path)
-    .set('Cookie', 'manaratak_refresh=' + session).set('X-CSRF-Token', csrf).set('Idempotency-Key', 'region-command');
+    .set('Cookie', 'absheer_refresh=' + session).set('X-CSRF-Token', csrf).set('Idempotency-Key', 'region-command');
   return { app, cases, evaluator, command, session, csrf };
 }
 describe('M10-07 region router/security contracts (no database)', () => {
@@ -84,8 +84,8 @@ describe('M10-07 region router/security contracts (no database)', () => {
     const anonymous = fixture(true, false);
     expect((await request(anonymous.app).get('/admin/reference-data/regions')).status).toBe(401);
     const f = fixture();
-    expect((await request(f.app).post('/admin/reference-data/regions').set('Cookie', 'manaratak_refresh=' + f.session).set('Idempotency-Key', 'key').send(body)).status).toBe(403);
-    expect((await request(f.app).post('/admin/reference-data/regions').set('Cookie', 'manaratak_refresh=' + f.session).set('X-CSRF-Token', f.csrf).send(body)).status).toBe(400);
+    expect((await request(f.app).post('/admin/reference-data/regions').set('Cookie', 'absheer_refresh=' + f.session).set('Idempotency-Key', 'key').send(body)).status).toBe(403);
+    expect((await request(f.app).post('/admin/reference-data/regions').set('Cookie', 'absheer_refresh=' + f.session).set('X-CSRF-Token', f.csrf).send(body)).status).toBe(400);
     expect(f.cases.upsertRegion).not.toHaveBeenCalled();
   });
 });

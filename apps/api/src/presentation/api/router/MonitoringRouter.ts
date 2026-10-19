@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { IMonitoringService, HealthStatus, HealthCheckResult } from '@manaratak/core';
+import { IMonitoringService, HealthStatus, HealthCheckResult } from '@absheer/core';
 import {
   ProductionReadinessReport,
   operationalProbeIds,
   launchDependencyManifest,
-} from '@manaratak/config';
+} from '@absheer/config';
 import { sanitizeDiagnostic, diagnosticErrorCode } from '../../monitoring/DiagnosticSanitizer.js';
 import { HealthObservationHistory } from '../../monitoring/HealthObservationHistory.js';
 
@@ -37,7 +37,7 @@ export class MonitoringRouter {
     router.use((_req, res, next) => {
       res.setHeader('Cache-Control', 'no-store');
       const sourceSha = process.env.RELEASE_SOURCE_SHA;
-      if (sourceSha && /^[0-9a-f]{40}$/.test(sourceSha)) res.setHeader('X-Manaratak-Source-Sha', sourceSha);
+      if (sourceSha && /^[0-9a-f]{40}$/.test(sourceSha)) res.setHeader('X-Absheer-Source-Sha', sourceSha);
       next();
     });
     const history = new HealthObservationHistory();

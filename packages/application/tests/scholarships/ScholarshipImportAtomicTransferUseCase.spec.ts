@@ -10,7 +10,7 @@ import {
   type IScholarshipRepository,
   type ScholarshipDto,
   type UpdateScholarshipDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import {
   ScholarshipImportAtomicTransferUseCase,

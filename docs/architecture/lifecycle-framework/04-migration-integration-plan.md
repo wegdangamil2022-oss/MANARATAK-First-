@@ -1,4 +1,4 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 
 # P0-2 Enterprise Lifecycle Framework
 
@@ -6,7 +6,7 @@
 
 ## 1. Executive Summary
 
-This document outlines the official architectural migration strategy to transition the current MANARATAK 2.0 repository to the newly approved Enterprise Lifecycle Framework. This plan is designed to be executed incrementally, ensuring zero unnecessary breaking changes, maintaining backward compatibility, and preserving domain autonomy. The migration ensures safe integration with the enterprise shared contracts and the global workflow engine.
+This document outlines the official architectural migration strategy to transition the current ABSHEER 2.0 repository to the newly approved Enterprise Lifecycle Framework. This plan is designed to be executed incrementally, ensuring zero unnecessary breaking changes, maintaining backward compatibility, and preserving domain autonomy. The migration ensures safe integration with the enterprise shared contracts and the global workflow engine.
 
 ## 2. Migration Strategy
 

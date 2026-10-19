@@ -1,12 +1,12 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { IAuthService, IPrincipalAccessValidator, ISecurityService, ISessionManager, ITokenProvider } from '@manaratak/core';
-import type { MfaUseCases, ICredentialVerifier, RegisterUserUseCase, VerifyEmailUseCase, ResendVerificationUseCase } from '@manaratak/application';
-import type { ForgotPasswordUseCase, ResetPasswordUseCase } from '@manaratak/application';
-import { AuthorizationEvaluatorService, IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@manaratak/domain';
+import { IAuthService, IPrincipalAccessValidator, ISecurityService, ISessionManager, ITokenProvider } from '@absheer/core';
+import type { MfaUseCases, ICredentialVerifier, RegisterUserUseCase, VerifyEmailUseCase, ResendVerificationUseCase } from '@absheer/application';
+import type { ForgotPasswordUseCase, ResetPasswordUseCase } from '@absheer/application';
+import { AuthorizationEvaluatorService, IIdentityRepository, IRoleAssignmentRepository, IRoleRepository } from '@absheer/domain';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { clearAuthCookies, readAccessCookie, readRefreshCookie, setAuthCookies, readRememberMeCookie } from '../../security/HttpOnlyAuthCookies.js';
-import type { ChangePasswordUseCase, DisablePasswordCredentialUseCase } from '@manaratak/application';
+import type { ChangePasswordUseCase, DisablePasswordCredentialUseCase } from '@absheer/application';
 import { AuthMiddleware } from '../../middleware/AuthMiddleware.js';
 import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
 import { KNOWN_ADMIN_PERMISSIONS } from '../../security/AdminPermissionCatalog.js';

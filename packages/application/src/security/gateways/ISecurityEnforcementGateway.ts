@@ -1,4 +1,4 @@
-import { SecurityPolicy } from '@manaratak/domain';
+import { SecurityPolicy } from '@absheer/domain';
 
 /**
  * Interface for communicating with physical security infrastructure.

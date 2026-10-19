@@ -3,7 +3,7 @@ import {
   parseSupportedLocale,
   resolveLocalePreference,
   type SupportedLocale,
-} from '@manaratak/shared';
+} from '@absheer/shared';
 
 export interface BrowserLocationLike {
   pathname: string;

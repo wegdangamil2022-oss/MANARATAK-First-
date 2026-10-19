@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: academic_taxonomy
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: academic_taxonomy
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- SOURCE ONLY, UNAPPLIED: owner preview/review/apply receipt, not generic P6 promotion.
 CREATE TABLE "AcademicTaxonomyImportReview" (
   "id" TEXT NOT NULL PRIMARY KEY,

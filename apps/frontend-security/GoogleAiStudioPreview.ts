@@ -23,14 +23,14 @@ export function frontendHeadersForDevelopment(studio: boolean): Readonly<Record<
 
 
 export function isGoogleAiStudio(env: Readonly<Record<string, string | undefined>>): boolean {
-  return env.MANARATAK_GOOGLE_AI_STUDIO === 'true' || env.MANARATAK_RUNTIME_PROFILE === 'google-ai-studio';
+  return env.ABSHEER_GOOGLE_AI_STUDIO === 'true' || env.ABSHEER_RUNTIME_PROFILE === 'google-ai-studio';
 }
 
 /** Frontend packages resolve from source in Vite; native Node entrypoints remain dist-based. */
 export function previewWorkspaceAliases(root: string) {
   return Object.fromEntries(
     ['core', 'domain', 'shared', 'types', 'ui', 'application', 'config', 'infrastructure'].map((name) => [
-      '@manaratak/' + name,
+      '@absheer/' + name,
       path.join(root, 'packages', name, name === 'ui' ? 'src/index.tsx' : 'src/index.ts'),
     ])
   );
@@ -39,7 +39,7 @@ export function previewWorkspaceAliases(root: string) {
 /** No proxy, SSR loader or backend import: every local API request fails closed. */
 export function googleAiStudioPreviewPlugin(): Plugin {
   return {
-    name: 'manaratak-google-ai-studio-web-only',
+    name: 'absheer-google-ai-studio-web-only',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         // Installed after the canonical header middleware, in dev only.

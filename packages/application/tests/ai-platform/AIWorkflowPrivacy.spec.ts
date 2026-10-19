@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AIExecutionStatus, AIRequestPurpose } from '@manaratak/domain';
+import { AIExecutionStatus, AIRequestPurpose } from '@absheer/domain';
 import { AIWorkflowUseCases } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
 
 function fixture() {

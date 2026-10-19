@@ -6,7 +6,7 @@ import {
   IOutboxDeliveryGateway,
   OutboxDeliveryContext,
   TransactionalOutboxEntry,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 /**
  * Durable anti-corruption projection from owner-domain outbox facts into the

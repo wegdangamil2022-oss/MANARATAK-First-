@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
-import { CmsDomainTargetType, isPublicUniversityProgram } from '@manaratak/domain';
-import { StudyDestinationUseCases } from '@manaratak/application';
+import { CmsDomainTargetType, isPublicUniversityProgram } from '@absheer/domain';
+import { StudyDestinationUseCases } from '@absheer/application';
 import { PrismaStudyDestinationRepository } from '../study-destinations/PrismaStudyDestinationRepository';
 
 /**

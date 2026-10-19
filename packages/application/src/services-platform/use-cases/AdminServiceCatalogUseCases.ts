@@ -17,7 +17,7 @@ import {
   ServiceCompletenessStatus,
   ServiceStatus,
   UpdateServiceCatalogItemDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 type ServiceCreateInput = Omit<
   CreateServiceCatalogItemDto,

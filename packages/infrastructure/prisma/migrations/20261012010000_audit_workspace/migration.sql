@@ -23,7 +23,7 @@ CREATE INDEX "PolicyRecord_ruleType_id_idx" ON "PolicyRecord"("ruleType","id");
 
 -- Native envelope covers every trusted INSERT, including legacy owner writers.
 -- No existing event is updated. Missing class durations retain events indefinitely.
-CREATE OR REPLACE FUNCTION manaratak_assign_audit_retention() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE OR REPLACE FUNCTION absheer_assign_audit_retention() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE
   policy jsonb;
   durations jsonb := '{}'::jsonb;
@@ -67,4 +67,4 @@ BEGIN
 END;
 $$;
 CREATE TRIGGER "audit_retention_envelope" BEFORE INSERT ON "AuditRecord"
-FOR EACH ROW EXECUTE FUNCTION manaratak_assign_audit_retention();
+FOR EACH ROW EXECUTE FUNCTION absheer_assign_audit_retention();

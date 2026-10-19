@@ -7,7 +7,7 @@ const databaseUrl = process.env.W3_DATABASE_TEST_DATABASE_URL;
 const disposable = process.env.W3_DATABASE_TEST_DATABASE_IS_DISPOSABLE === 'true';
 const describeDisposable = databaseUrl && disposable && destructiveDatabaseTestsEnabled(databaseUrl) ? describe : describe.skip;
 
-describeDisposable('MNT-AUD-0007 durable background-job lease fencing on disposable PostgreSQL', () => {
+describeDisposable('ABSH-AUD-0007 durable background-job lease fencing on disposable PostgreSQL', () => {
   let prisma: PrismaClient;
   let gateway: PrismaBackgroundJobExecutionGateway;
   const prefix = 'w3-bg-lease-';

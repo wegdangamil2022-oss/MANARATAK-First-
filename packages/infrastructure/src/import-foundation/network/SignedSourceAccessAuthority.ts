@@ -1,8 +1,8 @@
 import { createPublicKey, verify, type KeyObject } from 'node:crypto';
-import { SourceAccessClassification, SourceAccessExecutionPolicy, SourceConnectorCategory, type ImportSourceDefinition } from '@manaratak/domain';
-import type { ISourceAccessAuthority } from '@manaratak/application';
+import { SourceAccessClassification, SourceAccessExecutionPolicy, SourceConnectorCategory, type ImportSourceDefinition } from '@absheer/domain';
+import type { ISourceAccessAuthority } from '@absheer/application';
 
-interface AccessGrant { audience: 'MANARATAK_IMPORT'; sourceId: string; sourceRevision: string; classification: string;
+interface AccessGrant { audience: 'ABSHEER_IMPORT'; sourceId: string; sourceRevision: string; classification: string;
   origin: string; pathPrefixes: string[]; policyReference: string; expiresAt: string; credentialBinding?: string; }
 /** Ed25519 approvals are deployment-bound. Admin-editable metadata cannot mint them. */
 export class SignedSourceAccessAuthority implements ISourceAccessAuthority {
@@ -22,7 +22,7 @@ export class SignedSourceAccessAuthority implements ISourceAccessAuthority {
       if (parts.length !== 2 || parts.some(part => !/^[A-Za-z0-9_-]+$/.test(part))) continue;
       if (!verify(null, Buffer.from(parts[0]), this.key, Buffer.from(parts[1], 'base64url'))) continue;
       let grant: AccessGrant; try { grant = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8')); } catch { continue; }
-      if (!grant || typeof grant !== 'object' || grant.audience !== 'MANARATAK_IMPORT' || grant.sourceId !== source.sourceId || grant.classification !== source.accessClassification ||
+      if (!grant || typeof grant !== 'object' || grant.audience !== 'ABSHEER_IMPORT' || grant.sourceId !== source.sourceId || grant.classification !== source.accessClassification ||
           grant.sourceRevision !== source.updatedAt?.toISOString() || !Number.isFinite(Date.parse(grant.expiresAt)) || Date.parse(grant.expiresAt) <= this.now() ||
           typeof grant.policyReference !== 'string' || !grant.policyReference.trim() || grant.policyReference.length > 240 ||
           grant.origin !== new URL(source.baseUrl).origin || !Array.isArray(grant.pathPrefixes) || !grant.pathPrefixes.length || grant.pathPrefixes.length > 20 ||
@@ -75,7 +75,7 @@ export function assertRobotsAllowed(text: string, target: URL) {
       else if (value) { if (!value.startsWith('/')) throw new Error('SOURCE_ROBOTS_POLICY_INVALID'); group.rules.push({ allow: key === 'allow', path: value }); }
     }
   }
-  const exact = groups.filter(group => group.agents.includes('manaratakimport'));
+  const exact = groups.filter(group => group.agents.includes('absheerimport'));
   const applicable = exact.length ? exact : groups.filter(group => group.agents.includes('*'));
   if (applicable.some(group => group.delay > 0)) throw new Error('SOURCE_ROBOTS_CRAWL_DELAY_REQUIRES_POLICY');
   const normalize = (value: string) => value.replace(/%([0-9a-f]{2})/gi, (_all, hex: string) => {

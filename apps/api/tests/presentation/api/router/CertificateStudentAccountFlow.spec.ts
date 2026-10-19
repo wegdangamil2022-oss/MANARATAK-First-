@@ -2,18 +2,18 @@ import { randomUUID } from 'node:crypto';
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
-import { APPROVED_CERTIFICATE_DESIGN, approvedCertificateCopy } from '@manaratak/shared';
+import { APPROVED_CERTIFICATE_DESIGN, approvedCertificateCopy } from '@absheer/shared';
 import {
   CertificateUseCases,
   CertificateCompletionEventConsumer,
   CertificateArtifactRenderUseCase,
   CertificateReadModelService,
-} from '@manaratak/application';
+} from '@absheer/application';
 import {
   ProviderNeutralCertificateRenderingService,
   CertificateStudentDashboardReadGateway,
-} from '@manaratak/infrastructure';
-import { CertificateStatus, CertificateTemplateStatus, CourseOriginType } from '@manaratak/domain';
+} from '@absheer/infrastructure';
+import { CertificateStatus, CertificateTemplateStatus, CourseOriginType } from '@absheer/domain';
 import { StudentWorkspaceRouter } from '../../../../src/presentation/api/router/StudentWorkspaceRouter';
 
 /** Integration across real application/render/API boundaries; persistence and custody are test doubles. */
@@ -21,9 +21,9 @@ function harness() {
   const issuer: any = {
     id: 'issuer',
     publicId: 'issuer-public',
-    code: 'MANARATAK',
-    name: 'MANARATAK',
-    issuerType: 'MANARATAK',
+    code: 'ABSHEER',
+    name: 'ABSHEER',
+    issuerType: 'ABSHEER',
     status: 'ACTIVE',
     issuerLogoAssetId: 'logo',
     signingKeyReference: 'development-only',
@@ -54,7 +54,7 @@ function harness() {
   const course: any = {
     id: 'course',
     displayName: 'دورة المنح الدراسية',
-    originType: CourseOriginType.NATIVE_MANARATAK_COURSE,
+    originType: CourseOriginType.NATIVE_ABSHEER_COURSE,
     certificateAvailable: true,
     optionalFields: {
       certificateDisplayNames: { ar: 'دورة المنح الدراسية', en: 'Scholarships Course' },

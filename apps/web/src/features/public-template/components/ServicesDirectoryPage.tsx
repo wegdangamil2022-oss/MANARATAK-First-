@@ -153,7 +153,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
 
   return (
     <div
-      className="min-h-screen bg-[var(--mn-page)] pb-24 text-[var(--mn-heading)] font-['Cairo',sans-serif] select-none mn-panel "
+      className="min-h-screen bg-[var(--ab-page)] pb-24 text-[var(--ab-heading)] font-['Cairo',sans-serif] select-none ab-panel "
       dir={dir}
     >
       <div aria-live="polite">
@@ -165,7 +165,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
           </button>
         )}
       </div>
-      <div className="relative mn-search-hero overflow-hidden px-3 pb-12 pt-4 text-white shadow-xs sm:px-4 sm:pb-14 mn-inverse ">
+      <div className="relative ab-search-hero overflow-hidden px-3 pb-12 pt-4 text-white shadow-xs sm:px-4 sm:pb-14 ab-inverse ">
         <button
           type="button"
           onClick={onBack}
@@ -179,18 +179,18 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-5 top-3 grid grid-cols-5 gap-1.5 opacity-20">
             {Array.from({ length: 20 }).map((_, index) => (
-              <div key={index} className="h-1 w-1 rounded-full bg-[var(--mn-accent)] mn-gold " />
+              <div key={index} className="h-1 w-1 rounded-full bg-[var(--ab-accent)] ab-gold " />
             ))}
           </div>
-          <div className="absolute -left-12 -top-12 h-56 w-56 rounded-full border border-[var(--mn-accent)]/25" />
+          <div className="absolute -left-12 -top-12 h-56 w-56 rounded-full border border-[var(--ab-accent)]/25" />
           {isStudent ? (
             <GraduationCap
-              className="absolute -right-5 bottom-0 h-36 w-36 text-[var(--mn-heading)]"
+              className="absolute -right-5 bottom-0 h-36 w-36 text-[var(--ab-heading)]"
               strokeWidth={1.1}
             />
           ) : (
             <FileText
-              className="absolute -right-5 bottom-0 h-36 w-36 text-[var(--mn-heading)]"
+              className="absolute -right-5 bottom-0 h-36 w-36 text-[var(--ab-heading)]"
               strokeWidth={1.1}
             />
           )}
@@ -199,7 +199,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
         <div className="relative z-10 mx-auto max-w-md space-y-2 pt-2 text-center sm:max-w-xl">
           <div className="flex justify-center">
             <Sparkles
-              className="h-5 w-5 text-[var(--mn-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]"
+              className="h-5 w-5 text-[var(--ab-accent-text)] drop-shadow-[0_0_8px_rgba(214,164,59,0.8)]"
               aria-hidden="true"
             />
           </div>
@@ -208,7 +208,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
               ? serviceCopy('الخدمات الطلابية', language)
               : serviceCopy('الخدمات العامة والدعم', language)}
           </h1>
-          <p className="mx-auto max-w-[90%] text-[11px] font-semibold leading-5 text-[var(--mn-on-dark-muted)] sm:text-xs">
+          <p className="mx-auto max-w-[90%] text-[11px] font-semibold leading-5 text-[var(--ab-on-dark-muted)] sm:text-xs">
             {isStudent
               ? serviceCopy(
                   'خدمات تساعد الطالب في الاختيار وتجهيز ملفه الأكاديمي والتقديم.',
@@ -222,14 +222,14 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder={serviceCopy('ابحث عن خدمة...', language)}
-              className="h-11 w-full rounded-2xl border border-white/15 bg-[var(--mn-surface)] px-10 text-[11px] font-bold text-[var(--mn-heading)] shadow-lg outline-none transition focus:border-[var(--mn-accent)] sm:text-xs mn-panel "
+              className="h-11 w-full rounded-2xl border border-white/15 bg-[var(--ab-surface)] px-10 text-[11px] font-bold text-[var(--ab-heading)] shadow-lg outline-none transition focus:border-[var(--ab-accent)] sm:text-xs ab-panel "
             />
-            <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-accent-text)]" />
+            <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ab-accent-text)]" />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mn-text-muted)]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ab-text-muted)]"
                 aria-label={serviceCopy('مسح البحث', language)}
               >
                 <X className="h-4 w-4" />
@@ -239,20 +239,20 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
         </div>
       </div>
 
-      <div className="relative z-20 mx-auto -mt-5 max-w-md mn-inline-gutter pb-24 sm:max-w-xl">
-        <div className="mb-3 rounded-[20px] border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2.5 shadow-lg mn-panel ">
+      <div className="relative z-20 mx-auto -mt-5 max-w-md ab-inline-gutter pb-24 sm:max-w-xl">
+        <div className="mb-3 rounded-[20px] border border-[var(--ab-border)] bg-[var(--ab-surface)] p-2.5 shadow-lg ab-panel ">
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--mn-primary)]/10 text-[var(--mn-heading)]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--ab-primary)]/10 text-[var(--ab-heading)]">
               <SlidersHorizontal className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <label className="mb-1 block text-[9px] font-bold text-[var(--mn-text-muted)]">
+              <label className="mb-1 block text-[9px] font-bold text-[var(--ab-text-muted)]">
                 {serviceCopy('نوع الخدمة', language)}
               </label>
               <select
                 value={selectedCategory}
                 onChange={(event) => setSelectedCategory(event.target.value)}
-                className="h-9 w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 text-[10px] font-bold text-[var(--mn-text)] outline-none mn-panel "
+                className="h-9 w-full rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] px-2 text-[10px] font-bold text-[var(--ab-text)] outline-none ab-panel "
               >
                 {categories.map((category) => (
                   <option
@@ -269,14 +269,14 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
 
         <div className="mb-2 flex items-center justify-between px-1">
           <div>
-            <h2 className="text-[13px] font-bold text-[var(--mn-heading)]">
+            <h2 className="text-[13px] font-bold text-[var(--ab-heading)]">
               {serviceCopy('الخدمات المتاحة', language)}
             </h2>
-            <p className="text-[9px] font-bold text-[var(--mn-text-muted)]">
-              {serviceCopy('الخدمات المنشورة والمتاحة من كتالوج منارتك', language)}
+            <p className="text-[9px] font-bold text-[var(--ab-text-muted)]">
+              {serviceCopy('الخدمات المنشورة والمتاحة من كتالوج أبشر', language)}
             </p>
           </div>
-          <span className="rounded-full border border-[var(--mn-accent)]/20 bg-[var(--mn-accent)]/10 px-2 py-1 text-[9px] font-bold text-[var(--mn-accent-text)]">
+          <span className="rounded-full border border-[var(--ab-accent)]/20 bg-[var(--ab-accent)]/10 px-2 py-1 text-[9px] font-bold text-[var(--ab-accent-text)]">
             {filteredServices.length}
             {serviceCopy('خدمة', language)}
           </span>
@@ -284,12 +284,12 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
 
         <div className="space-y-2.5">
           {filteredServices.length === 0 ? (
-            <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 text-center shadow-sm mn-panel ">
-              <Search className="mx-auto h-6 w-6 text-[var(--mn-text-muted)]" />
-              <h3 className="mt-2 text-xs font-bold text-[var(--mn-text)]">
+            <div className="rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-5 text-center shadow-sm ab-panel ">
+              <Search className="mx-auto h-6 w-6 text-[var(--ab-text-muted)]" />
+              <h3 className="mt-2 text-xs font-bold text-[var(--ab-text)]">
                 {serviceCopy('لا توجد خدمات مطابقة', language)}
               </h3>
-              <p className="mt-1 text-[10px] font-semibold text-[var(--mn-text-muted)]">
+              <p className="mt-1 text-[10px] font-semibold text-[var(--ab-text-muted)]">
                 {serviceCopy('غيّر البحث أو نوع الخدمة.', language)}
               </p>
             </div>
@@ -297,7 +297,7 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
             filteredServices.map((service) => (
               <article
                 key={service.id}
-                className="relative group overflow-hidden rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] bg-[var(--mn-surface)] p-3 shadow-sm transition-all hover:shadow-md mn-panel "
+                className="relative group overflow-hidden rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] bg-[var(--ab-surface)] p-3 shadow-sm transition-all hover:shadow-md ab-panel "
               >
                 {onToggleFavorite && (
                   <FavoriteButton
@@ -310,46 +310,46 @@ export const ServicesDirectoryPage: React.FC<ServicesDirectoryPageProps> = ({
                   />
                 )}
                 <div className="flex items-start gap-2.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--mn-accent)]/20 bg-[var(--mn-accent)]/10">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--ab-accent)]/20 bg-[var(--ab-accent)]/10">
                     {isStudent ? (
-                      <GraduationCap className="h-5 w-5 text-[var(--mn-heading)]" />
+                      <GraduationCap className="h-5 w-5 text-[var(--ab-heading)]" />
                     ) : (
-                      <Briefcase className="h-5 w-5 text-[var(--mn-heading)]" />
+                      <Briefcase className="h-5 w-5 text-[var(--ab-heading)]" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-start justify-between gap-1.5">
                       <div className="min-w-0">
-                        <h3 className="font-['Cairo',sans-serif] text-[12.5px] font-bold leading-5 text-[var(--mn-heading)] sm:text-[13.5px]">
+                        <h3 className="font-['Cairo',sans-serif] text-[12.5px] font-bold leading-5 text-[var(--ab-heading)] sm:text-[13.5px]">
                           {service.title}
                         </h3>
-                        <p className="mt-0.5 text-[9px] font-bold text-[var(--mn-accent-text)]">
+                        <p className="mt-0.5 text-[9px] font-bold text-[var(--ab-accent-text)]">
                           {serviceCopy(service.category, language)}
                         </p>
                       </div>
-                      <span className="rounded-full bg-[var(--mn-primary)]/10 px-2 py-1 text-[8px] font-bold text-[var(--mn-heading)]">
+                      <span className="rounded-full bg-[var(--ab-primary)]/10 px-2 py-1 text-[8px] font-bold text-[var(--ab-heading)]">
                         {service.badge}
                       </span>
                     </div>
-                    <p className="mt-1.5 line-clamp-2 text-[10px] font-semibold leading-4 text-[var(--mn-text-muted)]">
+                    <p className="mt-1.5 line-clamp-2 text-[10px] font-semibold leading-4 text-[var(--ab-text-muted)]">
                       {service.shortDescription}
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-                  <div className="flex min-h-8 items-center justify-center gap-1 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 text-[9px] font-bold text-[var(--mn-text-muted)] mn-panel ">
-                    <Clock3 className="h-3 w-3 shrink-0 text-[var(--mn-accent-text)]" />
+                  <div className="flex min-h-8 items-center justify-center gap-1 rounded-lg border border-[var(--ab-border)] bg-[var(--ab-page)] px-2 text-[9px] font-bold text-[var(--ab-text-muted)] ab-panel ">
+                    <Clock3 className="h-3 w-3 shrink-0 text-[var(--ab-accent-text)]" />
                     <span className="truncate">{service.turnaround}</span>
                   </div>
-                  <div className="flex min-h-8 items-center justify-center gap-1 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 text-[9px] font-bold text-[var(--mn-text-muted)] mn-panel ">
-                    <Wallet className="h-3 w-3 shrink-0 text-[var(--mn-heading)]" />
+                  <div className="flex min-h-8 items-center justify-center gap-1 rounded-lg border border-[var(--ab-border)] bg-[var(--ab-page)] px-2 text-[9px] font-bold text-[var(--ab-text-muted)] ab-panel ">
+                    <Wallet className="h-3 w-3 shrink-0 text-[var(--ab-heading)]" />
                     <span className="truncate">{service.priceLabel}</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => onSelectService?.(service)}
-                    className="col-span-2 flex min-h-8 items-center justify-center gap-1 rounded-lg bg-[var(--mn-primary)] px-2 text-[9.5px] font-bold text-white shadow-2xs transition hover:bg-[var(--mn-primary)] active:scale-95 sm:col-span-1 mn-inverse hover:mn-inverse "
+                    className="col-span-2 flex min-h-8 items-center justify-center gap-1 rounded-lg bg-[var(--ab-primary)] px-2 text-[9.5px] font-bold text-white shadow-2xs transition hover:bg-[var(--ab-primary)] active:scale-95 sm:col-span-1 ab-inverse hover:ab-inverse "
                   >
                     {serviceCopy('عرض التفاصيل', language)}
                     <ChevronLeft className="h-3 w-3" />

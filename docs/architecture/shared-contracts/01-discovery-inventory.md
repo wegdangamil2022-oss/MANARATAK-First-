@@ -4,21 +4,21 @@ Document Status: APPROVED
 Architecture Program: Enterprise Shared Contracts Consolidation Program
 Version: 1.0
 Owner: Architecture Review Board (ARB)
-Project: MANARATAK 2.0
+Project: ABSHEER 2.0
 Last Updated: 2026-07-21
 ---
 
 # Enterprise Shared Contracts Discovery & Inventory
 
-> ⚠️ **HISTORICAL AUDIT NOTICE**: All references to C# (`.cs`) interfaces, C# namespaces (e.g., `MANARATAK.ReferenceData.*`), and .NET structures in this and related phase documents are **superseded historical artifacts**. The canonical technology stack is 100% TypeScript/Node.js, and all active production architecture strictly standardizes on TypeScript interfaces defined in `/packages/core/`.
+> ⚠️ **HISTORICAL AUDIT NOTICE**: All references to C# (`.cs`) interfaces, C# namespaces (e.g., `ABSHEER.ReferenceData.*`), and .NET structures in this and related phase documents are **superseded historical artifacts**. The canonical technology stack is 100% TypeScript/Node.js, and all active production architecture strictly standardizes on TypeScript interfaces defined in `/packages/core/`.
 
 ## 1. Executive Summary
-This document provides a comprehensive, read-only audit of the existing MANARATAK 2.0 architecture to identify cross-cutting contracts, shared foundations, reusable abstractions, and enterprise base components.
+This document provides a comprehensive, read-only audit of the existing ABSHEER 2.0 architecture to identify cross-cutting contracts, shared foundations, reusable abstractions, and enterprise base components.
 
 ## 2. Foundation Inventory
 - **packages/core**: Contains application interfaces (`IUnitOfWork`, `IRepository`), domain base classes (`Entity`, `ValueObject`, `Identifier`), and monitoring/security contracts. **[CANONICAL SYSTEM OF RECORD]**
 - **docs/legacy/reference-foundation**: Contains legacy C# interfaces (`IReferenceEntity`, `IReferenceRepository`). **[SUPERSEDED HISTORICAL ARTIFACT]**
-- **docs/phases/phase-07**: Contains the official `MANARATAK.ReferenceData.Domain.Foundation.Contracts` with C# interfaces. **[SUPERSEDED HISTORICAL ARTIFACT - TypeScript is canonical]**
+- **docs/phases/phase-07**: Contains the official `ABSHEER.ReferenceData.Domain.Foundation.Contracts` with C# interfaces. **[SUPERSEDED HISTORICAL ARTIFACT - TypeScript is canonical]**
 - **packages/shared**: Empty module designated for shared logic.
 - **packages/types**: Designated for shared types.
 

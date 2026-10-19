@@ -110,9 +110,9 @@ check('P4-STORAGE-001 storage baseline explicitly records W2 compatibility clean
 
 
 
-// MNT-AUD-0095 / MNT-AUD-0056 — canonical domain/type-safety remediation.
+// ABSH-AUD-0095 / ABSH-AUD-0056 — canonical domain/type-safety remediation.
 const domainBarrel = read('packages/domain/src/index.ts');
-const dummyInventory = read('docs/remediation/MNT-AUD-0095-GENERATED-DUMMY-MIGRATION-INVENTORY.md');
+const dummyInventory = read('docs/remediation/ABSH-AUD-0095-GENERATED-DUMMY-MIGRATION-INVENTORY.md');
 const identityProvisioning = read('packages/application/src/identity/ProvisionIdentityUseCase.ts');
 const identityMapper = read('packages/application/src/identity/mapper.ts');
 const identityDtos = read('packages/application/src/identity/dtos.ts');
@@ -124,19 +124,19 @@ const foundationSources = fs.readdirSync(foundationContractDir)
   .map((name) => fs.readFileSync(path.join(foundationContractDir, name), 'utf8'))
   .join('\n');
 
-check('MNT-AUD-0095 production domain barrel does not export generated dummy',
+check('ABSH-AUD-0095 production domain barrel does not export generated dummy',
   domainBarrel.includes("export * from './foundation-contracts';") &&
   !domainBarrel.includes('generated/dummy') &&
   !fs.existsSync(path.join(root, 'packages/domain/src/generated/dummy.ts')));
-check('MNT-AUD-0095 replacement foundation contracts reject permissive dummy signatures',
+check('ABSH-AUD-0095 replacement foundation contracts reject permissive dummy signatures',
   !/\bany\b/.test(foundationSources) && !/\bDUMMY\b/.test(foundationSources) && !/constructor\s*\(\.\.\./.test(foundationSources));
-check('MNT-AUD-0095 historical dummy export inventory is explicitly classified',
+check('ABSH-AUD-0095 historical dummy export inventory is explicitly classified',
   dummyInventory.includes('195') && dummyInventory.includes('173') &&
   dummyInventory.includes('FORMALLY_DEFERRED') && dummyInventory.includes('Scholarship'));
-check('MNT-AUD-0056 identity provisioning/mapper no longer suppress TypeScript',
+check('ABSH-AUD-0056 identity provisioning/mapper no longer suppress TypeScript',
   !/@ts-nocheck|@ts-ignore/.test(identityProvisioning + identityMapper) &&
   !/\bas any\b|:\s*any\b|<any>/.test(identityProvisioning + identityMapper));
-check('MNT-AUD-0056 provisioning actor is server-owned and absent from client schema',
+check('ABSH-AUD-0056 provisioning actor is server-owned and absent from client schema',
   /createdBy:\s*string/.test(identityDtos) &&
   !/technicalMetadata/.test(identityDtos.match(/export interface ProvisionIdentityInput \{([\s\S]*?)\n\}/)?.[1] ?? '') &&
   /createdBy: req\.authUserId/.test(identityRouter) &&
@@ -148,36 +148,36 @@ const persistenceManifest = JSON.parse(read('docs/architecture/persistence/persi
 const persistenceVerifier = read('scripts/architecture/verify-persistence-boundaries.mjs');
 const phase2Boundaries = read('docs/phases/phase-02-solution-architecture/phase-02-04-bounded-context-design.md');
 const phase2Physical = read('docs/phases/phase-02-solution-architecture/phase-02-06-database-physical-design.md');
-check('MNT-AUD-0088 ADR-028 formally selects shared relational ownership strategy',
+check('ABSH-AUD-0088 ADR-028 formally selects shared relational ownership strategy',
   persistenceAdr.includes('Select remediation option **(b)**') &&
   persistenceAdr.includes('Direct ORM mutation of another Domain owner') &&
   persistenceAdr.includes('independent review'));
-check('MNT-AUD-0088 persistence ownership manifest covers every Prisma model',
+check('ABSH-AUD-0088 persistence ownership manifest covers every Prisma model',
   Object.keys(persistenceManifest.models).length === [...schema.matchAll(/^model\s+(\w+)\s*\{/gm)].length &&
   persistenceManifest.strategy === 'SHARED_POSTGRESQL_SINGLE_SCHEMA_WITH_ENFORCED_DOMAIN_OWNERSHIP');
-check('MNT-AUD-0088 source guard enforces zero cross-context mutations and approved reads',
+check('ABSH-AUD-0088 source guard enforces zero cross-context mutations and approved reads',
   persistenceVerifier.includes('forbidden cross-context mutation') &&
   persistenceVerifier.includes('unapproved cross-context read') &&
   persistenceVerifier.includes('validateMigrationMetadata(entry.name, sql, manifest)') &&
-  read('scripts/architecture/migration-metadata-policy.mjs').includes('MANARATAK_MIGRATION_OWNER'));
-check('MNT-AUD-0088 Phase 02 active authority reconciles schema-isolation drift',
+  read('scripts/architecture/migration-metadata-policy.mjs').includes('ABSHEER_MIGRATION_OWNER'));
+check('ABSH-AUD-0088 Phase 02 active authority reconciles schema-isolation drift',
   phase2Boundaries.includes('ADR-028 persistence supersession') &&
   phase2Physical.includes('Canonical persistence override — ADR-028'));
 
 
 const greenfieldParity = read('scripts/database/verify-greenfield-migration-parity.sh');
 const greenfieldParityRunbook = read('docs/operations/GREENFIELD_MIGRATION_PARITY_VERIFICATION.md');
-check('MNT-AUD-0041 source contains authoritative greenfield migration replay + parity diff',
+check('ABSH-AUD-0041 source contains authoritative greenfield migration replay + parity diff',
   greenfieldParity.includes('migrate deploy') &&
   greenfieldParity.includes('--from-url') && greenfieldParity.includes('--from-migrations') &&
   greenfieldParity.includes('--to-schema-datamodel') && greenfieldParity.includes('--shadow-database-url') &&
   greenfieldParity.includes('--exit-code'));
-check('MNT-AUD-0041 verifier fails closed on unsafe targets and catalog anomalies',
+check('ABSH-AUD-0041 verifier fails closed on unsafe targets and catalog anomalies',
   greenfieldParity.includes('GREENFIELD_DATABASE_IS_DISPOSABLE') &&
   greenfieldParity.includes('TARGET_AND_SHADOW_MUST_DIFFER') &&
   greenfieldParity.includes('Invalid indexes detected') &&
   greenfieldParity.includes('Unvalidated constraints detected'));
-check('MNT-AUD-0041 runbook separates source proof from disposable-DB runtime evidence',
+check('ABSH-AUD-0041 runbook separates source proof from disposable-DB runtime evidence',
   greenfieldParityRunbook.includes('Source verification alone does not claim database parity') &&
   greenfieldParityRunbook.includes('db push` is not an acceptable staging/production provisioning mechanism'));
 
@@ -185,20 +185,20 @@ check('MNT-AUD-0041 runbook separates source proof from disposable-DB runtime ev
 const databaseBaselineSource = read('scripts/db-remediation-gate.ts');
 const databaseBaselineManifest = JSON.parse(read('scripts/database/database-baseline.manifest.json'));
 const databaseBaselineComparator = read('scripts/database/compare-database-baselines.mjs');
-check('MNT-AUD-0083 migration ledger and required counters fail closed',
+check('ABSH-AUD-0083 migration ledger and required counters fail closed',
   databaseBaselineSource.includes('BASELINE_REQUIRED_COUNTER_UNAVAILABLE') &&
   databaseBaselineSource.includes('MIGRATION_LEDGER_INVALID') &&
   !databaseBaselineSource.includes('.catch(() => [])') &&
   !databaseBaselineSource.includes("number | 'UNAVAILABLE'") &&
   !databaseBaselineSource.includes("return [name, 'UNAVAILABLE']"));
-check('MNT-AUD-0083 baseline manifest covers all persistence-owned models',
+check('ABSH-AUD-0083 baseline manifest covers all persistence-owned models',
   Object.keys(databaseBaselineManifest.models).length === Object.keys(persistenceManifest.models).length &&
   Object.values(databaseBaselineManifest.models).every((item) => item.required === true && Boolean(item.owner)));
-check('MNT-AUD-0083 artifacts include identity and source fingerprints',
+check('ABSH-AUD-0083 artifacts include identity and source fingerprints',
   databaseBaselineSource.includes('databaseTargetIdentity') &&
   databaseBaselineSource.includes('schemaSha256') && databaseBaselineSource.includes('migrationChainSha256') &&
   databaseBaselineSource.includes('commandVersion') && databaseBaselineSource.includes('capturedAt'));
-check('MNT-AUD-0083 before/after comparison requires declared count tolerances',
+check('ABSH-AUD-0083 before/after comparison requires declared count tolerances',
   databaseBaselineComparator.includes('outside declared tolerance') &&
   databaseBaselineComparator.includes('allowSchemaHashChange') &&
   databaseBaselineComparator.includes('allowMigrationChainChange'));
@@ -208,23 +208,23 @@ const seedManifest = JSON.parse(read('scripts/database/greenfield-seed.manifest.
 const seedOrchestrator = read('scripts/database/seed-orchestrator.mjs');
 const seedReconciliation = read('scripts/database/verify-seed-reconciliation.ts');
 const packageJson = JSON.parse(read('package.json'));
-check('MNT-AUD-0035 canonical ordered seed manifest and fail-closed orchestrator exist',
-  seedManifest.authority === 'MNT-AUD-0035' &&
+check('ABSH-AUD-0035 canonical ordered seed manifest and fail-closed orchestrator exist',
+  seedManifest.authority === 'ABSH-AUD-0035' &&
   seedManifest.policy.abortBeforeFirstMutationWhenBlocked === true &&
   seedOrchestrator.includes('SEED_PRECONDITION_BLOCKED') &&
   seedOrchestrator.indexOf('inspection.blockers.length') < seedOrchestrator.indexOf("requireDatabaseMutationGate('greenfield-db-seed'"));
-check('MNT-AUD-0035 mandatory seed versions/provenance/reconciliation contracts are explicit',
+check('ABSH-AUD-0035 mandatory seed versions/provenance/reconciliation contracts are explicit',
   seedManifest.steps.filter((step) => step.required).every((step) => Boolean(step.owner) && Boolean(step.provenance) && Boolean(step.expected)) &&
   seedReconciliation.includes('SEED_RECONCILIATION_EXACT_MISMATCH') &&
   seedReconciliation.includes('SEED_RECONCILIATION_MINIMUM_MISMATCH'));
 const seedInspection = inspectSeedManifest(seedManifest, root);
-check('MNT-AUD-0035 reference sources are hash-pinned or explicitly blocked before seeding',
+check('ABSH-AUD-0035 reference sources are hash-pinned or explicitly blocked before seeding',
   seedInspection.sourceErrors.length === 0 &&
   ['reference-countries', 'reference-currencies', 'reference-languages'].every(id => {
     const step = seedManifest.steps.find(item => item.id === id);
     return step && (step.state === 'READY' || seedInspection.blockers.includes(`${id}:${step.state}`));
   }));
-check('MNT-AUD-0035 root DB commands distinguish production provisioning from development mutations',
+check('ABSH-AUD-0035 root DB commands distinguish production provisioning from development mutations',
   Boolean(packageJson.scripts['db:migrate:deploy']) && Boolean(packageJson.scripts['db:seed']) &&
   Boolean(packageJson.scripts['db:provision']) && Boolean(packageJson.scripts['db:provision:verify']) &&
   Boolean(packageJson.scripts['db:dev:push']) && Boolean(packageJson.scripts['db:dev:migrate']) &&
@@ -236,28 +236,28 @@ const referenceContracts = read('packages/domain/src/reference-data/dto/Referenc
 const referenceRepository = read('packages/infrastructure/src/reference-data/PrismaReferenceDataRepository.ts');
 const referenceRouter = read('apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts');
 const referenceMigration = read('packages/infrastructure/prisma/migrations/20260906204000_reference_governance_lifecycle/migration.sql');
-check('MNT-AUD-0013 typed canonical lifecycle and terminal transition rules are source-enforced',
+check('ABSH-AUD-0013 typed canonical lifecycle and terminal transition rules are source-enforced',
   referenceGovernance.includes("ARCHIVED = 'ARCHIVED'") &&
   referenceGovernance.includes("SUPERSEDED = 'SUPERSEDED'") &&
   referenceGovernance.includes("MERGED = 'MERGED'") &&
   referenceGovernance.includes('REFERENCE_LIFECYCLE_TERMINAL_STATE') &&
   referenceGovernance.includes('REFERENCE_LIFECYCLE_TARGET_REQUIRED'));
-check('MNT-AUD-0013 DTO authority exposes lifecycle/version/effective history instead of isActive-only state',
+check('ABSH-AUD-0013 DTO authority exposes lifecycle/version/effective history instead of isActive-only state',
   referenceContracts.includes('lifecycleState: ReferenceLifecycleState') &&
   referenceContracts.includes('versionNumber: number') &&
   referenceContracts.includes('effectiveFrom: Date') &&
   referenceContracts.includes('ReferenceAliasInput') &&
   referenceContracts.includes('ReferenceProviderMappingInput'));
-check('MNT-AUD-0013 alias/provider resolution uses explicit governed stores, not metadata JSON',
+check('ABSH-AUD-0013 alias/provider resolution uses explicit governed stores, not metadata JSON',
   referenceRepository.includes('FROM "ReferenceAliasRecord"') &&
   referenceRepository.includes('FROM "ReferenceProviderMappingRecord"') &&
   !/jsonb_array_elements[\s\S]{0,300}metadata/.test(referenceRepository));
-check('MNT-AUD-0013 immutable versions and supersession/merge relationship persistence are authored',
+check('ABSH-AUD-0013 immutable versions and supersession/merge relationship persistence are authored',
   referenceMigration.includes('CREATE TABLE "ReferenceVersionRecord"') &&
   referenceMigration.includes('CREATE TABLE "ReferenceRelationshipRecord"') &&
-  referenceMigration.includes('MNT-AUD-0013_BASELINE') &&
+  referenceMigration.includes('ABSH-AUD-0013_BASELINE') &&
   referenceMigration.includes('ReferenceRelationshipRecord_no_self_check'));
-check('MNT-AUD-0013 Admin lifecycle authority is a dedicated audited command surface',
+check('ABSH-AUD-0013 Admin lifecycle authority is a dedicated audited command surface',
   referenceRouter.includes('/governance/:entityType/:referenceId/lifecycle') &&
   referenceRouter.includes('/governance/:entityType/:referenceId/history') &&
   referenceRouter.includes('/governance/:entityType/:referenceId/relationships') &&
@@ -282,29 +282,29 @@ const studentToolAssets = read('packages/application/src/student-tools/use-cases
 const serviceAssets = read('packages/application/src/services-platform/use-cases/AdminServiceCatalogUseCases.ts');
 const careerAssets = read('packages/application/src/career-alumni/use-cases/CareerAdminUseCases.ts');
 const courseAssets = read('packages/application/src/courses/use-cases/AdminCourseUseCases.ts');
-check('MNT-AUD-0030 canonical AssetReferencePolicy enforces existence/state/classification/owner boundaries',
+check('ABSH-AUD-0030 canonical AssetReferencePolicy enforces existence/state/classification/owner boundaries',
   assetReferencePolicy.includes('ASSET_NOT_FOUND') &&
   assetReferencePolicy.includes('ASSET_STATE_NOT_ALLOWED') &&
   assetReferencePolicy.includes('ASSET_CLASSIFICATION_NOT_ALLOWED') &&
   assetReferencePolicy.includes('ASSET_OWNER_MISMATCH') &&
   assetReferencePolicy.includes('RAW_ASSET_REFERENCE_FORBIDDEN') &&
   assetReferencePolicy.includes('ASSET_REFERENCE_POLICY_REQUIRED'));
-check('MNT-AUD-0030 weak consumer domains compose the P05 asset policy before persistence',
+check('ABSH-AUD-0030 weak consumer domains compose the P05 asset policy before persistence',
   [studentWorkspaceAssets, cmsAssets, universityAssets, internationalTestAssets, referenceAssets, destinationAssets, studentToolAssets, serviceAssets, careerAssets, courseAssets]
     .every((source) => source.includes('AssetReferencePolicy') &&
       (source.includes('assertAssetReferenceUsable') || source.includes('assertAssetReferencesUsable')) &&
       !/assetReferences\?\.assert(?:Usable|AllUsable)/.test(source)));
-check('MNT-AUD-0030 asset reference manifest covers direct Prisma AssetId fields and JSON-owned CMS references',
-  assetReferenceManifest.authority === 'MNT-AUD-0030/MNT-AUD-0050' &&
+check('ABSH-AUD-0030 asset reference manifest covers direct Prisma AssetId fields and JSON-owned CMS references',
+  assetReferenceManifest.authority === 'ABSH-AUD-0030/ABSH-AUD-0050' &&
   assetReferenceManifest.directReferences.length === [...schema.matchAll(/^\s*(\w*(?:AssetId|assetId))\s+String\??/gm)].length &&
   assetReferenceManifest.jsonReferences.some((item) => item.field === 'seoMetadata.openGraphAssetId') &&
   assetReferenceManifest.jsonReferences.some((item) => item.field === 'attachmentAssetIds') &&
   assetIntegrityVerifier.includes('ASSET_REFERENCE_MANIFEST_DRIFT'));
-check('MNT-AUD-0050 production composition uses derived Prisma asset usage authority instead of UNAVAILABLE',
+check('ABSH-AUD-0050 production composition uses derived Prisma asset usage authority instead of UNAVAILABLE',
   container.includes('new PrismaAssetUsageRegistryGateway(prisma)') &&
   !container.includes("createUnavailableCapability('assetUsageRegistry')") &&
   assetUsageRegistry.includes('ASSET_USAGE_REGISTRY_IS_DERIVED_READ_ONLY'));
-check('MNT-AUD-0050 purge fail-closes with concrete usage evidence',
+check('ABSH-AUD-0050 purge fail-closes with concrete usage evidence',
   assetUsageContract.includes('findUsages?') &&
   assetLifecycleUseCase.includes('usageRegistry.findUsages') &&
   assetLifecycleUseCase.includes("assertNotInUse(id, 'purge')") && assetLifecycleUseCase.includes('Cannot ${operation} asset') &&
@@ -321,16 +321,16 @@ const workflowExecutionProjection = read('packages/infrastructure/src/workflow/P
 const apiExposureProjection = read('packages/infrastructure/src/api-foundation/PrismaApiExposureGateway.ts');
 const componentRenderingProjection = read('packages/infrastructure/src/shared-components/PrismaComponentRenderingGateway.ts');
 const foundationMigration = read('packages/infrastructure/prisma/migrations/20260906223000_foundation_control_plane_persistence/migration.sql');
-check('MNT-AUD-0049 mounted Foundation control-plane repositories are durable Prisma adapters',
+check('ABSH-AUD-0049 mounted Foundation control-plane repositories are durable Prisma adapters',
   container.includes('new PrismaWorkflowRepository(prisma)') && container.includes('new PrismaApiServiceRepository(prisma)') && container.includes('new PrismaSharedComponentRepository(prisma)') &&
   !container.includes("createUnavailableCapability('workflowPersistence')") && !container.includes("createUnavailableCapability('apiServicePersistence')") && !container.includes("createUnavailableCapability('sharedComponentPersistence')") &&
   workflowPersistence.includes('workflowControlRecord.upsert') && apiServicePersistence.includes('apiServiceControlRecord.upsert') && componentPersistence.includes('sharedComponentControlRecord.upsert'));
-check('MNT-AUD-0049 execution/exposure/rendering dependencies are operational durable projections',
+check('ABSH-AUD-0049 execution/exposure/rendering dependencies are operational durable projections',
   container.includes('new PrismaWorkflowExecutionGateway(prisma)') && container.includes('new PrismaApiExposureGateway(prisma)') && container.includes('new PrismaComponentRenderingGateway(prisma)') &&
   workflowExecutionProjection.includes('workflowExecutionProjection.upsert') && apiExposureProjection.includes('apiServiceExposureProjection.upsert') && componentRenderingProjection.includes('sharedComponentRenderingProjection.upsert'));
-check('MNT-AUD-0049 Prisma schema and migration author all Foundation control-plane persistence',
+check('ABSH-AUD-0049 Prisma schema and migration author all Foundation control-plane persistence',
   ['WorkflowControlRecord','ApiServiceControlRecord','SharedComponentControlRecord','WorkflowExecutionProjection','ApiServiceExposureProjection','SharedComponentRenderingProjection'].every((model) => schema.includes(`model ${model}`)) &&
-  foundationMigration.includes('-- MANARATAK_MIGRATION_OWNER: foundation_control_plane') && foundationMigration.includes('-- MANARATAK_ARCH_DECISION: ADR-028') &&
+  foundationMigration.includes('-- ABSHEER_MIGRATION_OWNER: foundation_control_plane') && foundationMigration.includes('-- ABSHEER_ARCH_DECISION: ADR-028') &&
   foundationMigration.includes('CREATE TABLE "WorkflowControlRecord"') && foundationMigration.includes('CREATE TABLE "ApiServiceControlRecord"') && foundationMigration.includes('CREATE TABLE "SharedComponentControlRecord"'));
 
 
@@ -341,13 +341,13 @@ const serviceOperationsDomain = read('packages/domain/src/services-platform/oper
 const serviceOperationsUseCases = read('packages/application/src/services-platform/use-cases/ServiceOperationsUseCases.ts');
 const serviceOperationsRepository = read('packages/infrastructure/src/services-platform/PrismaServiceOperationsRepository.ts');
 const serviceOperationsMigration = read('packages/infrastructure/prisma/migrations/20260906231000_phase20_service_operations_owner_scope/migration.sql');
-check('MNT-AUD-0058 Phase 20 retained owner scope has first-class typed contracts and governed use cases',
+check('ABSH-AUD-0058 Phase 20 retained owner scope has first-class typed contracts and governed use cases',
   ['ServiceProviderDto','ServicePackageDto','ServicePricingDto','ServiceDiscountDto','ServicePromotionDto','ServiceAvailabilitySlotDto','ServiceBookingDto','ServiceWorkflowDefinitionDto','ServiceWorkflowExecutionDto','ServiceDeliveryArtifactDto','IServiceOperationsRepository']
     .every((symbol) => serviceOperationsDomain.includes(symbol)) &&
   ['registerProvider','createPackage','createPricing','createDiscount','createPromotion','createAvailabilitySlot','createBooking','createWorkflowDefinition','startWorkflow','addDeliveryArtifact']
     .every((method) => serviceOperationsUseCases.includes(`async ${method}`)) &&
   serviceOperationsUseCases.includes('SERVICE_PROVIDER_NOT_QUALIFIED') && serviceOperationsUseCases.includes('SERVICE_TIMEZONE_INVALID'));
-check('MNT-AUD-0058 booking/pricing/capacity/delivery invariants are enforced at owner persistence boundary',
+check('ABSH-AUD-0058 booking/pricing/capacity/delivery invariants are enforced at owner persistence boundary',
   serviceOperationsRepository.includes("isolationLevel: 'Serializable'") &&
   serviceOperationsRepository.includes('SERVICE_BOOKING_CAPACITY_EXHAUSTED') &&
   serviceOperationsRepository.includes('SERVICE_PROVIDER_CONCURRENT_CAPACITY_EXHAUSTED') &&
@@ -357,10 +357,10 @@ check('MNT-AUD-0058 booking/pricing/capacity/delivery invariants are enforced at
   serviceOperationsRepository.includes('SERVICE_DISCOUNT_REDEMPTION_LIMIT_REACHED') &&
   serviceOperationsUseCases.includes('pricingFingerprint: pricing.immutableFingerprint') &&
   serviceOperationsUseCases.includes("purpose: 'SERVICE_DELIVERY_ARTIFACT'"));
-check('MNT-AUD-0058 Prisma owner scope is real and reviewed owner composition is registered',
+check('ABSH-AUD-0058 Prisma owner scope is real and reviewed owner composition is registered',
   ['ServiceProviderRecord','ServicePackageRecord','ServicePricingRecord','ServiceDiscountRecord','ServicePromotionRecord','ServiceAvailabilitySlotRecord','ServiceBookingRecord','ServiceWorkflowDefinitionRecord','ServiceWorkflowExecutionRecord','ServiceDeliveryArtifactRecord']
     .every((model) => schema.includes(`model ${model}`)) &&
-  serviceOperationsMigration.includes('-- MANARATAK_MIGRATION_OWNER: services') && serviceOperationsMigration.includes('-- MANARATAK_ARCH_DECISION: ADR-028') &&
+  serviceOperationsMigration.includes('-- ABSHEER_MIGRATION_OWNER: services') && serviceOperationsMigration.includes('-- ABSHEER_ARCH_DECISION: ADR-028') &&
   container.includes('serviceOperationsUseCases:') && container.includes('serviceOperationsRepository:'));
 
 const careerEngagementContract = read('packages/domain/src/career-alumni/contracts/ICareerEngagementRepository.ts');
@@ -369,11 +369,11 @@ const careerEngagementUseCases = read('packages/application/src/career-alumni/us
 const careerEngagementRepository = read('packages/infrastructure/src/career-alumni/PrismaCareerEngagementRepository.ts');
 const careerOwnershipGateway = read('packages/application/src/career-alumni/gateways/Phase15CareerStudentOwnershipGateway.ts');
 const careerEngagementMigration = read('packages/infrastructure/prisma/migrations/20260906234000_phase21_career_engagement_owner_scope/migration.sql');
-check('MNT-AUD-0055 Career owner scope implements profiles, applications/CV and alumni contracts',
+check('ABSH-AUD-0055 Career owner scope implements profiles, applications/CV and alumni contracts',
   careerEngagementContract.includes('ICareerEngagementRepository') && careerEngagementContract.includes('ICareerStudentOwnershipGateway') &&
   ['CareerProfileDto','CareerApplicationDto','CareerAlumniProfileDto'].every((symbol) => careerEngagementEntities.includes(symbol)) &&
   ['upsertCareerProfile','submitApplication','withdrawApplication','reviewApplication','upsertAlumniProfile'].every((method) => careerEngagementUseCases.includes(`async ${method}`)));
-check('MNT-AUD-0055 application ownership, snapshot, AssetId, consent and optimistic concurrency fail closed',
+check('ABSH-AUD-0055 application ownership, snapshot, AssetId, consent and optimistic concurrency fail closed',
   careerEngagementUseCases.includes('assertActiveStudent') &&
   careerEngagementUseCases.includes("purpose: 'CAREER_APPLICATION_CV'") && careerEngagementUseCases.includes('expectedOwnerId: input.studentReferenceId') &&
   careerEngagementUseCases.includes('jobSnapshot: {') && careerEngagementUseCases.includes('CAREER_ALUMNI_PUBLIC_VISIBILITY_REQUIRES_CONSENT') &&
@@ -381,16 +381,16 @@ check('MNT-AUD-0055 application ownership, snapshot, AssetId, consent and optimi
   careerEngagementEntities.includes('consentGrantedBy') && careerEngagementEntities.includes('consentRevokedBy') &&
   careerEngagementRepository.includes('CAREER_APPLICATION_VERSION_CONFLICT') && careerEngagementRepository.includes('CAREER_PROFILE_VERSION_CONFLICT') && careerEngagementRepository.includes('CAREER_ALUMNI_VERSION_CONFLICT') &&
   careerOwnershipGateway.includes('StudentWorkspaceStatus.ACTIVE'));
-check('MNT-AUD-0055 Prisma owner scope is real and reviewed owner composition is registered',
+check('ABSH-AUD-0055 Prisma owner scope is real and reviewed owner composition is registered',
   ['CareerProfileRecord','CareerApplicationRecord','CareerAlumniProfileRecord'].every((model) => schema.includes(`model ${model}`)) &&
-  careerEngagementMigration.includes('-- MANARATAK_MIGRATION_OWNER: career') && careerEngagementMigration.includes('-- MANARATAK_ARCH_DECISION: ADR-028') &&
+  careerEngagementMigration.includes('-- ABSHEER_MIGRATION_OWNER: career') && careerEngagementMigration.includes('-- ABSHEER_ARCH_DECISION: ADR-028') &&
   careerEngagementMigration.includes('"jobSnapshot" JSONB NOT NULL') &&
   container.includes('careerEngagementUseCases:') && container.includes('careerEngagementRepository:') && container.includes('careerStudentOwnershipGateway:'));
 
 
 const disposableDbGuard = read('scripts/lib/disposable-database-target-guard.mjs');
 const disposableDbRunner = read('scripts/database/run-disposable-prisma-mutation.mjs');
-check('MNT-AUD-0075 direct root Prisma mutations are removed and disposable dev commands are guarded',
+check('ABSH-AUD-0075 direct root Prisma mutations are removed and disposable dev commands are guarded',
   !packageJson.scripts['db:push'] && !packageJson.scripts['db:migrate'] &&
   packageJson.scripts['db:dev:push'] === 'node scripts/database/run-disposable-prisma-mutation.mjs push' &&
   packageJson.scripts['db:dev:migrate'] === 'node scripts/database/run-disposable-prisma-mutation.mjs migrate-dev' &&
@@ -403,8 +403,8 @@ const recoveryManifest = JSON.parse(read('scripts/database/migration-recovery.ma
 const recoveryPolicy = read('docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md');
 const dbRemediationGate = read('scripts/db-remediation-gate.ts');
 const migrationDirs = fs.readdirSync(path.join(root, 'packages/infrastructure/prisma/migrations'), { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
-check('MNT-AUD-0079 every migration has fail-closed recovery classification and artifact authority',
-  recoveryManifest.authority === 'MNT-AUD-0079' &&
+check('ABSH-AUD-0079 every migration has fail-closed recovery classification and artifact authority',
+  recoveryManifest.authority === 'ABSH-AUD-0079' &&
   Object.keys(recoveryManifest.migrations).length === migrationDirs.length &&
   migrationDirs.every((id) => {
     const rule = recoveryManifest.migrations[id];
@@ -422,10 +422,10 @@ const identityAggregate = read('packages/domain/src/aggregates/Identity.ts');
 const scholarshipAuthoring = read('packages/application/src/scholarships/use-cases/AdminScholarshipUseCases.ts');
 const mergeProposal = read('packages/application/src/import-foundation/services/MergeProposalPreparationService.ts');
 const localAssetStorage = read('packages/infrastructure/src/asset-platform/LocalAssetStorageGateway.ts');
-check('MNT-AUD-0057 canonical persisted identifier generator is cryptographic and fail-closed',
+check('ABSH-AUD-0057 canonical persisted identifier generator is cryptographic and fail-closed',
   identifierGenerator.includes('CryptographicIdentifierGenerator') && identifierGenerator.includes('globalThis.crypto') && identifierGenerator.includes('randomUUID') &&
   identifierGenerator.includes('CRYPTO_RANDOM_UUID_UNAVAILABLE') && !identifierGenerator.includes('Math.random'));
-check('MNT-AUD-0057 persisted/public identity paths no longer use Math.random',
+check('ABSH-AUD-0057 persisted/public identity paths no longer use Math.random',
   [coreEntity, identityAggregate, scholarshipAuthoring, mergeProposal, localAssetStorage, container].every((source) => !source.includes('Math.random(')) &&
   coreEntity.includes('generateOpaqueIdentifier') && identityAggregate.includes('generateOpaqueIdentifier') && scholarshipAuthoring.includes('generateOpaqueIdentifier') && mergeProposal.includes('generateOpaqueIdentifier'));
 
@@ -442,25 +442,25 @@ const careerAdminRouter = read('apps/api/src/presentation/api/router/CareerAdmin
 const optimisticConcurrencyMigration = read('packages/infrastructure/prisma/migrations/20260906235500_phase20_phase21_optimistic_concurrency/migration.sql');
 const servicesAdminPage = read('apps/admin/src/pages/ServicesAdminPage.tsx');
 const careerAdminPage = read('apps/admin/src/pages/CareerAdminPage.tsx');
-check('MNT-AUD-0096 late-domain mutable records expose monotonic versions in schema and DTOs',
+check('ABSH-AUD-0096 late-domain mutable records expose monotonic versions in schema and DTOs',
   ['ServiceCatalogRecord','ServiceRequestRecord','CareerEmployerRecord','CareerJobPostingRecord'].every((model) => {
     const match = schema.match(new RegExp(`model ${model} \\{([\\s\\S]*?)\\n\\}`));
     return Boolean(match && /version\s+Int\s+@default\(1\)/.test(match[1]) && /@@unique\(\[id, version\]\)/.test(match[1]));
   }) &&
   /version: number;/.test(servicePlatformDomain) && /version: number;/.test(careerEmployerDomain) && /version: number;/.test(careerJobDomain));
-check('MNT-AUD-0096 repositories fence every core Service/Career mutation with id+expectedVersion and increment',
+check('ABSH-AUD-0096 repositories fence every core Service/Career mutation with id+expectedVersion and increment',
   servicePlatformRepository.includes('id_version: { id, version: expectedVersion }') &&
   servicePlatformRepository.includes("SERVICE_CATALOG_VERSION_CONFLICT") && servicePlatformRepository.includes("SERVICE_REQUEST_VERSION_CONFLICT") &&
   careerRepository.includes('id_version: { id, version: expectedVersion }') &&
   careerRepository.includes("CAREER_EMPLOYER_VERSION_CONFLICT") && careerRepository.includes("CAREER_JOB_VERSION_CONFLICT") &&
   [servicePlatformRepository, careerRepository].every((source) => source.includes('version: { increment: 1 }')));
-check('MNT-AUD-0096 application and HTTP mutation boundaries require expectedVersion',
+check('ABSH-AUD-0096 application and HTTP mutation boundaries require expectedVersion',
   serviceCatalogUseCases.includes('SERVICE_EXPECTED_VERSION_REQUIRED') && serviceRequestUseCases.includes('SERVICE_REQUEST_EXPECTED_VERSION_REQUIRED') &&
   careerAdminUseCases.includes('CAREER_EXPECTED_VERSION_REQUIRED') &&
   serviceAdminRouter.includes('expectedVersion: z.number().int().positive()') && careerAdminRouter.includes('expectedVersion: careerExpected') && read('apps/api/src/presentation/api/router/CareerHttp.ts').includes('careerExpected = z.number().int().positive()') &&
   servicesAdminPage.includes('expectedVersion: service.version') && careerAdminPage.includes('body.expectedVersion = editing.version') && careerAdminPage.includes('expectedVersion:row.version'));
-check('MNT-AUD-0096 controlled migration adds version fences for all four legacy late-domain aggregates',
-  optimisticConcurrencyMigration.includes('-- MNT-AUD-0096:') &&
+check('ABSH-AUD-0096 controlled migration adds version fences for all four legacy late-domain aggregates',
+  optimisticConcurrencyMigration.includes('-- ABSH-AUD-0096:') &&
   ['ServiceCatalogRecord','ServiceRequestRecord','CareerEmployerRecord','CareerJobPostingRecord'].every((model) =>
     optimisticConcurrencyMigration.includes(`ALTER TABLE "${model}" ADD COLUMN "version" INTEGER NOT NULL DEFAULT 1;`) &&
     optimisticConcurrencyMigration.includes(`CREATE UNIQUE INDEX "${model}_id_version_key"`)));
@@ -473,48 +473,48 @@ const auditRetentionGateway = read('packages/infrastructure/src/retention/Prisma
 const assetRetentionGateway = read('packages/infrastructure/src/retention/PrismaAssetRetentionGateway.ts');
 const retentionMigration = read('packages/infrastructure/prisma/migrations/20260907001500_retention_policy_enforcement/migration.sql');
 const retentionRunbook = read('docs/operations/RETENTION_LIFECYCLE_POLICY.md');
-check('MNT-AUD-0081 canonical policy distinguishes owner disposition and legal hold',
+check('ABSH-AUD-0081 canonical policy distinguishes owner disposition and legal hold',
   retentionDomain.includes("PURGE = 'PURGE'") && retentionDomain.includes("ARCHIVE = 'ARCHIVE'") && retentionDomain.includes("KEEP = 'KEEP'") &&
   retentionDomain.includes('LEGAL_HOLD_ACTIVE') && retentionDomain.includes('AUDIT_EVIDENCE_ARCHIVE') && retentionDomain.includes('IMPORT_RAW_PAYLOAD_EXPIRED') && retentionDomain.includes('ASSET_PERMANENT_POLICY'));
-check('MNT-AUD-0081 durable sweeper is retryable/idempotent and only terminal decisions suppress retry',
+check('ABSH-AUD-0081 durable sweeper is retryable/idempotent and only terminal decisions suppress retry',
   retentionSweepUseCase.includes('hasTerminalDecision') && retentionSweepUseCase.includes("result: 'FAILED'") &&
   retentionDecisionRepository.includes("result: { in: ['APPLIED', 'SKIPPED'] }") && retentionDecisionRepository.includes("input.result === 'FAILED' ? null : input.decisionKey"));
-check('MNT-AUD-0081 owner gateways claim before mutation and preserve owner-specific retention semantics',
+check('ABSH-AUD-0081 owner gateways claim before mutation and preserve owner-specific retention semantics',
   [importRetentionGateway,auditRetentionGateway,assetRetentionGateway].every((source)=>source.includes('retentionClaimToken') && source.includes('retentionClaimUntil')) &&
   importRetentionGateway.includes('retentionPurged: true') && importRetentionGateway.includes("retentionState: 'RAW_PURGED'") &&
   auditRetentionGateway.includes("lifecycleState:'ARCHIVED'") &&
   assetRetentionGateway.includes('softDeleteAsset') && assetRetentionGateway.includes('purgeAsset'));
-check('MNT-AUD-0081 schema/migration authors legal hold, claims, processed state and append-only decision evidence',
+check('ABSH-AUD-0081 schema/migration authors legal hold, claims, processed state and append-only decision evidence',
   ['ImportRecord','AuditRecord','AssetRecord'].every((model)=>{const match=schema.match(new RegExp(`model ${model} \\{([\\s\\S]*?)\\n\\}`)); return Boolean(match&&match[1].includes('legalHoldUntil')&&match[1].includes('retentionProcessedAt')&&match[1].includes('retentionClaimUntil')&&match[1].includes('retentionClaimToken'));}) &&
-  schema.includes('model RetentionDecisionRecord {') && retentionMigration.includes('-- MNT-AUD-0081:'));
-check('MNT-AUD-0081 owner executors remain valid when W3 durable scheduling/composition advances',
+  schema.includes('model RetentionDecisionRecord {') && retentionMigration.includes('-- ABSH-AUD-0081:'));
+check('ABSH-AUD-0081 owner executors remain valid when W3 durable scheduling/composition advances',
   importRetentionGateway.includes('class PrismaImportRetentionGateway') && auditRetentionGateway.includes('class PrismaAuditRetentionGateway') && assetRetentionGateway.includes('class PrismaAssetRetentionGateway') &&
   retentionSweepUseCase.includes('class RetentionSweepUseCase') &&
   (( !container.includes('retentionSweepUseCase:') && !container.includes('importRetentionGateway:') && !container.includes('auditRetentionGateway:') && !container.includes('assetRetentionGateway:') ) ||
    (container.includes('retentionSweepUseCase:') && container.includes('retentionBackgroundJobHandler:') && container.includes('durableBackgroundWorker:'))) &&
-  retentionRunbook.includes('MNT-AUD-0007'));
+  retentionRunbook.includes('ABSH-AUD-0007'));
 
 
 const diReachabilityManifest = JSON.parse(read('docs/remediation/DI_RUNTIME_REACHABILITY_MANIFEST.json'));
 const diReachabilityVerifier = read('scripts/architecture/verify-di-reachability.mjs');
 const applicationBarrel = read('packages/application/src/index.ts');
-check('MNT-AUD-0109 production DI has no orphan registrations or shadow Prisma authority',
+check('ABSH-AUD-0109 production DI has no orphan registrations or shadow Prisma authority',
   diReachabilityManifest.registrationCount === diReachabilityManifest.reachableCount &&
   diReachabilityManifest.unreachable.length === 0 &&
   diReachabilityManifest.registrations.every((entry) => entry.classification === 'RUNTIME_REACHABLE') &&
   !container.includes('createInMemoryPrismaClient'));
-check('MNT-AUD-0109 legacy foundation orchestrators are outside canonical production exports and DI',
+check('ABSH-AUD-0109 legacy foundation orchestrators are outside canonical production exports and DI',
   ['ManageMonitorsUseCase','ManageLogsUseCase','ManageSecurityPoliciesUseCase','ManageConfigurationsUseCase','ManageIntegrationsUseCase','ManageLocalizationsUseCase']
     .every((name) => !applicationBarrel.includes(`/use-cases/${name}`)) &&
   ['manageMonitorsUseCase:','manageLogsUseCase:','manageSecurityPoliciesUseCase:','manageConfigurationsUseCase:','manageIntegrationsUseCase:','manageLocalizationsUseCase:']
     .every((name) => !container.includes(name)));
-check('MNT-AUD-0109 deferred monitoring stays absent while completed Service/Career and retention composition is reachable',
+check('ABSH-AUD-0109 deferred monitoring stays absent while completed Service/Career and retention composition is reachable',
   ['monitoringRouter']
     .every((name) => diReachabilityManifest.deferredOrRemovedSource.some((entry) => entry.registration === name && entry.classification === 'FORMALLY_DEFERRED') && !container.includes(`${name}:`)) &&
   ['serviceOperationsUseCases','careerEngagementUseCases'].every(name => diReachabilityManifest.registrations.some(entry => entry.name === name && entry.classification === 'RUNTIME_REACHABLE') && container.includes(`${name}:`)) &&
   diReachabilityManifest.registrations.some((entry) => entry.name === 'retentionSweepUseCase' && entry.classification === 'RUNTIME_REACHABLE') &&
   container.includes('retentionSweepUseCase:'));
-check('MNT-AUD-0109 dead diagnostic source is removed and reachability guard is executable',
+check('ABSH-AUD-0109 dead diagnostic source is removed and reachability guard is executable',
   !exists('scripts/inspect_legacy.ts') &&
   diReachabilityManifest.deferredOrRemovedSource.some((entry) => entry.registration === 'inspect_legacy' && entry.classification === 'REMOVE') &&
   diReachabilityVerifier.includes('DI_REACHABILITY_VERIFY=PASS') && diReachabilityVerifier.includes('Deferred registration leaked back into production DI'));
@@ -527,26 +527,26 @@ const serviceCanonicalizationTests = read('packages/application/tests/services-p
 const careerCanonicalizationTests = read('packages/application/tests/career-alumni/CareerAdminUseCases.spec.ts');
 const canonicalizationBackfill = read('scripts/backfill-service-career-unicode-canonicalization.ts');
 const canonicalizationGuard = read('scripts/architecture/verify-unicode-owner-canonicalization.mjs');
-check('MNT-AUD-0091 shared identity authority is Unicode-aware with explicit Arabic rules',
+check('ABSH-AUD-0091 shared identity authority is Unicode-aware with explicit Arabic rules',
   unicodeCanonicalization.includes("normalize('NFKC')") &&
   unicodeCanonicalization.includes('\\p{L}') && unicodeCanonicalization.includes('\\p{N}') &&
   unicodeCanonicalization.includes('[أإآٱ]') && unicodeCanonicalization.includes(".replace(/ى/gu, 'ي')") &&
   unicodeCanonicalization.includes('ARABIC_DIACRITICS') && unicodeCanonicalization.includes('ARABIC_TATWEEL'));
-check('MNT-AUD-0091 Services/Careers use one canonical identity policy and Unicode slug policy',
+check('ABSH-AUD-0091 Services/Careers use one canonical identity policy and Unicode slug policy',
   ownerIdentityPolicies.includes('canonicalizeServiceIdentityName') && ownerIdentityPolicies.includes('canonicalizeCareerIdentityText') &&
   serviceCanonicalization.includes('canonicalizeServiceIdentityName') && serviceCanonicalization.includes('unicodeSlugSegment') &&
   careerCanonicalization.includes('canonicalizeCareerIdentityText') && careerCanonicalization.includes('unicodeSlugSegment') &&
   !/replace\(\/\[\^a-z0-9/i.test(serviceCanonicalization + careerCanonicalization));
-check('MNT-AUD-0091 Arabic create/update/dedup regression tests are authored for both owner domains',
+check('ABSH-AUD-0091 Arabic create/update/dedup regression tests are authored for both owner domains',
   /خِدمةُ التأشيرات|خدمة التأشيرات/u.test(serviceCanonicalizationTests) && serviceCanonicalizationTests.includes('distinct Arabic service names') &&
   /شركةُ البُراق|مُهندس برمجيات/u.test(careerCanonicalizationTests) && careerCanonicalizationTests.includes('distinct Arabic job titles') &&
   serviceCanonicalizationTests.includes('Arabic display-name update') && careerCanonicalizationTests.includes('Arabic canonical title during update'));
-check('MNT-AUD-0091 existing-data remediation is dry-run-first, collision-safe and mutation-gated',
+check('ABSH-AUD-0091 existing-data remediation is dry-run-first, collision-safe and mutation-gated',
   canonicalizationBackfill.includes("mode: apply ? 'APPLY' : 'DRY_RUN'") &&
   canonicalizationBackfill.includes('CANONICAL_DEDUP_COLLISION') && canonicalizationBackfill.includes('SLUG_COLLISION') &&
   canonicalizationBackfill.includes('__mntaud0091__') && canonicalizationBackfill.includes('Two-phase re-keying') &&
   canonicalizationBackfill.includes("allowedPurposes: ['backfill']"));
-check('MNT-AUD-0091 source guard forbids regression to ASCII-only owner identity normalizers',
+check('ABSH-AUD-0091 source guard forbids regression to ASCII-only owner identity normalizers',
   canonicalizationGuard.includes('forbidden ASCII-only identity normalizer') &&
   canonicalizationGuard.includes('packages/application/src/services-platform') &&
   canonicalizationGuard.includes('packages/application/src/career-alumni'));

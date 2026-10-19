@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { CourseCompletionStatus, CourseEnrollmentStatus } from '@manaratak/domain';
+import { CourseCompletionStatus, CourseEnrollmentStatus } from '@absheer/domain';
 import { PrismaCourseProgressRepository } from '../../src/courses/PrismaCourseProgressRepository';
 
 describe('PrismaCourseProgressRepository', () => {

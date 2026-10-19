@@ -3,7 +3,7 @@ import { InternationalTestPublicUseCases } from '../../src/tests-platform/use-ca
 import { 
   InternationalTestStatus,
   IInternationalTestRepository
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('InternationalTestPublicUseCases', () => {
   let mockRepository: any;

@@ -1,7 +1,7 @@
--- MANARATAK_MIGRATION_OWNER: background_jobs
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
--- MNT-AUD-0007: PostgreSQL-backed durable background worker foundation.
+-- ABSHEER_MIGRATION_OWNER: background_jobs
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
+-- ABSH-AUD-0007: PostgreSQL-backed durable background worker foundation.
 -- Source migration only. Apply only through the approved database remediation/provisioning gates.
 CREATE TABLE "BackgroundJobRecord" (
   "id" TEXT NOT NULL,

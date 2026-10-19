@@ -3,7 +3,7 @@ import {
   CertificateStatus,
   ICertificateRenderingService,
   ICertificateRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface CertificateArtifactRenderOutcome {
   certificateId: string;
@@ -21,7 +21,7 @@ export class CertificateArtifactRenderUseCase {
     private readonly repository: ICertificateRepository,
     private readonly renderer: ICertificateRenderingService,
     private readonly artifactStore: ICertificateArtifactStore,
-    private readonly trustGuard?: { assertRenderable(certificate: import('@manaratak/domain').CertificateDto): Promise<void>; attachRenderedArtifacts?: (id: string, input: Omit<import('@manaratak/domain').AttachCertificateArtifactsDto, 'certificateId' | 'actorId' | 'correlationId'>, actor: string, correlation?: string) => Promise<unknown> },
+    private readonly trustGuard?: { assertRenderable(certificate: import('@absheer/domain').CertificateDto): Promise<void>; attachRenderedArtifacts?: (id: string, input: Omit<import('@absheer/domain').AttachCertificateArtifactsDto, 'certificateId' | 'actorId' | 'correlationId'>, actor: string, correlation?: string) => Promise<unknown> },
   ) {}
 
   public async renderCertificate(

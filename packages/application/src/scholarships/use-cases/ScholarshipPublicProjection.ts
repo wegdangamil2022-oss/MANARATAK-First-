@@ -1,5 +1,5 @@
-import { isPublicScholarshipUniversityLink } from '@manaratak/domain';
-import type { PublicScholarshipDto, ScholarshipDto } from '@manaratak/domain';
+import { isPublicScholarshipUniversityLink } from '@absheer/domain';
+import type { PublicScholarshipDto, ScholarshipDto } from '@absheer/domain';
 
 /** Public scholarship shape: explicit allowlist, never a spread of the mutable owner record. */
 export function projectPublishedScholarship(source: ScholarshipDto, displayName: string): PublicScholarshipDto {

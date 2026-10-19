@@ -5,7 +5,7 @@ export function inspectStaticBuild(directory, unit, expectedSha) {
   try {
     const index = path.join(directory, 'index.html'),
       descriptor = JSON.parse(
-        fs.readFileSync(path.join(directory, 'manaratak-build.json'), 'utf8'),
+        fs.readFileSync(path.join(directory, 'absheer-build.json'), 'utf8'),
       );
     const html = fs.readFileSync(index, 'utf8');
     if (
@@ -13,7 +13,7 @@ export function inspectStaticBuild(directory, unit, expectedSha) {
       descriptor.unit !== unit ||
       !SHA.test(descriptor.sourceSha) ||
       (expectedSha && descriptor.sourceSha !== expectedSha) ||
-      !html.includes(`<meta name="manaratak-build-sha" content="${descriptor.sourceSha}">`)
+      !html.includes(`<meta name="absheer-build-sha" content="${descriptor.sourceSha}">`)
     )
       throw new Error('INVALID');
     return { version: 1, unit, status: 'BUILT', sourceSha: descriptor.sourceSha };

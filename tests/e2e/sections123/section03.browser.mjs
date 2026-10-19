@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const browser = await chromium.launch({ executablePath: '/usr/bin/chromium', args: ['--no-sandbox'] });
 try {
   const context = await browser.newContext({ bypassCSP: true, viewport: { width: 390, height: 844 } });
-  await context.addInitScript(() => localStorage.setItem('manaratak_admin_lang', 'en'));
+  await context.addInitScript(() => localStorage.setItem('absheer_admin_lang', 'en'));
   const page = await context.newPage();
   page.setDefaultTimeout(10000);
   const errors = [], calls = [];

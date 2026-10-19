@@ -1,12 +1,12 @@
 import { createHash, createHmac, timingSafeEqual } from 'crypto';
-import { createQrMatrix } from '@manaratak/shared';
+import { createQrMatrix } from '@absheer/shared';
 import {
   CertificateNumberingInput,
   CertificateVerificationQrPayload,
   ICertificateNumberingService,
   ICertificateSignatureService,
   ICertificateVerificationQrService,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface CertificateSigningRuntimeConfiguration {
   artifactReadinessProbe?: () => Promise<{

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { AcademicTaxonomyDeterministicKey, AcademicTaxonomyNodeType, AcademicStandardType } from '@manaratak/domain';
+import { AcademicTaxonomyDeterministicKey, AcademicTaxonomyNodeType, AcademicStandardType } from '@absheer/domain';
 
 // Extract the baseline logic to be testable
 const taxonomyNodes = [

@@ -1,4 +1,4 @@
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 import { EnterpriseEvent } from '../aggregates/EnterpriseEvent';
 
 

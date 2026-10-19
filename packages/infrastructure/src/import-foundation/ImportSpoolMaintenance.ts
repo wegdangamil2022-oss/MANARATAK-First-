@@ -6,7 +6,7 @@ let sweepOffset = 0;
 export async function sweepOrphanImportSpools(root = tmpdir(), now = Date.now()): Promise<number> {
   let removed = 0;
   const entries = await readdir(root, { withFileTypes: true });
-  const candidates = entries.filter(item => item.isDirectory() && /^manaratak-import-[A-Za-z0-9]+$/.test(item.name)).sort((a,b) => a.name.localeCompare(b.name));
+  const candidates = entries.filter(item => item.isDirectory() && /^absheer-import-[A-Za-z0-9]+$/.test(item.name)).sort((a,b) => a.name.localeCompare(b.name));
   if (sweepOffset >= candidates.length) sweepOffset = 0;
   const page = candidates.slice(sweepOffset, sweepOffset + 100); sweepOffset += page.length;
   for (const entry of page) {

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { MajorFilters, PaginatedMajorResult } from '@manaratak/domain';
+import { MajorFilters, PaginatedMajorResult } from '@absheer/domain';
 
 export interface CatalogItemDto {
   id: string;

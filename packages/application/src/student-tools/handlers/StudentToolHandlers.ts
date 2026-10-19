@@ -16,7 +16,7 @@ import {
   StudentToolExecutionType,
   UniversityComparisonInput,
   UniversityComparisonOutput,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 function known(input: Record<string, unknown>, fields: string[]) {
   if (Object.keys(input).some((key) => !fields.includes(key)))

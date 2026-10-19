@@ -3,7 +3,7 @@ import type {
   ITestDiscoveryLinkRepository,
   ITestDiscoveryOwnerGateway,
   TestDiscoveryPage,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 /** Commands belong to the producing owner. Public reads never mutate either catalog. */
 export class TestDiscoveryOwnerUseCases {
   constructor(

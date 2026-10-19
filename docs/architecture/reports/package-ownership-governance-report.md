@@ -1,7 +1,7 @@
 # Package Ownership Governance & Audit Report
 
 ## 1. Executive Summary
-This document establishes the official Package Ownership Governance standard for the MANARATAK monorepo. Clear ownership is critical for accountability, security, and architectural integrity. This report audits all existing packages, assigns Architectural Owners, defines functional boundaries, and integrates these assignments with the Repository Governance and Enterprise Dependency Graph standards. An automated audit was conducted to identify missing or conflicting ownership, resulting in a Gap Analysis and Governance Update Plan.
+This document establishes the official Package Ownership Governance standard for the ABSHEER monorepo. Clear ownership is critical for accountability, security, and architectural integrity. This report audits all existing packages, assigns Architectural Owners, defines functional boundaries, and integrates these assignments with the Repository Governance and Enterprise Dependency Graph standards. An automated audit was conducted to identify missing or conflicting ownership, resulting in a Gap Analysis and Governance Update Plan.
 
 ## 2. Package Ownership Audit & Inventory
 
@@ -11,29 +11,29 @@ The audit evaluated all internal packages and applications to formalize their ow
 
 | Package Name | Architectural Owner | Functional Responsibility | Business Domain | Public APIs Owned | Internal Components | Dependencies | Consumers | Protected Assets |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `@manaratak/api` | API Gateway Team | Core Backend API Gateway, routing, auth termination. | Integration / API Gateway | REST/GraphQL Endpoints | Route Handlers, Middlewares | `infrastructure`, `application` | External Clients | API Keys, Routes |
-| `@manaratak/web` | Frontend Platform Team | Public-facing student and partner portals. | Enterprise Public Platform / Enterprise Student Platform presentation boundary | N/A | Pages, Layouts, Forms | `ui`, `application` | End Users | Next.js Config |
-| `@manaratak/admin` | Internal Tools Team | Administrative backoffice and CMS presentation. | Enterprise CMS / Backoffice | N/A | Admin Views, Tables | `ui`, `application` | Internal Staff | Admin Routes |
+| `@absheer/api` | API Gateway Team | Core Backend API Gateway, routing, auth termination. | Integration / API Gateway | REST/GraphQL Endpoints | Route Handlers, Middlewares | `infrastructure`, `application` | External Clients | API Keys, Routes |
+| `@absheer/web` | Frontend Platform Team | Public-facing student and partner portals. | Enterprise Public Platform / Enterprise Student Platform presentation boundary | N/A | Pages, Layouts, Forms | `ui`, `application` | End Users | Next.js Config |
+| `@absheer/admin` | Internal Tools Team | Administrative backoffice and CMS presentation. | Enterprise CMS / Backoffice | N/A | Admin Views, Tables | `ui`, `application` | Internal Staff | Admin Routes |
 
 ### 2.2 Domain & Core Packages (`packages/*`)
 
 | Package Name | Architectural Owner | Functional Responsibility | Business Domain | Public APIs Owned | Internal Components | Dependencies | Consumers | Protected Assets |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `@manaratak/domain` | Chief Enterprise Architect | Core business entities, value objects, and interfaces. | All Business Domains | Entities, Value Objects | Domain Logic | `core`, `types` | `application`, `infrastructure` | Business Rules |
-| `@manaratak/application`| Application Arch. Team | Use cases, command/query handlers, and application logic. | All Business Domains | Use Cases, DTOs | Handlers, Validators | `domain`, `core` | `api`, `web`, `admin` | Application Logic |
-| `@manaratak/infrastructure`| Platform Engineering | Concrete repositories, database adapters, and external API clients. | Shared Infrastructure | DI Modules, Adapters | DB Clients, ORM Models | `application`, `domain` | `api` | DB Credentials |
-| `@manaratak/core` | Core Architecture Team | Base classes, shared architectural abstractions, error handling. | Cross-Cutting Concerns | BaseEntity, Result | Utilities | None | All Packages | Base Classes |
-| `@manaratak/config` | DevOps / SRE Team | Environment variable parsing, secrets management, and configuration. | Shared Infrastructure | ConfigService | Schema Validators | None | All Packages | Environment Schema |
-| `@manaratak/testing` | QA Engineering Team | Shared testing utilities, mocks, and fixtures. | Quality Assurance | Mock Factories | Setup Scripts | `domain`, `core` | Test Suites | Fixtures |
-| `@manaratak/types` | Core Architecture Team | Global TypeScript types, interfaces, and enums. | Cross-Cutting Concerns | Global Enums, Interfaces | N/A | None | All Packages | Global Types |
+| `@absheer/domain` | Chief Enterprise Architect | Core business entities, value objects, and interfaces. | All Business Domains | Entities, Value Objects | Domain Logic | `core`, `types` | `application`, `infrastructure` | Business Rules |
+| `@absheer/application`| Application Arch. Team | Use cases, command/query handlers, and application logic. | All Business Domains | Use Cases, DTOs | Handlers, Validators | `domain`, `core` | `api`, `web`, `admin` | Application Logic |
+| `@absheer/infrastructure`| Platform Engineering | Concrete repositories, database adapters, and external API clients. | Shared Infrastructure | DI Modules, Adapters | DB Clients, ORM Models | `application`, `domain` | `api` | DB Credentials |
+| `@absheer/core` | Core Architecture Team | Base classes, shared architectural abstractions, error handling. | Cross-Cutting Concerns | BaseEntity, Result | Utilities | None | All Packages | Base Classes |
+| `@absheer/config` | DevOps / SRE Team | Environment variable parsing, secrets management, and configuration. | Shared Infrastructure | ConfigService | Schema Validators | None | All Packages | Environment Schema |
+| `@absheer/testing` | QA Engineering Team | Shared testing utilities, mocks, and fixtures. | Quality Assurance | Mock Factories | Setup Scripts | `domain`, `core` | Test Suites | Fixtures |
+| `@absheer/types` | Core Architecture Team | Global TypeScript types, interfaces, and enums. | Cross-Cutting Concerns | Global Enums, Interfaces | N/A | None | All Packages | Global Types |
 
 ### 2.3 Shared & Utility Packages (`packages/*`)
 
 | Package Name | Architectural Owner | Functional Responsibility | Business Domain | Public APIs Owned | Internal Components | Dependencies | Consumers | Protected Assets |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `@manaratak/ui` | Design System Team | Reusable React components, theme, and design tokens. | Presentation Layer | Buttons, Modals, Theme | React Hooks, CSS | `core`, `types` | `web`, `admin` | Design Tokens |
-| `@manaratak/utils` | Platform Engineering | Shared utility functions (e.g., date formatting, string manipulation). | Cross-Cutting Concerns | Formatters, Helpers | N/A | None | All Packages | Utility Functions |
-| `@manaratak/shared` | Platform Engineering | Shared constants and cross-boundary DTOs. | Cross-Cutting Concerns | Constants | N/A | None | All Packages | Shared Constants |
+| `@absheer/ui` | Design System Team | Reusable React components, theme, and design tokens. | Presentation Layer | Buttons, Modals, Theme | React Hooks, CSS | `core`, `types` | `web`, `admin` | Design Tokens |
+| `@absheer/utils` | Platform Engineering | Shared utility functions (e.g., date formatting, string manipulation). | Cross-Cutting Concerns | Formatters, Helpers | N/A | None | All Packages | Utility Functions |
+| `@absheer/shared` | Platform Engineering | Shared constants and cross-boundary DTOs. | Cross-Cutting Concerns | Constants | N/A | None | All Packages | Shared Constants |
 
 ## 3. Consistency Verification
 
@@ -49,10 +49,10 @@ The package ownership assignments were cross-referenced against existing governa
 
 The audit revealed the following governance gaps and structural anomalies:
 
-*   **Missing Ownership:** `@manaratak/admin` is currently an empty placeholder application. While it has a theoretical owner (Internal Tools Team), it lacks active stewardship and a clear implementation roadmap.
-*   **Conflicting Ownership:** The `@manaratak/domain` package is highly monolithic. As per the `Enterprise Domain Ownership Matrix`, different business domains (e.g., Scholarships, Learning) have distinct owners. A single `@manaratak/domain` package creates shared, conflicting responsibility across multiple Domain Architects.
-*   **Shared Responsibility:** `@manaratak/utils` and `@manaratak/shared` suffer from the "tragedy of the commons." Without a strict Architectural Owner actively gating changes, these packages risk becoming dumping grounds for unrelated code.
-*   **Undefined Boundaries:** The boundary between `@manaratak/core`, `@manaratak/utils`, and `@manaratak/shared` is ambiguous. Many cross-cutting concerns overlap, leading to confusion over where new utilities should be placed.
+*   **Missing Ownership:** `@absheer/admin` is currently an empty placeholder application. While it has a theoretical owner (Internal Tools Team), it lacks active stewardship and a clear implementation roadmap.
+*   **Conflicting Ownership:** The `@absheer/domain` package is highly monolithic. As per the `Enterprise Domain Ownership Matrix`, different business domains (e.g., Scholarships, Learning) have distinct owners. A single `@absheer/domain` package creates shared, conflicting responsibility across multiple Domain Architects.
+*   **Shared Responsibility:** `@absheer/utils` and `@absheer/shared` suffer from the "tragedy of the commons." Without a strict Architectural Owner actively gating changes, these packages risk becoming dumping grounds for unrelated code.
+*   **Undefined Boundaries:** The boundary between `@absheer/core`, `@absheer/utils`, and `@absheer/shared` is ambiguous. Many cross-cutting concerns overlap, leading to confusion over where new utilities should be placed.
 
 ## 5. Governance Update Plan
 
@@ -66,7 +66,7 @@ To remediate the identified gaps and formalize package ownership, the following 
 
 ## 6. Future Architecture Evolution
 
-1.  **Domain Package Splitting:** Initiate an architectural review to split the monolithic `@manaratak/domain`, `@manaratak/application`, and `@manaratak/infrastructure` packages into vertical, domain-specific packages (e.g., `@manaratak/domain-scholarships`, `@manaratak/infrastructure-learning`). This aligns package structure with the `Enterprise Domain Ownership Matrix`. Note that no package restructuring has been approved at this time.
+1.  **Domain Package Splitting:** Initiate an architectural review to split the monolithic `@absheer/domain`, `@absheer/application`, and `@absheer/infrastructure` packages into vertical, domain-specific packages (e.g., `@absheer/domain-scholarships`, `@absheer/infrastructure-learning`). This aligns package structure with the `Enterprise Domain Ownership Matrix`. Note that no package restructuring has been approved at this time.
 
 ## 7. Repository Operational Recommendations
 

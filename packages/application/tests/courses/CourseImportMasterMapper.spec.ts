@@ -3,7 +3,7 @@ import {
   CourseAccessType,
   CourseImportCompletenessState,
   CourseStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseImportMasterMapper } from '../../src/courses/services/CourseImportMasterMapper';
 
 function payload(overrides: Record<string, unknown> = {}) {

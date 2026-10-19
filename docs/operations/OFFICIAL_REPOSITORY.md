@@ -1,7 +1,7 @@
 # Official repository adoption
 
-The source of truth is `wegdangamil2022-oss/MANARATAK-First-`, branch `main`.
-Predecessor repositories `wegdangamil2022-oss/MANARATAK_FINAL` and `wegdangamil2022-oss/Manaratal-Final` remain unchanged as historical references.
+The source of truth is `wegdangamil2022-oss/ABSHEER-First-`, branch `main`.
+Predecessor repositories `wegdangamil2022-oss/ABSHEER_FINAL` and `wegdangamil2022-oss/Absheer-Final` remain unchanged as historical references.
 
 ## Provenance
 

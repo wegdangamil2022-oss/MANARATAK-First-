@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { ParsedImportRow, ImportParseError, ImportTargetDomain } from '@manaratak/domain';
+import { ParsedImportRow, ImportParseError, ImportTargetDomain } from '@absheer/domain';
 import type { IImportGovernanceGateway, ImportMappingDefinition, ImportMappingProfileDto } from '../contracts/IImportGovernanceGateway';
 import type { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import { ImportAdminRouter } from '../../../../src/presentation/api/router/ImportAdminRouter';
-import { ImportTargetDomain } from '@manaratak/domain';
+import { ImportTargetDomain } from '@absheer/domain';
 
 describe('ImportAdminRouter', () => {
   beforeEach(() => {

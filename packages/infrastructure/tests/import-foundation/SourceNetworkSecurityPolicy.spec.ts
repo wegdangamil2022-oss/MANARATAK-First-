@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
+import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@absheer/domain';
 import { SourceNetworkSecurityPolicy } from '../../src/import-foundation/network/SourceNetworkSecurityPolicy';
 const source = new ImportSourceDefinition({ sourceId: 'official', displayName: 'Official', baseUrl: 'https://data.example.com/catalog/', category: SourceConnectorCategory.OFFICIAL_API, accessClassification: SourceAccessClassification.PUBLIC_ALLOWED, status: SourceStatus.ACTIVE, connectorId: 'official-api', connectorVersion: '2.0.0', metadata: { allowedUrlScope: { allowedOrigins: ['https://data.example.com'], allowedPathPrefixes: ['/catalog/'] } } });
 describe('SourceNetworkSecurityPolicy', () => {

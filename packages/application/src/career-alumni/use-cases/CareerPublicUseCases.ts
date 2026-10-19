@@ -1,4 +1,4 @@
-import type { CareerJobFilters, ICareerReferenceGateway, ICareerRepository, PublicCareerJobPostingDto, CareerJobPostingDto } from '@manaratak/domain';
+import type { CareerJobFilters, ICareerReferenceGateway, ICareerRepository, PublicCareerJobPostingDto, CareerJobPostingDto } from '@absheer/domain';
 import { careerJobOpen, careerPublicMetadata, careerRecord, publishedCareerJob } from '../CareerPolicy';
 export interface CareerPublicFilters extends Omit<CareerJobFilters, 'status'> { country?: string; city?: string; }
 export class CareerPublicUseCases {

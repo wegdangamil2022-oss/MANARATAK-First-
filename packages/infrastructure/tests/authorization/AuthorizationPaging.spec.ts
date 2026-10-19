@@ -7,7 +7,7 @@ import {
   Policy,
   Action,
   ResourceUrn,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { InMemoryRoleRepository } from '../../src/authorization/InMemoryRoleRepository';
 import { InMemoryRoleAssignmentRepository } from '../../src/authorization/InMemoryRoleAssignmentRepository';
 import { InMemoryPolicyRepository } from '../../src/authorization/InMemoryPolicyRepository';

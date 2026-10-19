@@ -2,8 +2,8 @@ import type {
   INotificationRecipientGateway,
   IIdentityRepository,
   AuthorizationEvaluatorService,
-} from '@manaratak/domain';
-import type { IPrincipalAccessValidator } from '@manaratak/core';
+} from '@absheer/domain';
+import type { IPrincipalAccessValidator } from '@absheer/core';
 /** Notification owner eligibility for explicit audit administrators; no contact-string inference. */
 export class AuditAdministratorRecipientGateway implements INotificationRecipientGateway {
   constructor(

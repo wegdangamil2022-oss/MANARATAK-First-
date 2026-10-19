@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
-import type { AuthorizationEvaluatorService } from '@manaratak/domain';
-import type { AcademicProgramExplorerUseCases } from '@manaratak/application';
+import type { AuthorizationEvaluatorService } from '@absheer/domain';
+import type { AcademicProgramExplorerUseCases } from '@absheer/application';
 const id = z.string().trim().min(1).max(160);
 export class AcademicProgramExplorerRouter {
   static create(

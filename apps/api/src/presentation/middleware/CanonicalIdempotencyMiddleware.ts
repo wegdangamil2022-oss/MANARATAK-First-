@@ -1,7 +1,7 @@
 import { isNotificationPreviewRequest } from '../http/NotificationPreviewRequest.js';
 import { createHash } from 'node:crypto';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
-import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
+import type { PrismaApiIdempotencyStore } from '@absheer/infrastructure';
 import { problemDetails } from '../http/ProblemDetails.js';
 
 function sha256(value: string): string {

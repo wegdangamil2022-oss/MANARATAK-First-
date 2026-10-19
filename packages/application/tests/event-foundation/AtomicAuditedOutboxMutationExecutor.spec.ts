@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { OutboxProcessingState } from '@manaratak/domain';
+import { OutboxProcessingState } from '@absheer/domain';
 import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
 
 const audit = {

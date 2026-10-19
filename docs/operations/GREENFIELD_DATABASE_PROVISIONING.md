@@ -1,4 +1,4 @@
-# MANARATAK — Greenfield Database Provisioning and Mutation Safety
+# ABSHEER — Greenfield Database Provisioning and Mutation Safety
 
 **Status:** ACTIVE OPERATIONAL AUTHORITY  
 **Effective date:** 2026-09-06  
@@ -7,7 +7,7 @@
 
 ## 1. Authority
 
-MANARATAK does not require an historical/original development database in order to begin runtime closure. The supported lifecycle is:
+ABSHEER does not require an historical/original development database in order to begin runtime closure. The supported lifecycle is:
 
 1. Source-complete working tree.
 2. Provision or select a clean PostgreSQL target.
@@ -64,7 +64,7 @@ npm run db:remediation:dry-run
 npm run db:remediation:rollback-plan
 ```
 
-For a new development database whose URL is `postgresql://...@localhost:5432/manaratak_dev`, the operator must explicitly set the target identity and purpose before deploy:
+For a new development database whose URL is `postgresql://...@localhost:5432/absheer_dev`, the operator must explicitly set the target identity and purpose before deploy:
 
 ```bash
 export NODE_ENV=development
@@ -72,7 +72,7 @@ export DATABASE_PROVISIONING_GATE=APPROVED
 export ALLOW_DATABASE_MUTATIONS=YES
 export DATABASE_MUTATION_ENVIRONMENT=development
 export DATABASE_MUTATION_PURPOSE=provision
-export DATABASE_MUTATION_TARGET=localhost:5432/manaratak_dev
+export DATABASE_MUTATION_TARGET=localhost:5432/absheer_dev
 npm run db:remediation:deploy
 ```
 

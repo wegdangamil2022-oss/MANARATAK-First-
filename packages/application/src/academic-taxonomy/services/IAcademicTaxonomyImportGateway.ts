@@ -1,4 +1,4 @@
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import type { AcademicImportRecord } from './AcademicTaxonomyScreeningConsumer';
 export interface AcademicImportReview {
   id: string; receiptId: string; sourceHash: string; record: AcademicImportRecord; previewHash: string;

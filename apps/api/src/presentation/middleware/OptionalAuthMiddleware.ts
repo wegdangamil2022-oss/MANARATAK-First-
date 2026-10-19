@@ -4,7 +4,7 @@ import {
   type ISessionManager,
   type ITokenProvider,
   UnauthorizedException,
-} from '@manaratak/core';
+} from '@absheer/core';
 import { readAccessCookie } from '../security/HttpOnlyAuthCookies.js';
 
 /**

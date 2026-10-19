@@ -11,7 +11,7 @@ import {
   ImportRecordStatus,
   IScholarshipRepository,
   ScholarshipDto
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { 
   ImportAdminUseCases, 
   AdminScholarshipUseCases, 

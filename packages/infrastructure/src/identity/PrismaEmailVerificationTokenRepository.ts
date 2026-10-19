@@ -1,4 +1,4 @@
-import { IEmailVerificationTokenRepository, EmailVerificationTokenRecord } from '@manaratak/domain';
+import { IEmailVerificationTokenRepository, EmailVerificationTokenRecord } from '@absheer/domain';
 
 export class PrismaEmailVerificationTokenRepository implements IEmailVerificationTokenRepository {
   constructor(private readonly prisma: any) {}

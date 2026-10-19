@@ -1,4 +1,4 @@
-import type { CourseProviderRegistryFilters, ExternalCourseProviderDto, UpdateCourseProviderMappings } from '@manaratak/domain';
+import type { CourseProviderRegistryFilters, ExternalCourseProviderDto, UpdateCourseProviderMappings } from '@absheer/domain';
 import { adminApiClient } from './client';
 
 export type ProviderRegistryRecord = Omit<ExternalCourseProviderDto, 'updatedAt' | 'createdAt' | 'lastVerifiedAt'> & { updatedAt: string; createdAt: string; lastVerifiedAt?: string };

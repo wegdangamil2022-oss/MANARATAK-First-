@@ -20,7 +20,7 @@ import {
   ServiceWorkflowDefinitionDto,
   ServiceWorkflowDefinitionStatus,
   ServiceWorkflowExecutionDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const object = (value: unknown): Record<string, unknown> | null =>
   value && typeof value === 'object' && !Array.isArray(value)

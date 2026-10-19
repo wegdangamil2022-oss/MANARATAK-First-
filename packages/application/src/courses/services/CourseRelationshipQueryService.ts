@@ -2,7 +2,7 @@ import {
   ICourseRelationshipRepository,
   CourseRelationshipPublicFilters,
   PublicCourseFilters,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class CourseRelationshipQueryService {
   public constructor(private readonly repository: ICourseRelationshipRepository) {}

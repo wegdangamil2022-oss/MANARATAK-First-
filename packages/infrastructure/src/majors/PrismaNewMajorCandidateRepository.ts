@@ -11,7 +11,7 @@ import {
   NewMajorCandidateSourceRef,
   NewMajorCandidateResolutionResult,
   PaginatedNewMajorCandidateResult,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 interface CandidateTransactionContext extends AtomicPersistenceContext {
   readonly transactionClient: Prisma.TransactionClient;

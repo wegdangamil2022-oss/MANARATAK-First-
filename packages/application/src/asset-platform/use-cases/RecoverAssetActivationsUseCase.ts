@@ -1,4 +1,4 @@
-import { AssetId, AssetLifecycleState, IAssetRecordRepository, IAuditRecordRepository } from '@manaratak/domain';
+import { AssetId, AssetLifecycleState, IAssetRecordRepository, IAuditRecordRepository } from '@absheer/domain';
 import { createAuditRecordFromDto } from '../../audit/use-cases/AuditRecordFactory';
 import { ProcessAssetLifecycleUseCase } from './ProcessAssetLifecycleUseCase';
 

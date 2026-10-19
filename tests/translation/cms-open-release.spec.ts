@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-vi.mock('@manaratak/shared', async (original) => ({
-  ...(await original<typeof import('@manaratak/shared')>()),
+vi.mock('@absheer/shared', async (original) => ({
+  ...(await original<typeof import('@absheer/shared')>()),
   PUBLIC_TEMPLATE_LOCALES: ['ar', 'en'],
 }));
 import { buildCmsSitemapXml } from '../../packages/application/src/cms/use-cases/CmsSeoSitemap';
 import { renderCmsPublishedPage } from '../../packages/application/src/cms/use-cases/CmsPublishedPage';
-import type { PublicCmsContentDto } from '@manaratak/domain';
+import type { PublicCmsContentDto } from '@absheer/domain';
 describe('CMS locale release with a synthetic approved policy only', () => {
   it('preserves actual translated slugs when an isolated release policy enables both languages', () => {
     const entries = [
@@ -16,7 +16,7 @@ describe('CMS locale release with a synthetic approved policy only', () => {
     expect(xml).toContain('<loc>https://example.test/en/news/english-news</loc>');
     const content = {
       contentId: 'content',
-      siteIdentifier: 'manaratak',
+      siteIdentifier: 'absheer',
       locale: 'en',
       slug: 'english-news',
       contentType: 'NEWS',

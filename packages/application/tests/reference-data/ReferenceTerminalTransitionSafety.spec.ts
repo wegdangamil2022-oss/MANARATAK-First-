@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ReferenceLifecycleState } from '@manaratak/domain';
+import { ReferenceLifecycleState } from '@absheer/domain';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 

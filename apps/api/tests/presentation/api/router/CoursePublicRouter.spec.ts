@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { CourseAccessType, CourseOriginType } from '@manaratak/domain';
+import { CourseAccessType, CourseOriginType } from '@absheer/domain';
 import { CoursePublicRouter } from '../../../../src/presentation/api/router/CoursePublicRouter';
 
 describe('CoursePublicRouter', () => {

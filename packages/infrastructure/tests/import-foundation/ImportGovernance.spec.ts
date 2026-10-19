@@ -1,7 +1,7 @@
 import { createHash, generateKeyPairSync, sign } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
-import { ImportGovernanceUseCases, AcquireImportSourceUseCase, SourceConnectorRegistry } from '@manaratak/application';
-import { ImportSourceDefinition, SourceAccessClassification as Access, SourceConnectorCategory as Category, SourceStatus, ParsedImportRow } from '@manaratak/domain';
+import { ImportGovernanceUseCases, AcquireImportSourceUseCase, SourceConnectorRegistry } from '@absheer/application';
+import { ImportSourceDefinition, SourceAccessClassification as Access, SourceConnectorCategory as Category, SourceStatus, ParsedImportRow } from '@absheer/domain';
 import { ImportHandoffDispatcher } from '../../../application/src/import-foundation/services/ImportHandoffDispatcher';
 import { PrismaImportScreeningReceiptStore, screeningReceiptIdentity } from '../../src/import-foundation/PrismaImportScreeningReceiptStore';
 import { PrismaImportGovernanceGateway } from '../../src/import-foundation/PrismaImportGovernanceGateway';
@@ -95,7 +95,7 @@ describe('immutable mappings and delegated review', () => {
 describe('server signed approvals and robots', () => {
   const pair = generateKeyPairSync('ed25519'); const key = pair.publicKey.export({ type: 'spki', format: 'pem' }).toString();
   const token = (classification: Access, changes: Record<string, unknown> = {}) => {
-    const data = Buffer.from(JSON.stringify({ audience: 'MANARATAK_IMPORT', sourceId: 'source', sourceRevision: revision.toISOString(), classification,
+    const data = Buffer.from(JSON.stringify({ audience: 'ABSHEER_IMPORT', sourceId: 'source', sourceRevision: revision.toISOString(), classification,
       origin: 'https://example.org', pathPrefixes: ['/data'], policyReference: 'agreement-123', expiresAt: '2099-01-01T00:00:00.000Z',
       credentialBinding: 'IMPORT_SOURCE_CREDENTIAL_PROVIDER', ...changes })).toString('base64url');
     return `${data}.${sign(null, Buffer.from(data), pair.privateKey).toString('base64url')}`;
@@ -118,7 +118,7 @@ describe('server signed approvals and robots', () => {
   it('checks longest allow/disallow rules, user-agent specificity and unsupported crawl delay', () => {
     expect(() => assertRobotsAllowed('User-agent: *\nDisallow: /data\nAllow: /data/public', new URL('https://example.org/data/private'))).toThrow('PATH_DENIED');
     expect(() => assertRobotsAllowed('User-agent: *\nDisallow: /data\nAllow: /data/public', new URL('https://example.org/data/public/1'))).not.toThrow();
-    expect(() => assertRobotsAllowed('User-agent: *\nDisallow: /\nUser-agent: ManaratakImport\nAllow: /data', new URL('https://example.org/data'))).not.toThrow();
+    expect(() => assertRobotsAllowed('User-agent: *\nDisallow: /\nUser-agent: AbsheerImport\nAllow: /data', new URL('https://example.org/data'))).not.toThrow();
     expect(() => assertRobotsAllowed('User-agent: *\nDisallow: /*secret$\nCrawl-delay: 5', new URL('https://example.org/data'))).toThrow('CRAWL_DELAY');
   });
   it('fetches robots separately with pinned DNS and never fetches a denied target', async () => {
@@ -126,7 +126,7 @@ describe('server signed approvals and robots', () => {
     const policy = { validate: vi.fn(async (_source: any, value: string) => ({ url: new URL(value), addresses: ['93.184.216.34'] })) };
     const authority = new SignedSourceAccessAuthority(key, [token(Access.PUBLIC_ROBOTS_RESTRICTED)]);
     await expect(new NodeSafeSourceHttpTransport(policy as any, executor, authority).get(source(Access.PUBLIC_ROBOTS_RESTRICTED), {})).rejects.toThrow('PATH_DENIED');
-    expect(executor.execute).toHaveBeenCalledOnce(); expect(executor.execute.mock.calls[0][0]).toMatchObject({ url: new URL('https://example.org/robots.txt'), headers: { 'User-Agent': 'ManaratakImport' } });
+    expect(executor.execute).toHaveBeenCalledOnce(); expect(executor.execute.mock.calls[0][0]).toMatchObject({ url: new URL('https://example.org/robots.txt'), headers: { 'User-Agent': 'AbsheerImport' } });
   });
 });
 describe('conditional verified snapshots, drift and fleet budgets', () => {
@@ -184,7 +184,7 @@ describe('owner review decisions and conservative recovery', () => {
   });
   it('never purges an uncertain dispatch even when its record says complete', async () => {
     const { PrismaImportRetentionGateway } = await import('../../src/retention/PrismaImportRetentionGateway');
-    const { RetentionOwner, RetentionDisposition } = await import('@manaratak/domain');
+    const { RetentionOwner, RetentionDisposition } = await import('@absheer/domain');
     const tx = { importRecord: { findUnique: async () => ({ batchId: 'b', rawPayload: { _phase6HandoffState: 'DISPATCH_IN_FLIGHT' }, batch: { batchStatus: 'CANCELLED' } }), updateMany: vi.fn() }, importBatch: { updateMany: vi.fn() } };
     const candidate = { owner: RetentionOwner.IMPORT, recordId: 'r', expiresAt: new Date(0) };
     const decision = { ...candidate, disposition: RetentionDisposition.PURGE, decisionKey: 'key', reason: 'expired', decidedAt: new Date() };
@@ -210,14 +210,14 @@ it('cleans only marked dead-process spools and keeps live/unmarked artifacts', a
   const root = await mkdtemp(join(tmpdir(), 'spool-maintenance-test-')); const deadPid = 2147483647;
   const now = Date.now() + 25 * 3600_000;
   try {
-    for (const [name, pid] of [['manaratak-import-dead', deadPid], ['manaratak-import-live', process.pid]] as const) {
+    for (const [name, pid] of [['absheer-import-dead', deadPid], ['absheer-import-live', process.pid]] as const) {
       const directory = join(root, name); await mkdir(directory); await writeFile(join(directory,'owner.json'), JSON.stringify({ pid, host: hostname(), createdAt: Date.now() })); await utimes(directory, new Date(), new Date());
     }
-    await mkdir(join(root,'manaratak-import-unmarked'));
+    await mkdir(join(root,'absheer-import-unmarked'));
     expect(await sweepOrphanImportSpools(root, now)).toBe(1);
-    await expect(access(join(root,'manaratak-import-dead'))).rejects.toThrow();
-    await expect(access(join(root,'manaratak-import-live'))).resolves.toBeUndefined();
-    await expect(access(join(root,'manaratak-import-unmarked'))).resolves.toBeUndefined();
+    await expect(access(join(root,'absheer-import-dead'))).rejects.toThrow();
+    await expect(access(join(root,'absheer-import-live'))).resolves.toBeUndefined();
+    await expect(access(join(root,'absheer-import-unmarked'))).resolves.toBeUndefined();
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 

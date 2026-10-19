@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
+import { ADMIN_PERMISSION_CATALOG } from '@absheer/shared';
 import {
   ISettingDefinitionRepository,
   SettingDefinitionPageQuery,
@@ -21,7 +21,7 @@ import {
   SettingValidationRules,
   IIdentityRepository,
   LifeStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   CreateSettingDefinitionInput,
   AssignSettingValueInput,

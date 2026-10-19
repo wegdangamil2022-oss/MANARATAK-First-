@@ -10,7 +10,7 @@ import {
   ServiceFulfillmentType,
   ServiceRequestStatus,
   ServiceStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   AdminServiceFulfillmentUseCases,
   StudentServiceRequestUseCases,
@@ -29,7 +29,7 @@ const service = {
   serviceAvailabilityStatus: ServiceAvailabilityStatus.AVAILABLE,
   requiredInputsOrDocuments: ['Passport'],
   deliveryMode: ServiceDeliveryMode.ONLINE,
-  responsibleServiceOwnerType: 'MANARATAK_TEAM',
+  responsibleServiceOwnerType: 'ABSHEER_TEAM',
   status: ServiceStatus.PUBLISHED,
   completenessStatus: ServiceCompletenessStatus.COMPLETE,
   createdAt: new Date(),

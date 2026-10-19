@@ -1,6 +1,6 @@
-import type { AtomicPersistenceContext, MajorImportPayload } from '@manaratak/domain';
-import type { MajorImportReview } from '@manaratak/domain';
-export type { MajorImportReview } from '@manaratak/domain';
+import type { AtomicPersistenceContext, MajorImportPayload } from '@absheer/domain';
+import type { MajorImportReview } from '@absheer/domain';
+export type { MajorImportReview } from '@absheer/domain';
 export interface IMajorImportReviewGateway {
  withTransaction(context:AtomicPersistenceContext):IMajorImportReviewGateway;lock():Promise<void>;
  screening(id:string):Promise<{requestHash:string;result:unknown}|null>;verifyArtifact(id:string,sha256:string):Promise<void>;

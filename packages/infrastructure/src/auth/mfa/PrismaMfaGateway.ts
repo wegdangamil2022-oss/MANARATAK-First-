@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
-import type { IMfaGateway, MfaProof } from '@manaratak/application';
+import type { AtomicPersistenceContext } from '@absheer/domain';
+import type { IMfaGateway, MfaProof } from '@absheer/application';
 import { encodeBase32, matchingStep } from './Totp';
 interface Envelope {
   version: 1;
@@ -107,7 +107,7 @@ export class PrismaMfaGateway implements IMfaGateway {
     });
     return {
       secret,
-      provisioningUri: `otpauth://totp/MANARATAK:${encodeURIComponent(identityId)}?secret=${secret}&issuer=MANARATAK&algorithm=SHA1&digits=6&period=30`,
+      provisioningUri: `otpauth://totp/ABSHEER:${encodeURIComponent(identityId)}?secret=${secret}&issuer=ABSHEER&algorithm=SHA1&digits=6&period=30`,
     };
   }
   async confirm(identityId: string, code: string, context: AtomicPersistenceContext) {

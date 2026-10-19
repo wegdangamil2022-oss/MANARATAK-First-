@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
-import { IIdentityRepository, IPasswordResetTokenRepository } from '@manaratak/domain';
-import { ISessionManager } from '@manaratak/core';
+import { IIdentityRepository, IPasswordResetTokenRepository } from '@absheer/domain';
+import { ISessionManager } from '@absheer/core';
 import { assertPasswordPolicy } from './PasswordPolicy';
 
 export interface ResetPasswordInput {

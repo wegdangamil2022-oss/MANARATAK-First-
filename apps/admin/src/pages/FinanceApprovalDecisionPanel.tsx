@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import type {FinancialApprovalDto} from '@manaratak/domain';
+import type {FinancialApprovalDto} from '@absheer/domain';
 import {useTranslation} from '../i18n/I18nProvider';
 import {useFinanceOperation} from './useFinanceOperation';
 import {FinanceOperationStatus} from './FinanceOperationStatus';

@@ -3,10 +3,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   readXlsxWorkbook,
   spreadsheetRowsToObjects,
-} from '@manaratak/shared';
+} from '@absheer/shared';
 import { FileCheck2, Loader2, Upload } from 'lucide-react';
 
-import type { ReferenceDataCollection, ReferenceDataFilters } from '@manaratak/domain';
+import type { ReferenceDataCollection, ReferenceDataFilters } from '@absheer/domain';
 import { getReferenceDataPage, referenceDataAdminApi } from '../api/referenceData';
 import { AdministrativeRegionsTab } from './AdministrativeRegionsTab';
 import { canonicalPickerApi } from '../api/canonicalPickers';

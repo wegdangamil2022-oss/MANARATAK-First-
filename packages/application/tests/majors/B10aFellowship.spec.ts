@@ -1,6 +1,6 @@
 import {describe,it,expect,vi} from 'vitest';
 import {AdminMajorUseCases} from '../../src/majors/use-cases/AdminMajorUseCases';
-import {assertMajorReviewCoverage,publicMajorProjection} from '@manaratak/domain';
+import {assertMajorReviewCoverage,publicMajorProjection} from '@absheer/domain';
 function setup(status='READY_TO_REVIEW') {
   const major:any={id:'owner',status,academicFieldId:'taxonomy',profiles:[]};
   const repo:any={findById:async()=>major,withTransaction:()=>repo,lockForRevision:vi.fn(async(_id,revision)=>{if(revision!==1)throw new Error('STALE');}),advanceRevision:vi.fn(),listLevelProfiles:async()=>major.profiles,allocateNextProfileCode:vi.fn(async()=>'FEL-330'),createLevelProfile:vi.fn(async input=>({...input,id:'profile'})),createSource:vi.fn(),createVersion:vi.fn(async input=>({...input,id:'version'})),createContentSections:vi.fn()};

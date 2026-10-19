@@ -7,7 +7,7 @@ import {
   InternationalTestCategory,
   InternationalTestCompletenessStatus,
   InternationalTestStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { InternationalTestImportPromotionUseCase } from '../../src/tests-platform/use-cases/InternationalTestImportPromotionUseCase';
 
 describe('InternationalTestImportPromotionUseCase', () => {

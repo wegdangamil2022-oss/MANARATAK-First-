@@ -1,7 +1,7 @@
 import { randomUUID, createHash } from 'node:crypto';
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { CertificateStatus, type IssueCertificateDto } from '@manaratak/domain';
+import { CertificateStatus, type IssueCertificateDto } from '@absheer/domain';
 import { PrismaCertificateRepository } from '../../src/certificates/PrismaCertificateRepository';
 const isolated = process.env.CERTIFICATE_RUNTIME_ISOLATED === '1';
 const url = new URL(
@@ -10,7 +10,7 @@ const url = new URL(
 if (
   isolated &&
   (!['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) ||
-    url.pathname !== '/manaratak_certificate_verification')
+    url.pathname !== '/absheer_certificate_verification')
 )
   throw new Error('CERTIFICATE_DISPOSABLE_DATABASE_REQUIRED');
 const first = new PrismaClient(),
@@ -57,7 +57,7 @@ function issuance(): IssueCertificateDto {
     templateVersionId: versionId,
     templateVersion: '1.0.0',
     issuerId,
-    issuerName: 'Isolated MANARATAK',
+    issuerName: 'Isolated ABSHEER',
     digitalSignature: 'fixture-signature',
     signingKeyReference: key,
     skills: [],
@@ -98,8 +98,8 @@ describe.skipIf(!isolated)(
           id: issuerId,
           publicId: randomUUID(),
           code: `FIXTURE-${randomUUID()}`,
-          name: 'Isolated MANARATAK',
-          issuerType: 'MANARATAK',
+          name: 'Isolated ABSHEER',
+          issuerType: 'ABSHEER',
           status: 'ACTIVE',
           issuerLogoAssetId: logoId,
           signingKeyReference: key,

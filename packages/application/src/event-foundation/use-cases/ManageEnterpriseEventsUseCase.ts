@@ -10,7 +10,7 @@ import {
   EventCausationReference,
   IEnterpriseEventRepository,
   EnterpriseEventSpecification
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   RegisterEnterpriseEventDto,
   PublishEnterpriseEventDto,

@@ -12,7 +12,7 @@ import {
   ICourseCurriculumRepository,
   ICourseProgressRepository,
   ICourseRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseProgressUseCases } from '../../src/courses/use-cases/CourseProgressUseCases';
 
 const atomic = {
@@ -29,7 +29,7 @@ describe('CourseProgressUseCases W9 integrity', () => {
   const nativeCourse = {
     id: 'course-1', publicId: 'crs-1', slug: 'native-course', canonicalName: 'Native Course',
     canonicalDedupKey: 'native-course', displayName: 'Native Course', version: 3,
-    accessType: CourseAccessType.FREE_CERTIFICATE, originType: CourseOriginType.NATIVE_MANARATAK_COURSE,
+    accessType: CourseAccessType.FREE_CERTIFICATE, originType: CourseOriginType.NATIVE_ABSHEER_COURSE,
     directCourseUrl: '/courses/native-course', status: CourseStatus.PUBLISHED,
     completenessStatus: CourseImportCompletenessState.COMPLETE, certificateAvailable: true,
     createdAt: new Date(), updatedAt: new Date(),

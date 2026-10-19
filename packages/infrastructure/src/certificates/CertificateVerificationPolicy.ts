@@ -1,4 +1,4 @@
-import type { IResolvedSettingsReader } from '@manaratak/domain';
+import type { IResolvedSettingsReader } from '@absheer/domain';
 
 /** Values are administered through the canonical Settings workspace, never secrets. */
 export class CertificateVerificationPolicy {

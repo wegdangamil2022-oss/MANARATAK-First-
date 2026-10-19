@@ -20,7 +20,7 @@ import {
   IDegreeLevelRepository,
   IAcademicTaxonomyRepository,
   UpsertInternationalTestDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AtomicDomainMutationCoordinator } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { InternationalTestCanonicalRelationshipService } from './InternationalTestCanonicalRelationshipService';
 

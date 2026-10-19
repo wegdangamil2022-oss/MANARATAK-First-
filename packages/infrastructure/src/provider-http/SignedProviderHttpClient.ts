@@ -1,4 +1,4 @@
-import { HealthStatus } from '@manaratak/core';
+import { HealthStatus } from '@absheer/core';
 import { createHash, createHmac, randomUUID } from 'node:crypto';
 
 export interface SignedProviderHttpClientOptions {
@@ -124,11 +124,11 @@ export class SignedProviderHttpClient {
     const signature = createHmac('sha256', this.options.signingSecret).update(canonical).digest('hex');
     const headers: Record<string, string> = {
       accept: 'application/json, application/octet-stream',
-      'x-manaratak-provider-key': this.options.apiKey.trim(),
-      'x-manaratak-timestamp': timestamp,
-      'x-manaratak-nonce': nonce,
-      'x-manaratak-content-sha256': bodyHash,
-      'x-manaratak-signature': signature,
+      'x-absheer-provider-key': this.options.apiKey.trim(),
+      'x-absheer-timestamp': timestamp,
+      'x-absheer-nonce': nonce,
+      'x-absheer-content-sha256': bodyHash,
+      'x-absheer-signature': signature,
     };
     if (contentType) headers['content-type'] = contentType;
     if (requestOptions.idempotencyKey) headers['idempotency-key'] = requestOptions.idempotencyKey;

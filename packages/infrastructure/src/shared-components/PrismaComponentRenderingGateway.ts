@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { SharedComponent } from '@manaratak/domain';
-import { IComponentRenderingGateway } from '@manaratak/application';
+import { SharedComponent } from '@absheer/domain';
+import { IComponentRenderingGateway } from '@absheer/application';
 
 export class PrismaComponentRenderingGateway implements IComponentRenderingGateway {
   constructor(private readonly prisma: PrismaClient) {}

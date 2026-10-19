@@ -1,6 +1,6 @@
 import {describe,it,expect,vi,beforeEach} from 'vitest';
 const policy=vi.hoisted(()=>({enabled:false}));
-vi.mock('@manaratak/shared',async original=>{const module=await original<any>();return {...module,assertTranslationContentAuthoringEnabled:(...args:any[])=>{if(!policy.enabled)module.assertTranslationContentAuthoringEnabled(...args);}};});
+vi.mock('@absheer/shared',async original=>{const module=await original<any>();return {...module,assertTranslationContentAuthoringEnabled:(...args:any[])=>{if(!policy.enabled)module.assertTranslationContentAuthoringEnabled(...args);}};});
 import {prepareOwnerDescription,approvedOwnerDescriptions,assertOwnerDescriptionsCurrent} from '../../src/localization/OwnerLocalizedDescription';
 import {AdminScholarshipUseCases} from '../../src/scholarships/use-cases/AdminScholarshipUseCases';
 import {InternationalTestAdminUseCases} from '../../src/tests-platform/use-cases/InternationalTestUseCases';
@@ -9,9 +9,9 @@ import {PublicCourseUseCases} from '../../src/courses/use-cases/PublicCourseUseC
 import {PublicScholarshipUseCases} from '../../src/scholarships/use-cases/PublicScholarshipUseCases';
 import {CoursePublicationService} from '../../src/courses/services/CoursePublicationService';
 import {LocalizedInternationalTestPublicUseCases} from '../../src/tests-platform/use-cases/LocalizedInternationalTestPublicUseCases';
-import {publicInternationalTest} from '@manaratak/domain';
+import {publicInternationalTest} from '@absheer/domain';
 const input={locale:'en' as const,displayName:'Reviewed title',description:'Reviewed description'};
-const owner=()=>({id:'owner',publicId:'exact-id',displayName:'Source title',canonicalName:'Canonical source',description:'Source description',version:1,revision:1,status:'DRAFT',completenessStatus:'COMPLETE',originType:'NATIVE_MANARATAK_COURSE',optionalFields:{description:'Source description'}});
+const owner=()=>({id:'owner',publicId:'exact-id',displayName:'Source title',canonicalName:'Canonical source',description:'Source description',version:1,revision:1,status:'DRAFT',completenessStatus:'COMPLETE',originType:'NATIVE_ABSHEER_COURSE',optionalFields:{description:'Source description'}});
 beforeEach(()=>{policy.enabled=true;});
 describe('B11 native owner description pairs',()=>{
  it('does not activate content writes while implementing the source contract',()=>{policy.enabled=false;expect(()=>prepareOwnerDescription('COURSE',owner(),input)).toThrow('CONTENT_AUTHORING_DISABLED');});

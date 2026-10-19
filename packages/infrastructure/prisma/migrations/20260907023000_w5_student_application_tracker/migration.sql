@@ -1,8 +1,8 @@
--- MANARATAK_MIGRATION_OWNER: student
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: student
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 
--- W5 / MNT-AUD-0074: P15 private scholarship application tracker.
+-- W5 / ABSH-AUD-0074: P15 private scholarship application tracker.
 -- Ownership: Student Workspace / Phase 15. Scholarship facts remain owned by Phase 12.
 CREATE TABLE "StudentApplicationTracker" (
   "id" TEXT NOT NULL, "studentReferenceId" TEXT NOT NULL, "scholarshipId" TEXT NOT NULL, "scholarshipSlug" TEXT,

@@ -6,7 +6,7 @@ import test from 'node:test';
 const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
-test('MNT-AUD-0110 audit HTTP surface is read-only and persistence is append-only', () => {
+test('ABSH-AUD-0110 audit HTTP surface is read-only and persistence is append-only', () => {
   const router = read('apps/api/src/presentation/api/router/AuditRouter.ts');
   assert.doesNotMatch(router, /router\.post\('\/records'/);
   assert.match(router, /router\.get\('\/records'/);
@@ -24,7 +24,7 @@ test('MNT-AUD-0110 audit HTTP surface is read-only and persistence is append-onl
   assert.match(inMemory, /AUDIT_APPEND_ONLY_DUPLICATE/);
 });
 
-test('MNT-AUD-0106 authenticated Admin actor is server-owned and required', () => {
+test('ABSH-AUD-0106 authenticated Admin actor is server-owned and required', () => {
   const helper = read('apps/api/src/presentation/audit/AuditHelper.ts');
   assert.match(helper, /getAuthenticatedPrincipal\(req\)/);
   assert.match(helper, /AUDIT_AUTHENTICATED_PRINCIPAL_REQUIRED/);
@@ -39,7 +39,7 @@ test('MNT-AUD-0106 authenticated Admin actor is server-owned and required', () =
   assert.match(middleware, /this\.scope === 'AUTH' \? 'OPTIONAL' : 'REQUIRED'/);
 });
 
-test('MNT-AUD-0084 all Admin mutations are audited by default', () => {
+test('ABSH-AUD-0084 all Admin mutations are audited by default', () => {
   const policy = read('apps/api/src/presentation/audit/MutationAuditMiddleware.ts');
   assert.match(policy, /return 'STANDARD_AUDIT_REQUIRED';/);
   for (const area of ['/admin/scholarships', '/admin/courses', '/admin/certificates', '/admin/cms', '/admin/services', '/admin/finance', '/admin/careers', '/admin/ai', '/admin/student-tools']) {

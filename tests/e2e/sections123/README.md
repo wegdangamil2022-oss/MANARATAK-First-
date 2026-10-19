@@ -9,11 +9,11 @@ Use Node 22.16.0 (the project engine). `npm ci` generates Prisma without changin
 **Before executing these commands, show them to the operator and explain that schema plus existing and new EAP reference/reconciliation guard sources will be installed ONLY on a newly created disposable container. Do not use an existing database/container or substitute a remote URL.** Never automate this preparation inside a unit/browser test. The 2026-10-12 review showed the commands before applying them.
 
 ```bash
-docker --host=unix:///var/run/docker.sock run -d --name manaratak-review-123-db \
+docker --host=unix:///var/run/docker.sock run -d --name absheer-review-123-db \
   -p 127.0.0.1:55432:5432 \
   -e POSTGRES_USER=eap_ci -e POSTGRES_PASSWORD=eap_ci_disposable_only \
-  -e POSTGRES_DB=manaratak_eap_ci_test postgres:16
-export DATABASE_URL='postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:55432/manaratak_eap_ci_test?schema=public'
+  -e POSTGRES_DB=absheer_eap_ci_test postgres:16
+export DATABASE_URL='postgresql://eap_ci:eap_ci_disposable_only@127.0.0.1:55432/absheer_eap_ci_test?schema=public'
 export DIRECT_URL="$DATABASE_URL"
 export DATABASE_MUTATIONS_ALLOWED=true RUN_DATABASE_INTEGRATION_TESTS=true
 export EAP_EPHEMERAL_DB_TESTS=true EAP_LOCAL_DISPOSABLE_DB_TESTS=true

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
 import { performance } from 'node:perf_hooks';
-import { AssetId } from '@manaratak/domain';
+import { AssetId } from '@absheer/domain';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PrismaAssetRecordRepository } from '../../../packages/infrastructure/src/asset-platform/PrismaAssetRecordRepository';
 import { PrismaAssetUsageRegistryGateway } from '../../../packages/infrastructure/src/asset-platform/PrismaAssetUsageRegistryGateway';

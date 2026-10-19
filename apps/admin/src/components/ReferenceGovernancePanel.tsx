@@ -10,8 +10,8 @@ import type {
   ReferenceHistoryPage,
   ReferenceRelationshipDto,
   ReferenceDependencyImpact,
-} from '@manaratak/domain';
-import { ReferenceLifecycleState } from '@manaratak/domain';
+} from '@absheer/domain';
+import { ReferenceLifecycleState } from '@absheer/domain';
 import { referenceDataAdminApi } from '../api/referenceData';
 import { ReferenceProviderReconciliation } from './ReferenceProviderReconciliation';
 import { CanonicalPicker } from './CanonicalPicker';

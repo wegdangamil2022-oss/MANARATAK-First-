@@ -1,9 +1,9 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-3 Prevent Reimplementation of Core Foundations
 # Phase 4 — Migration & Integration Plan
 
 ## 1. Executive Summary
-The Enterprise Foundation Migration & Integration Plan details the architectural strategy for transitioning disparate, domain-bound technical capabilities into unified Enterprise Foundations. Designed by the Architecture Review Board (ARB), this plan prioritizes runtime stability and backward compatibility. By leveraging incremental rollout strategies and an "Alias Strategy," MANARATAK 2.0 will shift to the unified `Enterprise.Shared.Contracts` and `Enterprise.Shared.Kernel` without disrupting active development or breaking existing bounded contexts.
+The Enterprise Foundation Migration & Integration Plan details the architectural strategy for transitioning disparate, domain-bound technical capabilities into unified Enterprise Foundations. Designed by the Architecture Review Board (ARB), this plan prioritizes runtime stability and backward compatibility. By leveraging incremental rollout strategies and an "Alias Strategy," ABSHEER 2.0 will shift to the unified `Enterprise.Shared.Contracts` and `Enterprise.Shared.Kernel` without disrupting active development or breaking existing bounded contexts.
 
 ## 2. Migration Strategy
 The migration is executed through a phased, incremental approach:

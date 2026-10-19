@@ -1,5 +1,5 @@
 {
-  "name": "@manaratak/api",
+  "name": "@absheer/api",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -14,11 +14,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@manaratak/application": "*",
-    "@manaratak/config": "*",
-    "@manaratak/core": "*",
-    "@manaratak/domain": "*",
-    "@manaratak/infrastructure": "*",
+    "@absheer/application": "*",
+    "@absheer/config": "*",
+    "@absheer/core": "*",
+    "@absheer/domain": "*",
+    "@absheer/infrastructure": "*",
     "@opentelemetry/api": "^1.9.1",
     "@prisma/client": "^5.22.0",
     "cors": "^2.8.5",
@@ -28,7 +28,7 @@
     "superagent": "^9.0.2",
     "supertest": "^7.2.2",
     "zod": "^4.4.3",
-    "@manaratak-vendor/awilix-core": "file:../../vendor/awilix-core"
+    "@absheer-vendor/awilix-core": "file:../../vendor/awilix-core"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

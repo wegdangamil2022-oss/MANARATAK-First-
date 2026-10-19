@@ -8,7 +8,7 @@ import {
   IImportedCourseOperationsRepository,
   ImportedCourseLinkCheckResult,
   ImportedCourseMasterRowContract,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { ImportAdminUseCases } from '../../import-foundation/use-cases/ImportAdminUseCases';
 import {
   CourseArtifactPreflightInput,

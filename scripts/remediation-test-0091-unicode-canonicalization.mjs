@@ -52,4 +52,4 @@ test('Unicode slug retains Arabic letters and rejects punctuation-only names', (
   assert.throws(() => unicodeSlugSegment('--- !!! ---'), /SLUG_SOURCE_REQUIRES_UNICODE_LETTER_OR_NUMBER/);
 });
 
-console.log(`MNT-AUD-0091 runtime canonicalization tests: ${passed}/4 PASS`);
+console.log(`ABSH-AUD-0091 runtime canonicalization tests: ${passed}/4 PASS`);

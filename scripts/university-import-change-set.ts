@@ -4,8 +4,8 @@ import { PrismaClient } from '@prisma/client';
 import {
   UniversityImportChangeExecutor,
   type UniversityImportChangePlan,
-} from '@manaratak/application';
-import { PrismaUniversityImportChangeExecutorGateway } from '@manaratak/infrastructure';
+} from '@absheer/application';
+import { PrismaUniversityImportChangeExecutorGateway } from '@absheer/infrastructure';
 
 const [mode, planPath] = process.argv.slice(2);
 if (!['inspect', 'commit', 'rollback'].includes(mode ?? '') || !planPath) {

@@ -6,7 +6,7 @@ import {
   StudentCourseProgressDto,
   StudentCertificateProjectionDto,
   StudentSupportWorkspaceDetailDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { StudentServiceRequestUseCases } from '../../services-platform/use-cases/ServiceRequestUseCases';
 import { StudentWorkspaceUseCases } from './StudentWorkspaceUseCases';
 

@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
 import request from 'supertest';
-import { ChangePasswordUseCase, IdentityPrincipalAccessValidator, InMemorySessionManager } from '@manaratak/application';
-import { PasswordHasher, PrismaPasswordCredentialRepository } from '@manaratak/infrastructure';
+import { ChangePasswordUseCase, IdentityPrincipalAccessValidator, InMemorySessionManager } from '@absheer/application';
+import { PasswordHasher, PrismaPasswordCredentialRepository } from '@absheer/infrastructure';
 import { AuthRouter } from '../../apps/api/dist/presentation/api/router/AuthRouter.js';
 
 async function harness() {
@@ -36,7 +36,7 @@ async function harness() {
     tokenProvider: { verifyAccessToken: async () => ({ userId: 'student', sessionId: 'session' }) },
     sessionManager: sessions, principalAccessValidator: access, changePasswordUseCase: change,
   }));
-  const send = (body = {}, csrf = true, authenticated = true, cookie = 'manaratak_access=access; manaratak_refresh=refresh') => {
+  const send = (body = {}, csrf = true, authenticated = true, cookie = 'absheer_access=access; absheer_refresh=refresh') => {
     const call = request(app).post('/auth/change-password');
     if (authenticated) call.set('Cookie', cookie);
     if (csrf) call.set('X-CSRF-Token', 'valid-csrf');
@@ -58,7 +58,7 @@ test('change password hashes credentials, revokes all sessions and preserves ide
 });
 test('access cookie alone cannot bypass CSRF by omitting the refresh cookie', async () => {
   const h = await harness();
-  assert.equal((await h.send({}, true, true, 'manaratak_access=access')).status, 403);
+  assert.equal((await h.send({}, true, true, 'absheer_access=access')).status, 403);
 });
 for (const [name, mutate, body, csrf, authenticated, expected] of [
   ['wrong current password', () => {}, { currentPassword: 'WrongPassword' }, true, true, 400],

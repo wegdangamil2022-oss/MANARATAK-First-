@@ -1,12 +1,12 @@
 import type { Plugin, ViteDevServer, PreviewServer } from 'vite';
 
 /**
- * Canonical browser-document security policy for MANARATAK Web/Admin.
+ * Canonical browser-document security policy for ABSHEER Web/Admin.
  *
- * MNT-AUD-0101: the policy is enforced at the HTML/static-hosting boundary,
+ * ABSH-AUD-0101: the policy is enforced at the HTML/static-hosting boundary,
  * not inferred from API response headers.
  *
- * MNT-AUD-0114: Web/Admin source no longer uses inline style attributes or
+ * ABSH-AUD-0114: Web/Admin source no longer uses inline style attributes or
  * inline <style> elements. Certificate preview colors are governed by a finite
  * source-controlled palette so the browser boundary can remain strict.
  */
@@ -63,7 +63,7 @@ function installHeaders(server: ViteDevServer | PreviewServer) {
  */
 export function frontendSecurityHeadersPlugin(): Plugin {
   return {
-    name: 'manaratak-frontend-security-headers',
+    name: 'absheer-frontend-security-headers',
     enforce: 'pre',
     configureServer(server) {
       installHeaders(server);

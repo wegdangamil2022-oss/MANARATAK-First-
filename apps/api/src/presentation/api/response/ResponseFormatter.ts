@@ -1,4 +1,4 @@
-import { ApiResponse, ApiMetadata, ApiError, PaginationMeta } from '@manaratak/core';
+import { ApiResponse, ApiMetadata, ApiError, PaginationMeta } from '@absheer/core';
 
 export class ResponseFormatter {
   constructor(private readonly version: string = 'v1') {}

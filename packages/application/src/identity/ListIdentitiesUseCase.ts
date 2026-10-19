@@ -1,5 +1,5 @@
-import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
-import { UseCase, Result, ResultFactory } from '@manaratak/core';
+import { ADMIN_PERMISSION_CATALOG } from '@absheer/shared';
+import { UseCase, Result, ResultFactory } from '@absheer/core';
 import {
   IIdentityRepository,
   IRoleRepository,
@@ -7,7 +7,7 @@ import {
   IAuditRecordRepository,
   IdentityType,
   LifeStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { IdentityDto } from './dtos';
 import { IdentityDtoMapper } from './mapper';
 

@@ -1,4 +1,4 @@
-# MANARATAK Observability Runbook
+# ABSHEER Observability Runbook
 
 Source authority: `config/monitoring/alert-rules.json`. Production/staging must configure `OTEL_EXPORTER_OTLP_ENDPOINT`; the API emits bounded-cardinality HTTP request metrics/traces and worker iteration metrics/traces through the same monitoring provider. Provider-side alert installation and live dashboards are `PENDING_NON_BLOCKING` until the telemetry backend is connected.
 

@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('remediation verifier runner', () => {
   it('stops and forwards the first failing verifier exit code', () => {
-    const fixture = mkdtempSync(path.join(tmpdir(), 'manaratak-remediation-'));
+    const fixture = mkdtempSync(path.join(tmpdir(), 'absheer-remediation-'));
     for (let index = 0; index <= 15; index += 1) {
       writeFileSync(path.join(fixture, `verify-w${index}-source.mjs`), index === 3 ? 'process.exit(7);' : 'process.exit(0);');
     }

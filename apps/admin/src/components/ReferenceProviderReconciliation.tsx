@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ReferenceDataCollection, ReferenceProviderMappingInput } from '@manaratak/domain';
+import type { ReferenceDataCollection, ReferenceProviderMappingInput } from '@absheer/domain';
 import { getReferenceDataPage, referenceDataAdminApi } from '../api/referenceData';
 
 type SupportedType = 'COUNTRY' | 'CURRENCY' | 'LANGUAGE' | 'CITY';

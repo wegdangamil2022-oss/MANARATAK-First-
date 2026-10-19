@@ -1,7 +1,7 @@
 # Controller Architecture Analysis & Unification Plan
 
 ## 1. Executive Summary
-This document defines the official Controller pattern for the MANARATAK Presentation Layer. Following an architectural analysis of the current setup (`BaseController` vs. `ExpressAdapter`), we have determined that `BaseController` violates Clean Architecture principles, while the Adapter Pattern represents the correct structural approach. To ensure long-term framework independence, this plan introduces an overarching HTTP Adapter abstraction.
+This document defines the official Controller pattern for the ABSHEER Presentation Layer. Following an architectural analysis of the current setup (`BaseController` vs. `ExpressAdapter`), we have determined that `BaseController` violates Clean Architecture principles, while the Adapter Pattern represents the correct structural approach. To ensure long-term framework independence, this plan introduces an overarching HTTP Adapter abstraction.
 
 ## 2. Architecture Analysis
 
@@ -17,10 +17,10 @@ Currently, two competing patterns exist in `apps/api/src/presentation/`:
 
 ## 3. Recommended Architecture
 
-The official Presentation Layer architecture for MANARATAK will standardize on a **Framework-Agnostic Adapter Pattern** utilizing `IController` and a new `IHttpAdapter` abstraction.
+The official Presentation Layer architecture for ABSHEER will standardize on a **Framework-Agnostic Adapter Pattern** utilizing `IController` and a new `IHttpAdapter` abstraction.
 
 *   **Deprecated Component:** `BaseController` is officially deprecated. No new controllers shall inherit from it. It will be phased out.
-*   **Architectural Abstraction:** A new `IHttpAdapter` interface will be defined to represent the contract for binding HTTP frameworks to MANARATAK controllers.
+*   **Architectural Abstraction:** A new `IHttpAdapter` interface will be defined to represent the contract for binding HTTP frameworks to ABSHEER controllers.
 *   **Standard Component:** `ExpressAdapter` will serve as just one specific implementation of `IHttpAdapter`.
 *   **Refinement Requirement:** `ExpressAdapter` (and any future adapters) must map the framework-specific request object (e.g., extracting `body`, `query`, `params`, `headers`) to a generic, framework-agnostic DTO before passing it to the controller.
 
@@ -33,7 +33,7 @@ Every future Controller must be implemented according to the following lifecycle
 
 ### 4.1 Controller Lifecycle & Isolation
 *   **Framework Agnosticism:** Controllers **MUST NOT** import `express` or interact with Express `Request`/`Response` objects (or any other HTTP framework primitives).
-*   **Interface:** All controllers **MUST** implement the `@manaratak/core` interface `IController<TRequest, TResponse>`.
+*   **Interface:** All controllers **MUST** implement the `@absheer/core` interface `IController<TRequest, TResponse>`.
 *   **Dependency Injection:** Controllers are the entry points for Use Cases. All Use Cases and services required by the controller must be injected via the constructor.
 
 ### 4.2 Request and Response Flow
@@ -53,6 +53,6 @@ Controllers should not use `try/catch` for standard domain exceptions unless the
 ## 5. Migration Strategy
 1.  **No Refactoring Required Yet:** As there are currently no controllers extending `BaseController`, no active code refactoring is necessary.
 2.  **Future Actions:** 
-    *   Introduce the `IHttpAdapter` interface in `@manaratak/core`.
+    *   Introduce the `IHttpAdapter` interface in `@absheer/core`.
     *   Update `ExpressAdapter.ts` to implement `IHttpAdapter` and map the Express Request to a framework-agnostic DTO.
 3.  **Deprecation:** Keep `BaseController` for reference temporarily if needed, but mark it with `@deprecated` in code comments.

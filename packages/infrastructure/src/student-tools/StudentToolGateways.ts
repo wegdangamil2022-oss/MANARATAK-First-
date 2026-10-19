@@ -1,4 +1,4 @@
-import { AIExecutionOrchestrator } from '@manaratak/application';
+import { AIExecutionOrchestrator } from '@absheer/application';
 import {
   AIExecutionStatus,
   IEnterpriseAIConsumerGateway,
@@ -16,8 +16,8 @@ import {
   ScholarshipCandidate,
   StudentToolDependency,
   UniversityComparisonItem,
-} from '@manaratak/domain';
-import { IRateLimiter } from '@manaratak/core';
+} from '@absheer/domain';
+import { IRateLimiter } from '@absheer/core';
 
 export class Phase17StudentToolsAIConsumerGateway implements IEnterpriseAIConsumerGateway {
   constructor(private readonly orchestrator: AIExecutionOrchestrator) {}

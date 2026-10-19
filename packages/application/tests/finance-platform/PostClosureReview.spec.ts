@@ -1,6 +1,6 @@
 import {createHash} from 'node:crypto';
 import {describe, expect, it, vi} from 'vitest';
-import {financeApprovalPolicy} from '@manaratak/domain';
+import {financeApprovalPolicy} from '@absheer/domain';
 import {FinancePlatformUseCases} from '../../src/finance-platform/use-cases/FinancePlatformUseCases';
 
 const dependencies = {

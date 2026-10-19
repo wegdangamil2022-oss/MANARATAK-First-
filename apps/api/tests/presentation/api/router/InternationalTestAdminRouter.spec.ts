@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import { InternationalTestAdminRouter } from '../../../../src/presentation/api/router/InternationalTestAdminRouter';
-import { InternationalTestCategory, InternationalTestStatus } from '@manaratak/domain';
+import { InternationalTestCategory, InternationalTestStatus } from '@absheer/domain';
 
 describe('InternationalTestAdminRouter', () => {
   const createMockUseCases = () => ({

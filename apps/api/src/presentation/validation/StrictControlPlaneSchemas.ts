@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { ValidationException } from '@manaratak/core';
-import { IdentityType, LifeStatus, RetentionCategory, SecurityClassification } from '@manaratak/domain';
+import { ValidationException } from '@absheer/core';
+import { IdentityType, LifeStatus, RetentionCategory, SecurityClassification } from '@absheer/domain';
 
 const shortId = z.string().trim().min(1).max(200);
 const label = z.string().trim().min(1).max(240);

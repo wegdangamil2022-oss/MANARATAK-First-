@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { loadPublicLiveSnapshot, type PublicLiveLoadResult, type PublicLiveLocale } from './publicLiveDataSource';
 import { resolvePublicTemplateDataMode, type PublicTemplateDataMode } from './publicScholarshipDataSource';
 
-declare const __MANARATAK_PROTOTYPE_DATA_ENABLED__: boolean;
+declare const __ABSHEER_PROTOTYPE_DATA_ENABLED__: boolean;
 
 const initial: PublicLiveLoadResult = {
   data: { scholarships: [], universities: [], majors: [], countries: [], exams: [], courses: [], paidCourses: [], importedCourses: [], articles: [], services: [], careers: [], tools: [] },
@@ -11,7 +11,7 @@ const initial: PublicLiveLoadResult = {
 };
 
 export function usePublicLiveData(value: unknown, locale: PublicLiveLocale = 'ar') {
-  const isProd = typeof __MANARATAK_PROTOTYPE_DATA_ENABLED__ !== 'undefined' && !__MANARATAK_PROTOTYPE_DATA_ENABLED__;
+  const isProd = typeof __ABSHEER_PROTOTYPE_DATA_ENABLED__ !== 'undefined' && !__ABSHEER_PROTOTYPE_DATA_ENABLED__;
 
   const requestedMode = resolvePublicTemplateDataMode(value);
   const mode: PublicTemplateDataMode = isProd ? 'api' : requestedMode;

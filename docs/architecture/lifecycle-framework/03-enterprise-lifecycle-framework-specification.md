@@ -1,4 +1,4 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 
 # P0-2 Enterprise Lifecycle Framework
 
@@ -6,7 +6,7 @@
 
 ## 1. Executive Summary
 
-This document serves as the definitive Enterprise Lifecycle Framework Specification for MANARATAK 2.0. It defines the canonical architectural framework, governance, contracts, and rules governing all lifecycles. It establishes a tiered architecture that centralizes infrastructure and reference lifecycles while empowering individual bounded contexts to own and manage their distinct business workflows.
+This document serves as the definitive Enterprise Lifecycle Framework Specification for ABSHEER 2.0. It defines the canonical architectural framework, governance, contracts, and rules governing all lifecycles. It establishes a tiered architecture that centralizes infrastructure and reference lifecycles while empowering individual bounded contexts to own and manage their distinct business workflows.
 
 ## 2. Enterprise Lifecycle Principles
 
@@ -243,6 +243,6 @@ This document serves as the definitive Enterprise Lifecycle Framework Specificat
 
 **Decision**: APPROVED.
 
-The Enterprise Lifecycle Framework Specification is complete and provides the necessary architectural controls to govern states across MANARATAK 2.0 safely and consistently.
+The Enterprise Lifecycle Framework Specification is complete and provides the necessary architectural controls to govern states across ABSHEER 2.0 safely and consistently.
 
 GO to Phase 4 (Migration & Integration Plan)

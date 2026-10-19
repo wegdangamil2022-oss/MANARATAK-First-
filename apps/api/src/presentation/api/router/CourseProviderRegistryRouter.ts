@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
-import { CourseProviderRegistryError, ExternalCourseProviderStatus } from '@manaratak/domain';
-import { CourseProviderRegistryUseCases } from '@manaratak/application';
+import { CourseProviderRegistryError, ExternalCourseProviderStatus } from '@absheer/domain';
+import { CourseProviderRegistryUseCases } from '@absheer/application';
 
 export class CourseProviderRegistryRouter {
   static create({ courseProviderRegistryUseCases: useCases }: { courseProviderRegistryUseCases: CourseProviderRegistryUseCases }): Router {

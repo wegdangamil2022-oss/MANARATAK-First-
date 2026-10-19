@@ -1,4 +1,4 @@
-import { SearchRequest, SearchResult, type SearchMatch } from '@manaratak/domain';
+import { SearchRequest, SearchResult, type SearchMatch } from '@absheer/domain';
 
 export type PublicSearchKind =
   | 'scholarships'

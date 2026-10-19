@@ -25,12 +25,12 @@ for (const unit of ['web', 'admin']) {
     index = path.join(directory, 'index.html');
   let html = fs
     .readFileSync(index, 'utf8')
-    .replace(/<meta name="manaratak-build-sha" content="[^"]*">/g, '');
+    .replace(/<meta name="absheer-build-sha" content="[^"]*">/g, '');
   if (!html.includes('</head>')) throw new Error('RELEASE_HTML_HEAD_MISSING');
-  html = html.replace('</head>', `<meta name="manaratak-build-sha" content="${sourceSha}"></head>`);
+  html = html.replace('</head>', `<meta name="absheer-build-sha" content="${sourceSha}"></head>`);
   fs.writeFileSync(index, html);
   fs.writeFileSync(
-    path.join(directory, 'manaratak-build.json'),
+    path.join(directory, 'absheer-build.json'),
     JSON.stringify({ version: 1, unit, sourceSha }) + '\n',
   );
 }
@@ -58,7 +58,7 @@ const artifacts = [];
 for (const [name, items] of units) {
   for (const i of items)
     if (!fs.existsSync(path.join(root, i))) throw new Error(`RELEASE_INPUT_MISSING:${i}`);
-  const target = path.join(out, `manaratak-${name}-${sourceSha}.tar`);
+  const target = path.join(out, `absheer-${name}-${sourceSha}.tar`);
   childProcess.execFileSync(
     'tar',
     [
@@ -95,14 +95,14 @@ const sbom = {
   version: 1,
   metadata: {
     timestamp: new Date().toISOString(),
-    component: { type: 'application', name: 'MANARATAK', version: sourceSha },
+    component: { type: 'application', name: 'ABSHEER', version: sourceSha },
   },
   components,
 };
 fs.writeFileSync(path.join(out, 'release-sbom.cdx.json'), JSON.stringify(sbom, null, 2) + '\n');
 const manifest = {
   version: 2,
-  kind: 'MANARATAK_IMMUTABLE_RELEASE',
+  kind: 'ABSHEER_IMMUTABLE_RELEASE',
   sourceSha,
   nodeVersion: process.version,
   createdAt: new Date().toISOString(),

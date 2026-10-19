@@ -6,13 +6,13 @@ import {
   RoleAssignment,
   AuthorizationEvaluatorService,
   AccessDecision,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   InMemoryRoleRepository,
   InMemoryPolicyRepository,
   InMemoryRoleAssignmentRepository,
   DefaultPolicyEvaluator,
-} from '@manaratak/infrastructure';
+} from '@absheer/infrastructure';
 import { SecurityMiddlewareFactory } from '../../../src/presentation/security/SecurityMiddlewareFactory';
 import { getResponseErrorCode } from '../../support/responsePayload';
 
@@ -228,7 +228,7 @@ describe('Runtime RBAC Authority & Permission Evaluation', () => {
       headers: {
         'x-admin-role': 'DEMO_SUPER_ADMIN',
         'x-admin-permissions': 'admin:*',
-        manaratak_demo_role: 'administrator',
+        absheer_demo_role: 'administrator',
       },
     } as any;
     const res = createResponse();

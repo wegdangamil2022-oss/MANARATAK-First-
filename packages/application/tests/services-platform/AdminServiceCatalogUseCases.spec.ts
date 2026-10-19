@@ -7,7 +7,7 @@ import {
   ServiceDeliveryMode,
   ServiceFulfillmentType,
   ServiceStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AdminServiceCatalogUseCases } from '../../src/services-platform/use-cases/AdminServiceCatalogUseCases';
 
 describe('AdminServiceCatalogUseCases', () => {
@@ -27,7 +27,7 @@ describe('AdminServiceCatalogUseCases', () => {
     serviceAvailabilityStatus: ServiceAvailabilityStatus.AVAILABLE,
     requiredInputsOrDocuments: ['Passport'],
     deliveryMode: ServiceDeliveryMode.ONLINE,
-    responsibleServiceOwnerType: 'MANARATAK_TEAM',
+    responsibleServiceOwnerType: 'ABSHEER_TEAM',
     status: ServiceStatus.READY_TO_PUBLISH,
     completenessStatus: ServiceCompletenessStatus.COMPLETE,
     createdAt: new Date(),
@@ -61,7 +61,7 @@ describe('AdminServiceCatalogUseCases', () => {
       serviceAvailabilityStatus: ServiceAvailabilityStatus.AVAILABLE,
       requiredInputsOrDocuments: ['Passport'],
       deliveryMode: ServiceDeliveryMode.ONLINE,
-      responsibleServiceOwnerType: 'MANARATAK_TEAM'
+      responsibleServiceOwnerType: 'ABSHEER_TEAM'
     });
 
     expect(result.slug).toMatch(/^visa-review-[0-9a-f]{8}$/);
@@ -81,7 +81,7 @@ describe('AdminServiceCatalogUseCases', () => {
       serviceAvailabilityStatus: ServiceAvailabilityStatus.AVAILABLE,
       requiredInputsOrDocuments: ['Passport'],
       deliveryMode: ServiceDeliveryMode.ONLINE,
-      responsibleServiceOwnerType: 'MANARATAK_TEAM'
+      responsibleServiceOwnerType: 'ABSHEER_TEAM'
     });
     const second = await useCases.createService({
       displayName: 'استشارات التأشيرات',
@@ -91,7 +91,7 @@ describe('AdminServiceCatalogUseCases', () => {
       serviceAvailabilityStatus: ServiceAvailabilityStatus.AVAILABLE,
       requiredInputsOrDocuments: ['Passport'],
       deliveryMode: ServiceDeliveryMode.ONLINE,
-      responsibleServiceOwnerType: 'MANARATAK_TEAM'
+      responsibleServiceOwnerType: 'ABSHEER_TEAM'
     });
 
     expect(first.canonicalName).toBe('خدمة التاشيرات');

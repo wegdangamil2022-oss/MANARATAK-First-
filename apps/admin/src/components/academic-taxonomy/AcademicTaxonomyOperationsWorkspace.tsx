@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { TaxonomyCrosswalkReport, TaxonomyDiagnosticsReport } from '@manaratak/domain';
+import type { TaxonomyCrosswalkReport, TaxonomyDiagnosticsReport } from '@absheer/domain';
 import { adminApiClient } from '../../api/client';
 const base = '/admin/academic-taxonomy';
 type Node = { nodeId: string; canonicalName: string; canonicalCode: string; nodeType: string; status: string; updatedAt: string };

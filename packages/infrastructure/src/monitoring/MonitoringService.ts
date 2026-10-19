@@ -6,7 +6,7 @@ import {
   HealthCheckResult,
   IMetrics,
   IMonitoringSpan,
-} from '@manaratak/core';
+} from '@absheer/core';
 
 export class MonitoringService implements IMonitoringService {
   private indicators: Map<string, IHealthIndicator> = new Map();

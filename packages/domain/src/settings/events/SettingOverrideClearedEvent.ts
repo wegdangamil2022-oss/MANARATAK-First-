@@ -1,4 +1,4 @@
-import { IDomainEvent } from '@manaratak/core';
+import { IDomainEvent } from '@absheer/core';
 export class SettingOverrideClearedEvent implements IDomainEvent {
   public readonly dateTimeOccurred = new Date();
   constructor(public readonly assignmentId: string, public readonly key: string, public readonly versionId: string) {}

@@ -1,11 +1,11 @@
 # Documentation Governance Standard & Cleanup Audit
 
 ## 1. Executive Summary
-This document establishes the official Documentation Governance Standard for the MANARATAK monorepo. Documentation is a critical architectural asset that requires strict lifecycle management, ownership, structuring, and traceability. This standard defines documentation categories, mandatory metadata, lifecycle statuses, and cross-reference validation policies to transform documentation into a traceable architectural knowledge graph. An automated audit of the repository’s documentation was conducted to identify fragmentation, conflicts, and orphans, followed by a consolidation and archive strategy.
+This document establishes the official Documentation Governance Standard for the ABSHEER monorepo. Documentation is a critical architectural asset that requires strict lifecycle management, ownership, structuring, and traceability. This standard defines documentation categories, mandatory metadata, lifecycle statuses, and cross-reference validation policies to transform documentation into a traceable architectural knowledge graph. An automated audit of the repository’s documentation was conducted to identify fragmentation, conflicts, and orphans, followed by a consolidation and archive strategy.
 
 ## 2. Documentation Governance Standard
 
-All documentation within the MANARATAK repository must adhere to strict categorization, metadata requirements, traceability, and lifecycle management.
+All documentation within the ABSHEER repository must adhere to strict categorization, metadata requirements, traceability, and lifecycle management.
 
 ### 2.1 Documentation Categories
 Every document must be explicitly classified into one of the following official categories:
@@ -46,7 +46,7 @@ For every Architecture Standard, ADR, Policy, and Architecture Report, the front
 *   **Supersedes:** Any older documents or versions that this document replaces.
 *   **Related ADRs:** Associated Architecture Decision Records.
 *   **Related Standards:** Associated governance standards or policies.
-*   **Covered Packages:** Monorepo packages (e.g., `@manaratak/domain`) governed by this document.
+*   **Covered Packages:** Monorepo packages (e.g., `@absheer/domain`) governed by this document.
 *   **Covered Applications:** Specific apps (e.g., `api`, `web`) affected by this document.
 *   **Covered Project Phases:** Specific rollout phases (e.g., Phase 1, Phase 5) relevant to this document.
 

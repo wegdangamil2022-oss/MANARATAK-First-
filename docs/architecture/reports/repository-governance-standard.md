@@ -1,11 +1,11 @@
 # Repository Governance Standard & Cleanup Audit
 
 ## 1. Executive Summary
-This document establishes the official Repository Governance Standard for the MANARATAK monorepo. As the codebase scales, maintaining repository hygiene is paramount for developer productivity, CI/CD performance, and architectural clarity. This standard defines strict file and directory categorizations, lifecycle statuses, and rules for what is permitted within the version control system. Furthermore, it treats the repository structure as a governed architectural asset by establishing clear repository ownership and modification approval policies. An automated scan of the repository was conducted to assess compliance and generate a targeted cleanup plan.
+This document establishes the official Repository Governance Standard for the ABSHEER monorepo. As the codebase scales, maintaining repository hygiene is paramount for developer productivity, CI/CD performance, and architectural clarity. This standard defines strict file and directory categorizations, lifecycle statuses, and rules for what is permitted within the version control system. Furthermore, it treats the repository structure as a governed architectural asset by establishing clear repository ownership and modification approval policies. An automated scan of the repository was conducted to assess compliance and generate a targeted cleanup plan.
 
 ## 2. Repository Governance Standard
 
-Every file and directory committed to the MANARATAK repository must be strictly classified into one of the following official categories and assigned a lifecycle status.
+Every file and directory committed to the ABSHEER repository must be strictly classified into one of the following official categories and assigned a lifecycle status.
 
 ### 2.1 File & Directory Classifications
 
@@ -59,7 +59,7 @@ Any structural or lifecycle modification to the repository requires explicit aut
 
 ## 4. Repository Inventory & Audit Report
 
-An automated scan of the entire MANARATAK workspace (excluding `node_modules` and `.git`) was conducted to baseline the current state of repository hygiene.
+An automated scan of the entire ABSHEER workspace (excluding `node_modules` and `.git`) was conducted to baseline the current state of repository hygiene.
 
 ### 4.1 Global Artifact Inventory
 *   **Source:** 736 files

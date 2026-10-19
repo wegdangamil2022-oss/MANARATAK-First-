@@ -1,4 +1,4 @@
-import { ParsedImportRow } from '@manaratak/domain';
+import { ParsedImportRow } from '@absheer/domain';
 import type { IImportStreamParser, ImportStreamParserContext, ImportStreamParserInput } from './IImportStreamParser';
 
 /** UTF-8 object or array of objects, framed without buffering the whole artifact. */

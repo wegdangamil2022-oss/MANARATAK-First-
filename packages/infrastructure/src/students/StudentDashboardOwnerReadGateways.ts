@@ -6,8 +6,8 @@ import {
   StudentCertificateProjectionDto,
   StudentCourseProgressDto,
   StudentOwnerPage,
-} from '@manaratak/domain';
-import { CertificateReadModelService } from '@manaratak/application';
+} from '@absheer/domain';
+import { CertificateReadModelService } from '@absheer/application';
 
 /** P13-owned learning read adapter for P15. P15 stores no Course truth here. */
 export class CourseStudentDashboardReadGateway implements IStudentLearningReadGateway {

@@ -1,7 +1,7 @@
--- MANARATAK_MIGRATION_OWNER: services
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
--- MNT-AUD-0058: retained Phase 20 owner scope: providers/packages/pricing/promotions/scheduling/bookings/workflow/delivery.
+-- ABSHEER_MIGRATION_OWNER: services
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
+-- ABSH-AUD-0058: retained Phase 20 owner scope: providers/packages/pricing/promotions/scheduling/bookings/workflow/delivery.
 
 CREATE TABLE "ServiceProviderRecord" (
   "id" TEXT NOT NULL,

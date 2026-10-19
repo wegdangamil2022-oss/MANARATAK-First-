@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
-import { AssetId } from '@manaratak/domain';
+import { AssetId } from '@absheer/domain';
 import { PrismaAssetUsageRegistryGateway } from '../../packages/infrastructure/src/asset-platform/PrismaAssetUsageRegistryGateway';
 import { PrismaStudentApplicationTrackerRepository } from '../../packages/infrastructure/src/students/PrismaStudentApplicationTrackerRepository';
 import { ProcessAssetLifecycleUseCase } from '../../packages/application/src/asset-platform/use-cases/ProcessAssetLifecycleUseCase';

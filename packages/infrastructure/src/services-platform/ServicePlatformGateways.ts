@@ -1,10 +1,10 @@
-import { FinancePlatformUseCases, ProcessAssetLifecycleUseCase } from '@manaratak/application';
+import { FinancePlatformUseCases, ProcessAssetLifecycleUseCase } from '@absheer/application';
 import {
   IReferenceResolver,
   IServiceFinanceGateway,
   IServiceDeliveryGateway,
   IServiceReferenceGateway,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const resolveLookup = (value: string) => {
   const trimmed = value.trim();

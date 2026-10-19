@@ -8,7 +8,7 @@ import {
   PaymentGatewayResult,
   BankTransferSubmission,
   BankTransferEvidence,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   SignedProviderHttpClient,
   type SignedProviderHttpClientOptions,
@@ -649,7 +649,7 @@ export class RedisFinanceWebhookReplayStore implements FinanceWebhookReplayStore
       throw new Error('FINANCE_WEBHOOK_REPLAY_TTL_INVALID');
     const key = this.redis.buildKey
       ? this.redis.buildKey('finance-webhook-replay', `${providerKey}:${nonceHash}`)
-      : `manaratak:finance-webhook-replay:${providerKey}:${nonceHash}`;
+      : `absheer:finance-webhook-replay:${providerKey}:${nonceHash}`;
     return (await this.redis.set(key, '1', { NX: true, PX: ttlMs })) === 'OK';
   }
 }

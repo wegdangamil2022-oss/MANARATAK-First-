@@ -2,7 +2,7 @@ import {defineConfig} from 'vitest/config';
 import {resolve} from 'node:path';
 export default defineConfig({
  esbuild:{jsx:'automatic'},
- resolve:{alias:Object.fromEntries(['core','domain','shared','application','infrastructure'].map(name=>['@manaratak/'+name,resolve('packages/'+name+'/src/index.ts')]))},
+ resolve:{alias:Object.fromEntries(['core','domain','shared','application','infrastructure'].map(name=>['@absheer/'+name,resolve('packages/'+name+'/src/index.ts')]))},
  test:{environment:'node',testTimeout:5000,maxWorkers:2,include:[
   '**/InternationalTestGovernanceCloseout.spec.ts','**/InternationalTestGovernanceCloseout.spec.tsx','**/MajorGovernanceCloseout.spec.ts',
   'packages/application/tests/majors/MajorCandidateComparison.spec.ts','packages/application/tests/majors/MajorOwnerImport.spec.ts',

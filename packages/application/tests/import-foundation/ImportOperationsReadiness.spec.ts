@@ -8,7 +8,7 @@ import {
   DriftSeverity,
   ImportTargetDomain,
   MergeProposalStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   ImportOperationsReadService,
   ImportOperationsSummaryDto,

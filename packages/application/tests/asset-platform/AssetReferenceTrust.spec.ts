@@ -3,7 +3,7 @@ import {
   AssetRecord, AssetId, AssetReference, AssetOwnerReference, AssetStorageLocator, AssetStorageZone,
   AssetMetadata, AssetChecksum, AssetSanitizationMetadata, AssetRetentionMetadata, AssetRetentionCategory,
   AssetLifecycleState, AssetSecurityClassification, IAssetRecordRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AssetReferencePolicy } from '../../src/asset-platform/AssetReferencePolicy';
 import { AdminCourseUseCases } from '../../src/courses/use-cases/AdminCourseUseCases';
 

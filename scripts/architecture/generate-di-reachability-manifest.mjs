@@ -14,7 +14,7 @@ if (analysis.unreachable.length) {
 }
 const manifest = {
   schemaVersion: 1,
-  finding: 'MNT-AUD-0109',
+  finding: 'ABSH-AUD-0109',
   generatedFor: 'Current registered production source reconciliation',
   container: analysis.container,
   registrationCount: analysis.registrationCount,

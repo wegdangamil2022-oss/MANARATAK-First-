@@ -14,8 +14,8 @@ import {
   ExposureIntent,
   IApiServiceRepository,
   OperationDefinition,
-} from '@manaratak/domain';
-import { ISpecification } from '@manaratak/core';
+} from '@absheer/domain';
+import { ISpecification } from '@absheer/core';
 
 type ApiSnapshot = {
   id: string;

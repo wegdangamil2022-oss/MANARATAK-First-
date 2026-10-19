@@ -1,7 +1,7 @@
 # Barrel Export Architecture Standard
 
 ## 1. Executive Summary
-This document establishes the official Barrel Export Architecture for the MANARATAK monorepo. It outlines the strategy for `index.ts` files (barrels) to ensure predictable module resolution, prevent circular dependencies, maintain a clean Public API, and govern re-export chains. An audit of the current repository state indicates significant deviations from best practices, requiring a structured migration.
+This document establishes the official Barrel Export Architecture for the ABSHEER monorepo. It outlines the strategy for `index.ts` files (barrels) to ensure predictable module resolution, prevent circular dependencies, maintain a clean Public API, and govern re-export chains. An audit of the current repository state indicates significant deviations from best practices, requiring a structured migration.
 
 ## 2. Audit of Existing `index.ts` Files
 
@@ -53,7 +53,7 @@ To prevent module resolution performance degradation and unpredictable dependenc
     *   **Deep Chaining:** `Nested Barrel` → `Sub-feature Barrel` → `Feature Barrel` → `Root Barrel` is forbidden.
     *   **Cyclic Re-export Chains:** Re-exporting symbols in a way that introduces circular dependencies between barrels is strictly forbidden.
     *   **Hidden Transitive Exports:** Re-exporting a third-party or cross-package symbol implicitly through a feature barrel is forbidden.
-*   **Traceability:** Developers must be able to trace any exported symbol from the `Root Barrel` to its source file in no more than two hops. Tools and IDEs should easily resolve `import { Symbol } from '@manaratak/package'` to `package/src/feature/Symbol.ts`.
+*   **Traceability:** Developers must be able to trace any exported symbol from the `Root Barrel` to its source file in no more than two hops. Tools and IDEs should easily resolve `import { Symbol } from '@absheer/package'` to `package/src/feature/Symbol.ts`.
 
 ## 4. Allowed Export Artifacts
 
@@ -69,7 +69,7 @@ Only specific architectural constructs are permitted to be exported through Feat
 **Forbidden from Export:**
 *   Private helper utilities (e.g., `StringHelper.ts` specific to one entity).
 *   Database-specific models/schemas (e.g., raw Prisma or TypeORM entities).
-*   Test mocks and fixtures (these belong in `@manaratak/testing` or local `__tests__` folders).
+*   Test mocks and fixtures (these belong in `@absheer/testing` or local `__tests__` folders).
 
 ## 5. Migration Strategy
 

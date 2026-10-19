@@ -1,5 +1,5 @@
 import type {AtomicMutationRequestContext} from '../event-foundation/use-cases/AtomicDomainMutationCoordinator';
-import { assertTranslationContentAuthoringEnabled } from '@manaratak/shared';
+import { assertTranslationContentAuthoringEnabled } from '@absheer/shared';
 import {
   ITranslationImportGateway,
   TranslationStagedCandidate,

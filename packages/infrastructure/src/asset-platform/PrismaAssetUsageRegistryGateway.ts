@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { AssetId, AssetUsageReference, IAssetUsageRegistryGateway } from '@manaratak/domain';
+import { AssetId, AssetUsageReference, IAssetUsageRegistryGateway } from '@absheer/domain';
 
 type DelegateCheck = {
   delegate: string;

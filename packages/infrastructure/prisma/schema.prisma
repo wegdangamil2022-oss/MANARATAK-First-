@@ -3221,7 +3221,7 @@ model CmsContentNode {
   id                String   @id @default(uuid())
   publicId          String   @unique
   slug              String
-  siteIdentifier    String   @default("MANARATAK")
+  siteIdentifier    String   @default("ABSHEER")
   primaryLocale     String   @default("ar")
   contentType       String
   status            String   @default("DRAFT")
@@ -3282,7 +3282,7 @@ model CmsContentDomainLink {
 model CmsLocalizedContent {
   id                 String   @id @default(uuid())
   contentId          String
-  siteIdentifier     String   @default("MANARATAK")
+  siteIdentifier     String   @default("ABSHEER")
   locale             String
   localizedSlug      String
   state              String   @default("DRAFT")
@@ -5159,7 +5159,7 @@ model ServiceRequestRecord {
 }
 
 
-// --- Phase 20 retained owner scope (MNT-AUD-0058) ---
+// --- Phase 20 retained owner scope (ABSH-AUD-0058) ---
 model ServiceProviderRecord {
   version Int @default(1)
   makerActorId String?
@@ -5500,7 +5500,7 @@ model CareerJobPostingRecord {
 }
 
 
-// --- Phase 21 Career/Alumni owner persistence expansion (MNT-AUD-0055) ---
+// --- Phase 21 Career/Alumni owner persistence expansion (ABSH-AUD-0055) ---
 model CareerProfileRecord {
   id                 String   @id @default(uuid())
   studentReferenceId String   @unique
@@ -5563,7 +5563,7 @@ model CareerAlumniProfileRecord {
   @@index([programReferenceId])
 }
 
-// --- Phase 05 Foundation Control Plane durable persistence (MNT-AUD-0049) ---
+// --- Phase 05 Foundation Control Plane durable persistence (ABSH-AUD-0049) ---
 model WorkflowControlRecord {
   id             String   @id
   reference      String   @unique

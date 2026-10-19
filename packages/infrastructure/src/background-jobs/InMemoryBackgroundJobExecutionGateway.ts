@@ -1,4 +1,4 @@
-import { IBackgroundJobExecutionGateway } from '@manaratak/application';
+import { IBackgroundJobExecutionGateway } from '@absheer/application';
 
 /** Development/test adapter only. Production composition must use PrismaBackgroundJobExecutionGateway. */
 export class InMemoryBackgroundJobExecutionGateway implements IBackgroundJobExecutionGateway {

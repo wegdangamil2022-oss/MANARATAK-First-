@@ -1,5 +1,5 @@
-import { IEventPublishingGateway } from '@manaratak/application';
-import { EnterpriseEvent } from '@manaratak/domain';
+import { IEventPublishingGateway } from '@absheer/application';
+import { EnterpriseEvent } from '@absheer/domain';
 
 export type EnterpriseEventListener = (event: EnterpriseEvent) => Promise<void> | void;
 

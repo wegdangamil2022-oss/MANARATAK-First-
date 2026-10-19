@@ -20,7 +20,7 @@ import { CmsRevisionHistory } from '../features/cms/CmsRevisionHistory';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { CmsOperationsPanels } from '../features/cms/CmsOperationsPanels';
-import { CmsRichText } from '@manaratak/ui';
+import { CmsRichText } from '@absheer/ui';
 import { AssetPicker } from '../components/AssetPicker';
 import { useCmsCopy, translateCms } from '../features/cms/cmsCopy';
 
@@ -231,7 +231,7 @@ export function CmsAdminPage() {
       const params = new URLSearchParams({
         page: String(page),
         pageSize: '20',
-        siteIdentifier: 'manaratak',
+        siteIdentifier: 'absheer',
       });
       if (query.trim()) params.set('q', query.trim());
       if (status) params.set('status', status);
@@ -346,7 +346,7 @@ export function CmsAdminPage() {
           title: create.title.trim(),
           slug: create.slug.trim(),
           contentType: create.contentType,
-          siteIdentifier: 'manaratak',
+          siteIdentifier: 'absheer',
           primaryLocale: 'ar',
           categoryId: create.categoryId || null,
           featuredAssetId: create.featuredAssetId.trim() || null,

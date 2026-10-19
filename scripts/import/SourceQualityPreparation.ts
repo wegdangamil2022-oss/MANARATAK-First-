@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { parse } from 'csv-parse/sync';
-import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@manaratak/shared';
-import type { UniversalImportHandoff } from '@manaratak/domain';
+import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@absheer/shared';
+import type { UniversalImportHandoff } from '@absheer/domain';
 import { EXTERNAL_COURSE_PROVIDER_SEED } from '../../packages/infrastructure/src/courses/ExternalCourseProviderSeed';
 import { iscedFBaselineNodes, iscedFBaselineAliases } from '../../packages/domain/src/academic-taxonomy/isced-f-baseline';
 import { sourceReviewHash } from '../../packages/application/src/import-foundation/services/CanonicalSourceReview';
@@ -45,7 +45,7 @@ export async function prepareSourceQuality(rootInput: string) {
     return items[0];
   };
 
-  const countryPath = 'workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx';
+  const countryPath = 'workspace/reference-data/countries/ABSHEER_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx';
   const countriesWorkbook = await readXlsxWorkbook(read(countryPath));
   const countrySheet = countriesWorkbook.sheets.get('Countries');
   if (!countrySheet) throw new Error('SOURCE_QC_COUNTRIES_SHEET_MISSING');
@@ -151,7 +151,7 @@ export async function prepareSourceQuality(rootInput: string) {
   const courses = projectReviewedCourseSources(courseRows);
   read('packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts');
   read('packages/domain/src/academic-taxonomy/isced-f-baseline.ts');
-  const languageRows = parse(read('workspace/reference-data/languages/MANARATAK_Languages_CLEAN_IMPORT_READY.csv').toString('utf8'), { columns: true, skip_empty_lines: true, bom: true }) as Record<string, string>[];
+  const languageRows = parse(read('workspace/reference-data/languages/ABSHEER_Languages_CLEAN_IMPORT_READY.csv').toString('utf8'), { columns: true, skip_empty_lines: true, bom: true }) as Record<string, string>[];
   const relationships = buildCourseSourceRelationshipQueue(courses.projected,
     EXTERNAL_COURSE_PROVIDER_SEED.map(provider => ({ publicId: provider.publicId, labels: [provider.canonicalName, provider.displayName, ...(provider.aliases ?? []).map(alias => alias.alias)], allowedDomains: [...(provider.allowedDomains ?? [])] })),
     languageRows.filter(row => row.isActive === 'true').map(row => ({ publicId: row.isoCode, labels: [row.isoCode, row.name, row.nameAr, row.nativeName, ...row.aliases.split('|')] })),

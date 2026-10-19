@@ -2,7 +2,7 @@ import {afterEach,describe,it,expect,vi} from 'vitest';
 import {Phase10CatalogRepository} from '../../src/majors/Phase10CatalogRepository';
 import {PrismaMajorProgramUsageGateway} from '../../src/universities/PrismaMajorProgramUsageGateway';
 import {PrismaMajorScholarshipUsageGateway} from '../../src/scholarships/PrismaMajorScholarshipUsageGateway';
-import {MajorImportPromotionUseCase} from '@manaratak/application';
+import {MajorImportPromotionUseCase} from '@absheer/application';
 import {PrismaMajorRepository} from '../../src/majors/PrismaMajorRepository';
 import {PrismaMajorImportReviewGateway} from '../../src/majors/PrismaMajorImportReviewGateway';
 afterEach(()=>vi.restoreAllMocks());

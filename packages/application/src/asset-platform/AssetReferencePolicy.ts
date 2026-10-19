@@ -5,7 +5,7 @@ import {
   AssetRecord,
   AssetSecurityClassification,
   IAssetRecordRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface AssetReferencePolicyOptions {
   purpose: string;

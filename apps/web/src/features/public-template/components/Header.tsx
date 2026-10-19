@@ -2,7 +2,7 @@ import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I1
 import React from 'react';
 import { Menu, User, Globe, Moon, Sun, Search, Sparkles, X, Bell, GraduationCap, BookOpen } from 'lucide-react';
 import { Language } from '../types';
-import { ManaratakLogo } from './ManaratakLogo';
+import { AbsheerLogo } from './AbsheerLogo';
 
 interface HeaderProps {
   language: Language;
@@ -49,12 +49,12 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
       <header
-        id="manaratak-header"
-        className="w-full bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-b border-[var(--mn-border)] dark:border-[var(--mn-border)] shadow-2xs sticky top-0 z-40 transition-colors mn-panel dark:mn-panel "
+        id="absheer-header"
+        className="w-full bg-[var(--ab-surface)] dark:bg-[var(--ab-surface)] border-b border-[var(--ab-border)] dark:border-[var(--ab-border)] shadow-2xs sticky top-0 z-40 transition-colors ab-panel dark:ab-panel "
       >
         {/* Main Top Bar */}
         <div className="w-full min-h-[68px] sm:h-20 py-1 sm:py-0 px-3 sm:px-6 flex items-center">
-          <div className="mn-header-row flex items-center justify-between gap-2 max-w-5xl mx-auto w-full">
+          <div className="ab-header-row flex items-center justify-between gap-2 max-w-5xl mx-auto w-full">
             {/* Brand Identity & Official Logo */}
             <div
               role="button"
@@ -69,31 +69,31 @@ export const Header: React.FC<HeaderProps> = ({
                 onTabChange?.('home');
                 onSelectCategory?.('all');
               }}
-              className="mn-header-brand flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none group"
-              aria-label={publicT('public_manaratak_home')}
+              className="ab-header-brand flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none group"
+              aria-label={publicT('public_absheer_home')}
             >
               {/* Circular Logo Container */}
               <div
                 className="w-[60px] h-[60px] sm:w-[68px] sm:h-[68px] rounded-full shrink-0 flex items-center justify-center transition-transform group-active:scale-95 p-0 bg-transparent border-0 overflow-hidden"
               >
-                <ManaratakLogo size={68} className="w-full h-full rounded-full object-contain" />
+                <AbsheerLogo size={68} className="w-full h-full rounded-full object-contain" />
               </div>
 
               {/* Brand Typography */}
               <div className="flex flex-col justify-center text-center sm:text-start transition-opacity group-hover:opacity-90">
-                {/* Platform Name: MANARATAK */}
-                <span className="text-[15px] sm:text-lg font-bold leading-tight tracking-wider text-[var(--mn-heading)] dark:text-[var(--mn-accent-text)] uppercase font-sans text-center sm:text-start">
-                  MANARATAK
+                {/* Platform Name: ABSHEER */}
+                <span className="text-[15px] sm:text-lg font-bold leading-tight tracking-wider text-[var(--ab-heading)] dark:text-[var(--ab-accent-text)] uppercase font-sans text-center sm:text-start">
+                  ABSHEER
                 </span>
-                {/* Subtitle: منارتك للفرص التعليمية */}
-                <span className="text-[9px] sm:text-[11px] font-bold sm:font-medium text-[var(--mn-heading)] dark:text-[var(--mn-text-muted)] leading-tight mt-0.5 whitespace-nowrap font-sans text-center sm:text-start">
-                  {isRtl ? publicT('public_manaratak_educational_opportunities') : 'Educational Opportunities'}
+                {/* Subtitle: أبشر للفرص التعليمية */}
+                <span className="text-[9px] sm:text-[11px] font-bold sm:font-medium text-[var(--ab-heading)] dark:text-[var(--ab-text-muted)] leading-tight mt-0.5 whitespace-nowrap font-sans text-center sm:text-start">
+                  {isRtl ? publicT('public_absheer_educational_opportunities') : 'Educational Opportunities'}
                 </span>
               </div>
             </div>
 
             {/* Actions Controls */}
-            <div className="mn-header-actions flex items-center gap-1.5 sm:gap-2">
+            <div className="ab-header-actions flex items-center gap-1.5 sm:gap-2">
               {/* Dark Mode Switcher */}
               {onToggleDarkMode && (
                 <button
@@ -148,28 +148,28 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Non-sticky search bar that scrolls away normally */}
       {(activeTab === 'home' || (activeTab === 'search' && isSearchVisible)) && (onGlobalSearchChange || onGlobalSearchSubmit || onOpenSmartSearch) && (
-        <div className="w-full px-3 sm:px-6 py-2 bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-muted)] border-b border-[var(--mn-border)] dark:border-[var(--mn-border)] shadow-sm">
+        <div className="w-full px-3 sm:px-6 py-2 bg-[var(--ab-surface-muted)] dark:bg-[var(--ab-surface-muted)] border-b border-[var(--ab-border)] dark:border-[var(--ab-border)] shadow-sm">
           <div className="max-w-5xl mx-auto flex items-center gap-1.5 sm:gap-2">
             <form
               onSubmit={(event) => {
                 event.preventDefault();
                 onGlobalSearchSubmit?.(globalSearchQuery.trim());
               }}
-              className="mn-search-control min-w-0 flex-1 h-10 flex items-center border border-[var(--mn-border)] dark:border-[var(--mn-border)] bg-[var(--mn-surface-muted)] dark:bg-[var(--mn-surface-elevated)] shadow-2xs overflow-hidden focus-within:border-[var(--mn-accent)]/70 focus-within:ring-2 focus-within:ring-[var(--mn-primary)]/10 transition-all rounded-[13px]"
+              className="ab-search-control min-w-0 flex-1 h-10 flex items-center border border-[var(--ab-border)] dark:border-[var(--ab-border)] bg-[var(--ab-surface-muted)] dark:bg-[var(--ab-surface-elevated)] shadow-2xs overflow-hidden focus-within:border-[var(--ab-accent)]/70 focus-within:ring-2 focus-within:ring-[var(--ab-primary)]/10 transition-all rounded-[13px]"
             >
               <input
                 id="header-global-search"
                 value={globalSearchQuery}
                 onChange={(event) => onGlobalSearchChange?.(event.target.value)}
-                placeholder={isRtl ? publicT('public_search_manaratak') : 'Search MANARATAK...'}
-                className="min-w-0 flex-1 bg-transparent py-2 px-3 sm:px-4 !text-[12px] font-bold text-[var(--mn-text)] placeholder:text-[var(--mn-text-muted)] outline-none font-['Cairo',sans-serif]"
+                placeholder={isRtl ? publicT('public_search_absheer') : 'Search ABSHEER...'}
+                className="min-w-0 flex-1 bg-transparent py-2 px-3 sm:px-4 !text-[12px] font-bold text-[var(--ab-text)] placeholder:text-[var(--ab-text-muted)] outline-none font-['Cairo',sans-serif]"
                 dir={isRtl ? 'rtl' : 'ltr'}
               />
               {globalSearchQuery && (
                 <button
                   type="button"
                   onClick={() => onGlobalSearchChange?.('')}
-                  className="w-7 h-full flex items-center justify-center text-[var(--mn-text-muted)] hover:text-[var(--mn-text-muted)] cursor-pointer"
+                  className="w-7 h-full flex items-center justify-center text-[var(--ab-text-muted)] hover:text-[var(--ab-text-muted)] cursor-pointer"
                   aria-label={publicT('public_clear_global_search')}
                 >
                   <X className="w-3.5 h-3.5" />
@@ -187,11 +187,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => onOpenSmartSearch?.(globalSearchQuery.trim())}
-              className="shrink-0 rounded-[12px] bg-[var(--mn-primary)] border border-transparent px-3 text-white flex flex-row items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform cursor-pointer mn-inverse !h-[38px] !min-h-0 !max-h-[38px]"
-              data-mn-design="56ab29fe6d"
+              className="shrink-0 rounded-[12px] bg-[var(--ab-primary)] border border-transparent px-3 text-white flex flex-row items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform cursor-pointer ab-inverse !h-[38px] !min-h-0 !max-h-[38px]"
+              data-ab-design="56ab29fe6d"
               title={isRtl ? publicT('public_open_smart_search') : 'Open smart search'}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[var(--mn-accent)] shrink-0" />
+              <Sparkles className="w-3.5 h-3.5 text-[var(--ab-accent)] shrink-0" />
               <span className="!text-[10px] font-bold font-['Cairo',sans-serif] leading-none whitespace-nowrap">{isRtl ? publicT('public_smart_search') : 'Smart'}</span>
             </button>
           </div>

@@ -94,9 +94,9 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
   const hasQuery = submittedQuery.trim().length > 0;
 
   return (
-    <div className="min-h-screen bg-[var(--mn-page)] pb-24 mn-panel " dir={publicDir}>
-      <section className="mn-search-hero text-white mn-inverse ">
-        <div className="max-w-5xl mx-auto mn-inline-gutter py-5 sm:py-7">
+    <div className="min-h-screen bg-[var(--ab-page)] pb-24 ab-panel " dir={publicDir}>
+      <section className="ab-search-hero text-white ab-inverse ">
+        <div className="max-w-5xl mx-auto ab-inline-gutter py-5 sm:py-7">
           <div className="relative flex flex-col items-center justify-center text-center">
             {/* Back Button */}
             <button 
@@ -110,18 +110,18 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
             {/* Standardized Section Title */}
             <div className="relative pb-1 mb-1 inline-block mt-0.5">
               <h1 
-                data-mn-design="6cb7f3251f"
+                data-ab-design="6cb7f3251f"
                 className="font-bold text-white inline-flex items-center justify-center gap-1.5"
               >
-                <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/10 border border-[var(--mn-accent)]/60 flex items-center justify-center shrink-0 shadow-2xs">
-                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--mn-accent)]" />
+                <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/10 border border-[var(--ab-accent)]/60 flex items-center justify-center shrink-0 shadow-2xs">
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--ab-accent)]" />
                 </span>
-                <span>{publicT('public_ask_manaratak_in_natural_language')}</span>
+                <span>{publicT('public_ask_absheer_in_natural_language')}</span>
               </h1>
-              <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[var(--mn-accent)] to-transparent" />
+              <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[var(--ab-accent)] to-transparent" />
             </div>
             <p 
-              data-mn-design="543c901a7d"
+              data-ab-design="543c901a7d"
               className="text-[10.5px] sm:text-[11px] text-white/90 font-medium max-w-md mx-auto"
             >{publicT('public_describe_what_you_want_to_find_without_needing')}</p>
           </div>
@@ -133,85 +133,85 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
                 setSubmittedQuery(query.trim());
                 onQueryChange?.(query.trim());
               }}
-              className="rounded-2xl bg-[var(--mn-surface)] p-2 shadow-lg mn-panel "
+              className="rounded-2xl bg-[var(--ab-surface)] p-2 shadow-lg ab-panel "
             >
               <textarea
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 rows={2}
                 placeholder={publicT('public_example_i_want_an_ai_masters_scholarship_in')}
-                data-mn-design="732ac8ae41"
-                className="w-full resize-none rounded-xl px-3 py-2 leading-5 text-[var(--mn-heading)] placeholder:text-[var(--mn-text-muted)] outline-none"
+                data-ab-design="732ac8ae41"
+                className="w-full resize-none rounded-xl px-3 py-2 leading-5 text-[var(--ab-heading)] placeholder:text-[var(--ab-text-muted)] outline-none"
               />
               <div className="flex items-center justify-end gap-2 px-1 pb-1">
                 <button 
                   type="submit" 
-                  data-mn-design="e874c16af7"
-                  className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-[var(--mn-primary)] px-3 py-1.5 font-bold text-white cursor-pointer mn-inverse"
+                  data-ab-design="e874c16af7"
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-[var(--ab-primary)] px-3 py-1.5 font-bold text-white cursor-pointer ab-inverse"
                 >
-                  <WandSparkles className="w-3 h-3 text-[var(--mn-accent)]" />{publicT('public_analyze_my_request')}</button>
+                  <WandSparkles className="w-3 h-3 text-[var(--ab-accent)]" />{publicT('public_analyze_my_request')}</button>
               </div>
             </form>
           </div>
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto mn-inline-gutter py-4 space-y-4">
+      <div className="max-w-5xl mx-auto ab-inline-gutter py-4 space-y-4">
         {hasQuery ? (
           <>
-            <section className="rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel ">
+            <section className="rounded-3xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-4 shadow-2xs ab-panel ">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[var(--mn-accent-text)]" />
-                <h2 className="text-sm font-bold text-[var(--mn-heading)]">{publicT('public_here_is_how_i_understood_your_request')}</h2>
+                <Sparkles className="w-4 h-4 text-[var(--ab-accent-text)]" />
+                <h2 className="text-sm font-bold text-[var(--ab-heading)]">{publicT('public_here_is_how_i_understood_your_request')}</h2>
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {analysis.intentions.map((item) => <span key={item} className="px-2.5 py-1.5 rounded-full bg-[var(--mn-primary)]/8 border border-[var(--mn-primary)]/15 text-[9px] font-bold text-[var(--mn-heading)]">{item}</span>)}
-                {analysis.degrees.map((item) => <span key={item} className="px-2.5 py-1.5 rounded-full bg-[var(--mn-success-soft)] border border-[var(--mn-success-border)] text-[9px] font-bold text-[var(--mn-success-text)]">{item}</span>)}
-                {analysis.countries.map((item) => <span key={item} className="px-2.5 py-1.5 rounded-full bg-[var(--mn-surface-muted)] border border-[var(--mn-border-brand)] text-[9px] font-bold text-[var(--mn-link)] mn-panel ">{item}</span>)}
+                {analysis.intentions.map((item) => <span key={item} className="px-2.5 py-1.5 rounded-full bg-[var(--ab-primary)]/8 border border-[var(--ab-primary)]/15 text-[9px] font-bold text-[var(--ab-heading)]">{item}</span>)}
+                {analysis.degrees.map((item) => <span key={item} className="px-2.5 py-1.5 rounded-full bg-[var(--ab-success-soft)] border border-[var(--ab-success-border)] text-[9px] font-bold text-[var(--ab-success-text)]">{item}</span>)}
+                {analysis.countries.map((item) => <span key={item} className="px-2.5 py-1.5 rounded-full bg-[var(--ab-surface-muted)] border border-[var(--ab-border-brand)] text-[9px] font-bold text-[var(--ab-link)] ab-panel ">{item}</span>)}
               </div>
-              <button onClick={() => onOpenNormalSearch(submittedQuery)} className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold text-[var(--mn-heading)] cursor-pointer">
+              <button onClick={() => onOpenNormalSearch(submittedQuery)} className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold text-[var(--ab-heading)] cursor-pointer">
                 <Search className="w-3.5 h-3.5" />{publicT('public_use_the_same_phrase_in_regular_search')}</button>
             </section>
 
             <section className="space-y-2.5">
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <h2 className="text-sm font-bold text-[var(--mn-heading)]">{publicT('public_results_from_manaratak_information')}</h2>
-                  <p className="mt-0.5 text-[9px] text-[var(--mn-text-muted)]">{publicT('public_examples_ranked_by_your_requests_words_using_information')}</p>
+                  <h2 className="text-sm font-bold text-[var(--ab-heading)]">{publicT('public_results_from_absheer_information')}</h2>
+                  <p className="mt-0.5 text-[9px] text-[var(--ab-text-muted)]">{publicT('public_examples_ranked_by_your_requests_words_using_information')}</p>
                 </div>
               </div>
 
               {analysis.scholarshipMatches.map((item) => (
-                <button key={item.id} onClick={() => onOpenScholarship(item)} className="w-full rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 text-start shadow-2xs cursor-pointer hover:border-[var(--mn-accent)]/60 mn-panel ">
+                <button key={item.id} onClick={() => onOpenScholarship(item)} className="w-full rounded-3xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3.5 text-start shadow-2xs cursor-pointer hover:border-[var(--ab-accent)]/60 ab-panel ">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-[var(--mn-primary)] text-white flex items-center justify-center shrink-0 mn-inverse "><GraduationCap className="w-4 h-4" /></div>
+                    <div className="w-10 h-10 rounded-2xl bg-[var(--ab-primary)] text-white flex items-center justify-center shrink-0 ab-inverse "><GraduationCap className="w-4 h-4" /></div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[9px] font-bold text-[var(--mn-accent-text)]">{publicT('public_scholarship')}</div>
-                      <div className="mt-0.5 text-[13px] font-bold text-[var(--mn-heading)]">{item.title}</div>
-                      <div className="mt-1 text-[10px] text-[var(--mn-text-muted)]">{item.countryFlag} {item.country} · {item.university} · {item.fundingType}</div>
+                      <div className="text-[9px] font-bold text-[var(--ab-accent-text)]">{publicT('public_scholarship')}</div>
+                      <div className="mt-0.5 text-[13px] font-bold text-[var(--ab-heading)]">{item.title}</div>
+                      <div className="mt-1 text-[10px] text-[var(--ab-text-muted)]">{item.countryFlag} {item.country} · {item.university} · {item.fundingType}</div>
                     </div>
-                    <ChevronLeft className="w-4 h-4 text-[var(--mn-accent-text)] mt-3" />
+                    <ChevronLeft className="w-4 h-4 text-[var(--ab-accent-text)] mt-3" />
                   </div>
                 </button>
               ))}
 
               {analysis.universityMatches.map((item: any) => (
-                <button key={item.id} onClick={() => onOpenUniversity(item)} className="w-full rounded-3xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 text-start shadow-2xs cursor-pointer hover:border-[var(--mn-accent)]/60 mn-panel ">
+                <button key={item.id} onClick={() => onOpenUniversity(item)} className="w-full rounded-3xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3.5 text-start shadow-2xs cursor-pointer hover:border-[var(--ab-accent)]/60 ab-panel ">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-[var(--mn-primary)] text-white flex items-center justify-center shrink-0 mn-inverse "><Building2 className="w-4 h-4" /></div>
+                    <div className="w-10 h-10 rounded-2xl bg-[var(--ab-primary)] text-white flex items-center justify-center shrink-0 ab-inverse "><Building2 className="w-4 h-4" /></div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[9px] font-bold text-[var(--mn-accent-text)]">{publicT('public_university')}</div>
-                      <div className="mt-0.5 text-[13px] font-bold text-[var(--mn-heading)]">{item.name}</div>
-                      <div className="mt-1 text-[10px] text-[var(--mn-text-muted)]">{[item.city, item.country].filter(Boolean).join(' · ')}</div>
+                      <div className="text-[9px] font-bold text-[var(--ab-accent-text)]">{publicT('public_university')}</div>
+                      <div className="mt-0.5 text-[13px] font-bold text-[var(--ab-heading)]">{item.name}</div>
+                      <div className="mt-1 text-[10px] text-[var(--ab-text-muted)]">{[item.city, item.country].filter(Boolean).join(' · ')}</div>
                     </div>
-                    <ChevronLeft className="w-4 h-4 text-[var(--mn-accent-text)] mt-3" />
+                    <ChevronLeft className="w-4 h-4 text-[var(--ab-accent-text)] mt-3" />
                   </div>
                 </button>
               ))}
             </section>
 
-            <section className="rounded-3xl border border-[var(--mn-accent)]/35 bg-[var(--mn-surface)] p-4 mn-panel ">
-              <h2 className="text-sm font-bold text-[var(--mn-heading)]">{publicT('public_explore_the_sections')}</h2>
+            <section className="rounded-3xl border border-[var(--ab-accent)]/35 bg-[var(--ab-surface)] p-4 ab-panel ">
+              <h2 className="text-sm font-bold text-[var(--ab-heading)]">{publicT('public_explore_the_sections')}</h2>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {[
                   ['scholarships', publicT('public_scholarships_5')],
@@ -221,7 +221,7 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
                   ['exams', publicT('public_exams_2')],
                   ['services', publicT('public_services_3')],
                 ].map(([category, label]) => (
-                  <button key={category} onClick={() => onNavigateCategory(category as CategoryType)} className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 flex items-center justify-between text-[10px] font-bold text-[var(--mn-heading)] cursor-pointer mn-panel ">
+                  <button key={category} onClick={() => onNavigateCategory(category as CategoryType)} className="rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-page)] p-3 flex items-center justify-between text-[10px] font-bold text-[var(--ab-heading)] cursor-pointer ab-panel ">
                     {label}<ChevronLeft className="w-3.5 h-3.5" />
                   </button>
                 ))}
@@ -229,10 +229,10 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
             </section>
           </>
         ) : (
-          <div className="py-14 text-center rounded-3xl border border-dashed border-[var(--mn-border)] bg-[var(--mn-surface)] mn-panel ">
-            <Sparkles className="w-9 h-9 mx-auto text-[var(--mn-accent-text)]" />
-            <div className="mt-2 text-xs font-bold text-[var(--mn-heading)]">{publicT('public_describe_your_study_or_career_goal_in_a')}</div>
-            <p className="mt-1 text-[10px] text-[var(--mn-text-muted)]">{publicT('public_example_i_want_a_funded_masters_in_data')}</p>
+          <div className="py-14 text-center rounded-3xl border border-dashed border-[var(--ab-border)] bg-[var(--ab-surface)] ab-panel ">
+            <Sparkles className="w-9 h-9 mx-auto text-[var(--ab-accent-text)]" />
+            <div className="mt-2 text-xs font-bold text-[var(--ab-heading)]">{publicT('public_describe_your_study_or_career_goal_in_a')}</div>
+            <p className="mt-1 text-[10px] text-[var(--ab-text-muted)]">{publicT('public_example_i_want_a_funded_masters_in_data')}</p>
           </div>
         )}
       </div>
@@ -243,7 +243,7 @@ const PrototypeSmartSearchPage: React.FC<SmartSearchPageProps> = ({
 function LiveSmartSearchPage({ initialQuery, onQueryChange, onBack, onOpenNormalSearch }: SmartSearchPageProps) {
   const { language } = usePublicTemplateTranslation(); const ar = language !== 'en';
   const [query, setQuery] = useState(initialQuery);
-  return <section className="mn-page-shell space-y-4 pb-24" dir={ar ? 'rtl' : 'ltr'}>
+  return <section className="ab-page-shell space-y-4 pb-24" dir={ar ? 'rtl' : 'ltr'}>
     <button type="button" onClick={onBack}>{ar ? 'رجوع' : 'Back'}</button>
     <h1>{ar ? 'ابحث في الفرص المنشورة' : 'Search published opportunities'}</h1>
     <form onSubmit={event => { event.preventDefault(); if (query.trim()) onOpenNormalSearch(query.trim()); }}>

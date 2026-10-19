@@ -9,7 +9,7 @@ import {
   studentToolLifecycleParamSchema,
   workflowTransitionSchema,
 } from '../../apps/api/src/presentation/validation/StrictControlPlaneSchemas';
-import { ValidationException } from '@manaratak/core';
+import { ValidationException } from '@absheer/core';
 
 const expectValidation = (fn: () => unknown) => assert.throws(fn, ValidationException);
 

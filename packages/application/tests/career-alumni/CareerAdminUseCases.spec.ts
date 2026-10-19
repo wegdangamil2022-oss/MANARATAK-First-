@@ -6,7 +6,7 @@ import {
   CareerOpportunityType,
   EmploymentType,
   ICareerRepository
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CareerAdminUseCases } from '../../src/career-alumni/use-cases/CareerAdminUseCases';
 
 describe('CareerAdminUseCases', () => {

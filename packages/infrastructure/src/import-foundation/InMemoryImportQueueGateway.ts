@@ -1,4 +1,4 @@
-import { ImportCheckpoint, ImportJobStatus } from '@manaratak/domain';
+import { ImportCheckpoint, ImportJobStatus } from '@absheer/domain';
 import {
   IImportQueueGateway,
   EnqueueImportJobCommand,
@@ -11,7 +11,7 @@ import {
   ClaimImportJobCommand,
   ImportJobLease,
   FailImportJobCommand,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 export class InMemoryImportQueueGateway implements IImportQueueGateway {
   public readonly persistenceClassification = 'DEVELOPMENT_ONLY' as const;

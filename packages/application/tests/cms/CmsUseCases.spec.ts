@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CmsContentStatus, CmsContentType, ICmsRepository } from '@manaratak/domain';
+import { CmsContentStatus, CmsContentType, ICmsRepository } from '@absheer/domain';
 import { AdminCmsUseCases, PublicCmsUseCases } from '../../src/cms/use-cases/CmsUseCases';
 
 describe('Phase 16 CMS use cases', () => {
@@ -74,7 +74,7 @@ describe('Phase 16 CMS use cases', () => {
     const content = await admin.createContent(
       {
         slug: 'study-guide',
-        siteIdentifier: 'manaratak',
+        siteIdentifier: 'absheer',
         primaryLocale: 'ar',
         contentType: CmsContentType.STUDY_GUIDE,
         title: 'دليل الدراسة',
@@ -97,7 +97,7 @@ describe('Phase 16 CMS use cases', () => {
       admin.createContent(
         {
           slug: 'bad-asset',
-          siteIdentifier: 'manaratak',
+          siteIdentifier: 'absheer',
           primaryLocale: 'ar',
           contentType: CmsContentType.ARTICLE,
           title: 'Bad',
@@ -155,7 +155,7 @@ describe('Phase 16 CMS use cases', () => {
     await admin.createContent(
       {
         slug: 'seo-governed',
-        siteIdentifier: 'manaratak',
+        siteIdentifier: 'absheer',
         primaryLocale: 'ar',
         contentType: CmsContentType.NEWS,
         title: 'خبر',
@@ -230,7 +230,7 @@ describe('Phase 16 CMS use cases', () => {
 
   it('passes paginated redirect search to the CMS owner without reading public content', async () => {
     vi.mocked(repository.searchRedirects).mockResolvedValue({ data: [], total: 0, page: 2, pageSize: 10, totalPages: 0 });
-    const query = { siteIdentifier: 'manaratak', locale: 'ar', q: 'old', active: true, page: 2, pageSize: 10 };
+    const query = { siteIdentifier: 'absheer', locale: 'ar', q: 'old', active: true, page: 2, pageSize: 10 };
     const result = await admin.searchRedirects(query);
     expect(result.page).toBe(2);
     expect(repository.searchRedirects).toHaveBeenCalledWith(query);
@@ -240,7 +240,7 @@ describe('Phase 16 CMS use cases', () => {
   it('never serves a stale Redis publication after the canonical owner archives it', async () => {
     const cache = {
       getPublished: vi.fn().mockResolvedValue({
-        siteIdentifier: 'manaratak', locale: 'ar', slug: 'archived',
+        siteIdentifier: 'absheer', locale: 'ar', slug: 'archived',
         title: 'Stale cached content', body: 'Should not be public',
       }),
       setPublished: vi.fn(),
@@ -248,9 +248,9 @@ describe('Phase 16 CMS use cases', () => {
     };
     const publicOwner = new PublicCmsUseCases(repository, cache);
     vi.mocked(repository.getPublishedBySlug).mockResolvedValue(null);
-    await expect(publicOwner.getBySlug('archived', 'ar', 'manaratak'))
+    await expect(publicOwner.getBySlug('archived', 'ar', 'absheer'))
       .rejects.toThrow('CMS_CONTENT_NOT_FOUND');
-    expect(repository.getPublishedBySlug).toHaveBeenCalledWith('archived', 'ar', 'manaratak');
+    expect(repository.getPublishedBySlug).toHaveBeenCalledWith('archived', 'ar', 'absheer');
     expect(cache.getPublished).not.toHaveBeenCalled();
     expect(cache.setPublished).not.toHaveBeenCalled();
   });

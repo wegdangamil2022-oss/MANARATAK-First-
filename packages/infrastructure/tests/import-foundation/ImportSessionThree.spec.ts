@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus,
-  RetentionOwner, RetentionDisposition } from '@manaratak/domain';
+  RetentionOwner, RetentionDisposition } from '@absheer/domain';
 import { CsvImportStreamParser, ImportSourceControlUseCases, ImportSourceIdentity, ImportParserRegistry,
-  SourceConnectorRegistry } from '@manaratak/application';
+  SourceConnectorRegistry } from '@absheer/application';
 import { PrismaImportRepository } from '../../src/import-foundation/PrismaImportRepository';
 import { VerifiedImportArtifactGateway } from '../../src/import-foundation/VerifiedImportArtifactGateway';
 import { PrismaImportRetentionGateway } from '../../src/retention/PrismaImportRetentionGateway';

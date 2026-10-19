@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { OFFICIAL_STUDENT_TOOLS } from '@manaratak/application';
+import { OFFICIAL_STUDENT_TOOLS } from '@absheer/application';
 import { PrismaStudentToolRegistryRepository } from '../../src/student-tools/PrismaStudentToolRegistryRepository';
 const fixture = () => {
   const original = structuredClone(

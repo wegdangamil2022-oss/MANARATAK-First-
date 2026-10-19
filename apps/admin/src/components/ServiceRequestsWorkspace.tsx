@@ -8,7 +8,7 @@ import {
   ServiceRequestStatus,
   type ServiceRequestDto,
   type ServiceCatalogItemDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { adminApiClient } from '../api/client';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 

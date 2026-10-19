@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ILogger, ILogContext, IErrorSerializer } from '@manaratak/core';
+import { ILogger, ILogContext, IErrorSerializer } from '@absheer/core';
 import { PresentationErrorTranslator } from '../errors/PresentationErrorTranslator.js';
 import { problemDetails } from '../http/ProblemDetails.js';
 

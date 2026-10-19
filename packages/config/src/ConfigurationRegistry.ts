@@ -1,4 +1,4 @@
-import { IConfigurationService } from '@manaratak/core';
+import { IConfigurationService } from '@absheer/core';
 import { ConfigurationService } from './ConfigurationService';
 import { EnvironmentLoader } from './EnvironmentLoader';
 import { ISchemaValidator, DefaultEnvironmentValidator } from './EnvironmentValidator';

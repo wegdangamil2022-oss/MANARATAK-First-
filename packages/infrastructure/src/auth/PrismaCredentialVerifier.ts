@@ -1,5 +1,5 @@
-import { ICredentialVerifier } from '@manaratak/application';
-import { LifeStatus, AccountAccessState } from '@manaratak/domain';
+import { ICredentialVerifier } from '@absheer/application';
+import { LifeStatus, AccountAccessState } from '@absheer/domain';
 import { PasswordHasher } from './PasswordHasher';
 
 export class PrismaCredentialVerifier implements ICredentialVerifier {

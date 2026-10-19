@@ -12,7 +12,7 @@ import {
   JobMetadata,
   IBackgroundJobRepository,
   BackgroundJobSpecification
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { IBackgroundJobExecutionGateway } from '../gateways/IBackgroundJobExecutionGateway';
 import { CancelJobDto, EnqueueJobDto, EnsureRecurringJobDto, GetJobStatusDto } from '../dtos/BackgroundJobsDtos';
 import { nextCronOccurrence, validateCronExpression } from '../services/CronScheduleCalculator';

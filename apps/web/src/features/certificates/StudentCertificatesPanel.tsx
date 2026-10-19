@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ApiClient, type StudentCertificateProjectionDto } from '../../api/client';
-import { certificateCopy, certificateStatusCopy } from '@manaratak/shared';
+import { certificateCopy, certificateStatusCopy } from '@absheer/shared';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { StudentCertificateActions } from './StudentCertificateActions';
 
@@ -94,14 +94,14 @@ export function StudentCertificatesPanel({
         </button>
       </div>
       {error && (
-        <p role="alert" className="text-sm text-[var(--mn-danger-text)]">
+        <p role="alert" className="text-sm text-[var(--ab-danger-text)]">
           {error}
         </p>
       )}
       {!rows.length && (
         <p className="rounded-xl border p-5 text-sm">
           {copy(
-            'تظهر شهادة منارتك للدورات المؤهلة بعد إتمام المتطلبات وانتهاء عملية إصدار الشهادة.',
+            'تظهر شهادة أبشر للدورات المؤهلة بعد إتمام المتطلبات وانتهاء عملية إصدار الشهادة.',
           )}
         </p>
       )}
@@ -109,7 +109,7 @@ export function StudentCertificatesPanel({
         {rows.map((row) => (
           <article
             key={row.id}
-            className="rounded-2xl border border-[#D6A43B]/40 bg-[var(--mn-surface)] p-4"
+            className="rounded-2xl border border-[#D6A43B]/40 bg-[var(--ab-surface)] p-4"
           >
             <h4 className="font-bold">{row.courseDisplayName}</h4>
             <p className="mt-1 text-xs">{certificateStatusCopy(language, row.status)}</p>

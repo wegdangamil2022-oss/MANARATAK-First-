@@ -5,7 +5,7 @@ import { readFileSync, existsSync } from 'node:fs';
 
 const read = (path) => readFileSync(path, 'utf8');
 
-test('MNT-AUD-0109 every production DI registration is runtime reachable', () => {
+test('ABSH-AUD-0109 every production DI registration is runtime reachable', () => {
   const output = execFileSync(process.execPath, ['scripts/architecture/verify-di-reachability.mjs'], { encoding: 'utf8' });
   assert.match(output, /DI_REACHABILITY_VERIFY=PASS/);
   const manifest = JSON.parse(read('docs/remediation/DI_RUNTIME_REACHABILITY_MANIFEST.json'));
@@ -14,7 +14,7 @@ test('MNT-AUD-0109 every production DI registration is runtime reachable', () =>
   assert.ok(manifest.registrations.every((entry) => entry.classification === 'RUNTIME_REACHABLE'));
 });
 
-test('MNT-AUD-0109 deferred source cannot masquerade as production DI', () => {
+test('ABSH-AUD-0109 deferred source cannot masquerade as production DI', () => {
   const container = read('apps/api/src/infrastructure/di/container.ts');
   const manifest = JSON.parse(read('docs/remediation/DI_RUNTIME_REACHABILITY_MANIFEST.json'));
   for (const name of ['manageMonitorsUseCase','manageLogsUseCase','manageSecurityPoliciesUseCase','manageConfigurationsUseCase','manageIntegrationsUseCase','manageLocalizationsUseCase','monitoringRouter']) {
@@ -23,7 +23,7 @@ test('MNT-AUD-0109 deferred source cannot masquerade as production DI', () => {
   }
 });
 
-test('MNT-AUD-0109 obsolete shadow database and unsafe legacy diagnostic are gone', () => {
+test('ABSH-AUD-0109 obsolete shadow database and unsafe legacy diagnostic are gone', () => {
   const container = read('apps/api/src/infrastructure/di/container.ts');
   assert.doesNotMatch(container, /createInMemoryPrismaClient/);
   assert.equal(existsSync('scripts/inspect_legacy.ts'), false);

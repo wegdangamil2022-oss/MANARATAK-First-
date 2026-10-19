@@ -7,7 +7,7 @@ import {
   OutboxDeliveryContext,
   TemplateId,
   TransactionalOutboxEntry,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { ManageNotificationIntentsUseCase } from './ManageNotificationIntentsUseCase';
 
 interface NotificationMapping {

@@ -1,6 +1,6 @@
-# MANARATAK Durable Background Worker Runtime
+# ABSHEER Durable Background Worker Runtime
 
-**Authority:** ADR-029 / MNT-AUD-0007 / MNT-AUD-0068
+**Authority:** ADR-029 / ABSH-AUD-0007 / ABSH-AUD-0068
 
 ## Production contract
 
@@ -41,7 +41,7 @@ Production/staging must explicitly enable and configure all required workers. So
 ## B09 host authority and inventory — 2026-10-15
 
 Source-verified host: the persistent Node process started by `apps/api/src/server.ts`
-(`npm run start --workspace @manaratak/api` after the existing build). The same process
+(`npm run start --workspace @absheer/api` after the existing build). The same process
 owns HTTP and worker shutdown. `RegisterRecurringJobs.ts` is the sole definition
 registration entry; `PollingWorkerRuntime.ts` is the sole interval scheduler. Flags
 remain opt-in. No request handler starts workers. The unused older bootstrapper was

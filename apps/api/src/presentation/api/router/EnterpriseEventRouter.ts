@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { ManageEnterpriseEventsUseCase } from '@manaratak/application';
+import { ManageEnterpriseEventsUseCase } from '@absheer/application';
 import { enterpriseEventPublishSchema, enterpriseEventRegisterSchema, parseStrict, referenceParamSchema } from '../../validation/StrictControlPlaneSchemas.js';
 
 export class EnterpriseEventRouter {

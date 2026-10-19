@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import type { ReferenceOwnerReview, ReferenceSnapshotRecord } from '@manaratak/domain';
-import { REQUIRED_REFERENCE_STANDARD_FAMILIES } from '@manaratak/domain';
+import type { ReferenceOwnerReview, ReferenceSnapshotRecord } from '@absheer/domain';
+import { REQUIRED_REFERENCE_STANDARD_FAMILIES } from '@absheer/domain';
 import { adminApiClient } from '../api/client';
 const base = '/admin/reference-data';
 export function ReferenceOwnerReviewWorkspace({ receiptId }: { receiptId?: string }) {

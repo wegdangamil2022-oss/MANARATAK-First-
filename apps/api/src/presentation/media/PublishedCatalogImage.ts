@@ -1,5 +1,5 @@
-import type { AssetReferencePolicy, ProcessAssetLifecycleUseCase } from '@manaratak/application';
-import { AssetSecurityClassification } from '@manaratak/domain';
+import type { AssetReferencePolicy, ProcessAssetLifecycleUseCase } from '@absheer/application';
+import { AssetSecurityClassification } from '@absheer/domain';
 
 export interface PublishedCatalogImageServices {
   assetReferencePolicy?: Pick<AssetReferencePolicy, 'assertUsable'>;

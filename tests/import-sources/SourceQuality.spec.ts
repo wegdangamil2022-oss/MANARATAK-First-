@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
-import type { UniversalImportHandoff, ImportedCourseMasterRowContract } from '@manaratak/domain';
+import type { UniversalImportHandoff, ImportedCourseMasterRowContract } from '@absheer/domain';
 import { CanonicalSourceReview, sourceReviewHash } from '../../packages/application/src/import-foundation/services/CanonicalSourceReview';
 import { buildUniversityCitySourceQueue } from '../../packages/application/src/universities/use-cases/UniversityCitySourceQueue';
 import { inspectUniversitySourceStage, reconcileUniversityQuarantine } from '../../packages/application/src/universities/use-cases/UniversitySourceQuality';

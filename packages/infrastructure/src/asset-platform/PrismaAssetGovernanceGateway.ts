@@ -1,6 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client';
-import { AssetId, type AssetRights, type AtomicPersistenceContext } from '@manaratak/domain';
-import type { IAssetGovernanceGateway, AssetRendition } from '@manaratak/application';
+import { AssetId, type AssetRights, type AtomicPersistenceContext } from '@absheer/domain';
+import type { IAssetGovernanceGateway, AssetRendition } from '@absheer/application';
 import { PrismaAssetRecordRepository } from './PrismaAssetRecordRepository';
 export class PrismaAssetGovernanceGateway implements IAssetGovernanceGateway {
   constructor(private readonly db: PrismaClient) {}

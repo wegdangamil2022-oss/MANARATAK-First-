@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { CmsContentType, PublicCmsContentDto } from '@manaratak/domain';
+import { CmsContentType, PublicCmsContentDto } from '@absheer/domain';
 import { renderCmsPublishedPage } from '../../src/cms/use-cases/CmsPublishedPage';
 const publication = (): PublicCmsContentDto => ({
   publicId: 'public-1',
   contentId: 'node-1',
-  siteIdentifier: 'manaratak',
+  siteIdentifier: 'absheer',
   locale: 'ar',
   slug: 'arabic-news',
   canonicalUrl: '/ar/news/arabic-news',
@@ -33,10 +33,10 @@ const publication = (): PublicCmsContentDto => ({
 });
 describe('Live CMS publication HTML', () => {
   it('renders approved text, exact canonical, localized alternates and escaped editorial fields', () => {
-    const html = renderCmsPublishedPage(publication(), 'https://manaratak.example');
+    const html = renderCmsPublishedPage(publication(), 'https://absheer.example');
     expect(html).toContain('<html lang="ar" dir="rtl">');
     expect(html).toContain('<p>Current approved text</p>');
-    expect(html).toContain('href="https://manaratak.example/ar/news/arabic-news"');
+    expect(html).toContain('href="https://absheer.example/ar/news/arabic-news"');
     expect(html).not.toContain('hreflang="en"');
     expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
     expect(html).not.toContain('<img');
@@ -46,7 +46,7 @@ describe('Live CMS publication HTML', () => {
   it('does not invent English alternates for Arabic-only publications', () => {
     const content = publication();
     content.availableLocales = [{ locale: 'ar', slug: content.slug }];
-    const html = renderCmsPublishedPage(content, 'https://manaratak.example');
+    const html = renderCmsPublishedPage(content, 'https://absheer.example');
     expect(html).not.toContain('hreflang="en"');
     expect(html).not.toContain('og:locale:alternate');
   });
@@ -56,7 +56,7 @@ describe('Live CMS publication HTML', () => {
       { ...publication(), siteIdentifier: 'foreign' },
       { ...publication(), canonicalUrl: '/ar/articles/arabic-news' },
     ])
-      expect(() => renderCmsPublishedPage(content, 'https://manaratak.example')).toThrow();
+      expect(() => renderCmsPublishedPage(content, 'https://absheer.example')).toThrow();
   });
   it('rejects spoofed origins and preserves explicit noindex/nofollow', () => {
     for (const origin of [
@@ -70,7 +70,7 @@ describe('Live CMS publication HTML', () => {
     const content = publication();
     content.seoMetadata.noIndex = true;
     content.seoMetadata.noFollow = true;
-    expect(renderCmsPublishedPage(content, 'https://manaratak.example')).toContain(
+    expect(renderCmsPublishedPage(content, 'https://absheer.example')).toContain(
       'content="noindex,nofollow"',
     );
   });

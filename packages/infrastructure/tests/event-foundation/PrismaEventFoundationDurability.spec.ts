@@ -9,7 +9,7 @@ import {
   EventPayloadMetadata,
   EventReference,
   EventVersion,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { PrismaEnterpriseEventRepository } from '../../src/event-foundation/PrismaEnterpriseEventRepository';
 import { PrismaEventPublishingGateway } from '../../src/event-foundation/PrismaEventPublishingGateway';
 

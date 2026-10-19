@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
-import type {FinanceInvoiceDto, WalletOperationsDto} from '@manaratak/domain';
+import type {FinanceInvoiceDto, WalletOperationsDto} from '@absheer/domain';
 import {useTranslation} from '../i18n/I18nProvider';
 import {financeMoney} from './financePresentation';
 import {useFinanceRead} from './useFinanceRead';

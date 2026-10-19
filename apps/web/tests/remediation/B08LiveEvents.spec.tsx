@@ -8,7 +8,7 @@ let tree: ReturnType<typeof create>;
 function Probe({ locale }: { locale: 'ar' | 'en' }) { const value = usePublicLiveData('api', locale); return <output>{JSON.stringify(value.data)}</output>; }
 beforeEach(() => {
   (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
-  vi.stubGlobal('__MANARATAK_PROTOTYPE_DATA_ENABLED__', false); vi.useFakeTimers(); state.load.mockReset();
+  vi.stubGlobal('__ABSHEER_PROTOTYPE_DATA_ENABLED__', false); vi.useFakeTimers(); state.load.mockReset();
   vi.stubGlobal('window', { setInterval, clearInterval, addEventListener: (name: string, fn: () => void) => { if (name === 'focus') state.focus = fn; }, removeEventListener: vi.fn() });
   vi.stubGlobal('document', { visibilityState: 'visible', addEventListener: vi.fn(), removeEventListener: vi.fn() });
 });

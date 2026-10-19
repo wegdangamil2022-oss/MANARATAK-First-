@@ -7,7 +7,7 @@
 - **Version:** 1.0.0
 - **Date:** 2026-09-06
 - **Decision Owner:** Project remediation manager under owner-delegated execution authority
-- **Finding:** `MNT-AUD-0088`
+- **Finding:** `ABSH-AUD-0088`
 - **Review note:** This record does **not** claim an independent human ARB review. It is the submitted architecture decision package and current source-remediation authority; independent review remains an explicit closure requirement.
 
 ## 2. Context
@@ -16,7 +16,7 @@ Phase 02 originally required separate physical/logical PostgreSQL schemas and pr
 
 ## 3. Decision
 
-Select remediation option **(b)** from `MNT-AUD-0088`: formally supersede Phase 02's mandatory physical/logical PostgreSQL schema partitioning requirement for the current Modular Monolith and replace it with executable ownership controls.
+Select remediation option **(b)** from `ABSH-AUD-0088`: formally supersede Phase 02's mandatory physical/logical PostgreSQL schema partitioning requirement for the current Modular Monolith and replace it with executable ownership controls.
 
 The canonical persistence strategy is:
 
@@ -59,4 +59,4 @@ ADR-028 deliberately requires **no database mutation** merely to move existing t
 
 ## 7. Closure Boundary
 
-`MNT-AUD-0088` may become `SOURCE_VERIFIED` when the manifest, guards, owner-writer refactors and active-document reconciliation pass. It cannot become `VERIFIED_CLOSED` until independent architecture review and the W6 disposable-DB/CI evidence are complete.
+`ABSH-AUD-0088` may become `SOURCE_VERIFIED` when the manifest, guards, owner-writer refactors and active-document reconciliation pass. It cannot become `VERIFIED_CLOSED` until independent architecture review and the W6 disposable-DB/CI evidence are complete.

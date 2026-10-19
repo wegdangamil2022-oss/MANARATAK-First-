@@ -39,8 +39,8 @@ describe('RedisClientFactory', () => {
   });
 
   it('formats keys according to the canonical namespace strategy <namespace>:<feature>:<key>', () => {
-    const key = RedisClientFactory.buildKey('manaratak:', 'cache', 'user:123');
-    expect(key).toBe('manaratak:cache:user:123');
+    const key = RedisClientFactory.buildKey('absheer:', 'cache', 'user:123');
+    expect(key).toBe('absheer:cache:user:123');
 
     const keyWithoutTrailingColon = RedisClientFactory.buildKey('custom_ns', 'rate-limit', 'ip:127.0.0.1');
     expect(keyWithoutTrailingColon).toBe('custom_ns:rate-limit:ip:127.0.0.1');

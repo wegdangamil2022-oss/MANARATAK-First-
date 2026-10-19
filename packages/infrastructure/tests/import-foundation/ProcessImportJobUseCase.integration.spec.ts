@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ProcessImportJobUseCase, ImportAdminUseCases } from '@manaratak/application';
-import { InMemoryImportQueueGateway } from '@manaratak/infrastructure';
-import { ImportTargetDomain } from '@manaratak/domain';
+import { ProcessImportJobUseCase, ImportAdminUseCases } from '@absheer/application';
+import { InMemoryImportQueueGateway } from '@absheer/infrastructure';
+import { ImportTargetDomain } from '@absheer/domain';
 
 describe('ProcessImportJobUseCase', () => {
   let mockImportRepo: any;

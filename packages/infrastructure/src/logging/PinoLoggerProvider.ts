@@ -1,5 +1,5 @@
 import pino, { Logger as PinoLogger } from 'pino';
-import { ILoggerProvider, StructuredLogMessage, LogLevel } from '@manaratak/core';
+import { ILoggerProvider, StructuredLogMessage, LogLevel } from '@absheer/core';
 import { AuditSecretSanitizer } from '../audit/AuditSecretSanitizer';
 
 export class PinoLoggerProvider implements ILoggerProvider {

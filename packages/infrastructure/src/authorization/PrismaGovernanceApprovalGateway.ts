@@ -1,11 +1,11 @@
 import { Prisma, type PrismaClient } from '@prisma/client';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import {
   governanceApprovalDigest,
   type GovernanceApproval,
   type GovernanceApprovalScope,
   type IGovernanceApprovalGateway,
-} from '@manaratak/application';
+} from '@absheer/application';
 export class PrismaGovernanceApprovalGateway implements IGovernanceApprovalGateway {
   constructor(private readonly db: PrismaClient) {}
   private tx(context: AtomicPersistenceContext) {

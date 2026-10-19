@@ -18,7 +18,7 @@ const check = (id, title, fn) => {
   }
 };
 
-check('MNT-AUD-0009', 'translation quality gate uses behavioral contracts', () => {
+check('ABSH-AUD-0009', 'translation quality gate uses behavioral contracts', () => {
   const source = read('scripts/verify-translation-quality-source.ts');
   const pkg = JSON.parse(read('package.json'));
   return requireAll(source, ['checkTranslationBehaviorContracts', 'translation:test']) &&
@@ -27,14 +27,14 @@ check('MNT-AUD-0009', 'translation quality gate uses behavioral contracts', () =
     String(pkg.scripts?.['translation:ci'] ?? '').includes('translation:test');
 });
 
-check('MNT-AUD-0010', 'imported-course security gate follows canonical force re-analysis', () => {
+check('ABSH-AUD-0010', 'imported-course security gate follows canonical force re-analysis', () => {
   const runtime = read('scripts/wp-ic-10-runtime-lib.mjs');
   const operations = read('packages/application/src/courses/use-cases/CourseImportOperationsUseCases.ts');
   return requireAll(runtime, ['CourseImportOperationsUseCases.ts', 'providerReplayForceReanalysisInvariant']) &&
     requireAll(operations, ['options.force', 'force: true']);
 });
 
-check('MNT-AUD-0047', 'P16 verifier follows the current CMS composition', () => {
+check('ABSH-AUD-0047', 'P16 verifier follows the current CMS composition', () => {
   const source = read('scripts/verify-phase16-source.mjs');
   return !source.includes('CmsContentDetail.tsx') && requireAll(source, [
     'CmsPublicRouter.ts',
@@ -44,13 +44,13 @@ check('MNT-AUD-0047', 'P16 verifier follows the current CMS composition', () => 
   ]);
 });
 
-check('MNT-AUD-0048', 'canonical CI is manifest-driven and runtime-deferred explicitly', () => {
+check('ABSH-AUD-0048', 'canonical CI is manifest-driven and runtime-deferred explicitly', () => {
   const manifest = JSON.parse(read('scripts/ci/source-closure-manifest.json'));
   const ci = read('.github/workflows/ci.yml');
   const evidence = read('scripts/ci/write-source-ci-evidence.mjs');
   const gateNames = new Set((manifest.gates ?? []).map((gate) => gate.id));
   const runtime = (manifest.gates ?? []).filter((gate) => gate.classification === 'RUNTIME');
-  return manifest.kind === 'MANARATAK_SOURCE_CLOSURE_MANIFEST' &&
+  return manifest.kind === 'ABSHEER_SOURCE_CLOSURE_MANIFEST' &&
     manifest.runtimePolicy === 'PENDING_NON_BLOCKING' &&
     typeof manifest.runtimePendingManifest === 'string' &&
     /^docs\/remediation\/W(?:6|7)_RUNTIME_PENDING_CHECKS\.md$/.test(manifest.runtimePendingManifest) &&
@@ -61,17 +61,17 @@ check('MNT-AUD-0048', 'canonical CI is manifest-driven and runtime-deferred expl
     ci.includes('npm run ci:closure:manifest') && evidence.includes('sourceClosureManifest');
 });
 
-check('MNT-AUD-0042', 'disposable PostgreSQL whole-platform integration harness is registered', () => {
+check('ABSH-AUD-0042', 'disposable PostgreSQL whole-platform integration harness is registered', () => {
   const config = read('vitest.database.config.ts');
   const suite = read('packages/infrastructure/tests/database/WholePlatformPersistence.integration.spec.ts');
   const harness = read('packages/infrastructure/tests/database/DisposablePostgresHarness.ts');
   return config.includes('WholePlatformPersistence.integration.spec.ts') &&
     Array.from({ length: 15 }, (_, i) => `P${String(i + 7).padStart(2, '0')}`).every((phase) => suite.includes(phase)) &&
     requireAll(suite, ['pg_constraint', 'pg_advisory_xact_lock', 'outbox', 'idempotency']) &&
-    requireAll(harness, ['assertDisposableDatabaseUrl', 'MANARATAK_DATABASE_INTEGRATION_ENABLED']);
+    requireAll(harness, ['assertDisposableDatabaseUrl', 'ABSHEER_DATABASE_INTEGRATION_ENABLED']);
 });
 
-check('MNT-AUD-0078', 'production telemetry provider and HTTP/background instrumentation are wired', () => {
+check('ABSH-AUD-0078', 'production telemetry provider and HTTP/background instrumentation are wired', () => {
   const provider = read('packages/infrastructure/src/monitoring/OtlpHttpMonitoringProvider.ts');
   const middleware = read('apps/api/src/presentation/monitoring/MonitoringMiddleware.ts');
   const monitoringService = read('packages/infrastructure/src/monitoring/MonitoringService.ts');
@@ -88,12 +88,12 @@ check('MNT-AUD-0078', 'production telemetry provider and HTTP/background instrum
     cfg.includes('OTEL_EXPORTER_OTLP_ENDPOINT');
 });
 
-check('MNT-AUD-0066', 'provider-neutral DR contract, readiness and restore drill are source-complete', () => {
+check('ABSH-AUD-0066', 'provider-neutral DR contract, readiness and restore drill are source-complete', () => {
   const contract = JSON.parse(read('config/recovery/production-recovery-contract.json'));
   const verifier = read('scripts/recovery/verify-recovery-contract.mjs');
   const drill = read('scripts/recovery/run-whole-platform-restore-drill.mjs');
   const workflow = read('.github/workflows/recovery-restore-audit.yml');
-  return contract.kind === 'MANARATAK_PRODUCTION_RECOVERY_CONTRACT' &&
+  return contract.kind === 'ABSHEER_PRODUCTION_RECOVERY_CONTRACT' &&
     contract.runtimeEvidenceStatus === 'REQUIRED_BEFORE_PRODUCTION' &&
     exists('scripts/recovery/verify-runtime-backup-readiness.mjs') &&
     exists('docs/operations/PLATFORM_DISASTER_RECOVERY_RUNBOOK.md') &&
@@ -102,14 +102,14 @@ check('MNT-AUD-0066', 'provider-neutral DR contract, readiness and restore drill
     requireAll(workflow, ['schedule:', 'recovery:runtime:readiness', 'recovery:restore:drill']);
 });
 
-check('MNT-AUD-0008', 'operational scripts are governed by the architecture guard', () => {
+check('ABSH-AUD-0008', 'operational scripts are governed by the architecture guard', () => {
   const core = read('scripts/architecture/source-architecture-guard-core.mjs');
   const policy = JSON.parse(read('scripts/architecture/operational-tooling-boundary.json'));
   return requireAll(core, ['collectOperationalToolingViolations', "walk(root, 'scripts')", 'operational-tooling-boundary.json']) &&
     Array.isArray(policy.classifiedDirectPrismaScripts) && Array.isArray(policy.classifiedPresentationImportScripts);
 });
 
-check('MNT-AUD-0087', 'all external GitHub Actions are immutable full-SHA pins', () => {
+check('ABSH-AUD-0087', 'all external GitHub Actions are immutable full-SHA pins', () => {
   if (!exists('.github/dependabot.yml')) return false;
   const workflowDir = path.join(root, '.github/workflows');
   const workflows = fs.readdirSync(workflowDir).filter((name) => /\.ya?ml$/i.test(name));
@@ -127,7 +127,7 @@ check('MNT-AUD-0087', 'all external GitHub Actions are immutable full-SHA pins',
   return bad.length === 0 && read('scripts/security/verify-github-action-pins.mjs').includes('40');
 });
 
-check('MNT-AUD-0094', 'immutable artifact build and exact-artifact environment promotion are wired', () => {
+check('ABSH-AUD-0094', 'immutable artifact build and exact-artifact environment promotion are wired', () => {
   const build = read('scripts/release/build-immutable-artifacts.mjs');
   const verify = read('scripts/release/verify-release-artifacts.mjs');
   const promote = read('scripts/release/promote-environment.mjs');
@@ -136,9 +136,9 @@ check('MNT-AUD-0094', 'immutable artifact build and exact-artifact environment p
   const ci = read('.github/workflows/ci.yml');
   return requireAll(build, ['CycloneDX', 'SHA256SUMS', '--sort=name', '--mtime=UTC 1970-01-01']) &&
     verify.includes('verifyReleaseManifest') && requireAll(read('scripts/release/lib/ReleaseContracts.mjs'), ['sha256', 'manifest.sbom', 'RELEASE_SOURCE_IDENTITY_MISMATCH']) && requireAll(promote, ['validation', 'staging', 'production']) &&
-    requireAll(smoke, ['MANARATAK_SMOKE_API_URL', 'MANARATAK_SMOKE_WEB_URL', 'MANARATAK_SMOKE_ADMIN_URL']) && requireAll(read('scripts/release/lib/SmokeContracts.mjs'), ['READINESS_PATH', 'SMOKE_API_READINESS_OR_REVISION_INVALID']) && requireAll(workflow, [
+    requireAll(smoke, ['ABSHEER_SMOKE_API_URL', 'ABSHEER_SMOKE_WEB_URL', 'ABSHEER_SMOKE_ADMIN_URL']) && requireAll(read('scripts/release/lib/SmokeContracts.mjs'), ['READINESS_PATH', 'SMOKE_API_READINESS_OR_REVISION_INVALID']) && requireAll(workflow, [
       'workflow_run:', 'needs: validation', 'needs: staging', 'immutable-release-$SOURCE_SHA', 'recovery:source:verify', 'release:smoke',
-    ]) && ci.includes('manaratak-release-artifacts-${{ github.sha }}');
+    ]) && ci.includes('absheer-release-artifacts-${{ github.sha }}');
 });
 
 for (const result of checks) {

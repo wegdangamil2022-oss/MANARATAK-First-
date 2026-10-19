@@ -1,4 +1,4 @@
-import type { SupportedLocale } from '@manaratak/shared';
+import type { SupportedLocale } from '@absheer/shared';
 import {
   apiFetch,
   type MajorFilters,

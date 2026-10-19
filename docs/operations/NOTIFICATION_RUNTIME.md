@@ -1,6 +1,6 @@
-# MANARATAK Notification Runtime
+# ABSHEER Notification Runtime
 
-**Authority:** MNT-AUD-0034 / ADR-029  
+**Authority:** ABSH-AUD-0034 / ADR-029  
 **Source state:** SOURCE_VERIFIED / DB_PROVIDER_RUNTIME_PENDING
 
 ## Source contract

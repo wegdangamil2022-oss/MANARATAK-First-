@@ -1,12 +1,12 @@
-import type {CourseAdminCommandUseCases,CourseAdminContext,AdminCourseUseCases} from '@manaratak/application';
+import type {CourseAdminCommandUseCases,CourseAdminContext,AdminCourseUseCases} from '@absheer/application';
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
 import {
   CourseAccessType,
   CourseImportCompletenessState,
   CourseOriginType,
-} from '@manaratak/domain';
-import { ImportedCourseAdminUseCases } from '@manaratak/application';
+} from '@absheer/domain';
+import { ImportedCourseAdminUseCases } from '@absheer/application';
 
 export class ImportedCourseAdminRouter {
   public static create(cradle: { courseAdminCommandUseCases:CourseAdminCommandUseCases; adminCourseUseCases:AdminCourseUseCases; importedCourseAdminUseCases: ImportedCourseAdminUseCases }): Router {

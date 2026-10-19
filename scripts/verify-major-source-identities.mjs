@@ -3,10 +3,10 @@ import path from 'node:path';
 
 const catalogsDir = path.join(process.cwd(), 'workspace', 'phase-10-major-catalogs');
 const sources = [
-  ['MJR', 843, 'MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md'],
-  ['MAS', 1116, 'MANARATAK_Master_Specializations_By_Academic_Fields_v1.0.md'],
-  ['DOC', 1114, 'MANARATAK_Doctoral_Specializations_By_Academic_Fields_v1.0.md'],
-  ['FEL', 329, 'MANARATAK_Fellowships_By_Professional_Domains_v1.0.md'],
+  ['MJR', 843, 'ABSHEER_Bachelor_Majors_By_Colleges_v1.0.md'],
+  ['MAS', 1116, 'ABSHEER_Master_Specializations_By_Academic_Fields_v1.0.md'],
+  ['DOC', 1114, 'ABSHEER_Doctoral_Specializations_By_Academic_Fields_v1.0.md'],
+  ['FEL', 329, 'ABSHEER_Fellowships_By_Professional_Domains_v1.0.md'],
 ];
 
 const identities = [];

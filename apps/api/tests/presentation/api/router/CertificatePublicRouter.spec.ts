@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { CertificateStatus } from '@manaratak/domain';
+import { CertificateStatus } from '@absheer/domain';
 import { CertificatePublicRouter } from '../../../../src/presentation/api/router/CertificatePublicRouter';
 
 describe('CertificatePublicRouter', () => {

@@ -94,7 +94,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto pt-0 pb-12 text-start font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--mn-surface-muted)] min-h-screen mn-panel ">
+    <div className="w-full max-w-md mx-auto pt-0 pb-12 text-start font-['Cairo',sans-serif] animate-in fade-in duration-200 bg-[var(--ab-surface-muted)] min-h-screen ab-panel ">
       {/* 1. TOP HERO CONTAINER (Compact horizontal layout with glowing gold graduation emblem on the right + arrow + title) */}
       <div className="relative w-full overflow-hidden">
         <div className="absolute top-2 left-2 z-30 scale-80 origin-top-left">
@@ -109,9 +109,9 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
           >
             <defs>
               <linearGradient id="heroGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="var(--mn-primary)" />
-                <stop offset="50%" stopColor="var(--mn-primary)" />
-                <stop offset="100%" stopColor="var(--mn-primary)" />
+                <stop offset="0%" stopColor="var(--ab-primary)" />
+                <stop offset="50%" stopColor="var(--ab-primary)" />
+                <stop offset="100%" stopColor="var(--ab-primary)" />
               </linearGradient>
             </defs>
 
@@ -122,31 +122,31 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             <g opacity="0.25">
               <path
                 d="M -50,30 Q 120,-10 260,35 T 550,20"
-                stroke="var(--mn-accent)"
+                stroke="var(--ab-accent)"
                 strokeWidth="1.5"
                 fill="none"
               />
               <path
                 d="M -30,60 Q 150,20 320,55 T 560,35"
-                stroke="var(--mn-accent)"
+                stroke="var(--ab-accent)"
                 strokeWidth="1"
                 fill="none"
               />
 
               {/* Gold Sparkle Dots */}
-              <circle cx="35" cy="25" r="1.5" fill="var(--mn-accent)" />
-              <circle cx="50" cy="18" r="1" fill="var(--mn-accent)" />
-              <circle cx="42" cy="38" r="1.2" fill="var(--mn-accent)" />
-              <circle cx="445" cy="22" r="1.5" fill="var(--mn-accent)" />
-              <circle cx="460" cy="35" r="1" fill="var(--mn-accent)" />
-              <circle cx="430" cy="42" r="1.2" fill="var(--mn-accent)" />
+              <circle cx="35" cy="25" r="1.5" fill="var(--ab-accent)" />
+              <circle cx="50" cy="18" r="1" fill="var(--ab-accent)" />
+              <circle cx="42" cy="38" r="1.2" fill="var(--ab-accent)" />
+              <circle cx="445" cy="22" r="1.5" fill="var(--ab-accent)" />
+              <circle cx="460" cy="35" r="1" fill="var(--ab-accent)" />
+              <circle cx="430" cy="42" r="1.2" fill="var(--ab-accent)" />
             </g>
 
             {/* The gold accent border following the bottom curve */}
             <path
               d="M 0,90 Q 250,112 500,90"
               fill="none"
-              stroke="var(--mn-accent)"
+              stroke="var(--ab-accent)"
               strokeWidth="2.2"
               strokeLinecap="round"
             />
@@ -160,13 +160,13 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             {/* Right Side: Glowing Gold Graduation Badge + Arrow */}
             <div className="flex items-center gap-2.5 shrink-0">
               {/* Circular Frame with Glowing Gold Graduation Cap inside */}
-              <div className="w-11 h-11 rounded-full border-2 border-[var(--mn-accent)] flex items-center justify-center p-1.5 shadow-[0_0_12px_rgba(214,164,59,0.5)] bg-gradient-to-br from-[var(--mn-primary)] to-[var(--mn-primary)] shrink-0 mn-inverse ">
+              <div className="w-11 h-11 rounded-full border-2 border-[var(--ab-accent)] flex items-center justify-center p-1.5 shadow-[0_0_12px_rgba(214,164,59,0.5)] bg-gradient-to-br from-[var(--ab-primary)] to-[var(--ab-primary)] shrink-0 ab-inverse ">
                 <svg viewBox="0 0 40 40" className="w-full h-full">
                   <defs>
                     <linearGradient id="goldCapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="var(--mn-accent-soft)" />
-                      <stop offset="45%" stopColor="var(--mn-accent-soft)" />
-                      <stop offset="100%" stopColor="var(--mn-accent)" />
+                      <stop offset="0%" stopColor="var(--ab-accent-soft)" />
+                      <stop offset="45%" stopColor="var(--ab-accent-soft)" />
+                      <stop offset="100%" stopColor="var(--ab-accent)" />
                     </linearGradient>
                     <filter id="goldShine" x="-30%" y="-30%" width="160%" height="160%">
                       <feGaussianBlur stdDeviation="1" result="blur" />
@@ -201,12 +201,12 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
               </div>
 
               {/* Simple subtle arrow pointing from the graduation cap to the title */}
-              <ArrowLeft className="w-4 h-4 text-[var(--mn-accent-text)] shrink-0 opacity-90 drop-shadow-[0_0_4px_rgba(214,164,59,0.4)]" />
+              <ArrowLeft className="w-4 h-4 text-[var(--ab-accent-text)] shrink-0 opacity-90 drop-shadow-[0_0_4px_rgba(214,164,59,0.4)]" />
             </div>
 
             {/* Left Side (in RTL): Scholarship Title & English Subtitle */}
             <div className="flex flex-col text-start min-w-0 flex-1 pr-1.5">
-              <h1 className="text-[15px] sm:text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm" data-mn-design="827f35e03a">
+              <h1 className="text-[15px] sm:text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm" data-ab-design="827f35e03a">
                 {scholarship.title}
               </h1>
               <p className="text-[11px] sm:text-[11px] font-bold text-white font-['Cairo',sans-serif] mt-0.5 tracking-wider truncate">
@@ -221,28 +221,28 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
       <div className="px-1.5 sm:px-2 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3">
         {/* 2. DONOR AUTHORITY CARD (Clean Distinctive Accent Line on Top Border) */}
         <div
-          className="relative w-full bg-[var(--mn-surface)] rounded-2xl py-3.5 px-3.5 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 flex items-center gap-3 overflow-hidden mn-panel "
+          className="relative w-full bg-[var(--ab-surface)] rounded-2xl py-3.5 px-3.5 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 flex items-center gap-3 overflow-hidden ab-panel "
           dir={publicDir}
         >
           {/* Distinctive Top Accent Line (clean inside the top border) */}
           <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
 
           {/* Emerald Green Circle with Gold Border & Building Icon */}
-          <div className="w-9 h-9 rounded-full bg-[var(--mn-primary)] flex items-center justify-center shrink-0 shadow-sm border-1.5 border-[var(--mn-accent)] ring-2 ring-[var(--mn-focus)]/20 mn-inverse ">
-            <Building2 className="w-4 h-4 text-[var(--mn-on-dark-muted)]" />
+          <div className="w-9 h-9 rounded-full bg-[var(--ab-primary)] flex items-center justify-center shrink-0 shadow-sm border-1.5 border-[var(--ab-accent)] ring-2 ring-[var(--ab-focus)]/20 ab-inverse ">
+            <Building2 className="w-4 h-4 text-[var(--ab-on-dark-muted)]" />
           </div>
 
           {/* Vertical Gold Divider Line */}
-          <div className="w-[1px] h-7 bg-[var(--mn-accent)]/40 shrink-0" />
+          <div className="w-[1px] h-7 bg-[var(--ab-accent)]/40 shrink-0" />
 
           {/* Donor Text */}
           <div className="space-y-0.5 min-w-0 flex-1 text-start">
-            <h2 className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-tight">
+            <h2 className="text-[11px] sm:text-xs font-bold text-[var(--ab-heading)] leading-tight">
               {scholarship.id === 'csc-china'
                 ? publicT('public_china_scholarship_council_csc_chinese_ministry_of_education')
                 : scholarship.university || publicT('public_government_funding_organization')}
             </h2>
-            <p className="text-[9px] font-medium text-[var(--mn-text-muted)] font-['Cairo',sans-serif] truncate">
+            <p className="text-[9px] font-medium text-[var(--ab-text-muted)] font-['Cairo',sans-serif] truncate">
               {scholarship.id === 'csc-china'
                 ? 'China Scholarship Council (CSC) - Ministry of Education of PRC'
                 : scholarship.universityEn || 'Official Government Donor'}
@@ -258,30 +258,30 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             <button
               type="button"
               onClick={() => scholarship.countryReferenceId && onOpenCountry?.(scholarship.countryReferenceId)}
-              className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-center gap-2 min-w-0 hover:border-[#142B5F] hover:shadow-md active:scale-[0.99] transition-all text-start group cursor-pointer mn-panel "
+              className="flex-1 bg-[var(--ab-surface)] rounded-2xl p-2.5 border border-[var(--ab-border)] shadow-sm flex items-center gap-2 min-w-0 hover:border-[#142B5F] hover:shadow-md active:scale-[0.99] transition-all text-start group cursor-pointer ab-panel "
               title={publicT('public_explore_country_name', { v0: scholarship.country })}
             >
-              <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
-                <Globe className="w-4 h-4 text-[var(--mn-accent-text)]" />
+              <div className="w-8 h-8 rounded-full bg-[var(--ab-primary)]/8 flex items-center justify-center shrink-0">
+                <Globe className="w-4 h-4 text-[var(--ab-accent-text)]" />
               </div>
               <div className="flex flex-col min-w-0 text-start flex-1">
-                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">{publicT('public_study_country')}</span>
-                <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] leading-tight truncate mt-0.5">
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-tight truncate">{publicT('public_study_country')}</span>
+                <span className="text-[9.5px] font-bold text-[var(--ab-text-muted)] leading-tight truncate mt-0.5">
                   {scholarship.country}
                 </span>
               </div>
-              <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--mn-heading)] opacity-60 group-hover:opacity-100 shrink-0 transition-all" />
+              <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--ab-heading)] opacity-60 group-hover:opacity-100 shrink-0 transition-all" />
             </button>
 
             {/* Gold Diamond Connector */}
-            <div className="w-1.5 h-1.5 rotate-45 bg-[var(--mn-surface-muted)] shrink-0 mn-panel " />
+            <div className="w-1.5 h-1.5 rotate-45 bg-[var(--ab-surface-muted)] shrink-0 ab-panel " />
 
             {/* Left Card: الدرجات العلمية */}
-            <div className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-center gap-2 min-w-0 mn-panel ">
-              <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
+            <div className="flex-1 bg-[var(--ab-surface)] rounded-2xl p-2.5 border border-[var(--ab-border)] shadow-sm flex items-center gap-2 min-w-0 ab-panel ">
+              <div className="w-8 h-8 rounded-full bg-[var(--ab-primary)]/8 flex items-center justify-center shrink-0">
                 <svg
                   viewBox="0 0 24 24"
-                  className="w-4 h-4 text-[var(--mn-accent-text)] fill-none stroke-current"
+                  className="w-4 h-4 text-[var(--ab-accent-text)] fill-none stroke-current"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -291,8 +291,8 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 </svg>
               </div>
               <div className="flex flex-col min-w-0 text-start">
-                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">{publicT('public_degrees')}</span>
-                <span className="text-[9px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] tracking-tight leading-tight truncate mt-0.5">
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-tight truncate">{publicT('public_degrees')}</span>
+                <span className="text-[9px] font-bold text-[var(--ab-text-muted)] font-['Cairo',sans-serif] tracking-tight leading-tight truncate mt-0.5">
                   BSc • MSc • PhD
                 </span>
               </div>
@@ -302,29 +302,29 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
           {/* ROW 2: انتهاء التقديم | نوع التمويل */}
           <div className="flex items-center gap-2">
             {/* Right Card: انتهاء التقديم */}
-            <div className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-center gap-2 min-w-0 mn-panel ">
-              <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
-                <Calendar className="w-4 h-4 text-[var(--mn-accent-text)]" />
+            <div className="flex-1 bg-[var(--ab-surface)] rounded-2xl p-2.5 border border-[var(--ab-border)] shadow-sm flex items-center gap-2 min-w-0 ab-panel ">
+              <div className="w-8 h-8 rounded-full bg-[var(--ab-primary)]/8 flex items-center justify-center shrink-0">
+                <Calendar className="w-4 h-4 text-[var(--ab-accent-text)]" />
               </div>
               <div className="flex flex-col min-w-0 text-start">
-                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">{publicT('public_application_deadline')}</span>
-                <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] leading-tight truncate mt-0.5">
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-tight truncate">{publicT('public_application_deadline')}</span>
+                <span className="text-[9.5px] font-bold text-[var(--ab-text-muted)] font-['Cairo',sans-serif] leading-tight truncate mt-0.5">
                   31-03-2027
                 </span>
               </div>
             </div>
 
             {/* Gold Diamond Connector */}
-            <div className="w-1.5 h-1.5 rotate-45 bg-[var(--mn-surface-muted)] shrink-0 mn-panel " />
+            <div className="w-1.5 h-1.5 rotate-45 bg-[var(--ab-surface-muted)] shrink-0 ab-panel " />
 
             {/* Left Card: نوع التمويل */}
-            <div className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-center gap-2 min-w-0 mn-panel ">
-              <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
-                <DollarSign className="w-4 h-4 text-[var(--mn-accent-text)]" />
+            <div className="flex-1 bg-[var(--ab-surface)] rounded-2xl p-2.5 border border-[var(--ab-border)] shadow-sm flex items-center gap-2 min-w-0 ab-panel ">
+              <div className="w-8 h-8 rounded-full bg-[var(--ab-primary)]/8 flex items-center justify-center shrink-0">
+                <DollarSign className="w-4 h-4 text-[var(--ab-accent-text)]" />
               </div>
               <div className="flex flex-col min-w-0 text-start">
-                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">{publicT('public_funding_type')}</span>
-                <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] leading-tight truncate mt-0.5">{publicT('public_fully_funded')}</span>
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-tight truncate">{publicT('public_funding_type')}</span>
+                <span className="text-[9.5px] font-bold text-[var(--ab-text-muted)] leading-tight truncate mt-0.5">{publicT('public_fully_funded')}</span>
               </div>
             </div>
           </div>
@@ -332,27 +332,27 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
           {/* ROW 3: لغة الدراسة | الجهة المانحة */}
           <div className="flex items-center gap-2">
             {/* Right Card: لغة الدراسة */}
-            <div className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-center gap-2 min-w-0 mn-panel ">
-              <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
-                <Languages className="w-4 h-4 text-[var(--mn-accent-text)]" />
+            <div className="flex-1 bg-[var(--ab-surface)] rounded-2xl p-2.5 border border-[var(--ab-border)] shadow-sm flex items-center gap-2 min-w-0 ab-panel ">
+              <div className="w-8 h-8 rounded-full bg-[var(--ab-primary)]/8 flex items-center justify-center shrink-0">
+                <Languages className="w-4 h-4 text-[var(--ab-accent-text)]" />
               </div>
               <div className="flex flex-col min-w-0 text-start">
-                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">{publicT('public_study_language')}</span>
-                <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] leading-tight truncate mt-0.5">{publicT('public_english_chinese')}</span>
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-tight truncate">{publicT('public_study_language')}</span>
+                <span className="text-[9.5px] font-bold text-[var(--ab-text-muted)] leading-tight truncate mt-0.5">{publicT('public_english_chinese')}</span>
               </div>
             </div>
 
             {/* Gold Diamond Connector */}
-            <div className="w-1.5 h-1.5 rotate-45 bg-[var(--mn-surface-muted)] shrink-0 mn-panel " />
+            <div className="w-1.5 h-1.5 rotate-45 bg-[var(--ab-surface-muted)] shrink-0 ab-panel " />
 
             {/* Left Card: الجهة المانحة */}
-            <div className="flex-1 bg-[var(--mn-surface)] rounded-2xl p-2.5 border border-[var(--mn-border)] shadow-sm flex items-center gap-2 min-w-0 mn-panel ">
-              <div className="w-8 h-8 rounded-full bg-[var(--mn-primary)]/8 flex items-center justify-center shrink-0">
-                <Building2 className="w-4 h-4 text-[var(--mn-accent-text)]" />
+            <div className="flex-1 bg-[var(--ab-surface)] rounded-2xl p-2.5 border border-[var(--ab-border)] shadow-sm flex items-center gap-2 min-w-0 ab-panel ">
+              <div className="w-8 h-8 rounded-full bg-[var(--ab-primary)]/8 flex items-center justify-center shrink-0">
+                <Building2 className="w-4 h-4 text-[var(--ab-accent-text)]" />
               </div>
               <div className="flex flex-col min-w-0 text-start">
-                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--mn-heading)] leading-tight truncate">{publicT('public_funding_organization')}</span>
-                <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] leading-tight truncate mt-0.5">{publicT('public_government')}</span>
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-[var(--ab-heading)] leading-tight truncate">{publicT('public_funding_organization')}</span>
+                <span className="text-[9.5px] font-bold text-[var(--ab-text-muted)] leading-tight truncate mt-0.5">{publicT('public_government')}</span>
               </div>
             </div>
           </div>
@@ -360,15 +360,15 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
         {/* 4. ABOUT SCHOLARSHIP SECTION (نبذة عن المنحة) */}
         <div
-          className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+          className="relative w-full bg-[var(--ab-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ab-panel "
           dir={publicDir}
         >
           <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
-          <DetailSectionHeader id="scholarship-about" icon={BookOpen} title={publicT('public_scholarship_overview')} level={3} titleClassName="mn-imported-detail-title" />
+          <DetailSectionHeader id="scholarship-about" icon={BookOpen} title={publicT('public_scholarship_overview')} level={3} titleClassName="ab-imported-detail-title" />
 
-          <div className="relative rounded-2xl bg-[var(--mn-page)]/70 border border-[var(--mn-border)] px-3.5 py-3">
-            <span className="absolute top-3 right-3 w-1.5 h-1.5 rotate-45 bg-[var(--mn-accent)]/75" />
-            <p className="text-[11px] sm:text-[11.5px] font-semibold text-[var(--mn-text)] leading-[1.9] pr-4">
+          <div className="relative rounded-2xl bg-[var(--ab-page)]/70 border border-[var(--ab-border)] px-3.5 py-3">
+            <span className="absolute top-3 right-3 w-1.5 h-1.5 rotate-45 bg-[var(--ab-accent)]/75" />
+            <p className="text-[11px] sm:text-[11.5px] font-semibold text-[var(--ab-text)] leading-[1.9] pr-4">
               {scholarship.description}
             </p>
           </div>
@@ -376,7 +376,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
         {/* 5. FUNDING & BENEFITS SECTION (المميزات والتمويل) */}
         <div
-          className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+          className="relative w-full bg-[var(--ab-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ab-panel "
           dir={publicDir}
         >
           {/* Distinctive Top Accent Line */}
@@ -396,12 +396,12 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             ].map((benefit, idx) => (
               <div
                 key={idx}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] transition-colors"
               >
-                <div className="w-4 h-4 rounded-full bg-[var(--mn-primary)] border border-[var(--mn-accent)] flex items-center justify-center shrink-0 shadow-2xs mn-inverse ">
-                  <Check className="w-2.5 h-2.5 text-[var(--mn-accent-text)] stroke-[2.5]" />
+                <div className="w-4 h-4 rounded-full bg-[var(--ab-primary)] border border-[var(--ab-accent)] flex items-center justify-center shrink-0 shadow-2xs ab-inverse ">
+                  <Check className="w-2.5 h-2.5 text-[var(--ab-accent-text)] stroke-[2.5]" />
                 </div>
-                <span className="text-[10.5px] font-bold text-[var(--mn-text)] leading-tight truncate">
+                <span className="text-[10.5px] font-bold text-[var(--ab-text)] leading-tight truncate">
                   {benefit}
                 </span>
               </div>
@@ -411,7 +411,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
         {/* 5. MAJORS SECTION (التخصصات المتاحة) */}
         <div
-          className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+          className="relative w-full bg-[var(--ab-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ab-panel "
           dir={publicDir}
         >
           <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
@@ -423,23 +423,23 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
           <div className="flex gap-1.5 mb-3 overflow-x-auto hide-scrollbar">
             <button
               onClick={() => setActiveMajorTab('bachelor')}
-              className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'bachelor' ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-border-brand)] shadow-sm mn-inverse ' : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:bg-[var(--mn-page)] '}`}
-              data-mn-design="98e8ac3671"
+              className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'bachelor' ? 'bg-[var(--ab-primary)] text-white border-[var(--ab-border-brand)] shadow-sm ab-inverse ' : 'bg-[var(--ab-surface)] text-[var(--ab-text-muted)] border-[var(--ab-border)] hover:bg-[var(--ab-page)] '}`}
+              data-ab-design="98e8ac3671"
             >{publicT('public_bachelors')}</button>
             <button
               onClick={() => setActiveMajorTab('master')}
-              className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'master' ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-border-brand)] shadow-sm mn-inverse ' : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:bg-[var(--mn-page)] '}`}
-              data-mn-design="98e8ac3671"
+              className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'master' ? 'bg-[var(--ab-primary)] text-white border-[var(--ab-border-brand)] shadow-sm ab-inverse ' : 'bg-[var(--ab-surface)] text-[var(--ab-text-muted)] border-[var(--ab-border)] hover:bg-[var(--ab-page)] '}`}
+              data-ab-design="98e8ac3671"
             >{publicT('public_masters')}</button>
             <button
               onClick={() => setActiveMajorTab('phd')}
-              className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'phd' ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-border-brand)] shadow-sm mn-inverse ' : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:bg-[var(--mn-page)] '}`}
-              data-mn-design="98e8ac3671"
+              className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'phd' ? 'bg-[var(--ab-primary)] text-white border-[var(--ab-border-brand)] shadow-sm ab-inverse ' : 'bg-[var(--ab-surface)] text-[var(--ab-text-muted)] border-[var(--ab-border)] hover:bg-[var(--ab-page)] '}`}
+              data-ab-design="98e8ac3671"
             >{publicT('public_doctorate')}</button>
             <button
               onClick={() => setActiveMajorTab('fellowship')}
-              className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'fellowship' ? 'bg-[var(--mn-primary)] text-white border-[var(--mn-border-brand)] shadow-sm mn-inverse ' : 'bg-[var(--mn-surface)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:bg-[var(--mn-page)] '}`}
-              data-mn-design="98e8ac3671"
+              className={`px-3 py-1.5 text-[10.5px] font-bold rounded-xl transition-all whitespace-nowrap border ${activeMajorTab === 'fellowship' ? 'bg-[var(--ab-primary)] text-white border-[var(--ab-border-brand)] shadow-sm ab-inverse ' : 'bg-[var(--ab-surface)] text-[var(--ab-text-muted)] border-[var(--ab-border)] hover:bg-[var(--ab-page)] '}`}
+              data-ab-design="98e8ac3671"
             >{publicT('public_fellowships')}</button>
           </div>
 
@@ -459,16 +459,16 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   type="button"
                   onClick={() => major.majorId && onOpenMajor?.(major.majorId)}
                   aria-label={major.majorId ? publicT('public_open_major_page', { v0: major.label }) : undefined}
-                  data-mn-design="98e8ac3671"
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--mn-page)] border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] text-[var(--mn-text)] text-[10.5px] font-bold rounded-lg transition-all group ${
+                  data-ab-design="98e8ac3671"
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--ab-page)] border border-[#142B5F]/30 dark:border-[var(--ab-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--ab-accent)] text-[var(--ab-text)] text-[10.5px] font-bold rounded-lg transition-all group ${
                     major.majorId
-                      ? 'hover:bg-[var(--mn-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-2xs active:scale-95 cursor-pointer'
+                      ? 'hover:bg-[var(--ab-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--ab-accent)]/40 hover:shadow-2xs active:scale-95 cursor-pointer'
                       : 'cursor-default'
                   }`}
                 >
                   <span>{major.label}</span>
                   {major.majorId && (
-                    <ArrowUpLeft className="w-3.5 h-3.5 text-[#142B5F] dark:text-[var(--mn-heading)] opacity-80 group-hover:opacity-100 group-hover:text-[var(--mn-accent-text)] group-hover:scale-110 transition-all duration-200 -mr-0.5" />
+                    <ArrowUpLeft className="w-3.5 h-3.5 text-[#142B5F] dark:text-[var(--ab-heading)] opacity-80 group-hover:opacity-100 group-hover:text-[var(--ab-accent-text)] group-hover:scale-110 transition-all duration-200 -mr-0.5" />
                   )}
                 </button>
               ))}
@@ -484,11 +484,11 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 <button
                   key={major}
                   type="button"
-                  data-mn-design="98e8ac3671"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--mn-page)] border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] text-[var(--mn-text)] text-[10.5px] font-bold rounded-lg hover:bg-[var(--mn-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-2xs active:scale-95 transition-all cursor-pointer group"
+                  data-ab-design="98e8ac3671"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--ab-page)] border border-[#142B5F]/30 dark:border-[var(--ab-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--ab-accent)] text-[var(--ab-text)] text-[10.5px] font-bold rounded-lg hover:bg-[var(--ab-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--ab-accent)]/40 hover:shadow-2xs active:scale-95 transition-all cursor-pointer group"
                 >
                   <span>{major}</span>
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-[#142B5F] dark:text-[var(--mn-heading)] opacity-80 group-hover:opacity-100 group-hover:text-[var(--mn-accent-text)] group-hover:scale-110 transition-all duration-200 -mr-0.5" />
+                  <ArrowUpLeft className="w-3.5 h-3.5 text-[#142B5F] dark:text-[var(--ab-heading)] opacity-80 group-hover:opacity-100 group-hover:text-[var(--ab-accent-text)] group-hover:scale-110 transition-all duration-200 -mr-0.5" />
                 </button>
               ))}
 
@@ -502,11 +502,11 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 <button
                   key={major}
                   type="button"
-                  data-mn-design="98e8ac3671"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--mn-page)] border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] text-[var(--mn-text)] text-[10.5px] font-bold rounded-lg hover:bg-[var(--mn-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-2xs active:scale-95 transition-all cursor-pointer group"
+                  data-ab-design="98e8ac3671"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--ab-page)] border border-[#142B5F]/30 dark:border-[var(--ab-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--ab-accent)] text-[var(--ab-text)] text-[10.5px] font-bold rounded-lg hover:bg-[var(--ab-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--ab-accent)]/40 hover:shadow-2xs active:scale-95 transition-all cursor-pointer group"
                 >
                   <span>{major}</span>
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-[#142B5F] dark:text-[var(--mn-heading)] opacity-80 group-hover:opacity-100 group-hover:text-[var(--mn-accent-text)] group-hover:scale-110 transition-all duration-200 -mr-0.5" />
+                  <ArrowUpLeft className="w-3.5 h-3.5 text-[#142B5F] dark:text-[var(--ab-heading)] opacity-80 group-hover:opacity-100 group-hover:text-[var(--ab-accent-text)] group-hover:scale-110 transition-all duration-200 -mr-0.5" />
                 </button>
               ))}
 
@@ -520,11 +520,11 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 <button
                   key={major}
                   type="button"
-                  data-mn-design="98e8ac3671"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--mn-page)] border border-[#142B5F]/30 dark:border-[var(--mn-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--mn-accent)] text-[var(--mn-text)] text-[10.5px] font-bold rounded-lg hover:bg-[var(--mn-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--mn-accent)]/40 hover:shadow-2xs active:scale-95 transition-all cursor-pointer group"
+                  data-ab-design="98e8ac3671"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--ab-page)] border border-[#142B5F]/30 dark:border-[var(--ab-border)] border-r-2 border-r-[#142B5F] dark:border-r-[var(--ab-accent)] text-[var(--ab-text)] text-[10.5px] font-bold rounded-lg hover:bg-[var(--ab-surface)] hover:border-[#142B5F]/50 dark:hover:border-[var(--ab-accent)]/40 hover:shadow-2xs active:scale-95 transition-all cursor-pointer group"
                 >
                   <span>{major}</span>
-                  <ArrowUpLeft className="w-3.5 h-3.5 text-[#142B5F] dark:text-[var(--mn-heading)] opacity-80 group-hover:opacity-100 group-hover:text-[var(--mn-accent-text)] group-hover:scale-110 transition-all duration-200 -mr-0.5" />
+                  <ArrowUpLeft className="w-3.5 h-3.5 text-[#142B5F] dark:text-[var(--ab-heading)] opacity-80 group-hover:opacity-100 group-hover:text-[var(--ab-accent-text)] group-hover:scale-110 transition-all duration-200 -mr-0.5" />
                 </button>
               ))}
           </div>
@@ -533,41 +533,41 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
         {/* 7. PARTICIPATING UNIVERSITIES SECTION (الجامعات المشاركة) */}
         {scholarship.participatingUniversities && scholarship.participatingUniversities.length > 0 && (
           <div
-            className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+            className="relative w-full bg-[var(--ab-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ab-panel "
             dir={publicDir}
           >
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
           <DetailSectionHeader id="scholarship-universities" icon={Building2} title={publicT('public_participating_universities')} level={3} />
 
-            <div className="grid grid-rows-2 grid-flow-col auto-cols-[80%] sm:auto-cols-[215px] gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none snap-x snap-mandatory" data-mn-design="9856d4f1a6">
+            <div className="grid grid-rows-2 grid-flow-col auto-cols-[80%] sm:auto-cols-[215px] gap-2 overflow-x-auto pb-1 pt-0.5 scrollbar-none snap-x snap-mandatory" data-ab-design="9856d4f1a6">
               {scholarship.participatingUniversities.map((university) => (
                 <button
                   key={university.id}
                   type="button"
                   onClick={() => onOpenUniversity?.(university.id)}
-                  className="w-full snap-start flex items-center gap-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/45 p-2 text-start transition-all group cursor-pointer"
+                  className="w-full snap-start flex items-center gap-2 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] hover:border-[var(--ab-accent)]/45 p-2 text-start transition-all group cursor-pointer"
                 >
-                  <div className="w-7 h-7 rounded-full bg-[var(--mn-primary)] flex items-center justify-center shrink-0 border border-[var(--mn-accent)]/55 shadow-2xs mn-inverse">
-                    <Building2 className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
+                  <div className="w-7 h-7 rounded-full bg-[var(--ab-primary)] flex items-center justify-center shrink-0 border border-[var(--ab-accent)]/55 shadow-2xs ab-inverse">
+                    <Building2 className="w-3.5 h-3.5 text-[var(--ab-accent-text)]" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="text-[10.5px] font-bold text-[var(--mn-heading)] leading-tight truncate">
+                    <div className="text-[10.5px] font-bold text-[var(--ab-heading)] leading-tight truncate">
                       {university.name}
                     </div>
-                    <div className="text-[8.5px] font-semibold text-[var(--mn-text-muted)] font-['Cairo',sans-serif] truncate mt-0.5">
+                    <div className="text-[8.5px] font-semibold text-[var(--ab-text-muted)] font-['Cairo',sans-serif] truncate mt-0.5">
                       {university.nameEn}
                     </div>
                     {university.city && (
-                      <div className="flex items-center gap-1 mt-0.5 text-[8.5px] font-bold text-[var(--mn-text-muted)]">
-                        <MapPin className="w-2.5 h-2.5 text-[var(--mn-accent-text)]" />
+                      <div className="flex items-center gap-1 mt-0.5 text-[8.5px] font-bold text-[var(--ab-text-muted)]">
+                        <MapPin className="w-2.5 h-2.5 text-[var(--ab-accent-text)]" />
                         <span>{university.city}{publicT('public_separator')}{' '}{scholarship.country}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="w-7 h-7 rounded-full bg-[var(--mn-surface)] border border-[var(--mn-border)] flex items-center justify-center shrink-0 group-hover:border-[var(--mn-accent)]/60 group-hover:bg-[var(--mn-primary)]/5 transition-colors mn-panel">
-                    <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--mn-heading)] group-hover:text-[var(--mn-accent-text)] transition-colors" />
+                  <div className="w-7 h-7 rounded-full bg-[var(--ab-surface)] border border-[var(--ab-border)] flex items-center justify-center shrink-0 group-hover:border-[var(--ab-accent)]/60 group-hover:bg-[var(--ab-primary)]/5 transition-colors ab-panel">
+                    <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--ab-heading)] group-hover:text-[var(--ab-accent-text)] transition-colors" />
                   </div>
                 </button>
               ))}
@@ -577,7 +577,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
         {/* 8. ELIGIBILITY SECTION (الشروط ومعايير التقديم) */}
         <div
-          className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+          className="relative w-full bg-[var(--ab-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ab-panel "
           dir={publicDir}
         >
           <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
@@ -594,12 +594,12 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             ].map((condition, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-2.5 px-3 py-2 rounded-xl bg-[var(--mn-page)] border border-[var(--mn-border)] transition-colors"
+                className="flex items-start gap-2.5 px-3 py-2 rounded-xl bg-[var(--ab-page)] border border-[var(--ab-border)] transition-colors"
               >
-                <div className="w-3.5 h-3.5 rounded-full bg-[var(--mn-surface)] border border-[var(--mn-border)] flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--mn-accent)] mn-gold " />
+                <div className="w-3.5 h-3.5 rounded-full bg-[var(--ab-surface)] border border-[var(--ab-border)] flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--ab-accent)] ab-gold " />
                 </div>
-                <span className="text-[10.5px] font-bold text-[var(--mn-text)] leading-snug">
+                <span className="text-[10.5px] font-bold text-[var(--ab-text)] leading-snug">
                   {condition}
                 </span>
               </div>
@@ -609,7 +609,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
         {/* 8. REQUIRED DOCUMENTS SECTION (المستندات المطلوبة) */}
         <div
-          className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+          className="relative w-full bg-[var(--ab-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ab-panel "
           dir={publicDir}
         >
           <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
@@ -631,12 +631,12 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             ].map((doc, idx) => (
               <div
                 key={idx}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-xl hover:bg-[var(--mn-surface)] hover:border-[var(--mn-accent)]/50 transition-all group cursor-default text-start w-fit"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[var(--ab-page)] border border-[var(--ab-border)] rounded-xl hover:bg-[var(--ab-surface)] hover:border-[var(--ab-accent)]/50 transition-all group cursor-default text-start w-fit"
               >
-                <div className="text-[#142B5F] dark:text-[var(--mn-accent-text)] shrink-0">
+                <div className="text-[#142B5F] dark:text-[var(--ab-accent-text)] shrink-0">
                   <doc.icon className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[10.5px] font-bold text-[var(--mn-text)] group-hover:text-[var(--mn-heading)] transition-colors leading-tight">
+                <span className="text-[10.5px] font-bold text-[var(--ab-text)] group-hover:text-[var(--ab-heading)] transition-colors leading-tight">
                   {doc.name}
                 </span>
               </div>
@@ -648,13 +648,13 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 key={exam.id}
                 type="button"
                 onClick={() => onOpenExam?.(exam.id)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-xl hover:bg-[var(--mn-surface)] hover:border-[var(--mn-accent)]/40 hover:shadow-2xs active:scale-95 transition-all group cursor-pointer text-start w-fit"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[var(--ab-page)] border border-[var(--ab-border)] rounded-xl hover:bg-[var(--ab-surface)] hover:border-[var(--ab-accent)]/40 hover:shadow-2xs active:scale-95 transition-all group cursor-pointer text-start w-fit"
                 title={publicT('public_open_title', { v0: exam.name })}
               >
-                <Languages className="w-3.5 h-3.5 text-[#142B5F] dark:text-[var(--mn-accent-text)] shrink-0" />
-                <span className="text-[10.5px] font-bold text-[var(--mn-text)] group-hover:text-[var(--mn-heading)] transition-colors leading-tight">{publicT('public_language_evidence')}{' '}{exam.nameEn}
+                <Languages className="w-3.5 h-3.5 text-[#142B5F] dark:text-[var(--ab-accent-text)] shrink-0" />
+                <span className="text-[10.5px] font-bold text-[var(--ab-text)] group-hover:text-[var(--ab-heading)] transition-colors leading-tight">{publicT('public_language_evidence')}{' '}{exam.nameEn}
                 </span>
-                <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--mn-heading)] opacity-80 group-hover:opacity-100 group-hover:text-[var(--mn-accent-text)] group-hover:scale-110 transition-all duration-200 -mr-0.5" />
+                <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--ab-heading)] opacity-80 group-hover:opacity-100 group-hover:text-[var(--ab-accent-text)] group-hover:scale-110 transition-all duration-200 -mr-0.5" />
               </button>
             ))}
           </div>
@@ -662,7 +662,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
         {/* 7. IMPORTANT NOTES SECTION (ملاحظات مهمة) */}
         <div
-          className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+          className="relative w-full bg-[var(--ab-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ab-panel "
           dir={publicDir}
         >
           <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
@@ -671,24 +671,24 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
           <DetailSectionHeader icon={Info} title={publicT('public_important_note')} level={3} />
 
           <div className="flex flex-col gap-2">
-            <div className="flex items-start gap-2.5 bg-[var(--mn-page)] rounded-xl p-3 border border-[var(--mn-border)] transition-all">
-              <div className="w-5 h-5 rounded-full bg-[var(--mn-primary)] flex items-center justify-center shrink-0 border border-[var(--mn-accent)]/50 shadow-xs mn-inverse mt-0.5">
-                <span className="text-[10px] font-bold text-[var(--mn-accent-text)] leading-none">
+            <div className="flex items-start gap-2.5 bg-[var(--ab-page)] rounded-xl p-3 border border-[var(--ab-border)] transition-all">
+              <div className="w-5 h-5 rounded-full bg-[var(--ab-primary)] flex items-center justify-center shrink-0 border border-[var(--ab-accent)]/50 shadow-xs ab-inverse mt-0.5">
+                <span className="text-[10px] font-bold text-[var(--ab-accent-text)] leading-none">
                   A
                 </span>
               </div>
-              <p className="text-[10.5px] font-bold text-[var(--mn-text)] leading-relaxed">
-                <span className="text-[var(--mn-heading)] font-bold">{publicT('public_category_a')}</span>{' '}{publicT('public_apply_through_the_ministries_and_embassies_of_your')}</p>
+              <p className="text-[10.5px] font-bold text-[var(--ab-text)] leading-relaxed">
+                <span className="text-[var(--ab-heading)] font-bold">{publicT('public_category_a')}</span>{' '}{publicT('public_apply_through_the_ministries_and_embassies_of_your')}</p>
             </div>
 
-            <div className="flex items-start gap-2.5 bg-[var(--mn-page)] rounded-xl p-3 border border-[var(--mn-border)] transition-all">
-              <div className="w-5 h-5 rounded-full bg-[var(--mn-primary)] flex items-center justify-center shrink-0 border border-[var(--mn-accent)]/50 shadow-xs mn-inverse mt-0.5">
-                <span className="text-[10px] font-bold text-[var(--mn-accent-text)] leading-none">
+            <div className="flex items-start gap-2.5 bg-[var(--ab-page)] rounded-xl p-3 border border-[var(--ab-border)] transition-all">
+              <div className="w-5 h-5 rounded-full bg-[var(--ab-primary)] flex items-center justify-center shrink-0 border border-[var(--ab-accent)]/50 shadow-xs ab-inverse mt-0.5">
+                <span className="text-[10px] font-bold text-[var(--ab-accent-text)] leading-none">
                   B
                 </span>
               </div>
-              <p className="text-[10.5px] font-bold text-[var(--mn-text)] leading-relaxed">
-                <span className="text-[var(--mn-heading)] font-bold">{publicT('public_category_b')}</span>{' '}{publicT('public_apply_through_universities_and_the_chinese_government_limited')}</p>
+              <p className="text-[10.5px] font-bold text-[var(--ab-text)] leading-relaxed">
+                <span className="text-[var(--ab-heading)] font-bold">{publicT('public_category_b')}</span>{' '}{publicT('public_apply_through_universities_and_the_chinese_government_limited')}</p>
             </div>
           </div>
         </div>
@@ -696,7 +696,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
         {/* CONTEXTUAL SERVICES & RELATED ARTICLES SECTION (خدمات ومقالات مرتبطة) */}
         {((contextualServices && contextualServices.length > 0) || (scholarship.relatedArticles && scholarship.relatedArticles.length > 0)) && (
           <section
-            className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+            className="relative w-full bg-[var(--ab-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ab-panel "
             dir={publicDir}
           >
             <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
@@ -713,16 +713,16 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                         key={service.id}
                         type="button"
                         onClick={() => onOpenService?.(service)}
-                        className="group flex min-h-12 items-center gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2.5 text-start transition-colors hover:border-[var(--mn-accent)] active:scale-[0.99] mn-panel shadow-2xs"
+                        className="group flex min-h-12 items-center gap-2.5 rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] px-3 py-2.5 text-start transition-colors hover:border-[var(--ab-accent)] active:scale-[0.99] ab-panel shadow-2xs"
                       >
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--mn-primary)]/10 text-[var(--mn-heading)] dark:bg-[var(--mn-accent)]/10 dark:text-[var(--mn-accent-text)]">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--ab-primary)]/10 text-[var(--ab-heading)] dark:bg-[var(--ab-accent)]/10 dark:text-[var(--ab-accent-text)]">
                           <GraduationCap className="h-4 w-4" />
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[9.5px] font-bold text-[var(--mn-text)] group-hover:text-[var(--mn-heading)] transition-colors">{service.title}</span>
-                          <span className="mt-0.5 block truncate text-[8.5px] font-medium text-[var(--mn-text-muted)]">{service.category}</span>
+                          <span className="block truncate text-[9.5px] font-bold text-[var(--ab-text)] group-hover:text-[var(--ab-heading)] transition-colors">{service.title}</span>
+                          <span className="mt-0.5 block truncate text-[8.5px] font-medium text-[var(--ab-text-muted)]">{service.category}</span>
                         </span>
-                        <ChevronLeft className="h-4 w-4 shrink-0 text-[var(--mn-accent-text)] transition-transform group-hover:-translate-x-0.5" />
+                        <ChevronLeft className="h-4 w-4 shrink-0 text-[var(--ab-accent-text)] transition-transform group-hover:-translate-x-0.5" />
                       </button>
                     ))}
                   </div>
@@ -741,14 +741,14 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                         type="button"
                         onClick={() => onOpenArticle?.(article.id)}
                         disabled={!onOpenArticle}
-                        className="group flex flex-col justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-start transition-colors enabled:hover:border-[var(--mn-accent)] enabled:active:scale-[0.99] mn-panel shadow-2xs h-full"
+                        className="group flex flex-col justify-between rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] p-3 text-start transition-colors enabled:hover:border-[var(--ab-accent)] enabled:active:scale-[0.99] ab-panel shadow-2xs h-full"
                       >
                         <div>
-                          <p className="text-[10px] sm:text-[10.5px] font-bold leading-5 text-[var(--mn-text)] group-hover:text-[var(--mn-heading)] transition-colors line-clamp-2">{article.title}</p>
+                          <p className="text-[10px] sm:text-[10.5px] font-bold leading-5 text-[var(--ab-text)] group-hover:text-[var(--ab-heading)] transition-colors line-clamp-2">{article.title}</p>
                         </div>
-                        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-[var(--mn-border)]/50 pt-2">
-                          {article.meta ? <p className="line-clamp-1 text-[8.5px] font-semibold text-[var(--mn-text-muted)]">{article.meta}</p> : <span />}
-                          <ChevronLeft className="h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)] transition-transform group-hover:-translate-x-0.5" />
+                        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-[var(--ab-border)]/50 pt-2">
+                          {article.meta ? <p className="line-clamp-1 text-[8.5px] font-semibold text-[var(--ab-text-muted)]">{article.meta}</p> : <span />}
+                          <ChevronLeft className="h-3.5 w-3.5 shrink-0 text-[var(--ab-accent-text)] transition-transform group-hover:-translate-x-0.5" />
                         </div>
                       </button>
                     ))}
@@ -761,7 +761,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
         {/* 9. APPLICATION LINKS SECTION (طريقة التقديم) */}
         <div
-          className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+          className="relative w-full bg-[var(--ab-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ab-panel "
           dir={publicDir}
         >
           <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
@@ -775,38 +775,38 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
               href={scholarship?.applicationUrl || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="mn-external-link inline-flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 bg-[var(--mn-page)] border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/50 transition-all group mn-panel "
+              className="ab-external-link inline-flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 bg-[var(--ab-page)] border border-[var(--ab-border)] hover:border-[var(--ab-accent)]/50 transition-all group ab-panel "
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[#142B5F]/10 dark:bg-[var(--mn-accent)]/10 flex items-center justify-center shrink-0 border border-[#142B5F]/20 dark:border-[var(--mn-accent)]/30">
-                  <Globe className="w-4 h-4 text-[#142B5F] dark:text-[var(--mn-accent-text)]" />
+                <div className="w-8 h-8 rounded-full bg-[#142B5F]/10 dark:bg-[var(--ab-accent)]/10 flex items-center justify-center shrink-0 border border-[#142B5F]/20 dark:border-[var(--ab-accent)]/30">
+                  <Globe className="w-4 h-4 text-[#142B5F] dark:text-[var(--ab-accent-text)]" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-bold text-[var(--mn-heading)] leading-tight mb-0.5">{publicT('public_apply_through_the_official_scholarship_website')}</span>
-                  <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] leading-tight">{publicT('public_submit_directly_through_the_funding_organizations_official_website')}</span>
+                  <span className="text-[11px] font-bold text-[var(--ab-heading)] leading-tight mb-0.5">{publicT('public_apply_through_the_official_scholarship_website')}</span>
+                  <span className="text-[9.5px] font-bold text-[var(--ab-text-muted)] leading-tight">{publicT('public_submit_directly_through_the_funding_organizations_official_website')}</span>
                 </div>
               </div>
-              <div className="w-6 h-6 rounded-full bg-[var(--mn-surface)] flex items-center justify-center shrink-0 border border-[var(--mn-border)] group-hover:border-[var(--mn-accent)]/40 group-hover:bg-[var(--mn-accent)]/10 transition-colors mn-panel ">
-                <ExternalLink className="w-3 h-3 text-[var(--mn-heading)]" />
+              <div className="w-6 h-6 rounded-full bg-[var(--ab-surface)] flex items-center justify-center shrink-0 border border-[var(--ab-border)] group-hover:border-[var(--ab-accent)]/40 group-hover:bg-[var(--ab-accent)]/10 transition-colors ab-panel ">
+                <ExternalLink className="w-3 h-3 text-[var(--ab-heading)]" />
               </div>
             </a>
 
             {/* Secondary Apply Button (Manartak Platform - Natural Theme Style) */}
             <div
-              aria-label={publicT('public_applications_through_manaratak_are_currently_unavailable')}
-              className="inline-flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 bg-[var(--mn-page)] border border-[var(--mn-border)] transition-all group cursor-default mn-panel "
+              aria-label={publicT('public_applications_through_absheer_are_currently_unavailable')}
+              className="inline-flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 bg-[var(--ab-page)] border border-[var(--ab-border)] transition-all group cursor-default ab-panel "
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[#142B5F]/10 dark:bg-[var(--mn-accent)]/10 flex items-center justify-center shrink-0 border border-[#142B5F]/20 dark:border-[var(--mn-accent)]/30">
-                  <MousePointerClick className="w-4 h-4 text-[#142B5F] dark:text-[var(--mn-accent-text)]" />
+                <div className="w-8 h-8 rounded-full bg-[#142B5F]/10 dark:bg-[var(--ab-accent)]/10 flex items-center justify-center shrink-0 border border-[#142B5F]/20 dark:border-[var(--ab-accent)]/30">
+                  <MousePointerClick className="w-4 h-4 text-[#142B5F] dark:text-[var(--ab-accent-text)]" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-bold text-[var(--mn-heading)] leading-tight mb-0.5">{publicT('public_apply_through_manaratak')}</span>
-                  <span className="text-[9.5px] font-bold text-[var(--mn-text-muted)] leading-tight">{publicT('public_easy_reliable_applications_with_a_professional_profile_coming')}</span>
+                  <span className="text-[11px] font-bold text-[var(--ab-heading)] leading-tight mb-0.5">{publicT('public_apply_through_absheer')}</span>
+                  <span className="text-[9.5px] font-bold text-[var(--ab-text-muted)] leading-tight">{publicT('public_easy_reliable_applications_with_a_professional_profile_coming')}</span>
                 </div>
               </div>
-              <div className="w-6 h-6 rounded-full bg-[var(--mn-surface)] flex items-center justify-center shrink-0 border border-[var(--mn-border)] mn-panel ">
-                <Link className="w-3 h-3 text-[var(--mn-heading)]" />
+              <div className="w-6 h-6 rounded-full bg-[var(--ab-surface)] flex items-center justify-center shrink-0 border border-[var(--ab-border)] ab-panel ">
+                <Link className="w-3 h-3 text-[var(--ab-heading)]" />
               </div>
             </div>
           </div>
@@ -814,7 +814,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
         {/* 10. SIMILAR SCHOLARSHIPS SECTION */}
         <div
-          className="relative w-full bg-[var(--mn-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--mn-border)] shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mb-2 mn-panel "
+          className="relative w-full bg-[var(--ab-surface)] rounded-3xl p-3.5 sm:p-4 border border-[var(--ab-border)] shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden mb-2 ab-panel "
           dir={publicDir}
         >
           <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
@@ -850,19 +850,19 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 type="button"
                 key={item.id}
                 onClick={() => onOpenScholarship?.(item.id)}
-                className="min-w-[200px] bg-[var(--mn-page)] border border-[var(--mn-border)] rounded-2xl p-2.5 flex flex-col gap-2 snap-center transition-all hover:border-[var(--mn-accent)]/40 hover:bg-[var(--mn-accent)]/5 cursor-pointer text-start active:scale-[0.99] mn-panel "
+                className="min-w-[200px] bg-[var(--ab-page)] border border-[var(--ab-border)] rounded-2xl p-2.5 flex flex-col gap-2 snap-center transition-all hover:border-[var(--ab-accent)]/40 hover:bg-[var(--ab-accent)]/5 cursor-pointer text-start active:scale-[0.99] ab-panel "
               >
                 {/* Header: Country and Funding Type */}
                 <div className="flex items-start justify-between gap-1.5">
                   <div className="flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-[var(--mn-text-muted)]" />
-                    <span className="text-[11px] font-bold text-[var(--mn-text-muted)]">{item.country}</span>
+                    <MapPin className="w-3.5 h-3.5 text-[var(--ab-text-muted)]" />
+                    <span className="text-[11px] font-bold text-[var(--ab-text-muted)]">{item.country}</span>
                   </div>
-                  <span className="px-1.5 py-0.5 bg-[var(--mn-primary)]/10 text-[var(--mn-heading)] rounded-md text-[8px] font-bold">{publicT('public_fully_funded')}</span>
+                  <span className="px-1.5 py-0.5 bg-[var(--ab-primary)]/10 text-[var(--ab-heading)] rounded-md text-[8px] font-bold">{publicT('public_fully_funded')}</span>
                 </div>
 
                 {/* Title */}
-                <h4 className="text-[11px] font-bold text-[var(--mn-heading)] line-clamp-2 leading-tight">
+                <h4 className="text-[11px] font-bold text-[var(--ab-heading)] line-clamp-2 leading-tight">
                   {item.title}
                 </h4>
 
@@ -871,7 +871,7 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                   {item.degrees.map((deg) => (
                     <span
                       key={deg}
-                      className="px-1.5 py-0.5 bg-[var(--mn-surface)] border border-[var(--mn-border)] text-[var(--mn-text-muted)] rounded-lg text-[8.5px] font-bold mn-panel "
+                      className="px-1.5 py-0.5 bg-[var(--ab-surface)] border border-[var(--ab-border)] text-[var(--ab-text-muted)] rounded-lg text-[8.5px] font-bold ab-panel "
                     >
                       {deg}
                     </span>
@@ -879,9 +879,9 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
                 </div>
 
                 {/* Footer: Deadline */}
-                <div className="flex items-center gap-1.5 pt-1.5 mt-0.5 border-t border-[var(--mn-border)]">
-                  <Calendar className="w-3 h-3 text-[var(--mn-accent-text)]" />
-                  <span className="text-[9px] font-bold text-[var(--mn-text-muted)]">{item.deadline}</span>
+                <div className="flex items-center gap-1.5 pt-1.5 mt-0.5 border-t border-[var(--ab-border)]">
+                  <Calendar className="w-3 h-3 text-[var(--ab-accent-text)]" />
+                  <span className="text-[9px] font-bold text-[var(--ab-text-muted)]">{item.deadline}</span>
                 </div>
               </button>
             ))}
@@ -894,25 +894,25 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
             onClick={() => {
               // Share functionality placeholder
             }}
-            data-mn-design="efc9da21fc"
-            className="py-2.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer bg-[var(--mn-surface)] text-[var(--mn-heading)] border border-[var(--mn-accent)]/40 hover:bg-[var(--mn-accent)]/5 hover:border-[var(--mn-accent)] flex-1 max-w-[170px] mn-panel "
+            data-ab-design="efc9da21fc"
+            className="py-2.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer bg-[var(--ab-surface)] text-[var(--ab-heading)] border border-[var(--ab-accent)]/40 hover:bg-[var(--ab-accent)]/5 hover:border-[var(--ab-accent)] flex-1 max-w-[170px] ab-panel "
           >
             <span>{publicT('public_share_scholarship')}</span>
-            <Share2 className="w-4 h-4 text-[var(--mn-accent-text)]" />
+            <Share2 className="w-4 h-4 text-[var(--ab-accent-text)]" />
           </button>
 
           <button
             onClick={handleSaveClick}
-            data-mn-design="efc9da21fc"
+            data-ab-design="efc9da21fc"
             className={`py-2.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer flex-1 max-w-[170px] ${
               isFavorite
-                ? 'bg-[var(--mn-primary)] text-[var(--mn-accent-text)] border border-[var(--mn-accent)] mn-inverse '
-                : 'bg-[var(--mn-primary)] text-white hover:bg-[var(--mn-primary)] mn-inverse hover:mn-inverse '
+                ? 'bg-[var(--ab-primary)] text-[var(--ab-accent-text)] border border-[var(--ab-accent)] ab-inverse '
+                : 'bg-[var(--ab-primary)] text-white hover:bg-[var(--ab-primary)] ab-inverse hover:ab-inverse '
             }`}
           >
             <span>{isFavorite ? publicT('public_saved_3') : publicT('public_save_scholarship')}</span>
             <Bookmark
-              className={`w-4 h-4 ${isFavorite ? 'fill-[var(--mn-accent)] text-[var(--mn-accent-text)]' : 'text-[var(--mn-accent-text)]'}`}
+              className={`w-4 h-4 ${isFavorite ? 'fill-[var(--ab-accent)] text-[var(--ab-accent-text)]' : 'text-[var(--ab-accent-text)]'}`}
             />
           </button>
         </div>
@@ -920,14 +920,14 @@ export const ScholarshipDetailModal: React.FC<ScholarshipDetailModalProps> = ({
 
       )}
       {scholarship.publishedData && <div className="px-3 py-4 flex justify-center">
-        <button type="button" onClick={handleSaveClick} className="flex items-center gap-2 rounded-2xl bg-[var(--mn-primary)] px-5 py-3 text-xs font-bold text-white">
+        <button type="button" onClick={handleSaveClick} className="flex items-center gap-2 rounded-2xl bg-[var(--ab-primary)] px-5 py-3 text-xs font-bold text-white">
           <Bookmark className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />{isFavorite ? publicT('public_saved_3') : publicT('public_save_scholarship')}
         </button>
       </div>}
       {/* Save Notification Toast */}
       {saveToast && (
-        <div className="fixed bottom-6 inset-x-4 max-w-xs mx-auto bg-[var(--mn-primary)] text-white px-4 py-2 rounded-full shadow-2xl z-50 flex items-center justify-center gap-2 text-xs font-bold animate-in fade-in slide-in-from-bottom-2 mn-inverse ">
-          <Check className="w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
+        <div className="fixed bottom-6 inset-x-4 max-w-xs mx-auto bg-[var(--ab-primary)] text-white px-4 py-2 rounded-full shadow-2xl z-50 flex items-center justify-center gap-2 text-xs font-bold animate-in fade-in slide-in-from-bottom-2 ab-inverse ">
+          <Check className="w-3.5 h-3.5 text-[var(--ab-accent-text)]" />
           <span>{isFavorite ? publicT('public_scholarship_added_to_my_favorites') : publicT('public_scholarship_removed_from_my_favorites')}</span>
         </div>
       )}

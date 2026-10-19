@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
 const ar = {
-  publicId: 'cms-public-1', contentId: 'node-1', siteIdentifier: 'manaratak',
+  publicId: 'cms-public-1', contentId: 'node-1', siteIdentifier: 'absheer',
   locale: 'ar', slug: 'arabic-news', canonicalUrl: '/ar/news/arabic-news',
   contentType: 'NEWS', title: 'خبر عربي', summary: 'ملخص',
   publishedAt: '2026-10-10T10:00:00.000Z',
@@ -32,7 +32,7 @@ const excluded = {
 async function runPrerender(dist: string, apiUrl: string): Promise<{ code: number; output: string }> {
   const args = [
     resolve(process.cwd(), 'scripts/prerender-public-seo.mjs'),
-    `--dist=${dist}`, '--public-url=https://manaratak.example',
+    `--dist=${dist}`, '--public-url=https://absheer.example',
     `--api-url=${apiUrl}`,
   ];
   const child = spawn(process.execPath, args, { cwd: process.cwd(), env: process.env });
@@ -81,7 +81,7 @@ describe('CMS prerender source contract (local mock API, no database/provider)',
     const sitemap = await readFile(resolve(dist, 'sitemap.xml'), 'utf8');
     const manifest = JSON.parse(await readFile(resolve(dist, 'prerender-manifest.json'), 'utf8'));
 
-    expect(arHtml).toContain('rel="canonical" href="https://manaratak.example/ar/news/arabic-news"');
+    expect(arHtml).toContain('rel="canonical" href="https://absheer.example/ar/news/arabic-news"');
     expect(arHtml).not.toContain('hreflang="en"');
     expect(manifest.routes.some((entry:{path:string})=>entry.path.startsWith('/en/'))).toBe(false);
     // Live CMS entries are now served by /cms-sitemap.xml; the generated
@@ -89,8 +89,8 @@ describe('CMS prerender source contract (local mock API, no database/provider)',
     expect(sitemap).not.toContain('/ar/news/arabic-news');
     expect(sitemap).not.toContain('/en/news/english-news');
     const robots = await readFile(resolve(dist, 'robots.txt'), 'utf8');
-    expect(robots).toContain('Sitemap: https://manaratak.example/sitemap.xml');
-    expect(robots).toContain('Sitemap: https://manaratak.example/cms-sitemap.xml');
+    expect(robots).toContain('Sitemap: https://absheer.example/sitemap.xml');
+    expect(robots).toContain('Sitemap: https://absheer.example/cms-sitemap.xml');
     expect(sitemap).not.toContain('/en/news/no-index');
     const monoHtml = await readFile(resolve(dist, 'ar/news/single-language/index.html'), 'utf8');
     expect(monoHtml).not.toContain('hreflang="en"');

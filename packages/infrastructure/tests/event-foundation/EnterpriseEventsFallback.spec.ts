@@ -9,7 +9,7 @@ import {
   EventMetadata,
   EnterpriseEventSpecification,
   EventLifecycleState
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   InMemoryEnterpriseEventRepository,
   InMemoryEventPublishingGateway

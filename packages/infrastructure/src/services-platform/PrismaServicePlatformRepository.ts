@@ -16,7 +16,7 @@ import {
   ServiceRequestStatus,
   ServiceStatus,
   ServiceCatalogRepositoryUpdateDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 import {
   boundedCursorLimit,

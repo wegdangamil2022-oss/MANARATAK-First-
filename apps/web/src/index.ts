@@ -1,2 +1,2 @@
-// @manaratak/web entry point
+// @absheer/web entry point
 export {};

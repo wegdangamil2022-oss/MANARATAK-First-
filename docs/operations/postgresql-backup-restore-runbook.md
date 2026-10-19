@@ -12,7 +12,7 @@
 
 ## Disposable rehearsal
 ```bash
-export DATABASE_URL='postgresql://.../manaratak_ci'
+export DATABASE_URL='postgresql://.../absheer_ci'
 export WPIC10_ALLOW_DISPOSABLE_DB=1
 bash scripts/wp-ic-10-db-backup-restore.sh
 ```

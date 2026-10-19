@@ -2,7 +2,7 @@ import {
   AuthorizationEvaluatorService, 
   ResourceUrn, 
   Action 
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { EvaluateAccessInput, AccessDecisionDto } from '../dtos/AuthorizationDtos';
 
 export class EvaluateAccessUseCase {

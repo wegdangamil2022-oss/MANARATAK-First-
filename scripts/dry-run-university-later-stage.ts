@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@manaratak/shared';
+import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@absheer/shared';
 import { UniversityLaterStagesDryRunUseCase, type UniversityLaterStage } from '../packages/application/src/universities/use-cases/UniversityLaterStagesDryRunUseCase';
-import type { UniversalImportHandoff } from '@manaratak/domain';
+import type { UniversalImportHandoff } from '@absheer/domain';
 import { readUniversityStage34Markdown } from './import/UniversityStage34MarkdownReader';
 import { universityStage3Payload, universityStage4Payload } from './import/UniversityStage34Payload';
 

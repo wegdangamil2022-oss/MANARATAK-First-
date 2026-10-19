@@ -5,7 +5,7 @@ import {
   CourseOriginType,
   CourseStatus,
   ICourseRepository
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AdminCourseUseCases } from '../../src/courses/use-cases/AdminCourseUseCases';
 import { CoursePublicationService } from '../../src/courses/services/CoursePublicationService';
 

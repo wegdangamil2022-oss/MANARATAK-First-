@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { PrismaClient } from '@prisma/client';
-import { decideRetention, RetentionOwner } from '@manaratak/domain';
+import { decideRetention, RetentionOwner } from '@absheer/domain';
 import { PrismaAuditRetentionGateway } from '../../src/retention/PrismaAuditRetentionGateway';
 
 describe('audit retention legal-hold write predicates (mock database)', () => {

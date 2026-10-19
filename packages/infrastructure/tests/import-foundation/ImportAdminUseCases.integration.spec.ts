@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ImportAdminUseCases, MajorImportStagingUseCase } from '@manaratak/application';
-import { InMemoryImportQueueGateway } from '@manaratak/infrastructure';
-import { ImportTargetDomain } from '@manaratak/domain';
+import { ImportAdminUseCases, MajorImportStagingUseCase } from '@absheer/application';
+import { InMemoryImportQueueGateway } from '@absheer/infrastructure';
+import { ImportTargetDomain } from '@absheer/domain';
 
 describe('ImportAdminUseCases - Queue Status Integration', () => {
   let mockImportRepo: any;

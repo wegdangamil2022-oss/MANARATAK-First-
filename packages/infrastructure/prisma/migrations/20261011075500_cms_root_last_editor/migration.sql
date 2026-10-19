@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: cms
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: cms
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- SOURCE ONLY. Apply only through separately approved post-28 migration rollout.
 -- Prefer the real effective root editor recorded in the editorial ledger.
 -- Primary-localization title/summary writes also modify root presentation.

@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { HealthCheckResult, HealthStatus, IHealthIndicator, IMetrics, IMonitoringProvider, IMonitoringSpan } from '@manaratak/core';
+import { HealthCheckResult, HealthStatus, IHealthIndicator, IMetrics, IMonitoringProvider, IMonitoringSpan } from '@absheer/core';
 
 export interface OtlpHttpMonitoringOptions {
   endpoint: string;
@@ -146,7 +146,7 @@ export class OtlpHttpMonitoringProvider implements IMonitoringProvider, IMetrics
     return {
       resourceMetrics: [{
         resource: { attributes: this.resourceAttributes() },
-        scopeMetrics: [{ scope: { name: 'manaratak.monitoring', version: '1' }, metrics }],
+        scopeMetrics: [{ scope: { name: 'absheer.monitoring', version: '1' }, metrics }],
       }],
     };
   }
@@ -172,7 +172,7 @@ export class OtlpHttpMonitoringProvider implements IMonitoringProvider, IMetrics
     return {
       resourceSpans: [{
         resource: { attributes: this.resourceAttributes() },
-        scopeSpans: [{ scope: { name: 'manaratak.monitoring', version: '1' }, spans }],
+        scopeSpans: [{ scope: { name: 'absheer.monitoring', version: '1' }, spans }],
       }],
     };
   }

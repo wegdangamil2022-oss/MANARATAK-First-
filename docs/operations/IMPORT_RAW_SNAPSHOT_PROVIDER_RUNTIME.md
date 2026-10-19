@@ -1,4 +1,4 @@
-# Import Raw Snapshot Provider Runtime Contract — W3 / MNT-AUD-0012
+# Import Raw Snapshot Provider Runtime Contract — W3 / ABSH-AUD-0012
 
 ## Source authority
 Production/staging raw import provenance uses `HttpImportRawSnapshotStore` over the same signed provider boundary as the Enterprise Asset Platform. `LocalImportRawSnapshotStore` is development-only and the in-memory implementation is test-only.
@@ -16,7 +16,7 @@ The configured provider must implement:
 Every request is protected by the HMAC request protocol documented in `ASSET_PROVIDER_RUNTIME.md`; write requests carry a stable idempotency key. Provider references must be durable/opaque and may not be `file:` or `memory:` locations.
 
 ## Retention
-`MANARATAK_IMPORT_RAW_RETENTION_DAYS` is mandatory in production/staging. The adapter sends an explicit `IMPORT_RAW_PROVENANCE` retention class and absolute expiry derived from the acquisition timestamp. The provider must keep bytes immutable until governed expiry, purge content according to the retention policy, and preserve the provider-side evidence/tombstone required for forensic traceability.
+`ABSHEER_IMPORT_RAW_RETENTION_DAYS` is mandatory in production/staging. The adapter sends an explicit `IMPORT_RAW_PROVENANCE` retention class and absolute expiry derived from the acquisition timestamp. The provider must keep bytes immutable until governed expiry, purge content according to the retention policy, and preserve the provider-side evidence/tombstone required for forensic traceability.
 
 ## Runtime closure evidence
 Source implementation and provider-contract tests do not prove a deployed provider. Before production closure, execute against an authorized sandbox and record:

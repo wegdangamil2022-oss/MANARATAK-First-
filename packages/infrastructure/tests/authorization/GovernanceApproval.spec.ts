@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { PrismaGovernanceApprovalGateway } from '../../src/authorization/PrismaGovernanceApprovalGateway';
-import { governanceApprovalDigest } from '@manaratak/application';
+import { governanceApprovalDigest } from '@absheer/application';
 const payload = {
   pairs: [],
   expectedRevision: null,

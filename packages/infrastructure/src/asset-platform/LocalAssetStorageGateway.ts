@@ -7,7 +7,7 @@ import {
   AssetStorageZone,
   AssetUploadVerificationRequest,
   VerifiedAssetUpload
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class LocalAssetStorageGateway implements IAssetStorageGateway {
   constructor(

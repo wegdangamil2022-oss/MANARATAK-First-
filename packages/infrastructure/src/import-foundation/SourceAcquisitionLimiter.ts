@@ -1,5 +1,5 @@
-import type { ISourceAcquisitionLimiter } from '@manaratak/application';
-import { SourceConnectorCategory, type ImportSourceDefinition } from '@manaratak/domain';
+import type { ISourceAcquisitionLimiter } from '@absheer/application';
+import { SourceConnectorCategory, type ImportSourceDefinition } from '@absheer/domain';
 
 type Bucket = { tokens: number; lastRefill: number; lastRequest?: number };
 

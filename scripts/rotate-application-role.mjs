@@ -16,13 +16,13 @@ export function validateRotateApplicationRoleRequest(env = process.env) {
 
   const errors = [];
 
-  const roleName = (env.DB_APPLICATION_ROLE || 'manaratak_application').trim();
+  const roleName = (env.DB_APPLICATION_ROLE || 'absheer_application').trim();
   if (!roleName || !/^[a-z_][a-z0-9_]{0,62}$/.test(roleName)) {
     errors.push('DB_APPLICATION_ROLE must be a valid lowercase PostgreSQL identifier');
   }
 
   // Prevent touching privileged or system roles
-  if (['postgres', 'manaratak_probe', 'manaratak_migration'].includes(roleName) || roleName.startsWith('pg_')) {
+  if (['postgres', 'absheer_probe', 'absheer_migration'].includes(roleName) || roleName.startsWith('pg_')) {
     errors.push(`Role ${roleName} is not permitted for single-role application rotation`);
   }
 

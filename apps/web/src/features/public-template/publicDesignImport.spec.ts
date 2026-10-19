@@ -17,8 +17,8 @@ describe('public design import boundaries', () => {
     const snapshot = loadPublicPrototypeSnapshot();
     expect(snapshot.data.courses.length).toBeGreaterThanOrEqual(6);
     expect(snapshot.data.services.length).toBeGreaterThanOrEqual(6);
-    expect(snapshot.data.courses.some(course => course.provider.includes('منارتك'))).toBe(true);
-    expect(snapshot.data.courses.some(course => !course.provider.includes('منارتك'))).toBe(true);
+    expect(snapshot.data.courses.some(course => course.provider.includes('أبشر'))).toBe(true);
+    expect(snapshot.data.courses.some(course => !course.provider.includes('أبشر'))).toBe(true);
     const countryIds = new Set(snapshot.data.countries.map(country => country.id));
     for (const scholarship of snapshot.data.scholarships) {
       expect(countryIds.has(scholarship.countryReferenceId || '')).toBe(true);

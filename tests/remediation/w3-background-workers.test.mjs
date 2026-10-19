@@ -11,12 +11,12 @@ const cron=load('packages/application/src/background-jobs/services/CronScheduleC
 const registryModule=load('packages/application/src/background-jobs/workers/BackgroundJobHandlerRegistry.ts',{'./DurableBackgroundJobContracts':{}});
 const workerModule=load('packages/application/src/background-jobs/workers/DurableBackgroundWorker.ts',{'./BackgroundJobHandlerRegistry':registryModule,'./DurableBackgroundJobContracts':{},'../services/CronScheduleCalculator':cron});
 
-test('MNT-AUD-0007 cron scheduler calculates deterministic UTC occurrences',()=>{
+test('ABSH-AUD-0007 cron scheduler calculates deterministic UTC occurrences',()=>{
  assert.equal(cron.nextCronOccurrence('*/15 * * * *',new Date('2026-09-06T20:01:30Z')).toISOString(),'2026-09-06T20:15:00.000Z');
  assert.throws(()=>cron.validateCronExpression('bad cron'),/BACKGROUND_JOB_CRON_INVALID/);
 });
 
-test('MNT-AUD-0007 worker owns terminal transitions and uses job reference as handler idempotency key',async()=>{
+test('ABSH-AUD-0007 worker owns terminal transitions and uses job reference as handler idempotency key',async()=>{
  const calls=[]; const claim={jobReference:'job-1',jobType:'test.handler',payload:{a:1},priority:0,attempt:1,maxAttempts:3,backoffType:'fixed',timeoutMs:1000,workerId:'worker-1',leaseToken:'lease-1',leaseUntil:new Date(Date.now()+10000)};
  const queue={capabilityStatus:'PRODUCTION_CAPABLE',persistenceClassification:'DURABLE',claimDue:async()=>[claim],heartbeat:async()=>true,complete:async(x)=>{calls.push(['complete',x]);return true;},fail:async(x)=>{calls.push(['fail',x]);return {applied:true,exhausted:false};},getOperationalSnapshot:async()=>({})};
  const handler={jobType:'test.handler',handle:async(_payload,ctx)=>calls.push(['handler',ctx.idempotencyKey])};
@@ -25,7 +25,7 @@ test('MNT-AUD-0007 worker owns terminal transitions and uses job reference as ha
  assert.equal(calls[0][0],'handler'); assert.equal(calls[0][1],'job-1'); assert.equal(calls[1][0],'complete'); assert.equal(state.snapshot().completedTotal,1);
 });
 
-test('MNT-AUD-0007 stale worker completion is rejected without a false success',async()=>{
+test('ABSH-AUD-0007 stale worker completion is rejected without a false success',async()=>{
  const claim={jobReference:'job-stale',jobType:'test.handler',payload:{},priority:0,attempt:1,maxAttempts:3,backoffType:'fixed',timeoutMs:1000,workerId:'worker-1',leaseToken:'old-token',leaseUntil:new Date(Date.now()+10000)};
  const queue={capabilityStatus:'PRODUCTION_CAPABLE',persistenceClassification:'DURABLE',claimDue:async()=>[claim],heartbeat:async()=>true,complete:async()=>false,fail:async()=>({applied:false,exhausted:false}),getOperationalSnapshot:async()=>({})};
  const registry=new registryModule.BackgroundJobHandlerRegistry([{jobType:'test.handler',handle:async()=>{}}]); const state=new workerModule.BackgroundWorkerRuntimeState(); const worker=new workerModule.DurableBackgroundWorker(queue,registry,state);

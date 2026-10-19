@@ -3,22 +3,22 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@manaratak/core": [
+      "@absheer/core": [
         "packages/core/src/index.ts"
       ],
-      "@manaratak/shared": [
+      "@absheer/shared": [
         "packages/shared/src/index.ts"
       ],
-      "@manaratak/domain": [
+      "@absheer/domain": [
         "packages/domain/src/index.ts"
       ],
-      "@manaratak/application": [
+      "@absheer/application": [
         "packages/application/src/index.ts"
       ],
-      "@manaratak/infrastructure": [
+      "@absheer/infrastructure": [
         "packages/infrastructure/src/index.ts"
       ],
-      "@manaratak/config": [
+      "@absheer/config": [
         "packages/config/src/index.ts"
       ]
     },

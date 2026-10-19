@@ -7,12 +7,12 @@ const themeSource = readFileSync(join(featureRoot, 'template.css'), 'utf8');
 
 function themeTokens(selector: string): Record<string, string> {
   const block = themeSource.slice(themeSource.indexOf(selector) + selector.length).split('}')[0];
-  return Object.fromEntries([...block.matchAll(/(--mn-[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+  return Object.fromEntries([...block.matchAll(/(--ab-[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
 }
 function resolveToken(tokens: Record<string, string>, key: string): string {
   const value = tokens[key];
   if (!value) throw new Error(`Missing theme token: ${key}`);
-  const ref = value.match(/^var\((--mn-[\w-]+)\)$/);
+  const ref = value.match(/^var\((--ab-[\w-]+)\)$/);
   return ref ? resolveToken(tokens, ref[1]) : value;
 }
 function luminance(hex: string): number {
@@ -29,25 +29,25 @@ function publicTemplateSources(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) return publicTemplateSources(path);
-    if (!/\.(css|tsx)$/.test(entry.name) || entry.name === 'ManaratakLogo.tsx') return [];
+    if (!/\.(css|tsx)$/.test(entry.name) || entry.name === 'AbsheerLogo.tsx') return [];
     return [readFileSync(path, 'utf8')];
   });
 }
 
 describe('public brand theme contract', () => {
   it('defines semantic surfaces and readable roles for both themes', () => {
-    expect(themeSource).toContain('.manaratak-public {');
-    expect(themeSource).toContain('.dark .manaratak-public {');
+    expect(themeSource).toContain('.absheer-public {');
+    expect(themeSource).toContain('.dark .absheer-public {');
     for (const token of [
-      '--mn-page',
-      '--mn-surface',
-      '--mn-surface-elevated',
-      '--mn-heading',
-      '--mn-text',
-      '--mn-text-muted',
-      '--mn-primary',
-      '--mn-accent',
-      '--mn-focus',
+      '--ab-page',
+      '--ab-surface',
+      '--ab-surface-elevated',
+      '--ab-heading',
+      '--ab-text',
+      '--ab-text-muted',
+      '--ab-primary',
+      '--ab-accent',
+      '--ab-focus',
     ]) {
       expect(themeSource.match(new RegExp(token, 'g'))?.length).toBeGreaterThanOrEqual(2);
     }
@@ -65,7 +65,7 @@ describe('public brand theme contract', () => {
   });
 
   it('uses the manual dark selector and never inverts the Tailwind neutral scale', () => {
-    expect(themeSource).toContain('@custom-variant mn-dark (&:where(.dark, .dark *));');
+    expect(themeSource).toContain('@custom-variant ab-dark (&:where(.dark, .dark *));');
     expect(themeSource).not.toMatch(/--color-(slate|stone|gray)-/);
     const source = publicTemplateSources(featureRoot).join('\n');
     expect(source).not.toMatch(/dark:text-(slate|stone|gray)-\d+/);
@@ -73,13 +73,13 @@ describe('public brand theme contract', () => {
 
   it('defines every semantic token consumed by a component', () => {
     const source = publicTemplateSources(featureRoot).join('\n');
-    const defined = new Set([...themeSource.matchAll(/(--mn-[\w-]+):/g)].map((m) => m[1]));
-    for (const m of source.matchAll(/var\((--mn-[\w-]+)\)/g)) expect(defined.has(m[1]), m[1]).toBe(true);
+    const defined = new Set([...themeSource.matchAll(/(--ab-[\w-]+):/g)].map((m) => m[1]));
+    for (const m of source.matchAll(/var\((--ab-[\w-]+)\)/g)) expect(defined.has(m[1]), m[1]).toBe(true);
   });
 
   it('keeps normal text at AA contrast on theme surfaces and action fills', () => {
-    const light = themeTokens('.manaratak-public {');
-    const dark = { ...light, ...themeTokens('.dark .manaratak-public {') };
+    const light = themeTokens('.absheer-public {');
+    const dark = { ...light, ...themeTokens('.dark .absheer-public {') };
     for (const [mode, tokens] of Object.entries({ light, dark })) {
       const pairs = [
         ...['page', 'surface', 'surface-elevated', 'surface-muted'].flatMap((bg) =>
@@ -91,7 +91,7 @@ describe('public brand theme contract', () => {
         ...['success', 'danger', 'warning', 'info'].map((status) => [`${status}-text`, `${status}-soft`]),
       ];
       for (const [fg, bg] of pairs) {
-        expect(contrast(resolveToken(tokens, `--mn-${fg}`), resolveToken(tokens, `--mn-${bg}`)), `${mode}: ${fg} on ${bg}`).toBeGreaterThanOrEqual(4.5);
+        expect(contrast(resolveToken(tokens, `--ab-${fg}`), resolveToken(tokens, `--ab-${bg}`)), `${mode}: ${fg} on ${bg}`).toBeGreaterThanOrEqual(4.5);
       }
     }
   });

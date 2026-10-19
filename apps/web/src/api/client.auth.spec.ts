@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CsrfClientManager } from '@manaratak/shared';
+import { CsrfClientManager } from '@absheer/shared';
 import { apiFetch } from './client';
 
 afterEach(() => vi.restoreAllMocks());

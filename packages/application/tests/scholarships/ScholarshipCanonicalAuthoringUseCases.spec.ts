@@ -12,7 +12,7 @@ import {
   ScholarshipVerificationStatus,
   type IScholarshipRepository,
   type ScholarshipDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AdminScholarshipUseCases } from '../../src/scholarships/use-cases/AdminScholarshipUseCases';
 import type {
   IScholarshipCanonicalLookupGateway,

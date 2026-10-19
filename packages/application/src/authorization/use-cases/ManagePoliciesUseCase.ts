@@ -1,4 +1,4 @@
-import { IPolicyRepository, Policy } from '@manaratak/domain';
+import { IPolicyRepository, Policy } from '@absheer/domain';
 import { isIP } from 'node:net';
 import {
   AtomicDomainMutationCoordinator,

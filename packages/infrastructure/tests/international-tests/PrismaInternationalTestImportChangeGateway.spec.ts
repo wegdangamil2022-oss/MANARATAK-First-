@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import { Prisma, type PrismaClient } from '@prisma/client';
-import { InternationalTestImportChangeExecutor, prepareInternationalTestImport, type InternationalTestImportApproval } from '@manaratak/application';
+import { InternationalTestImportChangeExecutor, prepareInternationalTestImport, type InternationalTestImportApproval } from '@absheer/application';
 import { PrismaInternationalTestImportChangeGateway } from '../../src/international-tests/PrismaInternationalTestImportChangeGateway';
 import { actorId, reviewBody } from '../../../application/tests/tests-platform/fixtures/reviewedTestImport';
 

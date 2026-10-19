@@ -1,4 +1,4 @@
-import type { NewMajorCandidateComparison } from '@manaratak/domain';
+import type { NewMajorCandidateComparison } from '@absheer/domain';
 import {useAdminAuthorization} from '../security/AdminAuthorizationContext';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';

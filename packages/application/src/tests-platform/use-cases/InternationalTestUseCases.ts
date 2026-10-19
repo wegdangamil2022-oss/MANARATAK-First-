@@ -1,7 +1,7 @@
 import {prepareOwnerDescription, assertNoForgedOwnerDescriptions, type OwnerDescriptionInput} from '../../localization/OwnerLocalizedDescription';
-import {assertAdmissionScoreProfiles} from '@manaratak/domain';
+import {assertAdmissionScoreProfiles} from '@absheer/domain';
 import { randomUUID } from 'node:crypto';
-import { assertInternationalTestTransition, publicInternationalTest, assertOfficialTestUrl } from '@manaratak/domain';
+import { assertInternationalTestTransition, publicInternationalTest, assertOfficialTestUrl } from '@absheer/domain';
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
 import {
   validateInternationalTestScorePolicy,
@@ -44,8 +44,8 @@ import {
   IReferenceResolver,
   IDegreeLevelRepository,
   IAcademicTaxonomyRepository
-} from '@manaratak/domain';
-import { assertNoTranslationPayloadFields } from '@manaratak/shared';
+} from '@absheer/domain';
+import { assertNoTranslationPayloadFields } from '@absheer/shared';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 type TestMutationContext = AtomicMutationRequestContext & { expectedRevision?: number; reason?: string };
 import { InternationalTestCanonicalRelationshipService } from './InternationalTestCanonicalRelationshipService';

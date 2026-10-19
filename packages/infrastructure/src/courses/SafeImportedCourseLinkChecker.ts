@@ -5,7 +5,7 @@ import { PublicNetworkAddressPolicy } from '../network/PublicNetworkAddressPolic
 import {
   IImportedCourseLinkChecker,
   ImportedCourseLinkCheckResult,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const MAX_REDIRECTS = 5;
 const REQUEST_TIMEOUT_MS = 8_000;
@@ -214,8 +214,8 @@ export class SafeImportedCourseLinkChecker implements IImportedCourseLinkChecker
         method,
         servername: url.hostname,
         headers: method === 'GET'
-          ? { Range: 'bytes=0-0', 'User-Agent': 'MANARATAK-LinkVerifier/1.0' }
-          : { 'User-Agent': 'MANARATAK-LinkVerifier/1.0' },
+          ? { Range: 'bytes=0-0', 'User-Agent': 'ABSHEER-LinkVerifier/1.0' }
+          : { 'User-Agent': 'ABSHEER-LinkVerifier/1.0' },
         lookup: (_hostname: string, _options: unknown, callback: Function) => {
           callback(null, resolved.address, resolved.family);
         },

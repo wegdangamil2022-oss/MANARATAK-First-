@@ -4,7 +4,7 @@ import {
   IReferenceResolver,
   ReferenceLookup,
   ReferenceLifecycleState,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 /**
  * Canonical resolver backed by bounded repository-side lookups. The resolver no

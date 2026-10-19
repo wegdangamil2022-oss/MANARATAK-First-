@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { IQueryRequest, IPaginationRequest, ISortRequest, IFilterRequest } from '@manaratak/core';
+import { IQueryRequest, IPaginationRequest, ISortRequest, IFilterRequest } from '@absheer/core';
 
 export class QueryParser {
   public static parse(req: Request): IQueryRequest {

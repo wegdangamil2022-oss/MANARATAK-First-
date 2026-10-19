@@ -1,4 +1,4 @@
-import { ParsedImportRow, ImportParseError } from '@manaratak/domain';
+import { ParsedImportRow, ImportParseError } from '@absheer/domain';
 import { IImportStreamParser, ImportStreamParserInput, ImportStreamParserContext } from './IImportStreamParser';
 
 export class CsvImportStreamParser implements IImportStreamParser {

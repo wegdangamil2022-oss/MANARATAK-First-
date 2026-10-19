@@ -844,7 +844,7 @@ export function CourseDetailPage() {
                       setFormData({ ...formData, certificateAvailable: e.target.checked })
                     }
                   />
-                  تتيح الدورة شهادة منارتك بعد استيفاء متطلبات الإتمام
+                  تتيح الدورة شهادة أبشر بعد استيفاء متطلبات الإتمام
                 </label>
               </div>
             )}

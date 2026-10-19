@@ -18,7 +18,7 @@ import {
   AuditChainReference,
   AuditRetentionMetadata,
   AuditRecordQuerySpecification
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { PrismaAuditRecordRepository, AuditRecordRow } from '../../src/audit/PrismaAuditRecordRepository';
 
 describe('PrismaAuditRecordRepository', () => {

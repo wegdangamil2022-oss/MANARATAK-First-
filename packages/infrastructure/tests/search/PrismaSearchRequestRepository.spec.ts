@@ -1,7 +1,7 @@
 import { describe,expect,it,vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
 import { PrismaSearchRequestRepository } from '../../src/search/PrismaSearchRequestRepository';
-import { LogicalOperator, SearchCriteria,SearchPagination,SearchReference,SearchRequest,SearchRequestId,SearchRequestSpecification,SearchScope } from '@manaratak/domain';
+import { LogicalOperator, SearchCriteria,SearchPagination,SearchReference,SearchRequest,SearchRequestId,SearchRequestSpecification,SearchScope } from '@absheer/domain';
 const base={id:'search-id',reference:'reference-a',scope:'PUBLIC_CATALOG',query:'private query',filters:[],logicalOperator:'AND',page:1,limit:20,sortField:null,sortDirection:null,state:'COMPLETED',totalCount:0,executionTimeMs:1,createdAt:new Date()};
 describe('Prisma search persistence ownership',()=>{
  it('filters reference/actor/scope in SQL before take, then rejects unexpected rows defensively',async()=>{

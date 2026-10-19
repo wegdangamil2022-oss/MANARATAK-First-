@@ -9,7 +9,7 @@ import {
   InternationalTestStatus,
   IInternationalTestRepository,
   IReferenceResolver
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('InternationalTestAdminUseCases', () => {
   let mockRepository: any;

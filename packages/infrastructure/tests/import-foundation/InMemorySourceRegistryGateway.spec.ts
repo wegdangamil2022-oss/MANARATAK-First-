@@ -4,7 +4,7 @@ import {
   SourceConnectorCategory, 
   SourceAccessClassification, 
   SourceStatus 
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { InMemorySourceRegistryGateway } from '../../src/import-foundation/InMemorySourceRegistryGateway';
 
 describe('InMemorySourceRegistryGateway', () => {

@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { createApiApp } from '../../../src/app';
 import { SecurityValidator } from '../../../src/presentation/security/SecurityValidator';
 import { SecurityMiddlewareFactory } from '../../../src/presentation/security/SecurityMiddlewareFactory';
-import { DefaultRateLimiter, SecurityService } from '@manaratak/infrastructure';
-import { ISecurityService, IRateLimiter, IRateLimitResult } from '@manaratak/core';
+import { DefaultRateLimiter, SecurityService } from '@absheer/infrastructure';
+import { ISecurityService, IRateLimiter, IRateLimitResult } from '@absheer/core';
 import { createRateLimiterForRuntime } from '../../../src/infrastructure/di/RuntimeDependencyPolicy';
 import { generateKeyPairSync } from 'node:crypto';
-import { loadAppConfig } from '@manaratak/config';
+import { loadAppConfig } from '@absheer/config';
 
 const testJwtKeyPair = generateKeyPairSync('rsa', { modulusLength: 2048 });
 const testJwtEnv = {
@@ -122,21 +122,21 @@ describe('Production Security Guardrails & Boot Validation', () => {
     const validProdEnv = {
       NODE_ENV: 'production',
       ...testJwtEnv,
-      JWT_ISSUER: 'manaratak-production-api',
-      JWT_AUDIENCE: 'manaratak-production-browser',
+      JWT_ISSUER: 'absheer-production-api',
+      JWT_AUDIENCE: 'absheer-production-browser',
       SESSION_SECRET: 'production-session-secret-must-be-very-long-32-chars',
       CSRF_SECRET: 'production-csrf-secret-must-be-very-long-32-chars-at-all',
-      CORS_ORIGIN: 'https://app.manaratak.org',
-      API_BASE_URL: 'https://api.manaratak.org',
-      DATABASE_URL: 'postgresql://prod_user:secret@postgres.prod:5432/manaratak?sslmode=require',
-      DIRECT_URL: 'postgresql://migration_user:secret@postgres.prod:5432/manaratak?sslmode=require',
+      CORS_ORIGIN: 'https://app.absheer.org',
+      API_BASE_URL: 'https://api.absheer.org',
+      DATABASE_URL: 'postgresql://prod_user:secret@postgres.prod:5432/absheer?sslmode=require',
+      DIRECT_URL: 'postgresql://migration_user:secret@postgres.prod:5432/absheer?sslmode=require',
       REDIS_URL: 'rediss://redis.prod:6379',
       ADMIN_AUTH_MODE: 'strict',
       SECURE_COOKIE: 'true',
       SECURITY_CSP_ENABLED: 'true',
       TRUST_PROXY_HOPS: '1',
-      PUBLIC_WEB_URL: 'https://app.manaratak.org',
-      ADMIN_WEB_URL: 'https://admin.manaratak.org',
+      PUBLIC_WEB_URL: 'https://app.absheer.org',
+      ADMIN_WEB_URL: 'https://admin.absheer.org',
       SECURITY_RATE_LIMIT_MAX: '100',
       SECURITY_RATE_LIMIT_WINDOW_MS: '60000',
       CERTIFICATE_COMPLETION_WORKER_ENABLED: 'true',
@@ -157,21 +157,21 @@ describe('Production Security Guardrails & Boot Validation', () => {
       BACKGROUND_CMS_CRON: '* * * * *',
       BACKGROUND_NOTIFICATION_CRON: '* * * * *',
       NOTIFICATION_RECIPIENT_MAX_DELIVERIES_PER_HOUR: '30',
-      MANARATAK_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.manaratak.internal/api/',
-      MANARATAK_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
-      MANARATAK_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
-      MANARATAK_IMPORT_RAW_RETENTION_DAYS: '365',
-      FINANCE_PROVIDER_BASE_URL: 'https://finance-provider.manaratak.internal/api/',
+      ABSHEER_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.absheer.internal/api/',
+      ABSHEER_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
+      ABSHEER_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
+      ABSHEER_IMPORT_RAW_RETENTION_DAYS: '365',
+      FINANCE_PROVIDER_BASE_URL: 'https://finance-provider.absheer.internal/api/',
       FINANCE_PROVIDER_API_KEY: 'finance-provider-key',
       FINANCE_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
       FINANCE_PAYMENT_PROVIDER_KEY: 'payment-test',
       FINANCE_FX_PROVIDER_KEY: 'fx-test',
       FINANCE_BANK_PROVIDER_KEY: 'bank-test',
-      NOTIFICATION_PROVIDER_BASE_URL: 'https://notification-provider.manaratak.internal/api/',
+      NOTIFICATION_PROVIDER_BASE_URL: 'https://notification-provider.absheer.internal/api/',
       NOTIFICATION_PROVIDER_API_KEY: 'notification-provider-key',
       NOTIFICATION_PROVIDER_SIGNING_SECRET: 'abcdef0123456789abcdef0123456789',
-      OTEL_SERVICE_NAME: 'manaratak-api',
-      OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.manaratak.internal/v1/traces',
+      OTEL_SERVICE_NAME: 'absheer-api',
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.absheer.internal/v1/traces',
     };
 
     it('normal production composition selects a production-capable distributed limiter', () => {

@@ -1,4 +1,4 @@
-import { IErrorLogger, ILogger, ILogContext } from '@manaratak/core';
+import { IErrorLogger, ILogger, ILogContext } from '@absheer/core';
 import { AuditSecretSanitizer } from '../audit/AuditSecretSanitizer';
 
 export class ErrorLogger implements IErrorLogger {

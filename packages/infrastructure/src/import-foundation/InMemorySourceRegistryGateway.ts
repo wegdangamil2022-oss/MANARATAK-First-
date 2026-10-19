@@ -1,12 +1,12 @@
 import { 
   ISourceRegistryGateway 
-} from '@manaratak/application';
+} from '@absheer/application';
 import { 
   ImportSourceDefinition, 
   SourceStatus, 
   SourceConnectorCategory, 
   SourceAccessClassification 
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class InMemorySourceRegistryGateway implements ISourceRegistryGateway {
   public readonly persistenceClassification = 'DEVELOPMENT_ONLY' as const;

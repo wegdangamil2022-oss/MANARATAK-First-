@@ -13,8 +13,8 @@ const parsed = Object.fromEntries(fs.readFileSync(envFile, 'utf8').split(/\r?\n/
   const i = line.indexOf('='); return [line.slice(0, i), line.slice(i + 1)];
 }));
 const runtime = (process.env.NODE_ENV || parsed.NODE_ENV || '').toLowerCase();
-if (runtime === 'production' || runtime === 'staging' || parsed.MANARATAK_COMPOSE_ENVIRONMENT !== 'development') {
-  console.error('Refusing to run local Docker Compose outside MANARATAK_COMPOSE_ENVIRONMENT=development.');
+if (runtime === 'production' || runtime === 'staging' || parsed.ABSHEER_COMPOSE_ENVIRONMENT !== 'development') {
+  console.error('Refusing to run local Docker Compose outside ABSHEER_COMPOSE_ENVIRONMENT=development.');
   process.exit(1);
 }
 for (const key of ['POSTGRES_PASSWORD', 'REDIS_PASSWORD']) {

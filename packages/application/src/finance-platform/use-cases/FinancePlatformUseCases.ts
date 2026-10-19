@@ -32,7 +32,7 @@ import {
   TransferStatus,
   validateBalancedPostings,
   validateInstallmentPlan,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface FinanceCommandIdentity {
   actorId: string;

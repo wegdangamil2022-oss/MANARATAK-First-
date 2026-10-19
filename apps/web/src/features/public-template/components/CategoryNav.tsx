@@ -220,13 +220,13 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
     <section id="categories-section" className="w-full py-3">
       {/* Section Title */}
       <div className="flex items-center justify-between mb-3 px-1">
-        <h3 className="text-sm font-bold text-[var(--mn-heading)] flex items-center gap-1.5">
+        <h3 className="text-sm font-bold text-[var(--ab-heading)] flex items-center gap-1.5">
           <span>{publicT('public_browse_by_category')}</span>
         </h3>
         {selectedCategory !== 'all' && (
           <button
             onClick={() => onSelectCategory('all')}
-            className="text-[11px] text-[var(--mn-heading)] font-bold hover:underline cursor-pointer"
+            className="text-[11px] text-[var(--ab-heading)] font-bold hover:underline cursor-pointer"
           >{publicT('public_view_all')}</button>
         )}
       </div>
@@ -242,8 +242,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
               onClick={() => onSelectCategory(isActive ? 'all' : cat.id)}
               className={`flex min-w-0 flex-col items-center justify-center p-1.5 sm:p-2 rounded-2xl transition-all active:scale-95 group cursor-pointer ${
                 isActive
-                  ? 'bg-[var(--mn-primary)] text-[var(--mn-accent-text)] shadow-sm ring-2 ring-[var(--mn-focus)] mn-inverse '
-                  : 'bg-[var(--mn-surface-muted)] hover:bg-[var(--mn-page)] border border-[var(--mn-border)] shadow-2xs hover:border-[var(--mn-accent)]/50 mn-panel hover:mn-panel '
+                  ? 'bg-[var(--ab-primary)] text-[var(--ab-accent-text)] shadow-sm ring-2 ring-[var(--ab-focus)] ab-inverse '
+                  : 'bg-[var(--ab-surface-muted)] hover:bg-[var(--ab-page)] border border-[var(--ab-border)] shadow-2xs hover:border-[var(--ab-accent)]/50 ab-panel hover:ab-panel '
               }`}
             >
               {/* Circular Icon Container */}
@@ -264,7 +264,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ selectedCategory, onSe
               {/* Label */}
               <span
                 className={`text-[10px] sm:text-[11px] font-bold leading-tight break-words ${
-                  isActive ? 'text-[var(--mn-accent-text)] font-bold' : 'text-[var(--mn-text)]'
+                  isActive ? 'text-[var(--ab-accent-text)] font-bold' : 'text-[var(--ab-text)]'
                 }`}
               >
                 {cat.label}

@@ -1,4 +1,4 @@
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 
 export type CourseImportTransferState =
   | 'READY_TO_TRANSFER'

@@ -1,4 +1,4 @@
-import { ApiService } from '@manaratak/domain';
+import { ApiService } from '@absheer/domain';
 
 export interface IApiExposureGateway {
   /**

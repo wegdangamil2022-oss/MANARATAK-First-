@@ -19,7 +19,7 @@ import {
   AssetActivationOperation, AssetRestoreOperation, AssetArchiveOperation,
   AssetRetentionSnapshot,
   AssetVersionChain, AssetVersion
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 interface AssetRecordRow {
   id: string;

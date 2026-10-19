@@ -5,7 +5,7 @@ import {
   type IServiceOperationsRepository,
   type ITestDiscoveryOwnerGateway,
   type TestDiscoveryIdentity,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 export class StudentToolTestDiscoveryOwnerGateway implements ITestDiscoveryOwnerGateway {
   constructor(private readonly tools: IStudentToolRegistryRepository) {}
   async resolve(ownerKey: string, locale: 'ar' | 'en'): Promise<TestDiscoveryIdentity | null> {

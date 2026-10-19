@@ -1,5 +1,5 @@
-import { FinancePlatformUseCases } from '@manaratak/application';
-import { ICourseFinancialClearanceGateway } from '@manaratak/domain';
+import { FinancePlatformUseCases } from '@absheer/application';
+import { ICourseFinancialClearanceGateway } from '@absheer/domain';
 
 /** Read-only course consumer of Finance-owned clearance truth through the Phase 19 boundary. */
 export class Phase19CourseFinancialClearanceGateway implements ICourseFinancialClearanceGateway {

@@ -1,11 +1,11 @@
-import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
+import { ADMIN_PERMISSION_CATALOG } from '@absheer/shared';
 import {
   validateSettingsDependencyPolicy,
   type SettingsDependencyPolicy,
   type AtomicPersistenceContext,
   type IIdentityRepository,
   LifeStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   AtomicDomainMutationCoordinator,
   type AtomicMutationRequestContext,

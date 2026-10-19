@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: majors
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: majors
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- SOURCE ONLY, UNAPPLIED. Preserve owner reviews and import/publication history.
 CREATE TABLE "MajorImportOwnerReview" (
  "id" TEXT PRIMARY KEY, "receiptId" TEXT NOT NULL UNIQUE, "requestHash" TEXT NOT NULL,

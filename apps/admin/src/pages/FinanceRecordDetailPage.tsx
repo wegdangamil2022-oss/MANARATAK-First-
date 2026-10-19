@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
-import type { FinancialApprovalDto } from '@manaratak/domain';
+import type { FinancialApprovalDto } from '@absheer/domain';
 import { FinanceApprovalDecisionPanel } from './FinanceApprovalDecisionPanel';
 import { financeMoney } from './financePresentation';
 const kinds = ['payments', 'refunds', 'transfers', 'approvals', 'commissions'];

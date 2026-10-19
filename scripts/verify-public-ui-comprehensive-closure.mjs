@@ -19,8 +19,8 @@ const authPage='apps/web/src/features/students/StudentAuthPage.tsx';
 const authFlow='apps/web/src/features/students/authenticateAccount.ts';
 const api='apps/web/src/api/client.ts';
 const authRouter='apps/api/src/presentation/api/router/AuthRouter.ts';
-const logo='apps/web/public/brand/manaratak-logo-official.png';
-const logoComponent='apps/web/src/features/public-template/components/ManaratakLogo.tsx';
+const logo='apps/web/public/brand/absheer-logo-official.png';
+const logoComponent='apps/web/src/features/public-template/components/AbsheerLogo.tsx';
 const publicDirs=[
  'apps/web/src/features/public-template','apps/web/src/features/students',
  'apps/web/src/features/student-tools','apps/web/src/features/certificates'
@@ -43,10 +43,10 @@ function contrastRatio(a,b){ const x=relativeLuminance(a), y=relativeLuminance(b
 
 // Theme / typography / responsive system
 for (const [id,val] of [
- ['LIGHT_PAGE','--mn-page: #f7f7f5'],['LIGHT_SURFACE','--mn-surface: #ffffff'],['LIGHT_MUTED','--mn-surface-muted: #f1f3f4'],
- ['LIGHT_HEADING','--mn-theme-heading: #213746'],['LIGHT_TEXT','--mn-theme-text: #334b57'],['PRIMARY','--mn-primary: #142b5f'],
- ['SECONDARY','--mn-secondary: #0e7c86'],['GOLD','--mn-accent: #d6a43b'],['DARK_PAGE','--mn-page: #09152f'],
- ['DARK_SURFACE','--mn-surface: #10264a'],['DARK_ELEVATED','--mn-surface-elevated: #153258'],['DARK_MUTED','--mn-surface-muted: #193b61']
+ ['LIGHT_PAGE','--ab-page: #f7f7f5'],['LIGHT_SURFACE','--ab-surface: #ffffff'],['LIGHT_MUTED','--ab-surface-muted: #f1f3f4'],
+ ['LIGHT_HEADING','--ab-theme-heading: #213746'],['LIGHT_TEXT','--ab-theme-text: #334b57'],['PRIMARY','--ab-primary: #142b5f'],
+ ['SECONDARY','--ab-secondary: #0e7c86'],['GOLD','--ab-accent: #d6a43b'],['DARK_PAGE','--ab-page: #09152f'],
+ ['DARK_SURFACE','--ab-surface: #10264a'],['DARK_ELEVATED','--ab-surface-elevated: #153258'],['DARK_MUTED','--ab-surface-muted: #193b61']
 ]) check(`THEME_${id}`,contains(css,val),val);
 check('TYPO_CAIRO',contains(css,"font-family: 'Cairo'"),'Cairo root font');
 check('TYPO_NO_BLACK_WEIGHT',!/(font-black|font-extrabold)/.test(allPublic),'no black/extrabold in live public surfaces');
@@ -55,16 +55,16 @@ check('STYLE_NO_IMPORTANT',!read(css).includes('!important'),'no new !important 
 check('STYLE_NO_NONSEMANTIC_PALETTE',!/(?:blue|indigo|emerald|violet)-(?:50|100|200|300|400|500|600|700|800|900|950)/.test(allWebSrc),'no non-semantic Tailwind identity colors in apps/web/src');
 check('STYLE_NO_TEXT_SYMBOL_ICONS',!/[❯▶►➜➡→←✓✕★◇]/u.test(allWebSrc),'Lucide/icons instead of text symbols');
 check('STYLE_NO_RANDOM_NEGATIVE_X',!/-mx-4\b/.test(allWebSrc),'no random -mx-4 public layout hacks');
-check('MOBILE_CONTAINER_9PX',contains(css,'--mn-container-mobile: 9px'),'mobile page gutter');
-check('MOBILE_GRID_TWO',contains(css,'.mn-detail-small-grid') && contains(css,'repeat(2, minmax(0, 1fr))'),'small cards 2-column mobile');
-check('MOBILE_FULL_BLEED_SEMANTIC',contains(css,'.mn-detail-full-bleed') && !/-mx-4\b/.test(allPublic),'semantic detail full-bleed gutters');
-check('DARK_CARD_GOLD',contains(css,'--mn-card-border-dark') && contains(css,'.dark .manaratak-public .mn-card'),'gold card boundary');
-check('DARK_POPOVERS',contains(css,"[data-popover-content]") && contains(css,'background-color: var(--mn-surface-elevated)'),'dark select/menu/popover');
-check('FILTER_SELECTED_GOLD',contains(css,".mn-filter-chip[aria-pressed='true']") && contains(css,'var(--mn-accent)'),'semantic selected chips');
-check('FOCUS_TOKEN',contains(css,'--mn-focus:'),'focus token');
+check('MOBILE_CONTAINER_9PX',contains(css,'--ab-container-mobile: 9px'),'mobile page gutter');
+check('MOBILE_GRID_TWO',contains(css,'.ab-detail-small-grid') && contains(css,'repeat(2, minmax(0, 1fr))'),'small cards 2-column mobile');
+check('MOBILE_FULL_BLEED_SEMANTIC',contains(css,'.ab-detail-full-bleed') && !/-mx-4\b/.test(allPublic),'semantic detail full-bleed gutters');
+check('DARK_CARD_GOLD',contains(css,'--ab-card-border-dark') && contains(css,'.dark .absheer-public .ab-card'),'gold card boundary');
+check('DARK_POPOVERS',contains(css,"[data-popover-content]") && contains(css,'background-color: var(--ab-surface-elevated)'),'dark select/menu/popover');
+check('FILTER_SELECTED_GOLD',contains(css,".ab-filter-chip[aria-pressed='true']") && contains(css,'var(--ab-accent)'),'semantic selected chips');
+check('FOCUS_TOKEN',contains(css,'--ab-focus:'),'focus token');
 check('REDUCED_MOTION',contains(css,'@media (prefers-reduced-motion: reduce)'),'motion accessibility');
-check('SEARCH_HEIGHT_40',contains(css,'.mn-search-control') && contains(css,'height: 40px'),'mobile search target');
-check('DETAIL_CLOSE_40',contains(css,'.mn-detail-close') && contains(css,'width: 40px') && contains(css,'height: 40px'),'detail control touch size');
+check('SEARCH_HEIGHT_40',contains(css,'.ab-search-control') && contains(css,'height: 40px'),'mobile search target');
+check('DETAIL_CLOSE_40',contains(css,'.ab-detail-close') && contains(css,'width: 40px') && contains(css,'height: 40px'),'detail control touch size');
 check('OVERFLOW_PROTECTED',contains(css,'overflow-x: clip'),'horizontal overflow guard');
 check('WCAG_LIGHT_BODY',contrastRatio('#334B57','#F7F7F5') >= 4.5,`ratio=${contrastRatio('#334B57','#F7F7F5').toFixed(2)}`);
 check('WCAG_LIGHT_MUTED',contrastRatio('#667985','#FFFFFF') >= 4.5,`ratio=${contrastRatio('#667985','#FFFFFF').toFixed(2)}`);
@@ -80,13 +80,13 @@ if(exists(logo)){
  check('LOGO_OFFICIAL_HASH',hash==='10bc5fd51307913795990c95e87c758bdd653a07583286fe1ade6b8239b7321c',hash);
 }
 // September 2026 public-design import supplies a new circular logo; keep the legacy asset intact too.
-const templateLogo='apps/web/public/brand/manaratak-logo.png';
+const templateLogo='apps/web/public/brand/absheer-logo.png';
 check('LOGO_TEMPLATE_ASSET_EXISTS',exists(templateLogo),templateLogo);
 if(exists(templateLogo)){
  const hash=crypto.createHash('sha256').update(fs.readFileSync(path.join(root,templateLogo))).digest('hex');
  check('LOGO_TEMPLATE_HASH',hash==='a1ad2bedd8cacbdb05a3c6b883edd0f4460112f658f69d9595c8324af1b6aef2',hash);
 }
-check('LOGO_IMAGE_NOT_SVG',contains(logoComponent,'/brand/manaratak-logo.png') && notContains(logoComponent,'<svg'),'user-supplied template image asset only');
+check('LOGO_IMAGE_NOT_SVG',contains(logoComponent,'/brand/absheer-logo.png') && notContains(logoComponent,'<svg'),'user-supplied template image asset only');
 check('LOGO_OBJECT_CONTAIN',contains(logoComponent,'object-contain'),'preserve aspect ratio');
 
 // Shared detail patterns
@@ -99,7 +99,7 @@ check('DETAIL_NO_TEXT_BACK',!/>\s*العودة\s*</.test(allPublic),'no standalo
 check('DETAIL_BACK_ARIA',contains('apps/web/src/features/public-template/components/DetailUi.tsx',"aria-label={mode === 'close' ? 'إغلاق' : 'العودة'}"),'accessible close/back control');
 for(const p of ['ScholarshipDetailModal.tsx','UniversityDetailModal.tsx','MajorDetailModal.tsx','CountryDetailModal.tsx','ExamDetailModal.tsx'].map(f=>`apps/web/src/features/public-template/components/${f}`)) check(`DETAIL_CLOSE_MODE_${path.basename(p).replace(/\W/g,'_')}`,(p.endsWith('/ExamDetailModal.tsx') ? contains(p,'<ExamDetails {...props}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','onClick={onClose}') && contains('packages/ui/src/public-tests/ExamDetails.tsx','aria-label={t("إغلاق")}') : contains(p,'mode="close"')),p);
 check('DETAIL_SCROLL_TARGET',contains('apps/web/src/features/public-template/components/DetailUi.tsx','scrollIntoView'),'search anchor scroll');
-check('DETAIL_TEMP_HIGHLIGHT',contains('apps/web/src/features/public-template/components/DetailUi.tsx','mn-search-term-mark'),'temporary matched phrase highlight');
+check('DETAIL_TEMP_HIGHLIGHT',contains('apps/web/src/features/public-template/components/DetailUi.tsx','ab-search-term-mark'),'temporary matched phrase highlight');
 
 // Roadmap + notifications
 const roadmap='apps/web/src/features/public-template/components/RoadmapPreview.tsx';
@@ -107,7 +107,7 @@ for(const text of ['حدّد هدفك الأكاديمي','اكتشف وقارن
 const notifications='apps/web/src/features/public-template/components/PushNotificationCenter.tsx';
 check('NOTIFY_LUCIDE',/from 'lucide-react'/.test(read(notifications)),'Lucide notifications');
 check('NOTIFY_NO_EMOJI',!/[🔥🎓⏰📚❯]/u.test(allPublic),'legacy notification emoji removed');
-check('NOTIFY_UNREAD_GOLD',contains(notifications,'mn-accent') || contains(notifications,'mn-border-gold'),'gold unread state');
+check('NOTIFY_UNREAD_GOLD',contains(notifications,'ab-accent') || contains(notifications,'ab-border-gold'),'gold unread state');
 check('NOTIFY_TOUCH_TARGETS',!/(?:h-9 w-9|w-9 h-9)[^\n]*(?:button|aria-label)/.test(read(notifications)) && contains(notifications,'h-10 w-10'),'notification actions >=40px');
 
 // Typed global search
@@ -154,14 +154,14 @@ for(const legacy of ['apps/web/src/features/auth','apps/web/src/features/discove
 // Header / public live surfaces
 const header='apps/web/src/features/public-template/components/Header.tsx';
 check('HEADER_MIN_WIDTH',contains(header,'min-w-0'),'header flex shrink safety');
-check('HEADER_LOGO_HOME',contains(header,'ManaratakLogo') && /onClick=\{[^}]*on/.test(read(header)),'logo interactive');
-check('HEADER_BRAND_VISIBLE_TINY',contains(css,'max-width: 359px') && !/max-width:\s*359px[^}]*span:first-child[^}]*display:\s*none/s.test(read(css)),'MANARATAK remains visible');
-check('STUDENT_WORKSPACE_SEMANTIC',contains('apps/web/src/features/students/StudentWorkspacePage.tsx','var(--mn-') && !/(#044A37|#087A55|font-black)/i.test(read('apps/web/src/features/students/StudentWorkspacePage.tsx')),'live student workspace theme');
-check('STUDENT_WORKSPACE_HERO_INVERSE',/className="[^"]*\bmn-inverse\b[^"]*\bbg-gradient-to-br\b/.test(read(studentWorkspace)),'semantic inverse hero context');
+check('HEADER_LOGO_HOME',contains(header,'AbsheerLogo') && /onClick=\{[^}]*on/.test(read(header)),'logo interactive');
+check('HEADER_BRAND_VISIBLE_TINY',contains(css,'max-width: 359px') && !/max-width:\s*359px[^}]*span:first-child[^}]*display:\s*none/s.test(read(css)),'ABSHEER remains visible');
+check('STUDENT_WORKSPACE_SEMANTIC',contains('apps/web/src/features/students/StudentWorkspacePage.tsx','var(--ab-') && !/(#044A37|#087A55|font-black)/i.test(read('apps/web/src/features/students/StudentWorkspacePage.tsx')),'live student workspace theme');
+check('STUDENT_WORKSPACE_HERO_INVERSE',/className="[^"]*\bab-inverse\b[^"]*\bbg-gradient-to-br\b/.test(read(studentWorkspace)),'semantic inverse hero context');
 check('STUDENT_WORKSPACE_MOBILE_STATS',/className="[^"]*\bgrid-cols-2\b[^"]*\bgap-[\d.]+/.test(read(studentWorkspace)),'two compact stats per row on mobile');
 check('STUDENT_WORKSPACE_ICON_UI',contains(studentWorkspace,'<Folder') && contains(studentWorkspace,'<ArrowLeft') && contains(studentWorkspace,'<X'),'Lucide workspace affordances');
-check('TOOL_ROUTE_SEMANTIC',contains('apps/web/src/features/student-tools/StudentToolPage.tsx','mn-page-shell'),'student tool live route themed');
-check('CERT_ROUTE_SEMANTIC',contains('apps/web/src/features/certificates/CertificateVerificationPage.tsx','mn-page-shell'),'certificate live route themed');
+check('TOOL_ROUTE_SEMANTIC',contains('apps/web/src/features/student-tools/StudentToolPage.tsx','ab-page-shell'),'student tool live route themed');
+check('CERT_ROUTE_SEMANTIC',contains('apps/web/src/features/certificates/CertificateVerificationPage.tsx','ab-page-shell'),'certificate live route themed');
 
 const failed=checks.filter(c=>!c.ok);
 for(const c of checks) console.log(`${c.ok?'PASS':'FAIL'} ${c.id} ${c.note||''}`);

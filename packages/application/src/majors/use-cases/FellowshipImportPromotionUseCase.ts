@@ -11,7 +11,7 @@ import {
   MajorNamingService,
   MajorStatus,
   resolveMajorSourceIdentity,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export type FellowshipPromotionResult =
   | { type: 'CREATED'; fellowshipId: string }

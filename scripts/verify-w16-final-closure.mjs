@@ -11,7 +11,7 @@ const exists = (p) => fs.existsSync(path.join(root, p));
 const checks = [];
 const check = (name, ok, detail = '') => checks.push({ name, ok: Boolean(ok), detail });
 
-const registerPath = 'docs/governance/audits/remediation/MANARATAK_MASTER_DEEP_AUDIT_REGISTER_PHASES_2_TO_19_v1.2.md';
+const registerPath = 'docs/governance/audits/remediation/ABSHEER_MASTER_DEEP_AUDIT_REGISTER_PHASES_2_TO_19_v1.2.md';
 const closurePath = 'docs/governance/audits/remediation/W16_FINAL_SOURCE_CLOSURE_AND_RUNTIME_HANDOFF.md';
 const evidencePath = 'docs/governance/audits/remediation/W16_FINAL_SOURCE_CLOSURE_EVIDENCE.json';
 const w15ClosurePath = 'docs/governance/audits/remediation/W15_SOURCE_REMEDIATION_CLOSURE.md';

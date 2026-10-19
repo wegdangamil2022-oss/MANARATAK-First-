@@ -25,7 +25,7 @@ export function Seo({
   const { language } = useTranslation();
   const location = useLocation();
   useEffect(() => {
-    const pageTitle = `${title} | MANARATAK`;
+    const pageTitle = `${title} | ABSHEER`;
     const baseUrl = import.meta.env.VITE_PUBLIC_WEB_URL || window.location.origin;
     const localizedLinks = buildLocalizedSeoLinks({
       baseUrl,

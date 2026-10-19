@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { IReferenceDataRepository, ReferenceImportScreeningReviewPage } from '@manaratak/domain';
+import type { IReferenceDataRepository, ReferenceImportScreeningReviewPage } from '@absheer/domain';
 import { ReferenceDataUseCases } from '../../src';
 
 describe('P7 durable screening review queue boundary', () => {

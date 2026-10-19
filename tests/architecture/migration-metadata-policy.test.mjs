@@ -33,7 +33,7 @@ test('explicitly reviewed historical migrations retain exact SQL bytes via sidec
 test('an unlisted future migration cannot inherit a historical metadata waiver', () => {
   const errors = validateMigrationMetadata('20261001000000_future', '-- no ownership metadata', manifest);
   assert.equal(errors.length, 3);
-  const valid = '-- MANARATAK_MIGRATION_OWNER: reference\n-- MANARATAK_MIGRATION_SCOPE: owner_only\n-- MANARATAK_ARCH_DECISION: ADR-028\n';
+  const valid = '-- ABSHEER_MIGRATION_OWNER: reference\n-- ABSHEER_MIGRATION_SCOPE: owner_only\n-- ABSHEER_ARCH_DECISION: ADR-028\n';
   assert.deepEqual(validateMigrationMetadata('20261001000000_future', valid, manifest), []);
   assert.ok(validateMigrationMetadata('20261001000000_future', valid.replace('owner_only', 'owner_only_unapproved'), manifest).some((error) => error.includes('SCOPE')));
 });

@@ -8,7 +8,7 @@ import {
   JobMetadata,
   BackgroundJobSpecification,
   BackgroundJobStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   InMemoryBackgroundJobRepository,
   InMemoryBackgroundJobExecutionGateway

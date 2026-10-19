@@ -1,4 +1,4 @@
-import { StudentToolDefinition } from '@manaratak/domain';
+import { StudentToolDefinition } from '@absheer/domain';
 export const STUDENT_TOOL_SCHEMAS: Record<
   string,
   Pick<StudentToolDefinition, 'inputSchema' | 'outputSchema'>

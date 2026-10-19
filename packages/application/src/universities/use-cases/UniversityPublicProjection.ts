@@ -1,5 +1,5 @@
-import { isPublicAdmissionRequirement, isPublicUniversityProgram } from '@manaratak/domain';
-import type { PublicUniversityDto, UniversityDto } from '@manaratak/domain';
+import { isPublicAdmissionRequirement, isPublicUniversityProgram } from '@absheer/domain';
+import type { PublicUniversityDto, UniversityDto } from '@absheer/domain';
 
 type PublicRow = Record<string, unknown>;
 const record = (value: unknown): PublicRow =>

@@ -7,7 +7,7 @@ import {
   UpsertReferenceLanguageDto,
   UpsertReferenceCityDto,
   ReferenceDataFilters
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 function createMockPrismaClient() {
   return {

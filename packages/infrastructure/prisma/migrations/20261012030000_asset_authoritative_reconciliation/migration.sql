@@ -1,6 +1,6 @@
 BEGIN;
 
-CREATE OR REPLACE FUNCTION manaratak_protect_pending_asset_archive() RETURNS trigger LANGUAGE plpgsql VOLATILE AS $$
+CREATE OR REPLACE FUNCTION absheer_protect_pending_asset_archive() RETURNS trigger LANGUAGE plpgsql VOLATILE AS $$
 DECLARE
   old_operation jsonb := OLD."malwareScanStatus" -> 'archiveOperation';
   new_operation jsonb;
@@ -39,7 +39,7 @@ $$;
 
 -- statement-breakpoint
 
-CREATE OR REPLACE FUNCTION manaratak_protect_pending_asset_restore() RETURNS trigger LANGUAGE plpgsql VOLATILE AS $$
+CREATE OR REPLACE FUNCTION absheer_protect_pending_asset_restore() RETURNS trigger LANGUAGE plpgsql VOLATILE AS $$
 DECLARE
   old_operation jsonb := OLD."malwareScanStatus" -> 'restoreOperation';
   new_operation jsonb;

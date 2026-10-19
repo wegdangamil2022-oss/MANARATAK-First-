@@ -1,7 +1,7 @@
 import { GovernanceApprovalsPanel } from './GovernanceApprovalsPanel';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { useEffect, useRef, useState } from 'react';
-import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
+import { ADMIN_PERMISSION_CATALOG } from '@absheer/shared';
 import { adminApiClient, createAdminIdempotencyKey } from '../api/client';
 import { AuthorizationIdentityPicker } from './AuthorizationIdentityPicker';
 import { useTranslation } from '../i18n/I18nProvider';

@@ -1,6 +1,6 @@
 import {createHash} from 'node:crypto';
 import type {PrismaClient} from '@prisma/client';
-import type {IStudentOwnerCatchupContinuationQueue,StudentOwnerCatchupContinuation} from '@manaratak/application';
+import type {IStudentOwnerCatchupContinuationQueue,StudentOwnerCatchupContinuation} from '@absheer/application';
 
 /** Durable per-page continuation: no new schema, one deterministic outbox ID per cursor. */
 export class PrismaStudentOwnerCatchupContinuationQueue implements IStudentOwnerCatchupContinuationQueue {

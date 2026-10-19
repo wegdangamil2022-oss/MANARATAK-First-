@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { CertificateStatus, CertificateTemplateStatus } from '@manaratak/domain';
+import { CertificateStatus, CertificateTemplateStatus } from '@absheer/domain';
 import { PrismaCertificateRepository } from '../../src/certificates/PrismaCertificateRepository';
 
 const issueData: any = {
@@ -7,7 +7,7 @@ const issueData: any = {
   status: CertificateStatus.ACTIVE, certificateType: 'COURSE', studentReferenceId: 'student-1', achievementType: 'COURSE', achievementId: 'course-1', achievementDisplayName: 'Course',
   sourceCompletionId: 'completion-1', completedAt: new Date(), sourceEventId: 'event-1', sourceEventType: 'CourseCompleted', sourceEventVersion: '1.0.0', sourceEventPayloadHash: 'payload-hash',
   courseId: 'course-1', courseDisplayName: 'Course', courseCompletionId: 'completion-1', courseCompletedAt: new Date(), validityPolicy: 'PERMANENT', requiresRevalidation: false,
-  templateId: 'template-1', templateVersionId: 'version-1', templateVersion: '1.0.0', issuerId: 'issuer-1', issuerName: 'MANARATAK', issuerReferenceId: 'issuer-public',
+  templateId: 'template-1', templateVersionId: 'version-1', templateVersion: '1.0.0', issuerId: 'issuer-1', issuerName: 'ABSHEER', issuerReferenceId: 'issuer-public',
   digitalSignature: 'sig', signingKeyReference: 'kms://issuer/key', skills: [], competencies: [], metadata: { signedEnvelope: {} }, actorId: 'phase14-system',
 };
 
@@ -19,7 +19,7 @@ describe('PrismaCertificateRepository W10 trust model', () => {
       certificate: { findUnique: vi.fn().mockResolvedValue(null), findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockImplementation(({ data }) => ({ id: 'cert-1', ...data, issuedAt: new Date(), createdAt: new Date(), updatedAt: new Date() })) },
       certificateTemplate: { findUnique: vi.fn().mockResolvedValue({ id: 'template-1', currentVersionId: 'version-1', status: CertificateTemplateStatus.ACTIVE, issuerId: 'issuer-1' }) },
       certificateTemplateVersion: { findUnique: vi.fn().mockResolvedValue({ id: 'version-1', versionNumber: '1.0.0', templateId: 'template-1', issuerId: 'issuer-1', status: CertificateTemplateStatus.ACTIVE }) },
-      certificateIssuer: { findUnique: vi.fn().mockResolvedValue({ id: 'issuer-1', issuerType: 'MANARATAK', status: 'ACTIVE', signingKeyReference: 'kms://issuer/key' }) },
+      certificateIssuer: { findUnique: vi.fn().mockResolvedValue({ id: 'issuer-1', issuerType: 'ABSHEER', status: 'ACTIVE', signingKeyReference: 'kms://issuer/key' }) },
       certificateLedgerEntry: { create: vi.fn() }, auditRecord: { create: vi.fn() }, transactionalOutboxRecord: { create: vi.fn() },
     };
     const repository = new PrismaCertificateRepository({ $transaction: (callback: any) => callback(tx) } as any);
@@ -34,10 +34,10 @@ describe('PrismaCertificateRepository W10 trust model', () => {
   it('creates immutable template versions and records template governance audit/outbox', async () => {
     const tx: any = {
       $queryRaw: vi.fn().mockResolvedValue([]),
-      certificateIssuer: { findUnique: vi.fn().mockResolvedValue({ id: 'issuer-1', issuerType: 'MANARATAK', status: 'ACTIVE', issuerLogoAssetId: 'asset', signingKeyReference: 'key' }) },
+      certificateIssuer: { findUnique: vi.fn().mockResolvedValue({ id: 'issuer-1', issuerType: 'ABSHEER', status: 'ACTIVE', issuerLogoAssetId: 'asset', signingKeyReference: 'key' }) },
       certificateTemplate: {
         create: vi.fn().mockResolvedValue({ id: 'template-1' }),
-        update: vi.fn().mockImplementation(({ data }) => ({ id: 'template-1', publicId: 'tpl-public', code: 'TPL', name: 'Template', nameAr: 'قالب', nameEn: 'Template', status: 'DRAFT', issuerId: 'issuer-1', currentVersion: { id: data.currentVersionId, publicId: 'v-public', templateId: 'template-1', issuerId: 'issuer-1', versionNumber: '1.0.0', status: 'DRAFT', language: 'BILINGUAL', layout: 'LANDSCAPE', accentColor: '#075E45', secondaryColor: '#C9A227', titleAr: 'شهادة', titleEn: 'Cert', bodyAr: 'نص طويل', bodyEn: 'body long', validityPolicy: 'PERMANENT', requiresRevalidation: false, createdBy: 'maker-1', createdAt: new Date() }, issuer: { name: 'MANARATAK', publicId: 'issuer-public' }, createdAt: new Date(), updatedAt: new Date() })),
+        update: vi.fn().mockImplementation(({ data }) => ({ id: 'template-1', publicId: 'tpl-public', code: 'TPL', name: 'Template', nameAr: 'قالب', nameEn: 'Template', status: 'DRAFT', issuerId: 'issuer-1', currentVersion: { id: data.currentVersionId, publicId: 'v-public', templateId: 'template-1', issuerId: 'issuer-1', versionNumber: '1.0.0', status: 'DRAFT', language: 'BILINGUAL', layout: 'LANDSCAPE', accentColor: '#075E45', secondaryColor: '#C9A227', titleAr: 'شهادة', titleEn: 'Cert', bodyAr: 'نص طويل', bodyEn: 'body long', validityPolicy: 'PERMANENT', requiresRevalidation: false, createdBy: 'maker-1', createdAt: new Date() }, issuer: { name: 'ABSHEER', publicId: 'issuer-public' }, createdAt: new Date(), updatedAt: new Date() })),
       },
       certificateTemplateVersion: { create: vi.fn().mockImplementation(({ data }) => ({ id: 'version-1', ...data })) },
       auditRecord: { create: vi.fn() }, transactionalOutboxRecord: { create: vi.fn() },
@@ -76,7 +76,7 @@ describe('PrismaCertificateRepository W10 trust model', () => {
         issuerId:'issuer-1',status:CertificateTemplateStatus.ACTIVE,
       })},
       certificateIssuer:{findUnique:vi.fn().mockResolvedValue({
-        id:'issuer-1',issuerType:'MANARATAK',status:'ACTIVE',signingKeyReference:'kms://issuer/key',
+        id:'issuer-1',issuerType:'ABSHEER',status:'ACTIVE',signingKeyReference:'kms://issuer/key',
       })},
       certificateLedgerEntry:{create:vi.fn()},auditRecord:{create:vi.fn()},
       transactionalOutboxRecord:{create:vi.fn()},
@@ -136,7 +136,7 @@ describe('PrismaCertificateRepository W10 trust model', () => {
       },
       certificateTemplate: { findUnique: vi.fn().mockResolvedValue({ id: 'template-1', currentVersionId: 'version-1', status: CertificateTemplateStatus.ACTIVE, issuerId: 'issuer-1' }) },
       certificateTemplateVersion: { findUnique: vi.fn().mockResolvedValue({ id: 'version-1', versionNumber: '1.0.0', templateId: 'template-1', issuerId: 'issuer-1', status: CertificateTemplateStatus.ACTIVE }) },
-      certificateIssuer: { findUnique: vi.fn().mockResolvedValue({ id: 'issuer-1', issuerType: 'MANARATAK', status: 'ACTIVE', signingKeyReference: 'kms://issuer/key' }) },
+      certificateIssuer: { findUnique: vi.fn().mockResolvedValue({ id: 'issuer-1', issuerType: 'ABSHEER', status: 'ACTIVE', signingKeyReference: 'kms://issuer/key' }) },
       certificateLedgerEntry: { create: vi.fn() }, auditRecord: { create: vi.fn() }, transactionalOutboxRecord: { create: vi.fn() },
     };
     const repository = new PrismaCertificateRepository({ $transaction: (callback: any) => callback(tx) } as any);

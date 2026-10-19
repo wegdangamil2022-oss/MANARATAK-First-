@@ -3,7 +3,7 @@ import type {
   IScholarshipRepository,
   ScholarshipCompletenessState,
   ScholarshipPublicationStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export type ScholarshipImportOperationalClass =
   | 'REAL'

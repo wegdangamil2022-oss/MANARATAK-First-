@@ -4,7 +4,7 @@ import {
   APPLICATION_SUPPORTED_LOCALES,
   isApplicationSupportedLocale,
   type ApplicationSupportedLocale,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 export const UNSUPPORTED_LOCALE_ERROR_CODE = 'UNSUPPORTED_LOCALE' as const;
 

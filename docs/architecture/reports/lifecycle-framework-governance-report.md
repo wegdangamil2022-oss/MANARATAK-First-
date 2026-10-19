@@ -1,4 +1,4 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-2 Enterprise Lifecycle Framework
 # Documentation Governance & Baseline Adoption Report
 
@@ -38,4 +38,4 @@ A formal cross-reference note has been injected into the Architecture Specificat
 ## 7. Remaining Issues
 None.
 
-The Enterprise Lifecycle Framework has been fully adopted as an official Enterprise Architecture Baseline for MANARATAK 2.0.
+The Enterprise Lifecycle Framework has been fully adopted as an official Enterprise Architecture Baseline for ABSHEER 2.0.

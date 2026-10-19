@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
-import type { UniversityAcademicProgramAuthoringInput } from '@manaratak/domain';
+import type { UniversityAcademicProgramAuthoringInput } from '@absheer/domain';
 import { PrismaUniversityRepository } from '../../src/universities/PrismaUniversityRepository';
 import { UniversityCanonicalRelationshipValidator, type UniversityRelationshipValidationClient } from '../../src/universities/UniversityCanonicalRelationshipValidator';
 

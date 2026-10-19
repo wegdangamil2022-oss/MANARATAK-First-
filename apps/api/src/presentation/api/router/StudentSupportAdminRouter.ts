@@ -6,8 +6,8 @@ import {
   type AuthorizationEvaluatorService,
   type IIdentityRepository,
   type IRoleAssignmentRepository,
-} from '@manaratak/domain';
-import { StudentWorkspaceUseCases, StudentDashboardHydrationService, StudentApplicationTrackerUseCases, AdminServiceFulfillmentUseCases } from '@manaratak/application';
+} from '@absheer/domain';
+import { StudentWorkspaceUseCases, StudentDashboardHydrationService, StudentApplicationTrackerUseCases, AdminServiceFulfillmentUseCases } from '@absheer/application';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 
 export class StudentSupportAdminRouter {

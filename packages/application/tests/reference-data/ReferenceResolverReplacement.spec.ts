@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ReferenceResolverService } from '../../src/reference-data/services/ReferenceResolverService';
-import type { IReferenceResolutionRepository } from '@manaratak/domain';
+import type { IReferenceResolutionRepository } from '@absheer/domain';
 
 describe('P7 historical canonical resolver continuity', () => {
   it('reports the replacement but preserves the original canonical UUID', async () => {

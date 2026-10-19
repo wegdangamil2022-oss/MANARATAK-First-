@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { Router, Request } from 'express';
 import { z } from 'zod';
-import { CareerAdminUseCases, CareerEngagementUseCases, ProcessAssetLifecycleUseCase } from '@manaratak/application';
-import { AuthorizationEvaluatorService, CareerApplicationStatus, CareerEmployerStatus, CareerJobStatus, CareerOpportunityType, EmploymentType, ICareerEngagementRepository } from '@manaratak/domain';
+import { CareerAdminUseCases, CareerEngagementUseCases, ProcessAssetLifecycleUseCase } from '@absheer/application';
+import { AuthorizationEvaluatorService, CareerApplicationStatus, CareerEmployerStatus, CareerJobStatus, CareerOpportunityType, EmploymentType, ICareerEngagementRepository } from '@absheer/domain';
 import { careerUrl, careerMetadata, careerPaging, careerExpected, careerReason, careerHandler, careerError } from './CareerHttp.js';
 export class CareerAdminRouter {
   static create(cradle: { careerAdminUseCases: CareerAdminUseCases; careerEngagementUseCases: CareerEngagementUseCases;

@@ -18,7 +18,7 @@ import {
   AIWorkflowVersion,
   IAIExecutionRepository,
   IAIPlatformRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const ASYNC_LEASE_MS = 600_000;
 

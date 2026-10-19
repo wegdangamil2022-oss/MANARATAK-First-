@@ -4,14 +4,14 @@ Document Status: APPROVED
 Architecture Program: Enterprise Shared Contracts Consolidation Program
 Version: 1.0
 Owner: Architecture Review Board (ARB)
-Project: MANARATAK 2.0
+Project: ABSHEER 2.0
 Last Updated: 2026-07-21
 ---
 
 # Enterprise Shared Contracts Consolidation Blueprint
 
 ## 1. Executive Summary
-This blueprint leverages the findings of the Discovery Audit to propose the official architectural consolidation of the Enterprise Shared Contracts for MANARATAK 2.0.
+This blueprint leverages the findings of the Discovery Audit to propose the official architectural consolidation of the Enterprise Shared Contracts for ABSHEER 2.0.
 
 ## 2. Canonical Foundation Decision
 - **Official Enterprise Foundation**: A unified approach using `packages/core` as the single source of truth for canonical TypeScript runtime contracts and architectural specifications.
@@ -37,7 +37,7 @@ This blueprint leverages the findings of the Discovery Audit to propose the offi
 - Establish a single source of truth for runtime base classes in `packages/core`.
 
 ## 6. Phantom References Resolution
-- **`Enterprise.Architecture.Phase5.*`**: Deprecated legacy namespace references. These are redirected to actual existing domain abstractions or standardized to the canonical TypeScript package `@manaratak/core-contracts`.
+- **`Enterprise.Architecture.Phase5.*`**: Deprecated legacy namespace references. These are redirected to actual existing domain abstractions or standardized to the canonical TypeScript package `@absheer/core-contracts`.
 
 ## 7. Shared Package Decision
 - **`packages/shared`**: Promoted to Enterprise Shared Kernel for cross-cutting utility functions.

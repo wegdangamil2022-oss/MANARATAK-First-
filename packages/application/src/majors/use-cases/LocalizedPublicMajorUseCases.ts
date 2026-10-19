@@ -4,8 +4,8 @@ import {
   PaginatedMajorResult,
   PublicMajorDto,
   PublicMajorFilters,
-} from '@manaratak/domain';
-import { DEFAULT_LOCALE, type SupportedLocale } from '@manaratak/shared';
+} from '@absheer/domain';
+import { DEFAULT_LOCALE, type SupportedLocale } from '@absheer/shared';
 import { ApplicationLocaleProjectionService } from '../../localization/ApplicationLocaleProjectionService';
 
 export class LocalizedPublicMajorUseCases {

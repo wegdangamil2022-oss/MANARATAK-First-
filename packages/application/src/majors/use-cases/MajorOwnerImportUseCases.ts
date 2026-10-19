@@ -1,6 +1,6 @@
 import { taxonomyRevisionHash as hash } from '../../academic-taxonomy/services/TaxonomyRevisionHash';
 import { AtomicDomainMutationCoordinator, type AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import { parseMajorOwnerPayload } from '../services/MajorImportScreeningConsumer';
 import type { IMajorImportReviewGateway, MajorImportReview } from '../services/IMajorImportReviewGateway';
 export class MajorOwnerImportUseCases {

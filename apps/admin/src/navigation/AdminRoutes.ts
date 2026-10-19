@@ -1,4 +1,4 @@
-import { ADMIN_SECTIONS } from '@manaratak/shared';
+import { ADMIN_SECTIONS } from '@absheer/shared';
 
 type Section = typeof ADMIN_SECTIONS[number][0];
 type Permission = typeof ADMIN_SECTIONS[number][1];

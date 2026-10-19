@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { IScholarshipRepository, ScholarshipDto } from '@manaratak/domain';
+import type { IScholarshipRepository, ScholarshipDto } from '@absheer/domain';
 import {
   ScholarshipImportCenterUseCases,
   appendScholarshipImportReviewDecision,

@@ -6,7 +6,7 @@ import {
   AcademicTaxonomyStatus,
   AcademicStandardType,
   AcademicMappingStrength,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('PrismaAcademicTaxonomyRepository - Relations Operations (P8E-2)', () => {
   let mockPrisma: any;

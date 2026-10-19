@@ -3,7 +3,7 @@ import {
   UniversityImportCompletenessState,
   UniversityStatus,
   type UniversityDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { projectPublicUniversity } from '../../src/universities/use-cases/UniversityPublicProjection';
 
 const university = (): UniversityDto => ({

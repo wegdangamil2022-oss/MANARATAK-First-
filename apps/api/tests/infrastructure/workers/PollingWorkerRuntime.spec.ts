@@ -1,5 +1,5 @@
-import { createContainer, asValue } from '@manaratak-vendor/awilix-core';
-import type { IConfigurationService } from '@manaratak/core';
+import { createContainer, asValue } from '@absheer-vendor/awilix-core';
+import type { IConfigurationService } from '@absheer/core';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { startPollingWorkers, stopPollingWorkers } from '../../../src/infrastructure/workers/PollingWorkerRuntime';
 

@@ -1,7 +1,7 @@
 import React from 'react';import {act,create} from 'react-test-renderer';import {MemoryRouter} from 'react-router-dom';import {describe,it,expect,vi,afterEach} from 'vitest';
 const mocks=vi.hoisted(()=>({request:vi.fn()}));vi.mock('../../src/api/client',()=>({adminApiClient:{request:mocks.request}}));
 import {TranslationOwnerCapabilitiesPanel} from '../../src/components/TranslationOwnerCapabilitiesPanel';
-import {TRANSLATION_OWNER_CAPABILITIES} from '@manaratak/shared';
+import {TRANSLATION_OWNER_CAPABILITIES} from '@absheer/shared';
 let tree:ReturnType<typeof create>;(globalThis as any).IS_REACT_ACT_ENVIRONMENT=true;
 afterEach(async()=>{if(tree)await act(async()=>tree.unmount());mocks.request.mockReset();});
 describe('B11 owner capability navigation',()=>{

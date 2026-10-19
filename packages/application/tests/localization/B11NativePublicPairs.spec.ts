@@ -1,7 +1,7 @@
 import {describe,it,expect,vi} from 'vitest';
 import {PublicServiceCatalogUseCases} from '../../src/services-platform/use-cases/PublicServiceCatalogUseCases';
 import {CareerPublicUseCases} from '../../src/career-alumni/use-cases/CareerPublicUseCases';
-import {TRANSLATION_OWNER_CAPABILITIES} from '@manaratak/shared';
+import {TRANSLATION_OWNER_CAPABILITIES} from '@absheer/shared';
 describe('B11 native service and career snapshot language',()=>{
  it.each([true,false])('keeps service title and description on the same published snapshot (complete pair %s)',async complete=>{
   const snapshot:any={id:'service',status:'PUBLISHED',displayName:'Published source',serviceDescription:'Published description',version:3,localizedContent:{en:{displayName:'Published EN',...(complete?{serviceDescription:'Description EN'}:{})}}};

@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('MANARATAK source-level runtime smoke checks', () => {
+test.describe('ABSHEER source-level runtime smoke checks', () => {
   test('renders the public web application', async ({ page }) => {
     const response = await page.goto('/');
 
     expect(response?.ok()).toBeTruthy();
     await expect(page.locator('body')).toBeVisible();
     await expect(page.locator('body')).not.toBeEmpty();
-    await expect(page).toHaveTitle(/MANARATAK|منارتك/i);
+    await expect(page).toHaveTitle(/ABSHEER|أبشر/i);
   });
 
   test('reports API liveness from the running application', async ({ request }) => {

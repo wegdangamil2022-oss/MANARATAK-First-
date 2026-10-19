@@ -25,7 +25,7 @@ import {
   AcademicTaxonomyValidationIssue,
   AcademicTaxonomySeedBatch,
   AcademicTaxonomyFilters,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   AcademicTaxonomyImportHandoffService,
   AcademicTaxonomyImportHandoffCommand,

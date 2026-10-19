@@ -1,4 +1,4 @@
-import { IPasswordResetTokenRepository, PasswordResetTokenRecord } from '@manaratak/domain';
+import { IPasswordResetTokenRepository, PasswordResetTokenRecord } from '@absheer/domain';
 
 export class PrismaPasswordResetTokenRepository implements IPasswordResetTokenRepository {
   constructor(private readonly prisma: any) {}

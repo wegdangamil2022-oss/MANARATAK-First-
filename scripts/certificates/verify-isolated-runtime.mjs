@@ -5,7 +5,7 @@ const url = new URL(process.env.DATABASE_URL ?? '');
 if (
   process.env.CERTIFICATE_RUNTIME_ISOLATED !== '1' ||
   !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) ||
-  url.pathname !== '/manaratak_certificate_verification' ||
+  url.pathname !== '/absheer_certificate_verification' ||
   process.env.DIRECT_URL !== process.env.DATABASE_URL ||
   !['postgres:', 'postgresql:'].includes(url.protocol)
 )

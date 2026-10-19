@@ -53,10 +53,10 @@ export const PRODUCTION_REQUIRED_CONFIG_KEYS = Object.freeze([
   'BACKGROUND_IMPORT_CRON',
   'BACKGROUND_CMS_CRON',
   'BACKGROUND_NOTIFICATION_CRON',
-  'MANARATAK_ASSET_PROVIDER_BASE_URL',
-  'MANARATAK_ASSET_PROVIDER_API_KEY',
-  'MANARATAK_ASSET_PROVIDER_SIGNING_SECRET',
-  'MANARATAK_IMPORT_RAW_RETENTION_DAYS',
+  'ABSHEER_ASSET_PROVIDER_BASE_URL',
+  'ABSHEER_ASSET_PROVIDER_API_KEY',
+  'ABSHEER_ASSET_PROVIDER_SIGNING_SECRET',
+  'ABSHEER_IMPORT_RAW_RETENTION_DAYS',
   'FINANCE_MERCHANT_REFERENCE',
   'FINANCE_RUNTIME_APPROVED',
   'SERVICES_MAINTENANCE_ENABLED',
@@ -95,18 +95,18 @@ export const AppConfigSchema = z.preprocess((input) => {
     return {
       ...env,
       NODE_ENV: nodeEnv,
-      DATABASE_URL: env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/manaratak_dev',
-      DIRECT_URL: env.DIRECT_URL || (env.DATABASE_URL ? (isLoopbackPostgres(env.DATABASE_URL) ? env.DATABASE_URL : undefined) : 'postgresql://postgres:postgres@localhost:5432/manaratak_dev'),
+      DATABASE_URL: env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/absheer_dev',
+      DIRECT_URL: env.DIRECT_URL || (env.DATABASE_URL ? (isLoopbackPostgres(env.DATABASE_URL) ? env.DATABASE_URL : undefined) : 'postgresql://postgres:postgres@localhost:5432/absheer_dev'),
       REDIS_URL: env.REDIS_URL || undefined,
-      REDIS_NAMESPACE: env.REDIS_NAMESPACE || 'manaratak:',
+      REDIS_NAMESPACE: env.REDIS_NAMESPACE || 'absheer:',
       JWT_ACTIVE_KEY_ID: env.JWT_ACTIVE_KEY_ID || 'dev-ephemeral',
       ACCESS_TOKEN_TTL_SECONDS: env.ACCESS_TOKEN_TTL_SECONDS || 900,
       SESSION_TTL_SECONDS: env.SESSION_TTL_SECONDS || 604800,
       SECURE_COOKIE: env.SECURE_COOKIE ?? false,
       CSRF_SECRET: env.CSRF_SECRET || DEVELOPMENT_CSRF_SECRET,
       ADMIN_AUTH_MODE: env.ADMIN_AUTH_MODE || 'strict',
-      JWT_ISSUER: env.JWT_ISSUER || 'manaratak-local',
-      JWT_AUDIENCE: env.JWT_AUDIENCE || 'manaratak-local-clients',
+      JWT_ISSUER: env.JWT_ISSUER || 'absheer-local',
+      JWT_AUDIENCE: env.JWT_AUDIENCE || 'absheer-local-clients',
       TRUST_PROXY_HOPS: env.TRUST_PROXY_HOPS || 0,
       SECURITY_CSP_ENABLED: env.SECURITY_CSP_ENABLED ?? true,
       SECURITY_RATE_LIMIT_MAX: env.SECURITY_RATE_LIMIT_MAX || 100,
@@ -146,7 +146,7 @@ export const AppConfigSchema = z.preprocess((input) => {
   NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error']).default('info'),
-  OTEL_SERVICE_NAME: z.string().min(1).default('manaratak-api'),
+  OTEL_SERVICE_NAME: z.string().min(1).default('absheer-api'),
   OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().optional(),
   OTEL_EXPORT_INTERVAL_MS: z.coerce.number().int().min(1_000).max(300_000).default(10_000),
   OTEL_TRACES_SAMPLER_RATIO: z.coerce.number().min(0).max(1).default(1),
@@ -164,7 +164,7 @@ export const AppConfigSchema = z.preprocess((input) => {
   SMTP_USERNAME: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   REDIS_URL: z.string().optional(),
-  REDIS_NAMESPACE: z.string().default('manaratak:'),
+  REDIS_NAMESPACE: z.string().default('absheer:'),
   JWT_ACTIVE_KEY_ID: z.string().min(1).optional(),
   JWT_PRIVATE_KEY_PEM: z.string().optional(),
   JWT_PUBLIC_KEY_PEM: z.string().optional(),
@@ -187,7 +187,7 @@ export const AppConfigSchema = z.preprocess((input) => {
   OWNER_DOMAIN_OUTBOX_WORKER_ENABLED: envBoolean.optional(),
   OWNER_DOMAIN_OUTBOX_WORKER_INTERVAL_MS: z.coerce.number().int().min(1_000).max(300_000).optional(),
   BACKGROUND_WORKER_ENABLED: envBoolean.optional(),
-  MANARATAK_MFA_ENCRYPTION_KEY: z.string().regex(/^[a-fA-F0-9]{64}$/).optional(),
+  ABSHEER_MFA_ENCRYPTION_KEY: z.string().regex(/^[a-fA-F0-9]{64}$/).optional(),
   ASSET_LIFECYCLE_RECOVERY_ENABLED: envBoolean.optional(),
   AUDIT_ALERTS_ENABLED: envBoolean.optional(),
   ASSET_ACTIVATION_RECOVERY_ENABLED: envBoolean.optional(),
@@ -202,13 +202,13 @@ export const AppConfigSchema = z.preprocess((input) => {
   BACKGROUND_IMPORT_CRON: z.string().trim().min(9).max(128).optional(),
   BACKGROUND_CMS_CRON: z.string().trim().min(9).max(128).optional(),
   BACKGROUND_NOTIFICATION_CRON: z.string().trim().min(9).max(128).optional(),
-  MANARATAK_ASSET_PROVIDER_BASE_URL: z.string().url().optional(),
-  MANARATAK_ASSET_PROVIDER_API_KEY: z.string().trim().min(1).optional(),
-  MANARATAK_ASSET_PROVIDER_SIGNING_SECRET: z.string().min(32).optional(),
-  MANARATAK_ASSET_PROVIDER_TIMEOUT_MS: z.coerce.number().int().min(100).max(120_000).optional(),
-  MANARATAK_ASSET_PROVIDER_MAX_RESPONSE_BYTES: z.coerce.number().int().positive().max(134_217_728).optional(),
-  MANARATAK_ASSET_PROVIDER_ALLOW_INSECURE_HTTP: envBoolean.optional(),
-  MANARATAK_IMPORT_RAW_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).optional(),
+  ABSHEER_ASSET_PROVIDER_BASE_URL: z.string().url().optional(),
+  ABSHEER_ASSET_PROVIDER_API_KEY: z.string().trim().min(1).optional(),
+  ABSHEER_ASSET_PROVIDER_SIGNING_SECRET: z.string().min(32).optional(),
+  ABSHEER_ASSET_PROVIDER_TIMEOUT_MS: z.coerce.number().int().min(100).max(120_000).optional(),
+  ABSHEER_ASSET_PROVIDER_MAX_RESPONSE_BYTES: z.coerce.number().int().positive().max(134_217_728).optional(),
+  ABSHEER_ASSET_PROVIDER_ALLOW_INSECURE_HTTP: envBoolean.optional(),
+  ABSHEER_IMPORT_RAW_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).optional(),
   FINANCE_MERCHANT_REFERENCE: z.string().trim().regex(/^[A-Za-z0-9._:-]{1,160}$/).optional(),
   FINANCE_RUNTIME_APPROVED: envBoolean.optional(),
   SERVICES_MAINTENANCE_ENABLED:envBoolean.optional(),
@@ -281,17 +281,17 @@ export const AppConfigSchema = z.preprocess((input) => {
     if (data.REDIS_URL && !data.REDIS_URL.startsWith('rediss://')) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'REDIS_URL must use rediss:// in production/staging', path: ['REDIS_URL'] });
     if (data.EMAIL_DELIVERY_PROVIDER) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Test email delivery is forbidden in production/staging', path: ['EMAIL_DELIVERY_PROVIDER'] });
     // W3 provider-backed asset security and immutable import provenance are mandatory in production/staging.
-    if (!data.MANARATAK_ASSET_PROVIDER_BASE_URL || !data.MANARATAK_ASSET_PROVIDER_BASE_URL.startsWith('https://')) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'MANARATAK_ASSET_PROVIDER_BASE_URL must be HTTPS in production/staging', path: ['MANARATAK_ASSET_PROVIDER_BASE_URL'] });
+    if (!data.ABSHEER_ASSET_PROVIDER_BASE_URL || !data.ABSHEER_ASSET_PROVIDER_BASE_URL.startsWith('https://')) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'ABSHEER_ASSET_PROVIDER_BASE_URL must be HTTPS in production/staging', path: ['ABSHEER_ASSET_PROVIDER_BASE_URL'] });
     }
-    if (!data.MANARATAK_ASSET_PROVIDER_API_KEY) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'MANARATAK_ASSET_PROVIDER_API_KEY is required in production/staging', path: ['MANARATAK_ASSET_PROVIDER_API_KEY'] });
+    if (!data.ABSHEER_ASSET_PROVIDER_API_KEY) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'ABSHEER_ASSET_PROVIDER_API_KEY is required in production/staging', path: ['ABSHEER_ASSET_PROVIDER_API_KEY'] });
     }
-    if (!data.MANARATAK_ASSET_PROVIDER_SIGNING_SECRET || data.MANARATAK_ASSET_PROVIDER_SIGNING_SECRET.length < 32) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'MANARATAK_ASSET_PROVIDER_SIGNING_SECRET must be at least 32 characters in production/staging', path: ['MANARATAK_ASSET_PROVIDER_SIGNING_SECRET'] });
+    if (!data.ABSHEER_ASSET_PROVIDER_SIGNING_SECRET || data.ABSHEER_ASSET_PROVIDER_SIGNING_SECRET.length < 32) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'ABSHEER_ASSET_PROVIDER_SIGNING_SECRET must be at least 32 characters in production/staging', path: ['ABSHEER_ASSET_PROVIDER_SIGNING_SECRET'] });
     }
-    if (!data.MANARATAK_IMPORT_RAW_RETENTION_DAYS) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'MANARATAK_IMPORT_RAW_RETENTION_DAYS is required in production/staging', path: ['MANARATAK_IMPORT_RAW_RETENTION_DAYS'] });
+    if (!data.ABSHEER_IMPORT_RAW_RETENTION_DAYS) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'ABSHEER_IMPORT_RAW_RETENTION_DAYS is required in production/staging', path: ['ABSHEER_IMPORT_RAW_RETENTION_DAYS'] });
     }
 
     // 2. REDIS_URL — required for distributed production/staging rate limiting.

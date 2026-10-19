@@ -10,7 +10,7 @@ import {
   ICourseRelationshipRepository,
   IImportedCourseOperationsRepository,
   ITransactionalCourseRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { courseSourceRelationshipReviewRequired } from './CourseSourceRelationshipReadiness';
 

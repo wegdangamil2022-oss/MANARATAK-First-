@@ -21,7 +21,7 @@ import {
   ApiServiceDeprecatedEvent,
   ApiServiceArchivedEvent,
   ApiLifecycleState
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   CreateApiServiceDto,
   PublishVersionDto,

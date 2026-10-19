@@ -1,4 +1,4 @@
-import { Configuration } from '@manaratak/domain';
+import { Configuration } from '@absheer/domain';
 
 /**
  * Interface for communicating with physical configuration infrastructure.

@@ -1,13 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@manaratak/shared';
+import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@absheer/shared';
 import { UniversityStage1DryRunUseCase } from '../packages/application/src/universities/use-cases/UniversityStage1DryRunUseCase';
-import type { UniversalImportHandoff } from '@manaratak/domain';
+import type { UniversalImportHandoff } from '@absheer/domain';
 
 const sourceDirectory = path.resolve(process.argv[2] ?? 'workspace/import-sources/universities/stage-1');
 const countrySourcePath = path.resolve(
-  process.argv[3] ?? 'workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx',
+  process.argv[3] ?? 'workspace/reference-data/countries/ABSHEER_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx',
 );
 const files = fs.readdirSync(sourceDirectory)
   .filter(file => file.toLowerCase().endsWith('.xlsx'))

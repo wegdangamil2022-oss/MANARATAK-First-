@@ -4,7 +4,7 @@ import {
   IFinanceCurrencyReferenceGateway,
   IPaymentGateway,
   IPaymentGatewayRegistry,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class PrismaFinanceCurrencyReferenceGateway implements IFinanceCurrencyReferenceGateway {
   constructor(private readonly db: any) {}

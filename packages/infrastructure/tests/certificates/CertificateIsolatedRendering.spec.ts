@@ -4,10 +4,10 @@ import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { ProviderNeutralCertificateRenderingService } from '../../src/certificates/ProviderNeutralCertificateRenderingService';
 import { assertCertificateVisualImage } from '../../src/certificates/CertificateVisualImagePolicy';
-import type { CertificateRenderInput } from '@manaratak/domain';
+import type { CertificateRenderInput } from '@absheer/domain';
 const png = readFileSync(
   resolve(
-    'packages/infrastructure/assets/certificates/manaratak-logo-official.png',
+    'packages/infrastructure/assets/certificates/absheer-logo-official.png',
   ),
 );
 describe.skipIf(process.env.CERTIFICATE_RUNTIME_ISOLATED !== '1')(
@@ -23,7 +23,7 @@ describe.skipIf(process.env.CERTIFICATE_RUNTIME_ISOLATED !== '1')(
           serialNumber: 'FIXTURE-CRS',
           verificationCode: 'FIXTURE-VERIFY',
           verificationUrl: 'https://fixture.invalid/verify/FIXTURE-VERIFY',
-          issuerName: 'MANARATAK',
+          issuerName: 'ABSHEER',
           issuedAt: new Date('2026-10-13T00:00:00Z'),
         },
         templateVersion: {

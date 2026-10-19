@@ -1,4 +1,4 @@
-import { ExternalCourseProviderDto } from '@manaratak/domain';
+import { ExternalCourseProviderDto } from '@absheer/domain';
 
 export interface CourseProviderNativeKeyResolution {
   key: string;

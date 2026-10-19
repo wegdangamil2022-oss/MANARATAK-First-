@@ -1,5 +1,5 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
-import { ThemeProvider, RTLProvider } from '@manaratak/ui';
+import { ThemeProvider, RTLProvider } from '@absheer/ui';
 import { AppRouter } from './router';
 import { I18nProvider } from './i18n/I18nProvider';
 
@@ -34,9 +34,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#FAF7F0] dark:bg-[#0E1F44] text-[#142B5F] dark:text-[#F2CD78] font-['Cairo',sans-serif] text-center">
-          <div className="max-w-md p-6 bg-white dark:bg-[#142B5F] rounded-2xl shadow-lg border border-[var(--mn-border)] space-y-4">
+          <div className="max-w-md p-6 bg-white dark:bg-[#142B5F] rounded-2xl shadow-lg border border-[var(--ab-border)] space-y-4">
             <h2 className="text-lg font-bold">حدث خطأ أثناء تحميل الصفحة</h2>
-            <p className="text-xs text-[var(--mn-text-muted)] leading-relaxed">
+            <p className="text-xs text-[var(--ab-text-muted)] leading-relaxed">
               يرجى إعادة تحميل الصفحة لاستئناف التصفح بشكل سليم.
             </p>
             <button

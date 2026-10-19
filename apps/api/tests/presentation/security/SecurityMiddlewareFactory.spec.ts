@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import { SecurityMiddlewareFactory } from '../../../src/presentation/security/SecurityMiddlewareFactory';
-import { DefaultRateLimiter, SecurityService } from '@manaratak/infrastructure';
+import { DefaultRateLimiter, SecurityService } from '@absheer/infrastructure';
 import { getResponseErrorCode } from '../../support/responsePayload';
 
 function createResponse() {
@@ -25,7 +25,7 @@ function createResponse() {
   };
 }
 
-import { AccessDecision } from '@manaratak/domain';
+import { AccessDecision } from '@absheer/domain';
 
 describe('SecurityMiddlewareFactory production headers', () => {
   it('emits the complete hardened header baseline when CSP is enabled', async () => {
@@ -382,7 +382,7 @@ describe('SecurityMiddlewareFactory CSRF guard middleware', () => {
     const middleware = SecurityMiddlewareFactory.createCsrfGuard(securityService);
 
     for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
-      const req = createMockRequest(method, { Cookie: `manaratak_refresh=${sessionSecret}` });
+      const req = createMockRequest(method, { Cookie: `absheer_refresh=${sessionSecret}` });
       const res = createResponse();
       const next = vi.fn();
 
@@ -417,7 +417,7 @@ describe('SecurityMiddlewareFactory CSRF guard middleware', () => {
 
     for (const token of invalidTokens) {
       const req = createMockRequest('POST', {
-        Cookie: `manaratak_refresh=${sessionSecret}`,
+        Cookie: `absheer_refresh=${sessionSecret}`,
         'X-CSRF-Token': token,
       });
       const res = createResponse();
@@ -441,7 +441,7 @@ describe('SecurityMiddlewareFactory CSRF guard middleware', () => {
 
     for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
       const req = createMockRequest(method, {
-        Cookie: `manaratak_refresh=${sessionSecret}`,
+        Cookie: `absheer_refresh=${sessionSecret}`,
         'X-CSRF-Token': validToken,
       });
       const res = createResponse();
@@ -487,7 +487,7 @@ describe('SecurityMiddlewareFactory CSRF guard middleware', () => {
     const validToken = securityService.generateCsrfToken(sessionSecret);
     const req = createMockRequest(
       'POST',
-      { Cookie: `manaratak_refresh=${sessionSecret}` },
+      { Cookie: `absheer_refresh=${sessionSecret}` },
       { _csrf: validToken },
     );
     req.query = { _csrf: validToken };

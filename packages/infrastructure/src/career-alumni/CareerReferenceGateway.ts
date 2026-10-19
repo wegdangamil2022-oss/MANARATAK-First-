@@ -1,4 +1,4 @@
-import { ICareerReferenceGateway, IReferenceResolutionRepository, IReferenceResolver } from '@manaratak/domain';
+import { ICareerReferenceGateway, IReferenceResolutionRepository, IReferenceResolver } from '@absheer/domain';
 
 const lookup = (value: string) => {
   const v = value.trim();

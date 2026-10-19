@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { AtomicDomainMutationCoordinator } from '../event-foundation/use-cases/AtomicDomainMutationCoordinator';
-import { AssetSecurityClassification } from '@manaratak/domain';
+import { AssetSecurityClassification } from '@absheer/domain';
 import {
   AssetReferencePolicy,
   assertAssetReferenceUsable,
@@ -24,7 +24,7 @@ import {
   StudyDestinationAuthorityDecision,
   StudyDestinationMissingCheck,
   StudyDestinationVerificationStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const activeReference = (
   reference: { isActive: boolean; lifecycleState: string } | null | undefined,

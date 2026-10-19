@@ -1,4 +1,4 @@
-# MANARATAK Platform Disaster Recovery Runbook
+# ABSHEER Platform Disaster Recovery Runbook
 
 ## Authority and objectives
 The machine-readable authority is `config/recovery/production-recovery-contract.json`. The current architecture target is regional-loss **RPO <= 5 minutes**, **RTO <= 60 minutes**, with PostgreSQL PITR available for at least 30 days. Source implementation is complete in W6; provider/database execution evidence is `PENDING_NON_BLOCKING` until the production provider and isolated restore environment are connected.
@@ -12,7 +12,7 @@ The machine-readable authority is `config/recovery/production-recovery-contract.
 1. Freeze writes/traffic using the deployment control plane.
 2. Select the newest valid recovery point before the incident within the 30-day PITR window.
 3. Restore into an isolated disposable target first; never restore destructively over the only surviving copy.
-4. Run `npm run recovery:restore:drill` with `MANARATAK_DATABASE_INTEGRATION_ENABLED=true`. The drill validates every persisted P07-P21 owner, PostgreSQL constraints/transactions, outbox/idempotency/job primitives, and object checksum integrity.
+4. Run `npm run recovery:restore:drill` with `ABSHEER_DATABASE_INTEGRATION_ENABLED=true`. The drill validates every persisted P07-P21 owner, PostgreSQL constraints/transactions, outbox/idempotency/job primitives, and object checksum integrity.
 5. Record the measured RPO/RTO and immutable evidence. Unmet objectives are an operations/release finding.
 
 ## Regional failover / traffic cutover

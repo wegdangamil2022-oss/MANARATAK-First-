@@ -1,4 +1,4 @@
-import { ExtractorType, ExtractionCandidate } from '@manaratak/domain';
+import { ExtractorType, ExtractionCandidate } from '@absheer/domain';
 
 export interface ExtractionSourceContext {
   sourceId: string;

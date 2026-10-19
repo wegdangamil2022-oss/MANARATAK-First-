@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
-import { RetentionOwner, RetentionDisposition } from '@manaratak/domain';
+import { RetentionOwner, RetentionDisposition } from '@absheer/domain';
 import { PrismaRetentionDecisionRepository } from '../../src/retention/PrismaRetentionDecisionRepository';
 
 describe('retention completion versus temporary skip evidence', () => {

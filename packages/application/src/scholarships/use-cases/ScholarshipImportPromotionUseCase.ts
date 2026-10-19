@@ -11,7 +11,7 @@ import {
   ScholarshipVerificationStatus,
   ImportRecordDto,
   ImportRecordStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export type PromotionResult = 
   | { type: 'CREATED'; scholarshipId: string }

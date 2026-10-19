@@ -4,7 +4,7 @@ import {
   type ProgramIntake,
   validateProgramStudy,
   validateProgramIntake,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AtomicDomainMutationCoordinator } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import type { UniversityMutationContext } from './AdminUniversityUseCases';
 export interface ProgramQuery {

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ReferenceLifecycleState } from '@manaratak/domain';
+import { ReferenceLifecycleState } from '@absheer/domain';
 beforeEach(() => { vi.resetModules(); vi.stubGlobal('fetch', vi.fn()); });
 afterEach(() => vi.unstubAllGlobals());
 

@@ -49,10 +49,10 @@ const assetHelper = {
   },
 };
 
-test('MNT-AUD-0058 Service owner use case validates provider/package/pricing/slot invariants', async () => {
+test('ABSH-AUD-0058 Service owner use case validates provider/package/pricing/slot invariants', async () => {
   const { ServiceOperationsUseCases } = loadTsModule(
     'packages/application/src/services-platform/use-cases/ServiceOperationsUseCases.ts',
-    { '@manaratak/domain': serviceDomain, '../../asset-platform/AssetReferencePolicy': assetHelper },
+    { '@absheer/domain': serviceDomain, '../../asset-platform/AssetReferencePolicy': assetHelper },
   );
   const services = new Map([
     ['svc-1', { id:'svc-1', status:'PUBLISHED' }],
@@ -84,10 +84,10 @@ test('MNT-AUD-0058 Service owner use case validates provider/package/pricing/slo
   assert.equal(captured.booking.items[0].serviceId, 'svc-1');
 });
 
-test('MNT-AUD-0058 Prisma booking transaction rechecks authority and consumes discount with optimistic CAS', async () => {
+test('ABSH-AUD-0058 Prisma booking transaction rechecks authority and consumes discount with optimistic CAS', async () => {
   const { PrismaServiceOperationsRepository } = loadTsModule(
     'packages/infrastructure/src/services-platform/PrismaServiceOperationsRepository.ts',
-    { '@manaratak/domain': serviceDomain, '@prisma/client': {} },
+    { '@absheer/domain': serviceDomain, '@prisma/client': {} },
   );
   const future = new Date(Date.now()+60000); const later = new Date(Date.now()+120000);
   let discountUpdates = 0; let created = 0;
@@ -117,10 +117,10 @@ test('MNT-AUD-0058 Prisma booking transaction rechecks authority and consumes di
   assert.equal(booking.id,'booking'); assert.equal(discountUpdates,1); assert.equal(created,1);
 });
 
-test('MNT-AUD-0058 exhausted discount fails before booking creation', async () => {
+test('ABSH-AUD-0058 exhausted discount fails before booking creation', async () => {
   const { PrismaServiceOperationsRepository } = loadTsModule(
     'packages/infrastructure/src/services-platform/PrismaServiceOperationsRepository.ts',
-    { '@manaratak/domain': serviceDomain, '@prisma/client': {} },
+    { '@absheer/domain': serviceDomain, '@prisma/client': {} },
   );
   const future = new Date(Date.now()+60000), later = new Date(Date.now()+120000);
   let created=0;
@@ -143,8 +143,8 @@ const CareerProfileVisibility={PRIVATE:'PRIVATE',PLATFORM:'PLATFORM',PUBLIC:'PUB
 const AlumniProfileVisibility={PRIVATE:'PRIVATE',ALUMNI_ONLY:'ALUMNI_ONLY',PUBLIC:'PUBLIC'};
 const careerDomain={AssetSecurityClassification:{PRIVATE:'PRIVATE'},CareerApplicationStatus,CareerJobStatus,CareerProfileVisibility,AlumniProfileVisibility};
 
-test('MNT-AUD-0055 career profile/application enforce active student and P05-owned CV/resume', async()=>{
-  const { CareerEngagementUseCases }=loadTsModule('packages/application/src/career-alumni/use-cases/CareerEngagementUseCases.ts',{'@manaratak/domain':careerDomain,'../../asset-platform/AssetReferencePolicy':assetHelper});
+test('ABSH-AUD-0055 career profile/application enforce active student and P05-owned CV/resume', async()=>{
+  const { CareerEngagementUseCases }=loadTsModule('packages/application/src/career-alumni/use-cases/CareerEngagementUseCases.ts',{'@absheer/domain':careerDomain,'../../asset-platform/AssetReferencePolicy':assetHelper});
   const assetChecks=[];
   const policy={assertUsable:async(id,o)=>assetChecks.push([id,o])};
   const students={assertActiveStudent:async(id)=>{if(id!=='student-1')throw new Error('CAREER_STUDENT_NOT_ACTIVE');}};
@@ -167,8 +167,8 @@ test('MNT-AUD-0055 career profile/application enforce active student and P05-own
   assert.equal(assetChecks.at(-1)[1].expectedOwnerId,'student-1');
 });
 
-test('MNT-AUD-0055 alumni non-private visibility requires self-owned consent evidence', async()=>{
-  const { CareerEngagementUseCases }=loadTsModule('packages/application/src/career-alumni/use-cases/CareerEngagementUseCases.ts',{'@manaratak/domain':careerDomain,'../../asset-platform/AssetReferencePolicy':assetHelper});
+test('ABSH-AUD-0055 alumni non-private visibility requires self-owned consent evidence', async()=>{
+  const { CareerEngagementUseCases }=loadTsModule('packages/application/src/career-alumni/use-cases/CareerEngagementUseCases.ts',{'@absheer/domain':careerDomain,'../../asset-platform/AssetReferencePolicy':assetHelper});
   const students={assertActiveStudent:async()=>{}}; const career={}; let saved;
   const engagement={findAlumniProfile:async()=>null,upsertAlumniProfile:async(v)=>{saved=v;return {id:'a',...v,version:1,createdAt:new Date(),updatedAt:new Date()}}};
   const uc=new CareerEngagementUseCases(career,engagement,students,{assertUsable:async()=>{}});
@@ -178,8 +178,8 @@ test('MNT-AUD-0055 alumni non-private visibility requires self-owned consent evi
   assert.equal(saved.consentGrantedBy,'s1'); assert.equal(saved.consentSource,'student-ui'); assert.equal(saved.consentRevokedAt,null);
 });
 
-test('MNT-AUD-0055 application lifecycle rejects invalid transitions and fences version', async()=>{
-  const { CareerEngagementUseCases }=loadTsModule('packages/application/src/career-alumni/use-cases/CareerEngagementUseCases.ts',{'@manaratak/domain':careerDomain,'../../asset-platform/AssetReferencePolicy':assetHelper});
+test('ABSH-AUD-0055 application lifecycle rejects invalid transitions and fences version', async()=>{
+  const { CareerEngagementUseCases }=loadTsModule('packages/application/src/career-alumni/use-cases/CareerEngagementUseCases.ts',{'@absheer/domain':careerDomain,'../../asset-platform/AssetReferencePolicy':assetHelper});
   let updated;
   const engagement={findApplication:async()=>({id:'app',studentReferenceId:'s',status:'SUBMITTED',version:2}),updateApplicationStatus:async(id,status,input)=>{updated={id,status,input};return {...updated,version:3}}};
   const uc=new CareerEngagementUseCases({},engagement,{assertActiveStudent:async()=>{}},{assertUsable:async()=>{}});

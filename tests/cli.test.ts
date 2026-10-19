@@ -7,7 +7,7 @@ const mockPrisma = {
 };
 
 // We need to mock the awilix container which is imported in the script
-vi.mock('@manaratak/api/src/di/container', () => {
+vi.mock('@absheer/api/src/di/container', () => {
   return {
     container: {
       resolve: vi.fn((key) => {

@@ -1,4 +1,4 @@
-import { AssetRetentionCategory } from '@manaratak/domain';
+import { AssetRetentionCategory } from '@absheer/domain';
 
 export class AssetValidator {
   private static readonly ALLOWED_MIME_TYPES = new Set([

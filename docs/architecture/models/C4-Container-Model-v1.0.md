@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-This document defines the Level 2 (Container) architecture for MANARATAK 2.0.
+This document defines the Level 2 (Container) architecture for ABSHEER 2.0.
 
 ## 2. Diagram Description
 

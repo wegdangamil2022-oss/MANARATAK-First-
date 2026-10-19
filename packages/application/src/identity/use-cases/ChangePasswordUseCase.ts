@@ -1,5 +1,5 @@
-import type { IPrincipalAccessValidator } from '@manaratak/core';
-import type { IPasswordCredentialRepository } from '@manaratak/domain';
+import type { IPrincipalAccessValidator } from '@absheer/core';
+import type { IPasswordCredentialRepository } from '@absheer/domain';
 import { assertPasswordPolicy } from './PasswordPolicy';
 
 export class ChangePasswordUseCase {

@@ -1,4 +1,4 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-3 Prevent Reimplementation of Core Foundations
 # Phase 1 — Discovery Addendum: Architectural Root Cause Analysis
 

@@ -1,4 +1,4 @@
-import type { InternationalTestDto } from '@manaratak/domain';
+import type { InternationalTestDto } from '@absheer/domain';
 
 type TestRelationships = Pick<InternationalTestDto, 'countryRelationships' | 'languageRelationships' | 'academicTaxonomyRelationships' | 'degreeRelationships'>;
 

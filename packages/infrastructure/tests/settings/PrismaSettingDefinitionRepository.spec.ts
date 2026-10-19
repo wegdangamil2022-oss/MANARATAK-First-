@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PrismaSettingDefinitionRepository } from '../../src/settings/PrismaSettingDefinitionRepository';
-import { SettingDefinition, NamespacedKey, ValueType } from '@manaratak/domain';
+import { SettingDefinition, NamespacedKey, ValueType } from '@absheer/domain';
 
 describe('PrismaSettingDefinitionRepository', () => {
   let mockPrisma: any;

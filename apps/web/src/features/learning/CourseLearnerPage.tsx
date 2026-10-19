@@ -217,22 +217,22 @@ export function CourseLearnerPage() {
 
   if (loading)
     return (
-      <div className="mn-page-shell grid min-h-[50vh] place-items-center">
+      <div className="ab-page-shell grid min-h-[50vh] place-items-center">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
   if (authRequired)
     return (
-      <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
-        <LockKeyhole className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
+      <main dir="rtl" className="ab-page-shell mx-auto max-w-xl py-16 text-center">
+        <LockKeyhole className="mx-auto h-10 w-10 text-[var(--ab-primary)]" />
         <h1 className="mt-4 text-xl font-bold">سجّل الدخول لمتابعة التعلم</h1>
-        <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
+        <p className="mt-2 text-sm text-[var(--ab-text-muted)]">
           سيتم الاحتفاظ بمسار هذه الدورة والعودة إليه بعد تسجيل الدخول.
         </p>
         <Link
           to={loginPath}
           onClick={() => preservePostLoginReturn(returnPath)}
-          className="mt-6 inline-flex rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white"
+          className="mt-6 inline-flex rounded-xl bg-[var(--ab-primary)] px-5 py-3 font-bold text-white"
         >
           تسجيل الدخول
         </Link>
@@ -241,21 +241,21 @@ export function CourseLearnerPage() {
 
   if (!workspace)
     return (
-      <main dir="rtl" className="mn-page-shell mx-auto max-w-xl py-16 text-center">
-        <BookOpen className="mx-auto h-10 w-10 text-[var(--mn-primary)]" />
-        <h1 className="mt-4 text-xl font-bold">{enrollmentRequired ? 'ابدأ هذه الدورة على منارتك' : 'تعذر فتح مساحة التعلم'}</h1>
-        <p className="mt-2 text-sm text-[var(--mn-text-muted)]">
+      <main dir="rtl" className="ab-page-shell mx-auto max-w-xl py-16 text-center">
+        <BookOpen className="mx-auto h-10 w-10 text-[var(--ab-primary)]" />
+        <h1 className="mt-4 text-xl font-bold">{enrollmentRequired ? 'ابدأ هذه الدورة على أبشر' : 'تعذر فتح مساحة التعلم'}</h1>
+        <p className="mt-2 text-sm text-[var(--ab-text-muted)]">
           التسجيل والتقدم والاختبارات تُدار من نظام التعلم الداخلي.
         </p>
         {error && (
-          <p role="alert" className="mt-4 text-sm text-[var(--mn-danger-text)]">
+          <p role="alert" className="mt-4 text-sm text-[var(--ab-danger-text)]">
             {error}
           </p>
         )}
         <button
           disabled={busy}
           onClick={() => enrollmentRequired ? void enroll() : void load()}
-          className="mt-6 rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white disabled:opacity-60"
+          className="mt-6 rounded-xl bg-[var(--ab-primary)] px-5 py-3 font-bold text-white disabled:opacity-60"
         >
           {busy ? 'جارٍ التسجيل...' : enrollmentRequired ? 'التسجيل في الدورة' : 'إعادة المحاولة'}
         </button>
@@ -264,18 +264,18 @@ export function CourseLearnerPage() {
 
   const progress = workspace.progress.enrollment.progressPercentage;
   return (
-    <main dir="rtl" className="mn-page-shell mx-auto max-w-4xl space-y-5 py-8">
-      <section className="mn-card rounded-3xl p-5 sm:p-7">
+    <main dir="rtl" className="ab-page-shell mx-auto max-w-4xl space-y-5 py-8">
+      <section className="ab-card rounded-3xl p-5 sm:p-7">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-[var(--mn-secondary)]">مساحة التعلم</p>
-            <h1 className="mt-1 text-2xl font-bold">دورة منارتك</h1>
+            <p className="text-xs font-semibold text-[var(--ab-secondary)]">مساحة التعلم</p>
+            <h1 className="mt-1 text-2xl font-bold">دورة أبشر</h1>
           </div>
-          <span className="rounded-full bg-[var(--mn-gold-surface)] px-3 py-1 text-sm font-bold">
+          <span className="rounded-full bg-[var(--ab-gold-surface)] px-3 py-1 text-sm font-bold">
             {progress}%
           </span>
         </div>
-        <progress className="mn-native-progress mt-4 h-2 w-full" value={progress} max={100} />
+        <progress className="ab-native-progress mt-4 h-2 w-full" value={progress} max={100} />
       </section>
 
       {[...workspace.curriculum.modules, ...(workspace.curriculum.quizzes.some(quiz => !quiz.moduleId) ?
@@ -289,10 +289,10 @@ export function CourseLearnerPage() {
             .filter((quiz) => module.id === '__course_assessments' ? !quiz.moduleId : quiz.moduleId === module.id)
             .sort((a, b) => a.position - b.position);
           return (
-            <section key={module.id} className="mn-card rounded-3xl p-5 sm:p-6">
+            <section key={module.id} className="ab-card rounded-3xl p-5 sm:p-6">
               <h2 className="text-lg font-bold">{module.title}</h2>
               {module.description && (
-                <p className="mt-2 text-sm text-[var(--mn-text-muted)]">{module.description}</p>
+                <p className="mt-2 text-sm text-[var(--ab-text-muted)]">{module.description}</p>
               )}
               <div className="mt-4 space-y-3">
                 {lessons.map((lesson) => {
@@ -300,21 +300,21 @@ export function CourseLearnerPage() {
                   return (
                     <article
                       key={lesson.id}
-                      className="rounded-2xl border border-[var(--mn-border)] p-4"
+                      className="rounded-2xl border border-[var(--ab-border)] p-4"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <h3 className="font-bold">{lesson.title}</h3>
                           {lesson.summary && (
-                            <p className="mt-1 text-sm text-[var(--mn-text-muted)]">
+                            <p className="mt-1 text-sm text-[var(--ab-text-muted)]">
                               {lesson.summary}
                             </p>
                           )}
                         </div>
                         {done ? (
-                          <CheckCircle2 className="h-5 w-5 text-[var(--mn-success-text)]" />
+                          <CheckCircle2 className="h-5 w-5 text-[var(--ab-success-text)]" />
                         ) : (
-                          <PlayCircle className="h-5 w-5 text-[var(--mn-secondary)]" />
+                          <PlayCircle className="h-5 w-5 text-[var(--ab-secondary)]" />
                         )}
                       </div>
                       {lesson.contentText && (
@@ -346,7 +346,7 @@ export function CourseLearnerPage() {
                         <button
                           disabled={busy}
                           onClick={() => void completeLesson(lesson.id)}
-                          className="mt-4 rounded-xl border border-[var(--mn-border)] px-4 py-2 text-sm font-bold disabled:opacity-60"
+                          className="mt-4 rounded-xl border border-[var(--ab-border)] px-4 py-2 text-sm font-bold disabled:opacity-60"
                         >
                           تحديد الدرس كمكتمل
                         </button>
@@ -357,7 +357,7 @@ export function CourseLearnerPage() {
                 {quizzes.map((quiz) => (
                   <article
                     key={quiz.id}
-                    className="rounded-2xl border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] p-4"
+                    className="rounded-2xl border border-[var(--ab-border-gold)] bg-[var(--ab-gold-surface)] p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div>
@@ -376,7 +376,7 @@ export function CourseLearnerPage() {
                       <button
                         disabled={busy}
                         onClick={() => void startQuiz(quiz.id)}
-                        className="mt-4 rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+                        className="mt-4 rounded-xl bg-[var(--ab-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
                       >
                         {quiz.assessmentType === 'ASSIGNMENT' ? 'بدء الواجب' : 'بدء الاختبار'}
                       </button>
@@ -392,7 +392,7 @@ export function CourseLearnerPage() {
                           return (
                             <fieldset
                               key={question.id}
-                              className="rounded-xl bg-[var(--mn-surface)] p-3"
+                              className="rounded-xl bg-[var(--ab-surface)] p-3"
                             >
                               <legend className="font-bold">{question.prompt}</legend>
                               {choices.length ? (
@@ -423,7 +423,7 @@ export function CourseLearnerPage() {
                                 <textarea
                                   aria-label={question.prompt}
                                   maxLength={10000}
-                                  className="mn-search-control mt-2 w-full"
+                                  className="ab-search-control mt-2 w-full"
                                   required
                                   onChange={(event) =>
                                     setAnswers((value) => ({
@@ -439,7 +439,7 @@ export function CourseLearnerPage() {
                         <button
                           disabled={busy}
                           type="submit"
-                          className="rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
+                          className="rounded-xl bg-[var(--ab-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-60"
                         >
                           إرسال الإجابات
                         </button>
@@ -453,7 +453,7 @@ export function CourseLearnerPage() {
         })}
 
       {media && (
-        <section className="rounded-2xl border bg-[var(--mn-surface)] p-4">
+        <section className="rounded-2xl border bg-[var(--ab-surface)] p-4">
           <div className="flex justify-between gap-3">
             <h2 className="font-bold">{media.title}</h2>
             <button onClick={() => setMedia(null)}>إغلاق المحتوى</button>
@@ -470,22 +470,22 @@ export function CourseLearnerPage() {
       {error && (
         <p
           role="alert"
-          className="rounded-xl bg-[var(--mn-danger-soft)] p-4 text-sm text-[var(--mn-danger-text)]"
+          className="rounded-xl bg-[var(--ab-danger-soft)] p-4 text-sm text-[var(--ab-danger-text)]"
         >
           {error}
         </p>
       )}
       {workspace.progress.completion && (
-        <section className="mn-card rounded-2xl p-5 text-center">
+        <section className="ab-card rounded-2xl p-5 text-center">
           <h2 className="font-bold">اكتملت الدورة</h2>
           <p className="mt-2 text-sm">
             {workspace.progress.completion.eligibleForCertificate
-              ? 'تُجهز شهادة منارتك بعد التحقق من الاستحقاق. ستظهر في حسابك عند اكتمال الإصدار.'
+              ? 'تُجهز شهادة أبشر بعد التحقق من الاستحقاق. ستظهر في حسابك عند اكتمال الإصدار.'
               : 'لم يسجل النظام استحقاق شهادة لهذه الدورة.'}
           </p>
           <Link
             to={`/${locale}/student?tab=LEARNING#certificates`}
-            className="mt-3 inline-block text-[var(--mn-secondary)] underline"
+            className="mt-3 inline-block text-[var(--ab-secondary)] underline"
           >
             عرض شهاداتي في حساب الطالب
           </Link>
@@ -495,7 +495,7 @@ export function CourseLearnerPage() {
         <button
           disabled={busy || progress < 100 || !!workspace.progress.completion}
           onClick={() => void completeCourse()}
-          className="rounded-xl bg-[var(--mn-primary)] px-5 py-3 font-bold text-white disabled:opacity-50"
+          className="rounded-xl bg-[var(--ab-primary)] px-5 py-3 font-bold text-white disabled:opacity-50"
         >
           إنهاء الدورة والتحقق من الاستحقاق
         </button>

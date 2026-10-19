@@ -83,10 +83,10 @@ function parseMarkdownFile(filePath: string, level: string, kind: string, prefix
 async function verifyOrGenerateIndex() {
   const catalogsDir = path.join(process.cwd(), 'workspace/phase-10-major-catalogs');
   
-  const bacFile = path.join(catalogsDir, 'MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md');
-  const masFile = path.join(catalogsDir, 'MANARATAK_Master_Specializations_By_Academic_Fields_v1.0.md');
-  const docFile = path.join(catalogsDir, 'MANARATAK_Doctoral_Specializations_By_Academic_Fields_v1.0.md');
-  const felFile = path.join(catalogsDir, 'MANARATAK_Fellowships_By_Professional_Domains_v1.0.md');
+  const bacFile = path.join(catalogsDir, 'ABSHEER_Bachelor_Majors_By_Colleges_v1.0.md');
+  const masFile = path.join(catalogsDir, 'ABSHEER_Master_Specializations_By_Academic_Fields_v1.0.md');
+  const docFile = path.join(catalogsDir, 'ABSHEER_Doctoral_Specializations_By_Academic_Fields_v1.0.md');
+  const felFile = path.join(catalogsDir, 'ABSHEER_Fellowships_By_Professional_Domains_v1.0.md');
   
   const items: CatalogItem[] = [];
   

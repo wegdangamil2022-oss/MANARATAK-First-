@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { IController } from '@manaratak/core';
+import { IController } from '@absheer/core';
 
 export class ExpressAdapter {
   public static adapt(controller: IController<any, any>) {

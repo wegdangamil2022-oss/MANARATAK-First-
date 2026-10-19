@@ -1,10 +1,10 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # Enterprise Baseline Propagation Review
 # Transactional Outbox Baseline Adoption
 # Architecture Consistency Assessment
 
 ## 1. Executive Summary
-Following the official adoption of the Enterprise Transactional Outbox Program (P0-4) into the MANARATAK 2.0 Enterprise Architecture Baseline, the Architecture Review Board (ARB) has conducted a comprehensive consistency assessment. This review aims to identify all legacy references to direct, synchronous event publishing across Phase 07 through Phase 13 documentation. The findings indicate widespread legacy documentation that explicitly directs developers to use `IPublisher` and inline dispatching within database transactions, violating the newly adopted Outbox specification.
+Following the official adoption of the Enterprise Transactional Outbox Program (P0-4) into the ABSHEER 2.0 Enterprise Architecture Baseline, the Architecture Review Board (ARB) has conducted a comprehensive consistency assessment. This review aims to identify all legacy references to direct, synchronous event publishing across Phase 07 through Phase 13 documentation. The findings indicate widespread legacy documentation that explicitly directs developers to use `IPublisher` and inline dispatching within database transactions, violating the newly adopted Outbox specification.
 
 ## 2. Overall Consistency Score
 - **Phase 07:** Non-compliant.

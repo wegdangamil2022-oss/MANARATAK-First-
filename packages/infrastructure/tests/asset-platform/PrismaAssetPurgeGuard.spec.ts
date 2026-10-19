@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AssetId } from '@manaratak/domain';
+import { AssetId } from '@absheer/domain';
 import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAssetRecordRepository';
 
 const fixed = new Date('2026-10-09T00:00:00.000Z');

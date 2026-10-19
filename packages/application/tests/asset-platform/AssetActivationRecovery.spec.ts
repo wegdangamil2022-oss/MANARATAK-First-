@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AssetLifecycleState, AssetRecord, IAssetRecordRepository } from '@manaratak/domain';
+import { AssetLifecycleState, AssetRecord, IAssetRecordRepository } from '@absheer/domain';
 import { RecoverAssetActivationsUseCase } from '../../src/asset-platform/use-cases/RecoverAssetActivationsUseCase';
 import { BackgroundJobHandlerRegistry } from '../../src/background-jobs/workers/BackgroundJobHandlerRegistry';
 import { DurableBackgroundWorker, BackgroundWorkerRuntimeState } from '../../src/background-jobs/workers/DurableBackgroundWorker';

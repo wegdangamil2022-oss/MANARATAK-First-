@@ -5,7 +5,7 @@ import {
   AssetId, AssetRecord, AssetReference, AssetOwnerReference, AssetMetadata,
   AssetStorageLocator, AssetChecksum, AssetSanitizationMetadata, AssetRetentionMetadata,
   AssetRetentionCategory, AssetLifecycleState, AssetSecurityClassification, AssetStorageZone,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AssetReuseRouter } from '../../../../src/presentation/api/router/AssetReuseRouter';
 import { SecurityMiddlewareFactory } from '../../../../src/presentation/security/SecurityMiddlewareFactory';
 

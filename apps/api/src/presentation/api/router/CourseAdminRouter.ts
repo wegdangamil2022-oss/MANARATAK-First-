@@ -1,4 +1,4 @@
-import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@manaratak/application';
+import type {CourseAdminScope, CourseAdminContext, CourseAdminCommandUseCases} from '@absheer/application';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import {
@@ -11,8 +11,8 @@ import {
   CourseStatus,
   LessonAssetType,
   UpdateCourseDto
-} from '@manaratak/domain';
-import type { CourseProgressUseCases } from '@manaratak/application';
+} from '@absheer/domain';
+import type { CourseProgressUseCases } from '@absheer/application';
 import type {} from '../../middleware/AuthMiddleware.js';
 
 export class CourseAdminRouter {
@@ -643,7 +643,7 @@ export class CourseAdminRouter {
     router.post('/:id/mark-ready', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases, nativeCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
-      if (course.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) await nativeCourseUseCases.markReadyToReview(req.params.id);
+      if (course.originType === CourseOriginType.NATIVE_ABSHEER_COURSE) await nativeCourseUseCases.markReadyToReview(req.params.id);
       else await adminCourseUseCases.markReadyToReview(req.params.id);
       res.status(200).json({ success: true });
     }));
@@ -651,7 +651,7 @@ export class CourseAdminRouter {
     router.post('/:id/mark-publishable', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases, nativeCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
-      if (course.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) await nativeCourseUseCases.markReadyToPublish(req.params.id);
+      if (course.originType === CourseOriginType.NATIVE_ABSHEER_COURSE) await nativeCourseUseCases.markReadyToPublish(req.params.id);
       else await adminCourseUseCases.markReadyToPublish(req.params.id);
       res.status(200).json({ success: true });
     }));
@@ -659,7 +659,7 @@ export class CourseAdminRouter {
     router.post('/:id/publish', asyncHandler(async (req: Request, res: Response, scope: CourseAdminScope) => {
       const {adminCourseUseCases, nativeCourseUseCases}=scope;
       const course = await adminCourseUseCases.getCourse(req.params.id);
-      if (course.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) await nativeCourseUseCases.publish(req.params.id, mutationContext(req));
+      if (course.originType === CourseOriginType.NATIVE_ABSHEER_COURSE) await nativeCourseUseCases.publish(req.params.id, mutationContext(req));
       else await adminCourseUseCases.publish(req.params.id, mutationContext(req));
       res.status(200).json({ success: true });
     }));

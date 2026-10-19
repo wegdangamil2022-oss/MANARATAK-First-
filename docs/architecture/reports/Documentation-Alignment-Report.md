@@ -13,7 +13,7 @@ The following documents were automatically updated to align with the Enterprise 
 - `docs/architecture/reviews/Contract-Freeze-Review-v1.0.md`
 - `docs/architecture/reviews/Architecture-Freeze-Review-v1.0.md`
 - `docs/architecture/reports/outbox-discovery-assessment.md`
-- `docs/governance/blueprint/MANARATAK-2.0-Master-Blueprint.md`
+- `docs/governance/blueprint/ABSHEER-2.0-Master-Blueprint.md`
 
 ## Terms Replaced
 As identified in the Semantic Terminology Review, the following terms were safely updated:

@@ -1,4 +1,4 @@
-import { CourseCompletedEventPayload } from '@manaratak/domain';
+import { CourseCompletedEventPayload } from '@absheer/domain';
 import { ICourseCompletionEventPublisher } from './ICourseCompletionEventPublisher';
 
 /**

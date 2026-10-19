@@ -10,7 +10,7 @@ import {
   ICourseImportAnalysisRepository,
   InitialCourseSourceUrlInput,
   UpsertCourseImportAnalysisInput,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 function toInputJson(value: Record<string, unknown> | undefined): Prisma.InputJsonObject | undefined {
   if (value === undefined) return undefined;

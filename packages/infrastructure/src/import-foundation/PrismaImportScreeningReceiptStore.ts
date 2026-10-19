@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
-import type { UniversalImportHandoff } from '@manaratak/domain';
-import type { IImportScreeningReceiptStore } from '@manaratak/application';
+import type { UniversalImportHandoff } from '@absheer/domain';
+import type { IImportScreeningReceiptStore } from '@absheer/application';
 
 function canonical(value: unknown): unknown {
   if (value instanceof Date) return value.toISOString();

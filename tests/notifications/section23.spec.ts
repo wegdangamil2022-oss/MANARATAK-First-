@@ -26,7 +26,7 @@ import {
   NotificationReference,
   NotificationRecipientReference,
   TemplateVariable,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 const candidate = () => ({
   id: 'n1',
   reference: 'admin:n1',

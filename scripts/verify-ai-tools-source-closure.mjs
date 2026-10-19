@@ -89,7 +89,7 @@ const checks = {
   ai_admin_brand_identity: /#142B5F/.test(aiAdmin) && /#0E7C86/.test(aiAdmin),
   tools_admin_brand_identity: /#142B5F/.test(toolsAdmin) && /#0E7C86/.test(toolsAdmin),
   ai_admin_runtime_pending_semantics: /RUNTIME_PENDING/.test(aiAdmin),
-  execution_page_brand_identity: /var\(--mn-primary\)/.test(executionPage) && /var\(--mn-secondary\)/.test(executionPage) && /var\(--mn-border-gold\)/.test(executionPage),
+  execution_page_brand_identity: /var\(--ab-primary\)/.test(executionPage) && /var\(--ab-secondary\)/.test(executionPage) && /var\(--ab-border-gold\)/.test(executionPage),
   no_fake_success_ui_copy: !/fake success|simulated execution|mock health/i.test(aiAdmin + toolsAdmin + executionPage),
 };
 

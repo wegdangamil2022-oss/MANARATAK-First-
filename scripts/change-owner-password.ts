@@ -42,8 +42,8 @@ async function main() {
     }
 
     const setCookies = loginRes.headers.getSetCookie();
-    const accessCookie = setCookies.find(c => c.startsWith('manaratak_access='))?.split(';')[0];
-    const refreshCookie = setCookies.find(c => c.startsWith('manaratak_refresh='))?.split(';')[0];
+    const accessCookie = setCookies.find(c => c.startsWith('absheer_access='))?.split(';')[0];
+    const refreshCookie = setCookies.find(c => c.startsWith('absheer_refresh='))?.split(';')[0];
 
     if (!accessCookie || !refreshCookie) {
       throw new Error('Required cookies not found in login response.');
@@ -157,8 +157,8 @@ async function main() {
     }
 
     const newCookies = newLoginRes.headers.getSetCookie();
-    const newAccessCookie = newCookies.find(c => c.startsWith('manaratak_access='))?.split(';')[0];
-    const newRefreshCookie = newCookies.find(c => c.startsWith('manaratak_refresh='))?.split(';')[0];
+    const newAccessCookie = newCookies.find(c => c.startsWith('absheer_access='))?.split(';')[0];
+    const newRefreshCookie = newCookies.find(c => c.startsWith('absheer_refresh='))?.split(';')[0];
     const newAuthCookies = `${newAccessCookie}; ${newRefreshCookie}`;
     console.log('[Step 6] Login with new password successful.');
 

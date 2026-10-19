@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { StudentSavedItemType, StudentWorkspaceStatus } from '@manaratak/domain';
+import { StudentSavedItemType, StudentWorkspaceStatus } from '@absheer/domain';
 import { PrismaStudentWorkspaceRepository } from '../../src/students/PrismaStudentWorkspaceRepository';
 
 const workspace = {

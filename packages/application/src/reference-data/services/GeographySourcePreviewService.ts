@@ -1,4 +1,4 @@
-import { normalizeReferenceIdentityToken } from '@manaratak/domain';
+import { normalizeReferenceIdentityToken } from '@absheer/domain';
 
 export interface RegionSourceRecord extends Record<string, unknown> {
   regionId?: unknown; countryIso2?: unknown; regionCode?: unknown; nameEn?: unknown;

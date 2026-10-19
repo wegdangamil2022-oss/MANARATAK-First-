@@ -32,8 +32,8 @@ import {
   PublicationReadinessError,
   TaxonomyMappedMajorDto,
   UpdateMajorDto
-} from '@manaratak/domain';
-import { assertNoTranslationPayloadFields } from '@manaratak/shared';
+} from '@absheer/domain';
+import { assertNoTranslationPayloadFields } from '@absheer/shared';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { CanonicalMajorReferenceService } from '../services/CanonicalMajorReferenceService';
 
@@ -187,7 +187,7 @@ export class AdminMajorUseCases {
         canonicalMajorName: input.canonicalMajorName.trim(),
         degreeLevel: resolvedLevel,
         degreeLevelId,
-        sourceClassificationSystem: 'MANARATAK_DISCOVERY_QUEUE',
+        sourceClassificationSystem: 'ABSHEER_DISCOVERY_QUEUE',
         academicFieldOrDiscipline: input.academicFieldOrDiscipline || undefined,
         officialSourceUrl: input.officialSourceUrl || sourceUrl,
         sourceUrl: input.sourceUrl || sourceUrl,
@@ -241,7 +241,7 @@ export class AdminMajorUseCases {
         disciplineId: input.disciplineId ?? null,
         optionalFields: {
           degreeLevel: resolvedLevel,
-          sourceClassificationSystem: 'MANARATAK_DISCOVERY_QUEUE',
+          sourceClassificationSystem: 'ABSHEER_DISCOVERY_QUEUE',
           academicFieldOrDiscipline: input.academicFieldOrDiscipline ?? undefined,
           classificationCode,
           sourceUrl: input.sourceUrl ?? sourceUrl,
@@ -352,7 +352,7 @@ export class AdminMajorUseCases {
     });
   }
 
-  private assertCandidateReview(candidate: import('@manaratak/domain').NewMajorCandidateDto,context?:MajorMutationContext):void {
+  private assertCandidateReview(candidate: import('@absheer/domain').NewMajorCandidateDto,context?:MajorMutationContext):void {
     if(!context?.expectedSourceDigest || context.expectedSourceDigest!==candidate.sourceDigest) throw new Error('NEW_MAJOR_CANDIDATE_STALE_SOURCE');
     if(candidate.sourcesTruncated) throw new Error('NEW_MAJOR_CANDIDATE_SOURCE_LIMIT_REVIEW_REQUIRED');
   }
@@ -643,7 +643,7 @@ export class AdminMajorUseCases {
       resolvedLevel: MajorLevel; degreeLevelId: string; canonicalName: string;
       localizedNameAr?: string | null; localizedNameEn?: string | null;
       academicFieldId?: string | null; disciplineId?: string | null;
-      candidateKey: string; sourceCount: number; sourceDigest:string; evidence:import('@manaratak/domain').NewMajorCandidateDto;
+      candidateKey: string; sourceCount: number; sourceDigest:string; evidence:import('@absheer/domain').NewMajorCandidateDto;
     },
   ): Promise<{ created: boolean; code?: string | null }> {
     const profiles = repository.listLevelProfiles ? await repository.listLevelProfiles(major.id) : (major.profiles ?? []);

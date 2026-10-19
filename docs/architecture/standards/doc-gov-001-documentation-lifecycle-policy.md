@@ -7,11 +7,11 @@
 - **Owner:** Architecture Review Board (ARB)
 
 ## 1. Purpose
-The purpose of this Documentation Lifecycle Policy is to establish a rigorous, standardized, and enforceable enterprise-wide framework governing the lifecycle of every official project document within the MANARATAK 2.0 ecosystem. It ensures that all documentation remains accurate, traceable, and aligned with architectural goals from creation through retirement.
+The purpose of this Documentation Lifecycle Policy is to establish a rigorous, standardized, and enforceable enterprise-wide framework governing the lifecycle of every official project document within the ABSHEER 2.0 ecosystem. It ensures that all documentation remains accurate, traceable, and aligned with architectural goals from creation through retirement.
 
 ## 2. Scope
 This policy applies to:
-- All Phases of the MANARATAK 2.0 project
+- All Phases of the ABSHEER 2.0 project
 - All Architecture Documents (Blueprints, Master Plans)
 - All Architecture Decision Records (ADRs)
 - All Standards and Guidelines
@@ -139,7 +139,7 @@ All formal documents must follow Semantic Versioning (SemVer) principles:
 - **Patch (0.0.X):** Typo corrections, formatting fixes, or minor clarifications. Does not require full ARB review.
 - **Baseline Versions:** All baselined documents must be locked to a specific Major/Minor version.
 - **Relationship with ADRs:** Documents modified due to an ADR must bump their Minor or Major version and explicitly reference the ADR ID.
-- **Relationship with Architecture Version:** Document versions must be explicitly mapped to the overarching MANARATAK 2.0 Architecture Version they support.
+- **Relationship with Architecture Version:** Document versions must be explicitly mapped to the overarching ABSHEER 2.0 Architecture Version they support.
 
 ## 9. Document Traceability
 Every document must maintain strict traceability through its metadata header:

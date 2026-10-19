@@ -7,7 +7,7 @@ import {
   ScholarshipVerificationStatus,
   UpdateScholarshipDto,
   type IScholarshipRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   AdminScholarshipUseCases,
   ManageAuditRecordsUseCase,
@@ -23,7 +23,7 @@ import {
   type IScholarshipImportAtomicGateway,
   type IScholarshipImportCenterGateway,
   type ScholarshipImportOperationalClass,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 export class ScholarshipAdminRouter {
   public static create(cradle: {

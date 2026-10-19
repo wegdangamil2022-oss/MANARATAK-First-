@@ -38,7 +38,7 @@ try {
     });
     const universities = page.locator('#featured-universities-section');
     const courses = page.locator('#featured-courses-section');
-    const nativeText = locale === 'ar' ? 'دورات منارتك' : 'Manaratak Courses';
+    const nativeText = locale === 'ar' ? 'دورات أبشر' : 'Absheer Courses';
     const retryText = locale === 'ar' ? 'إعادة المحاولة' : 'Try again';
     const state = (section, value) => section.locator(`[data-catalog-state="${value}"]`).waitFor({ state: 'visible', timeout: 10000 });
     const slots = async (section, kind) => assert.equal(await section.locator(`[data-catalog-slot="${kind}"]`).count(), 3);
@@ -68,7 +68,7 @@ try {
     await slots(universities, 'universities'); await slots(courses, 'courses');
     mode = 'ready'; await universities.getByRole('button', { name: retryText, exact: true }).click();
     await universities.getByText(university.displayName, { exact: false }).first().waitFor();
-    await courses.getByText('Published Fixture NATIVE_MANARATAK_COURSE', { exact: true }).waitFor();
+    await courses.getByText('Published Fixture NATIVE_ABSHEER_COURSE', { exact: true }).waitFor();
     await courses.locator('button[aria-controls="home-course-cards"]').first().click();
     await courses.getByText('Published Fixture EXTERNAL_LINKED_COURSE', { exact: true }).waitFor();
     assert.equal(await universities.locator('[data-catalog-slot]').count(), 0);

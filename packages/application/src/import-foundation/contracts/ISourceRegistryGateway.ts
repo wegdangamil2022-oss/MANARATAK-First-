@@ -3,10 +3,10 @@ import {
   SourceStatus, 
   SourceConnectorCategory, 
   SourceAccessClassification 
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface ISourceRegistryGateway {
-  withTransaction?(context: import('@manaratak/domain').AtomicPersistenceContext): ISourceRegistryGateway;
+  withTransaction?(context: import('@absheer/domain').AtomicPersistenceContext): ISourceRegistryGateway;
   replaceSource?(source: ImportSourceDefinition, expectedUpdatedAt: Date): Promise<void>;
   registerSource(source: ImportSourceDefinition): Promise<void>;
   

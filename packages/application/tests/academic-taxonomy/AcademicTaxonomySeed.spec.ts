@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { AcademicTaxonomyDeterministicKey } from '@manaratak/domain';
-import { AcademicTaxonomyNodeType, AcademicStandardType } from '@manaratak/domain';
+import { AcademicTaxonomyDeterministicKey } from '@absheer/domain';
+import { AcademicTaxonomyNodeType, AcademicStandardType } from '@absheer/domain';
 
 describe('Academic Taxonomy Seed Baseline', () => {
   it('should generate valid deterministic keys', () => {

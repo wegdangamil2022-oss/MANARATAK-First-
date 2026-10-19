@@ -200,11 +200,11 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
   const totalVisible = searchMode === 'api' ? serverItems.length : visiblePrototype.length;
 
   return (
-    <div className="mn-page-shell pb-24" dir={locale === 'en' ? 'ltr' : 'rtl'}>
+    <div className="ab-page-shell pb-24" dir={locale === 'en' ? 'ltr' : 'rtl'}>
       {/* ========================================================================= */}
       {/* HERO BANNER - MATCHING MAJORS SEARCH PAGE DESIGN */}
       {/* ========================================================================= */}
-      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-12 sm:pb-14 overflow-hidden shadow-sm mn-inverse ">
+      <div className="relative ab-search-hero text-white px-3 sm:px-4 pt-4 pb-12 sm:pb-14 overflow-hidden shadow-sm ab-inverse ">
         {/* Back Button */}
         {onBack && (
           <button
@@ -227,29 +227,29 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
           >
             <path
               d="M-50,50 Q100,-20 250,60 T550,40"
-              stroke="var(--mn-accent)"
+              stroke="var(--ab-accent)"
               strokeWidth="1.5"
               fill="none"
             />
             <path
               d="M-20,120 Q150,40 300,140 T600,100"
-              stroke="var(--mn-accent)"
+              stroke="var(--ab-accent)"
               strokeWidth="1"
               fill="none"
             />
-            <circle cx="30" cy="30" r="1" fill="var(--mn-accent)" />
-            <circle cx="45" cy="30" r="1" fill="var(--mn-accent)" />
-            <circle cx="60" cy="30" r="1" fill="var(--mn-accent)" />
-            <circle cx="30" cy="45" r="1" fill="var(--mn-accent)" />
-            <circle cx="45" cy="45" r="1" fill="var(--mn-accent)" />
-            <circle cx="60" cy="45" r="1" fill="var(--mn-accent)" />
+            <circle cx="30" cy="30" r="1" fill="var(--ab-accent)" />
+            <circle cx="45" cy="30" r="1" fill="var(--ab-accent)" />
+            <circle cx="60" cy="30" r="1" fill="var(--ab-accent)" />
+            <circle cx="30" cy="45" r="1" fill="var(--ab-accent)" />
+            <circle cx="45" cy="45" r="1" fill="var(--ab-accent)" />
+            <circle cx="60" cy="45" r="1" fill="var(--ab-accent)" />
           </svg>
         </div>
 
         <div className="max-w-xl mx-auto text-center relative z-10 space-y-2.5">
           {/* Little 4-pointed Gold Sparkle Star */}
           <div className="flex justify-center -mb-1">
-            <Sparkles className="h-4 w-4 text-[var(--mn-accent-text)]" aria-hidden="true" />
+            <Sparkles className="h-4 w-4 text-[var(--ab-accent-text)]" aria-hidden="true" />
           </div>
 
           {/* Headline with Gold Curve */}
@@ -258,14 +258,14 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
               <span>{publicT('public_results')}{' '}</span>
               <span className="relative inline-block text-white">{publicT('public_global_search')}{/* Gold brush accent line underneath */}
                 <svg
-                  className="absolute -bottom-1.5 inset-x-0 w-full h-2 text-[var(--mn-accent-text)]"
+                  className="absolute -bottom-1.5 inset-x-0 w-full h-2 text-[var(--ab-accent-text)]"
                   viewBox="0 0 100 12"
                   fill="none"
                   preserveAspectRatio="none"
                 >
                   <path
                     d="M2,9 Q50,2 98,6"
-                    stroke="var(--mn-accent)"
+                    stroke="var(--ab-accent)"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                   />
@@ -274,12 +274,12 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
             </h1>
 
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] mt-1.5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">{publicT('public_search_across_published_public_scholarship_university_and_major')}</p>
+            <p className="text-[11px] sm:text-xs text-[var(--ab-on-dark-muted)] font-medium font-['Cairo',sans-serif] mt-1.5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">{publicT('public_search_across_published_public_scholarship_university_and_major')}</p>
           </div>
         </div>
       </div>
 
-      <div className="mn-public-container space-y-4 py-4">
+      <div className="ab-public-container space-y-4 py-4">
         {/* Try Smart Search Button with Fine Rotating Gold Spark Line and Smooth Indigo-Turquoise Gradient */}
         <button 
           type="button" 
@@ -291,12 +291,12 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
           
           {/* Inner button container with smooth Indigo-Turquoise gradient matching the top hero */}
           <div 
-            data-mn-design="543c901a7d"
+            data-ab-design="543c901a7d"
             className="relative flex w-full items-center justify-between gap-3 rounded-[14px] bg-gradient-to-r from-[#142B5F] to-[#0E7C86] px-5 py-3 text-start"
           >
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5 text-[13px] sm:text-[14px] mn-font-emphasis text-white">
-                <Sparkles className="h-4 w-4 animate-pulse text-[var(--mn-accent-text)]" />
+              <div className="flex items-center gap-1.5 text-[13px] sm:text-[14px] ab-font-emphasis text-white">
+                <Sparkles className="h-4 w-4 animate-pulse text-[var(--ab-accent-text)]" />
                 <span>{publicT('public_try_smart_search')}</span>
               </div>
               <div className="mt-1 text-[10px] sm:text-[11px] text-white/95 font-medium">{searchMode === 'prototype' ? publicT('public_for_more_complex_exploration_using_ai_and_natural') : locale === 'en' ? 'Search published opportunities, then refine your results in each catalog.' : 'ابحث في الفرص المنشورة ثم استخدم فلاتر القسم لتحديد النتائج.'}</div>
@@ -306,16 +306,16 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
         </button>
 
         <div className="flex gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
-          <button type="button" onClick={() => setSelectedKind('all')} aria-pressed={selectedKind === 'all'} className={`mn-filter-chip whitespace-nowrap ${selectedKind === 'all' ? 'is-selected' : ''}`}>{publicT('public_all')}{searchMode === 'prototype' && totalVisible ? ` · ${totalVisible}` : ''}</button>
+          <button type="button" onClick={() => setSelectedKind('all')} aria-pressed={selectedKind === 'all'} className={`ab-filter-chip whitespace-nowrap ${selectedKind === 'all' ? 'is-selected' : ''}`}>{publicT('public_all')}{searchMode === 'prototype' && totalVisible ? ` · ${totalVisible}` : ''}</button>
           {(Object.keys(CATEGORY_META) as GlobalResultKind[]).map((kind) => (
-            <button type="button" key={kind} onClick={() => setSelectedKind(kind)} aria-pressed={selectedKind === kind} className={`mn-filter-chip flex items-center gap-1.5 whitespace-nowrap ${selectedKind === kind ? 'is-selected' : ''}`}>
+            <button type="button" key={kind} onClick={() => setSelectedKind(kind)} aria-pressed={selectedKind === kind} className={`ab-filter-chip flex items-center gap-1.5 whitespace-nowrap ${selectedKind === kind ? 'is-selected' : ''}`}>
               {CATEGORY_META[kind].icon}{publicT(CATEGORY_META[kind].label)}{searchMode === 'prototype' && counts[kind] ? ` · ${counts[kind]}` : ''}
             </button>
           ))}
         </div>
 
-        {loading ? <div className="mn-card py-12 text-center"><Loader2 className="mx-auto h-7 w-7 animate-spin" /><div className="mt-2 text-xs">{publicT('public_searching_the_published_index')}</div></div> : null}
-        {!loading && searchError ? <div className="mn-card border-red-200 py-10 text-center"><div className="text-xs font-semibold">{publicT('public_could_not_load_search_results')}</div><div className="mt-1 text-[10px] text-[var(--mn-text-muted)]">{searchError}</div><button type="button" onClick={() => void executeServerSearch()} className="mt-3 mn-filter-chip is-selected">{publicT('public_try_again')}</button></div> : null}
+        {loading ? <div className="ab-card py-12 text-center"><Loader2 className="mx-auto h-7 w-7 animate-spin" /><div className="mt-2 text-xs">{publicT('public_searching_the_published_index')}</div></div> : null}
+        {!loading && searchError ? <div className="ab-card border-red-200 py-10 text-center"><div className="text-xs font-semibold">{publicT('public_could_not_load_search_results')}</div><div className="mt-1 text-[10px] text-[var(--ab-text-muted)]">{searchError}</div><button type="button" onClick={() => void executeServerSearch()} className="mt-3 ab-filter-chip is-selected">{publicT('public_try_again')}</button></div> : null}
 
         {!loading && !searchError && query.trim() && searchMode === 'api' && serverItems.length > 0 ? (
           <div className="space-y-2.5">
@@ -323,11 +323,11 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
               const kind = result.kind as GlobalResultKind;
               const favoriteKind = favoriteKindForResult(kind);
               const favoriteKey = `${favoriteKind}:${result.id}` as FavoriteKey;
-              return <article key={`${result.kind}:${result.id}`} role="link" tabIndex={0} aria-label={publicT('public_open_title', { v0: result.title })} onClick={() => handleResultClick(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleResultClick(result); } }} className="mn-card w-full cursor-pointer p-3.5 text-start transition hover:-translate-y-0.5 hover:border-[var(--mn-accent)]/60 hover:shadow-md">
-                <div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--mn-primary)] text-white mn-inverse">{CATEGORY_META[kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--mn-accent-text)]">{publicT(CATEGORY_META[kind].label)}</div><h2 className="mt-0.5 text-[14px] font-semibold leading-snug text-[var(--mn-heading)] sm:text-[15px]">{result.title}</h2>{result.subtitle && <p className="mt-1 line-clamp-2 text-[11px] leading-5 text-[var(--mn-text-muted)] sm:text-xs">{result.subtitle}</p>}</div><div className="flex shrink-0 flex-col items-center gap-1.5">{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.id); }} />}<ChevronLeft className="mn-card-arrow h-4 w-4" /></div></div>
+              return <article key={`${result.kind}:${result.id}`} role="link" tabIndex={0} aria-label={publicT('public_open_title', { v0: result.title })} onClick={() => handleResultClick(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleResultClick(result); } }} className="ab-card w-full cursor-pointer p-3.5 text-start transition hover:-translate-y-0.5 hover:border-[var(--ab-accent)]/60 hover:shadow-md">
+                <div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--ab-primary)] text-white ab-inverse">{CATEGORY_META[kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--ab-accent-text)]">{publicT(CATEGORY_META[kind].label)}</div><h2 className="mt-0.5 text-[14px] font-semibold leading-snug text-[var(--ab-heading)] sm:text-[15px]">{result.title}</h2>{result.subtitle && <p className="mt-1 line-clamp-2 text-[11px] leading-5 text-[var(--ab-text-muted)] sm:text-xs">{result.subtitle}</p>}</div><div className="flex shrink-0 flex-col items-center gap-1.5">{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.id); }} />}<ChevronLeft className="ab-card-arrow h-4 w-4" /></div></div>
               </article>;
             })}
-            {hasMore && nextCursor && <button type="button" disabled={loadingMore} onClick={() => void executeServerSearch(nextCursor, true)} className="mn-card w-full py-3 text-center text-xs font-semibold disabled:opacity-60">{loadingMore ? publicT('public_loading_more') : publicT('public_load_more')}</button>}
+            {hasMore && nextCursor && <button type="button" disabled={loadingMore} onClick={() => void executeServerSearch(nextCursor, true)} className="ab-card w-full py-3 text-center text-xs font-semibold disabled:opacity-60">{loadingMore ? publicT('public_loading_more') : publicT('public_load_more')}</button>}
           </div>
         ) : null}
 
@@ -335,13 +335,13 @@ export const GlobalSearchPage: React.FC<GlobalSearchPageProps> = ({
           <div className="space-y-2.5">
             {visiblePrototype.map((result) => {
               const favoriteKind = favoriteKindForResult(result.kind); const favoriteKey = `${favoriteKind}:${result.targetId}` as FavoriteKey;
-              return <article key={`${result.key}:${result.anchor || 'top'}`} role="button" tabIndex={0} onClick={() => openPrototypeResult(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openPrototypeResult(result); } }} className="mn-card w-full cursor-pointer p-3.5 text-start"><div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--mn-primary)] text-white mn-inverse">{CATEGORY_META[result.kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--mn-accent-text)]">{result.category}</div><h2 className="mt-0.5 text-[14px] font-semibold text-[var(--mn-heading)]">{result.title}</h2><p className="mt-1 line-clamp-2 text-[11px] text-[var(--mn-text-muted)]">{result.excerpt || result.subtitle}</p></div>{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.targetId); }} />}</div></article>;
+              return <article key={`${result.key}:${result.anchor || 'top'}`} role="button" tabIndex={0} onClick={() => openPrototypeResult(result)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openPrototypeResult(result); } }} className="ab-card w-full cursor-pointer p-3.5 text-start"><div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--ab-primary)] text-white ab-inverse">{CATEGORY_META[result.kind].icon}</div><div className="min-w-0 flex-1"><div className="text-[10px] font-semibold text-[var(--ab-accent-text)]">{result.category}</div><h2 className="mt-0.5 text-[14px] font-semibold text-[var(--ab-heading)]">{result.title}</h2><p className="mt-1 line-clamp-2 text-[11px] text-[var(--ab-text-muted)]">{result.excerpt || result.subtitle}</p></div>{onToggleFavorite && <FavoriteButton active={favoriteKeys.includes(favoriteKey)} onToggle={(event) => { event.stopPropagation(); onToggleFavorite(favoriteKind, result.targetId); }} />}</div></article>;
             })}
           </div>
         ) : null}
 
-        {!loading && !searchError && query.trim() && ((searchMode === 'api' && serverItems.length === 0) || (searchMode === 'prototype' && visiblePrototype.length === 0)) ? <div className="mn-card py-14 text-center border-dashed"><Search className="mx-auto h-9 w-9 text-[var(--mn-text-muted)]" /><div className="mt-2 text-xs font-semibold text-[var(--mn-heading)]">{publicT('public_no_published_results_match_this_phrase')}</div><button type="button" onClick={onOpenSmartSearch} className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-[11px] font-semibold text-white mn-inverse"><Sparkles className="h-3.5 w-3.5 text-[var(--mn-accent-soft)]" />{publicT('public_try_smart_search')}</button></div> : null}
-        {!query.trim() ? <div className="mn-card py-14 text-center border-dashed"><Search className="mx-auto h-9 w-9 text-[var(--mn-text-muted)]" /><div className="mt-2 text-xs font-semibold text-[var(--mn-heading)]">{publicT('public_start_with_a_scholarship_university_major_course_exam')}</div><div className="mt-1 text-[11px] text-[var(--mn-text-muted)]">{publicT('public_the_index_searches_published_public_fields_only')}</div></div> : null}
+        {!loading && !searchError && query.trim() && ((searchMode === 'api' && serverItems.length === 0) || (searchMode === 'prototype' && visiblePrototype.length === 0)) ? <div className="ab-card py-14 text-center border-dashed"><Search className="mx-auto h-9 w-9 text-[var(--ab-text-muted)]" /><div className="mt-2 text-xs font-semibold text-[var(--ab-heading)]">{publicT('public_no_published_results_match_this_phrase')}</div><button type="button" onClick={onOpenSmartSearch} className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-[var(--ab-primary)] px-4 py-2 text-[11px] font-semibold text-white ab-inverse"><Sparkles className="h-3.5 w-3.5 text-[var(--ab-accent-soft)]" />{publicT('public_try_smart_search')}</button></div> : null}
+        {!query.trim() ? <div className="ab-card py-14 text-center border-dashed"><Search className="mx-auto h-9 w-9 text-[var(--ab-text-muted)]" /><div className="mt-2 text-xs font-semibold text-[var(--ab-heading)]">{publicT('public_start_with_a_scholarship_university_major_course_exam')}</div><div className="mt-1 text-[11px] text-[var(--ab-text-muted)]">{publicT('public_the_index_searches_published_public_fields_only')}</div></div> : null}
       </div>
     </div>
   );

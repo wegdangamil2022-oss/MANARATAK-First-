@@ -1,4 +1,4 @@
-import { Monitor } from '@manaratak/domain';
+import { Monitor } from '@absheer/domain';
 
 /**
  * Interface for communicating with physical monitoring infrastructure.

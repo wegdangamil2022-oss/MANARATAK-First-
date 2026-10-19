@@ -12,7 +12,7 @@ describe('published home previews, bounded per origin', () => {
     const { loadPublishedCourses } = await import('../../src/features/public-template/publicLiveDataSource');
     const result = await loadPublishedCourses('en');
     expect(api.getCourses).toHaveBeenCalledTimes(3);
-    for (const originType of ['EXTERNAL_LINKED_COURSE', 'NATIVE_MANARATAK_COURSE', 'PAID_COURSE']) expect(api.getCourses).toHaveBeenCalledWith({ originType, limit: 3 }, 'en');
+    for (const originType of ['EXTERNAL_LINKED_COURSE', 'NATIVE_ABSHEER_COURSE', 'PAID_COURSE']) expect(api.getCourses).toHaveBeenCalledWith({ originType, limit: 3 }, 'en');
     expect(result.homeCoursePreviews.global.status).toBe('ready'); expect(result.homeCoursePreviews.native.status).toBe('ready');
     expect(result.homeCoursePreviews.global.courses[0].ownerId).toBe('owner-EXTERNAL_LINKED_COURSE');
     expect(result.homeCoursePreviews.native.courses).toHaveLength(2);
@@ -48,13 +48,13 @@ describe('published home previews, bounded per origin', () => {
     const image = { url: 'https://media.example.test/public-grant', expiresAt: new Date(Date.now() + 240000).toISOString() };
     const university = mapPublicUniversityDto({ publicId: 'uni-fixture', slug: 'uni-fixture', displayName: 'Requested English name', canonicalName: 'English name', localizedNames: { ar: 'اسم المصدر العربي' }, image } as never);
     expect(university.name).toBe('Requested English name'); expect(university.imageUrl).toBe(image.url);
-    const mapped = mapCourse({ ...dto('NATIVE_MANARATAK_COURSE'), image, thumbnailAssetId: 'not-a-public-url' } as never);
+    const mapped = mapCourse({ ...dto('NATIVE_ABSHEER_COURSE'), image, thumbnailAssetId: 'not-a-public-url' } as never);
     expect(mapped.course.imageUrl).toBe(image.url);
   });
   it('does not hide native success or relabel it as paid when only the paid query is unavailable', async () => {
     api.getCourses.mockImplementation(async ({ originType }) => {
       if (originType === 'PAID_COURSE') throw new Error('paid offline');
-      return { data: originType === 'NATIVE_MANARATAK_COURSE' ? [dto(originType)] : [] };
+      return { data: originType === 'NATIVE_ABSHEER_COURSE' ? [dto(originType)] : [] };
     });
     const { loadPublishedCourses } = await import('../../src/features/public-template/publicLiveDataSource');
     const result = await loadPublishedCourses('en');

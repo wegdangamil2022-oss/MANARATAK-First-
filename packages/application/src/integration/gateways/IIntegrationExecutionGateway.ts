@@ -1,4 +1,4 @@
-import { Integration } from '@manaratak/domain';
+import { Integration } from '@absheer/domain';
 
 /**
  * Interface for communicating with physical integration execution infrastructure.

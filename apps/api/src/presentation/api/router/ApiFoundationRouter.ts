@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ManageApiServicesUseCase } from '@manaratak/application';
+import { ManageApiServicesUseCase } from '@absheer/application';
 import {
   apiServiceCreateSchema,
   apiServiceListQuerySchema,

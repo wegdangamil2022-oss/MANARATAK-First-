@@ -1,5 +1,5 @@
-import { createContainer, asValue } from '@manaratak-vendor/awilix-core';
-import type { IConfigurationService } from '@manaratak/core';
+import { createContainer, asValue } from '@absheer-vendor/awilix-core';
+import type { IConfigurationService } from '@absheer/core';
 import { describe, it, expect, vi } from 'vitest';
 import { registerRecurringJobs } from '../../../src/infrastructure/workers/RegisterRecurringJobs';
 import { WorkerHealthObservation } from '../../../src/infrastructure/runtime/WorkerHealthObservation';

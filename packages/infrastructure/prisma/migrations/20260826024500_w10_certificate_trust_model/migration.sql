@@ -58,7 +58,7 @@ CREATE TABLE "CertificateTemplateVersion" (
   CONSTRAINT "CertificateTemplateVersion_templateId_versionNumber_key" UNIQUE ("templateId", "versionNumber")
 );
 
--- Runtime reconciliation must create/resolve the canonical MANARATAK issuer and one
+-- Runtime reconciliation must create/resolve the canonical ABSHEER issuer and one
 -- template-version row per legacy template before the following NOT NULL/FK promotion.
 ALTER TABLE "CertificateTemplate" ADD COLUMN "issuerId" TEXT;
 ALTER TABLE "CertificateTemplate" ADD COLUMN "currentVersionId" TEXT;

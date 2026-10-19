@@ -1,6 +1,6 @@
 import {TestOwnerDiscovery} from './TestOwnerDiscovery';
 import React from 'react';
-import { ExamDetails } from '@manaratak/ui';
+import { ExamDetails } from '@absheer/ui';
 import type { Exam } from '../types';
 import { RelatedArticlesStrip } from './RelatedArticlesStrip';
 import { FavoriteButton } from './FavoriteButton';
@@ -24,7 +24,7 @@ export const ExamDetailModal: React.FC<ExamDetailModalProps> = (props) => {
   return <ExamDetails {...props}
     favoriteControl={props.onToggleFavorite && <FavoriteButton active={props.isFavorite ?? false}
       onToggle={(event) => { event.stopPropagation(); props.onToggleFavorite?.(props.exam.id); }}
-      className="bg-[var(--mn-surface)]/95 mn-panel" />}
+      className="bg-[var(--ab-surface)]/95 ab-panel" />}
     relatedArticles={<><RelatedArticlesStrip articles={props.exam.relatedArticles} onOpenArticle={props.onOpenArticle} compact />{props.exam.ownerId&&props.exam.slug&&<TestOwnerDiscovery slug={props.exam.slug}/>}</>}
   />;
 };

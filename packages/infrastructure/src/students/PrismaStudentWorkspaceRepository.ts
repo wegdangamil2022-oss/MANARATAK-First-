@@ -26,7 +26,7 @@ import {
   StudentSupportWorkspaceDetailDto,
   StudentWorkspaceStatus,
   UpsertStudentWorkspaceDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const json = (value: unknown): Prisma.InputJsonValue | undefined =>
   value === undefined ? undefined : (JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue);

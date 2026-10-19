@@ -4,8 +4,8 @@ import type {
   IUniversityRepository,
   IScholarshipRepository,
   IInternationalTestRepository,
-} from '@manaratak/domain';
-import { isPublicScholarshipOwner } from '@manaratak/domain';
+} from '@absheer/domain';
+import { isPublicScholarshipOwner } from '@absheer/domain';
 import {
   crossModuleIntegrityReport,
   type IntegrityFact,
@@ -54,8 +54,8 @@ export class CrossModuleIntegrityUseCase {
         const mapping:Record<string,IntegrityOwner>={UNIVERSITY:'UNIVERSITIES',ACADEMIC_PROGRAM:'PROGRAMS',SCHOLARSHIP:'SCHOLARSHIPS',MAJOR:'MAJORS',INTERNATIONAL_TEST:'TESTS',COURSE:'COURSES',REFERENCE_COUNTRY:'COUNTRIES'};
         for(const link of links){const domain=mapping[link.targetType];if(domain)add(domain,link.targetId);else sourceFindings.push({owner,ownerId:row.id,targetOwner:'CMS',targetId:row.id,code:'UNKNOWN_POLYMORPHIC_OWNER'});}
       }
-      if(owner==='MAJORS')for(const link of (row as import('@manaratak/domain').MajorDto).relationships??[])add('MAJORS',link.targetMajorId);
-      if(owner==='TESTS')for(const link of (row as import('@manaratak/domain').InternationalTestDto).countryRelationships??[])add('COUNTRIES',link.canonicalReferenceId);
+      if(owner==='MAJORS')for(const link of (row as import('@absheer/domain').MajorDto).relationships??[])add('MAJORS',link.targetMajorId);
+      if(owner==='TESTS')for(const link of (row as import('@absheer/domain').InternationalTestDto).countryRelationships??[])add('COUNTRIES',link.canonicalReferenceId);
       if (owner === 'UNIVERSITIES')
         for (const program of (row as Awaited<ReturnType<IUniversityRepository['findById']>>)
           ?.academicPrograms ?? []) {
@@ -134,7 +134,7 @@ export class CrossModuleIntegrityUseCase {
         if(ref.owner==='COUNTRIES'){if(!this.references?.getCountryById)throw new Error('OWNER_PORT_MISSING');const row=await this.references.getCountryById(ref.id);return {key:`${ref.owner}:${ref.id}`,exists:!!row,published:row?.isActive===true&&row.lifecycleState==='ACTIVE',unavailable:false};}
         if(ref.owner==='CMS'){const row=await this.cms?.findContentById(ref.id);return {key:`${ref.owner}:${ref.id}`,exists:!!row,published:row?.status==='PUBLISHED',unavailable:false};}
         const target=await repositories[ref.owner].findById(ref.id);
-        const published=!!target&&(ref.owner==='SCHOLARSHIPS'?isPublicScholarshipOwner(target as NonNullable<Awaited<ReturnType<IScholarshipRepository['findById']>>>):ref.owner==='TESTS'?Boolean(typeof (target as import('@manaratak/domain').InternationalTestDto).slug==='string'&&(await this.tests.findPublishedBySlug(String((target as import('@manaratak/domain').InternationalTestDto).slug)))?.id===target.id):target.status==='PUBLISHED');
+        const published=!!target&&(ref.owner==='SCHOLARSHIPS'?isPublicScholarshipOwner(target as NonNullable<Awaited<ReturnType<IScholarshipRepository['findById']>>>):ref.owner==='TESTS'?Boolean(typeof (target as import('@absheer/domain').InternationalTestDto).slug==='string'&&(await this.tests.findPublishedBySlug(String((target as import('@absheer/domain').InternationalTestDto).slug)))?.id===target.id):target.status==='PUBLISHED');
         return {key:`${ref.owner}:${ref.id}`,exists:!!target,published,unavailable:false};
       }catch{return {key:`${ref.owner}:${ref.id}`,exists:false,published:false,unavailable:true};}
     }));
@@ -149,7 +149,7 @@ export class CrossModuleIntegrityUseCase {
     const symmetryFindings:Array<{owner:IntegrityOwner;ownerId:string;targetOwner:IntegrityOwner;targetId:string;code:string}>=[];
     let symmetryPairsChecked=0,symmetryUnavailable=0;
     if(owner==='SCHOLARSHIPS'&&allowed.has('PROGRAMS')&&this.universities.readProgramIntegrityReference){
-      for(const sourceRow of source.data){const row=sourceRow as import('@manaratak/domain').ScholarshipDto;if(!isPublicScholarshipOwner(row))continue;
+      for(const sourceRow of source.data){const row=sourceRow as import('@absheer/domain').ScholarshipDto;if(!isPublicScholarshipOwner(row))continue;
         for(const link of row.universityLinks??[]){if(!link.academicProgramId||link.resolutionStatus!=='RESOLVED'||symmetryPairsChecked>=10)continue;
           try{const program=await this.universities.readProgramIntegrityReference(link.academicProgramId);if(!program?.publiclyEligible||(link.universityId&&link.universityId!==program.universityId))continue;
             ++symmetryPairsChecked;const reverse=await this.scholarships.listPublished({ownerId:row.id,academicProgramId:link.academicProgramId,limit:1});

@@ -3,12 +3,12 @@ import type {
   AuthorizationEvaluatorService,
   INotificationRecipientGateway,
   IStudentWorkspaceRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { z } from 'zod';
 import {
   ManageNotificationTemplatesUseCase,
   ManageNotificationIntentsUseCase,
-} from '@manaratak/application';
+} from '@absheer/application';
 import {
   notificationIntentSchema,
   notificationTemplateSchema,

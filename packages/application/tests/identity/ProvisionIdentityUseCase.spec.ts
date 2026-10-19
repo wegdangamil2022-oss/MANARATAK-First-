@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ProvisionIdentityUseCase } from '../../src/identity/ProvisionIdentityUseCase';
-import { IdentityType } from '@manaratak/domain';
+import { IdentityType } from '@absheer/domain';
 
 describe('ProvisionIdentityUseCase', () => {
   it('should provision a human identity successfully', async () => {
@@ -19,7 +19,7 @@ describe('ProvisionIdentityUseCase', () => {
     const useCase = new ProvisionIdentityUseCase(mockRepo as any);
     const result = await useCase.execute({
       type: IdentityType.Human,
-      primaryEmail: 'newuser@manaratak.local'
+      primaryEmail: 'newuser@absheer.local'
     });
 
     if (!result.isSuccess) {
@@ -28,6 +28,6 @@ describe('ProvisionIdentityUseCase', () => {
 
     expect(result.isSuccess).toBe(true);
     expect(result.getValue().type).toBe(IdentityType.Human);
-    expect(result.getValue().user?.contactRegistry.primaryEmail).toBe('newuser@manaratak.local');
+    expect(result.getValue().user?.contactRegistry.primaryEmail).toBe('newuser@absheer.local');
   });
 });

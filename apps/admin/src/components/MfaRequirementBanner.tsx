@@ -9,8 +9,8 @@ export function MfaRequirementBanner() {
       const value = (event as CustomEvent<{ code?: string }>).detail?.code;
       if (value === 'MFA_ENROLLMENT_REQUIRED' || value === 'MFA_STEP_UP_REQUIRED') setCode(value);
     };
-    window.addEventListener('manaratak-admin-mfa-required', listener);
-    return () => window.removeEventListener('manaratak-admin-mfa-required', listener);
+    window.addEventListener('absheer-admin-mfa-required', listener);
+    return () => window.removeEventListener('absheer-admin-mfa-required', listener);
   }, []);
   if (!code) return null;
   return (

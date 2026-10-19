@@ -1,5 +1,5 @@
-import { BackgroundJob, IBackgroundJobRepository } from '@manaratak/domain';
-import { ISpecification } from '@manaratak/core';
+import { BackgroundJob, IBackgroundJobRepository } from '@absheer/domain';
+import { ISpecification } from '@absheer/core';
 
 export class InMemoryBackgroundJobRepository implements IBackgroundJobRepository {
   private readonly jobs = new Map<string, BackgroundJob>();

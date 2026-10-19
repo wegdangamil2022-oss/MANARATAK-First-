@@ -8,8 +8,8 @@ import {
   MergeProposal,
   MergeProposalStatus,
   ExtractionCandidate
-} from '@manaratak/domain';
-import { generateOpaqueIdentifier } from '@manaratak/core';
+} from '@absheer/domain';
+import { generateOpaqueIdentifier } from '@absheer/core';
 
 export class MergeProposalPreparationService {
   public async prepareProposal(input: {

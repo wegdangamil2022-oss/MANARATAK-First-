@@ -7,7 +7,7 @@ import {
   PaginatedFinanceResult,
   FinancialAccountFilters,
   normalizeFinancialAccountFilters,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 /** Read-only compatibility facade. All financial commands use FinancePlatformUseCases. */
 export class FinanceAdminUseCases {

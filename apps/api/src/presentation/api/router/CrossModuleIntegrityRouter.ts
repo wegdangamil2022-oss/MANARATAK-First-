@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import type { AuthorizationEvaluatorService } from '@manaratak/domain';
-import type { CrossModuleIntegrityUseCase, IntegrityOwner } from '@manaratak/application';
+import type { AuthorizationEvaluatorService } from '@absheer/domain';
+import type { CrossModuleIntegrityUseCase, IntegrityOwner } from '@absheer/application';
 export const INTEGRITY_OWNER_PERMISSIONS = {
   MAJORS: 'admin:majors:manage',
   UNIVERSITIES: 'admin:universities:manage',

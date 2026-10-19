@@ -31,7 +31,7 @@ const detailKeys = ['selectedScholarship', 'selectedUniversity', 'selectedMajor'
 const emptyDetails = Object.fromEntries(detailKeys.map(key => [key, null]));
 type Entry = {version: 29; index: number; route: NavigationState; scroll: number};
 function readEntry(): Entry | null {
-  const entry = window.history.state?.manaratakPublic;
+  const entry = window.history.state?.absheerPublic;
   return entry?.version === 29 && typeof entry.index === 'number' && entry.route?.activeTab
     ? entry : null;
 }
@@ -104,7 +104,7 @@ export function usePublicNavigation() {
     let saved: any = null;
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        const raw = window.localStorage.getItem('manaratak_nav_state_v2');
+        const raw = window.localStorage.getItem('absheer_nav_state_v2');
         if (raw) saved = JSON.parse(raw);
       }
     } catch (_) {}
@@ -118,7 +118,7 @@ export function usePublicNavigation() {
   useEffect(() => {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.setItem('manaratak_nav_state_v2', JSON.stringify(state));
+        window.localStorage.setItem('absheer_nav_state_v2', JSON.stringify(state));
       }
     } catch (_) {}
   }, [state]);
@@ -141,7 +141,7 @@ export function usePublicNavigation() {
       if (current.current) current.current.scroll = window.scrollY;
     };
     const persist = () => {
-      if (current.current) history.replaceState({...history.state, manaratakPublic: current.current}, '', publicUrlForState(current.current.route));
+      if (current.current) history.replaceState({...history.state, absheerPublic: current.current}, '', publicUrlForState(current.current.route));
     };
     window.addEventListener('popstate', pop);
     window.addEventListener('scroll', scroll, {passive: true});
@@ -163,10 +163,10 @@ export function usePublicNavigation() {
     if (restored) {
       entry = {...restored, route: state};
     } else if (changed && mounted.current) {
-      history.replaceState({...history.state, manaratakPublic: current.current}, '', publicUrlForState(current.current!.route));
+      history.replaceState({...history.state, absheerPublic: current.current}, '', publicUrlForState(current.current!.route));
       entry = {version: 29, index: current.current!.index + (replaceNext.current ? 0 : 1), route: state, scroll: 0};
-      if (replaceNext.current) history.replaceState({...history.state, manaratakPublic: entry}, '', publicUrlForState(state));
-      else history.pushState({...history.state, manaratakPublic: entry}, '', publicUrlForState(state));
+      if (replaceNext.current) history.replaceState({...history.state, absheerPublic: entry}, '', publicUrlForState(state));
+      else history.pushState({...history.state, absheerPublic: entry}, '', publicUrlForState(state));
     } else {
       entry = {version: 29, index: current.current?.index || 0, route: state, scroll: current.current?.scroll || 0};
     }
@@ -174,10 +174,10 @@ export function usePublicNavigation() {
     replaceNext.current = false;
     // Preserve the address bar on the first render so PublicTemplateApp can hydrate a direct URL.
     if (firstMount && preserveInitialUrl.current) {
-      history.replaceState({...history.state, manaratakPublic: entry}, '');
+      history.replaceState({...history.state, absheerPublic: entry}, '');
       preserveInitialUrl.current = false;
     } else {
-      history.replaceState({...history.state, manaratakPublic: entry}, '', publicUrlForState(state));
+      history.replaceState({...history.state, absheerPublic: entry}, '', publicUrlForState(state));
     }
     mounted.current = true;
     if (changed || restored) {

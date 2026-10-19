@@ -1,4 +1,4 @@
-import { ExtractionCandidate } from '@manaratak/domain';
+import { ExtractionCandidate } from '@absheer/domain';
 
 export interface IExtractionValidationService {
   validateCandidate(candidate: ExtractionCandidate): Promise<ExtractionCandidate>;

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { IRoleAssignmentRepository } from '@manaratak/domain';
+import type { IRoleAssignmentRepository } from '@absheer/domain';
 
 export function createStudentRoleGuard(assignments: IRoleAssignmentRepository) {
   return async (req: Request, res: Response, next: NextFunction) => {

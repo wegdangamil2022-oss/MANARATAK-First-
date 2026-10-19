@@ -1,5 +1,5 @@
-import { Identity, IdentityType, LifeStatus, User, Profile, ContactRegistry, Account, TechnicalMetadata } from '@manaratak/domain';
-import { Identifier } from '@manaratak/core';
+import { Identity, IdentityType, LifeStatus, User, Profile, ContactRegistry, Account, TechnicalMetadata } from '@absheer/domain';
+import { Identifier } from '@absheer/core';
 
 export class IdentityMapper {
   public static toDomain(record: any): Identity {

@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
-import type {FinancialAccountDto, PaginatedFinanceResult} from '@manaratak/domain';
+import type {FinancialAccountDto, PaginatedFinanceResult} from '@absheer/domain';
 import {adminApiClient} from '../api/client';
 import {useTranslation} from '../i18n/I18nProvider';
 

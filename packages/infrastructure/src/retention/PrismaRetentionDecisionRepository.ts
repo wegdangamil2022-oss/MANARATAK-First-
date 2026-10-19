@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { IRetentionDecisionRepository } from '@manaratak/application';
-import { RetentionDecision } from '@manaratak/domain';
+import { IRetentionDecisionRepository } from '@absheer/application';
+import { RetentionDecision } from '@absheer/domain';
 
 export class PrismaRetentionDecisionRepository implements IRetentionDecisionRepository {
   constructor(private readonly prisma: PrismaClient) {}

@@ -1,6 +1,6 @@
-import { SourceConnectorCategory, ImportSourceDefinition } from '@manaratak/domain';
+import { SourceConnectorCategory, ImportSourceDefinition } from '@absheer/domain';
 import { BaseSourceConnector } from './BaseSourceConnector';
-import type { SourceAcquisitionRequest, SourceAcquisitionResult } from '@manaratak/application';
+import type { SourceAcquisitionRequest, SourceAcquisitionResult } from '@absheer/application';
 
 export class BrowserAssistedSourceConnector extends BaseSourceConnector {
   readonly connectorId = 'browser-assisted-stub';

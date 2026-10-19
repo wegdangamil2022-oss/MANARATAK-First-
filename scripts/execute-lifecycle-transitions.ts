@@ -38,8 +38,8 @@ async function main() {
   }
 
   const setCookies = loginRes.headers.getSetCookie();
-  const accessCookie = setCookies.find(c => c.startsWith('manaratak_access='))?.split(';')[0];
-  const refreshCookie = setCookies.find(c => c.startsWith('manaratak_refresh='))?.split(';')[0];
+  const accessCookie = setCookies.find(c => c.startsWith('absheer_access='))?.split(';')[0];
+  const refreshCookie = setCookies.find(c => c.startsWith('absheer_refresh='))?.split(';')[0];
   if (!accessCookie || !refreshCookie) {
     console.error('Auth cookies missing in login response.');
     process.exit(1);

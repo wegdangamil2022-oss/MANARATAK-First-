@@ -93,20 +93,20 @@ This document provides the official migration plan for eliminating duplicate con
 
 Executing this architectural migration will affect the following packages and imports:
 
-1. **`@manaratak/core`**:
+1. **`@absheer/core`**:
    - Removes `ApiResponse` and `ApiMetadata` (Moves to shared).
    - Needs internal renames for `Role` type -> `RoleIdentifier` and `LogEntry` -> `LogPayload`.
-2. **`@manaratak/shared`**:
+2. **`@absheer/shared`**:
    - Gains new global artifacts: `ApiResponse`, `ApiMetadata`, `CompatibilityMetadata`, `SecurityClassification`.
-3. **`@manaratak/domain`**:
-   - `api-foundation`: Needs to update imports to use `@manaratak/shared` for `ApiMetadata` and `CompatibilityMetadata`.
-   - `shared-components`: Needs to update imports to use `@manaratak/shared` for `CompatibilityMetadata`.
-   - `file-management`: Needs to update imports for `SecurityClassification` to `@manaratak/shared`. Rename internal `FileMetadata` if required.
-   - `security`: Needs to update imports for `SecurityClassification` to `@manaratak/shared`.
-   - `import-foundation`: Must drop local `IValidationContext` and import from `@manaratak/core`.
-4. **`@manaratak/application`**:
+3. **`@absheer/domain`**:
+   - `api-foundation`: Needs to update imports to use `@absheer/shared` for `ApiMetadata` and `CompatibilityMetadata`.
+   - `shared-components`: Needs to update imports to use `@absheer/shared` for `CompatibilityMetadata`.
+   - `file-management`: Needs to update imports for `SecurityClassification` to `@absheer/shared`. Rename internal `FileMetadata` if required.
+   - `security`: Needs to update imports for `SecurityClassification` to `@absheer/shared`.
+   - `import-foundation`: Must drop local `IValidationContext` and import from `@absheer/core`.
+4. **`@absheer/application`**:
    - Will need to update imports reflecting the changes in `core` (like `Role` -> `RoleIdentifier`) and new shared DTOs.
-5. **`@manaratak/infrastructure`**:
+5. **`@absheer/infrastructure`**:
    - Will be impacted by interface renaming in `core` (`LogEntry` -> `LogPayload`) and `Role` -> `RoleIdentifier`.
 
 ## 5. Execution Mandates

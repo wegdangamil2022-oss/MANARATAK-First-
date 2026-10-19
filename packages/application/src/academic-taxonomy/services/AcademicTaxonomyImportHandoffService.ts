@@ -6,7 +6,7 @@ import {
   AcademicTaxonomySeedRecord,
   AcademicTaxonomySeedRecordType,
   AcademicTaxonomySeedPlanner,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface AcademicTaxonomyImportHandoffCommand {
   seedBatchId: string;

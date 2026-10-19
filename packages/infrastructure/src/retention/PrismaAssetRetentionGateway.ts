@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { IRetentionOwnerGateway, ProcessAssetLifecycleUseCase } from '@manaratak/application';
-import { RetentionCandidate, RetentionDecision, RetentionDisposition, RetentionOwner } from '@manaratak/domain';
+import { IRetentionOwnerGateway, ProcessAssetLifecycleUseCase } from '@absheer/application';
+import { RetentionCandidate, RetentionDecision, RetentionDisposition, RetentionOwner } from '@absheer/domain';
 
 export class PrismaAssetRetentionGateway implements IRetentionOwnerGateway {
   readonly owner = RetentionOwner.ASSET;

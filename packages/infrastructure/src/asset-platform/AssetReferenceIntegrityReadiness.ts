@@ -50,20 +50,20 @@ export async function assertAssetReferenceIntegrityInstalled(prisma: Pick<Prisma
       guard.functionName === fn && guard.argumentsHex === args &&
       JSON.stringify(guard.columns) === JSON.stringify([...columns].sort()));
   if (!available('AssetRecord', 'eap_asset_lifecycle_student_document', 27,
-    'manaratak_guard_student_document_asset_lifecycle', '', ['id','lifecycleState'])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
+    'absheer_guard_student_document_asset_lifecycle', '', ['id','lifecycleState'])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   if (!available('AssetRecord', 'eap_asset_lifecycle_certificate_delegation', 27,
-    'manaratak_guard_certificate_delegation_evidence_lifecycle', '', ['lifecycleState'])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
+    'absheer_guard_certificate_delegation_evidence_lifecycle', '', ['lifecycleState'])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   if (!available('AssetRecord', 'eap_asset_reference_lifecycle', 27,
-    'manaratak_protect_asset_references', '', [])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
+    'absheer_protect_asset_references', '', [])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   if (!available('AssetRecord', 'eap_asset_restore_barrier', 27,
-    'manaratak_protect_pending_asset_restore', '', [])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
+    'absheer_protect_pending_asset_restore', '', [])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   if (!available('AssetRecord', 'eap_asset_archive_barrier', 27,
-    'manaratak_protect_pending_asset_archive', '', [])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
+    'absheer_protect_pending_asset_archive', '', [])) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   for (const owner of ASSET_REFERENCE_OWNER_GUARDS) {
     const args = Buffer.from([owner.fields.join(','), String(owner.attachments), String(owner.seo), ''].join('\0')).toString('hex');
     const columns: string[] = [...owner.fields, ...(owner.attachments ? ['attachmentAssetIds'] : []), ...(owner.seo ? ['seoMetadata'] : [])];
     if (!available(owner.table, 'eap_asset_reference_owner', 23,
-      'manaratak_require_active_asset_reference', args, columns)) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
+      'absheer_require_active_asset_reference', args, columns)) throw new Error('ASSET_REFERENCE_INTEGRITY_NOT_INSTALLED');
   }
   const foreignKeys = await prisma.$queryRaw<Array<{ installed: boolean }>>`
     SELECT EXISTS (

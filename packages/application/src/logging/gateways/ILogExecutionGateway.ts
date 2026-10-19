@@ -1,4 +1,4 @@
-import { LogEntry } from '@manaratak/domain';
+import { LogEntry } from '@absheer/domain';
 
 /**
  * Interface for communicating with physical logging infrastructure.

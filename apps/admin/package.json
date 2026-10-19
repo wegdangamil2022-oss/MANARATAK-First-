@@ -1,5 +1,5 @@
 {
-  "name": "@manaratak/admin",
+  "name": "@absheer/admin",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -10,10 +10,10 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@manaratak/ui": "*",
-    "@manaratak/shared": "*",
-    "@manaratak/types": "*",
-    "@manaratak/domain": "*",
+    "@absheer/ui": "*",
+    "@absheer/shared": "*",
+    "@absheer/types": "*",
+    "@absheer/domain": "*",
     "react-router-dom": "^7.18.1",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",

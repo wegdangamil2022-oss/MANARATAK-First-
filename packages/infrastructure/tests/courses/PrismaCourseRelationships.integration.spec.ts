@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { afterAll, describe, expect, it } from 'vitest';
-import { CourseRelationshipResolutionService } from '@manaratak/application';
+import { CourseRelationshipResolutionService } from '@absheer/application';
 import { PrismaCourseRelationshipRepository } from '../../src/courses/PrismaCourseRelationshipRepository';
 import { destructiveDatabaseTestsEnabled } from './disposableDatabaseGuard';
 

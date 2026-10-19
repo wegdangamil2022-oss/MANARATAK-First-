@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "kind": "MANARATAK_OBSERVABILITY_ALERT_RULES",
+  "kind": "ABSHEER_OBSERVABILITY_ALERT_RULES",
   "runtimeStatus": "PENDING_NON_BLOCKING",
   "rules": [
     {

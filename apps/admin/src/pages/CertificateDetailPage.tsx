@@ -1,5 +1,5 @@
 import { useTranslation } from '../i18n/I18nProvider';
-import { certificateCopy } from '@manaratak/shared';
+import { certificateCopy } from '@absheer/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
@@ -181,7 +181,7 @@ export function CertificateDetailPage() {
             <h2 className="mb-3 font-black">{copy("بيانات الشهادة")}</h2>
             <Info label={copy("المستفيد")} value={certificate.recipientDisplayName || copy("لم يُلتقط الاسم عند الإصدار")} />
             <Info label={copy("مرجع الطالب")} value={certificate.studentReferenceId} />
-            <Info label={copy("الجهة المصدرة")} value={certificate.issuerName || 'MANARATAK'} />
+            <Info label={copy("الجهة المصدرة")} value={certificate.issuerName || 'ABSHEER'} />
             <Info label={copy("تاريخ الإكمال")} value={formatDateTime(certificate.completedAt, language)} />
             <Info label={copy("تاريخ الإصدار")} value={formatDateTime(certificate.issuedAt, language)} />
             <Info label={copy("السياسة")} value={certificate.validityPolicy} />

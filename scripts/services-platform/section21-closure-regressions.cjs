@@ -19,7 +19,7 @@ function load(relative) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
   new Function('require', 'module', 'exports', compiled)((name) => {
-    if (name === '@manaratak/domain') return domain;
+    if (name === '@absheer/domain') return domain;
     if (name === '@prisma/client') return { Prisma: { DbNull: dbNull } };
     if (name.startsWith('.')) return load(path.relative(root, path.resolve(path.dirname(file), name + '.ts')));
     return require(name);

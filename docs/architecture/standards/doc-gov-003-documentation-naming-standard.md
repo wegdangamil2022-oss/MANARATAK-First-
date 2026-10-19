@@ -21,10 +21,10 @@
 ---
 
 ## 1. Purpose
-The purpose of the Documentation Naming Standard is to establish a single, enterprise-wide naming convention governing every official document produced throughout the MANARATAK 2.0 project lifecycle. This standard ensures consistency, discoverability, traceability, and structural integrity across the entire documentation repository.
+The purpose of the Documentation Naming Standard is to establish a single, enterprise-wide naming convention governing every official document produced throughout the ABSHEER 2.0 project lifecycle. This standard ensures consistency, discoverability, traceability, and structural integrity across the entire documentation repository.
 
 ## 2. Scope
-This standard applies to all existing and future documentation within the MANARATAK 2.0 ecosystem. It dictates the nomenclature for files, directories, document titles, unique identifiers, version labels, and specific document types such as ADRs and Phase reports.
+This standard applies to all existing and future documentation within the ABSHEER 2.0 ecosystem. It dictates the nomenclature for files, directories, document titles, unique identifiers, version labels, and specific document types such as ADRs and Phase reports.
 
 ## 3. Objectives
 - **Consistency:** Ensure absolute uniformity across all documentation assets.

@@ -10,7 +10,7 @@ import {
   JsonValue,
   type SettingsDependencyPolicy,
   type SettingValidationRules,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 export interface SettingsValueChange {
   key: string;
   level: string;

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { AssetRetentionCategory } from '@manaratak/domain';
+import { AssetRetentionCategory } from '@absheer/domain';
 import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAssetRecordRepository';
 
 describe('EAP Admin pagination and filter integrity', () => {

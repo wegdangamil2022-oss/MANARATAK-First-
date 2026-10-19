@@ -1,5 +1,5 @@
 import { EnterpriseEvent } from '../aggregates/EnterpriseEvent';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 
 export interface IEnterpriseEventRepository {
   save(event: EnterpriseEvent): Promise<void>;

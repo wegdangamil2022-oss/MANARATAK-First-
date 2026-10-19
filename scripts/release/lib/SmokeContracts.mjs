@@ -45,7 +45,7 @@ export async function runSmoke({ api, web, admin, sha }, fetcher = fetch) {
     body.code !== 'AVAILABLE' ||
     !Number.isFinite(Date.parse(body.timestamp)) ||
     Math.abs(Date.now() - Date.parse(body.timestamp)) > 60000 ||
-    health.headers.get('x-manaratak-source-sha') !== sha
+    health.headers.get('x-absheer-source-sha') !== sha
   )
     throw new Error('SMOKE_API_READINESS_OR_REVISION_INVALID');
   for (const [unit, base] of [
@@ -68,7 +68,7 @@ export async function runSmoke({ api, web, admin, sha }, fetcher = fetch) {
       throw new Error('SMOKE_HTML_CONTENT_TYPE_INVALID');
     const html = await readBounded(root);
     if (
-      !html.includes(`<meta name="manaratak-build-sha" content="${sha}">`) ||
+      !html.includes(`<meta name="absheer-build-sha" content="${sha}">`) ||
       !/id=["']root["']/.test(html) ||
       !/<script\b[^>]*src=["'][^"']+\.js(?:\?[^"']*)?["']/.test(html) ||
       /Platform is initializing|Please build web assets/i.test(html)

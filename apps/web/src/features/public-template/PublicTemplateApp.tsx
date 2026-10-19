@@ -361,7 +361,7 @@ export default function App() {
   }, [navigation.state]);
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    const saved = readStored('manaratak_dark_mode');
+    const saved = readStored('absheer_dark_mode');
     if (saved !== null) return saved === 'true';
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches || false;
   });
@@ -379,13 +379,13 @@ export default function App() {
   // Domain datasets are owner-API backed in live mode. Prototype data is available only through the explicit dynamic prototype adapter.
   const [milestones, setMilestones] = useState<ApplicationMilestone[]>(() => {
     return publicDataMode === 'prototype'
-      ? readStoredArray<ApplicationMilestone>('manaratak_milestones', INITIAL_MILESTONES)
+      ? readStoredArray<ApplicationMilestone>('absheer_milestones', INITIAL_MILESTONES)
       : [];
   });
 
   const [favoriteKeys, setFavoriteKeys] = useState<FavoriteKey[]>(() => {
     if (publicDataMode !== 'prototype') return [];
-    const savedV2 = readStored('manaratak_favorites_v2');
+    const savedV2 = readStored('absheer_favorites_v2');
     if (savedV2) {
       try {
         const parsed = JSON.parse(savedV2);
@@ -395,7 +395,7 @@ export default function App() {
       }
     }
 
-    const legacy = readStored('manaratak_favorites');
+    const legacy = readStored('absheer_favorites');
     if (legacy) {
       try {
         const parsed = JSON.parse(legacy);
@@ -410,7 +410,7 @@ export default function App() {
 
   const [notifications, setNotifications] = useState<PushNotificationItem[]>(() => {
     if (publicDataMode !== 'prototype') return [];
-    return readStoredArray<PushNotificationItem>('manaratak_notifications', INITIAL_NOTIFICATIONS).filter((item, index, list) => !item.title.includes('مرحباً بك في منصة منارتك') || list.findIndex((candidate) => candidate.title.includes('مرحباً بك في منصة منارتك')) === index).map((item) => item.title.includes('مرحباً بك في منصة منارتك') ? {...item, id: 'welcome-v29', actionType: undefined, targetId: undefined, body: t('public_template_preview_notifications')} : item);
+    return readStoredArray<PushNotificationItem>('absheer_notifications', INITIAL_NOTIFICATIONS).filter((item, index, list) => !item.title.includes('مرحباً بك في منصة أبشر') || list.findIndex((candidate) => candidate.title.includes('مرحباً بك في منصة أبشر')) === index).map((item) => item.title.includes('مرحباً بك في منصة أبشر') ? {...item, id: 'welcome-v29', actionType: undefined, targetId: undefined, body: t('public_template_preview_notifications')} : item);
   });
 
   // Modal Dialogs
@@ -707,11 +707,11 @@ export default function App() {
       if (typeof preferences?.unreadNotifications === 'number') setLiveUnreadNotifications(preferences.unreadNotifications);
       if (theme === 'DARK' || theme === 'LIGHT' || theme === 'SYSTEM') setIsDarkMode(theme === 'DARK' || (theme === 'SYSTEM' && Boolean(window.matchMedia?.('(prefers-color-scheme: dark)').matches)));
     };
-    window.addEventListener('manaratak-student-preferences', applyPreferences);
-    return () => window.removeEventListener('manaratak-student-preferences', applyPreferences);
+    window.addEventListener('absheer-student-preferences', applyPreferences);
+    return () => window.removeEventListener('absheer-student-preferences', applyPreferences);
   }, []);
   useEffect(() => {
-    writeStored('manaratak_dark_mode', String(isDarkMode));
+    writeStored('absheer_dark_mode', String(isDarkMode));
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
       document.body.classList.add('dark');
@@ -724,12 +724,12 @@ export default function App() {
   // Save to LocalStorage
   useEffect(() => {
     if (publicDataMode !== 'prototype') return;
-    writeStored('manaratak_milestones', JSON.stringify(milestones));
+    writeStored('absheer_milestones', JSON.stringify(milestones));
   }, [milestones, publicDataMode]);
 
   useEffect(() => {
     if (publicDataMode !== 'prototype') return;
-    writeStored('manaratak_favorites_v2', JSON.stringify(favoriteKeys));
+    writeStored('absheer_favorites_v2', JSON.stringify(favoriteKeys));
   }, [favoriteKeys, publicDataMode]);
 
 
@@ -748,7 +748,7 @@ export default function App() {
         try {
           const account = await ApiClient.getMyStudentDashboard();
           if (!cancelled && account.capabilityStatus?.notifications !== 'DEGRADED') setLiveUnreadNotifications(account.statistics.unreadNotifications);
-          if (!cancelled) window.dispatchEvent(new CustomEvent('manaratak-student-preferences', { detail: { theme: account.workspace.theme } }));
+          if (!cancelled) window.dispatchEvent(new CustomEvent('absheer-student-preferences', { detail: { theme: account.workspace.theme } }));
         } catch { /* Account cards retain their own retry path. */ }
         const pending = consumePostLoginAction();
         if (pending?.kind === 'SAVE_FAVORITE') {
@@ -773,7 +773,7 @@ export default function App() {
 
   useEffect(() => {
     if (publicDataMode !== 'prototype') return;
-    writeStored('manaratak_notifications', JSON.stringify(notifications));
+    writeStored('absheer_notifications', JSON.stringify(notifications));
   }, [notifications, publicDataMode]);
 
   // Handle document direction on language change
@@ -834,7 +834,7 @@ export default function App() {
   useEffect(() => {
     if (publicDataMode !== 'prototype') return;
     if (notifications.some(
-        (item) => item.id === 'welcome-v29' || item.title.includes('مرحباً بك في منصة منارتك'))) return;
+        (item) => item.id === 'welcome-v29' || item.title.includes('مرحباً بك في منصة أبشر'))) return;
     const timer = setTimeout(() => {
       setNotifications((previous) => previous.some((item) => item.id === 'welcome-v29') ? previous : [{
         id: 'welcome-v29', timestamp: t('public_template_now'), read: false,
@@ -1029,8 +1029,8 @@ export default function App() {
   const isCompareRoute = /^\/(?:ar|en)\/compare(?:\/|$)/.test(window.location.pathname);
 
   return (
-    <div className="manaratak-public flex flex-col min-h-screen w-full bg-[var(--mn-page)] text-[var(--mn-text)] selection:bg-[var(--mn-accent)]/30 selection:text-[var(--mn-heading)] font-['Cairo',sans-serif] pb-24 sm:pb-28 transition-colors mn-panel ">
-      {cycleIntent&&<div role="dialog" aria-modal="true" aria-label={language==='en'?'Choose application cycle':'اختيار دورة التقديم'} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"><div className="rounded-xl bg-[var(--mn-page)] p-6 space-y-3">
+    <div className="absheer-public flex flex-col min-h-screen w-full bg-[var(--ab-page)] text-[var(--ab-text)] selection:bg-[var(--ab-accent)]/30 selection:text-[var(--ab-heading)] font-['Cairo',sans-serif] pb-24 sm:pb-28 transition-colors ab-panel ">
+      {cycleIntent&&<div role="dialog" aria-modal="true" aria-label={language==='en'?'Choose application cycle':'اختيار دورة التقديم'} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"><div className="rounded-xl bg-[var(--ab-page)] p-6 space-y-3">
         <p>{language==='en'?'Choose the published application cycle. Each cycle keeps its own progress and history.':'اختر دورة التقديم المنشورة. لكل دورة تقدمها وسجلها المستقل.'}</p>
         {cycleIntent.cycles.map(c=><button type="button" className="block border rounded p-2" key={c.id} disabled={cycleBusy} onClick={()=>{setCycleBusy(true);void ApiClient.createMyStudentApplicationTracker({...cycleIntent.input,cycleId:c.id}).then(finishCycleTracking).catch(error=>triggerInstantPush({title:t('public_template_tracker_error'),body:error instanceof Error?error.message:t('public_template_retry'),type:'system'})).finally(()=>setCycleBusy(false));}}>{applicationCycleLabel(c.cycleKey,language==='en'?'en':'ar')}</button>)}
         <button type="button" disabled={cycleBusy} onClick={()=>setCycleIntent(null)}>{language==='en'?'Cancel':'إلغاء'}</button>
@@ -1081,12 +1081,12 @@ export default function App() {
           fallback={
             <div className="flex min-h-[50vh] flex-col items-center justify-center p-8 text-center">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#142B5F] dark:border-[#D6A43B] border-t-transparent mb-3" />
-              <span className="text-xs font-semibold text-[var(--mn-text-muted)]">{t('public_template_loading')}</span>
+              <span className="text-xs font-semibold text-[var(--ab-text-muted)]">{t('public_template_loading')}</span>
             </div>
           }
         >
         {publicDataMode === 'api' && !(activeTab === 'home' && selectedCategory === 'all') && unavailableDomains.length > 0 && (
-          <div className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-5xl items-center justify-between gap-3 rounded-2xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] px-3 py-2 text-[11px] text-[var(--mn-danger-text)]">
+          <div className="mx-auto mt-3 flex w-[calc(100%-1rem)] max-w-5xl items-center justify-between gap-3 rounded-2xl border border-[var(--ab-danger-border)] bg-[var(--ab-danger-soft)] px-3 py-2 text-[11px] text-[var(--ab-danger-text)]">
             <div className="flex min-w-0 items-center gap-2">
               <AlertTriangle className="h-4 w-4 shrink-0" />
               <span>{t('public_template_live_unavailable').replace('{domains}',unavailableDomains.join(', '))}</span>
@@ -1097,7 +1097,7 @@ export default function App() {
           </div>
         )}
         {publicDataMode === 'api' && !(activeTab === 'home' && selectedCategory === 'all') && unavailableDomains.length === 0 && loadingDomains.length > 0 && (
-          <div className="mx-auto mt-3 w-[calc(100%-1rem)] max-w-5xl rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-center text-[10px] font-bold text-[var(--mn-text-muted)]">
+          <div className="mx-auto mt-3 w-[calc(100%-1rem)] max-w-5xl rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] px-3 py-2 text-center text-[10px] font-bold text-[var(--ab-text-muted)]">
             {t('public_template_loading_sources')}
           </div>
         )}
@@ -1797,7 +1797,7 @@ export default function App() {
               ) : selectedCourseTrack === 'native' ? (
                 <CourseTrackPreview
                   track="native"
-                  courses={courses.filter((course) => course.provider.includes('منارتك'))}
+                  courses={courses.filter((course) => course.provider.includes('أبشر'))}
                   favoriteIds={favoriteKeys.filter((k) => k.startsWith('course:')).map((k) => k.replace(/^course:/, ''))}
                   onToggleFavorite={(id) => handleToggleFavorite('course', id)}
                   onBack={goBack}
@@ -1819,7 +1819,7 @@ export default function App() {
               )
             ) : (
               (activeTab === 'search' || (activeTab === 'home' && selectedCategory !== 'all')) && (
-                <div className="w-full max-w-4xl lg:max-w-5xl mx-auto mn-inline-gutter py-2 sm:pt-3 space-y-3">
+                <div className="w-full max-w-4xl lg:max-w-5xl mx-auto ab-inline-gutter py-2 sm:pt-3 space-y-3">
                   {/* Search Bar at Top */}
                   <SmartSearchBar
                     searchQuery={searchQuery}
@@ -1851,8 +1851,8 @@ export default function App() {
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all inline-flex items-center gap-1.5 ${
                           selectedCategory === item.id ||
                           (selectedCategory === 'all' && item.id === 'scholarships')
-                            ? 'bg-[var(--mn-primary)] text-[var(--mn-accent-soft)] shadow-xs mn-inverse '
-                            : 'bg-[var(--mn-surface-muted)] border border-[var(--mn-border)] text-[var(--mn-text)] hover:bg-[var(--mn-page)] mn-panel hover:mn-panel '
+                            ? 'bg-[var(--ab-primary)] text-[var(--ab-accent-soft)] shadow-xs ab-inverse '
+                            : 'bg-[var(--ab-surface-muted)] border border-[var(--ab-border)] text-[var(--ab-text)] hover:bg-[var(--ab-page)] ab-panel hover:ab-panel '
                         }`}
                       >
                         <ItemIcon className="h-3.5 w-3.5 shrink-0" />
@@ -1898,7 +1898,7 @@ export default function App() {
                     /* Scholarships Cards List */
                     <div className="space-y-3 pt-1">
                       {/* Results Count & Filter Bar */}
-                      <div className="flex items-center justify-between text-xs text-[var(--mn-text-muted)] font-bold px-1">
+                      <div className="flex items-center justify-between text-xs text-[var(--ab-text-muted)] font-bold px-1">
                         <span>{t('public_template_available_count').replace('{count}',String(filteredScholarships.length))}</span>
                         <button
                           onClick={() => {
@@ -1906,8 +1906,8 @@ export default function App() {
                           }}
                           className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-colors ${
                             onlyFullyFunded
-                              ? 'bg-[var(--mn-accent)] text-[var(--mn-on-accent)] border-[var(--mn-border-gold)] mn-gold '
-                              : 'bg-[var(--mn-surface-muted)] text-[var(--mn-text)] border-[var(--mn-border)] mn-panel '
+                              ? 'bg-[var(--ab-accent)] text-[var(--ab-on-accent)] border-[var(--ab-border-gold)] ab-gold '
+                              : 'bg-[var(--ab-surface-muted)] text-[var(--ab-text)] border-[var(--ab-border)] ab-panel '
                           }`}
                         >
                           <span className="inline-flex items-center gap-1.5"><BadgeDollarSign className="h-3.5 w-3.5" aria-hidden="true" />{t('public_template_fully_funded')}</span>
@@ -1915,8 +1915,8 @@ export default function App() {
                       </div>
 
                       {filteredScholarships.length === 0 ? (
-                        <div className="py-16 text-center text-[var(--mn-text-muted)] text-xs space-y-2">
-                          <GraduationCap className="w-10 h-10 mx-auto text-[var(--mn-text-muted)]" />
+                        <div className="py-16 text-center text-[var(--ab-text-muted)] text-xs space-y-2">
+                          <GraduationCap className="w-10 h-10 mx-auto text-[var(--ab-text-muted)]" />
                           <p className="font-bold">{t('public_template_no_results')}</p>
                           <button
                             onClick={() => {
@@ -1925,7 +1925,7 @@ export default function App() {
                               setOnlyFullyFunded(false);
                               setOnlyWithoutIelts(false);
                             }}
-                            className="px-4 py-1.5 bg-[var(--mn-primary)] text-[var(--mn-accent-soft)] rounded-xl text-xs font-bold mn-inverse "
+                            className="px-4 py-1.5 bg-[var(--ab-primary)] text-[var(--ab-accent-soft)] rounded-xl text-xs font-bold ab-inverse "
                           >
                             {t('public_template_reset_filters')}
                           </button>
@@ -1946,28 +1946,28 @@ export default function App() {
                                 }
                               }}
                               onClick={() => setSelectedScholarship(sch)}
-                              className="bg-[var(--mn-surface-muted)] rounded-2xl border border-[var(--mn-border)] shadow-xs hover:shadow-md transition-all overflow-hidden p-3.5 space-y-2.5 text-right hover:border-[var(--mn-border-gold)] cursor-pointer active:scale-99 mn-panel "
+                              className="bg-[var(--ab-surface-muted)] rounded-2xl border border-[var(--ab-border)] shadow-xs hover:shadow-md transition-all overflow-hidden p-3.5 space-y-2.5 text-right hover:border-[var(--ab-border-gold)] cursor-pointer active:scale-99 ab-panel "
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div className="flex items-start gap-3">
                                   <img
                                     src={sch.imageUrl}
                                     alt={sch.title}
-                                    className="w-14 h-14 rounded-xl object-cover border border-[var(--mn-border)] shrink-0"
+                                    className="w-14 h-14 rounded-xl object-cover border border-[var(--ab-border)] shrink-0"
                                   />
                                   <div>
                                     <div className="flex items-center gap-1.5">
-                                      <span className="px-2 py-0.5 rounded-full bg-[var(--mn-gold-surface)] text-[var(--mn-heading)] font-bold text-[9px] mn-panel ">
+                                      <span className="px-2 py-0.5 rounded-full bg-[var(--ab-gold-surface)] text-[var(--ab-heading)] font-bold text-[9px] ab-panel ">
                                         {sch.fundingType}
                                       </span>
                                       <span className="text-xs">
                                         {sch.countryFlag} {sch.country}
                                       </span>
                                     </div>
-                                    <h3 className="text-xs font-bold text-[var(--mn-heading)] mt-1 leading-snug">
+                                    <h3 className="text-xs font-bold text-[var(--ab-heading)] mt-1 leading-snug">
                                       {sch.title}
                                     </h3>
-                                    <p className="text-[10px] text-[var(--mn-text-muted)] font-semibold mt-0.5">
+                                    <p className="text-[10px] text-[var(--ab-text-muted)] font-semibold mt-0.5">
                                       {sch.university}
                                     </p>
                                   </div>
@@ -1978,21 +1978,21 @@ export default function App() {
                                     e.stopPropagation();
                                     handleToggleFavorite('scholarship', sch.id);
                                   }}
-                                  className="p-1.5 text-[var(--mn-text-muted)] hover:text-[var(--mn-accent-text)] rounded-lg"
+                                  className="p-1.5 text-[var(--ab-text-muted)] hover:text-[var(--ab-accent-text)] rounded-lg"
                                 >
                                   <Heart
                                     className={`w-4 h-4 ${
                                       isFavorited
-                                        ? 'fill-[var(--mn-accent-soft)] text-[var(--mn-accent-soft)]'
-                                        : 'text-[var(--mn-text-muted)]'
+                                        ? 'fill-[var(--ab-accent-soft)] text-[var(--ab-accent-soft)]'
+                                        : 'text-[var(--ab-text-muted)]'
                                     }`}
                                   />
                                 </button>
                               </div>
 
-                              <div className="flex items-center justify-between pt-2 border-t border-[var(--mn-border)] text-[11px]">
-                                <div className="flex items-center gap-2 text-[var(--mn-text-muted)] font-semibold">
-                                  <span className="flex items-center gap-1 text-[var(--mn-danger-text)] font-bold">
+                              <div className="flex items-center justify-between pt-2 border-t border-[var(--ab-border)] text-[11px]">
+                                <div className="flex items-center gap-2 text-[var(--ab-text-muted)] font-semibold">
+                                  <span className="flex items-center gap-1 text-[var(--ab-danger-text)] font-bold">
                                     <Calendar className="w-3.5 h-3.5" />
                                     {t('public_template_days_remaining').replace('{count}',String(sch.daysLeft))}
                                   </span>
@@ -2000,9 +2000,9 @@ export default function App() {
                                   <span>{sch.degreeLevel.join(', ')}</span>
                                 </div>
 
-                                <span className="text-[11px] font-semibold text-[var(--mn-heading)] flex items-center gap-1">
+                                <span className="text-[11px] font-semibold text-[var(--ab-heading)] flex items-center gap-1">
                                   <span>{t('public_template_details')}</span>
-                                  <ChevronLeft className="w-3 h-3 text-[var(--mn-accent-text)]" />
+                                  <ChevronLeft className="w-3 h-3 text-[var(--ab-accent-text)]" />
                                 </span>
                               </div>
                             </div>
@@ -2070,7 +2070,7 @@ export default function App() {
 
       {/* Bottom Docked Navigation Bar (Always Visible) */}
       {publicDataMode === 'prototype' && (
-        <p className="text-center text-xs text-[var(--mn-text-muted)] py-2" role="status">
+        <p className="text-center text-xs text-[var(--ab-text-muted)] py-2" role="status">
           {t('public_template_prototype')}
         </p>
       )}

@@ -40,7 +40,7 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
   return (
     <section id="featured-scholarships-section" className="px-0 py-3 w-full">
       {/* Standard Framed Container with top accent border only */}
-      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-sm overflow-hidden mn-panel ">
+      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--ab-surface)] to-[var(--ab-page)]/80 border border-[var(--ab-border)] shadow-sm overflow-hidden ab-panel ">
         {/* Elegant top gradient border line */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
         
@@ -57,7 +57,7 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_browse_prominent_funded_scholarships_and_discover_opportunities_to')}</p>
+            <p className="text-[11px] sm:text-xs text-[var(--ab-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_browse_prominent_funded_scholarships_and_discover_opportunities_to')}</p>
           </div>
 
           {/* 2 Featured Cards: Edge-to-edge layout with Square Proportions */}
@@ -78,10 +78,10 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
                     }
                   }}
                   onClick={() => handleCardClick(scholarship)}
-                  className="group relative flex flex-col rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-[var(--mn-border)] bg-[var(--mn-primary)] cursor-pointer transition-all active:scale-97 hover:border-[var(--mn-accent)] mn-inverse "
+                  className="group relative flex flex-col rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-[var(--ab-border)] bg-[var(--ab-primary)] cursor-pointer transition-all active:scale-97 hover:border-[var(--ab-accent)] ab-inverse "
                 >
                   {/* Image Container with Square (1:1) Proportions */}
-                  <div className="relative aspect-square w-full overflow-hidden bg-[var(--mn-primary)] mn-inverse ">
+                  <div className="relative aspect-square w-full overflow-hidden bg-[var(--ab-primary)] ab-inverse ">
                     <img
                       src={scholarship.imageUrl || '/preview-art/scholarships.svg'}
                       alt={scholarship.title}
@@ -98,23 +98,23 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
                         e.stopPropagation();
                         if (onToggleFavorite) onToggleFavorite(scholarship.id);
                       }}
-                      className="absolute top-2 left-2 p-1.5 rounded-full bg-black/50 backdrop-blur-xs text-white hover:text-[var(--mn-accent-text)] transition-colors z-10 cursor-pointer"
+                      className="absolute top-2 left-2 p-1.5 rounded-full bg-black/50 backdrop-blur-xs text-white hover:text-[var(--ab-accent-text)] transition-colors z-10 cursor-pointer"
                       aria-label={publicT('public_add_to_favorites_2')}
                     >
                       <Heart
-                        className={`w-3.5 h-3.5 ${isFav ? 'fill-[var(--mn-accent)] text-[var(--mn-accent-text)]' : 'text-white'}`}
+                        className={`w-3.5 h-3.5 ${isFav ? 'fill-[var(--ab-accent)] text-[var(--ab-accent-text)]' : 'text-white'}`}
                       />
                     </button>
 
                     {/* Dark Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--mn-primary)] via-[var(--mn-primary)]/60 to-transparent pointer-events-none mn-inverse " />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--ab-primary)] via-[var(--ab-primary)]/60 to-transparent pointer-events-none ab-inverse " />
 
                     {/* Card Title and Country */}
                     <div className="absolute inset-x-0 bottom-0 p-2 text-center text-white z-10">
                       <h4 className="font-bold text-[11px] sm:text-xs leading-tight text-white line-clamp-2 drop-shadow-xs mb-0.5 font-['Cairo',sans-serif]">
                         {scholarship.title}
                       </h4>
-                      <p className="text-[10px] font-semibold text-[var(--mn-text-muted)] flex items-center justify-center gap-1 font-['Cairo',sans-serif]">
+                      <p className="text-[10px] font-semibold text-[var(--ab-text-muted)] flex items-center justify-center gap-1 font-['Cairo',sans-serif]">
                         <span>{scholarship.country}</span>
                       </p>
                     </div>
@@ -129,7 +129,7 @@ export const FeaturedScholarships: React.FC<FeaturedScholarshipsProps> = ({
             <button
               id="btn-view-all-scholarships"
               onClick={onViewAllClick}
-              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
+              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--ab-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
             >
               <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_all_scholarships')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />

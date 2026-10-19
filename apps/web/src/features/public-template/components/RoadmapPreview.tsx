@@ -30,7 +30,7 @@ export const RoadmapPreview: React.FC<{
   return (
     <section className="w-full py-3 font-['Cairo',sans-serif]" aria-labelledby="academic-roadmap-title">
       {/* Standard Framed Container with top accent border only */}
-      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-sm overflow-hidden mn-panel">
+      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--ab-surface)] to-[var(--ab-page)]/80 border border-[var(--ab-border)] shadow-sm overflow-hidden ab-panel">
         {/* Elegant top gradient border line */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
 
@@ -47,7 +47,7 @@ export const RoadmapPreview: React.FC<{
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_organized_steps_to_guide_you_from_choosing_a')}</p>
+            <p className="text-[11px] sm:text-xs text-[var(--ab-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_organized_steps_to_guide_you_from_choosing_a')}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-6">
@@ -58,12 +58,12 @@ export const RoadmapPreview: React.FC<{
                   type="button"
                   key={step.number}
                   onClick={() => activate(step.target)}
-                  className="mn-card-subtle group p-2.5 sm:p-3 flex items-center gap-2 text-start transition hover:-translate-y-0.5 hover:border-[var(--mn-accent)]/65 hover:shadow-sm"
+                  className="ab-card-subtle group p-2.5 sm:p-3 flex items-center gap-2 text-start transition hover:-translate-y-0.5 hover:border-[var(--ab-accent)]/65 hover:shadow-sm"
                 >
-                  <span className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-lg bg-[var(--mn-primary)] text-white mn-inverse">
+                  <span className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-lg bg-[var(--ab-primary)] text-white ab-inverse">
                     <Icon className="h-4 w-4" />
                   </span>
-                  <h3 className="text-[11px] sm:text-[12px] font-bold leading-tight text-[var(--mn-heading)] dark:text-white group-hover:text-[var(--mn-accent-text)] transition-colors">
+                  <h3 className="text-[11px] sm:text-[12px] font-bold leading-tight text-[var(--ab-heading)] dark:text-white group-hover:text-[var(--ab-accent-text)] transition-colors">
                     {publicT(step.title)}
                   </h3>
                 </button>
@@ -76,7 +76,7 @@ export const RoadmapPreview: React.FC<{
             <button
               type="button"
               onClick={() => activate('student')}
-              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs cursor-pointer "
+              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--ab-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs cursor-pointer "
             >
               <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_the_steps')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />

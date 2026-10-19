@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {ApplicationLocaleProjectionService} from '../../src/localization/ApplicationLocaleProjectionService';
-import {publicMajorProjection} from '@manaratak/domain';
+import {publicMajorProjection} from '@absheer/domain';
 const major:any={id:'major',publicId:'FEL-330',slug:'fellowship',displayName:'Source',canonicalName:'Source',status:'PUBLISHED',profiles:[{id:'profile',level:'FELLOWSHIP',status:'PUBLISHED',currentPublishedVersionId:'version'}]};
 describe('B11 language survives the immutable owner projection',()=>{
  it('retains locale while dropping private section metadata',()=>{const result=publicMajorProjection(major,[{sectionKey:'requirements',locale:'en',content:'English',reviewStatus:'PUBLISHED',metadata:{private:'secret'}}]);expect(result.contentSections).toEqual([{sectionKey:'requirements',locale:'en',title:undefined,content:'English',reviewStatus:'PUBLISHED'}]);expect(JSON.stringify(result)).not.toContain('secret');});

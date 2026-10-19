@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: notifications
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: notifications
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- Source preparation only. Review/apply after section 28 with a backup and separate DB approval.
 ALTER TABLE "NotificationTemplateRecord" ADD COLUMN "contents" JSONB, ADD COLUMN "active" BOOLEAN NOT NULL DEFAULT TRUE;
 ALTER TABLE "NotificationIntentRecord" ADD COLUMN "variablesEncrypted" JSONB, ADD COLUMN "variablesFingerprint" TEXT, ADD COLUMN "payloadErasedAt" TIMESTAMP(3), ADD COLUMN "contentsSnapshot" JSONB, ADD COLUMN "channelsSnapshot" JSONB,

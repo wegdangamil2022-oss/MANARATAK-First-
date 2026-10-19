@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
-import { type ISettingsGovernanceGateway, type SettingsProposal } from '@manaratak/application';
+import { type ISettingsGovernanceGateway, type SettingsProposal } from '@absheer/application';
 import {
   type AtomicPersistenceContext,
   ScopeIdentifier,
@@ -13,7 +13,7 @@ import {
   BooleanValue,
   JsonValue,
   validateSettingRuleValue,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { PrismaSettingsDependencyGuard } from './PrismaSettingsDependencyGuard';
 import { PrismaSettingAssignmentRepository } from './PrismaSettingAssignmentRepository';
 const canonical = (value: unknown): string =>

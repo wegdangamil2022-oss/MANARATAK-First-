@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: cms
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: cms
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- SOURCE-ONLY; never run against a real DB until Post-28 approval/backups.
 -- Read path retains legacy published rows until each has a stored snapshot.
 CREATE TABLE "CmsSitePublishedSnapshot" (

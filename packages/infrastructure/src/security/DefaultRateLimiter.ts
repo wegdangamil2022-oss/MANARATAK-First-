@@ -1,4 +1,4 @@
-import { IRateLimiter, IRateLimitResult } from '@manaratak/core';
+import { IRateLimiter, IRateLimitResult } from '@absheer/core';
 
 export interface RateLimitRecord {
   count: number;

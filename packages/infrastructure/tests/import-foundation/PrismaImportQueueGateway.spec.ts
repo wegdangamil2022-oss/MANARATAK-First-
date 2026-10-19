@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ImportCheckpoint, ImportJobStatus, ImportRetryPolicy } from '@manaratak/domain';
+import { ImportCheckpoint, ImportJobStatus, ImportRetryPolicy } from '@absheer/domain';
 import { PrismaImportQueueGateway } from '../../src/import-foundation/PrismaImportQueueGateway';
 
 describe('PrismaImportQueueGateway', () => {

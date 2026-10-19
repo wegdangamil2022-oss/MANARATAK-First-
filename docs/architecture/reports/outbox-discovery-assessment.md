@@ -1,9 +1,9 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-4 Transactional Outbox Strategy
 # Phase 1 — Discovery & Architecture Assessment
 
 ## 1. Executive Summary
-The Enterprise Architecture Review Board (ARB) has conducted a comprehensive discovery phase to evaluate the reliability and consistency of event publishing across MANARATAK 2.0. The assessment reveals that while the platform heavily relies on Event-Driven Architecture (EDA) to synchronize Search, Caching, Analytics, and downstream systems, the current implementation relies on direct in-process dispatching (e.g., MediatR `IPublisher`) coupled with database transactions (`SaveChangesAsync`). This approach suffers from the classic "Dual-Write Problem," introducing critical risks of phantom events, data loss, and distributed inconsistency. A standardized Transactional Outbox pattern is urgently required to guarantee at-least-once delivery and eventual consistency across the enterprise.
+The Enterprise Architecture Review Board (ARB) has conducted a comprehensive discovery phase to evaluate the reliability and consistency of event publishing across ABSHEER 2.0. The assessment reveals that while the platform heavily relies on Event-Driven Architecture (EDA) to synchronize Search, Caching, Analytics, and downstream systems, the current implementation relies on direct in-process dispatching (e.g., MediatR `IPublisher`) coupled with database transactions (`SaveChangesAsync`). This approach suffers from the classic "Dual-Write Problem," introducing critical risks of phantom events, data loss, and distributed inconsistency. A standardized Transactional Outbox pattern is urgently required to guarantee at-least-once delivery and eventual consistency across the enterprise.
 
 ## 2. Current Architecture Assessment
 - **Current Event Publishing:** Domain entities accumulate events internally (e.g., `_domainEvents`). During `SaveChangesAsync`, an Entity Framework interceptor or the Repository base class reads these events and publishes them via an in-process memory bus (like `IPublisher`).

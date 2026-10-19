@@ -8,7 +8,7 @@ import {
   UpsertInternationalTestDegreeRelationshipReference,
   UpsertInternationalTestDto,
   UpsertInternationalTestReferenceRelationshipDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface CanonicalInternationalTestRelationships {
   countryRelationships?: UpsertInternationalTestReferenceRelationshipDto[];

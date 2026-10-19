@@ -7,7 +7,7 @@ import {
   IAssetSanitizationGateway,
   AssetId,
   AssetLifecycleState,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 import {
   ValidateAssetDto,

@@ -3,7 +3,7 @@ import {
   AssetSecurityClassification,
   AssetRetentionCategory,
   AssetStorageZone
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface RequestAssetUploadLocatorDto {
   assetId: string;

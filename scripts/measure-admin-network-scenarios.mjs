@@ -131,7 +131,7 @@ async function runScenarioSuccessfulLoginAndDashboard() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      email: 'admin@manaratak.local',
+      email: 'admin@absheer.local',
       password: 'AdminPassword123!',
     }),
   });

@@ -1,8 +1,8 @@
 import { publishedCatalogImage, type PublishedCatalogImageServices } from '../../media/PublishedCatalogImage.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { LocalizedPublicUniversityUseCases } from '@manaratak/application';
-import { IReferenceDataRepository, IUniversityRepository, PublicUniversityFilters } from '@manaratak/domain';
+import { LocalizedPublicUniversityUseCases } from '@absheer/application';
+import { IReferenceDataRepository, IUniversityRepository, PublicUniversityFilters } from '@absheer/domain';
 import { localeQuerySchema, parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
 
 export class UniversityPublicRouter {

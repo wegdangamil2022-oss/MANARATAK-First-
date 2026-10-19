@@ -4,7 +4,7 @@ BEGIN;
 
 -- statement-breakpoint
 
-CREATE FUNCTION manaratak_asset_reference_ids(document jsonb, fields text[], attachments boolean, seo boolean)
+CREATE FUNCTION absheer_asset_reference_ids(document jsonb, fields text[], attachments boolean, seo boolean)
 RETURNS text[] LANGUAGE sql IMMUTABLE AS $$
   SELECT COALESCE(array_agg(DISTINCT reference_id ORDER BY reference_id), ARRAY[]::text[])
   FROM (
@@ -23,7 +23,7 @@ $$;
 
 -- statement-breakpoint
 
-CREATE FUNCTION manaratak_require_active_asset_reference() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE FUNCTION absheer_require_active_asset_reference() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE
   fields text[] := string_to_array(TG_ARGV[0], ',');
   new_refs text[];
@@ -31,9 +31,9 @@ DECLARE
   reference_id text;
   asset_state text;
 BEGIN
-  new_refs := manaratak_asset_reference_ids(to_jsonb(NEW), fields, TG_ARGV[1]::boolean, TG_ARGV[2]::boolean);
+  new_refs := absheer_asset_reference_ids(to_jsonb(NEW), fields, TG_ARGV[1]::boolean, TG_ARGV[2]::boolean);
   IF TG_OP = 'UPDATE' THEN
-    old_refs := manaratak_asset_reference_ids(to_jsonb(OLD), fields, TG_ARGV[1]::boolean, TG_ARGV[2]::boolean);
+    old_refs := absheer_asset_reference_ids(to_jsonb(OLD), fields, TG_ARGV[1]::boolean, TG_ARGV[2]::boolean);
   END IF;
   -- Ordered locks last until the owner transaction commits/rolls back, including bulk/nested writes.
   FOREACH reference_id IN ARRAY new_refs LOOP
@@ -50,7 +50,7 @@ $$;
 
 -- statement-breakpoint
 
-CREATE FUNCTION manaratak_protect_asset_references() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE FUNCTION absheer_protect_asset_references() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE used boolean;
 BEGIN
   IF TG_OP = 'UPDATE' THEN
@@ -133,112 +133,112 @@ $$;
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_lifecycle" BEFORE UPDATE OR DELETE ON "AssetRecord"
-FOR EACH ROW EXECUTE FUNCTION manaratak_protect_asset_references();
+FOR EACH ROW EXECUTE FUNCTION absheer_protect_asset_references();
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "thumbnailAssetId" ON "Course"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('thumbnailAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('thumbnailAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "assetId" ON "CourseLessonAsset"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('assetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('assetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "issuerLogoAssetId" ON "CertificateIssuer"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('issuerLogoAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('issuerLogoAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "logoAssetId", "sealAssetId", "signatureAssetId", "designAssetId" ON "CertificateTemplateVersion"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('logoAssetId,sealAssetId,signatureAssetId,designAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('logoAssetId,sealAssetId,signatureAssetId,designAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "certificatePdfAssetId", "previewImageAssetId", "verificationQrAssetId", "signatureAssetId" ON "Certificate"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('certificatePdfAssetId,previewImageAssetId,verificationQrAssetId,signatureAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('certificatePdfAssetId,previewImageAssetId,verificationQrAssetId,signatureAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "logoAssetId" ON "University"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('logoAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('logoAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "assetId" ON "InternationalTestPreparationMaterial"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('assetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('assetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "avatarAssetId" ON "StudentWorkspace"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('avatarAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('avatarAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "certificatePdfAssetId", "previewImageAssetId" ON "StudentCertificateReadProjection"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('certificatePdfAssetId,previewImageAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('certificatePdfAssetId,previewImageAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "featuredAssetId", "seoMetadata" ON "CmsContentNode"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('featuredAssetId', 'false', 'true');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('featuredAssetId', 'false', 'true');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "featuredAssetId", "seoMetadata" ON "CmsLocalizedContent"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('featuredAssetId', 'false', 'true');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('featuredAssetId', 'false', 'true');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "assetId" ON "CmsContentAttachment"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('assetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('assetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "featuredAssetId", "seoMetadata", "attachmentAssetIds" ON "CmsPublishedContent"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('featuredAssetId', 'true', 'true');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('featuredAssetId', 'true', 'true');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "flagAssetId" ON "ReferenceCountry"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('flagAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('flagAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "imageAssetId" ON "StudyDestinationProfile"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('imageAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('imageAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "iconAssetId" ON "StudentToolDefinitionRecord"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('iconAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('iconAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "thumbnailAssetId" ON "ServiceCatalogRecord"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('thumbnailAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('thumbnailAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "assetId" ON "ServiceDeliveryArtifactRecord"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('assetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('assetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "logoAssetId" ON "CareerEmployerRecord"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('logoAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('logoAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "resumeAssetId" ON "CareerProfileRecord"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('resumeAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('resumeAssetId', 'false', 'false');
 
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "cvAssetId" ON "CareerApplicationRecord"
-FOR EACH ROW EXECUTE FUNCTION manaratak_require_active_asset_reference('cvAssetId', 'false', 'false');
+FOR EACH ROW EXECUTE FUNCTION absheer_require_active_asset_reference('cvAssetId', 'false', 'false');
 
 -- statement-breakpoint
 

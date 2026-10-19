@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ImportTargetDomain } from '@manaratak/domain';
+import { ImportTargetDomain } from '@absheer/domain';
 import { MajorDetailDossierMarkdownParser } from '../../src/majors/services/MajorDetailDossierMarkdownParser';
 
 describe('MajorDetailDossierMarkdownParser', () => {

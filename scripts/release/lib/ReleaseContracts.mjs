@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-export const REPOSITORY = 'wegdangamil2022-oss/MANARATAK-First-';
+export const REPOSITORY = 'wegdangamil2022-oss/ABSHEER-First-';
 export const SHA = /^[0-9a-f]{40}$/;
 export const DIGEST = /^[0-9a-f]{64}$/;
 export const READINESS_PATH = '/api/v1/monitoring/health/readiness';
@@ -48,7 +48,7 @@ export function verifyReleaseManifest(directory, expectedSha, expectedRepository
   );
   if (
     manifest.version !== 2 ||
-    manifest.kind !== 'MANARATAK_IMMUTABLE_RELEASE' ||
+    manifest.kind !== 'ABSHEER_IMMUTABLE_RELEASE' ||
     manifest.sourceSha !== expectedSha ||
     manifest.provenance?.repository !== expectedRepository
   )

@@ -1,5 +1,5 @@
 import { RoleAssignment } from '../aggregates/RoleAssignment';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 import { AtomicPersistenceContext } from '../../event-foundation/outbox/TransactionalOutbox';
 
 export interface IRoleAssignmentRepository {

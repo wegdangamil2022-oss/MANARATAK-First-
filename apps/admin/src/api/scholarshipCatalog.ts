@@ -5,7 +5,7 @@ import type {
   ScholarshipEligibilityItemDto,
   ScholarshipMajorTargetDto,
   ScholarshipRequiredDocumentDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { adminApiClient } from './client';
 
 export interface ScholarshipCatalogUnresolvedLink {

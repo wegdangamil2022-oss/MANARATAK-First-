@@ -73,36 +73,36 @@ textarea {
   }
 }
 
-/* MNT-AUD-0114: CSP-safe dynamic progress and decorative presentation. */
-.mn-student-hero-pattern {
-  background-image: radial-gradient(circle at 20% 30%, var(--mn-accent) 0 2px, transparent 3px);
+/* ABSH-AUD-0114: CSP-safe dynamic progress and decorative presentation. */
+.ab-student-hero-pattern {
+  background-image: radial-gradient(circle at 20% 30%, var(--ab-accent) 0 2px, transparent 3px);
 }
 
-.mn-native-progress {
+.ab-native-progress {
   display: block;
   appearance: none;
   -webkit-appearance: none;
   overflow: hidden;
   border: 0;
   border-radius: 9999px;
-  background: var(--mn-surface-muted, #e2e8f0);
+  background: var(--ab-surface-muted, #e2e8f0);
 }
-.mn-native-progress::-webkit-progress-bar {
+.ab-native-progress::-webkit-progress-bar {
   border-radius: 9999px;
-  background: var(--mn-surface-muted, #e2e8f0);
+  background: var(--ab-surface-muted, #e2e8f0);
 }
-.mn-native-progress::-webkit-progress-value { border-radius: 9999px; }
-.mn-native-progress::-moz-progress-bar { border-radius: 9999px; }
-.mn-native-progress-secondary::-webkit-progress-value { background: var(--mn-secondary, #0E7C86); }
-.mn-native-progress-secondary::-moz-progress-bar { background: var(--mn-secondary, #0E7C86); }
-.mn-native-progress-primary::-webkit-progress-value { background: var(--mn-primary, #142B5F); }
-.mn-native-progress-primary::-moz-progress-bar { background: var(--mn-primary, #142B5F); }
-.mn-native-progress-accent::-webkit-progress-value { background: var(--mn-accent, #D6A43B); }
-.mn-native-progress-accent::-moz-progress-bar { background: var(--mn-accent, #D6A43B); }
-.mn-native-progress-accent-on-dark { background: rgb(255 255 255 / 10%); }
-.mn-native-progress-accent-on-dark::-webkit-progress-bar { background: rgb(255 255 255 / 10%); }
-.mn-native-progress-accent-on-dark::-webkit-progress-value { background: var(--mn-accent, #D6A43B); }
-.mn-native-progress-accent-on-dark::-moz-progress-bar { background: var(--mn-accent, #D6A43B); }
+.ab-native-progress::-webkit-progress-value { border-radius: 9999px; }
+.ab-native-progress::-moz-progress-bar { border-radius: 9999px; }
+.ab-native-progress-secondary::-webkit-progress-value { background: var(--ab-secondary, #0E7C86); }
+.ab-native-progress-secondary::-moz-progress-bar { background: var(--ab-secondary, #0E7C86); }
+.ab-native-progress-primary::-webkit-progress-value { background: var(--ab-primary, #142B5F); }
+.ab-native-progress-primary::-moz-progress-bar { background: var(--ab-primary, #142B5F); }
+.ab-native-progress-accent::-webkit-progress-value { background: var(--ab-accent, #D6A43B); }
+.ab-native-progress-accent::-moz-progress-bar { background: var(--ab-accent, #D6A43B); }
+.ab-native-progress-accent-on-dark { background: rgb(255 255 255 / 10%); }
+.ab-native-progress-accent-on-dark::-webkit-progress-bar { background: rgb(255 255 255 / 10%); }
+.ab-native-progress-accent-on-dark::-webkit-progress-value { background: var(--ab-accent, #D6A43B); }
+.ab-native-progress-accent-on-dark::-moz-progress-bar { background: var(--ab-accent, #D6A43B); }
 
 @keyframes swipeLeftMotion {
   0% {

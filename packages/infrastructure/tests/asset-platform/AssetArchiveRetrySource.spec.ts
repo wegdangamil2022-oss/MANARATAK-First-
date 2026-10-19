@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import { RetentionDisposition } from '@manaratak/domain';
+import { RetentionDisposition } from '@absheer/domain';
 import { PrismaAssetRetentionGateway } from '../../src/retention/PrismaAssetRetentionGateway';
 // Isolates retention claim/retry handling, not EAP permission to retry an uncertain provider write.
 it('can retry retention orchestration when its lifecycle adapter permits a later attempt', async () => {

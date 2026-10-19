@@ -7,7 +7,7 @@ const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
 const exists = (p) => fs.existsSync(path.join(root, p));
 
-test('MNT-AUD-0111 retires orphan DTO middleware and establishes strict route-local validation authority', () => {
+test('ABSH-AUD-0111 retires orphan DTO middleware and establishes strict route-local validation authority', () => {
   assert.equal(exists('apps/api/src/presentation/validation/DtoValidationMiddleware.ts'), false);
   const app = read('apps/api/src/app.ts');
   assert.doesNotMatch(app, /new DtoValidationMiddleware|new ValidationService|new ZodValidationProvider|new DefaultSanitizer/);
@@ -17,7 +17,7 @@ test('MNT-AUD-0111 retires orphan DTO middleware and establishes strict route-lo
   assert.doesNotMatch(schemas, /\.passthrough\(\)/);
 });
 
-test('MNT-AUD-0111 privileged routers never forward raw request bodies into application commands', () => {
+test('ABSH-AUD-0111 privileged routers never forward raw request bodies into application commands', () => {
   const routerDir = path.join(root, 'apps/api/src/presentation/api/router');
   const violations = [];
   for (const name of fs.readdirSync(routerDir).filter((n) => n.endsWith('.ts'))) {
@@ -36,7 +36,7 @@ test('MNT-AUD-0111 privileged routers never forward raw request bodies into appl
   assert.deepEqual(violations, []);
 });
 
-test('MNT-AUD-0111 known legacy and later-domain regressions are explicitly schema-gated', () => {
+test('ABSH-AUD-0111 known legacy and later-domain regressions are explicitly schema-gated', () => {
   const workflow = read('apps/api/src/presentation/api/router/WorkflowRouter.ts');
   const apiFoundation = read('apps/api/src/presentation/api/router/ApiFoundationRouter.ts');
   const shared = read('apps/api/src/presentation/api/router/SharedComponentRouter.ts');

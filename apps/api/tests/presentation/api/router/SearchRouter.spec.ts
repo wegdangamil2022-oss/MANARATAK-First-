@@ -1,8 +1,8 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { ManageSearchUseCase, type IPublicSearchGateway } from '@manaratak/application';
-import { SearchResult, type ISearchRequestRepository } from '@manaratak/domain';
+import { ManageSearchUseCase, type IPublicSearchGateway } from '@absheer/application';
+import { SearchResult, type ISearchRequestRepository } from '@absheer/domain';
 import { SearchRouter } from '../../../../src/presentation/api/router/SearchRouter';
 vi.mock('../../../../src/infrastructure/di/container.js', () => ({ container: { resolve: vi.fn() } }));
 

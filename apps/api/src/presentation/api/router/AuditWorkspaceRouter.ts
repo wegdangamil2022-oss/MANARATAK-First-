@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
-import type { AuthorizationEvaluatorService } from '@manaratak/domain';
-import type { AuditWorkspaceUseCases } from '@manaratak/application';
+import type { AuthorizationEvaluatorService } from '@absheer/domain';
+import type { AuditWorkspaceUseCases } from '@absheer/application';
 import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
 import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
 

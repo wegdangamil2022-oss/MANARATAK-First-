@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ExternalCourseProviderStatus, type AtomicPersistenceContext, type AuditRecord, type ExternalCourseProviderDto, type ICourseProviderRegistryRepository, type ITransactionalAuditRecordRepository, type ITransactionalOutboxStore, type TransactionalOutboxEntry, type UpdateCourseProviderMappings } from '@manaratak/domain';
+import { ExternalCourseProviderStatus, type AtomicPersistenceContext, type AuditRecord, type ExternalCourseProviderDto, type ICourseProviderRegistryRepository, type ITransactionalAuditRecordRepository, type ITransactionalOutboxStore, type TransactionalOutboxEntry, type UpdateCourseProviderMappings } from '@absheer/domain';
 import { CourseProviderRegistryUseCases, validateProviderMappings } from '../../src/courses/use-cases/CourseProviderRegistryUseCases';
 import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
 

@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: import
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: import
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- SOURCE ONLY; UNAPPLIED. Screening receipts do not authorize canonical writes.
 -- AlterTable
 ALTER TABLE "ImportBatch" ADD COLUMN     "invalidRecords" INTEGER,

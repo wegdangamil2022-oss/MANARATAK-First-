@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { IReferenceDataRepository, ReferenceDataSeedBatch } from '@manaratak/domain';
-import { ReferenceDataSeedStatus } from '@manaratak/domain';
+import type { IReferenceDataRepository, ReferenceDataSeedBatch } from '@absheer/domain';
+import { ReferenceDataSeedStatus } from '@absheer/domain';
 import { ReferenceDataSeedApplyService } from '../../src';
 
 describe('P7 legacy SeedApply fail-closed gate', () => {

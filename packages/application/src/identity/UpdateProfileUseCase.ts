@@ -1,5 +1,5 @@
-import { UseCase, Result, ResultFactory } from '@manaratak/core';
-import { IIdentityRepository, Profile } from '@manaratak/domain';
+import { UseCase, Result, ResultFactory } from '@absheer/core';
+import { IIdentityRepository, Profile } from '@absheer/domain';
 import { UpdateProfileInput, IdentityDto } from './dtos';
 import { IdentityDtoMapper } from './mapper';
 

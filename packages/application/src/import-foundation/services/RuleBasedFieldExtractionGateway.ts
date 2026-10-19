@@ -4,7 +4,7 @@ import {
   ConfidenceScore,
   FieldEvidence,
   ExtractionCandidate
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { IFieldExtractionGateway } from '../contracts/IFieldExtractionGateway';
 import {
   ExtractFieldsCommand,

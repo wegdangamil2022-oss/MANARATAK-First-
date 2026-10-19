@@ -27,7 +27,7 @@ import {
   UpdateCourseQuestionBankDto,
   UpdateCourseQuestionDto,
   UpdateCourseQuizDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class CourseCurriculumUseCases {
   constructor(

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ValueType, SettingDefinition, NamespacedKey, ScopeIdentifier, SettingAssignment, SettingVersion, BooleanValue } from '@manaratak/domain';
+import { ValueType, SettingDefinition, NamespacedKey, ScopeIdentifier, SettingAssignment, SettingVersion, BooleanValue } from '@absheer/domain';
 import { ManageSettingsUseCase } from '../../src/settings/use-cases/ManageSettingsUseCase';
 import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';

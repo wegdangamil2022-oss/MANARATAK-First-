@@ -1,4 +1,4 @@
-import type { ConnectorSignature, ImportSourceDefinition, SourceConnectorCategory } from '@manaratak/domain';
+import type { ConnectorSignature, ImportSourceDefinition, SourceConnectorCategory } from '@absheer/domain';
 
 export interface ManualSourceInput { rawBytes: Uint8Array; fileName?: string; contentType?: string; assetReference?: string; }
 export interface SourceAcquisitionRequest { targetUrl?: string; conditional?: { etag?: string; lastModified?: string }; manualInput?: ManualSourceInput; timeoutMs?: number; maxResponseBytes?: number; maxRedirects?: number; }

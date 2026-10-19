@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { container, registerDependencies } from '../../../src/infrastructure/di/container';
-import { CapturedEmailDeliveryGateway, SmtpEmailDeliveryGateway } from '@manaratak/infrastructure';
+import { CapturedEmailDeliveryGateway, SmtpEmailDeliveryGateway } from '@absheer/infrastructure';
 
 describe('M5 email composition', () => {
   it('keeps captured delivery available for source tests', () => {

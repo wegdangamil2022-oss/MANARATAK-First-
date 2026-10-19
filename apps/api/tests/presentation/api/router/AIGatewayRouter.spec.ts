@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { AIExecutionStatus } from '@manaratak/domain';
+import { AIExecutionStatus } from '@absheer/domain';
 import { AIGatewayRouter } from '../../../../src/presentation/api/router/AIGatewayRouter';
 
 describe('AIGatewayRouter capability boundary', () => {

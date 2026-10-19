@@ -3,7 +3,7 @@ import {
   IPermissionEvaluator,
   Role,
   Permission
-} from '@manaratak/core';
+} from '@absheer/core';
 
 export interface IUserRoleProvider {
   getRolesForUser(userId: string): Promise<Role[]>;

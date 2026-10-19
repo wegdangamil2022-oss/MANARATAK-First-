@@ -79,7 +79,7 @@ describe('B08 owner discovery', () => {
     state.courses.mockResolvedValue({ data: [{ course: { id: 'course-slug', title: 'Published course' }, imported: null, track: 'native' }], total: 41, nextCursor: 'next-course' });
     await mount(<PublishedCatalogDiscovery kind="courses" courseTrack="native" initialQuery="Computing" />);
     await act(async () => button('Load more').props.onClick());
-    expect(state.courses).toHaveBeenLastCalledWith(expect.objectContaining({ category: 'Computing', originType: 'NATIVE_MANARATAK_COURSE', cursor: 'next-course' }), 'en', expect.any(AbortSignal));
+    expect(state.courses).toHaveBeenLastCalledWith(expect.objectContaining({ category: 'Computing', originType: 'NATIVE_ABSHEER_COURSE', cursor: 'next-course' }), 'en', expect.any(AbortSignal));
   });
   it('continues editorial discovery with the actual CMS offset contract', async () => {
     state.language = 'en'; state.articles.mockImplementation(async ({ page }) => ({ data: [{ id: String(page), titleAr: 'Article', titleEn: 'Published article', body: 'Body' }], total: 101, totalPages: 6 }));

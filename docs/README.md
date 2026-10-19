@@ -1,4 +1,4 @@
-# MANARATAK 2.0 Documentation Index
+# ABSHEER 2.0 Documentation Index
 
 **Status:** ACTIVE / SOURCE-ALIGNED  
 **Updated:** 2026-10-11
@@ -8,8 +8,8 @@ This file is the navigation entrypoint for the current `docs/` tree. It does not
 
 ## Authority order
 
-1. [`governance/blueprint/MANARATAK-2.0-Master-Blueprint.md`](./governance/blueprint/MANARATAK-2.0-Master-Blueprint.md) — project constitution.
-2. [`governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md`](./governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md) — current phase ownership and sequence.
+1. [`governance/blueprint/ABSHEER-2.0-Master-Blueprint.md`](./governance/blueprint/ABSHEER-2.0-Master-Blueprint.md) — project constitution.
+2. [`governance/roadmap/ABSHEER-2.0-Roadmap-v6.0.md`](./governance/roadmap/ABSHEER-2.0-Roadmap-v6.0.md) — current phase ownership and sequence.
 3. [`architecture/Enterprise-Architecture-Governance-Index.md`](./architecture/Enterprise-Architecture-Governance-Index.md) and active ADRs/standards — cross-cutting architecture authority.
 4. `phases/` — phase architecture/domain/implementation requirements.
 5. `operations/` — executable operational runbooks and runtime handoff contracts.
@@ -69,7 +69,7 @@ The repository currently contains these phase roots:
 
 For the current remediation chain, read in this order:
 
-- `remediation/MANARATAK_REMEDIATION_EXECUTION_REGISTER_v0.68_ORDERED_W2_EXECUTED.md` — preserved ordered register copy/evidence baseline.
+- `remediation/ABSHEER_REMEDIATION_EXECUTION_REGISTER_v0.68_ORDERED_W2_EXECUTED.md` — preserved ordered register copy/evidence baseline.
 - `remediation/CROSS_PHASE_RELATIONSHIP_CLOSURE_MATRIX.md` — active source-rebaselined cross-phase relationship authority.
 - `remediation/P23_P24_REBASELINE_TRACEABILITY.md` — P23/P24 source rebaseline and runtime-pending boundary.
 - `remediation/W2_SOURCE_CLOSURE_2026-09-06.md` through the latest `W*_CLOSED_*.md` wave closure records.

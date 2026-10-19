@@ -136,7 +136,7 @@ function collectCycleViolations() {
     const source = fs.readFileSync(file, 'utf8');
     const owner = packageByFile.get(file);
     for (const specifier of importSpecifiers(source)) {
-      if (specifier.startsWith('@manaratak/')) {
+      if (specifier.startsWith('@absheer/')) {
         const target = [...packages.keys()].find((name) => specifier === name || specifier.startsWith(`${name}/`));
         if (target && target !== owner) packageEdges.get(owner)?.add(target);
       }

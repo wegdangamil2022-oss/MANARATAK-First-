@@ -29,11 +29,11 @@ export default [
         {
           patterns: [
             {
-              group: ["@manaratak/ui/*", "!@manaratak/ui"],
-              message: "Please use public exports from @manaratak/ui."
+              group: ["@absheer/ui/*", "!@absheer/ui"],
+              message: "Please use public exports from @absheer/ui."
             },
             {
-              group: ["@manaratak/*/src/infrastructure/*"],
+              group: ["@absheer/*/src/infrastructure/*"],
               message: "Clean architecture violation: Cannot import directly from infrastructure layers."
             }
           ]

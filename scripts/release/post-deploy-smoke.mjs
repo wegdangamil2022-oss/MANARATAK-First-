@@ -5,9 +5,9 @@ const environment = process.argv[2];
 if (!['validation', 'staging', 'production'].includes(environment))
   throw new Error('SMOKE_ENVIRONMENT_INVALID');
 await runSmoke({
-  api: required('MANARATAK_SMOKE_API_URL'),
-  web: required('MANARATAK_SMOKE_WEB_URL'),
-  admin: required('MANARATAK_SMOKE_ADMIN_URL'),
+  api: required('ABSHEER_SMOKE_API_URL'),
+  web: required('ABSHEER_SMOKE_WEB_URL'),
+  admin: required('ABSHEER_SMOKE_ADMIN_URL'),
   sha: required('SOURCE_SHA'),
 });
 console.log(`POST_DEPLOY_SMOKE=${environment.toUpperCase()}_PASS`);

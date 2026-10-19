@@ -1,13 +1,13 @@
 import https from 'node:https';
-import { ImportSourceDefinition as SourceDefinition } from '@manaratak/domain';
-import type { ISourceAccessAuthority, ISourceAcquisitionLimiter } from '@manaratak/application';
+import { ImportSourceDefinition as SourceDefinition } from '@absheer/domain';
+import type { ISourceAccessAuthority, ISourceAcquisitionLimiter } from '@absheer/application';
 import { assertRobotsAllowed } from './SignedSourceAccessAuthority';
-import { SourceAccessExecutionPolicy, type ImportSourceDefinition } from '@manaratak/domain';
+import { SourceAccessExecutionPolicy, type ImportSourceDefinition } from '@absheer/domain';
 import type {
   ISafeSourceHttpTransport,
   SafeSourceHttpResponse,
   SourceAcquisitionRequest,
-} from '@manaratak/application';
+} from '@absheer/application';
 import { SourceNetworkSecurityPolicy } from './SourceNetworkSecurityPolicy';
 
 export const SOURCE_HTTP_LIMITS = Object.freeze({
@@ -154,7 +154,7 @@ export class NodeSafeSourceHttpTransport implements ISafeSourceHttpTransport {
         const robots = await this.policy.validate(robotsSource, robotsUrl.toString());
         await this.limiter?.wait(source);
         const policy = await this.executor.execute({ url: robots.url, pinnedAddress: robots.addresses[0], timeoutMs,
-          maxBytes: 100_000, headers: { 'User-Agent': 'ManaratakImport' } });
+          maxBytes: 100_000, headers: { 'User-Agent': 'AbsheerImport' } });
         if (policy.statusCode !== 200) throw new Error('SOURCE_ROBOTS_POLICY_UNAVAILABLE');
         let text: string; try { text = new TextDecoder('utf-8', { fatal: true }).decode(policy.rawBytes); }
         catch { throw new Error('SOURCE_ROBOTS_POLICY_INVALID'); }
@@ -167,7 +167,7 @@ export class NodeSafeSourceHttpTransport implements ISafeSourceHttpTransport {
         pinnedAddress: target.addresses[0],
         timeoutMs,
         maxBytes,
-        headers: { 'User-Agent': 'ManaratakImport', ...accessHeaders,
+        headers: { 'User-Agent': 'AbsheerImport', ...accessHeaders,
         ...(request.conditional && new URL(requestedUrl).origin === target.url.origin ? {
           ...(request.conditional.etag ? { 'If-None-Match': this.safeValidator(request.conditional.etag) } : {}),
           ...(request.conditional.lastModified ? { 'If-Modified-Since': this.safeValidator(request.conditional.lastModified) } : {}),

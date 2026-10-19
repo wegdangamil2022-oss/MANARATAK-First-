@@ -6,7 +6,7 @@ import {
   ScholarshipNamingService,
   type IScholarshipRepository,
   type ScholarshipDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import type {
   IScholarshipImportCenterGateway,
   IScholarshipImportReviewDecisionPort,

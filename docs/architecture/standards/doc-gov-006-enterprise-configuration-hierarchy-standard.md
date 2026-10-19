@@ -1,8 +1,8 @@
-# MANARATAK 2.0: Enterprise Configuration Hierarchy Standard
+# ABSHEER 2.0: Enterprise Configuration Hierarchy Standard
 
 ## 1. Purpose
 
-The Enterprise Configuration Hierarchy Standard defines the official, unified approach for organizing, layering, inheriting, overriding, validating, securing, versioning, and documenting configuration data across the entire MANARATAK 2.0 platform. 
+The Enterprise Configuration Hierarchy Standard defines the official, unified approach for organizing, layering, inheriting, overriding, validating, securing, versioning, and documenting configuration data across the entire ABSHEER 2.0 platform. 
 
 A unified configuration hierarchy is strictly required to ensure:
 *   **Consistency:** Guaranteeing uniform configuration behavior across all domains and environments.
@@ -16,7 +16,7 @@ A unified configuration hierarchy is strictly required to ensure:
 
 ## 2. Scope
 
-This standard governs the configuration hierarchy for all components within the approved MANARATAK 2.0 architecture. 
+This standard governs the configuration hierarchy for all components within the approved ABSHEER 2.0 architecture. 
 
 **Included Configuration Scopes:**
 *   **Enterprise:** Global project-wide policies, constants, and shared baseline configurations.
@@ -45,7 +45,7 @@ This standard governs the configuration hierarchy for all components within the 
 
 ## 3. Configuration Principles
 
-All configurations within MANARATAK 2.0 must strictly adhere to the following enterprise principles:
+All configurations within ABSHEER 2.0 must strictly adhere to the following enterprise principles:
 
 1.  **Single Source of Truth:** Every configuration item must be defined in one authoritative location. Duplication of identical configuration keys across isolated repositories is strictly prohibited.
 2.  **Explicit Override Rules:** Configuration inheritance and overrides must follow a strictly defined, predictable order. Implicit or undocumented overrides are forbidden.
@@ -62,7 +62,7 @@ All configurations within MANARATAK 2.0 must strictly adhere to the following en
 
 ## 4. Configuration Hierarchy
 
-The official MANARATAK 2.0 configuration precedence dictates how configurations are layered and overridden. Resolution occurs from the lowest priority (Base) to the highest priority (Runtime Override). The highest priority value always wins.
+The official ABSHEER 2.0 configuration precedence dictates how configurations are layered and overridden. Resolution occurs from the lowest priority (Base) to the highest priority (Runtime Override). The highest priority value always wins.
 
 **Hierarchy Order (Lowest to Highest Priority):**
 
@@ -83,7 +83,7 @@ The official MANARATAK 2.0 configuration precedence dictates how configurations 
 
 Every enterprise configuration item must be documented with the following mandatory metadata:
 
-*   **Configuration Key:** The exact string identifier of the configuration (e.g., `MANARATAK.Notification.RetryCount`). Must follow the Enterprise Naming Convention.
+*   **Configuration Key:** The exact string identifier of the configuration (e.g., `ABSHEER.Notification.RetryCount`). Must follow the Enterprise Naming Convention.
 *   **Description:** A clear explanation of what the configuration controls.
 *   **Scope:** The layer to which the configuration applies (e.g., Environment, Domain, Integration).
 *   **Owner:** The specific domain or team responsible for managing the configuration.
@@ -159,7 +159,7 @@ Configuration_Item:
   Version: "v1.0"
   Status: "Active"
   Related_ADR: "ADR-0045"
-  Related_Baseline: "MANARATAK 2.0 - Phase 4"
+  Related_Baseline: "ABSHEER 2.0 - Phase 4"
 ```
 
 ---

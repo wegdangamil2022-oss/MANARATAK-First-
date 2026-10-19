@@ -3,7 +3,7 @@ import {
   IIdentityRepository,
   IEmailVerificationTokenRepository,
   LifeStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface VerifyEmailInput {
   token: string;

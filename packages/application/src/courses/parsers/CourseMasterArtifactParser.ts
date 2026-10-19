@@ -3,11 +3,11 @@ import {
   readXlsxWorkbook,
   spreadsheetColumnName,
   SpreadsheetWorksheet,
-} from '@manaratak/shared';
+} from '@absheer/shared';
 import {
   IMPORTED_COURSE_MASTER_COLUMNS,
   ImportedCourseMasterRowContract,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export type CourseMasterArtifactFormat = 'XLSX' | 'CSV';
 export type CourseMasterIssueSeverity = 'ERROR' | 'WARNING';

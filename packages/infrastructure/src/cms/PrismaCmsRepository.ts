@@ -42,7 +42,7 @@ import {
   UpdateCmsContentDto,
   UpsertCmsLocalizedContentDto,
   UpsertCmsContentDomainLinkDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const json = (value: unknown): Prisma.InputJsonValue | undefined =>
   value === undefined ? undefined : (JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue);
@@ -1023,7 +1023,7 @@ export class PrismaCmsRepository implements ICmsRepository {
   public async getPublishedBySlug(
     slug: string,
     locale = 'ar',
-    siteIdentifier = 'manaratak',
+    siteIdentifier = 'absheer',
   ): Promise<PublicCmsContentDto | null> {
     const row = await this.db.cmsPublishedContent.findUnique({
       where: { siteIdentifier_locale_slug: { siteIdentifier, locale, slug } },
@@ -1039,7 +1039,7 @@ export class PrismaCmsRepository implements ICmsRepository {
    * the sentinel prevents accidentally returning a truncated "complete" feed.
    */
   public async listIndexableSitemapEntries(siteIdentifier: string): Promise<CmsSitemapEntryDto[]> {
-    if (siteIdentifier !== 'manaratak') throw new Error('CMS_SITE_SCOPE_UNSUPPORTED');
+    if (siteIdentifier !== 'absheer') throw new Error('CMS_SITE_SCOPE_UNSUPPORTED');
     const rows = await this.db.cmsPublishedContent.findMany({
       where: { siteIdentifier, status: CmsContentStatus.PUBLISHED },
       select: {
@@ -1180,12 +1180,12 @@ export class PrismaCmsRepository implements ICmsRepository {
   public async listPublishedDomainTargetPage(targetType:string,targetId:string,locale:string,cursor?:string,requestedLimit=12){
     await new PrismaCmsDomainOwnerReadGateway(this.db).assertPublished(targetType as CmsDomainTargetType,targetId);
     const limit=boundedCursorLimit(requestedLimit,12,50),after=decodeStableCursor(cursor);
-    const where=Prisma.sql`p."siteIdentifier"='manaratak' AND p.locale=${locale} AND p.status=${CmsContentStatus.PUBLISHED} AND EXISTS(SELECT 1 FROM "CmsContentDomainLink" l WHERE l."contentId"=p."contentId" AND l."targetType"=${targetType} AND l."targetId"=${targetId})`;
+    const where=Prisma.sql`p."siteIdentifier"='absheer' AND p.locale=${locale} AND p.status=${CmsContentStatus.PUBLISHED} AND EXISTS(SELECT 1 FROM "CmsContentDomainLink" l WHERE l."contentId"=p."contentId" AND l."targetType"=${targetType} AND l."targetId"=${targetId})`;
     const [rows,counts]=await Promise.all([
       this.db.$queryRaw(Prisma.sql`SELECT p.id,p."contentId" FROM "CmsPublishedContent" p WHERE ${where} ${after?Prisma.sql`AND p.id>${after}`:Prisma.empty} ORDER BY p.id LIMIT ${limit+1}`) as Promise<Array<{id:string;contentId:string}>>,
       this.db.$queryRaw(Prisma.sql`SELECT count(*) AS total FROM "CmsPublishedContent" p WHERE ${where}`) as Promise<Array<{total:bigint}>>,
     ]);
-    const selected=rows.slice(0,limit),ids=selected.map(row=>row.id),records=await this.db.cmsPublishedContent.findMany({where:{id:{in:ids},status:CmsContentStatus.PUBLISHED,locale,siteIdentifier:'manaratak'}});
+    const selected=rows.slice(0,limit),ids=selected.map(row=>row.id),records=await this.db.cmsPublishedContent.findMany({where:{id:{in:ids},status:CmsContentStatus.PUBLISHED,locale,siteIdentifier:'absheer'}});
     const byId=new Map<string,any>(records.map((row:any)=>[row.id,row])),locales=await this.availableLocales(selected.map(row=>row.contentId)),total=Number(counts[0]?.total??0);
     if(!Number.isSafeInteger(total))throw new Error('CMS_PUBLIC_TOTAL_INVALID');
     return {data:ids.flatMap(id=>{const row=byId.get(id);return row?[this.publicContent(row,locales.get(row.contentId)??[])]:[]}),total,hasMore:rows.length>limit,nextCursor:rows.length>limit?encodeStableCursor(selected.at(-1)!.id):null};
@@ -1195,7 +1195,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     targetType: string,
     targetId: string,
     locale = 'ar',
-    siteIdentifier = 'manaratak',
+    siteIdentifier = 'absheer',
     limit = 6,
   ): Promise<PublicCmsContentDto[]> {
     // Public related-content queries must not reveal an owner relationship

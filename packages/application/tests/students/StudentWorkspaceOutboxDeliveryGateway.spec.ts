@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { assertStudentIntegrationEvent } from '@manaratak/domain';
+import { assertStudentIntegrationEvent } from '@absheer/domain';
 import { StudentWorkspaceOutboxDeliveryGateway } from '../../src/students/use-cases/StudentWorkspaceOutboxDeliveryGateway';
 import { StudentWorkspaceOutboxWorker } from '../../src/students/use-cases/StudentWorkspaceOutboxWorker';
 

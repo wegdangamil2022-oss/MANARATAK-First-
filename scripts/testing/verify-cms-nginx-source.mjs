@@ -18,7 +18,7 @@ const api = createServer((req, res) => {
   res.setHeader('Cache-Control', 'private, no-store, must-revalidate');
   if (url.pathname === '/api/v1/public/cms/sitemap.xml') {
     res.setHeader('Content-Type', 'application/xml');
-    res.end('<urlset><url><loc>https://manaratak.example/ar/news/fresh</loc></url></urlset>');
+    res.end('<urlset><url><loc>https://absheer.example/ar/news/fresh</loc></url></urlset>');
     return;
   }
   assert.equal(url.pathname, '/api/v1/public/cms/pages/http-resolve');

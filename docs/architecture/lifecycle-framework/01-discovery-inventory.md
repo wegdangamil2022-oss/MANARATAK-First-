@@ -1,4 +1,4 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 
 # P0-2 Enterprise Lifecycle Framework
 
@@ -6,7 +6,7 @@
 
 ## 1. Executive Summary
 
-This report presents the findings of the Enterprise Lifecycle Framework Discovery audit. The audit evaluated the MANARATAK 2.0 repository to identify every lifecycle, status model, workflow state, and state transition. The discovery revealed massive duplication of lifecycle states across domain packages, conflicting naming conventions (PascalCase vs. UPPERCASE), and a lack of a unified enterprise state machine.
+This report presents the findings of the Enterprise Lifecycle Framework Discovery audit. The audit evaluated the ABSHEER 2.0 repository to identify every lifecycle, status model, workflow state, and state transition. The discovery revealed massive duplication of lifecycle states across domain packages, conflicting naming conventions (PascalCase vs. UPPERCASE), and a lack of a unified enterprise state machine.
 
 ## 2. Lifecycle Inventory
 

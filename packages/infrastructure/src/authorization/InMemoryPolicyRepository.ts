@@ -1,5 +1,5 @@
-import { Policy, IPolicyRepository, IRoleRepository } from '@manaratak/domain';
-import { ISpecification } from '@manaratak/core';
+import { Policy, IPolicyRepository, IRoleRepository } from '@absheer/domain';
+import { ISpecification } from '@absheer/core';
 
 export class InMemoryPolicyRepository implements IPolicyRepository {
   constructor(private readonly roles?: IRoleRepository) {}

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { ImportedCourseMasterRowContract } from '@manaratak/domain';
+import type { ImportedCourseMasterRowContract } from '@absheer/domain';
 import { normalizeSourceLabel, sourceReviewHash } from '../../packages/application/src/import-foundation/services/CanonicalSourceReview';
 
 export interface CourseSourceRow { datasetId: string; artifactHash: string; sourceRowNumber: number; row: ImportedCourseMasterRowContract }

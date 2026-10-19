@@ -1,5 +1,5 @@
 import {createHash} from 'node:crypto';
-import {assertTranslationContentAuthoringEnabled} from '@manaratak/shared';
+import {assertTranslationContentAuthoringEnabled} from '@absheer/shared';
 export type DescriptionOwner = 'INTERNATIONAL_TEST' | 'SCHOLARSHIP' | 'COURSE';
 export interface OwnerDescriptionEvidence {ownerId:string;sourceRevision:string;sourceDigest:string;valueDigest:string;locale:'ar'|'en';displayName:string;description:string}
 export interface OwnerDescriptionInput {locale:'ar'|'en'; displayName?:string; description?:string; remove?:boolean}

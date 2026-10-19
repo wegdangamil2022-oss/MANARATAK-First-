@@ -5,7 +5,7 @@ import {
   PublicServiceCatalogItemDto,
   ServiceCatalogItemDto,
   ServiceStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class PublicServiceCatalogUseCases {
   constructor(private readonly repository: IServiceCatalogRepository) {}

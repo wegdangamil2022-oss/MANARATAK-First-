@@ -1,4 +1,4 @@
-import type { ICertificateSignatureService } from '@manaratak/domain';
+import type { ICertificateSignatureService } from '@absheer/domain';
 
 export interface CertificateTransitKey {
   issuerCode: string;

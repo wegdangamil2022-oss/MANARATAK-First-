@@ -3,7 +3,7 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
-import { AUDIT_QUERY_CATALOG, auditCodeLabel } from '@manaratak/shared';
+import { AUDIT_QUERY_CATALOG, auditCodeLabel } from '@absheer/shared';
 import { Link } from 'react-router-dom';
 import {
   auditFilterParams,
@@ -112,7 +112,7 @@ export function AuditCenterPage() {
   const { hasPermission } = useAdminAuthorization();
   const [timeZone, setTimeZone] = useState<AuditTimeZone>(() => {
     try {
-      return localStorage.getItem('manaratak_audit_timezone') === 'LOCAL' ? 'LOCAL' : 'UTC';
+      return localStorage.getItem('absheer_audit_timezone') === 'LOCAL' ? 'LOCAL' : 'UTC';
     } catch {
       return 'UTC';
     }
@@ -384,7 +384,7 @@ export function AuditCenterPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `manaratak-audit-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `absheer-audit-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -418,7 +418,7 @@ export function AuditCenterPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `manaratak-audit-filtered-${Date.now()}.json`;
+      link.download = `absheer-audit-filtered-${Date.now()}.json`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -688,7 +688,7 @@ export function AuditCenterPage() {
                 const zone = event.target.value as AuditTimeZone;
                 setTimeZone(zone);
                 try {
-                  localStorage.setItem('manaratak_audit_timezone', zone);
+                  localStorage.setItem('absheer_audit_timezone', zone);
                 } catch {
                   /* preference storage is optional */
                 }

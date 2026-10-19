@@ -1,4 +1,4 @@
-import { IConfigurationProvider } from '@manaratak/core';
+import { IConfigurationProvider } from '@absheer/core';
 
 export class EnvironmentLoader {
   constructor(private readonly providers: IConfigurationProvider[]) {}

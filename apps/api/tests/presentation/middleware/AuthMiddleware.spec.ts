@@ -23,7 +23,7 @@ describe('AuthMiddleware cookie sessions', () => {
 
   it('accepts an HttpOnly access-cookie value only while its server session is active', async () => {
     const { app, sessionManager } = createApp(true);
-    const response = await request(app).get('/student').set('Cookie', 'manaratak_access=access-token');
+    const response = await request(app).get('/student').set('Cookie', 'absheer_access=access-token');
     expect(response.status).toBe(200);
     expect(response.body.userId).toBe('student-1');
     expect(sessionManager.isSessionActive).toHaveBeenCalledWith('student-1', 'session-1');
@@ -31,14 +31,14 @@ describe('AuthMiddleware cookie sessions', () => {
 
   it('rejects a revoked cookie session with a generic response', async () => {
     const { app } = createApp(false);
-    const response = await request(app).get('/student').set('Cookie', 'manaratak_access=access-token');
+    const response = await request(app).get('/student').set('Cookie', 'absheer_access=access-token');
     expect(response.status).toBe(401);
     expect(response.body).toEqual({ message: 'Unauthorized' });
   });
   it('rejects a previously valid session when the canonical identity becomes inactive', async () => {
     const { app, principalAccessValidator, sessionManager } = createApp(true);
     principalAccessValidator.isAuthenticationAllowed.mockResolvedValue(false);
-    const response = await request(app).get('/student').set('Cookie', 'manaratak_access=access-token');
+    const response = await request(app).get('/student').set('Cookie', 'absheer_access=access-token');
     expect(response.status).toBe(401);
     expect(sessionManager.revokeAllSessions).toHaveBeenCalledWith('student-1');
   });

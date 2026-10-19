@@ -14,7 +14,7 @@ import {
   SortDirection,
   ISearchRequestRepository,
   SearchRequestSpecification
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { SearchRequestDto } from '../dtos/SearchDtos';
 import { ISearchEngineGateway } from '../gateways/ISearchEngineGateway';
 

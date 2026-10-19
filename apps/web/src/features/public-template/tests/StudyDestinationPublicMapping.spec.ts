@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-vi.mock('@manaratak/ui', () => ({ mapInternationalTestToExam: vi.fn() }));
+vi.mock('@absheer/ui', () => ({ mapInternationalTestToExam: vi.fn() }));
 import {
   mapCountry,
   loadPublishedCountries,

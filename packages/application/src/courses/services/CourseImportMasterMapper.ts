@@ -5,7 +5,7 @@ import {
   CourseStatus,
   CreateCourseDto,
   UpdateCourseDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface CourseImportSemanticRow {
   sourceOrder: string | number | null;

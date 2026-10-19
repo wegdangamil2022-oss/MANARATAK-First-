@@ -3,9 +3,9 @@ import type { PreviewProbeClient } from './RuntimeResourceRegistry.js';
 type Environment = Readonly<Record<string, string | undefined>>;
 
 export function isPreviewDatabaseProbeEnabled(env: Environment): boolean {
-  return env.MANARATAK_RUNTIME_PROFILE !== 'google-ai-studio' && env.MANARATAK_GOOGLE_AI_STUDIO !== 'true'
+  return env.ABSHEER_RUNTIME_PROFILE !== 'google-ai-studio' && env.ABSHEER_GOOGLE_AI_STUDIO !== 'true'
     && env.VERCEL === '1' && env.VERCEL_ENV === 'preview'
-    && env.MANARATAK_PREVIEW_DATABASE_PROBE === 'true';
+    && env.ABSHEER_PREVIEW_DATABASE_PROBE === 'true';
 }
 
 function classify(error: unknown): string {
@@ -98,16 +98,16 @@ export function probePreviewDatabaseSchema(env: Environment = process.env) {
     // Generated Prisma metadata respects @@map; never return internal table names.
     const { previewProbeModelNames } = await import('./RuntimeResourceRegistry.js');
     const expected = previewProbeModelNames();
-    const manaratakTableCount = expected.filter((name) => names.has(name)).length;
+    const absheerTableCount = expected.filter((name) => names.has(name)).length;
     return {
       publicSchemaExists: schema.exists,
       prismaMigrationsTableExists,
       migrationCount,
       publicTableCount: names.size,
-      manaratakTableCount,
-      expectedManaratakTableCount: expected.length,
-      missingManaratakTableCount: expected.length - manaratakTableCount,
-      manaratakSchemaProvisioned: expected.length > 0 && manaratakTableCount === expected.length,
+      absheerTableCount,
+      expectedAbsheerTableCount: expected.length,
+      missingAbsheerTableCount: expected.length - absheerTableCount,
+      absheerSchemaProvisioned: expected.length > 0 && absheerTableCount === expected.length,
     };
   });
 }

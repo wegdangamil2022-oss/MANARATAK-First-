@@ -1,7 +1,7 @@
 import { registerRecurringJobs } from './infrastructure/workers/RegisterRecurringJobs.js';
 import { createApiApp } from './app.js';
 import { container } from './infrastructure/di/container.js';
-import { ConfigurationRegistry, EnvironmentLoader, EnvironmentConfigurationProvider, ZodEnvironmentValidator } from '@manaratak/config';
+import { ConfigurationRegistry, EnvironmentLoader, EnvironmentConfigurationProvider, ZodEnvironmentValidator } from '@absheer/config';
 import { startPollingWorkers, stopPollingWorkers } from './infrastructure/workers/PollingWorkerRuntime.js';
 
 const SHUTDOWN_TIMEOUT_MS = 15_000;

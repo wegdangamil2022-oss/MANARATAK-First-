@@ -1,7 +1,7 @@
-# MANARATAK Frontend Security Headers — Web/Admin Delivery Contract
+# ABSHEER Frontend Security Headers — Web/Admin Delivery Contract
 
 **Status:** SOURCE_ENFORCED / RUNTIME_DELIVERY_PENDING  
-**Findings:** MNT-AUD-0101, MNT-AUD-0114  
+**Findings:** ABSH-AUD-0101, ABSH-AUD-0114  
 **Applies to:** `apps/web`, `apps/admin`
 
 ## Canonical source
@@ -30,9 +30,9 @@ The API Helmet policy remains defense-in-depth only. It is not evidence that Web
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: strict-origin-when-cross-origin`
 
-## Temporary MNT-AUD-0114 exception
+## Temporary ABSH-AUD-0114 exception
 
-The current source contains 171 React inline-style sites discovered during MNT-AUD-0101 remediation: 21 under Web and 150 under Admin at the remediation snapshot.
+The current source contains 171 React inline-style sites discovered during ABSH-AUD-0101 remediation: 21 under Web and 150 under Admin at the remediation snapshot.
 
 For compatibility, the canonical policy currently isolates one explicit exception:
 
@@ -40,16 +40,16 @@ For compatibility, the canonical policy currently isolates one explicit exceptio
 
 This exception does **not** apply to scripts or `<style>` elements. `script-src` and `style-src` remain free of `unsafe-inline`.
 
-MNT-AUD-0101 must remain `RUNTIME_PENDING / POLICY_EXCEPTION_OPEN` until MNT-AUD-0114 removes the inline-style dependency and the exception is deleted from the canonical policy.
+ABSH-AUD-0101 must remain `RUNTIME_PENDING / POLICY_EXCEPTION_OPEN` until ABSH-AUD-0114 removes the inline-style dependency and the exception is deleted from the canonical policy.
 
 ## Production acceptance
 
-Do not close MNT-AUD-0101 from source inspection alone. After deployment, verify the actual Web and Admin HTML responses:
+Do not close ABSH-AUD-0101 from source inspection alone. After deployment, verify the actual Web and Admin HTML responses:
 
 ```bash
 node scripts/security/verify-frontend-security-headers.mjs \
-  --url https://app.manaratak.org \
-  --url https://admin.manaratak.org
+  --url https://app.absheer.org \
+  --url https://admin.absheer.org
 ```
 
 The verifier must confirm the delivered headers, not a configuration flag. The production host must also be checked to ensure `_headers` (or the equivalent host-native mapping) is actually honored.

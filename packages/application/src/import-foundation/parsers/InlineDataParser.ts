@@ -1,5 +1,5 @@
 import { CsvImportStreamParser } from './CsvImportStreamParser';
-import { ParsedImportRow, ImportParseError } from '@manaratak/domain';
+import { ParsedImportRow, ImportParseError } from '@absheer/domain';
 
 export class InlineDataParser {
   public static async parse(dataText: string): Promise<any[]> {

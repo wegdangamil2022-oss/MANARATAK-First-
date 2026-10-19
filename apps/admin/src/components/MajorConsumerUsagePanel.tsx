@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { MajorConsumerPage } from '@manaratak/domain';
+import type { MajorConsumerPage } from '@absheer/domain';
 import { adminApiClient } from '../api/client';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
 import { useTranslation } from '../i18n/I18nProvider';

@@ -1,6 +1,6 @@
 import {TranslationOwnerCapabilitiesPanel} from '../components/TranslationOwnerCapabilitiesPanel';
-import {TRANSLATION_OWNER_CAPABILITIES} from '@manaratak/shared';
-import { resolveSourceLocaleEvidence } from '@manaratak/shared';
+import {TRANSLATION_OWNER_CAPABILITIES} from '@absheer/shared';
+import { resolveSourceLocaleEvidence } from '@absheer/shared';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BookOpen,
@@ -20,7 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { TRANSLATION_CONTENT_MODE, canAuthorDomainTranslations } from '@manaratak/shared';
+import { TRANSLATION_CONTENT_MODE, canAuthorDomainTranslations } from '@absheer/shared';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 

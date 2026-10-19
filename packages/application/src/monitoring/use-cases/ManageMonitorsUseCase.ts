@@ -18,7 +18,7 @@ import {
   MonitorStateChangedEvent,
   MonitorDeprecatedEvent,
   MonitorArchivedEvent
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   CreateMonitorDto,
   UpdateMonitorDefinitionDto,

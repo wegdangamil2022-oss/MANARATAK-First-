@@ -22,7 +22,7 @@ import {
   RevokeCertificateDto,
   UpdateCertificateIssuerDto,
   UpdateCertificateTemplateDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const json = (value: unknown): Prisma.InputJsonValue | undefined =>
   value === undefined ? undefined : (JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue);
@@ -220,9 +220,9 @@ export class PrismaCertificateRepository implements ICertificateRepository {
 
   public async findActiveTemplateByName(name: string): Promise<CertificateTemplateDto | null> {
     // Legacy method name retained as a port; selection is canonical, never by display label.
-    if (name !== 'MANARATAK Signature Certificate') throw new Error('CERTIFICATE_DEFAULT_TEMPLATE_BINDING_INVALID');
+    if (name !== 'ABSHEER Signature Certificate') throw new Error('CERTIFICATE_DEFAULT_TEMPLATE_BINDING_INVALID');
     const row = await this.db.certificateTemplate.findUnique({ where: { code: 'MNR-SIGNATURE' }, include: this.templateInclude });
-    if (!row || row.status !== 'ACTIVE' || row.issuer?.issuerType !== 'MANARATAK' || row.issuer?.status !== 'ACTIVE') return null;
+    if (!row || row.status !== 'ACTIVE' || row.issuer?.issuerType !== 'ABSHEER' || row.issuer?.status !== 'ACTIVE') return null;
     return this.template(row);
   }
 
@@ -580,7 +580,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
     ]);
     if (!template || template.status !== CertificateTemplateStatus.ACTIVE) throw new Error('ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED');
     if (!version || version.templateId !== template.id || template.currentVersionId !== version.id || version.versionNumber !== data.templateVersion || version.status !== CertificateTemplateStatus.ACTIVE) throw new Error('ACTIVE_CERTIFICATE_TEMPLATE_VERSION_REQUIRED');
-    if (!issuer || issuer.status !== 'ACTIVE' || (issuer.issuerType !== 'MANARATAK' && !issuer.metadata?.trust?.approvedBy) || version.issuerId !== issuer.id || template.issuerId !== issuer.id) throw new Error('ACTIVE_ACCREDITED_CERTIFICATE_ISSUER_REQUIRED');
+    if (!issuer || issuer.status !== 'ACTIVE' || (issuer.issuerType !== 'ABSHEER' && !issuer.metadata?.trust?.approvedBy) || version.issuerId !== issuer.id || template.issuerId !== issuer.id) throw new Error('ACTIVE_ACCREDITED_CERTIFICATE_ISSUER_REQUIRED');
     const authorityVersion=(data.metadata?.signedEnvelope as {issuer?:{authorityVersion?:number}}|undefined)?.issuer?.authorityVersion;
     if(authorityVersion!==undefined && authorityVersion!==Number(issuer.metadata?.authorityVersion ?? 1))throw new Error('CERTIFICATE_ISSUER_STALE');
     if (issuer.signingKeyReference !== data.signingKeyReference) throw new Error('CERTIFICATE_ISSUER_SIGNING_KEY_MISMATCH');
@@ -712,7 +712,7 @@ export class PrismaCertificateRepository implements ICertificateRepository {
   private async requireActiveIssuer(tx: any, issuerId: string): Promise<any> {
     await tx.$queryRaw`SELECT id FROM "CertificateIssuer" WHERE id = ${issuerId} FOR UPDATE`;
     const issuer = await tx.certificateIssuer.findUnique({ where: { id: issuerId } });
-    if (!issuer || issuer.status !== 'ACTIVE' || (issuer.issuerType !== 'MANARATAK' && !issuer.metadata?.trust?.approvedBy)) throw new Error('ACTIVE_ACCREDITED_CERTIFICATE_ISSUER_REQUIRED');
+    if (!issuer || issuer.status !== 'ACTIVE' || (issuer.issuerType !== 'ABSHEER' && !issuer.metadata?.trust?.approvedBy)) throw new Error('ACTIVE_ACCREDITED_CERTIFICATE_ISSUER_REQUIRED');
     if (!issuer.issuerLogoAssetId || !issuer.signingKeyReference) throw new Error('CERTIFICATE_ISSUER_AUTHORITY_INCOMPLETE');
     return issuer;
   }

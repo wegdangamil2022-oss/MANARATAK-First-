@@ -2,7 +2,7 @@ import fs from 'node:fs';
 const admin=fs.readFileSync('apps/admin/src/pages/ServicesAdminPage.tsx','utf8');
 const domain=fs.readFileSync('packages/domain/src/services-platform/index.ts','utf8');
 const checks=[];
-checks.push(['shared-owner-enums', admin.includes("from '@manaratak/domain'") && ['ServiceCategory','ServiceFulfillmentType','ServiceAvailabilityStatus','ServiceStatus','ServiceDeliveryMode'].every(x=>admin.includes(x))]);
+checks.push(['shared-owner-enums', admin.includes("from '@absheer/domain'") && ['ServiceCategory','ServiceFulfillmentType','ServiceAvailabilityStatus','ServiceStatus','ServiceDeliveryMode'].every(x=>admin.includes(x))]);
 checks.push(['no-local-enum-unions', !/type Service(Category|Status|FulfillmentType|DeliveryMode|AvailabilityStatus)\s*=/.test(admin)]);
 checks.push(['select-options-derived', ['Object.values(ServiceCategory)','Object.values(ServiceFulfillmentType)','Object.values(ServiceDeliveryMode)','Object.values(ServiceAvailabilityStatus)','Object.values(ServiceStatus)'].every(x=>admin.includes(x))]);
 checks.push(['bad-values-removed', !/(AUXILIARY_PROFESSIONAL_SERVICES|ENTERPRISE_OPERATIONAL_SERVICES|BOOKING_OR_APPOINTMENT|DIGITAL_DELIVERABLE|MANUAL_FULFILLMENT|HYBRID_WORKFLOW|COMING_SOON|LIMITED|EXTERNAL_COORDINATION|\bIMPORTED\b)/.test(admin)]);

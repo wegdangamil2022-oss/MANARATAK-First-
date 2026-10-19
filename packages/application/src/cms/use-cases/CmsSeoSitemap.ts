@@ -1,5 +1,5 @@
-import { PUBLIC_TEMPLATE_LOCALES } from '@manaratak/shared';
-import { CmsSitemapEntryDto } from '@manaratak/domain';
+import { PUBLIC_TEMPLATE_LOCALES } from '@absheer/shared';
+import { CmsSitemapEntryDto } from '@absheer/domain';
 
 const CMS_CANONICAL_PATH =
   /^\/(?:ar|en)\/(?:articles|news|study-guides|checklists|faqs|pages|landing)\/[a-z0-9]+(?:-[a-z0-9]+)*$/;

@@ -8,11 +8,11 @@ import {
   IAssetRecordRepository,
   CertificateArtifactStoreInput,
   ICertificateArtifactStore,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   IngestAssetUseCase,
   ProcessAssetLifecycleUseCase,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 /** Resumable generated content through EAP's verification/scanning/sanitization/promotion. */
 export class EapCertificateArtifactStore implements ICertificateArtifactStore {

@@ -5,7 +5,7 @@ import {
   ImportJobStatus,
   ImportRecordStatus,
   ImportTargetDomain,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { v4 as uuidv4 } from 'uuid';
 import { IImportQueueGateway } from '../gateways/IImportQueueGateway';
 import { ImportJobLease } from '../dtos/ImportQueueDtos';

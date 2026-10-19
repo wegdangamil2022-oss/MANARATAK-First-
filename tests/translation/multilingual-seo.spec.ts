@@ -8,8 +8,8 @@ import {
 
 describe('multilingual SEO contract', () => {
   it('normalizes the configured public base URL', () => {
-    expect(normalizePublicBaseUrl('https://manaratak.example/')).toBe(
-      'https://manaratak.example',
+    expect(normalizePublicBaseUrl('https://absheer.example/')).toBe(
+      'https://absheer.example',
     );
   });
 
@@ -22,41 +22,41 @@ describe('multilingual SEO contract', () => {
   it('builds canonical and alternate URLs for the same entity path', () => {
     expect(
       buildLocalizedSeoLinks({
-        baseUrl: 'https://manaratak.example',
+        baseUrl: 'https://absheer.example',
         pathname: '/en/universities/example-university',
         locale: 'en',
       }),
     ).toEqual({
-      canonical: 'https://manaratak.example/en/universities/example-university',
+      canonical: 'https://absheer.example/en/universities/example-university',
       indexable: false,
       alternates: {
-        ar: 'https://manaratak.example/ar/universities/example-university',
+        ar: 'https://absheer.example/ar/universities/example-university',
       },
       xDefault:
-        'https://manaratak.example/ar/universities/example-university',
+        'https://absheer.example/ar/universities/example-university',
     });
   });
 
   it('ignores query strings because pathname is the canonical SEO identity', () => {
     expect(
       buildLocalizedSeoLinks({
-        baseUrl: 'https://manaratak.example/',
+        baseUrl: 'https://absheer.example/',
         pathname: '/ar/majors/artificial-intelligence',
         locale: 'ar',
       }).canonical,
     ).toBe(
-      'https://manaratak.example/ar/majors/artificial-intelligence',
+      'https://absheer.example/ar/majors/artificial-intelligence',
     );
   });
 
   it('uses Arabic as x-default because Arabic is the platform default', () => {
     expect(
       buildLocalizedSeoLinks({
-        baseUrl: 'https://manaratak.example',
+        baseUrl: 'https://absheer.example',
         pathname: '/en/universities',
         locale: 'en',
       }).xDefault,
-    ).toBe('https://manaratak.example/ar/universities');
+    ).toBe('https://absheer.example/ar/universities');
   });
 
   it('maps locales to Open Graph locale codes deterministically', () => {

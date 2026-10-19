@@ -12,7 +12,7 @@ import {
   ImportedCourseLinkCheckResult,
   ImportedCoursePage,
   ImportedCourseUpdateInput,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AdminCourseUseCases } from './AdminCourseUseCases';
 
 export class ImportedCourseAdminUseCases {

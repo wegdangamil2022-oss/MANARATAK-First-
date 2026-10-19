@@ -12,7 +12,7 @@ import {
   AuditTimestamp,
   ContextMetadata,
   AuditRecordQuerySpecification
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { InMemoryAuditRecordRepository } from '../../src/audit/InMemoryAuditRecordRepository';
 
 describe('InMemoryAuditRecordRepository', () => {

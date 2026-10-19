@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {Link} from 'react-router-dom';
-import type {MajorImportReview} from '@manaratak/domain';
+import type {MajorImportReview} from '@absheer/domain';
 import {adminApiClient} from '../api/client';
 import {useTranslation} from '../i18n/I18nProvider';
 import {useAdminAuthorization} from '../security/AdminAuthorizationContext';

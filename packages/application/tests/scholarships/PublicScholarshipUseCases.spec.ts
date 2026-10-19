@@ -5,7 +5,7 @@ import {
   ScholarshipStatus,
   ScholarshipCompletenessState,
   ScholarshipPublicationStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('PublicScholarshipUseCases', () => {
   let mockRepo: IScholarshipRepository;

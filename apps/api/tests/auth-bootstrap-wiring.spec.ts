@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createApiApp } from '../src/app';
 import { container } from '../src/infrastructure/di/container';
-import { PrismaCredentialVerifier } from '@manaratak/infrastructure';
-import { AuthService } from '@manaratak/application';
+import { PrismaCredentialVerifier } from '@absheer/infrastructure';
+import { AuthService } from '@absheer/application';
 
 describe('WP1-E.1.1 DI Container & Auth Wiring Smoke Test', () => {
   it('successfully boots the API container and resolves the real PrismaCredentialVerifier', async () => {

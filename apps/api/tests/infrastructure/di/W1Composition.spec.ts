@@ -5,8 +5,8 @@ import {
   LocalImportRawSnapshotStore,
   NodeSafeSourceHttpTransport,
   SourceAcquisitionLimiter,
-} from '@manaratak/infrastructure';
-import { ConfigurationResolutionService } from '@manaratak/domain';
+} from '@absheer/infrastructure';
+import { ConfigurationResolutionService } from '@absheer/domain';
 
 describe('W1 composition boundaries', () => {
   it('wires settings resolution repositories explicitly under PROXY injection', () => {

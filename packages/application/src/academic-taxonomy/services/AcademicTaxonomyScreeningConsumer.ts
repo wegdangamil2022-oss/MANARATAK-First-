@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { AcademicMappingStrength, AcademicStandardType, AcademicTaxonomyNodeType, AcademicTaxonomyStatus,
-  IImportHandoffConsumer, UniversalImportHandoff } from '@manaratak/domain';
+  IImportHandoffConsumer, UniversalImportHandoff } from '@absheer/domain';
 
 const id = z.string().trim().min(1).max(128);
 const standard = z.nativeEnum(AcademicStandardType);

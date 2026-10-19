@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { LearningPathDto, LearningPathCourseDto } from '@manaratak/domain';
+import type { LearningPathDto, LearningPathCourseDto } from '@absheer/domain';
 import { adminApiClient } from '../api/client';
 import { CanonicalPicker } from './CanonicalPicker';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';
@@ -60,7 +60,7 @@ export function CourseLearningPathsWorkspace() {
   };
   const loadCourses: Parameters<typeof CanonicalPicker>[0]['load'] = async (query, page = 1) => {
     const params = new URLSearchParams({
-      originType: 'NATIVE_MANARATAK_COURSE',
+      originType: 'NATIVE_ABSHEER_COURSE',
       page: String(page),
       pageSize: '50',
     });

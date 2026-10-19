@@ -6,13 +6,13 @@ import { resolve } from 'node:path';
 import PDFDocument from 'pdfkit';
 import SVGtoPDF from 'svg-to-pdfkit';
 import { create as createFont, type Font } from 'fontkit';
-import { APPROVED_CERTIFICATE_DESIGN, renderApprovedCertificateSvg } from '@manaratak/shared';
+import { APPROVED_CERTIFICATE_DESIGN, renderApprovedCertificateSvg } from '@absheer/shared';
 import {
   CertificateRenderInput,
   CertificateRenderResult,
   ICertificateRenderingService,
-} from '@manaratak/domain';
-import { createQrMatrix, qrMatrixToSvg } from '@manaratak/shared';
+} from '@absheer/domain';
+import { createQrMatrix, qrMatrixToSvg } from '@absheer/shared';
 
 // Package assets retain their paths in source, ESM workspaces and CJS API bundles.
 // CJS uses the actual bundle location; ESM launchers run from a workspace root.
@@ -20,7 +20,7 @@ const assetRequire = createRequire(
   typeof __filename === 'string' ? __filename : resolve(process.cwd(), 'package.json'),
 );
 const certificateAsset = (name: string) =>
-  assetRequire.resolve(`@manaratak/infrastructure/assets/certificates/${name}`);
+  assetRequire.resolve(`@absheer/infrastructure/assets/certificates/${name}`);
 
 const encode = (value: string) => new TextEncoder().encode(value);
 const xml = (value: unknown) =>
@@ -35,7 +35,7 @@ const xml = (value: unknown) =>
  * into certificate business rules.
  */
 export class ProviderNeutralCertificateRenderingService implements ICertificateRenderingService {
-  public readonly rendererId = 'manaratak-provider-neutral-certificate-renderer';
+  public readonly rendererId = 'absheer-provider-neutral-certificate-renderer';
   public readonly rendererVersion = '1.4.0';
   constructor(
     private readonly visualAssets?: {
@@ -123,7 +123,7 @@ export class ProviderNeutralCertificateRenderingService implements ICertificateR
       }
       const logo =
         visualAssets.logoAssetId?.bytes ??
-        (await readFile(certificateAsset('manaratak-logo-official.png')));
+        (await readFile(certificateAsset('absheer-logo-official.png')));
       const metrics = new PDFDocument({ autoFirstPage: false });
       metrics.registerFont('CertificateArabic', font);
       const latinFont = await readFile(certificateAsset('DejaVuSerif.ttf'));

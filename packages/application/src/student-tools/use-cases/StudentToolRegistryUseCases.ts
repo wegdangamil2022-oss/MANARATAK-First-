@@ -15,7 +15,7 @@ import {
   StudentToolLifecycleStatus,
   StudentToolVisibilityStatus,
   StudentToolPublicAccessPolicy,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { STUDENT_TOOL_SCHEMAS } from '../handlers/StudentToolSchemas';
 import { OFFICIAL_STUDENT_TOOLS } from '../OfficialStudentToolRegistry';
 export class StudentToolRegistryUseCases {

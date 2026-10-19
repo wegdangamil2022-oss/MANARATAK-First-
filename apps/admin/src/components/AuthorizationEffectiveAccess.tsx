@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { AuthorizationIdentityPicker } from './AuthorizationIdentityPicker';
-import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
+import { ADMIN_PERMISSION_CATALOG } from '@absheer/shared';
 type AccessRole = {
   id: string;
   name?: string;

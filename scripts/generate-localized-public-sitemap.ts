@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import {
   PUBLIC_TEMPLATE_LOCALES,
   type SupportedLocale,
-} from '@manaratak/shared';
+} from '@absheer/shared';
 import { localizePathname } from '../apps/web/src/i18n/localeRouting';
 import { normalizePublicBaseUrl } from '../apps/web/src/seo/localeSeo';
 

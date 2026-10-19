@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { AIExecutionOrchestrator } from '@manaratak/application';
+import { AIExecutionOrchestrator } from '@absheer/application';
 
 const capabilityRequestSchema = z.object({
   capabilityKey: z

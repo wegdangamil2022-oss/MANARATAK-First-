@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Prisma } from '@prisma/client';
 import type { PrismaClient } from '@prisma/client';
-import { ReferenceLifecycleState } from '@manaratak/domain';
+import { ReferenceLifecycleState } from '@absheer/domain';
 import { PrismaReferenceDataRepository } from '../../src/reference-data/PrismaReferenceDataRepository';
 
 const region = () => ({ id: 'region-1', countryReferenceId: 'country-1', countryIso2Code: 'YE', regionCode: 'YE-AD', name: 'Aden', nameAr: null, localName: null, regionType: null,

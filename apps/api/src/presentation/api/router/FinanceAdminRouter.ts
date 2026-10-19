@@ -5,15 +5,15 @@ import {
   FinanceAdminUseCases,
   FinanceCommandIdentity,
   FinancePlatformUseCases,
-} from '@manaratak/application';
+} from '@absheer/application';
 import {
   AuthorizationEvaluatorService,
   InvoiceStatus,
   PaymentStatus,
   TransferStatus,
   financeApprovalPolicy,
-} from '@manaratak/domain';
-import { ForbiddenException } from '@manaratak/core';
+} from '@absheer/domain';
+import { ForbiddenException } from '@absheer/core';
 
 const allAsUndefined = (value: unknown) =>
   typeof value === 'string' && ['', 'all', 'الكل'].includes(value.trim().toLowerCase())

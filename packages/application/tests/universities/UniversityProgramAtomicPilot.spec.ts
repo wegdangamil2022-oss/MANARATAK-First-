@@ -3,7 +3,7 @@ import {
   type AtomicPersistenceContext, type ITransactionalAuditRecordRepository,
   type ITransactionalOutboxStore, type ITransactionalUniversityRepository,
   type UniversityAcademicProgramAuthoringInput, UniversityStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AdminUniversityUseCases } from '../../src/universities/use-cases/AdminUniversityUseCases';
 import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';

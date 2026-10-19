@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { MfaUseCases, type IMfaGateway } from '../../src/auth/mfa/MfaUseCases';
 import type { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
-import type { ISessionManager } from '@manaratak/core';
+import type { ISessionManager } from '@absheer/core';
 function setup() {
   const proof = { enrollmentId: 'enrollment-1', verifiedAt: new Date().toISOString() },
     gateway = {

@@ -1,4 +1,4 @@
-import { IRequestLogger, ILogger, ILogContext } from '@manaratak/core';
+import { IRequestLogger, ILogger, ILogContext } from '@absheer/core';
 import { AuditSecretSanitizer } from '../audit/AuditSecretSanitizer';
 
 export class RequestLogger implements IRequestLogger {

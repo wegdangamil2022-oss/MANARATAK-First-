@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ManagePoliciesUseCase } from '@manaratak/application';
-import { InMemoryPolicyRepository, InMemoryRoleRepository, DefaultPolicyEvaluator } from '@manaratak/infrastructure';
-import { Action, ResourceUrn } from '@manaratak/domain';
+import { ManagePoliciesUseCase } from '@absheer/application';
+import { InMemoryPolicyRepository, InMemoryRoleRepository, DefaultPolicyEvaluator } from '@absheer/infrastructure';
+import { Action, ResourceUrn } from '@absheer/domain';
 const definition = {
   id: 'office',
   name: 'Office hours',
@@ -85,7 +85,7 @@ describe('policy control plane', () => {
 describe('shared policy scope cannot bypass delegation authority',()=>{
   it('rejects loosening a policy on a role outside the actor authority, and permits an authorized update',async()=>{
     const roles=new InMemoryRoleRepository();const policies=new InMemoryPolicyRepository(roles);const useCase=new ManagePoliciesUseCase(policies);
-    const {Role,PermissionReference}=await import('@manaratak/domain');
+    const {Role,PermissionReference}=await import('@absheer/domain');
     await roles.save(new Role({id:'finance-role',name:'Finance',description:'Finance',permissions:[new PermissionReference('admin:finance:manage')],policyIds:['office']}));
     await useCase.create(definition,undefined,['admin:finance:manage']);const current=(await useCase.get('office'))!;
     await expect(useCase.update({...definition,configuration:{start:'00:00',end:'23:59',timezone:'UTC'}},current.revision!,undefined,['admin:universities:manage'])).rejects.toThrow('POLICY_PERMISSION_EXCEEDS_ACTOR');
@@ -95,7 +95,7 @@ describe('shared policy scope cannot bypass delegation authority',()=>{
   });
   it('also checks policy retirement and fails closed without the usage capability',async()=>{
     const roles=new InMemoryRoleRepository();const policies=new InMemoryPolicyRepository(roles);const useCase=new ManagePoliciesUseCase(policies);
-    const {Role,PermissionReference}=await import('@manaratak/domain');
+    const {Role,PermissionReference}=await import('@absheer/domain');
     await roles.save(new Role({id:'role',name:'Reviewer',description:'Review',permissions:[new PermissionReference('admin:universities:manage')],policyIds:['office']}));
     await useCase.create(definition,undefined,['admin:universities:manage']);const revision=(await useCase.get('office'))!.revision!;
     await expect(useCase.retire('office',revision)).rejects.toThrow('POLICY_PERMISSION_EXCEEDS_ACTOR');
@@ -103,7 +103,7 @@ describe('shared policy scope cannot bypass delegation authority',()=>{
     await expect(unsafe.update(definition,(await unsafe.get('office'))!.revision!)).rejects.toThrow('POLICY_USAGE_CHECK_UNAVAILABLE');
   });
   it('checks every linked role beyond the first page instead of authorizing only a truncated subset',async()=>{
-    const roles=new InMemoryRoleRepository();const {Role,PermissionReference}=await import('@manaratak/domain');
+    const roles=new InMemoryRoleRepository();const {Role,PermissionReference}=await import('@absheer/domain');
     for(let index=0;index<101;index++)await roles.save(new Role({id:String(index).padStart(3,'0'),name:`Role ${index}`,description:'Role',permissions:[new PermissionReference(index===100?'admin:finance:manage':'admin:universities:manage')],policyIds:['office']}));
     const policies=new InMemoryPolicyRepository(roles);const useCase=new ManagePoliciesUseCase(policies);await useCase.create(definition,undefined,['admin:universities:manage','admin:finance:manage']);
     await expect(useCase.update(definition,(await useCase.get('office'))!.revision!,undefined,['admin:universities:manage'])).rejects.toThrow('POLICY_PERMISSION_EXCEEDS_ACTOR');
@@ -112,7 +112,7 @@ describe('shared policy scope cannot bypass delegation authority',()=>{
 
 it('cannot restore a dangling policy reference to indirectly grant permissions outside the actor authority',async()=>{
   const roles=new InMemoryRoleRepository();const policies=new InMemoryPolicyRepository(roles);const useCase=new ManagePoliciesUseCase(policies);
-  const {Role,PermissionReference}=await import('@manaratak/domain');
+  const {Role,PermissionReference}=await import('@absheer/domain');
   await roles.save(new Role({id:'finance-role',name:'Finance',description:'Finance',permissions:[new PermissionReference('admin:finance:manage')],policyIds:['office']}));
   await expect(useCase.create(definition,undefined,['admin:universities:manage'])).rejects.toThrow('POLICY_PERMISSION_EXCEEDS_ACTOR');
   expect(await useCase.get('office')).toBeNull();

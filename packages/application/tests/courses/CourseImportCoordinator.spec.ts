@@ -8,7 +8,7 @@ import {
   CourseStatus,
   CreateCourseDto,
   UpdateCourseDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseImportCoordinator } from '../../src/courses/use-cases/CourseImportCoordinator';
 import type {
   CourseFieldProvenanceWrite,

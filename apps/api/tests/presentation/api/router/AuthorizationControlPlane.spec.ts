@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { Role, PermissionReference, LifeStatus } from '@manaratak/domain';
+import { Role, PermissionReference, LifeStatus } from '@absheer/domain';
 import { AuthorizationAdminRouter } from '../../../../src/presentation/api/router/AuthorizationAdminRouter';
 const revision = '2026-01-01T00:00:00.000Z';
 const role = new Role({

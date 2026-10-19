@@ -1,6 +1,6 @@
 import { PrismaConfiguredAuditRetention } from './PrismaAuditWorkspaceGateway';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 import {
   ITransactionalAuditRecordRepository,
   AtomicPersistenceContext,
@@ -25,7 +25,7 @@ import {
   AuditRecordPage,
   AuditIntegrityReport,
   AuditIntegrityQuery
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AuditSecretSanitizer } from './AuditSecretSanitizer';
 import type { PrismaAtomicPersistenceContext } from '../event-foundation/PrismaTransactionalOutboxStore';
 

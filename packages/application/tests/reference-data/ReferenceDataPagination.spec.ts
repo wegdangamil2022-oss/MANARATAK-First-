@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { IReferenceDataRepository } from '@manaratak/domain';
+import type { IReferenceDataRepository } from '@absheer/domain';
 import { ReferenceDataUseCases } from '../../src/reference-data/use-cases/ReferenceDataUseCases';
 
 describe('Reference data owner pagination', () => {

@@ -23,7 +23,7 @@ async function run() {
     const classificationCode = getString(item.classificationCode) ?? getString(optionalFields.classificationCode);
     if (classificationCode) codeCount++;
     
-    const isDetailDossier = getString(optionalFields.sourceClassificationSystem) === 'MANARATAK_PHASE_10_DETAIL_DOSSIER';
+    const isDetailDossier = getString(optionalFields.sourceClassificationSystem) === 'ABSHEER_PHASE_10_DETAIL_DOSSIER';
     const sourceType = isDetailDossier ? 'DETAIL_DOSSIER' : undefined;
     const sectionCount = isDetailDossier ? 22 : undefined;
     

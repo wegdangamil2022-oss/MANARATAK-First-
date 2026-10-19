@@ -1,9 +1,9 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-4 Transactional Outbox Strategy
 # Phase 4 — Migration & Integration Plan
 
 ## 1. Executive Summary
-The Enterprise Transactional Outbox Migration & Integration Plan defines the architectural strategy for transitioning MANARATAK 2.0 from synchronous, in-process event dispatching to a resilient, asynchronous outbox model. Formulated by the Architecture Review Board (ARB), this plan prioritizes runtime stability, zero business logic disruption, and safe rollback mechanisms. By decoupling domain logic from message broker availability, the migration ensures at-least-once delivery for critical enterprise systems—including Search, Analytics, Notifications, and Workflows—while preserving strict Domain-Driven Design (DDD) autonomy.
+The Enterprise Transactional Outbox Migration & Integration Plan defines the architectural strategy for transitioning ABSHEER 2.0 from synchronous, in-process event dispatching to a resilient, asynchronous outbox model. Formulated by the Architecture Review Board (ARB), this plan prioritizes runtime stability, zero business logic disruption, and safe rollback mechanisms. By decoupling domain logic from message broker availability, the migration ensures at-least-once delivery for critical enterprise systems—including Search, Analytics, Notifications, and Workflows—while preserving strict Domain-Driven Design (DDD) autonomy.
 
 ## 2. Migration Strategy
 The migration is structured into sequential, non-destructive phases:

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Identity, IdentityType, User, Profile, ContactRegistry, TechnicalMetadata, Account } from '@manaratak/domain';
+import { Identity, IdentityType, User, Profile, ContactRegistry, TechnicalMetadata, Account } from '@absheer/domain';
 import { PrismaIdentityRepository } from '../../src/identity/PrismaIdentityRepository';
 
 describe('PrismaIdentityRepository', () => {
@@ -54,7 +54,7 @@ describe('PrismaIdentityRepository', () => {
     const user = new User({
       profile: new Profile({ displayName: 'Test Prisma User' }),
       contactRegistry: new ContactRegistry({
-        primaryEmail: 'testprisma@manaratak.local',
+        primaryEmail: 'testprisma@absheer.local',
         isEmailVerified: true,
         isPhoneVerified: false
       })
@@ -86,7 +86,7 @@ describe('PrismaIdentityRepository', () => {
       user: {
         identityId: identity.id.toString(),
         displayName: 'Test Prisma User',
-        primaryEmail: 'testprisma@manaratak.local',
+        primaryEmail: 'testprisma@absheer.local',
         isEmailVerified: true,
         isPhoneVerified: false,
         alternativeContacts: null
@@ -105,7 +105,7 @@ describe('PrismaIdentityRepository', () => {
     expect(retrieved).not.toBeNull();
     expect(retrieved?.id.toString()).toBe(identity.id.toString());
     expect(retrieved?.type).toBe(IdentityType.Human);
-    expect(retrieved?.user?.contactRegistry.primaryEmail).toBe('testprisma@manaratak.local');
+    expect(retrieved?.user?.contactRegistry.primaryEmail).toBe('testprisma@absheer.local');
     expect(retrieved?.account.storageQuotaBytes).toBe(2000);
   });
 });

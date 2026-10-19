@@ -8,18 +8,18 @@ import {
 
 const baseEnv = {
   NODE_ENV: 'development',
-  DATABASE_URL: 'postgresql://operator:secret@localhost:5432/manaratak_dev',
+  DATABASE_URL: 'postgresql://operator:secret@localhost:5432/absheer_dev',
   DATABASE_PROVISIONING_GATE: 'APPROVED',
   ALLOW_DATABASE_MUTATIONS: 'YES',
   DATABASE_MUTATION_ENVIRONMENT: 'development',
   DATABASE_MUTATION_PURPOSE: 'seed',
-  DATABASE_MUTATION_TARGET: 'localhost:5432/manaratak_dev',
+  DATABASE_MUTATION_TARGET: 'localhost:5432/absheer_dev',
 };
 
 test('derives a non-secret target identity from PostgreSQL URLs', () => {
   assert.equal(
-    databaseTargetIdentity('postgresql://user:secret@DB.EXAMPLE:6432/manaratak?sslmode=require'),
-    'db.example:6432/manaratak',
+    databaseTargetIdentity('postgresql://user:secret@DB.EXAMPLE:6432/absheer?sslmode=require'),
+    'db.example:6432/absheer',
   );
 });
 
@@ -58,10 +58,10 @@ test('production mutations require a separate production authorization and chang
   const productionEnv = {
     ...baseEnv,
     NODE_ENV: 'production',
-    DATABASE_URL: 'postgresql://operator:secret@db.prod.internal:5432/manaratak',
+    DATABASE_URL: 'postgresql://operator:secret@db.prod.internal:5432/absheer',
     DATABASE_MUTATION_ENVIRONMENT: 'production',
     DATABASE_MUTATION_PURPOSE: 'migrate',
-    DATABASE_MUTATION_TARGET: 'db.prod.internal:5432/manaratak',
+    DATABASE_MUTATION_TARGET: 'db.prod.internal:5432/absheer',
   };
   const blocked = inspectDatabaseMutationGate('db-remediation-deploy', { allowedPurposes: ['migrate'] }, productionEnv);
   assert.equal(blocked.ok, false);

@@ -10,7 +10,7 @@ process.env.DATABASE_URL = `postgresql://${user}:${pass}@localhost/${db}?host=${
 const prisma = new PrismaClient();
 
 const REGIONS_CSV = './workspace/reference-data/regions/asia/02_admin_regions_asia.csv';
-const CITIES_CSV = './workspace/reference-data/cities/asia/MANARATAK_Asia_Cities_All_Combined.csv';
+const CITIES_CSV = './workspace/reference-data/cities/asia/ABSHEER_Asia_Cities_All_Combined.csv';
 const MAP_PATH = '/tmp/asia_source_to_uuid_map.json';
 
 function parseCSVLine(line: string): string[] {

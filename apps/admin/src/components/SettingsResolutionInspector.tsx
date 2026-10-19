@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import type { ResolvedSetting } from '@manaratak/domain';
+import type { ResolvedSetting } from '@absheer/domain';
 import { adminApiClient } from '../api/client';
 
 function display(value: unknown): string {

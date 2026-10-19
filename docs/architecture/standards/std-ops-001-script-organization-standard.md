@@ -25,11 +25,11 @@
 
 ## 1. Purpose
 
-The purpose of the Script Organization Standard is to establish a rigorous, enterprise-wide framework governing all executable scripts used throughout the MANARATAK 2.0 repository. This standard ensures consistency, discoverability, maintainability, execution safety, and robust automation across the entire software development lifecycle (SDLC).
+The purpose of the Script Organization Standard is to establish a rigorous, enterprise-wide framework governing all executable scripts used throughout the ABSHEER 2.0 repository. This standard ensures consistency, discoverability, maintainability, execution safety, and robust automation across the entire software development lifecycle (SDLC).
 
 ## 2. Scope
 
-This standard applies to all executable scripts maintained within the MANARATAK 2.0 monorepo. This includes, but is not limited to, Bash/Shell scripts, Node.js (`.js`, `.ts`) scripts, PowerShell scripts, and Python utilities utilized for local development, CI/CD automation, database migrations, and operational maintenance.
+This standard applies to all executable scripts maintained within the ABSHEER 2.0 monorepo. This includes, but is not limited to, Bash/Shell scripts, Node.js (`.js`, `.ts`) scripts, PowerShell scripts, and Python utilities utilized for local development, CI/CD automation, database migrations, and operational maintenance.
 
 ## 3. Objectives
 

@@ -1,5 +1,5 @@
 import { CacheEntry } from '../aggregates/CacheEntry';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 
 export interface ICacheEntryRepository {
   save(entry: CacheEntry): Promise<void>;

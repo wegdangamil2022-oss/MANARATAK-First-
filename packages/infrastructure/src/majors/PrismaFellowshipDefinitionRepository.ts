@@ -4,7 +4,7 @@ import {
   IFellowshipDefinitionRepository,
   MajorImportCompletenessState,
   MajorStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class PrismaFellowshipDefinitionRepository implements IFellowshipDefinitionRepository {
   constructor(private readonly prisma: PrismaClient) {}

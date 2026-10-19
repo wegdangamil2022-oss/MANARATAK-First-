@@ -4,7 +4,7 @@ import {
   IExternalCourseProviderRepository,
   IImportedCourseLinkChecker,
   IImportedCourseOperationsRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   CourseImportArtifactUseCase,
   CourseImportOperationsUseCases,
@@ -12,7 +12,7 @@ import {
   CourseProviderDriftError,
   defaultCourseProviderConnectorRegistry,
   ImportAdminUseCases,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 export class CourseImportOperationsRouter {
   public static create(cradle: {

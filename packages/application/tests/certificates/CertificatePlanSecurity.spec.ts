@@ -14,9 +14,9 @@ const activeImage = {
 };
 const pending = {
   id: 'issuer',
-  code: 'MANARATAK',
-  name: 'MANARATAK',
-  issuerType: 'MANARATAK',
+  code: 'ABSHEER',
+  name: 'ABSHEER',
+  issuerType: 'ABSHEER',
   status: 'PENDING_APPROVAL',
   issuerLogoAssetId: 'logo',
   signingKeyReference: 'key',

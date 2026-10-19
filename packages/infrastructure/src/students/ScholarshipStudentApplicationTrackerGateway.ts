@@ -2,7 +2,7 @@ import {
   IStudentApplicationScholarshipGateway,
   IScholarshipRepository,
   isPublicScholarshipOwner,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 export class ScholarshipStudentApplicationTrackerGateway implements IStudentApplicationScholarshipGateway {
   constructor(private readonly scholarships: IScholarshipRepository) {}
   async resolve(scholarshipId: string, cycleId?: string) {

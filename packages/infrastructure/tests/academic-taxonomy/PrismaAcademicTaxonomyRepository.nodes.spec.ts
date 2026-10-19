@@ -8,7 +8,7 @@ import {
   AcademicTaxonomyStatus,
   AcademicStandardType,
   AcademicTaxonomyDeterministicKey,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('PrismaAcademicTaxonomyRepository - Node Operations', () => {
   let mockPrisma: any;

@@ -1,5 +1,5 @@
 import { taxonomyRevisionHash } from './TaxonomyRevisionHash';
-import { AcademicTaxonomyValidationService, normalizeAcademicTaxonomyAlias, TaxonomyGovernanceSnapshot, TaxonomyDiagnosticIssue, TaxonomyDiagnosticsReport } from '@manaratak/domain';
+import { AcademicTaxonomyValidationService, normalizeAcademicTaxonomyAlias, TaxonomyGovernanceSnapshot, TaxonomyDiagnosticIssue, TaxonomyDiagnosticsReport } from '@absheer/domain';
 export const TAXONOMY_DIAGNOSTIC_CODES = ['CYCLE', 'MULTIPLE_PRIMARY_PARENTS', 'ORPHAN', 'EMPTY_ROOT', 'ISOLATED_LEAF', 'EXCESSIVE_DEPTH',
   'UNREACHABLE_NATIONAL_MAPPING', 'INVALID_MAPPING', 'HISTORICAL_MAPPING', 'ALIAS_CONFLICT', 'DUPLICATE_ALIAS', 'ALIAS_NORMALIZATION_DRIFT', 'INVALID_EDGE'] as const;
 export class TaxonomyDiagnosticsService {

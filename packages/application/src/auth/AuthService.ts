@@ -6,7 +6,7 @@ import {
   AuthTokens,
   InvalidTokenException,
   IPrincipalAccessValidator,
-} from '@manaratak/core';
+} from '@absheer/core';
 import { ICredentialVerifier, DenyAllCredentialVerifier } from './ICredentialVerifier';
 import { randomUUID } from 'node:crypto';
 

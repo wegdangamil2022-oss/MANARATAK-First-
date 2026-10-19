@@ -4,7 +4,7 @@ import path from 'node:path';
 const root=process.cwd();
 const manifest=JSON.parse(fs.readFileSync(path.join(root,'scripts/ci/source-closure-manifest.json'),'utf8'));
 const failures=[];
-if (manifest.version !== 1 || manifest.kind !== 'MANARATAK_SOURCE_CLOSURE_MANIFEST') failures.push('manifest identity/version invalid');
+if (manifest.version !== 1 || manifest.kind !== 'ABSHEER_SOURCE_CLOSURE_MANIFEST') failures.push('manifest identity/version invalid');
 const ids=new Set();
 for (const gate of manifest.gates ?? []) {
   if (!gate.id || ids.has(gate.id)) failures.push(`duplicate/missing gate id ${gate.id}`); ids.add(gate.id);

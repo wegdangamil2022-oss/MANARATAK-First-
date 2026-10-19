@@ -2,18 +2,18 @@ import { createHash, randomUUID } from 'node:crypto';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { writeXlsxWorkbook } from '@manaratak/shared';
+import { writeXlsxWorkbook } from '@absheer/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import {
   AssetId, AssetLifecycleState, AssetMetadata, AssetOwnerReference, AssetRecord,
   AssetReference, AssetRetentionCategory, AssetRetentionMetadata, AssetSecurityClassification,
   AssetStorageLocator, AssetStorageZone, AtomicPersistenceContext,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   AtomicAuditedOutboxMutationExecutor, AtomicDomainMutationCoordinator, CourseImportArtifactUseCase,
   CourseImportCoordinator, CourseImportIdentityDiffUseCase, ImportAdminUseCases,
-} from '@manaratak/application';
+} from '@absheer/application';
 import { LocalAssetStorageGateway } from '../../src/asset-platform/LocalAssetStorageGateway';
 import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAssetRecordRepository';
 import { PrismaAuditRecordRepository } from '../../src/audit/PrismaAuditRecordRepository';

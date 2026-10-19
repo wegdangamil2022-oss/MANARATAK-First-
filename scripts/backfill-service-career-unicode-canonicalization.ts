@@ -136,7 +136,7 @@ async function main(): Promise<void> {
   ];
 
   const report = {
-    authority: 'MNT-AUD-0091',
+    authority: 'ABSH-AUD-0091',
     mode: apply ? 'APPLY' : 'DRY_RUN',
     rewriteFallbackSlugs,
     scanned: {
@@ -158,8 +158,8 @@ async function main(): Promise<void> {
     console.log(JSON.stringify(report, null, 2));
     return;
   }
-  if (blockers.length > 0) throw new Error(`MNT_AUD_0091_BACKFILL_BLOCKED:${blockers.length}`);
-  requireDatabaseMutationGate('MNT-AUD-0091 Unicode canonicalization backfill', { allowedPurposes: ['backfill'] });
+  if (blockers.length > 0) throw new Error(`ABSH_AUD_0091_BACKFILL_BLOCKED:${blockers.length}`);
+  requireDatabaseMutationGate('ABSH-AUD-0091 Unicode canonicalization backfill', { allowedPurposes: ['backfill'] });
 
   let databaseWrites = 0;
   await prisma.$transaction(async (tx) => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Policy, ResourceUrn, Action } from '@manaratak/domain';
+import { Policy, ResourceUrn, Action } from '@absheer/domain';
 import { DefaultPolicyEvaluator } from '../../src/authorization/DefaultPolicyEvaluator';
 
 const context = (extra: Record<string, unknown> = {}) => ({

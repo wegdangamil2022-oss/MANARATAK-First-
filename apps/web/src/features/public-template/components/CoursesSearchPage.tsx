@@ -138,33 +138,33 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
 
   return (
     <div
-      className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
+      className="min-h-screen bg-[var(--ab-page)] text-[var(--ab-heading)] pb-24 font-['Cairo',sans-serif] select-none ab-panel "
       dir={publicDir}
     >
       {/* HERO — same visual language as Scholarships / Universities / Majors */}
-      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-12 sm:pb-14 overflow-hidden shadow-xs border-b border-[var(--mn-accent)]/20 mn-inverse ">
+      <div className="relative ab-search-hero text-white px-3 sm:px-4 pt-4 pb-12 sm:pb-14 overflow-hidden shadow-xs border-b border-[var(--ab-accent)]/20 ab-inverse ">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute inset-0 pointer-events-none opacity-20">
             <svg className="w-full h-full" viewBox="0 0 400 220" fill="none" preserveAspectRatio="none">
-              <path d="M-50,50 Q100,-20 250,60 T550,40" stroke="var(--mn-accent)" strokeWidth="1.5" fill="none" />
-              <path d="M-20,125 Q150,45 300,145 T600,105" stroke="var(--mn-accent)" strokeWidth="1" fill="none" />
-              <circle cx="30" cy="30" r="1" fill="var(--mn-accent)" />
-              <circle cx="45" cy="30" r="1" fill="var(--mn-accent)" />
-              <circle cx="60" cy="30" r="1" fill="var(--mn-accent)" />
-              <circle cx="30" cy="45" r="1" fill="var(--mn-accent)" />
-              <circle cx="45" cy="45" r="1" fill="var(--mn-accent)" />
-              <circle cx="60" cy="45" r="1" fill="var(--mn-accent)" />
+              <path d="M-50,50 Q100,-20 250,60 T550,40" stroke="var(--ab-accent)" strokeWidth="1.5" fill="none" />
+              <path d="M-20,125 Q150,45 300,145 T600,105" stroke="var(--ab-accent)" strokeWidth="1" fill="none" />
+              <circle cx="30" cy="30" r="1" fill="var(--ab-accent)" />
+              <circle cx="45" cy="30" r="1" fill="var(--ab-accent)" />
+              <circle cx="60" cy="30" r="1" fill="var(--ab-accent)" />
+              <circle cx="30" cy="45" r="1" fill="var(--ab-accent)" />
+              <circle cx="45" cy="45" r="1" fill="var(--ab-accent)" />
+              <circle cx="60" cy="45" r="1" fill="var(--ab-accent)" />
             </svg>
           </div>
 
-          <div className="absolute top-0 right-10 w-64 h-64 bg-[var(--mn-accent)] rounded-full mix-blend-screen filter blur-[120px] opacity-10 mn-gold " />
-          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-[var(--mn-primary)] rounded-full mix-blend-screen filter blur-[100px] opacity-20 mn-inverse " />
+          <div className="absolute top-0 right-10 w-64 h-64 bg-[var(--ab-accent)] rounded-full mix-blend-screen filter blur-[120px] opacity-10 ab-gold " />
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-[var(--ab-primary)] rounded-full mix-blend-screen filter blur-[100px] opacity-20 ab-inverse " />
 
 
-          <PlayCircle className="imported-course-float mn-anim-10 w-16 h-16 left-[15%] top-[60%]" />
-          <TrendingUp className="imported-course-float mn-anim-12-delay-4 w-12 h-12 left-[80%] top-[40%]" />
-          <Briefcase className="imported-course-float mn-anim-14-delay-2 w-10 h-10 left-[40%] top-[70%]" />
-          <Sparkles className="imported-course-float mn-anim-9-delay-7 w-8 h-8 left-[60%] top-[30%]" />
+          <PlayCircle className="imported-course-float ab-anim-10 w-16 h-16 left-[15%] top-[60%]" />
+          <TrendingUp className="imported-course-float ab-anim-12-delay-4 w-12 h-12 left-[80%] top-[40%]" />
+          <Briefcase className="imported-course-float ab-anim-14-delay-2 w-10 h-10 left-[40%] top-[70%]" />
+          <Sparkles className="imported-course-float ab-anim-9-delay-7 w-8 h-8 left-[60%] top-[30%]" />
         </div>
 
         {onBack && (
@@ -180,18 +180,18 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
 
         <div className="max-w-md sm:max-w-xl mx-auto text-center relative z-10 space-y-2.5 pt-5">
           <div className="relative inline-block mb-1">
-            <div className="absolute -inset-x-6 -inset-y-3 bg-[var(--mn-accent)]/10 blur-xl rounded-full" />
-            <h1 className="relative text-2xl sm:text-3xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">{publicT('public_courses')}{' '}<span className="text-[var(--mn-accent-soft)]">{publicT('public_worldwide')}</span>
+            <div className="absolute -inset-x-6 -inset-y-3 bg-[var(--ab-accent)]/10 blur-xl rounded-full" />
+            <h1 className="relative text-2xl sm:text-3xl font-bold text-white font-['Cairo',sans-serif] tracking-tight leading-tight">{publicT('public_courses')}{' '}<span className="text-[var(--ab-accent-soft)]">{publicT('public_worldwide')}</span>
             </h1>
           </div>
 
           <div className="flex justify-center items-center gap-2 py-1">
-            <div className="w-12 h-px bg-gradient-to-r from-transparent to-[var(--mn-accent-soft)]/50" />
-            <PlayCircle className="w-4 h-4 text-[var(--mn-accent-text)]" />
-            <div className="w-12 h-px bg-gradient-to-l from-transparent to-[var(--mn-accent-soft)]/50" />
+            <div className="w-12 h-px bg-gradient-to-r from-transparent to-[var(--ab-accent-soft)]/50" />
+            <PlayCircle className="w-4 h-4 text-[var(--ab-accent-text)]" />
+            <div className="w-12 h-px bg-gradient-to-l from-transparent to-[var(--ab-accent-soft)]/50" />
           </div>
 
-          <p className="text-[12px] sm:text-sm text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] leading-relaxed max-w-[92%] mx-auto drop-shadow-md">{publicT('public_search_free_courses_from_leading_global_platforms_and')}</p>
+          <p className="text-[12px] sm:text-sm text-[var(--ab-on-dark-muted)] font-medium font-['Cairo',sans-serif] leading-relaxed max-w-[92%] mx-auto drop-shadow-md">{publicT('public_search_free_courses_from_leading_global_platforms_and')}</p>
 
           {/* Search stays inside the upper section, matching Scholarships. */}
           <div className="pt-1 max-w-sm sm:max-w-md mx-auto px-1">
@@ -201,13 +201,13 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder={publicT('public_enter_a_course_name_domain_or_platform')}
-                className="w-full py-2.5 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-xs font-semibold placeholder:text-[var(--mn-text-muted)] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel "
+                className="w-full py-2.5 pl-4 pr-10 bg-[var(--ab-surface)] text-[var(--ab-heading)] rounded-full text-xs font-semibold placeholder:text-[var(--ab-text-muted)] focus:outline-none shadow-md border border-[var(--ab-border)] focus:border-[var(--ab-accent)] transition-all text-center font-['Cairo',sans-serif] ab-panel "
               />
-              <Search className="w-4 h-4 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[var(--ab-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] cursor-pointer"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[var(--ab-text-muted)] hover:text-[var(--ab-text)] cursor-pointer"
                   title={publicT('public_clear_search')}
                 >
                   <X className="w-3.5 h-3.5" />
@@ -221,7 +221,7 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
           <div className="flex justify-center mt-2 relative z-10">
             <button
               onClick={resetFilters}
-              className="text-[10px] font-bold text-[var(--mn-danger-text)] hover:text-[var(--mn-danger-text)] bg-[var(--mn-surface-elevated)]/95 px-2.5 py-0.5 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-panel "
+              className="text-[10px] font-bold text-[var(--ab-danger-text)] hover:text-[var(--ab-danger-text)] bg-[var(--ab-surface-elevated)]/95 px-2.5 py-0.5 rounded-full shadow-xs transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif] ab-panel "
             >
               <RotateCcw className="w-3 h-3" />
               <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>
@@ -231,15 +231,15 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
       </div>
 
       {/* Three visible filters only */}
-      <div className="max-w-lg mx-auto mn-inline-gutter -mt-7 sm:-mt-8 relative z-20 pb-3">
+      <div className="max-w-lg mx-auto ab-inline-gutter -mt-7 sm:-mt-8 relative z-20 pb-3">
         <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
           {/* نوع الدورة */}
-          <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[62px] sm:h-[66px] cursor-pointer mn-panel ">
-            <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] font-semibold text-[10.5px] sm:text-xs font-['Cairo',sans-serif] w-full">
+          <div className="relative bg-[var(--ab-surface)] hover:bg-[var(--ab-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[62px] sm:h-[66px] cursor-pointer ab-panel ">
+            <div className="flex items-center justify-center gap-1 text-[var(--ab-heading)] font-semibold text-[10.5px] sm:text-xs font-['Cairo',sans-serif] w-full">
               <span className="truncate">{freeCourseMode === 'all' ? publicT('public_course_type') : selectedFreeCourseLabel}</span>
               <Award className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
+            <ChevronDown className="w-3.5 h-3.5 text-[var(--ab-text-muted)] mt-0.5" />
             <select
               value={freeCourseMode}
               onChange={(event) => setFreeCourseMode(event.target.value as FreeCourseMode)}
@@ -253,12 +253,12 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
           </div>
 
           {/* المنصة */}
-          <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[62px] sm:h-[66px] cursor-pointer mn-panel ">
-            <div className="flex items-center justify-center gap-1 text-[var(--mn-heading)] font-semibold text-[10.5px] sm:text-xs font-['Cairo',sans-serif] w-full">
+          <div className="relative bg-[var(--ab-surface)] hover:bg-[var(--ab-surface-muted)] border-1.5 border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[62px] sm:h-[66px] cursor-pointer ab-panel ">
+            <div className="flex items-center justify-center gap-1 text-[var(--ab-heading)] font-semibold text-[10.5px] sm:text-xs font-['Cairo',sans-serif] w-full">
               <span className="truncate">{selectedPlatform === 'all' ? publicT('public_platform') : selectedPlatform}</span>
               <Globe2 className="w-3.5 h-3.5 text-[#142B5F] dark:text-[#D6A43B] shrink-0" />
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-0.5" />
+            <ChevronDown className="w-3.5 h-3.5 text-[var(--ab-text-muted)] mt-0.5" />
             <select
               value={selectedPlatform}
               onChange={(event) => setSelectedPlatform(event.target.value)}
@@ -278,52 +278,52 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
             onClick={() => setShowAdvancedFilters((current) => !current)}
             className={`relative border-1.5 rounded-xl sm:rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all h-[62px] sm:h-[66px] cursor-pointer ${
               showAdvancedFilters || advancedFiltersCount > 0
-                ? 'bg-[var(--mn-primary)] border-[var(--mn-border-brand)] text-white mn-inverse '
-                : 'bg-[var(--mn-surface)] hover:bg-[var(--mn-surface-muted)] border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] text-[var(--mn-heading)] mn-panel '
+                ? 'bg-[var(--ab-primary)] border-[var(--ab-border-brand)] text-white ab-inverse '
+                : 'bg-[var(--ab-surface)] hover:bg-[var(--ab-surface-muted)] border-[#142B5F]/50 dark:border-[#D6A43B]/60 hover:border-[#142B5F] text-[var(--ab-heading)] ab-panel '
             }`}
           >
             <div className="flex items-center justify-center gap-1 font-semibold text-[10.5px] sm:text-xs font-['Cairo',sans-serif] w-full">
               <span>{advancedFiltersCount > 0 ? publicT('public_filter_count', { v0: advancedFiltersCount }) : publicT('public_filter')}</span>
-              <SlidersHorizontal className={`w-3.5 h-3.5 shrink-0 ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-accent-soft)]' : 'text-[#142B5F] dark:text-[#D6A43B]'}`} />
+              <SlidersHorizontal className={`w-3.5 h-3.5 shrink-0 ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--ab-accent-soft)]' : 'text-[#142B5F] dark:text-[#D6A43B]'}`} />
             </div>
-            <span className={`mt-0.5 max-w-full truncate text-[8px] sm:text-[9px] font-bold ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--mn-on-dark-muted)]' : 'text-[var(--mn-text-muted)]'}`}>{publicT('public_domain_language_level_certificate')}</span>
+            <span className={`mt-0.5 max-w-full truncate text-[8px] sm:text-[9px] font-bold ${showAdvancedFilters || advancedFiltersCount > 0 ? 'text-[var(--ab-on-dark-muted)]' : 'text-[var(--ab-text-muted)]'}`}>{publicT('public_domain_language_level_certificate')}</span>
           </button>
         </div>
 
         {/* Hidden-by-default advanced filters: opened only from the third tile. */}
         {showAdvancedFilters && (
-          <div className="mt-2.5 rounded-2xl border border-[var(--mn-accent)]/45 bg-[var(--mn-surface)] p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.07)] mn-panel ">
+          <div className="mt-2.5 rounded-2xl border border-[var(--ab-accent)]/45 bg-[var(--ab-surface)] p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.07)] ab-panel ">
             <div className="grid grid-cols-2 gap-2">
-              <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 pr-8 mn-panel ">
-                <BookOpen className="absolute right-2.5 w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedField === 'all' ? publicT('public_domain_or_specialization') : COURSE_FIELD_OPTIONS.find(option => option.value === selectedField)?.label || initialField}</span>
+              <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] px-2.5 pr-8 ab-panel ">
+                <BookOpen className="absolute right-2.5 w-3.5 h-3.5 text-[var(--ab-accent-text)]" />
+                <span className="truncate text-[10px] font-semibold text-[var(--ab-text)]">{selectedField === 'all' ? publicT('public_domain_or_specialization') : COURSE_FIELD_OPTIONS.find(option => option.value === selectedField)?.label || initialField}</span>
                 <select value={selectedField} onChange={(event) => setSelectedField(event.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
                   <option value="all">{publicT('public_all_domains_and_specializations')}</option>
                   {COURSE_FIELD_OPTIONS.map((field) => <option key={field.value} value={field.value}>{field.label}</option>)}
                 </select>
               </label>
 
-              <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 pr-8 mn-panel ">
-                <Languages className="absolute right-2.5 w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedLanguage === 'all' ? publicT('public_language') : selectedLanguage}</span>
+              <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] px-2.5 pr-8 ab-panel ">
+                <Languages className="absolute right-2.5 w-3.5 h-3.5 text-[var(--ab-accent-text)]" />
+                <span className="truncate text-[10px] font-semibold text-[var(--ab-text)]">{selectedLanguage === 'all' ? publicT('public_language') : selectedLanguage}</span>
                 <select value={selectedLanguage} onChange={(event) => setSelectedLanguage(event.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
                   <option value="all">{publicT('public_all_languages')}</option>
                   {LANGUAGE_OPTIONS.map((language) => <option key={language} value={language}>{language}</option>)}
                 </select>
               </label>
 
-              <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 pr-8 mn-panel ">
-                <GraduationCap className="absolute right-2.5 w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedLevel === 'all' ? publicT('public_level') : selectedLevel}</span>
+              <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] px-2.5 pr-8 ab-panel ">
+                <GraduationCap className="absolute right-2.5 w-3.5 h-3.5 text-[var(--ab-accent-text)]" />
+                <span className="truncate text-[10px] font-semibold text-[var(--ab-text)]">{selectedLevel === 'all' ? publicT('public_level') : selectedLevel}</span>
                 <select value={selectedLevel} onChange={(event) => setSelectedLevel(event.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
                   <option value="all">{publicT('public_all_levels')}</option>
                   {LEVEL_OPTIONS.map((level) => <option key={level} value={level}>{level}</option>)}
                 </select>
               </label>
 
-              <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 pr-8 mn-panel ">
-                <Award className="absolute right-2.5 w-3.5 h-3.5 text-[var(--mn-accent-text)]" />
-                <span className="truncate text-[10px] font-semibold text-[var(--mn-text)]">{selectedCertificate === 'all' ? publicT('public_certificate_type') : selectedCertificate}</span>
+              <label className="relative flex min-h-[50px] items-center rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] px-2.5 pr-8 ab-panel ">
+                <Award className="absolute right-2.5 w-3.5 h-3.5 text-[var(--ab-accent-text)]" />
+                <span className="truncate text-[10px] font-semibold text-[var(--ab-text)]">{selectedCertificate === 'all' ? publicT('public_certificate_type') : selectedCertificate}</span>
                 <select value={selectedCertificate} onChange={(event) => setSelectedCertificate(event.target.value)} className="absolute inset-0 opacity-0 cursor-pointer">
                   <option value="all">{publicT('public_all_certificate_types')}</option>
                   {CERTIFICATE_OPTIONS.map((certificate) => <option key={certificate} value={certificate}>{certificate}</option>)}
@@ -336,9 +336,9 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
 
       {/* Golden imported-course cards — all records use the same reusable detail template. */}
       {visibleImportedCourses.length > 0 ? (
-        <section className="max-w-lg mx-auto mn-inline-gutter pt-2 pb-5 space-y-3">
+        <section className="max-w-lg mx-auto ab-inline-gutter pt-2 pb-5 space-y-3">
           {visibleImportedCourses.map((course) => (
-            <article key={course.id} className="relative overflow-hidden rounded-[22px] border border-[var(--mn-border)] bg-[var(--mn-surface)] shadow-[0_8px_24px_rgba(20,43,95,0.08)] mn-panel ">
+            <article key={course.id} className="relative overflow-hidden rounded-[22px] border border-[var(--ab-border)] bg-[var(--ab-surface)] shadow-[0_8px_24px_rgba(20,43,95,0.08)] ab-panel ">
               {onToggleFavorite && (
                 <FavoriteButton
                   active={favoriteIds.includes(course.id)}
@@ -349,69 +349,69 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
                   className="absolute left-3 top-3 z-20"
                 />
               )}
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-l from-[var(--mn-primary)] via-[var(--mn-accent)] to-[var(--mn-primary)] mn-inverse " />
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-l from-[var(--ab-primary)] via-[var(--ab-accent)] to-[var(--ab-primary)] ab-inverse " />
 
               <div className="p-3.5 pt-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--mn-accent)]/30 bg-gradient-to-br from-[var(--mn-primary)] to-[var(--mn-primary)] shadow-sm mn-inverse ">
-                    <Code2 className="h-5 w-5 text-[var(--mn-accent-soft)]" />
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--ab-accent)]/30 bg-gradient-to-br from-[var(--ab-primary)] to-[var(--ab-primary)] shadow-sm ab-inverse ">
+                    <Code2 className="h-5 w-5 text-[var(--ab-accent-soft)]" />
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex items-center gap-1.5">
-                      <span className="truncate text-[10px] font-semibold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{course.provider}</span>
-                      <span className="h-1 w-1 shrink-0 rounded-full bg-[var(--mn-accent)] mn-gold " />
-                      <span className="shrink-0 rounded-full bg-[var(--mn-gold-surface)] px-2 py-0.5 text-[9px] font-bold text-[var(--mn-accent-text)] border border-[var(--mn-border-gold)] font-['Cairo',sans-serif] mn-panel ">{publicT('public_imported')}</span>
+                      <span className="truncate text-[10px] font-semibold text-[var(--ab-heading)] font-['Cairo',sans-serif]">{course.provider}</span>
+                      <span className="h-1 w-1 shrink-0 rounded-full bg-[var(--ab-accent)] ab-gold " />
+                      <span className="shrink-0 rounded-full bg-[var(--ab-gold-surface)] px-2 py-0.5 text-[9px] font-bold text-[var(--ab-accent-text)] border border-[var(--ab-border-gold)] font-['Cairo',sans-serif] ab-panel ">{publicT('public_imported')}</span>
                     </div>
 
-                    <h2 className="line-clamp-2 text-[14px] font-bold leading-6 text-[var(--mn-heading)] font-['Cairo',sans-serif]">
+                    <h2 className="line-clamp-2 text-[14px] font-bold leading-6 text-[var(--ab-heading)] font-['Cairo',sans-serif]">
                       {course.title}
                     </h2>
-                    <p className="mt-0.5 truncate text-[10px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">
+                    <p className="mt-0.5 truncate text-[10px] font-bold text-[var(--ab-text-muted)] font-['Cairo',sans-serif]">
                       {course.field}
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <div className="flex min-h-[42px] items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/80 px-2.5 mn-panel ">
-                    <Globe2 className="h-3.5 w-3.5 shrink-0 text-[var(--mn-heading)]" />
+                  <div className="flex min-h-[42px] items-center gap-2 rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)]/80 px-2.5 ab-panel ">
+                    <Globe2 className="h-3.5 w-3.5 shrink-0 text-[var(--ab-heading)]" />
                     <div className="min-w-0">
-                      <div className="text-[8px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">{publicT('public_language')}</div>
-                      <div className="truncate text-[10px] font-semibold text-[var(--mn-text)] font-['Cairo',sans-serif]">{course.language}</div>
+                      <div className="text-[8px] font-bold text-[var(--ab-text-muted)] font-['Cairo',sans-serif]">{publicT('public_language')}</div>
+                      <div className="truncate text-[10px] font-semibold text-[var(--ab-text)] font-['Cairo',sans-serif]">{course.language}</div>
                     </div>
                   </div>
 
-                  <div className="flex min-h-[42px] items-center gap-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)]/80 px-2.5 mn-panel ">
-                    <GraduationCap className="h-3.5 w-3.5 shrink-0 text-[var(--mn-heading)]" />
+                  <div className="flex min-h-[42px] items-center gap-2 rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)]/80 px-2.5 ab-panel ">
+                    <GraduationCap className="h-3.5 w-3.5 shrink-0 text-[var(--ab-heading)]" />
                     <div className="min-w-0">
-                      <div className="text-[8px] font-bold text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">{publicT('public_level')}</div>
-                      <div className="truncate text-[10px] font-semibold text-[var(--mn-text)] font-['Cairo',sans-serif]">{course.level}</div>
+                      <div className="text-[8px] font-bold text-[var(--ab-text-muted)] font-['Cairo',sans-serif]">{publicT('public_level')}</div>
+                      <div className="truncate text-[10px] font-semibold text-[var(--ab-text)] font-['Cairo',sans-serif]">{course.level}</div>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-2.5 flex flex-wrap gap-1.5">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] px-2.5 py-1 text-[9px] font-bold text-[var(--mn-success-text)] font-['Cairo',sans-serif]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--ab-success-border)] bg-[var(--ab-success-soft)] px-2.5 py-1 text-[9px] font-bold text-[var(--ab-success-text)] font-['Cairo',sans-serif]">
                     <CheckCircle2 className="h-3 w-3" />
                     {course.freeCertificate ? publicT('public_accredited_completion_certificate') : publicT('public_accredited_content')}
                   </span>
                   {course.freeCertificate && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] px-2.5 py-1 text-[9px] font-bold text-[var(--mn-accent-text)] font-['Cairo',sans-serif] mn-panel ">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--ab-border-gold)] bg-[var(--ab-gold-surface)] px-2.5 py-1 text-[9px] font-bold text-[var(--ab-accent-text)] font-['Cairo',sans-serif] ab-panel ">
                       <BadgeCheck className="h-3 w-3" />
                       {course.certificateType}
                     </span>
                   )}
                 </div>
 
-                <div className="mt-3 border-t border-[var(--mn-border)] pt-2.5">
+                <div className="mt-3 border-t border-[var(--ab-border)] pt-2.5">
                   <button
                     type="button"
                     onClick={() => onSelectCourse?.(course)}
-                    className="flex w-full items-center justify-between rounded-xl bg-[var(--mn-primary)] px-3.5 py-2.5 text-white shadow-sm transition-transform active:scale-[0.99] mn-inverse "
+                    className="flex w-full items-center justify-between rounded-xl bg-[var(--ab-primary)] px-3.5 py-2.5 text-white shadow-sm transition-transform active:scale-[0.99] ab-inverse "
                   >
                     <span className="text-[11px] font-bold font-['Cairo',sans-serif]">{publicT('public_view_details')}</span>
-                    <ArrowLeft className="h-4 w-4 text-[var(--mn-accent-soft)]" />
+                    <ArrowLeft className="h-4 w-4 text-[var(--ab-accent-soft)]" />
                   </button>
                 </div>
               </div>
@@ -419,12 +419,12 @@ export const CoursesSearchPage: React.FC<CoursesSearchPageProps> = ({ onBack, on
           ))}
         </section>
       ) : (
-        <div className="max-w-lg mx-auto mn-inline-gutter pt-2 pb-5">
-          <div className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-5 text-center text-[11px] font-bold text-[var(--mn-text-muted)] shadow-sm mn-panel ">{publicT('public_no_courses_match_the_current_filters')}</div>
+        <div className="max-w-lg mx-auto ab-inline-gutter pt-2 pb-5">
+          <div className="rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-5 text-center text-[11px] font-bold text-[var(--ab-text-muted)] shadow-sm ab-panel ">{publicT('public_no_courses_match_the_current_filters')}</div>
         </div>
       )}
 
-      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--mn-accent-text)] via-[var(--mn-accent-soft)] to-[var(--mn-accent-text)] shadow-xs" />
+      <div className="w-full h-0.5 bg-gradient-to-r from-[var(--ab-accent-text)] via-[var(--ab-accent-soft)] to-[var(--ab-accent-text)] shadow-xs" />
     </div>
   );
 };

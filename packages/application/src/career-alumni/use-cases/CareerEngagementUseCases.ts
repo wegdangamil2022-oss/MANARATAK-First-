@@ -1,7 +1,7 @@
 import {careerAlumniConsentCurrent} from '../CareerPolicy';
 import { createHash } from 'node:crypto';
 import { careerJobOpen, publishedCareerJob } from '../CareerPolicy';
-import { AssetSecurityClassification } from '@manaratak/domain';
+import { AssetSecurityClassification } from '@absheer/domain';
 import {
   AlumniProfileVisibility,
   CareerAlumniProfileDto,
@@ -12,7 +12,7 @@ import {
   ICareerEngagementRepository,
   ICareerRepository,
   ICareerStudentOwnershipGateway,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AssetReferencePolicy, assertAssetReferenceUsable } from '../../asset-platform/AssetReferencePolicy';
 
 export const ALLOWED_APPLICATION_TRANSITIONS: Record<CareerApplicationStatus, readonly CareerApplicationStatus[]> = {

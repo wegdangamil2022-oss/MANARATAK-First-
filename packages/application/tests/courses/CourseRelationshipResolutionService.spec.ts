@@ -3,7 +3,7 @@ import {
   CourseAcademicTaxonomyLinkDto,
   CourseMajorProjectionDto,
   ICourseRelationshipRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseRelationshipResolutionService } from '../../src/courses/services/CourseRelationshipResolutionService';
 
 class FakeRelationshipRepository implements ICourseRelationshipRepository {

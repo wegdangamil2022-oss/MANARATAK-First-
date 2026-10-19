@@ -26,41 +26,41 @@ const TYPE_STYLE: Record<ArticleType, { icon: React.ReactNode; label: string; cl
       icon: <BookOpenText className="h-4 w-4" />,
       label: "public_study_guide",
       className:
-        'bg-[var(--mn-surface-muted)] text-[var(--mn-link)] border-[var(--mn-border-brand)] mn-panel ',
+        'bg-[var(--ab-surface-muted)] text-[var(--ab-link)] border-[var(--ab-border-brand)] ab-panel ',
     },
     ARTICLE: {
       icon: <Newspaper className="h-4 w-4" />,
       label: "public_article",
-      className: 'bg-[var(--mn-page)] text-[var(--mn-text)] border-[var(--mn-border)] mn-panel ',
+      className: 'bg-[var(--ab-page)] text-[var(--ab-text)] border-[var(--ab-border)] ab-panel ',
     },
     NEWS: {
       icon: <Clock3 className="h-4 w-4" />,
       label: "public_news",
       className:
-        'bg-[var(--mn-gold-surface)] text-[var(--mn-accent-text)] border-[var(--mn-border-gold)] mn-panel ',
+        'bg-[var(--ab-gold-surface)] text-[var(--ab-accent-text)] border-[var(--ab-border-gold)] ab-panel ',
     },
     CHECKLIST: {
       icon: <FileCheck2 className="h-4 w-4" />,
       label: "public_checklist",
       className:
-        'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]',
+        'bg-[var(--ab-success-soft)] text-[var(--ab-success-text)] border-[var(--ab-success-border)]',
     },
     FAQ: {
       icon: <FileText className="h-4 w-4" />,
       label: "public_frequently_asked_questions",
-      className: 'bg-[var(--mn-page)] text-[var(--mn-text)] border-[var(--mn-border)] mn-panel',
+      className: 'bg-[var(--ab-page)] text-[var(--ab-text)] border-[var(--ab-border)] ab-panel',
     },
     LANDING_PAGE: {
       icon: <FileText className="h-4 w-4" />,
       label: "public_landing_page",
       className:
-        'bg-[var(--mn-surface-muted)] text-[var(--mn-text)] border-[var(--mn-border)] mn-panel',
+        'bg-[var(--ab-surface-muted)] text-[var(--ab-text)] border-[var(--ab-border)] ab-panel',
     },
     STATIC_PAGE: {
       icon: <FileText className="h-4 w-4" />,
       label: "public_static_page",
       className:
-        'bg-[var(--mn-surface-muted)] text-[var(--mn-text)] border-[var(--mn-border)] mn-panel',
+        'bg-[var(--ab-surface-muted)] text-[var(--ab-text)] border-[var(--ab-border)] ab-panel',
     },
   };
 
@@ -99,10 +99,10 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
   return (
     <main
       dir={publicDir}
-      className="min-h-screen bg-[var(--mn-page)] pb-16 font-['Cairo',sans-serif] mn-panel "
+      className="min-h-screen bg-[var(--ab-page)] pb-16 font-['Cairo',sans-serif] ab-panel "
     >
-      <section className="relative overflow-hidden bg-gradient-to-b from-[var(--mn-primary)] via-[var(--mn-primary)] to-[var(--mn-primary)] px-4 pb-12 pt-5 text-white shadow-sm mn-inverse ">
-        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full border border-[var(--mn-border-gold)]" />
+      <section className="relative overflow-hidden bg-gradient-to-b from-[var(--ab-primary)] via-[var(--ab-primary)] to-[var(--ab-primary)] px-4 pb-12 pt-5 text-white shadow-sm ab-inverse ">
+        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full border border-[var(--ab-border-gold)]" />
         <div className="pointer-events-none absolute -right-24 bottom-0 h-56 w-56 rounded-full border border-white/10" />
 
         <div className="relative mx-auto max-w-xl">
@@ -110,35 +110,35 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-[var(--mn-on-dark-muted)] backdrop-blur-sm transition hover:bg-white/10"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-[var(--ab-on-dark-muted)] backdrop-blur-sm transition hover:bg-white/10"
               aria-label={publicT('public_back')}
               title={publicT('public_back')}
             >
               <ArrowRight className="h-4 w-4" />
             </button>
-            <span className="rounded-full border border-[var(--mn-border-gold)] bg-[var(--mn-accent)]/10 px-3 py-1 text-[10px] font-bold text-[var(--mn-accent-text)]">{publicT('public_knowledge_platform')}</span>
+            <span className="rounded-full border border-[var(--ab-border-gold)] bg-[var(--ab-accent)]/10 px-3 py-1 text-[10px] font-bold text-[var(--ab-accent-text)]">{publicT('public_knowledge_platform')}</span>
           </div>
 
           <div className="text-center">
-            <Sparkles className="mb-1 h-4 w-4 text-[var(--mn-accent-text)]" aria-hidden="true" />
+            <Sparkles className="mb-1 h-4 w-4 text-[var(--ab-accent-text)]" aria-hidden="true" />
             <h1 className="text-[22px] font-bold leading-9 sm:text-[26px]">{publicT('public_articles_and_study_guides')}</h1>
-            <p className="mx-auto mt-1.5 max-w-sm text-[11px] font-medium leading-6 text-[var(--mn-on-dark-muted)] sm:text-xs">{publicT('public_practical_guides_and_editorial_articles_to_help_you')}</p>
+            <p className="mx-auto mt-1.5 max-w-sm text-[11px] font-medium leading-6 text-[var(--ab-on-dark-muted)] sm:text-xs">{publicT('public_practical_guides_and_editorial_articles_to_help_you')}</p>
           </div>
 
           <div className="mx-auto mt-4 max-w-md">
             <div className="relative">
-              <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-accent-text)]" />
+              <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ab-accent-text)]" />
               <input
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder={publicT('public_search_by_article_title_or_topic')}
-                className="w-full rounded-full border border-[var(--mn-border-gold)] bg-[var(--mn-primary)]/80 py-2.5 pl-10 pr-10 text-center text-xs font-bold text-white outline-none placeholder:text-[var(--mn-on-dark-muted)] focus:border-[var(--mn-border-gold)] focus:bg-[var(--mn-primary)] mn-inverse focus:mn-inverse "
+                className="w-full rounded-full border border-[var(--ab-border-gold)] bg-[var(--ab-primary)]/80 py-2.5 pl-10 pr-10 text-center text-xs font-bold text-white outline-none placeholder:text-[var(--ab-on-dark-muted)] focus:border-[var(--ab-border-gold)] focus:bg-[var(--ab-primary)] ab-inverse focus:ab-inverse "
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-[var(--mn-on-dark-muted)] hover:text-white"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-[var(--ab-on-dark-muted)] hover:text-white"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -148,8 +148,8 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
         </div>
       </section>
 
-      <div className="relative z-10 mx-auto -mt-7 max-w-xl space-y-3 mn-inline-gutter">
-        <div className="rounded-3xl border border-[var(--mn-border-gold)] bg-[var(--mn-surface)] p-2 shadow-md mn-panel ">
+      <div className="relative z-10 mx-auto -mt-7 max-w-xl space-y-3 ab-inline-gutter">
+        <div className="rounded-3xl border border-[var(--ab-border-gold)] bg-[var(--ab-surface)] p-2 shadow-md ab-panel ">
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
             {[
               { value: 'ALL', label: 'الكل' },
@@ -166,8 +166,8 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
                   onClick={() => setSelectedType(item.value as 'ALL' | ArticleType)}
                   className={`min-h-9 shrink-0 rounded-2xl px-3 text-[10px] font-bold transition sm:text-[11px] ${
                     active
-                      ? 'bg-[var(--mn-primary)] text-white shadow-sm mn-inverse '
-                      : 'border border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-text-muted)] hover:bg-[var(--mn-surface-muted)] mn-panel hover:mn-panel '
+                      ? 'bg-[var(--ab-primary)] text-white shadow-sm ab-inverse '
+                      : 'border border-[var(--ab-border)] bg-[var(--ab-page)] text-[var(--ab-text-muted)] hover:bg-[var(--ab-surface-muted)] ab-panel hover:ab-panel '
                   }`}
                 >
                   {publicT(item.label)}
@@ -177,7 +177,7 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-1 pt-1 text-[10px] font-bold text-[var(--mn-text-muted)] sm:text-[11px]">
+        <div className="flex items-center justify-between px-1 pt-1 text-[10px] font-bold text-[var(--ab-text-muted)] sm:text-[11px]">
           <span>{filtered.length}{' '}{publicT('public_knowledge_resources')}</span>
           <span>{publicT('public_newest_first')}</span>
         </div>
@@ -188,7 +188,7 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
             return (
               <article
                 key={article.id}
-                className="relative group overflow-hidden rounded-3xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] bg-[var(--mn-surface)] shadow-sm transition hover:shadow-md mn-panel "
+                className="relative group overflow-hidden rounded-3xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] bg-[var(--ab-surface)] shadow-sm transition hover:shadow-md ab-panel "
               >
                 {onToggleFavorite && (
                   <FavoriteButton
@@ -201,18 +201,18 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
                   />
                 )}
                 <div className="grid grid-cols-[88px_1fr] gap-0 sm:grid-cols-[116px_1fr]">
-                  <div className="relative min-h-[156px] overflow-hidden bg-gradient-to-br from-[var(--mn-primary)] via-[var(--mn-primary)] to-[var(--mn-primary)] p-3 text-white sm:min-h-[172px] mn-inverse ">
-                    <div className="absolute -left-8 -top-8 h-24 w-24 rounded-full border border-[var(--mn-border-gold)]" />
-                    <div className="absolute -bottom-10 -right-8 h-24 w-24 rounded-full bg-[var(--mn-accent)]/10" />
+                  <div className="relative min-h-[156px] overflow-hidden bg-gradient-to-br from-[var(--ab-primary)] via-[var(--ab-primary)] to-[var(--ab-primary)] p-3 text-white sm:min-h-[172px] ab-inverse ">
+                    <div className="absolute -left-8 -top-8 h-24 w-24 rounded-full border border-[var(--ab-border-gold)]" />
+                    <div className="absolute -bottom-10 -right-8 h-24 w-24 rounded-full bg-[var(--ab-accent)]/10" />
                     <div className="relative flex h-full flex-col justify-between">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-[var(--mn-accent-text)]">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-[var(--ab-accent-text)]">
                         {typeStyle.icon}
                       </div>
                       <div>
-                        <span className="block text-[9px] font-bold text-[var(--mn-accent-text)]">
-                          MANARATAK
+                        <span className="block text-[9px] font-bold text-[var(--ab-accent-text)]">
+                          ABSHEER
                         </span>
-                        <span className="mt-0.5 block text-[9px] font-bold leading-4 text-[var(--mn-on-dark-muted)]">{publicT('public_knowledge_and_guidance')}</span>
+                        <span className="mt-0.5 block text-[9px] font-bold leading-4 text-[var(--ab-on-dark-muted)]">{publicT('public_knowledge_and_guidance')}</span>
                       </div>
                     </div>
                   </div>
@@ -225,27 +225,27 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
                         {typeStyle.icon}
                         {article.contentTypeLabelAr}
                       </span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mn-surface)] px-2 py-1 text-[9px] font-bold text-[var(--mn-accent-text)] mn-panel ">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ab-surface)] px-2 py-1 text-[9px] font-bold text-[var(--ab-accent-text)] ab-panel ">
                         <Tag className="h-2.5 w-2.5" />
                         {article.categoryAr}
                       </span>
                       {index === 0 && (
-                        <span className="rounded-full bg-[var(--mn-primary)]/7 px-2 py-1 text-[9px] font-bold text-[var(--mn-heading)]">{publicT('public_featured')}</span>
+                        <span className="rounded-full bg-[var(--ab-primary)]/7 px-2 py-1 text-[9px] font-bold text-[var(--ab-heading)]">{publicT('public_featured')}</span>
                       )}
                     </div>
 
-                    <h2 className="line-clamp-2 text-[13px] font-bold leading-6 text-[var(--mn-heading)] sm:text-[14px]">
+                    <h2 className="line-clamp-2 text-[13px] font-bold leading-6 text-[var(--ab-heading)] sm:text-[14px]">
                       {article.titleAr}
                     </h2>
                     <p
-                      className="mt-0.5 line-clamp-1 text-left text-[9px] font-semibold text-[var(--mn-text-muted)]"
+                      className="mt-0.5 line-clamp-1 text-left text-[9px] font-semibold text-[var(--ab-text-muted)]"
                       dir="ltr"
                     >
                       {article.titleEn}
                     </p>
 
                     {article.excerptAr && (
-                      <p className="mt-2 line-clamp-2 text-[10px] font-medium leading-5 text-[var(--mn-text-muted)] sm:text-[11px]">
+                      <p className="mt-2 line-clamp-2 text-[10px] font-medium leading-5 text-[var(--ab-text-muted)] sm:text-[11px]">
                         {article.excerptAr}
                       </p>
                     )}
@@ -255,7 +255,7 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
                         {article.linkedEntities.slice(0, 3).map((entity) => (
                           <span
                             key={`${entity.type}-${entity.name}`}
-                            className="rounded-lg border border-[var(--mn-border-brand)] bg-[var(--mn-surface-muted)]/60 px-1.5 py-1 text-[8px] font-semibold text-[var(--mn-heading)]"
+                            className="rounded-lg border border-[var(--ab-border-brand)] bg-[var(--ab-surface-muted)]/60 px-1.5 py-1 text-[8px] font-semibold text-[var(--ab-heading)]"
                           >
                             {entity.name}
                           </span>
@@ -263,8 +263,8 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
                       </div>
                     )}
 
-                    <div className="mt-3 flex items-center justify-between border-t border-[var(--mn-border)] pt-2.5">
-                      <div className="min-w-0 space-y-0.5 text-[8px] font-bold text-[var(--mn-text-muted)] sm:text-[9px]">
+                    <div className="mt-3 flex items-center justify-between border-t border-[var(--ab-border)] pt-2.5">
+                      <div className="min-w-0 space-y-0.5 text-[8px] font-bold text-[var(--ab-text-muted)] sm:text-[9px]">
                         <span className="flex items-center gap-1 truncate">
                           <UserRound className="h-2.5 w-2.5" />
                           {article.author}
@@ -277,7 +277,7 @@ export const ArticlesSearchPage: React.FC<ArticlesSearchPageProps> = ({
                       <button
                         type="button"
                         onClick={() => onSelectArticle?.(article)}
-                        className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-xl bg-[var(--mn-primary)] px-3 text-[10px] font-bold text-white shadow-sm transition hover:bg-[var(--mn-primary-hover)] active:scale-[0.99] mn-inverse hover:mn-inverse"
+                        className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-xl bg-[var(--ab-primary)] px-3 text-[10px] font-bold text-white shadow-sm transition hover:bg-[var(--ab-primary-hover)] active:scale-[0.99] ab-inverse hover:ab-inverse"
                       >{publicT('public_read_article')}<ChevronLeft className="h-3.5 w-3.5" />
                       </button>
                     </div>

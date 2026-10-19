@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { evaluateAdmissionScores, type AdmissionVersionScale } from '@manaratak/domain';
+import { evaluateAdmissionScores, type AdmissionVersionScale } from '@absheer/domain';
 import { adminApiClient } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 type Requirement = {

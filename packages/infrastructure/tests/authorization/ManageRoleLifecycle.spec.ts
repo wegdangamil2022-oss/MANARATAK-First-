@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { ManageRolesUseCase } from '@manaratak/application';
-import { InMemoryRoleRepository } from '@manaratak/infrastructure';
-import { PermissionReference, Role } from '@manaratak/domain';
+import { ManageRolesUseCase } from '@absheer/application';
+import { InMemoryRoleRepository } from '@absheer/infrastructure';
+import { PermissionReference, Role } from '@absheer/domain';
 
 const input = {
   id: 'custom-1',

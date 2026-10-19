@@ -1,6 +1,6 @@
 # Neutral educational platform — ABSHEER source handoff
 
-This is an independent, data-cleared **source-only** handoff based on MANARATAK-First-. The original main branch is unchanged.
+This is an independent, data-cleared **source-only** handoff based on ABSHEER-First-. The original main branch is unchanged.
 
 - `apps/web`: public website; `apps/admin`: admin dashboard; `apps/api`: API.
 - `packages`: domain, application, persistence and database schema. Admin and catalog modules stay available.

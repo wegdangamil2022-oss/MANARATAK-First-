@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ConfigurationValidationService, NamespacedKey, ScopeIdentifier, SettingDefinition, SettingVersion, StringValue, ValueType } from '@manaratak/domain';
+import { ConfigurationValidationService, NamespacedKey, ScopeIdentifier, SettingDefinition, SettingVersion, StringValue, ValueType } from '@absheer/domain';
 import { ManageSettingsUseCase } from '../../src/settings/use-cases/ManageSettingsUseCase';
 
 function fixture(secret: boolean, missing = false) {

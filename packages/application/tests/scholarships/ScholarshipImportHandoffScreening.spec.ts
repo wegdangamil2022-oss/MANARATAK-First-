@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { UniversalImportHandoff } from '@manaratak/domain';
+import type { UniversalImportHandoff } from '@absheer/domain';
 import {
   ScholarshipImportHandoffService,
   type IScholarshipHandoffCanonicalScreening,

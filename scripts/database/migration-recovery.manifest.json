@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "authority": "MNT-AUD-0079",
+  "authority": "ABSH-AUD-0079",
   "defaultPolicy": "FAIL_CLOSED",
   "migrations": {
     "20260806172001_init_schema": {

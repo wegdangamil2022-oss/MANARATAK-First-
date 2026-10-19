@@ -1,8 +1,8 @@
-# MANARATAK 2.0: Enterprise Technical Audit Report
+# ABSHEER 2.0: Enterprise Technical Audit Report
 
 ## 1. Executive Summary
 
-An exhaustive technical and architectural audit was conducted on the **MANARATAK 2.0** repository. The audit revealed a profound discrepancy between the documented architecture and the actual codebase. While the documentation describes a mature, C#/.NET based Enterprise application utilizing Entity Framework Core, MediatR, and SQL Server, the implementation is an incomplete TypeScript/Node.js monorepo. Furthermore, the application is heavily reliant on `InMemory` repositories and mock gateways, making it functionally a prototype rather than a production-ready enterprise system. The frontend is a mere skeleton, and several critical configuration and versioning conflicts exist within the monorepo setup.
+An exhaustive technical and architectural audit was conducted on the **ABSHEER 2.0** repository. The audit revealed a profound discrepancy between the documented architecture and the actual codebase. While the documentation describes a mature, C#/.NET based Enterprise application utilizing Entity Framework Core, MediatR, and SQL Server, the implementation is an incomplete TypeScript/Node.js monorepo. Furthermore, the application is heavily reliant on `InMemory` repositories and mock gateways, making it functionally a prototype rather than a production-ready enterprise system. The frontend is a mere skeleton, and several critical configuration and versioning conflicts exist within the monorepo setup.
 
 ## 2. Architecture Assessment
 
@@ -74,7 +74,7 @@ An exhaustive technical and architectural audit was conducted on the **MANARATAK
 ### 5.1 Hardcoded Workspace Dependencies
 
 - **Location:** `packages/testing/package.json`
-- **Why it's a problem:** It references `@manaratak/core: "1.0.0"` instead of `*`.
+- **Why it's a problem:** It references `@absheer/core: "1.0.0"` instead of `*`.
 - **Impact:** Breaks NPM/Yarn workspace symlinking, potentially causing the package manager to fetch from the public registry instead of using local packages.
 - **Root Cause:** Manual editing of `package.json` without understanding workspace linking.
 - **Best Fix:** Change the dependency versions to `"*"` to match the rest of the monorepo.
@@ -97,7 +97,7 @@ An exhaustive technical and architectural audit was conducted on the **MANARATAK
 - **Why it's a problem:** `npm run test` executes `echo "No tests specified"`.
 - **Impact:** No automated validation of domain logic or infrastructure.
 - **Root Cause:** Testing was deferred.
-- **Best Fix:** Introduce Jest/Vitest and write unit tests for the `@manaratak/domain` and `@manaratak/application` packages.
+- **Best Fix:** Introduce Jest/Vitest and write unit tests for the `@absheer/domain` and `@absheer/application` packages.
 - **Cost:** Medium
 
 ### 6.2 Incorrect Build Scripts in Apps

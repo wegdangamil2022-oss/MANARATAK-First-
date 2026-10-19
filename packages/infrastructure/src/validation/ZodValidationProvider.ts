@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Result, ResultFactory } from '@manaratak/core';
+import { Result, ResultFactory } from '@absheer/core';
 
 export class ZodValidationProvider {
   /**

@@ -1,5 +1,5 @@
 import {describe,it,expect,vi} from 'vitest';
-import {ScholarshipStatus,ScholarshipPublicationStatus,ScholarshipCompletenessState,type ScholarshipDto} from '@manaratak/domain';
+import {ScholarshipStatus,ScholarshipPublicationStatus,ScholarshipCompletenessState,type ScholarshipDto} from '@absheer/domain';
 import {AdminScholarshipUseCases} from '../../src/scholarships/use-cases/AdminScholarshipUseCases';
 import {projectPublishedScholarship} from '../../src/scholarships/use-cases/ScholarshipPublicProjection';
 

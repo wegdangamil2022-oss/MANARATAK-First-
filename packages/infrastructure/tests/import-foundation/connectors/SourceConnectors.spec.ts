@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { ImportSourceDefinition, SourceConnectorCategory, SourceAccessClassification, SourceStatus } from '@manaratak/domain';
-import type { ISafeSourceHttpTransport } from '@manaratak/application';
+import { ImportSourceDefinition, SourceConnectorCategory, SourceAccessClassification, SourceStatus } from '@absheer/domain';
+import type { ISafeSourceHttpTransport } from '@absheer/application';
 import { OfficialApiSourceConnector, OfficialFeedSourceConnector, SitemapSourceConnector, StaticHtmlSourceConnector, ManualUploadSourceConnector } from '../../../src';
 const transport: ISafeSourceHttpTransport = { async get(_source, request) { return { requestedUrl: request.targetUrl!, finalUrl: request.targetUrl!, statusCode: 200, contentType: 'application/octet-stream', rawBytes: new TextEncoder().encode('safe-offline-fixture'), fetchedAt: new Date('2026-08-23T00:00:00Z') }; } };
 const operational = [new OfficialApiSourceConnector(transport), new OfficialFeedSourceConnector(transport), new SitemapSourceConnector(transport), new StaticHtmlSourceConnector(transport)];

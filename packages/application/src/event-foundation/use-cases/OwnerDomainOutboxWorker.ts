@@ -1,4 +1,4 @@
-import { ITransactionalOutboxDispatcher, OutboxDispatchResult } from '@manaratak/domain';
+import { ITransactionalOutboxDispatcher, OutboxDispatchResult } from '@absheer/domain';
 
 export interface OwnerDomainOutboxWorkerOptions {
   batchSize?: number;

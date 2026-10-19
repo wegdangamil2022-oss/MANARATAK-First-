@@ -32,7 +32,7 @@ const files = {
   apiServer: read('apps/api/src/server.ts'),
   pollingRuntime: read('apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts'),
   apiApp: read('apps/api/src/app.ts'),
-  phase14Runbook: read('docs/implementation-status/MANARATAK-2.0-Phase14-Source-Closure-and-Google-Studio-Runbook.md'),
+  phase14Runbook: read('docs/implementation-status/ABSHEER-2.0-Phase14-Source-Closure-and-Google-Studio-Runbook.md'),
 };
 
 const checks=[];
@@ -45,7 +45,7 @@ check('CERT-OWN-001', all(files.usecase,["event.sourceDomain !== 'COURSES'","eve
 check('CERT-OWN-002', !files.adminRouter.includes('/course-completions/issue'), 'No synthetic/manual initial issuance HTTP route exists.');
 check('CERT-OWN-003', files.usecase.includes('findBySourceEventId(event.eventId)'), 'Event-level issuance is idempotent.');
 check('CERT-OWN-004', files.usecase.includes('findBySourceCompletionId(payload.completionId)'), 'Completion-level issuance is idempotent.');
-check('CERT-OWN-005', all(files.usecase,['CourseOriginType.NATIVE_MANARATAK_COURSE','MANARATAK_CERTIFICATE_NATIVE_COURSE_REQUIRED']), 'MANARATAK certificates fail closed for imported/external courses.');
+check('CERT-OWN-005', all(files.usecase,['CourseOriginType.NATIVE_ABSHEER_COURSE','ABSHEER_CERTIFICATE_NATIVE_COURSE_REQUIRED']), 'ABSHEER certificates fail closed for imported/external courses.');
 check('CERT-OWN-006', files.usecase.includes('COURSE_CERTIFICATE_DISABLED'), 'Native course must explicitly enable certificate eligibility.');
 check('CERT-OWN-007', all(files.usecase,['LearningPathCompletedEventPayload','issueLearningPathCompletion']), 'Learning-path completion has a distinct issuance path.');
 check('CERT-OWN-008', files.usecase.includes('ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED'), 'Issuance requires an active governed template.');
@@ -91,13 +91,13 @@ check('CERT-PUB-013', files.readService.includes('verificationUrl: row.verificat
 check('CERT-TPL-001', all(files.usecase,['CertificateTemplateStatus.PENDING_APPROVAL','CertificateTemplateStatus.APPROVED','CertificateTemplateStatus.ACTIVE']), 'Template lifecycle includes maker/checker approval before activation.');
 check('CERT-TPL-002', files.repo.includes('CERTIFICATE_TEMPLATE_MAKER_CHECKER_REQUIRED'), 'Persistence enforces maker/checker separation.');
 check('CERT-TPL-003', files.schema.includes('model CertificateTemplateVersion'), 'Template versions are first-class immutable records.');
-check('CERT-TPL-004', files.usecase.includes("accentColor: '#142B5F'"), 'Default template uses MANARATAK navy.');
-check('CERT-TPL-005', files.usecase.includes("secondaryColor: '#D6A43B'"), 'Default template uses MANARATAK gold.');
+check('CERT-TPL-004', files.usecase.includes("accentColor: '#142B5F'"), 'Default template uses ABSHEER navy.');
+check('CERT-TPL-005', files.usecase.includes("secondaryColor: '#D6A43B'"), 'Default template uses ABSHEER gold.');
 check('CERT-TPL-006', files.usecase.includes("titleAr: 'شهادة إتمام'"), 'Default Arabic credential title is Certificate of Completion.');
 check('CERT-TPL-007', files.usecase.includes('titleEn: approvedCertificateCopy.titleEn') && files.approvedDesign.includes("titleEn: 'Certificate of Completion'"), 'Default English credential title is Certificate of Completion.');
-check('CERT-TPL-008', !files.usecase.includes('شهادة إتمام معتمدة'), 'Default MANARATAK template does not falsely claim external accreditation.');
-check('CERT-TPL-009', all(files.usecase, ["signatoryNameAr: 'إدارة منصة منارتك'", "signatoryNameEn: 'MANARATAK Management'"]), 'Approved default signatory is bilingual MANARATAK Management.');
-check('CERT-TPL-010', all(files.usecase,['UNIVERSITY','CERTIFICATE_ISSUER_ACCREDITATION_REQUIRED']), 'Non-MANARATAK issuer paths require explicit accreditation evidence where configured.');
+check('CERT-TPL-008', !files.usecase.includes('شهادة إتمام معتمدة'), 'Default ABSHEER template does not falsely claim external accreditation.');
+check('CERT-TPL-009', all(files.usecase, ["signatoryNameAr: 'إدارة منصة أبشر'", "signatoryNameEn: 'ABSHEER Management'"]), 'Approved default signatory is bilingual ABSHEER Management.');
+check('CERT-TPL-010', all(files.usecase,['UNIVERSITY','CERTIFICATE_ISSUER_ACCREDITATION_REQUIRED']), 'Non-ABSHEER issuer paths require explicit accreditation evidence where configured.');
 check('CERT-TPL-011', files.adminRouter.includes('/templates/bootstrap-default'), 'Admin can bootstrap the governed default draft through the real owner API.');
 check('CERT-TPL-012', all(files.adminRouter,['templates:author','templates:approve','issuers:manage','lifecycle:manage']), 'Admin API separates certificate permissions by responsibility.');
 
@@ -106,7 +106,7 @@ check('CERT-ADM-001', files.adminPage.includes('سجل الشهادات'), 'Actu
 check('CERT-ADM-002', files.adminPage.includes('القوالب'), 'Actual Admin dashboard manages templates.');
 check('CERT-ADM-003', files.adminPage.includes('جهات الإصدار'), 'Actual Admin dashboard manages issuers.');
 check('CERT-ADM-004', files.adminPage.includes('الجاهزية والحوكمة'), 'Actual Admin dashboard exposes readiness/governance.');
-check('CERT-ADM-005', files.adminPage.includes('#142B5F') && files.adminPage.includes('#D6A43B'), 'Actual Admin dashboard uses MANARATAK brand colors.');
+check('CERT-ADM-005', files.adminPage.includes('#142B5F') && files.adminPage.includes('#D6A43B'), 'Actual Admin dashboard uses ABSHEER brand colors.');
 check('CERT-ADM-006', files.adminPage.includes('الإصدار الأولي لا يتم يدويًا'), 'Admin explicitly communicates trusted-event initial issuance.');
 check('CERT-ADM-007', files.detailPage.includes('إلغاء رسمي'), 'Certificate detail supports governed revocation.');
 check('CERT-ADM-008', files.detailPage.includes('إعادة إصدار'), 'Certificate detail supports governed reissue.');

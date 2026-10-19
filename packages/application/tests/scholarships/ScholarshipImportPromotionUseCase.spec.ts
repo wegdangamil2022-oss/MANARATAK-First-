@@ -6,7 +6,7 @@ import {
   ImportRecordStatus,
   ScholarshipStatus,
   ScholarshipCompletenessState
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('ScholarshipImportPromotionUseCase', () => {
   const createMockRepo = (): IScholarshipRepository => ({

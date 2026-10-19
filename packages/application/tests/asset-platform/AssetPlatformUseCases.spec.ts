@@ -19,7 +19,7 @@ import {
   AssetRetentionCategory,
   MalwareScanResult,
   SanitizationResult
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 import {
   IngestAssetUseCase,

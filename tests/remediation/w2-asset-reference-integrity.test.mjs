@@ -43,10 +43,10 @@ function domainMock() {
   return { AssetId, AssetLifecycleState, AssetSecurityClassification };
 }
 
-test('MNT-AUD-0030 runtime policy rejects missing/state/classification/owner violations', async () => {
+test('ABSH-AUD-0030 runtime policy rejects missing/state/classification/owner violations', async () => {
   const { AssetReferencePolicy, assertAssetReferenceUsable } = loadTsModule(
     'packages/application/src/asset-platform/AssetReferencePolicy.ts',
-    { '@manaratak/domain': domainMock() },
+    { '@absheer/domain': domainMock() },
   );
   const repo = { findById: async (id) => records.get(id.value) ?? null };
   const records = new Map([
@@ -65,7 +65,7 @@ test('MNT-AUD-0030 runtime policy rejects missing/state/classification/owner vio
   await assert.rejects(policy.assertUsable('https://example.com/x.png', { purpose: 'TEST' }), /RAW_ASSET_REFERENCE_FORBIDDEN/);
 });
 
-test('MNT-AUD-0050 derived registry detects direct and CMS JSON usages and remains read-only', async () => {
+test('ABSH-AUD-0050 derived registry detects direct and CMS JSON usages and remains read-only', async () => {
   const calls = [];
   const prisma = new Proxy({}, {
     get(_target, delegate) {
@@ -83,7 +83,7 @@ test('MNT-AUD-0050 derived registry detects direct and CMS JSON usages and remai
   });
   const { PrismaAssetUsageRegistryGateway } = loadTsModule(
     'packages/infrastructure/src/asset-platform/PrismaAssetUsageRegistryGateway.ts',
-    { '@manaratak/domain': domainMock(), '@prisma/client': {} },
+    { '@absheer/domain': domainMock(), '@prisma/client': {} },
   );
   const registry = new PrismaAssetUsageRegistryGateway(prisma);
   assert.equal(await registry.isAssetInUse(new AssetId('unused')), false);
@@ -95,7 +95,7 @@ test('MNT-AUD-0050 derived registry detects direct and CMS JSON usages and remai
   assert.ok(calls.length > 25, 'registry should inspect the complete direct + JSON manifest surface');
 });
 
-test('MNT-AUD-0050 purge rejects in-use asset before storage deletion', async () => {
+test('ABSH-AUD-0050 purge rejects in-use asset before storage deletion', async () => {
   let deleteCalls = 0;
   let purgeCalls = 0;
   const record = {
@@ -111,7 +111,7 @@ test('MNT-AUD-0050 purge rejects in-use asset before storage deletion', async ()
   const { ProcessAssetLifecycleUseCase } = loadTsModule(
     'packages/application/src/asset-platform/use-cases/ProcessAssetLifecycleUseCase.ts',
     {
-      '@manaratak/domain': { ...domainMock() },
+      '@absheer/domain': { ...domainMock() },
       '../mappers/AssetRecordMapper': { AssetRecordMapper: { toDto: (v) => v } },
       '../dtos/AssetDtos': {},
     },
@@ -122,7 +122,7 @@ test('MNT-AUD-0050 purge rejects in-use asset before storage deletion', async ()
   assert.equal(deleteCalls, 0);
 });
 
-test('MNT-AUD-0030 consumer use cases fail closed when an AssetId is supplied without P05 policy', () => {
+test('ABSH-AUD-0030 consumer use cases fail closed when an AssetId is supplied without P05 policy', () => {
   const files = [
     'packages/application/src/students/use-cases/StudentWorkspaceUseCases.ts',
     'packages/application/src/cms/use-cases/CmsUseCases.ts',

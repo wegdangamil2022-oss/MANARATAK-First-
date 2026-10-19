@@ -10,8 +10,8 @@ import {
   ICourseRepository,
   PaginatedCourseResult,
   UpdateCourseDto,
-} from '@manaratak/domain';
-import { assertNoTranslationPayloadFields } from '@manaratak/shared';
+} from '@absheer/domain';
+import { assertNoTranslationPayloadFields } from '@absheer/shared';
 import { AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { CoursePublicationService } from '../services/CoursePublicationService';
 
@@ -69,7 +69,7 @@ export class AdminCourseUseCases {
       }
     }
 
-    if (existing.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) {
+    if (existing.originType === CourseOriginType.NATIVE_ABSHEER_COURSE) {
       if (updates.directCourseUrl && !updates.directCourseUrl.startsWith('/courses/')) {
         throw new Error('NATIVE_COURSE_INTERNAL_URL_REQUIRED');
       }
@@ -128,7 +128,7 @@ export class AdminCourseUseCases {
 
   public async markReadyToPublish(id: string): Promise<void> {
     const existing = await this.getCourse(id);
-    if (existing.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) {
+    if (existing.originType === CourseOriginType.NATIVE_ABSHEER_COURSE) {
       throw new Error('NATIVE_COURSE_LIFECYCLE_REQUIRES_NATIVE_BOUNDARY');
     }
     if (existing.status !== CourseStatus.READY_TO_REVIEW) throw new Error('COURSE_REVIEW_REQUIRED');
@@ -139,7 +139,7 @@ export class AdminCourseUseCases {
 
   public async publish(id: string, context?: AtomicMutationRequestContext): Promise<void> {
     const existing = await this.getCourse(id);
-    if (existing.originType === CourseOriginType.NATIVE_MANARATAK_COURSE) {
+    if (existing.originType === CourseOriginType.NATIVE_ABSHEER_COURSE) {
       throw new Error('NATIVE_COURSE_LIFECYCLE_REQUIRES_NATIVE_BOUNDARY');
     }
     if (!this.publicationService) throw new Error('COURSE_PUBLICATION_POLICY_NOT_CONFIGURED');

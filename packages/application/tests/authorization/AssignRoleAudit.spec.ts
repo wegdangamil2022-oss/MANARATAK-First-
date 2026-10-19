@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AssignRoleUseCase } from '../../src/authorization/use-cases/AssignRoleUseCase';
-import type { RoleAssignment } from '@manaratak/domain';
+import type { RoleAssignment } from '@absheer/domain';
 
 describe('role assignment audit boundary', () => {
   it('records grant and revocation through the atomic audit coordinator', async () => {

@@ -1,6 +1,6 @@
 import dns from 'node:dns/promises';
 import { isIP } from 'node:net';
-import type { ImportSourceDefinition } from '@manaratak/domain';
+import type { ImportSourceDefinition } from '@absheer/domain';
 import { PublicNetworkAddressPolicy } from '../../network/PublicNetworkAddressPolicy';
 
 export interface SourceAddressResolver {

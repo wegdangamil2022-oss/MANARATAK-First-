@@ -1,4 +1,4 @@
-import { LogSeverity } from '@manaratak/domain';
+import { LogSeverity } from '@absheer/domain';
 
 export interface CreateLogEntryDto {
   reference: string;

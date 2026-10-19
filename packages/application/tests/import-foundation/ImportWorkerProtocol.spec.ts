@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ImportRetryPolicy } from '@manaratak/domain';
+import { ImportRetryPolicy } from '@absheer/domain';
 import { IImportQueueGateway, ImportWorkerProtocol } from '../../src';
 
 const policy = ImportRetryPolicy.create({

@@ -1,4 +1,4 @@
-import { ImportCheckpoint } from '@manaratak/domain';
+import { ImportCheckpoint } from '@absheer/domain';
 import {
   EnqueueImportJobCommand,
   ImportJobStatusDto,

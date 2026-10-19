@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { UniversalImportHandoff } from '@manaratak/domain';
+import type { UniversalImportHandoff } from '@absheer/domain';
 import { UniversityLaterStagesDryRunUseCase, type UniversityLaterStageResult } from './UniversityLaterStagesDryRunUseCase';
 
 const shape = z.object({

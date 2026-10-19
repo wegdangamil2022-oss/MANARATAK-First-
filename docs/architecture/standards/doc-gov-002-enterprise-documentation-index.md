@@ -21,10 +21,10 @@
 ---
 
 ## 1. Purpose
-The Enterprise Documentation Index serves as the single authoritative entry point and central navigation hub for the MANARATAK 2.0 project. It catalogs every official project document, ensuring that all architecture, governance, technical, operational, and project documentation is easily discoverable, strictly governed, and tightly aligned with the overall enterprise architecture.
+The Enterprise Documentation Index serves as the single authoritative entry point and central navigation hub for the ABSHEER 2.0 project. It catalogs every official project document, ensuring that all architecture, governance, technical, operational, and project documentation is easily discoverable, strictly governed, and tightly aligned with the overall enterprise architecture.
 
 ## 2. Scope
-This index covers all official documentation assets produced, maintained, and retired throughout the entire lifecycle of the MANARATAK 2.0 project, regardless of the target audience (executives, architects, developers, or operators). It applies to all current, historical, and planned documents.
+This index covers all official documentation assets produced, maintained, and retired throughout the entire lifecycle of the ABSHEER 2.0 project, regardless of the target audience (executives, architects, developers, or operators). It applies to all current, historical, and planned documents.
 
 ## 3. Objectives
 - **Centralized Navigation:** Provide a single, reliable point of entry for discovering project knowledge.

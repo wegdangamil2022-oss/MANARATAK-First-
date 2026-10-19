@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ReferenceDataUseCases } from '../../src/reference-data/use-cases/ReferenceDataUseCases';
-import type { IReferenceDataRepository } from '@manaratak/domain';
+import type { IReferenceDataRepository } from '@absheer/domain';
 
 describe('P7 quality evidence policy', () => {
   it('counts owner records and does not invent completeness or broken FK metrics', async () => {

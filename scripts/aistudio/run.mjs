@@ -80,10 +80,10 @@ const [app = 'web', command = 'dev', ...args] = process.argv.slice(2);
 if (!['web', 'admin'].includes(app) || !['dev', 'build'].includes(command)) {
   throw new Error('Use: node scripts/aistudio/run.mjs web|admin dev|build [--port 3000]');
 }
-const env = loadEnv('aistudio', root, ['MANARATAK_', 'VITE_', 'DISABLE_HMR']);
+const env = loadEnv('aistudio', root, ['ABSHEER_', 'VITE_', 'DISABLE_HMR']);
 for (const [key, value] of Object.entries(env)) process.env[key] ??= value;
-process.env.MANARATAK_GOOGLE_AI_STUDIO = 'true';
-process.env.MANARATAK_RUNTIME_PROFILE = 'google-ai-studio';
+process.env.ABSHEER_GOOGLE_AI_STUDIO = 'true';
+process.env.ABSHEER_RUNTIME_PROFILE = 'google-ai-studio';
 if (!process.env.DATABASE_URL && process.env.SQL_HOST && process.env.SQL_DB_NAME) {
   // Ensure Cloud SQL Unix domain socket is available if using proxy directory
   if (process.env.SQL_HOST.startsWith('/app/cloudsql')) {
@@ -153,12 +153,12 @@ if (command === 'dev') {
   }
 }
 
-process.env.REDIS_NAMESPACE ??= 'manaratak:';
+process.env.REDIS_NAMESPACE ??= 'absheer:';
 process.env.EMAIL_DELIVERY_PROVIDER ??= existsSync('/usr/local/bin/mailpit') ? 'smtp' : 'captured';
 process.env.SMTP_HOST ??= '127.0.0.1';
 process.env.SMTP_PORT ??= '1025';
 process.env.SMTP_SECURE ??= 'false';
-process.env.SMTP_FROM ??= 'noreply@manaratak.local';
+process.env.SMTP_FROM ??= 'noreply@absheer.local';
 applyStudioRuntimeDefaults(process.env);
 
 const configFile = path.join(root, 'apps', app, 'vite.config.ts');

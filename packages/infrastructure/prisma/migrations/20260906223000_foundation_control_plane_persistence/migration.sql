@@ -1,7 +1,7 @@
--- MANARATAK_MIGRATION_OWNER: foundation_control_plane
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
--- MNT-AUD-0049: durable persistence for mounted Phase 05 control-plane aggregates.
+-- ABSHEER_MIGRATION_OWNER: foundation_control_plane
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
+-- ABSH-AUD-0049: durable persistence for mounted Phase 05 control-plane aggregates.
 
 CREATE TABLE "WorkflowControlRecord" (
   "id" TEXT NOT NULL,

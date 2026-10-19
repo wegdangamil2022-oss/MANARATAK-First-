@@ -7,7 +7,7 @@ import {
   type IImportHandoffConsumer,
   type IInternationalTestRepository,
   type UniversalImportHandoff,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const ALLOWED_OWNER_DOMAINS = new Set(['TESTS', 'INTERNATIONAL_TESTS']);
 

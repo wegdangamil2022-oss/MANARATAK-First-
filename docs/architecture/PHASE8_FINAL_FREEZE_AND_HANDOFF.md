@@ -2,9 +2,9 @@
 
 ## 1. Executive Summary
 
-Phase 8 established the authoritative Academic Taxonomy for the MANARATAK platform, creating a governed, versioned, and standard-aligned hierarchy for academic fields, disciplines, and standard classifications. This document serves as the formal baseline freeze for Phase 8, defining the rigid contracts that future phases (especially Phase 10: University Integration) must respect.
+Phase 8 established the authoritative Academic Taxonomy for the ABSHEER platform, creating a governed, versioned, and standard-aligned hierarchy for academic fields, disciplines, and standard classifications. This document serves as the formal baseline freeze for Phase 8, defining the rigid contracts that future phases (especially Phase 10: University Integration) must respect.
 
-The taxonomy is built upon the UNESCO ISCED-F 2013 standard, extending it with MANARATAK-specific programmatic areas and specializations while preserving deterministic relationships and provenance.
+The taxonomy is built upon the UNESCO ISCED-F 2013 standard, extending it with ABSHEER-specific programmatic areas and specializations while preserving deterministic relationships and provenance.
 
 **Phase 8 Status**: FROZEN
 
@@ -147,7 +147,7 @@ The Taxonomy should normally derive from the `Major`. Organizational structures 
 The following items are deferred to the Phase 10 / University phase:
 * A. Normalize the current University JSON-based structure into relational entities (`Campus`, `Faculty`/`School`/`College`, `Department`, `AcademicProgram`).
 * B. Replace unsafe random University public ID generation.
-* C. Preserve existing MANARATAK University Reference IDs.
+* C. Preserve existing ABSHEER University Reference IDs.
 * D. Refactor University deduplication to prioritize canonical source reference IDs.
 * E. Create stable `AcademicProgram` identity strategy.
 
@@ -158,7 +158,7 @@ The following items are deferred to the Phase 10 / University phase:
 | DegreeLevel canonical codes | Aliases |
 | Phase 8 ownership boundaries | Verified standard mappings |
 | Existing node types | Future CIP crosswalk |
-| Canonical relationship principle | Future MANARATAK custom classification layer |
+| Canonical relationship principle | Future ABSHEER custom classification layer |
 | Deterministic identity contract | Additional external classification standards |
 | ISCED-F baseline version | New taxonomy versions |
 | Public/Admin API boundary | |

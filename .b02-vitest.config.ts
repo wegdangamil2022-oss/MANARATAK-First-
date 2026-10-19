@@ -3,7 +3,7 @@ import base from './.section16-vitest.config';
 import {resolve} from 'node:path';
 export default defineConfig({
  ...base,
- resolve:{alias:{...base.resolve?.alias,'@manaratak/config':resolve('packages/config/src/index.ts')}},
+ resolve:{alias:{...base.resolve?.alias,'@absheer/config':resolve('packages/config/src/index.ts')}},
  test:{...base.test,maxWorkers:1,include:[
   'apps/api/tests/presentation/security/SecurityMiddlewareFactory.spec.ts',
   'apps/api/tests/presentation/security/AuthSessionBoundary.spec.ts',

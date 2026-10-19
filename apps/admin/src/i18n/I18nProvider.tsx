@@ -4,7 +4,7 @@ import {
   getLocaleDirection,
   isSupportedLocale,
   type SupportedLocale,
-} from '@manaratak/shared';
+} from '@absheer/shared';
 import { en } from './en';
 import { ar } from './ar';
 
@@ -48,7 +48,7 @@ const safeSetItem = (key: string, value: string): void => {
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<SupportedLocale>(() => {
-    const saved = safeGetItem('manaratak_admin_lang');
+    const saved = safeGetItem('absheer_admin_lang');
     if (isSupportedLocale(saved)) {
       return saved;
     }
@@ -57,7 +57,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setLanguage = (lang: SupportedLocale) => {
     setLanguageState(lang);
-    safeSetItem('manaratak_admin_lang', lang);
+    safeSetItem('absheer_admin_lang', lang);
   };
 
   const dir = getLocaleDirection(language);
@@ -81,7 +81,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useTranslation = () => {
   const context = useContext(I18nContext);
   if (context === undefined) {
-    const savedLang = safeGetItem('manaratak_admin_lang') || safeGetItem('manaratak_lang');
+    const savedLang = safeGetItem('absheer_admin_lang') || safeGetItem('absheer_lang');
     const language = isSupportedLocale(savedLang) ? savedLang : DEFAULT_LOCALE;
     const dict = dictionaries[language] || dictionaries.ar;
     return {

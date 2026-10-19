@@ -1,5 +1,5 @@
-import { EnterpriseEvent, IEnterpriseEventRepository } from '@manaratak/domain';
-import { ISpecification } from '@manaratak/core';
+import { EnterpriseEvent, IEnterpriseEventRepository } from '@absheer/domain';
+import { ISpecification } from '@absheer/core';
 
 export class InMemoryEnterpriseEventRepository implements IEnterpriseEventRepository {
   public readonly persistenceClassification = 'DEVELOPMENT_ONLY' as const;

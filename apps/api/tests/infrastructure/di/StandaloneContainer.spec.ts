@@ -4,10 +4,10 @@ import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import * as esmContainer from '@manaratak-vendor/awilix-core';
+import * as esmContainer from '@absheer-vendor/awilix-core';
 
 const require = createRequire(import.meta.url);
-const cjsContainer = require('@manaratak-vendor/awilix-core') as typeof esmContainer;
+const cjsContainer = require('@absheer-vendor/awilix-core') as typeof esmContainer;
 const vendor = new URL('../../../../../vendor/awilix-core/', import.meta.url);
 
 describe.each([

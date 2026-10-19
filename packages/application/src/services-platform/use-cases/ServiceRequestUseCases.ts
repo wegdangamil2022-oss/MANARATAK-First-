@@ -1,4 +1,4 @@
-import { ServiceSupportTriageFilters } from '@manaratak/domain';
+import { ServiceSupportTriageFilters } from '@absheer/domain';
 import { serviceFingerprint, serviceInput } from '../ServiceSafety';
 import {
   AssetReferencePolicy,
@@ -16,7 +16,7 @@ import {
   ServiceRequestStatus,
   ServiceAvailabilityStatus,
   ServiceStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class StudentServiceRequestUseCases {
   constructor(

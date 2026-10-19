@@ -1,7 +1,7 @@
 import { PrismaDutyGuard } from './PrismaDutyGuard';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { AtomicPersistenceContext, RoleAssignment, IRoleAssignmentRepository, ITransactionalRoleAssignmentRepository } from '@manaratak/domain';
-import { ISpecification } from '@manaratak/core';
+import { AtomicPersistenceContext, RoleAssignment, IRoleAssignmentRepository, ITransactionalRoleAssignmentRepository } from '@absheer/domain';
+import { ISpecification } from '@absheer/core';
 
 export interface RoleAssignmentRecordRow {
   id: string;

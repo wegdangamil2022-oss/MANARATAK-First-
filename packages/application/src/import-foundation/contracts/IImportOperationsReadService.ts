@@ -2,7 +2,7 @@ import {
   ImportJobStatus,
   SourceStatus,
   DriftSeverity
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   ImportOperationsSummaryDto,
   ImportBatchOperationsDto,

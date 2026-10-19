@@ -40,28 +40,28 @@ describe('Google AI Studio compatibility boundaries', () => {
   });
 
   it.each(['web', 'admin'])('uses source aliases and Web-only middleware for %s without dist artifacts', async (app) => {
-    vi.stubEnv('MANARATAK_GOOGLE_AI_STUDIO', 'true');
+    vi.stubEnv('ABSHEER_GOOGLE_AI_STUDIO', 'true');
     const result = await loadConfigFromFile({ command: 'serve', mode: 'aistudio' }, resolve('apps', app, 'vite.config.ts'));
     expect(result).not.toBeNull();
     const plugins = result!.config.plugins?.flat().filter(Boolean) as Array<{ name: string }>;
-    expect(plugins.map((plugin) => plugin.name)).toContain('manaratak-google-ai-studio-web-only');
+    expect(plugins.map((plugin) => plugin.name)).toContain('absheer-google-ai-studio-web-only');
     expect(plugins.map((plugin) => plugin.name)).not.toContain('express-api-plugin');
     expect(result!.config.server?.hmr).toBe(true);
     const aliases = result!.config.resolve?.alias as Record<string, string>;
-    expect(aliases['@manaratak/shared'].replaceAll('\\', '/')).toMatch(/packages\/shared\/src\/index\.ts$/);
-    expect(aliases['@manaratak/domain'].replaceAll('\\', '/')).toMatch(/packages\/domain\/src\/index\.ts$/);
+    expect(aliases['@absheer/shared'].replaceAll('\\', '/')).toMatch(/packages\/shared\/src\/index\.ts$/);
+    expect(aliases['@absheer/domain'].replaceAll('\\', '/')).toMatch(/packages\/domain\/src\/index\.ts$/);
   });
 
   it('keeps the existing API plugin outside Google AI Studio', async () => {
-    vi.stubEnv('MANARATAK_GOOGLE_AI_STUDIO', 'false');
-    vi.stubEnv('MANARATAK_RUNTIME_PROFILE', '');
+    vi.stubEnv('ABSHEER_GOOGLE_AI_STUDIO', 'false');
+    vi.stubEnv('ABSHEER_RUNTIME_PROFILE', '');
     const result = await loadConfigFromFile({ command: 'serve', mode: 'development' }, resolve('apps/web/vite.config.ts'));
     const plugins = result!.config.plugins?.flat().filter(Boolean) as Array<{ name: string }>;
     expect(plugins.map((plugin) => plugin.name)).toContain('express-api-plugin');
   });
 
   it('passes an external API base through to the browser unchanged', async () => {
-    vi.stubEnv('MANARATAK_GOOGLE_AI_STUDIO', 'true');
+    vi.stubEnv('ABSHEER_GOOGLE_AI_STUDIO', 'true');
     vi.stubEnv('VITE_API_URL', 'https://experimental.example.invalid/api/v1');
     const { resolveConfig } = await import('vite');
     const config = await resolveConfig({ configFile: resolve('apps/web/vite.config.ts'), mode: 'aistudio' }, 'serve');
@@ -69,26 +69,26 @@ describe('Google AI Studio compatibility boundaries', () => {
   });
 
   it('prevents accidental Preview database probing with the Web-only profile', () => {
-    const preview = { VERCEL: '1', VERCEL_ENV: 'preview', MANARATAK_PREVIEW_DATABASE_PROBE: 'true' };
+    const preview = { VERCEL: '1', VERCEL_ENV: 'preview', ABSHEER_PREVIEW_DATABASE_PROBE: 'true' };
     expect(isPreviewDatabaseProbeEnabled(preview)).toBe(true);
-    expect(isPreviewDatabaseProbeEnabled({ ...preview, MANARATAK_RUNTIME_PROFILE: 'google-ai-studio' })).toBe(false);
-    expect(isPreviewDatabaseProbeEnabled({ ...preview, MANARATAK_GOOGLE_AI_STUDIO: 'true' })).toBe(false);
+    expect(isPreviewDatabaseProbeEnabled({ ...preview, ABSHEER_RUNTIME_PROFILE: 'google-ai-studio' })).toBe(false);
+    expect(isPreviewDatabaseProbeEnabled({ ...preview, ABSHEER_GOOGLE_AI_STUDIO: 'true' })).toBe(false);
   });
 
   it('shows template fixtures only in an isolated Studio development preview without an API', async () => {
-    vi.stubEnv('MANARATAK_GOOGLE_AI_STUDIO', 'true');
+    vi.stubEnv('ABSHEER_GOOGLE_AI_STUDIO', 'true');
     vi.stubEnv('NODE_ENV', 'development');
     vi.stubEnv('VITE_API_URL', '');
     vi.stubEnv('VITE_PUBLIC_TEMPLATE_DATA_MODE', '');
     const config = await loadConfigFromFile({ command: 'serve', mode: 'aistudio' }, resolve('apps/web/vite.config.ts'));
-    expect(config!.config.define?.__MANARATAK_PROTOTYPE_DATA_ENABLED__).toBe('true');
+    expect(config!.config.define?.__ABSHEER_PROTOTYPE_DATA_ENABLED__).toBe('true');
     expect(config!.config.define?.['import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE']).toBe('"prototype"');
     vi.stubEnv('VITE_API_URL', 'https://api.example.invalid/api/v1');
     const live = await loadConfigFromFile({ command: 'serve', mode: 'aistudio' }, resolve('apps/web/vite.config.ts'));
     expect(live!.config.define?.['import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE']).toBe('"api"');
     vi.stubEnv('VITE_API_URL', '');
     const build = await loadConfigFromFile({ command: 'build', mode: 'aistudio' }, resolve('apps/web/vite.config.ts'));
-    expect(build!.config.define?.__MANARATAK_PROTOTYPE_DATA_ENABLED__).toBe('false');
+    expect(build!.config.define?.__ABSHEER_PROTOTYPE_DATA_ENABLED__).toBe('false');
     expect(build!.config.define?.['import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE']).toBe('"api"');
   });
 });

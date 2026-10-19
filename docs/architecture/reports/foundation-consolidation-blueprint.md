@@ -1,9 +1,9 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-3 Prevent Reimplementation of Core Foundations
 # Phase 2 — Enterprise Foundation Consolidation Blueprint
 
 ## 1. Executive Summary
-This document serves as the official Enterprise Foundation Consolidation Blueprint. Its purpose is to define the architectural strategy to prevent the reimplementation of enterprise technical foundations across MANARATAK 2.0, while strictly preserving the autonomy of Domain-Driven Design (DDD) boundaries. By resolving the root causes identified in Phase 1—such as the Quasi-Shared Kernel Syndrome and misinterpretations of DDD decoupling—this blueprint establishes a centralized, well-governed catalog of Enterprise Foundations. It ensures that technical capabilities are implemented exactly once, without forcing domains to become unofficial frameworks or dependency hubs.
+This document serves as the official Enterprise Foundation Consolidation Blueprint. Its purpose is to define the architectural strategy to prevent the reimplementation of enterprise technical foundations across ABSHEER 2.0, while strictly preserving the autonomy of Domain-Driven Design (DDD) boundaries. By resolving the root causes identified in Phase 1—such as the Quasi-Shared Kernel Syndrome and misinterpretations of DDD decoupling—this blueprint establishes a centralized, well-governed catalog of Enterprise Foundations. It ensures that technical capabilities are implemented exactly once, without forcing domains to become unofficial frameworks or dependency hubs.
 
 ## 2. Root Cause Resolution
 - **Missing Centralized Enterprise Shared Foundations**: Addressed by establishing a formal `Enterprise Shared Contracts` layer that sits below all bounded contexts, providing universal abstractions (like `IEnterpriseDomainEvent` and `IRepository<T>`).

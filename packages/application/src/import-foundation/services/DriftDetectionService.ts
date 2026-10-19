@@ -5,7 +5,7 @@ import {
   DriftAlert, 
   DriftType, 
   DriftSeverity 
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class DriftDetectionService implements IDriftDetectionService {
   async compareSignatures(input: {

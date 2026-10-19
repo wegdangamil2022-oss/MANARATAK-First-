@@ -19,7 +19,7 @@ Date:
 Context
 --------------------------------------------------
 
-The MANARATAK enterprise architecture includes two content-related domains:
+The ABSHEER enterprise architecture includes two content-related domains:
 
 - Learning Platform (introduced in Phase 13)
 - Enterprise CMS (planned for Phase 16)

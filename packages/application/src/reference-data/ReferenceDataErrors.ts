@@ -1,4 +1,4 @@
-import { ReferenceDataValidationIssue } from '@manaratak/domain';
+import { ReferenceDataValidationIssue } from '@absheer/domain';
 
 export class ReferenceDataValidationError extends Error {
   public readonly code = 'REFERENCE_DATA_VALIDATION_FAILED';

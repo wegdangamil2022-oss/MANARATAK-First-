@@ -5,7 +5,7 @@ import ts from 'typescript';
 
 const files = ['apps/web/src/i18n/ar.ts', 'apps/admin/src/i18n/ar.ts'];
 const approved = new Set([
-  'MANARATAK',
+  'ABSHEER',
   'React',
   'SQL',
   'IELTS',
@@ -42,7 +42,7 @@ const approved = new Set([
   'Cambridge',
   'apps',
   'admin',
-  'manaratak',
+  'absheer',
   'csv',
   'json',
   'fallback',
@@ -103,8 +103,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   if (!findings.length) console.log('PASS arabic-values-no-accidental-english-prose');
   const representative = [
     'view_service',
-    'browse_manaratak_student_document_visa_travel_acad',
-    'explore_manaratak_student_tools_checklists_assista',
+    'browse_absheer_student_document_visa_travel_acad',
+    'explore_absheer_student_tools_checklists_assista',
     'manage_service_catalog_items_readiness_publication',
   ];
   const reps = representative.every((key) =>
@@ -114,7 +114,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
         typeof value === 'string' &&
         /[\u0600-\u06FF]/u.test(value) &&
         !/[A-Za-z]/.test(
-          value.replaceAll('MANARATAK', '').replace(/\{[A-Za-z_][A-Za-z0-9_]*\}/g, ''),
+          value.replaceAll('ABSHEER', '').replace(/\{[A-Za-z_][A-Za-z0-9_]*\}/g, ''),
         )
       );
     }),

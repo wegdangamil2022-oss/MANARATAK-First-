@@ -2,7 +2,7 @@ import { AssetPicker } from '../components/AssetPicker';
 import { reviewOwnerSearch } from '../features/review-queue/ReviewOwnerNavigation';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import type { CareerJobPostingDto, CareerEmployerDto, CareerApplicationDto } from '@manaratak/domain';
+import type { CareerJobPostingDto, CareerEmployerDto, CareerApplicationDto } from '@absheer/domain';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { useAdminAuthorization } from '../security/AdminAuthorizationContext';

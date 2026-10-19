@@ -9,7 +9,7 @@ import {
   ValueType,
   SettingDefinitionPageQuery,
   SettingValidationRules
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface SettingDefinitionRecordRow {
   id: string;

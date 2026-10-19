@@ -7,7 +7,7 @@ describe('CMS block public retirement', () => {
       id: 'block',
       version: 4,
       status: 'PUBLISHED',
-      siteIdentifier: 'manaratak',
+      siteIdentifier: 'absheer',
       locale: 'en',
       payload: { title: 'Title' },
     };

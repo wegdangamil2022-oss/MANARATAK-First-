@@ -10,7 +10,7 @@ import {
   AcademicStandardType,
   AcademicMappingStrength,
   AcademicTaxonomyValidationSeverity,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('AcademicTaxonomyImportHandoffService', () => {
   const service = new AcademicTaxonomyImportHandoffService();

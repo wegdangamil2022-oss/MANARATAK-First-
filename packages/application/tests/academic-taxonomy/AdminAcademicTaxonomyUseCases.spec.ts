@@ -16,7 +16,7 @@ import {
   AcademicTaxonomyAliasDto,
   AcademicStandardMappingDto,
   AcademicTaxonomySeedStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('AdminAcademicTaxonomyUseCases', () => {
   const mockNode: AcademicTaxonomyNodeDto = {

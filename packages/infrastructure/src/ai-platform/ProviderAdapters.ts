@@ -7,7 +7,7 @@ import {
   AIProviderInvocationResult,
   AIProviderOperationalStatus,
   IAIProviderRegistry,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface AIHttpTransport {
   request(input: {

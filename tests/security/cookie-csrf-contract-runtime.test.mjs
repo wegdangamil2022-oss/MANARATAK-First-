@@ -10,7 +10,7 @@ const source = fs.readFileSync(new URL('../../packages/infrastructure/src/securi
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
 class DefaultRateLimiter { async consume() { return { allowed: true, remaining: 1, resetTime: Date.now() }; } }
 const sandbox = { module: { exports: {} }, exports: {}, console, Buffer, require(specifier) {
-  if (specifier === '@manaratak/core') return {};
+  if (specifier === '@absheer/core') return {};
   if (specifier === './DefaultRateLimiter') return { DefaultRateLimiter };
   if (specifier === 'node:crypto') return require('node:crypto');
   throw new Error(`unexpected require: ${specifier}`);

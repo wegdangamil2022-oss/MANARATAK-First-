@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalCourseProviderStatus } from '@manaratak/domain';
+import { ExternalCourseProviderStatus } from '@absheer/domain';
 import { courseProviderRegistryApi as api, type ProviderRegistryRecord } from '../api/courseProviders';
 
 const emptyForm = { displayName: '', officialWebsite: '', aliases: '', domains: '', reason: '', evidenceReference: '', reviewed: false };

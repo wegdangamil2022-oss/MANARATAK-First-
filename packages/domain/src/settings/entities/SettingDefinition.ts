@@ -3,7 +3,7 @@ import { NamespacedKey } from '../value-objects/NamespacedKey';
 import { StringValue, NumberValue, BooleanValue, JsonValue } from '../value-objects/SettingValueData';
 import { ValueType } from '../enums/ValueType';
 import { SettingValidationRules, validateSettingRuleDefinition, validateSettingRuleValue } from '../value-objects/SettingValidationRules';
-import { IDomainEvent } from '@manaratak/core';
+import { IDomainEvent } from '@absheer/core';
 import { SettingDefinitionCreatedEvent } from '../events/SettingDefinitionCreatedEvent';
 
 export interface SettingDefinitionProps {

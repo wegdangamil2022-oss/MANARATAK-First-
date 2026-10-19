@@ -7,7 +7,7 @@ import {
   MajorImportCompletenessState,
   MajorStatus,
   resolveMajorSourceIdentity,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { MajorImportPromotionUseCase } from '../../src/majors/use-cases/MajorImportPromotionUseCase';
 import { AtomicDomainMutationCoordinator } from '../../src/event-foundation/use-cases/AtomicDomainMutationCoordinator';
 
@@ -164,12 +164,12 @@ describe('MajorImportPromotionUseCase', () => {
       createRecord(ImportRecordStatus.VALID, {
         canonicalMajorName: 'Computer Science',
         degreeLevel: 'Bachelor',
-        sourceClassificationSystem: 'MANARATAK_PHASE_10_CATALOG',
+        sourceClassificationSystem: 'ABSHEER_PHASE_10_CATALOG',
         academicFieldOrDiscipline: 'Computing',
         academicFieldId: 'taxonomy-computing',
         disciplineId: 'taxonomy-software',
         classificationCode: 'MJR-0100',
-        officialSourceUrl: 'https://manaratak.test/majors/computer-science',
+        officialSourceUrl: 'https://absheer.test/majors/computer-science',
         localizedNames: { ar: 'علوم الحاسب', en: 'Computer Science' },
         aliases: ['CS'],
         synonyms: ['Computing Science'],
@@ -315,7 +315,7 @@ describe('MajorImportPromotionUseCase', () => {
       createRecord(ImportRecordStatus.NEEDS_REVIEW, {
         canonicalMajorName: 'Medicine and Surgery',
         degreeLevel: 'Bachelor',
-        sourceClassificationSystem: 'MANARATAK_PHASE_10_DETAIL_DOSSIER',
+        sourceClassificationSystem: 'ABSHEER_PHASE_10_DETAIL_DOSSIER',
         classificationCode: 'MJR-0001',
         localizedNames: { ar: 'الطب والجراحة', en: 'Medicine and Surgery' },
         sourceImportMode: 'DETAIL_DOSSIER',
@@ -401,7 +401,7 @@ describe('MajorImportPromotionUseCase', () => {
     const bachelorKey = MajorDeduplicationService.generateKey({
       canonicalMajorName: 'Medical Sciences',
       degreeLevel: 'Bachelor',
-      sourceClassificationSystem: 'MANARATAK_PHASE_10_CATALOG',
+      sourceClassificationSystem: 'ABSHEER_PHASE_10_CATALOG',
       academicFieldOrDiscipline: 'Health Sciences',
       collegeOrFaculty: 'College of Medicine',
       classificationCode: 'MJR-0004',
@@ -410,7 +410,7 @@ describe('MajorImportPromotionUseCase', () => {
     const masterKey = MajorDeduplicationService.generateKey({
       canonicalMajorName: 'Medical Sciences',
       degreeLevel: 'Master',
-      sourceClassificationSystem: 'MANARATAK_PHASE_10_CATALOG',
+      sourceClassificationSystem: 'ABSHEER_PHASE_10_CATALOG',
       academicFieldOrDiscipline: 'Health Sciences',
       collegeOrFaculty: 'Graduate Studies',
       classificationCode: 'MAS-0001',
@@ -419,7 +419,7 @@ describe('MajorImportPromotionUseCase', () => {
     const doctorateKey = MajorDeduplicationService.generateKey({
       canonicalMajorName: 'Medical Sciences',
       degreeLevel: 'Doctorate',
-      sourceClassificationSystem: 'MANARATAK_PHASE_10_DETAIL_DOSSIER',
+      sourceClassificationSystem: 'ABSHEER_PHASE_10_DETAIL_DOSSIER',
       academicFieldOrDiscipline: 'Health Sciences',
       classificationCode: 'DOC-0001',
       sourceImportMode: 'DETAIL_DOSSIER',
@@ -443,7 +443,7 @@ describe('MajorImportPromotionUseCase', () => {
       createRecord(ImportRecordStatus.NEEDS_REVIEW, {
         canonicalMajorName: 'Medical Sciences',
         degreeLevel: 'Master',
-        sourceClassificationSystem: 'MANARATAK_PHASE_10_CATALOG',
+        sourceClassificationSystem: 'ABSHEER_PHASE_10_CATALOG',
         academicFieldOrDiscipline: 'Health Sciences',
         collegeOrFaculty: 'Graduate College',
         classificationCode: 'MAS-0001',
@@ -480,7 +480,7 @@ describe('MajorImportPromotionUseCase', () => {
       createRecord(ImportRecordStatus.NEEDS_REVIEW, {
         canonicalMajorName: 'Computer Science',
         degreeLevel: 'Bachelor',
-        sourceClassificationSystem: 'MANARATAK_PHASE_10_DETAIL_DOSSIER',
+        sourceClassificationSystem: 'ABSHEER_PHASE_10_DETAIL_DOSSIER',
         academicFieldOrDiscipline: 'Computing',
         classificationCode: 'MJR-0100',
         sourceImportMode: 'DETAIL_DOSSIER',

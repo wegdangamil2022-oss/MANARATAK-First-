@@ -1,4 +1,4 @@
-import type { CourseAcademicTaxonomyLinkDto, CourseTaxonomyResolutionDto } from '@manaratak/domain';
+import type { CourseAcademicTaxonomyLinkDto, CourseTaxonomyResolutionDto } from '@absheer/domain';
 
 export const normalizeCourseSourceTerm = (value: string): string => value.normalize('NFKC').trim().toLowerCase().replace(/[\u2010-\u2015\u2212]/g, '-').replace(/\s+/g, ' ');
 export function courseSourceRelationshipReviewRequired(rawTopics: string | null | undefined, links: readonly CourseAcademicTaxonomyLinkDto[], resolutions: readonly CourseTaxonomyResolutionDto[]): boolean {

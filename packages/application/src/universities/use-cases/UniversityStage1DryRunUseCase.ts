@@ -3,7 +3,7 @@ import {
   UniversityImportReadinessPolicy,
   UniversitySourceReferenceId,
   UniversalImportHandoff,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface UniversityStage1CountryResolver {
   resolveCountryByIso3(iso3: string): Promise<{ id: string; active: boolean | null } | null>;

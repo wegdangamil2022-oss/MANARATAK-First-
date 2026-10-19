@@ -41,7 +41,7 @@ export class RedisClientFactory {
    * Generates a canonical namespaced Redis key following `<namespace>:<feature>:<key>`.
    */
   public static buildKey(namespace: string, feature: string, key: string): string {
-    const cleanNs = (namespace || 'manaratak:').trim();
+    const cleanNs = (namespace || 'absheer:').trim();
     const formattedNs = cleanNs.endsWith(':') ? cleanNs : `${cleanNs}:`;
     const cleanFeature = feature.replace(/^:+|:+$/g, '');
     const cleanKey = key.replace(/^:+/, '');
@@ -53,13 +53,13 @@ export class RedisClientFactory {
    */
   public static createClient(config: RedisClientConfig | string, logger?: any): RedisClientType & { buildKey: (feature: string, key: string) => string } {
     let rawUrl: string | undefined;
-    let namespace: string = 'manaratak:';
+    let namespace: string = 'absheer:';
 
     if (typeof config === 'string') {
       rawUrl = config;
     } else if (config && typeof config === 'object') {
       rawUrl = config.REDIS_URL || config.redisUrl || (typeof config.getOptional === 'function' ? config.getOptional('REDIS_URL') : undefined);
-      namespace = config.REDIS_NAMESPACE || config.redisNamespace || (typeof config.getOptional === 'function' ? config.getOptional('REDIS_NAMESPACE') : undefined) || 'manaratak:';
+      namespace = config.REDIS_NAMESPACE || config.redisNamespace || (typeof config.getOptional === 'function' ? config.getOptional('REDIS_NAMESPACE') : undefined) || 'absheer:';
     }
 
     if (!rawUrl || typeof rawUrl !== 'string' || !rawUrl.trim()) {

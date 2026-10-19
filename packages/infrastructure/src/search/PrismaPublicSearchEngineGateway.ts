@@ -1,11 +1,11 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { SearchRequest, SearchResult, type SearchMatch } from '@manaratak/domain';
+import { SearchRequest, SearchResult, type SearchMatch } from '@absheer/domain';
 import type {
   IPublicSearchGateway,
   PublicSearchCursorPage,
   PublicSearchInput,
   PublicSearchKind,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 type SearchRow = {
   kind: PublicSearchKind;

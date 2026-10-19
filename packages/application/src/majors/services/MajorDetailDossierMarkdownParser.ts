@@ -1,4 +1,4 @@
-import { ImportTargetDomain } from '@manaratak/domain';
+import { ImportTargetDomain } from '@absheer/domain';
 import { MajorCatalogKind } from './MajorCatalogMarkdownParser';
 
 export interface MajorDetailContentBlock {
@@ -20,7 +20,7 @@ export interface MajorDetailDossierRow {
     en?: string;
   };
   degreeLevel?: 'Bachelor' | 'Master' | 'Doctorate';
-  sourceClassificationSystem: 'MANARATAK_PHASE_10_DETAIL_DOSSIER';
+  sourceClassificationSystem: 'ABSHEER_PHASE_10_DETAIL_DOSSIER';
   classificationCode: string;
   sourceImportMode: 'DETAIL_DOSSIER';
   contentBlocks: MajorDetailContentBlock[];
@@ -130,7 +130,7 @@ export class MajorDetailDossierMarkdownParser {
       canonicalMajorName,
       localizedNames: names,
       degreeLevel: DEGREE_BY_KIND[catalogKind],
-      sourceClassificationSystem: 'MANARATAK_PHASE_10_DETAIL_DOSSIER',
+      sourceClassificationSystem: 'ABSHEER_PHASE_10_DETAIL_DOSSIER',
       classificationCode: code,
       sourceImportMode: 'DETAIL_DOSSIER',
       contentBlocks: (() => {

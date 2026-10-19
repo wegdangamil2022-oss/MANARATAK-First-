@@ -1,2 +1,2 @@
-// @manaratak/api entry point
+// @absheer/api entry point
 export {};

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Prisma, type PrismaClient } from '@prisma/client';
-import type { AtomicPersistenceContext, UniversalImportHandoff } from '@manaratak/domain';
-import type { IImportGovernanceGateway, ImportMappingDefinition, ImportMappingProfileDto } from '@manaratak/application';
+import type { AtomicPersistenceContext, UniversalImportHandoff } from '@absheer/domain';
+import type { IImportGovernanceGateway, ImportMappingDefinition, ImportMappingProfileDto } from '@absheer/application';
 import { screeningReceiptIdentity } from './PrismaImportScreeningReceiptStore';
 
 const terminal = ['COMPLETED','PARTIALLY_COMPLETED','FAILED_PERMANENT','DLQ','CANCELLED','PAUSED'];

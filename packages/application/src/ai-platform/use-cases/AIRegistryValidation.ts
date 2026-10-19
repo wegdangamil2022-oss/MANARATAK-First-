@@ -1,4 +1,4 @@
-import { AIProviderType, AIRequestPurpose, type AIRegistryResource } from '@manaratak/domain';
+import { AIProviderType, AIRequestPurpose, type AIRegistryResource } from '@absheer/domain';
 
 /** Validate governance inputs before they can become executable configuration. */
 export function validateAIRegistry(resource: AIRegistryResource, value: Record<string, unknown>) {

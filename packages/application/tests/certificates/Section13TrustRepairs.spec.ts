@@ -4,8 +4,8 @@ import {CertificateTrustPolicy} from '../../src/certificates/services/Certificat
 import {CertificateArtifactRenderUseCase} from '../../src/certificates/use-cases/CertificateArtifactRenderUseCase';
 import {PrismaCertificateRepository} from '../../../infrastructure/src/certificates/PrismaCertificateRepository';
 function harness(){
- const course:any={id:'c',version:3,displayName:'Original course',originType:'NATIVE_MANARATAK_COURSE',certificateAvailable:true};
- const issuer:any={id:'issuer',publicId:'issuer-public',code:'MNR',name:'MANARATAK',issuerType:'MANARATAK',status:'ACTIVE',issuerLogoAssetId:'logo',signingKeyReference:'key'};
+ const course:any={id:'c',version:3,displayName:'Original course',originType:'NATIVE_ABSHEER_COURSE',certificateAvailable:true};
+ const issuer:any={id:'issuer',publicId:'issuer-public',code:'MNR',name:'ABSHEER',issuerType:'ABSHEER',status:'ACTIVE',issuerLogoAssetId:'logo',signingKeyReference:'key'};
  const version:any={id:'tv',templateId:'t',versionNumber:'1.0.0',status:'ACTIVE',issuerId:'issuer'};
  const template:any={id:'t',status:'ACTIVE',templateVersion:'1.0.0',issuerId:'issuer',currentVersionId:'tv',currentVersion:version,validityPolicy:'PERMANENT',requiresRevalidation:false};
  let stored:any;

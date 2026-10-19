@@ -1,5 +1,5 @@
 /** This deliberately empty, unbranded public homepage is reserved for ABSHEER.
- * No MANARATAK homepage widgets, copy, images, or catalog samples are displayed.
+ * No ABSHEER homepage widgets, copy, images, or catalog samples are displayed.
  * Admin, API, and student subpage routes continue to exist unchanged.
  */
 export function EmptyStudentHomepage() {

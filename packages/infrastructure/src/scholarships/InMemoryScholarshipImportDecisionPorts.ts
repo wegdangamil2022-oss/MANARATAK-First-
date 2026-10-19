@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { IScholarshipImportCanonicalResolutionDecisionPort, IScholarshipImportVerificationDecisionPort, ScholarshipImportCanonicalResolutionDecision, ScholarshipImportVerificationDecision } from '@manaratak/application';
+import type { IScholarshipImportCanonicalResolutionDecisionPort, IScholarshipImportVerificationDecisionPort, ScholarshipImportCanonicalResolutionDecision, ScholarshipImportVerificationDecision } from '@absheer/application';
 
 export class InMemoryScholarshipImportVerificationDecisionPort implements IScholarshipImportVerificationDecisionPort {
   public readonly persistenceClassification = 'DEVELOPMENT_ONLY' as const; private readonly values = new Map<string, Array<ScholarshipImportVerificationDecision & { decisionId: string; recordedAt: string }>>();

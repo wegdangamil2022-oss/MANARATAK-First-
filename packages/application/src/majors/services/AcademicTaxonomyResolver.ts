@@ -1,4 +1,4 @@
-import { MajorNamingService, iscedFBaselineNodes, MajorDto } from '@manaratak/domain';
+import { MajorNamingService, iscedFBaselineNodes, MajorDto } from '@absheer/domain';
 
 export enum TaxonomyResolutionOutcome {
   EXACT_MATCH = 'EXACT_MATCH',

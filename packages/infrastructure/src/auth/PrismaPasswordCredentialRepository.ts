@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
-import type { IPasswordCredentialRepository } from '@manaratak/domain';
+import type { IPasswordCredentialRepository } from '@absheer/domain';
 
 export class PrismaPasswordCredentialRepository implements IPasswordCredentialRepository {
   constructor(private readonly prisma: PrismaClient) {}

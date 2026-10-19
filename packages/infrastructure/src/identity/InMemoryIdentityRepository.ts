@@ -1,11 +1,11 @@
-import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
+import { ADMIN_PERMISSION_CATALOG } from '@absheer/shared';
 import {
   Identity,
   IIdentityRepository,
   ListIdentitiesCriteria,
   IRoleRepository,
   IRoleAssignmentRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class InMemoryIdentityRepository implements IIdentityRepository {
   constructor(

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
-import type { AuditRecord } from '@manaratak/domain';
-import type { ISpecification } from '@manaratak/core';
+import type { AuditRecord } from '@absheer/domain';
+import type { ISpecification } from '@absheer/core';
 import { PrismaAuditRecordRepository } from '../../src/audit/PrismaAuditRecordRepository';
 
 describe('legacy audit read safety boundary', () => {

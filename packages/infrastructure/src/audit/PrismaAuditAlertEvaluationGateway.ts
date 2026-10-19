@@ -6,7 +6,7 @@ import type {
   WorkspaceRow,
   IAuditAlertEvaluationGateway,
   ManageNotificationIntentsUseCase,
-} from '@manaratak/application';
+} from '@absheer/application';
 import type { PrismaAuditWorkspaceGateway } from './PrismaAuditWorkspaceGateway';
 export class PrismaAuditAlertEvaluationGateway implements IAuditAlertEvaluationGateway {
   constructor(

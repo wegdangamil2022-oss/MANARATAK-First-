@@ -1,7 +1,7 @@
--- MANARATAK_MIGRATION_OWNER: reference
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
--- MNT-AUD-0013: explicit P07 lifecycle, immutable versions, aliases, provider mappings and supersession/merge relationships.
+-- ABSHEER_MIGRATION_OWNER: reference
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
+-- ABSH-AUD-0013: explicit P07 lifecycle, immutable versions, aliases, provider mappings and supersession/merge relationships.
 
 ALTER TABLE "ReferenceCountry"
   ADD COLUMN "lifecycleState" TEXT NOT NULL DEFAULT 'ACTIVE',
@@ -139,7 +139,7 @@ ON CONFLICT ("entityType","normalizedProviderSystem","normalizedProviderId") DO 
 -- Initial immutable version for every existing governed reference.
 INSERT INTO "ReferenceVersionRecord" ("id","entityType","referenceId","versionNumber","lifecycleState","effectiveFrom","effectiveTo","snapshot","changeReason","actorId","createdAt")
 SELECT md5(random()::text || clock_timestamp()::text || x.id || x.entity_type), x.entity_type, x.id, 1, x.lifecycle_state, x.effective_from,
-       CASE WHEN x.lifecycle_state='ACTIVE' THEN NULL ELSE CURRENT_TIMESTAMP END, x.snapshot, 'MNT-AUD-0013_BASELINE', NULL, CURRENT_TIMESTAMP
+       CASE WHEN x.lifecycle_state='ACTIVE' THEN NULL ELSE CURRENT_TIMESTAMP END, x.snapshot, 'ABSH-AUD-0013_BASELINE', NULL, CURRENT_TIMESTAMP
 FROM (
   SELECT 'COUNTRY' entity_type, "id" id, "lifecycleState" lifecycle_state, "effectiveFrom" effective_from, to_jsonb(c) snapshot FROM "ReferenceCountry" c
   UNION ALL SELECT 'CURRENCY', "id", "lifecycleState", "effectiveFrom", to_jsonb(c) FROM "ReferenceCurrency" c

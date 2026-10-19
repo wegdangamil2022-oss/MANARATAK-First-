@@ -1,4 +1,4 @@
-# MANARATAK Authentication Token & Key Rotation Runbook
+# ABSHEER Authentication Token & Key Rotation Runbook
 
 **Status:** ACTIVE OPERATIONAL AUTHORITY  
 **Security model:** RS256 access JWT + opaque single-use refresh credential  

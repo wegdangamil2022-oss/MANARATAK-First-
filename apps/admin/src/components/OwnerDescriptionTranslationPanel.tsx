@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {canAuthorDomainTranslations,type TranslationDomainKey} from '@manaratak/shared';
+import {canAuthorDomainTranslations,type TranslationDomainKey} from '@absheer/shared';
 import {adminApiClient} from '../api/client';
 export function OwnerDescriptionTranslationPanel({domain,ownerId,endpoint,optionalFields,status,onSaved}:{domain:Extract<TranslationDomainKey,'COURSE'|'SCHOLARSHIP'|'INTERNATIONAL_TEST'>;ownerId:string;endpoint:string;optionalFields?:Record<string,unknown>;status:string;onSaved:()=>void|Promise<void>}) {
   const [locale,setLocale]=useState<'ar'|'en'>('ar');const [title,setTitle]=useState('');const [description,setDescription]=useState('');

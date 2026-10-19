@@ -20,7 +20,7 @@
 
 ## 3. Context
 
-Under the initial MANARATAK 2.0 system architecture specifications, the platform was modeled and documented using a Microsoft .NET and C# enterprise ecosystem. This included technologies such as Entity Framework Core (EF Core) for object-relational mapping, MediatR for in-process messaging and mediator-pattern CQRS routing, SQL Server as the primary relational database, FluentValidation for structural input validation, and xUnit/Moq for testing.
+Under the initial ABSHEER 2.0 system architecture specifications, the platform was modeled and documented using a Microsoft .NET and C# enterprise ecosystem. This included technologies such as Entity Framework Core (EF Core) for object-relational mapping, MediatR for in-process messaging and mediator-pattern CQRS routing, SQL Server as the primary relational database, FluentValidation for structural input validation, and xUnit/Moq for testing.
 
 During physical prototyping and implementation phases, the development team transitioned the codebase to a modern, highly responsive TypeScript/Node.js monorepo using Express.js and Prisma ORM. This transition was motivated by:
 
@@ -45,7 +45,7 @@ The co-existence of two divergent technology definitions (C#/.NET in documentati
 
 ## 5. Decision
 
-The Architecture Review Board (ARB) has decided to establish a **single canonical technology stack** for all business domains and platform modules in the MANARATAK 2.0 ecosystem.
+The Architecture Review Board (ARB) has decided to establish a **single canonical technology stack** for all business domains and platform modules in the ABSHEER 2.0 ecosystem.
 
 All documentation—including Specifications, Domain Contracts (`*-02-domain-contracts.md`), Implementation Guides (`*-03-implementation-guide.md`), and the Master Blueprint—shall be systematically updated to reflect this canonical stack.
 
@@ -83,7 +83,7 @@ The following C#/.NET technologies are officially deprecated, retired from the a
 ### Alternative B: Co-Existence (Polyglot Architecture)
 
 - **Description:** Maintain both .NET and Node.js components as distinct microservices.
-- **Rationale for Rejection:** Rejected. MANARATAK 2.0 is designed as a Modular Monolith. Running a dual-language runtime adds massive operational complexity, duplicates infrastructure requirements, and violates the single canonical design principles of the enterprise.
+- **Rationale for Rejection:** Rejected. ABSHEER 2.0 is designed as a Modular Monolith. Running a dual-language runtime adds massive operational complexity, duplicates infrastructure requirements, and violates the single canonical design principles of the enterprise.
 
 ### Alternative C: Align Documentation with TypeScript / Node.js
 

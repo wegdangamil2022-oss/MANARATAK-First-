@@ -20,7 +20,7 @@ import {
   NotificationTemplate,
   NotificationTemplateSummary,
   TemplateId,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const variableFingerprint = (value: Record<string, string>) =>
   createHash('sha256')
@@ -901,11 +901,11 @@ function inAppContent(candidate: NotificationDeliveryCandidate): {
             ? 'Service request update'
             : isReminder
               ? 'Scholarship deadline reminder'
-              : 'Notification from MANARATAK')
+              : 'Notification from ABSHEER')
       : undefined) ||
     variables.title?.trim() ||
     titles[eventType] ||
-    (isService ? 'تحديث طلب الخدمة' : isReminder ? 'تذكير بموعد المنحة' : 'إشعار من منارتك');
+    (isService ? 'تحديث طلب الخدمة' : isReminder ? 'تذكير بموعد المنحة' : 'إشعار من أبشر');
   const message =
     (content ? render(content.body) : undefined) ||
     (english

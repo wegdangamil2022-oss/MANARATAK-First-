@@ -8,7 +8,7 @@ import {
   RequestLogger, 
   ErrorLogger,
   AuditSecretSanitizer 
-} from '@manaratak/infrastructure';
+} from '@absheer/infrastructure';
 import { 
   ConfigurationRegistry, 
   EnvironmentConfigurationProvider, 
@@ -16,10 +16,10 @@ import {
   ZodEnvironmentValidator, 
   ConfigurationService, 
   loadAppConfig 
-} from '@manaratak/config';
+} from '@absheer/config';
 import { LoggingMiddleware } from '../../src/presentation/middleware/LoggingMiddleware';
 import { GlobalExceptionHandler } from '../../src/presentation/middleware/GlobalExceptionHandler';
-import { DefaultErrorSerializer } from '@manaratak/infrastructure';
+import { DefaultErrorSerializer } from '@absheer/infrastructure';
 
 describe('WP1-C Foundations — Logging, Correlation & Configuration', () => {
   describe('1. Request Correlation Context (AsyncLogContext)', () => {
@@ -230,12 +230,12 @@ describe('WP1-C Foundations — Logging, Correlation & Configuration', () => {
         DISABLE_FEATURE: '0',
         STRICT_MODE: true,
         RETRY_COUNT: '5',
-        SITE_TITLE: 'Manaratak',
+        SITE_TITLE: 'Absheer',
       };
 
       const configService = new ConfigurationService(rawConfig);
 
-      expect(configService.getString('SITE_TITLE')).toBe('Manaratak');
+      expect(configService.getString('SITE_TITLE')).toBe('Absheer');
       expect(configService.getNumber('PORT')).toBe(3000);
       expect(configService.getNumber('RETRY_COUNT')).toBe(5);
       expect(configService.getBoolean('ENABLE_FEATURE')).toBe(true);
@@ -249,7 +249,7 @@ describe('WP1-C Foundations — Logging, Correlation & Configuration', () => {
 
       expect(loaded.NODE_ENV).toBe('development');
       expect(loaded.PORT).toBe(3000);
-      expect(loaded.DATABASE_URL).toBe('postgresql://postgres:postgres@localhost:5432/manaratak_dev');
+      expect(loaded.DATABASE_URL).toBe('postgresql://postgres:postgres@localhost:5432/absheer_dev');
       expect(loaded.JWT_ACTIVE_KEY_ID).toBe('dev-ephemeral');
       expect(loaded.ACCESS_TOKEN_TTL_SECONDS).toBe(900);
     });
@@ -269,8 +269,8 @@ describe('WP1-C Foundations — Logging, Correlation & Configuration', () => {
       const validProdEnv = {
         NODE_ENV: 'production',
         PORT: '3000',
-        DATABASE_URL: 'postgresql://prod_user:strongpass123@prod-db.cloud/manaratak?sslmode=require',
-        DIRECT_URL: 'postgresql://migration_user:strongpass123@prod-db.cloud/manaratak?sslmode=require',
+        DATABASE_URL: 'postgresql://prod_user:strongpass123@prod-db.cloud/absheer?sslmode=require',
+        DIRECT_URL: 'postgresql://migration_user:strongpass123@prod-db.cloud/absheer?sslmode=require',
         REDIS_URL: 'rediss://prod-redis.cloud:6379',
         JWT_ACTIVE_KEY_ID: 'prod-key',
         JWT_PRIVATE_KEY_PEM: '-----BEGIN ' + 'PRIVATE KEY-----\nprivate\n-----END PRIVATE KEY-----',
@@ -278,17 +278,17 @@ describe('WP1-C Foundations — Logging, Correlation & Configuration', () => {
         ACCESS_TOKEN_TTL_SECONDS: '900',
         SESSION_SECRET: 'a-very-strong-production-session-secret-key-32-chars-minimum',
         CSRF_SECRET: 'a-very-strong-production-csrf-secret-key-32-chars-minimum',
-        CORS_ORIGIN: 'https://app.manaratak.com',
+        CORS_ORIGIN: 'https://app.absheer.com',
         ADMIN_AUTH_MODE: 'strict',
         ADMIN_BEARER_TOKEN: 'a-very-strong-production-admin-bearer-token-32-chars-minimum',
-        JWT_ISSUER: 'manaratak-production-api',
-        JWT_AUDIENCE: 'manaratak-production-browser',
+        JWT_ISSUER: 'absheer-production-api',
+        JWT_AUDIENCE: 'absheer-production-browser',
         SECURE_COOKIE: 'true',
         TRUST_PROXY_HOPS: '1',
         SECURITY_CSP_ENABLED: 'true',
-        API_BASE_URL: 'https://api.manaratak.com',
-        PUBLIC_WEB_URL: 'https://app.manaratak.com',
-        ADMIN_WEB_URL: 'https://admin.manaratak.com',
+        API_BASE_URL: 'https://api.absheer.com',
+        PUBLIC_WEB_URL: 'https://app.absheer.com',
+        ADMIN_WEB_URL: 'https://admin.absheer.com',
         SECURITY_RATE_LIMIT_MAX: '100',
         SECURITY_RATE_LIMIT_WINDOW_MS: '60000',
         CERTIFICATE_COMPLETION_WORKER_ENABLED: 'true',
@@ -309,21 +309,21 @@ describe('WP1-C Foundations — Logging, Correlation & Configuration', () => {
         BACKGROUND_CMS_CRON: '* * * * *',
         BACKGROUND_NOTIFICATION_CRON: '* * * * *',
         NOTIFICATION_RECIPIENT_MAX_DELIVERIES_PER_HOUR: '30',
-        MANARATAK_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.manaratak.internal/api/',
-        MANARATAK_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
-        MANARATAK_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
-        MANARATAK_IMPORT_RAW_RETENTION_DAYS: '365',
-        FINANCE_PROVIDER_BASE_URL: 'https://finance-provider.manaratak.internal/api/',
+        ABSHEER_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.absheer.internal/api/',
+        ABSHEER_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
+        ABSHEER_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
+        ABSHEER_IMPORT_RAW_RETENTION_DAYS: '365',
+        FINANCE_PROVIDER_BASE_URL: 'https://finance-provider.absheer.internal/api/',
         FINANCE_PROVIDER_API_KEY: 'finance-provider-key',
         FINANCE_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
         FINANCE_PAYMENT_PROVIDER_KEY: 'payment-test',
         FINANCE_FX_PROVIDER_KEY: 'fx-test',
         FINANCE_BANK_PROVIDER_KEY: 'bank-test',
-        NOTIFICATION_PROVIDER_BASE_URL: 'https://notification-provider.manaratak.internal/api/',
+        NOTIFICATION_PROVIDER_BASE_URL: 'https://notification-provider.absheer.internal/api/',
         NOTIFICATION_PROVIDER_API_KEY: 'notification-provider-key',
         NOTIFICATION_PROVIDER_SIGNING_SECRET: 'abcdef0123456789abcdef0123456789',
-        OTEL_SERVICE_NAME: 'manaratak-api',
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.manaratak.internal/v1/traces',
+        OTEL_SERVICE_NAME: 'absheer-api',
+        OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.absheer.internal/v1/traces',
       };
 
       const loaded = loadAppConfig(validProdEnv);

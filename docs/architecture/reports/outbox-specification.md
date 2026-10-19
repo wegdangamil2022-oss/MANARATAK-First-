@@ -1,9 +1,9 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-4 Transactional Outbox Strategy
 # Phase 3 — Enterprise Transactional Outbox Specification
 
 ## 1. Executive Summary
-The Enterprise Transactional Outbox Specification is the authoritative architectural reference for reliable, asynchronous event publishing across MANARATAK 2.0. Building upon the approved Phase 2 Blueprint, this specification formally defines the contracts, state machine, delivery guarantees, and operational characteristics of the Transactional Outbox. It strictly enforces the elimination of the Dual-Write Problem by mandating database-transaction-bound event persistence, asynchronous "At-Least-Once" dispatching, and compulsory downstream consumer idempotency.
+The Enterprise Transactional Outbox Specification is the authoritative architectural reference for reliable, asynchronous event publishing across ABSHEER 2.0. Building upon the approved Phase 2 Blueprint, this specification formally defines the contracts, state machine, delivery guarantees, and operational characteristics of the Transactional Outbox. It strictly enforces the elimination of the Dual-Write Problem by mandating database-transaction-bound event persistence, asynchronous "At-Least-Once" dispatching, and compulsory downstream consumer idempotency.
 
 ## 2. Enterprise Outbox Specification
 The Transactional Outbox serves as an enterprise-wide capability to ensure ultimate consistency between distributed systems without distributed transactions (2PC). 

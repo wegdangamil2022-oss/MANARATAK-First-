@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { Role, PermissionReference, LifeStatus } from '@manaratak/domain';
+import { Role, PermissionReference, LifeStatus } from '@absheer/domain';
 import { AuthorizationAdminRouter } from '../../../../src/presentation/api/router/AuthorizationAdminRouter';
 
 function appFor({ verified = true, actorPermission = true, grantedPermission = 'admin:universities:manage' } = {}) {

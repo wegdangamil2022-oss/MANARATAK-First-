@@ -11,7 +11,7 @@ import {
   ExtractionCandidate,
   DomainHandoffRequest,
   MatchCandidate
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { MergeProposalPreparationService } from '../../src';
 
 describe('MergeProposalPreparationService', () => {

@@ -3,7 +3,7 @@ import {
   ITransactionalAuditRecordRepository,
   ITransactionalOutboxStore,
   TransactionalOutboxEntry,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CreateAuditRecordDto } from '../../audit/dtos/AuditDtos';
 import { createAuditRecordFromDto } from '../../audit/use-cases/AuditRecordFactory';
 import { IAtomicPersistenceUnitOfWork } from '../gateways/IAtomicPersistenceUnitOfWork';

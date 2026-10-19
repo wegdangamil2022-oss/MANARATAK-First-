@@ -1,12 +1,12 @@
 import { Prisma, type PrismaClient } from '@prisma/client';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import {
   AuditRetentionPolicyResolver,
   type AuditRetentionDurations,
   type IAuditWorkspaceGateway,
   type WorkspaceKind,
   type WorkspaceRow,
-} from '@manaratak/application';
+} from '@absheer/application';
 export class PrismaAuditWorkspaceGateway implements IAuditWorkspaceGateway {
   constructor(
     private readonly db: PrismaClient,
@@ -64,7 +64,7 @@ export class PrismaAuditWorkspaceGateway implements IAuditWorkspaceGateway {
       throw new Error('AUDIT_WORKSPACE_NAMESPACE_INVALID');
     if (row.kind === 'RETENTION_POLICY') {
       const guards = await db.$queryRaw<Array<{ installed: boolean }>>(
-        Prisma.sql`SELECT EXISTS (SELECT 1 FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_proc p ON p.oid=t.tgfoid WHERE n.nspname=current_schema() AND c.relname='AuditRecord' AND t.tgname='audit_retention_envelope' AND t.tgenabled IN ('O','A') AND t.tgtype=7 AND p.proname='manaratak_assign_audit_retention' AND current_setting('session_replication_role')='origin') AS installed`,
+        Prisma.sql`SELECT EXISTS (SELECT 1 FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_proc p ON p.oid=t.tgfoid WHERE n.nspname=current_schema() AND c.relname='AuditRecord' AND t.tgname='audit_retention_envelope' AND t.tgenabled IN ('O','A') AND t.tgtype=7 AND p.proname='absheer_assign_audit_retention' AND current_setting('session_replication_role')='origin') AS installed`,
       );
       if (guards[0]?.installed !== true) throw new Error('AUDIT_RETENTION_ENVELOPE_NOT_INSTALLED');
     }

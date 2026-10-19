@@ -3,7 +3,7 @@ import {
   PublicCertificateVerificationDto,
   ICertificateRepository,
   StudentCertificateReadModelDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CertificateUseCases } from './CertificateUseCases';
 
 /**
@@ -14,7 +14,7 @@ export class CertificateReadModelService {
   constructor(
     private readonly repository: ICertificateRepository,
     private readonly certificates: CertificateUseCases,
-    private readonly affiliations?:import('@manaratak/domain').ICertificateAffiliationReadGateway,
+    private readonly affiliations?:import('@absheer/domain').ICertificateAffiliationReadGateway,
   ) {}
 
   public async listForStudent(studentReferenceId: string, cursor?:string, pageSize=50): Promise<StudentCertificateReadModelDto[]> {
@@ -27,7 +27,7 @@ export class CertificateReadModelService {
       serialNumber: row.serialNumber,
       verificationCode: row.verificationCode,
       verificationUrl: row.verificationUrl,
-      status: row.status === 'ACTIVE' && row.expiresAt && new Date(row.expiresAt) <= new Date() ? 'EXPIRED' as import('@manaratak/domain').CertificateStatus : row.status,
+      status: row.status === 'ACTIVE' && row.expiresAt && new Date(row.expiresAt) <= new Date() ? 'EXPIRED' as import('@absheer/domain').CertificateStatus : row.status,
       certificateType: row.certificateType,
       achievementType: row.achievementType,
       achievementId: row.achievementId,
@@ -50,7 +50,7 @@ export class CertificateReadModelService {
       serialNumber: row.serialNumber,
       verificationCode: row.verificationCode,
       verificationUrl: row.verificationUrl,
-      status: row.status === 'ACTIVE' && row.expiresAt && new Date(row.expiresAt) <= new Date() ? 'EXPIRED' as import('@manaratak/domain').CertificateStatus : row.status,
+      status: row.status === 'ACTIVE' && row.expiresAt && new Date(row.expiresAt) <= new Date() ? 'EXPIRED' as import('@absheer/domain').CertificateStatus : row.status,
       certificateType: row.certificateType,
       recipientDisplayName: row.recipientDisplayName,
       achievementType: row.achievementType,

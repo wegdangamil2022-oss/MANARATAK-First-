@@ -10,7 +10,7 @@ import {
   LearningPathEnrollmentStatus,
   LearningPathStatus,
   CourseOriginType,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 
 export class LearningPathUseCases {
@@ -30,7 +30,7 @@ export class LearningPathUseCases {
     for (const item of courses) {
       const course = await this.courseRepository.findById(item.courseId);
       if (!course) throw new Error(`LEARNING_PATH_COURSE_NOT_FOUND:${item.courseId}`);
-      if (course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) {
+      if (course.originType !== CourseOriginType.NATIVE_ABSHEER_COURSE) {
         throw new Error(`LEARNING_PATH_NATIVE_COURSE_REQUIRED:${item.courseId}`);
       }
     }
@@ -53,7 +53,7 @@ export class LearningPathUseCases {
     if((input.completionLogic ?? path.completionLogic)!=='ALL' && courses.length && !courses.some(course=>course.required)) throw new Error('LEARNING_PATH_REQUIRED_COURSE_MISSING');
     for(const item of courses) {
       const course=await this.courseRepository.findById(item.courseId);
-      if(!course || course.originType!==CourseOriginType.NATIVE_MANARATAK_COURSE) throw new Error('LEARNING_PATH_NATIVE_COURSE_REQUIRED');
+      if(!course || course.originType!==CourseOriginType.NATIVE_ABSHEER_COURSE) throw new Error('LEARNING_PATH_NATIVE_COURSE_REQUIRED');
     }
     if(!this.repository.updateDraft) throw new Error('LEARNING_PATH_DRAFT_PERSISTENCE_REQUIRED');
     return this.repository.updateDraft(id,{...input,courses});
@@ -80,7 +80,7 @@ export class LearningPathUseCases {
     for (const item of path.courses) {
       const course = await this.courseRepository.findById(item.courseId);
       if (!course || course.status !== 'PUBLISHED') throw new Error(`LEARNING_PATH_COURSE_NOT_PUBLISHED:${item.courseId}`);
-      if (course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) throw new Error(`LEARNING_PATH_NATIVE_COURSE_REQUIRED:${item.courseId}`);
+      if (course.originType !== CourseOriginType.NATIVE_ABSHEER_COURSE) throw new Error(`LEARNING_PATH_NATIVE_COURSE_REQUIRED:${item.courseId}`);
     }
     return this.repository.updateStatus(id, LearningPathStatus.PUBLISHED);
   }

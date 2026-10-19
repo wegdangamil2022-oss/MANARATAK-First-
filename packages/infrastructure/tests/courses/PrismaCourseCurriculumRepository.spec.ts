@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { CourseContentStatus, LessonAssetType } from '@manaratak/domain';
+import { CourseContentStatus, LessonAssetType } from '@absheer/domain';
 import { PrismaCourseCurriculumRepository } from '../../src/courses/PrismaCourseCurriculumRepository';
 
 describe('PrismaCourseCurriculumRepository', () => {

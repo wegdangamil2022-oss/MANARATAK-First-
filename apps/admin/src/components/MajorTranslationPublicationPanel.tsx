@@ -1,5 +1,5 @@
 import {useRef,useState} from 'react';
-import {canAuthorDomainTranslations} from '@manaratak/shared';
+import {canAuthorDomainTranslations} from '@absheer/shared';
 import {adminApiClient} from '../api/client';
 interface Target {ownerRevision?:string;sourceDigest?:string;proposedFields?:Record<string,string>}
 export function MajorTranslationPublicationPanel({publicId,profileId,versionId,sectionKeys,onSaved}:{publicId:string;profileId:string;versionId:string;sectionKeys:string[];onSaved:()=>void|Promise<void>}) {

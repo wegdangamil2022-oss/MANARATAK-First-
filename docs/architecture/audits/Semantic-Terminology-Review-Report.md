@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This report provides a rigorous semantic review of non-compliant terminology identified across the MANARATAK 2.0 documentation. The objective is to determine the true architectural meaning of each term before any documentation updates are applied, ensuring absolute alignment with the newly adopted Enterprise Content Ownership Model.
+This report provides a rigorous semantic review of non-compliant terminology identified across the ABSHEER 2.0 documentation. The objective is to determine the true architectural meaning of each term before any documentation updates are applied, ensuring absolute alignment with the newly adopted Enterprise Content Ownership Model.
 
 ---
 
@@ -68,7 +68,7 @@ This report provides a rigorous semantic review of non-compliant terminology ide
 
 | Attribute                        | Evaluation                                                                                                             |
 | :------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
-| **Document**                     | `docs/governance/blueprint/MANARATAK-2.0-Master-Blueprint.md`                                                          |
+| **Document**                     | `docs/governance/blueprint/ABSHEER-2.0-Master-Blueprint.md`                                                          |
 | **Section**                      | Architecture Components                                                                                                |
 | **Current Term**                 | Content Engine                                                                                                         |
 | **Architectural Classification** | Generic Description                                                                                                    |

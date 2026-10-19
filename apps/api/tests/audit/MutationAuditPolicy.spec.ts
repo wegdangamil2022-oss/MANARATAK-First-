@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Request } from 'express';
 import { MutationAuditPolicy } from '../../src/presentation/audit/MutationAuditMiddleware';
 import { AuditHelper } from '../../src/presentation/audit/AuditHelper';
-import { InMemoryAuditRecordRepository } from '@manaratak/infrastructure';
+import { InMemoryAuditRecordRepository } from '@absheer/infrastructure';
 
 function request(method: string, originalUrl: string): Request {
   return { method, originalUrl } as Request;

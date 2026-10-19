@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   renderApprovedCertificateSvg,
   type ApprovedCertificateDesignInput,
-} from '@manaratak/shared';
+} from '@absheer/shared';
 
 let assetsPromise:
   | Promise<{
@@ -34,7 +34,7 @@ type Assets = {
 function loadAssets(): Promise<Assets> {
   if (!assetsPromise) {
     assetsPromise = Promise.all([
-      dataUrl(`${import.meta.env.BASE_URL}brand/manaratak-logo-official.png`),
+      dataUrl(`${import.meta.env.BASE_URL}brand/absheer-logo-official.png`),
       dataUrl(`${import.meta.env.BASE_URL}fonts/certificate-arabic.ttf`),
       dataUrl(`${import.meta.env.BASE_URL}fonts/certificate-latin.ttf`),
       dataUrl(`${import.meta.env.BASE_URL}fonts/certificate-arabic-bold.ttf`),
@@ -106,12 +106,12 @@ export function ApprovedCertificatePreview({
     <div className="space-y-2">
       <img
         src={url}
-        alt="معاينة قالب منارتك المعتمد"
+        alt="معاينة قالب أبشر المعتمد"
         className="w-full border"
         width={842}
         height={595}
       />
-      <a href={url} download="manaratak-certificate-editable.svg" className="text-xs underline">
+      <a href={url} download="absheer-certificate-editable.svg" className="text-xs underline">
         تنزيل القالب القابل للتعديل SVG
       </a>
     </div>

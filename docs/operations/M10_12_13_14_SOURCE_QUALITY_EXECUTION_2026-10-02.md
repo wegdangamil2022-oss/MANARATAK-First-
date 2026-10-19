@@ -32,7 +32,7 @@ Source results do not prove Runtime/E2E success.
 
 ## Connected environment acceptance — prepared, not executed
 
-1. Pull the verified `main` commit. On a clean checkout run `npm run build -w @manaratak/application`, then `npm run imports:qc:verify` and `npm run imports:qc:test` from repository root. These commands are offline and do not consume DB credentials.
+1. Pull the verified `main` commit. On a clean checkout run `npm run build -w @absheer/application`, then `npm run imports:qc:verify` and `npm run imports:qc:test` from repository root. These commands are offline and do not consume DB credentials.
 2. Ensure the existing controlled M10-07 schema-parity/recovery procedure has been completed by the environment operator before affected API paths. This task applies no migrations.
 3. Export or inspect current canonical rows in that environment: stable IDs, lifecycle, country/region chain, University INS, program owning university, DegreeLevel and InternationalTest. Do not send connection strings, passwords or identity data to chat. Use verified account identity and current admin permission checks.
 4. For one ambiguous city, one unknown territory, one missing city and one quarantined Stage 3/4 item: verify they stay Draft/held; wrong country/region or non-finite fee fails before persistence. Choose a legitimate existing scoped city with documented evidence; current API must revalidate it. Do not infer territory parent or create guessed references.

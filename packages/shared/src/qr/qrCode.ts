@@ -1,5 +1,5 @@
 /**
- * Minimal standards-compliant QR Code Model 2 encoder for MANARATAK verification URLs.
+ * Minimal standards-compliant QR Code Model 2 encoder for ABSHEER verification URLs.
  *
  * Scope is intentionally narrow: Version 4, error-correction level L, byte mode,
  * UTF-8 payloads up to 106 bytes. That safely covers the canonical public

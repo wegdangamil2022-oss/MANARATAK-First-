@@ -1,4 +1,4 @@
-import type { ICertificateRepository } from '@manaratak/domain';
+import type { ICertificateRepository } from '@absheer/domain';
 import type { EapCertificateArtifactStore } from './EapCertificateArtifactStore';
 /** Bounded reconciliation; only withdrawn certificates' unpublished uploads are cancelled. */
 export class CertificateArtifactRecovery {

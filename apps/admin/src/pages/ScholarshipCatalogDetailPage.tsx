@@ -5,7 +5,7 @@ import { ScholarshipRelationshipEditorPage } from './ScholarshipRelationshipEdit
 import {ScholarshipReferenceLifecycleEditor} from '../features/integration/ScholarshipReferenceLifecycleEditor';
 import type {
 ScholarshipDto
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
 AlertCircle,
 AlertTriangle,

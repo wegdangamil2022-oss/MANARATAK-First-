@@ -1,5 +1,5 @@
-import { ParsedImportRow } from '@manaratak/domain';
-import { ImportParseError } from '@manaratak/domain';
+import { ParsedImportRow } from '@absheer/domain';
+import { ImportParseError } from '@absheer/domain';
 
 export interface ImportStreamParserInput {
   fileName?: string;

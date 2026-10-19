@@ -156,15 +156,15 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
   ];
 
   const EmptyWidget = ({ icon: Icon, title, text }: { icon: React.ElementType; title: string; text: string }) => (
-    <div className="rounded-2xl border border-dashed border-[var(--mn-border)] dark:border-[var(--mn-border)] bg-[var(--mn-page)]/70 dark:bg-[var(--mn-surface-elevated)] p-4 text-center dark:mn-panel ">
-      <Icon className="w-6 h-6 mx-auto text-[var(--mn-text-muted)] mb-2" />
-      <div className="text-xs font-bold text-[var(--mn-heading)] dark:text-white">{title}</div>
-      <p className="text-[10px] leading-5 text-[var(--mn-text-muted)] mt-1">{text}</p>
+    <div className="rounded-2xl border border-dashed border-[var(--ab-border)] dark:border-[var(--ab-border)] bg-[var(--ab-page)]/70 dark:bg-[var(--ab-surface-elevated)] p-4 text-center dark:ab-panel ">
+      <Icon className="w-6 h-6 mx-auto text-[var(--ab-text-muted)] mb-2" />
+      <div className="text-xs font-bold text-[var(--ab-heading)] dark:text-white">{title}</div>
+      <p className="text-[10px] leading-5 text-[var(--ab-text-muted)] mt-1">{text}</p>
     </div>
   );
 
   return (
-    <section className="w-full max-w-4xl mx-auto mn-inline-gutter pb-12 text-start font-['Cairo',sans-serif]" dir={publicDir}>
+    <section className="w-full max-w-4xl mx-auto ab-inline-gutter pb-12 text-start font-['Cairo',sans-serif]" dir={publicDir}>
       <div className="pt-3 sm:pt-5">
         {/* Main Hero Card with Golden Top Bar & Royal Gradient */}
         <div className="relative overflow-hidden rounded-[26px] border border-[#142B5F] dark:border-[#B38018]/50 bg-gradient-to-br from-[#142B5F] via-[#112450] to-[#0c1a3b] text-white shadow-md relative group">
@@ -186,7 +186,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
 
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-xl font-bold text-white leading-tight">
-                  {profile?.name || publicT('public_manaratak_student_account')}
+                  {profile?.name || publicT('public_absheer_student_account')}
                 </h1>
 
                 <p className="text-[11.5px] sm:text-[12.5px] leading-relaxed text-white/80 mt-1 max-w-xl font-medium">
@@ -202,19 +202,19 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
               <button
                 type="button"
                 onClick={() => handleAction(onOpenAuth)}
-                data-mn-design="4df103579c"
+                data-ab-design="4df103579c"
                 className="w-full min-h-[38px] rounded-xl bg-gradient-to-r from-[#0d2a45] via-[#113a5f] to-[#0d2a45] hover:brightness-110 border border-[#D6A43B] hover:border-[#F3CE74] text-white font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md cursor-pointer py-2 px-3.5 relative overflow-hidden group"
               >
                 <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
                 <LogIn className="w-4 h-4 text-[#E5B54F] stroke-[2.2]" />
-                <span data-mn-design="01abfae3c9" className="text-white font-bold">{publicT('public_sign_in_or_create_an_account')}</span>
+                <span data-ab-design="01abfae3c9" className="text-white font-bold">{publicT('public_sign_in_or_create_an_account')}</span>
               </button>
             )}
           </div>
         </div>
 
         {/* Navigation Tabs Bar - Normal flow without sticky overlap */}
-        <div className="mt-3.5 p-1.5 rounded-2xl bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-white/10 shadow-sm grid grid-cols-4 gap-1.5 mn-panel">
+        <div className="mt-3.5 p-1.5 rounded-2xl bg-[var(--ab-surface)] dark:bg-[var(--ab-surface)] border border-[var(--ab-border)] dark:border-white/10 shadow-sm grid grid-cols-4 gap-1.5 ab-panel">
           {navigation.map((item) => {
             const Icon = item.icon;
             const active = section === item.id;
@@ -224,8 +224,8 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                 onClick={() => setSection(item.id)}
                 className={`min-w-0 rounded-xl px-1.5 py-2 flex flex-col items-center gap-1 transition-all cursor-pointer ${
                   active
-                    ? 'bg-[var(--mn-primary)] text-white shadow-xs font-bold'
-                    : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)] dark:hover:bg-[var(--mn-surface-elevated)] font-medium'
+                    ? 'bg-[var(--ab-primary)] text-white shadow-xs font-bold'
+                    : 'text-[var(--ab-text-muted)] hover:bg-[var(--ab-page)] dark:hover:bg-[var(--ab-surface-elevated)] font-medium'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${active ? 'text-[#E5B54F]' : ''}`} />
@@ -251,27 +251,27 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   <button
                     key={item.label}
                     onClick={item.action}
-                    className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-2.5 sm:p-3 min-h-[80px] text-center shadow-2xs hover:shadow-xs active:scale-[0.98] transition-all mn-panel cursor-pointer group"
+                    className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-2.5 sm:p-3 min-h-[80px] text-center shadow-2xs hover:shadow-xs active:scale-[0.98] transition-all ab-panel cursor-pointer group"
                   >
                     <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-1.5 group-hover:scale-110 transition-transform" />
-                    <div className="text-sm sm:text-base font-bold text-[var(--mn-heading)] leading-none">{item.value}</div>
-                    <div className="text-[9.5px] sm:text-[10.5px] font-semibold text-[var(--mn-text-muted)] mt-1.5">{item.label}</div>
+                    <div className="text-sm sm:text-base font-bold text-[var(--ab-heading)] leading-none">{item.value}</div>
+                    <div className="text-[9.5px] sm:text-[10.5px] font-semibold text-[var(--ab-text-muted)] mt-1.5">{item.label}</div>
                   </button>
                 );
               })}
             </div>
 
             {/* Academic Profile Card */}
-            <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
+            <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-4 shadow-2xs ab-panel">
               <div className="text-center mb-3.5">
                 <div className="inline-flex items-center justify-center gap-2">
                   <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                     <GraduationCap className="w-3.5 h-3.5 text-[#E5B54F]" />
                   </div>
-                  <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_my_academic_profile')}</h2>
+                  <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--ab-heading)] font-['Cairo',sans-serif]">{publicT('public_my_academic_profile')}</h2>
                 </div>
                 <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                <p className="text-[10.5px] text-[var(--mn-text-muted)] font-medium">{publicT('public_a_summary_of_your_academic_information_target_degree')}</p>
+                <p className="text-[10.5px] text-[var(--ab-text-muted)] font-medium">{publicT('public_a_summary_of_your_academic_information_target_degree')}</p>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {[
@@ -282,9 +282,9 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   [publicT('public_target_countries'), profile?.targetCountries?.length ? profile.targetCountries.join('، ') : publicT('public_not_specified_5')],
                   [publicT('public_account_status'), profile ? publicT('public_linked_and_active') : publicT('public_preview_only')],
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] dark:border-white/10 p-2.5 mn-panel text-center">
-                    <div className="text-[9.5px] font-bold text-[var(--mn-text-muted)]">{label}</div>
-                    <div className="text-[11px] font-bold text-[var(--mn-heading)] mt-1 line-clamp-2">{value}</div>
+                  <div key={label} className="rounded-xl bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] border border-[var(--ab-border)] dark:border-white/10 p-2.5 ab-panel text-center">
+                    <div className="text-[9.5px] font-bold text-[var(--ab-text-muted)]">{label}</div>
+                    <div className="text-[11px] font-bold text-[var(--ab-heading)] mt-1 line-clamp-2">{value}</div>
                   </div>
                 ))}
               </div>
@@ -292,11 +292,11 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                 <button
                   type="button"
                   onClick={() => handleAction(onOpenAuth)}
-                  data-mn-design="3b7dc7a9b0"
-                  className="mt-3.5 w-full min-h-[36px] rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs py-2 px-3 relative overflow-hidden group"
+                  data-ab-design="3b7dc7a9b0"
+                  className="mt-3.5 w-full min-h-[36px] rounded-xl bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] border border-[var(--ab-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--ab-heading)] dark:text-[#E5B54F] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs py-2 px-3 relative overflow-hidden group"
                 >
                   <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B]/60 to-transparent" />
-                  <span data-mn-design="3b7dc7a9b0">{publicT('public_sign_in_to_complete_your_academic_profile')}</span>
+                  <span data-ab-design="3b7dc7a9b0">{publicT('public_sign_in_to_complete_your_academic_profile')}</span>
                   <ChevronLeft className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] group-hover:-translate-x-0.5 transition-transform" />
                 </button>
               )}
@@ -305,25 +305,25 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
             {/* Journey & Deadlines 2-Column Grid */}
             <div className="grid sm:grid-cols-2 gap-3.5">
               {/* Journey Now */}
-              <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel flex flex-col justify-between">
+              <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-4 shadow-2xs ab-panel flex flex-col justify-between">
                 <div>
                   <div className="text-center mb-3">
                     <div className="inline-flex items-center justify-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                         <History className="w-3.5 h-3.5 text-[#E5B54F]" />
                       </div>
-                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_my_current_journey')}</h2>
+                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--ab-heading)] font-['Cairo',sans-serif]">{publicT('public_my_current_journey')}</h2>
                     </div>
                     <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                    <p className="text-[10.5px] text-[var(--mn-text-muted)] font-medium">{publicT('public_a_summary_of_your_ongoing_steps_and_tracked')}</p>
+                    <p className="text-[10.5px] text-[var(--ab-text-muted)] font-medium">{publicT('public_a_summary_of_your_ongoing_steps_and_tracked')}</p>
                   </div>
                   {latestJourneyItems.length ? (
                     <div className="space-y-2">
                       {latestJourneyItems.slice(0, 3).map((item) => (
-                        <div key={item.id} className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 border border-[var(--mn-border)] dark:border-white/10 mn-panel">
+                        <div key={item.id} className="rounded-xl bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] p-2.5 border border-[var(--ab-border)] dark:border-white/10 ab-panel">
                           <div className="text-[9.5px] font-bold text-[#142B5F] dark:text-[#E5B54F]">{publicEnumLabel(item.type, publicT)}</div>
-                          <div className="text-[11px] font-bold text-[var(--mn-heading)] mt-0.5 line-clamp-1">{item.title}</div>
-                          <div className="text-[9.5px] text-[var(--mn-text-muted)] mt-1">{item.meta}</div>
+                          <div className="text-[11px] font-bold text-[var(--ab-heading)] mt-0.5 line-clamp-1">{item.title}</div>
+                          <div className="text-[9.5px] text-[var(--ab-text-muted)] mt-1">{item.meta}</div>
                         </div>
                       ))}
                     </div>
@@ -335,28 +335,28 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   <button
                     type="button"
                     onClick={() => setSection('journey')}
-                    data-mn-design="3b7dc7a9b0"
-                    className="mt-3 w-full min-h-[36px] rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs py-2 px-3 relative overflow-hidden group"
+                    data-ab-design="3b7dc7a9b0"
+                    className="mt-3 w-full min-h-[36px] rounded-xl bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] border border-[var(--ab-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--ab-heading)] dark:text-[#E5B54F] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs py-2 px-3 relative overflow-hidden group"
                   >
                     <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
-                    <span data-mn-design="3b7dc7a9b0">{publicT('public_view_journey_and_tracking')}</span>
+                    <span data-ab-design="3b7dc7a9b0">{publicT('public_view_journey_and_tracking')}</span>
                     <ChevronLeft className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] group-hover:-translate-x-0.5 transition-transform" />
                   </button>
                 )}
               </div>
 
               {/* Important Deadlines */}
-              <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel flex flex-col justify-between">
+              <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-4 shadow-2xs ab-panel flex flex-col justify-between">
                 <div>
                   <div className="text-center mb-3">
                     <div className="inline-flex items-center justify-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                         <CalendarClock className="w-3.5 h-3.5 text-[#E5B54F]" />
                       </div>
-                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_important_dates')}</h2>
+                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--ab-heading)] font-['Cairo',sans-serif]">{publicT('public_important_dates')}</h2>
                     </div>
                     <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                    <p className="text-[10.5px] text-[var(--mn-text-muted)] font-medium">{publicT('public_upcoming_deadlines_for_your_opportunities')}</p>
+                    <p className="text-[10.5px] text-[var(--ab-text-muted)] font-medium">{publicT('public_upcoming_deadlines_for_your_opportunities')}</p>
                   </div>
                   {activeMilestones.length ? (
                     <div className="space-y-2">
@@ -364,10 +364,10 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                         <button
                           key={item.id}
                           onClick={() => setSection('journey')}
-                          className="w-full rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 text-start mn-panel cursor-pointer"
+                          className="w-full rounded-xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] p-2.5 text-start ab-panel cursor-pointer"
                         >
-                          <div className="text-[11px] font-bold text-[var(--mn-heading)] line-clamp-1">{item.scholarshipTitle}</div>
-                          <div className="mt-1.5 flex items-center justify-between gap-2 text-[9.5px] text-[var(--mn-text-muted)]">
+                          <div className="text-[11px] font-bold text-[var(--ab-heading)] line-clamp-1">{item.scholarshipTitle}</div>
+                          <div className="mt-1.5 flex items-center justify-between gap-2 text-[9.5px] text-[var(--ab-text-muted)]">
                             <span>{item.stage}</span>
                             <span className="font-bold text-[#142B5F] dark:text-[#E5B54F]">{item.deadline}</span>
                           </div>
@@ -384,17 +384,17 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
             {/* Achievements & Certificates Section */}
             <div className="grid sm:grid-cols-2 gap-3.5">
               {/* My Certificates & Achievements */}
-              <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel flex flex-col justify-between">
+              <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-4 shadow-2xs ab-panel flex flex-col justify-between">
                 <div>
                   <div className="text-center mb-3">
                     <div className="inline-flex items-center justify-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                         <Award className="w-3.5 h-3.5 text-[#E5B54F]" />
                       </div>
-                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_my_achievements_and_certificates')}</h2>
+                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--ab-heading)] font-['Cairo',sans-serif]">{publicT('public_my_achievements_and_certificates')}</h2>
                     </div>
                     <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                    <p className="text-[10px] text-[var(--mn-text-muted)] font-medium">{publicT('public_earned_certificates_and_digital_badges')}</p>
+                    <p className="text-[10px] text-[var(--ab-text-muted)] font-medium">{publicT('public_earned_certificates_and_digital_badges')}</p>
                   </div>
 
                   <EmptyWidget
@@ -406,17 +406,17 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
               </div>
 
               {/* Continue Learning / Courses */}
-              <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel flex flex-col justify-between">
+              <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-4 shadow-2xs ab-panel flex flex-col justify-between">
                 <div>
                   <div className="text-center mb-3">
                     <div className="inline-flex items-center justify-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                         <BookOpen className="w-3.5 h-3.5 text-[#E5B54F]" />
                       </div>
-                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_course_and_learning_progress')}</h2>
+                      <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--ab-heading)] font-['Cairo',sans-serif]">{publicT('public_course_and_learning_progress')}</h2>
                     </div>
                     <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                    <p className="text-[10px] text-[var(--mn-text-muted)] font-medium">{publicT('public_ongoing_courses_completion_progress_and_lessons')}</p>
+                    <p className="text-[10px] text-[var(--ab-text-muted)] font-medium">{publicT('public_ongoing_courses_completion_progress_and_lessons')}</p>
                   </div>
 
                   <EmptyWidget
@@ -435,18 +435,18 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                     <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
                   </div>
-                  <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)] font-['Cairo',sans-serif]">{publicT('public_personalized_recommendations')}</h2>
+                  <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--ab-heading)] font-['Cairo',sans-serif]">{publicT('public_personalized_recommendations')}</h2>
                 </div>
                 <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
-                <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">{publicT('public_find_scholarships_courses_and_opportunities_that_fit_your')}</p>
+                <p className="text-[11px] leading-relaxed text-[var(--ab-text-muted)] font-medium mt-1">{publicT('public_find_scholarships_courses_and_opportunities_that_fit_your')}</p>
                 <button
                   type="button"
                   onClick={() => handleAction(onOpenSmartSearch)}
-                  data-mn-design="3b7dc7a9b0"
-                  className="mt-3 inline-flex items-center justify-center gap-1.5 min-h-[34px] px-4 rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--mn-heading)] dark:text-[#E5B54F] font-semibold transition-all cursor-pointer shadow-2xs py-1.5 relative overflow-hidden group"
+                  data-ab-design="3b7dc7a9b0"
+                  className="mt-3 inline-flex items-center justify-center gap-1.5 min-h-[34px] px-4 rounded-xl bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] border border-[var(--ab-border)] hover:border-[#D6A43B]/60 dark:border-white/10 dark:hover:border-[#E5B54F]/50 text-[var(--ab-heading)] dark:text-[#E5B54F] font-semibold transition-all cursor-pointer shadow-2xs py-1.5 relative overflow-hidden group"
                 >
                   <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
-                  <span data-mn-design="3b7dc7a9b0">{publicT('public_use_smart_search_now')}</span>
+                  <span data-ab-design="3b7dc7a9b0">{publicT('public_use_smart_search_now')}</span>
                   <ChevronLeft className="w-3.5 h-3.5 text-[#D6A43B] dark:text-[#E5B54F] group-hover:-translate-x-0.5 transition-transform" />
                 </button>
               </div>
@@ -457,19 +457,19 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
         {/* Section: VAULT */}
         {section === 'vault' && (
           <div className="mt-3.5 space-y-3.5">
-            <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
+            <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-4 sm:p-5 shadow-2xs ab-panel">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">{publicT('public_saved_items_vault')}</span>
-                  <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">{publicT('public_favorites_and_saved_items')}</h2>
-                  <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">{publicT('public_one_space_for_all_your_saved_scholarships_universities')}</p>
+                  <h2 className="text-base sm:text-lg font-bold text-[var(--ab-heading)] mt-0.5">{publicT('public_favorites_and_saved_items')}</h2>
+                  <p className="text-[11px] leading-relaxed text-[var(--ab-text-muted)] font-medium mt-1">{publicT('public_one_space_for_all_your_saved_scholarships_universities')}</p>
                 </div>
                 <div className="w-11 h-11 rounded-2xl bg-red-500/10 dark:bg-red-500/15 flex items-center justify-center shrink-0">
                   <Heart className="w-5 h-5 text-red-600 dark:text-red-400 fill-red-500/20" />
                 </div>
               </div>
-              <div className="mt-4 text-3xl font-bold text-[var(--mn-heading)]">{favoritesCount}</div>
-              <div className="text-[11px] font-medium text-[var(--mn-text-muted)] mt-0.5">{publicT('public_item_saved_in_your_account')}</div>
+              <div className="mt-4 text-3xl font-bold text-[var(--ab-heading)]">{favoritesCount}</div>
+              <div className="text-[11px] font-medium text-[var(--ab-text-muted)] mt-0.5">{publicT('public_item_saved_in_your_account')}</div>
             </div>
 
             {savedGroups.length ? (
@@ -478,10 +478,10 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                   <button
                     key={kind}
                     onClick={() => handleAction(onOpenFavorites)}
-                    className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-start shadow-2xs active:scale-[0.98] transition-all mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
+                    className="rounded-xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-3 text-start shadow-2xs active:scale-[0.98] transition-all ab-panel cursor-pointer hover:border-[var(--ab-primary)] dark:hover:border-[#E5B54F]/40"
                   >
-                    <div className="text-xl font-bold text-[var(--mn-heading)]">{count}</div>
-                    <div className="text-[10.5px] font-bold text-[var(--mn-text-muted)] mt-1">{publicEnumLabel(kindLabels[kind] || kind, publicT)}</div>
+                    <div className="text-xl font-bold text-[var(--ab-heading)]">{count}</div>
+                    <div className="text-[10.5px] font-bold text-[var(--ab-text-muted)] mt-1">{publicEnumLabel(kindLabels[kind] || kind, publicT)}</div>
                   </button>
                 ))}
               </div>
@@ -492,7 +492,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
             <button
               type="button"
               onClick={() => handleAction(onOpenFavorites)}
-              className="w-full min-h-[44px] rounded-xl bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white border border-[#E5B54F]/40 font-bold text-xs sm:text-[13px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xs cursor-pointer mn-inverse"
+              className="w-full min-h-[44px] rounded-xl bg-[var(--ab-primary)] hover:bg-[#1a3777] text-white border border-[#E5B54F]/40 font-bold text-xs sm:text-[13px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-xs cursor-pointer ab-inverse"
             >
               <span>{publicT('public_open_all_favorites_and_saved_items')}</span>
               <ChevronLeft className="w-4 h-4 text-[#E5B54F]" />
@@ -503,40 +503,40 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
         {/* Section: JOURNEY */}
         {section === 'journey' && (
           <div className="mt-3.5 space-y-3.5">
-            <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
+            <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-4 sm:p-5 shadow-2xs ab-panel">
               <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">{publicT('public_application_process')}</span>
-              <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">{publicT('public_my_learning_journey')}</h2>
-              <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">{publicT('public_an_interactive_record_of_your_scholarship_course_and')}</p>
+              <h2 className="text-base sm:text-lg font-bold text-[var(--ab-heading)] mt-0.5">{publicT('public_my_learning_journey')}</h2>
+              <p className="text-[11px] leading-relaxed text-[var(--ab-text-muted)] font-medium mt-1">{publicT('public_an_interactive_record_of_your_scholarship_course_and')}</p>
               <div className="mt-4 grid grid-cols-3 gap-2">
-                <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 text-center mn-panel">
-                  <div className="text-lg font-bold text-[var(--mn-heading)]">{activeMilestones.length}</div>
-                  <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-1">{publicT('public_active_tracking')}</div>
+                <div className="rounded-xl bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] p-3 text-center ab-panel">
+                  <div className="text-lg font-bold text-[var(--ab-heading)]">{activeMilestones.length}</div>
+                  <div className="text-[10px] font-semibold text-[var(--ab-text-muted)] mt-1">{publicT('public_active_tracking')}</div>
                 </div>
-                <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 text-center mn-panel">
-                  <div className="text-lg font-bold text-[var(--mn-heading)]">{journeyProgress}%</div>
-                  <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-1">{publicT('public_task_progress')}</div>
+                <div className="rounded-xl bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] p-3 text-center ab-panel">
+                  <div className="text-lg font-bold text-[var(--ab-heading)]">{journeyProgress}%</div>
+                  <div className="text-[10px] font-semibold text-[var(--ab-text-muted)] mt-1">{publicT('public_task_progress')}</div>
                 </div>
-                <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 text-center mn-panel">
-                  <div className="text-lg font-bold text-[var(--mn-heading)]">{notifications.length}</div>
-                  <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-1">{publicT('public_opportunity_alerts')}</div>
+                <div className="rounded-xl bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] p-3 text-center ab-panel">
+                  <div className="text-lg font-bold text-[var(--ab-heading)]">{notifications.length}</div>
+                  <div className="text-[10px] font-semibold text-[var(--ab-text-muted)] mt-1">{publicT('public_opportunity_alerts')}</div>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
+            <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-4 shadow-2xs ab-panel">
               <div className="flex items-center justify-between gap-2 mb-3">
-                <h3 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)]">{publicT('public_latest_activity')}</h3>
+                <h3 className="text-[13.5px] sm:text-sm font-bold text-[var(--ab-heading)]">{publicT('public_latest_activity')}</h3>
                 <Clock3 className="w-4 h-4 text-[#142B5F] dark:text-[#E5B54F]" />
               </div>
               {latestJourneyItems.length ? (
-                <div className="relative pr-4 space-y-3 before:absolute before:right-[5px] before:top-2 before:bottom-2 before:w-px before:bg-[var(--mn-surface-muted)] dark:before:bg-white/10">
+                <div className="relative pr-4 space-y-3 before:absolute before:right-[5px] before:top-2 before:bottom-2 before:w-px before:bg-[var(--ab-surface-muted)] dark:before:bg-white/10">
                   {latestJourneyItems.map((item) => (
                     <div key={item.id} className="relative">
-                      <span className="absolute -right-4 top-1.5 w-2.5 h-2.5 rounded-full bg-[#E5B54F] ring-4 ring-[var(--mn-surface)]" />
-                      <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] border border-[var(--mn-border)] dark:border-white/10 p-3 mn-panel">
+                      <span className="absolute -right-4 top-1.5 w-2.5 h-2.5 rounded-full bg-[#E5B54F] ring-4 ring-[var(--ab-surface)]" />
+                      <div className="rounded-xl bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] border border-[var(--ab-border)] dark:border-white/10 p-3 ab-panel">
                         <div className="text-[9.5px] font-bold text-[#142B5F] dark:text-[#E5B54F]">{item.type}</div>
-                        <div className="text-[11px] font-bold text-[var(--mn-heading)] mt-0.5">{item.title}</div>
-                        <div className="text-[9.5px] text-[var(--mn-text-muted)] mt-1">{item.meta}</div>
+                        <div className="text-[11px] font-bold text-[var(--ab-heading)] mt-0.5">{item.title}</div>
+                        <div className="text-[9.5px] text-[var(--ab-text-muted)] mt-1">{item.meta}</div>
                       </div>
                     </div>
                   ))}
@@ -551,13 +551,13 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
         {/* Section: CONTROL / SETTINGS */}
         {section === 'control' && (
           <div className="mt-3.5 space-y-3.5">
-            <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
+            <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-4 sm:p-5 shadow-2xs ab-panel">
               <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">{publicT('public_account_settings')}</span>
-              <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">{publicT('public_settings_and_privacy')}</h2>
-              <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">{publicT('public_manage_account_preferences_notifications_language_and_appearance')}</p>
+              <h2 className="text-base sm:text-lg font-bold text-[var(--ab-heading)] mt-0.5">{publicT('public_settings_and_privacy')}</h2>
+              <p className="text-[11px] leading-relaxed text-[var(--ab-text-muted)] font-medium mt-1">{publicT('public_manage_account_preferences_notifications_language_and_appearance')}</p>
             </div>
 
-            <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] overflow-hidden shadow-2xs mn-panel">
+            <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] overflow-hidden shadow-2xs ab-panel">
               {[
                 {
                   title: publicT('public_personalized_recommendations_2'),
@@ -583,13 +583,13 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
               ].map((item, index) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.title} className={`p-3.5 sm:p-4 flex items-center gap-3 ${index ? 'border-t border-[var(--mn-border)] dark:border-white/10' : ''}`}>
-                    <div className="w-9 h-9 rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] flex items-center justify-center shrink-0 text-[#142B5F] dark:text-[#E5B54F] mn-panel">
+                  <div key={item.title} className={`p-3.5 sm:p-4 flex items-center gap-3 ${index ? 'border-t border-[var(--ab-border)] dark:border-white/10' : ''}`}>
+                    <div className="w-9 h-9 rounded-xl bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] flex items-center justify-center shrink-0 text-[#142B5F] dark:text-[#E5B54F] ab-panel">
                       <Icon className="w-4 h-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[11.5px] font-bold text-[var(--mn-heading)]">{item.title}</div>
-                      <p className="text-[10px] leading-4 text-[var(--mn-text-muted)] font-medium mt-0.5">{item.text}</p>
+                      <div className="text-[11.5px] font-bold text-[var(--ab-heading)]">{item.title}</div>
+                      <p className="text-[10px] leading-4 text-[var(--ab-text-muted)] font-medium mt-0.5">{item.text}</p>
                     </div>
                     <button
                       type="button"
@@ -608,28 +608,28 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
               <button
                 type="button"
                 onClick={() => handleAction(onToggleLanguage)}
-                className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-start flex items-center justify-between gap-2 mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
+                className="rounded-xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-3 text-start flex items-center justify-between gap-2 ab-panel cursor-pointer hover:border-[var(--ab-primary)] dark:hover:border-[#E5B54F]/40"
               >
                 <div>
-                  <div className="text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_language')}</div>
-                  <div className="text-[10px] font-medium text-[var(--mn-text-muted)] mt-0.5">{language === 'ar' ? publicT('public_arabic') : 'English'}</div>
+                  <div className="text-[11px] font-bold text-[var(--ab-heading)]">{publicT('public_language')}</div>
+                  <div className="text-[10px] font-medium text-[var(--ab-text-muted)] mt-0.5">{language === 'ar' ? publicT('public_arabic') : 'English'}</div>
                 </div>
                 <Languages className="w-4 h-4 text-[#142B5F] dark:text-[#E5B54F]" />
               </button>
               <button
                 type="button"
                 onClick={onToggleDarkMode}
-                className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-start flex items-center justify-between gap-2 mn-panel cursor-pointer hover:border-[var(--mn-primary)] dark:hover:border-[#E5B54F]/40"
+                className="rounded-xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] p-3 text-start flex items-center justify-between gap-2 ab-panel cursor-pointer hover:border-[var(--ab-primary)] dark:hover:border-[#E5B54F]/40"
               >
                 <div>
-                  <div className="text-[11px] font-bold text-[var(--mn-heading)]">{publicT('public_appearance')}</div>
-                  <div className="text-[10px] font-medium text-[var(--mn-text-muted)] mt-0.5">{isDarkMode ? publicT('public_dark_mode') : publicT('public_light_mode')}</div>
+                  <div className="text-[11px] font-bold text-[var(--ab-heading)]">{publicT('public_appearance')}</div>
+                  <div className="text-[10px] font-medium text-[var(--ab-text-muted)] mt-0.5">{isDarkMode ? publicT('public_dark_mode') : publicT('public_light_mode')}</div>
                 </div>
                 {isDarkMode ? <Moon className="w-4 h-4 text-[#E5B54F]" /> : <Sun className="w-4 h-4 text-[#142B5F]" />}
               </button>
             </div>
 
-            <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] divide-y divide-[var(--mn-border)] dark:divide-white/10 shadow-2xs mn-panel">
+            <div className="rounded-2xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-surface)] divide-y divide-[var(--ab-border)] dark:divide-white/10 shadow-2xs ab-panel">
               {[
                 { label: publicT('public_manage_the_notification_and_alert_center'), icon: Bell, action: onOpenNotifications },
                 { label: publicT('public_search_within_the_student_workspace'), icon: Search, action: onOpenGlobalSearch },
@@ -641,24 +641,24 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
                     key={item.label}
                     type="button"
                     onClick={() => handleAction(item.action)}
-                    className="w-full min-h-[48px] px-4 flex items-center justify-between gap-3 text-start cursor-pointer hover:bg-[var(--mn-page)]/50 transition-colors"
+                    className="w-full min-h-[48px] px-4 flex items-center justify-between gap-3 text-start cursor-pointer hover:bg-[var(--ab-page)]/50 transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
                       <Icon className="w-4 h-4 text-[#142B5F] dark:text-[#E5B54F]" />
-                      <span className="text-[11px] font-bold text-[var(--mn-heading)]">{item.label}</span>
+                      <span className="text-[11px] font-bold text-[var(--ab-heading)]">{item.label}</span>
                     </div>
-                    <ChevronLeft className="w-4 h-4 text-[var(--mn-text-muted)]" />
+                    <ChevronLeft className="w-4 h-4 text-[var(--ab-text-muted)]" />
                   </button>
                 );
               })}
             </div>
 
-            <div className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 space-y-1.5 mn-panel">
-              <div className="flex items-center gap-2 text-[11px] font-bold text-[var(--mn-heading)]">
+            <div className="rounded-xl border border-[var(--ab-border)] dark:border-white/10 bg-[var(--ab-page)] dark:bg-[var(--ab-surface-elevated)] p-3 space-y-1.5 ab-panel">
+              <div className="flex items-center gap-2 text-[11px] font-bold text-[var(--ab-heading)]">
                 <ShieldCheck className="w-4 h-4 text-[#142B5F] dark:text-[#E5B54F]" />
-                <span>{publicT('public_your_privacy_and_data_security_in_manaratak')}</span>
+                <span>{publicT('public_your_privacy_and_data_security_in_absheer')}</span>
               </div>
-              <p className="text-[10px] leading-relaxed text-[var(--mn-text-muted)] font-medium">{publicT('public_your_academic_information_and_files_are_encrypted_and')}</p>
+              <p className="text-[10px] leading-relaxed text-[var(--ab-text-muted)] font-medium">{publicT('public_your_academic_information_and_files_are_encrypted_and')}</p>
             </div>
           </div>
         )}

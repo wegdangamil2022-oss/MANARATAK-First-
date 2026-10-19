@@ -28,7 +28,7 @@ export function recoveryTarget(databaseUrl, assertion, publicKey, sha, now = Dat
   const target = databaseIdentity(databaseUrl),
     proof = verifySignedEvidence(assertion, publicKey, sha, now, 1);
   if (
-    proof.kind !== 'MANARATAK_DISPOSABLE_RESTORE_AUTHORIZATION' ||
+    proof.kind !== 'ABSHEER_DISPOSABLE_RESTORE_AUTHORIZATION' ||
     proof.targetFingerprint !== target.fingerprint ||
     proof.sourceDatabaseFingerprint === target.fingerprint ||
     !DIGEST.test(proof.sourceDatabaseFingerprint ?? '') ||
@@ -40,8 +40,8 @@ export function recoveryTarget(databaseUrl, assertion, publicKey, sha, now = Dat
     new Set(proof.approvers ?? []).size < 2 ||
     proof.approvers?.some((id) => typeof id !== 'string' || !id.trim() || id.length > 120) ||
     !proof.disposableInstanceId?.match(/^[0-9a-f-]{36}$/) ||
-    target.role !== 'manaratak_restore_runner' ||
-    !/^manaratak_restore_[0-9a-f]{32}$/.test(target.database) ||
+    target.role !== 'absheer_restore_runner' ||
+    !/^absheer_restore_[0-9a-f]{32}$/.test(target.database) ||
     !Array.isArray(proof.allowedHosts) || !Array.isArray(proof.approvers) ||
     !proof.allowedHosts?.includes(target.host)
   )

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ReferenceDataUseCases } from '../../src';
-import type { IReferenceDataRepository } from '@manaratak/domain';
+import type { IReferenceDataRepository } from '@absheer/domain';
 import type { AtomicAuditedOutboxMutationExecutor } from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
 
 describe('P7 explicit legacy city country-link repair', () => {

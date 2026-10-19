@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-The purpose of this document is to serve as the official navigation and governance index for the MANARATAK Enterprise Architecture. It establishes a clear mapping of architectural concerns to their respective authoritative documents, ensuring that developers, architects, and stakeholders can easily locate and refer to the correct single source of truth.
+The purpose of this document is to serve as the official navigation and governance index for the ABSHEER Enterprise Architecture. It establishes a clear mapping of architectural concerns to their respective authoritative documents, ensuring that developers, architects, and stakeholders can easily locate and refer to the correct single source of truth.
 
 This index exists solely to improve governance, discoverability, consistency, and maintainability across all phases of the project.
 
@@ -10,7 +10,7 @@ This index exists solely to improve governance, discoverability, consistency, an
 
 ## 2. Governance Principles
 
-The MANARATAK Enterprise Architecture governance is guided by the following core principles:
+The ABSHEER Enterprise Architecture governance is guided by the following core principles:
 
 - **Single Source of Truth (SSOT):** Every architecture policy, rule, contract, or design pattern must reside in exactly one authoritative location.
 - **Cognitive Manageability:** Technical and domain logic are organized cleanly to prevent mental translation overhead and ensure ease of comprehension.
@@ -56,7 +56,7 @@ The table below defines the authoritative document for each key enterprise archi
 | **Version Compatibility Matrix**        | Matrix tracking systems supporting which versions of enterprise contracts. (docs/architecture/models/Enterprise-Version-Compatibility-Matrix-v1.0.md) |
 | **Consumer-Producer Matrix**            | Matrix tracking producers and consumers of enterprise contracts. (docs/architecture/models/Enterprise-Consumer-Producer-Matrix-v1.0.md)               |
 | **API Interface Standards**             | Standards for API naming, versioning, pagination, idempotency, and error handling. (docs/architecture/standards/std-api-001-interface-standards.md)   |
-| **Operational Playbooks**               | Baseline SRE runbooks for MANARATAK 2.0 deployment and operations. (docs/architecture/standards/std-ops-002-operational-playbooks.md)                 |
+| **Operational Playbooks**               | Baseline SRE runbooks for ABSHEER 2.0 deployment and operations. (docs/architecture/standards/std-ops-002-operational-playbooks.md)                 |
 
 ---
 

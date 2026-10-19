@@ -1,5 +1,5 @@
 import {describe,it,expect,vi} from 'vitest';
-vi.mock('@manaratak/shared',async original=>({...await original<any>(),assertTranslationContentAuthoringEnabled:vi.fn()}));
+vi.mock('@absheer/shared',async original=>({...await original<any>(),assertTranslationContentAuthoringEnabled:vi.fn()}));
 import {PrismaTranslationImportGateway} from '../../src/translation-import/PrismaTranslationImportGateway';
 import {governanceApprovalDigest} from '../../../application/src/authorization/use-cases/GovernanceApprovalUseCases';
 function fixture(){

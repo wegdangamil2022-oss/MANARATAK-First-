@@ -8,7 +8,7 @@ import {
   LearningPathEnrollmentDto,
   LearningPathEnrollmentStatus,
   LearningPathStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 interface LearningPathTransactionContext extends AtomicPersistenceContext {
   readonly transactionClient: Prisma.TransactionClient;

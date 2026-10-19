@@ -4,7 +4,7 @@ import {
   IRoleRepository,
   ITransactionalRoleAssignmentRepository,
   RoleAssignment
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AssignRoleInput } from '../dtos/AuthorizationDtos';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 

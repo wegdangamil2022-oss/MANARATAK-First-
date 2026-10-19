@@ -7,7 +7,7 @@ import {
   IExternalCourseProviderRepository,
   ImportTargetDomain,
   ImportedCourseMasterRowContract,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { ImportAdminUseCases } from '../../import-foundation/use-cases/ImportAdminUseCases';
 import {
   CourseMasterArtifactIssue,

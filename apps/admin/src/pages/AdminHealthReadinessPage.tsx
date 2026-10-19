@@ -146,7 +146,7 @@ export function AdminHealthReadinessPage() {
     const url = URL.createObjectURL(new Blob([report()], { type: 'application/json' }));
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `manaratak-health-${Date.now()}.json`;
+    anchor.download = `absheer-health-${Date.now()}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
   };

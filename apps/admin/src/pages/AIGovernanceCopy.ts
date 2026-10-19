@@ -29,7 +29,7 @@ export const AI_COPY_EN: Readonly<Record<string, string>> = {
   'إعدادات المنصة': 'Platform settings',
   'هناك تعديلات غير محفوظة؛ مغادرة الصفحة؟': 'Unsaved changes. Leave this page?',
   'مركز الذكاء الاصطناعي والحوكمة ·': 'AI and governance center ·',
-  'مركز منارتك للذكاء الاصطناعي': 'Manaratak AI Center',
+  'مركز أبشر للذكاء الاصطناعي': 'Absheer AI Center',
   'حوكمة مركزية للمزوّدين والنماذج والتوجيه والموجّهات والسلامة والتكلفة والتقييم، دون تخزين أي مفاتيح سرية.':
     'Central governance for providers, models, routing, prompts, safety, costs and evaluations. Secret keys are never stored here.',
   'وضع التنفيذ الحالي': 'Current execution mode',

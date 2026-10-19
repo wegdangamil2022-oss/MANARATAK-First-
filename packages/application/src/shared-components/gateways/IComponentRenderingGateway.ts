@@ -1,4 +1,4 @@
-import { SharedComponent } from '@manaratak/domain';
+import { SharedComponent } from '@absheer/domain';
 
 export interface IComponentRenderingGateway {
   /**

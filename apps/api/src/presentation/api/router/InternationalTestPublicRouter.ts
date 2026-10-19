@@ -1,8 +1,8 @@
-import type {TestDiscoveryOwnerUseCases} from '@manaratak/application';
+import type {TestDiscoveryOwnerUseCases} from '@absheer/application';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { LocalizedInternationalTestPublicUseCases } from '@manaratak/application';
-import { IInternationalTestRepository, InternationalTestCategory, InternationalTestCompletenessStatus } from '@manaratak/domain';
+import { LocalizedInternationalTestPublicUseCases } from '@absheer/application';
+import { IInternationalTestRepository, InternationalTestCategory, InternationalTestCompletenessStatus } from '@absheer/domain';
 import { localeQuerySchema, parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
 
 export class InternationalTestPublicRouter {

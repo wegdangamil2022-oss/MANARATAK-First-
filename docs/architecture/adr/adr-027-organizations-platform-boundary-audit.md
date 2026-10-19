@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary
 
-In accordance with **ADR-027**, MANARATAK 2.0 explicitly excludes and bans:
+In accordance with **ADR-027**, ABSHEER 2.0 explicitly excludes and bans:
 - Phase 25 (Architecture is locked at 24 phases)
 - Organizations Platform / Organizations & Employers Platform
 - Employers Platform
@@ -100,7 +100,7 @@ The following items contain confusing naming or legacy stubs that do not activel
 
 > ### **PERMANENT ARCHITECTURAL DOCTRINE: NO ORGANIZATIONS PLATFORM**
 >
-> **MANARATAK 2.0 does not have an Organizations Platform, Employers Platform, or centralized B2B Organization Registry.**
+> **ABSHEER 2.0 does not have an Organizations Platform, Employers Platform, or centralized B2B Organization Registry.**
 >
 > 1. Any sponsor, service provider, employer, university, or accrediting body data **MUST remain natively owned by its respective domain phase** (Phase 11, Phase 12, Phase 20, Phase 21).
 > 2. B2B entities **MUST NOT be centralized** into a generic Organization entity, generic organization database table, generic `/api/organizations` endpoint, or generic `/admin/organizations` administrative UI screen.

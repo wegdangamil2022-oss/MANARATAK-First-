@@ -1,4 +1,4 @@
--- SOURCE-ONLY DRAFT. Do not apply until the MANARATAK runtime/database gate is opened.
+-- SOURCE-ONLY DRAFT. Do not apply until the ABSHEER runtime/database gate is opened.
 -- Adds CMS-to-domain editorial references without copying or mutating canonical domain records.
 CREATE TABLE "CmsContentDomainLink" (
   "id" TEXT NOT NULL,

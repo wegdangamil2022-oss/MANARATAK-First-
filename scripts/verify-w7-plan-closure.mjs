@@ -8,12 +8,12 @@ if (result.stderr) process.stderr.write(result.stderr);
 if (result.status !== 0) process.exit(result.status ?? 1);
 
 const required = [
-  'PASS MNT-AUD-0003',
-  'PASS MNT-AUD-0019',
-  'PASS MNT-AUD-0023',
-  'PASS MNT-AUD-0051',
-  'PASS MNT-AUD-0052',
-  'PASS MNT-AUD-0004',
+  'PASS ABSH-AUD-0003',
+  'PASS ABSH-AUD-0019',
+  'PASS ABSH-AUD-0023',
+  'PASS ABSH-AUD-0051',
+  'PASS ABSH-AUD-0052',
+  'PASS ABSH-AUD-0004',
 ];
 const output = result.stdout ?? '';
 const missing = required.filter((token) => !output.includes(token));

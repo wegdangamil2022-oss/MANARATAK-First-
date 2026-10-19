@@ -39,7 +39,7 @@ test('DR contract includes PITR, immutable backups, provider readiness and weekl
 
 test('release promotion consumes one immutable artifact set across validation staging and production',()=>{
   const workflow=read('.github/workflows/release-promotion.yml');
-  for(const marker of ['workflow_run','manaratak-release-artifacts-$SOURCE_SHA','immutable-release-$SOURCE_SHA','needs: validation','needs: staging','release:verify','environment: production']) assert.ok(workflow.includes(marker),marker);
+  for(const marker of ['workflow_run','absheer-release-artifacts-$SOURCE_SHA','immutable-release-$SOURCE_SHA','needs: validation','needs: staging','release:verify','environment: production']) assert.ok(workflow.includes(marker),marker);
   const builder=read('scripts/release/build-immutable-artifacts.mjs');
   for(const marker of ['release-sbom.cdx.json','SHA256SUMS','--sort=name','--mtime=UTC 1970-01-01']) assert.ok(builder.includes(marker),marker);
 });

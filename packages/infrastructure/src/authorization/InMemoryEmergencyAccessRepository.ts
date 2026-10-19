@@ -1,4 +1,4 @@
-import type { EmergencyAccessGrantRecord, IEmergencyAccessRepository } from '@manaratak/domain';
+import type { EmergencyAccessGrantRecord, IEmergencyAccessRepository } from '@absheer/domain';
 
 export class InMemoryEmergencyAccessRepository implements IEmergencyAccessRepository {
   private readonly rows = new Map<string, EmergencyAccessGrantRecord>();

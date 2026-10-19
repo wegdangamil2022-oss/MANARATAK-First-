@@ -7,7 +7,7 @@ const checks=[
 ['0037 deterministic ranking', r('packages/infrastructure/src/search/PrismaPublicSearchEngineGateway.ts').includes('ORDER BY r.score DESC, lower(r.title) ASC, r.kind ASC, r.id ASC')],
 ['0037 published owner truth only', r('packages/infrastructure/src/search/PrismaPublicSearchEngineGateway.ts').includes("WHERE c.status = 'PUBLISHED'") && r('packages/infrastructure/src/search/PrismaPublicSearchEngineGateway.ts').includes("cc.status = 'PUBLISHED'")],
 ['0037 P24 API mode calls server search', r('apps/web/src/features/public-template/components/GlobalSearchPage.tsx').includes('ApiClient.searchPublicCatalog')],
-['0037 prototype local index explicitly isolated', r('apps/web/src/features/public-template/usePublicLiveData.ts').includes('__MANARATAK_PROTOTYPE_DATA_ENABLED__')],
+['0037 prototype local index explicitly isolated', r('apps/web/src/features/public-template/usePublicLiveData.ts').includes('__ABSHEER_PROTOTYPE_DATA_ENABLED__')],
 ['0046 exact CMS types preserved', r('apps/web/src/features/public-template/types.ts').includes("'FAQ' | 'STATIC_PAGE'") && r('apps/web/src/features/public-template/publicLiveDataSource.ts').includes('CMS_CONTENT_TYPE_UNSUPPORTED')],
 ['0046 article discovery explicitly filters owner types', r('apps/web/src/features/public-template/publicLiveDataSource.ts').includes("editorialTypes") && r('apps/web/src/features/public-template/publicLiveDataSource.ts').includes('contentType, page, pageSize: 50')],
 ['0046 generic canonical content route exists', r('apps/web/src/router/index.tsx').includes("path: 'content/:slug'")],

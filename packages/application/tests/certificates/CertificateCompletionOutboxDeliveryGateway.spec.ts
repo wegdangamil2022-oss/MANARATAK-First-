@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { OutboxProcessingState } from '@manaratak/domain';
+import { OutboxProcessingState } from '@absheer/domain';
 import { CertificateCompletionOutboxDeliveryGateway } from '../../src/certificates/use-cases/CertificateCompletionOutboxDeliveryGateway';
 import { CertificateCompletionOutboxWorker } from '../../src/certificates/use-cases/CertificateCompletionOutboxWorker';
 

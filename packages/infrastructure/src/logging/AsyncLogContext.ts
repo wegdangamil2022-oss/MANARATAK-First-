@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from 'async_hooks';
-import { ILogContext } from '@manaratak/core';
+import { ILogContext } from '@absheer/core';
 
 export class AsyncLogContext implements ILogContext {
   private static readonly asyncLocalStorage = new AsyncLocalStorage<Map<string, unknown>>();

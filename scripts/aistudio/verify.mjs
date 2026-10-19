@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const env = Object.fromEntries(Object.entries(process.env).filter(([name]) =>
   /^(PATH|SYSTEMROOT|WINDIR|TEMP|TMP|COMSPEC|PATHEXT|LOCALAPPDATA)$/i.test(name)));
-Object.assign(env, { MANARATAK_GOOGLE_AI_STUDIO: 'true', MANARATAK_RUNTIME_PROFILE: 'google-ai-studio', NO_COLOR: '1' });
+Object.assign(env, { ABSHEER_GOOGLE_AI_STUDIO: 'true', ABSHEER_RUNTIME_PROFILE: 'google-ai-studio', NO_COLOR: '1' });
 const manifest = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
 assert.equal(manifest.scripts.dev, 'node scripts/aistudio/run.mjs web dev');
 const child = spawn(process.execPath, [

@@ -7,7 +7,7 @@ import {
   type InternationalTestDto,
   type MajorDto,
   type UniversityDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { ApplicationLocaleProjectionService } from '../../src/localization/ApplicationLocaleProjectionService';
 
 const projection = new ApplicationLocaleProjectionService();

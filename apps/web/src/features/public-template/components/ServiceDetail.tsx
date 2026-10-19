@@ -79,21 +79,21 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
 
   return (
     <div
-      className="min-h-screen bg-[var(--mn-page)] pb-24 font-['Cairo',sans-serif] text-[var(--mn-heading)] mn-panel "
+      className="min-h-screen bg-[var(--ab-page)] pb-24 font-['Cairo',sans-serif] text-[var(--ab-heading)] ab-panel "
       dir={dir}
     >
       {language === 'en' &&
         /[\u0600-\u06ff]/.test(
           service.requirements.join(' ') + service.faqs.map((f) => f.question + f.answer).join(' '),
         ) && <p role="note">Some service details are shown in their original language.</p>}
-      <div className="relative overflow-hidden border-b-[3px] border-[var(--mn-accent)]/70 bg-gradient-to-b from-[var(--mn-primary)] via-[var(--mn-hero-secondary)] to-[var(--mn-primary)] px-4 pb-5 pt-4 text-white shadow-md mn-inverse ">
+      <div className="relative overflow-hidden border-b-[3px] border-[var(--ab-accent)]/70 bg-gradient-to-b from-[var(--ab-primary)] via-[var(--ab-hero-secondary)] to-[var(--ab-primary)] px-4 pb-5 pt-4 text-white shadow-md ab-inverse ">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-4 top-2 grid grid-cols-5 gap-1.5 opacity-20">
             {Array.from({ length: 15 }).map((_, index) => (
-              <div key={index} className="h-1 w-1 rounded-full bg-[var(--mn-accent)] mn-gold " />
+              <div key={index} className="h-1 w-1 rounded-full bg-[var(--ab-accent)] ab-gold " />
             ))}
           </div>
-          <div className="absolute -left-12 -top-12 h-48 w-48 rounded-full border border-[var(--mn-accent)]/25" />
+          <div className="absolute -left-12 -top-12 h-48 w-48 rounded-full border border-[var(--ab-accent)]/25" />
           <div className="absolute -right-6 bottom-0 opacity-25">
             {isStudent ? (
               <GraduationCap className="h-36 w-36" strokeWidth={1} />
@@ -110,7 +110,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
               event.stopPropagation();
               onToggleFavorite(service.id);
             }}
-            className="absolute left-4 top-4 z-20 bg-[var(--mn-surface)]/95 mn-panel "
+            className="absolute left-4 top-4 z-20 bg-[var(--ab-surface)]/95 ab-panel "
           />
         )}
 
@@ -120,7 +120,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
 
         <div className="relative z-10 mx-auto max-w-md text-right sm:max-w-xl">
           <div className="mb-2 flex flex-wrap gap-1.5">
-            <span className="rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[8.5px] font-bold text-[var(--mn-accent-soft)]">
+            <span className="rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[8.5px] font-bold text-[var(--ab-accent-soft)]">
               {service.badge}
             </span>
             <span className="rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[8.5px] font-bold text-white">
@@ -130,55 +130,55 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
           <h1 className="text-[20px] font-bold leading-8 text-white sm:text-2xl">
             {service.title}
           </h1>
-          <p className="mt-1.5 max-w-xl text-[10.5px] font-semibold leading-5 text-[var(--mn-on-dark-muted)] sm:text-xs">
+          <p className="mt-1.5 max-w-xl text-[10.5px] font-semibold leading-5 text-[var(--ab-on-dark-muted)] sm:text-xs">
             {service.shortDescription}
           </p>
         </div>
       </div>
 
-      <main className="mx-auto max-w-md mn-inline-gutter pb-24 pt-3 sm:max-w-xl">
+      <main className="mx-auto max-w-md ab-inline-gutter pb-24 pt-3 sm:max-w-xl">
         <section className="mb-3 grid grid-cols-3 gap-1.5">
-          <div className="rounded-xl border border-[var(--mn-border-gold)] bg-[var(--mn-surface)] p-2 text-center shadow-2xs mn-panel ">
-            <Wallet className="mx-auto h-4 w-4 text-[var(--mn-accent-text)]" />
-            <span className="mt-1 block text-[8px] font-bold text-[var(--mn-text-muted)]">
+          <div className="rounded-xl border border-[var(--ab-border-gold)] bg-[var(--ab-surface)] p-2 text-center shadow-2xs ab-panel ">
+            <Wallet className="mx-auto h-4 w-4 text-[var(--ab-accent-text)]" />
+            <span className="mt-1 block text-[8px] font-bold text-[var(--ab-text-muted)]">
               {serviceCopy('السعر', language)}
             </span>
-            <span className="mt-0.5 block text-[9px] font-bold text-[var(--mn-text)]">
+            <span className="mt-0.5 block text-[9px] font-bold text-[var(--ab-text)]">
               {service.priceLabel}
             </span>
           </div>
-          <div className="rounded-xl border border-[var(--mn-border-gold)] bg-[var(--mn-surface)] p-2 text-center shadow-2xs mn-panel ">
-            <Clock3 className="mx-auto h-4 w-4 text-[var(--mn-heading)]" />
-            <span className="mt-1 block text-[8px] font-bold text-[var(--mn-text-muted)]">
+          <div className="rounded-xl border border-[var(--ab-border-gold)] bg-[var(--ab-surface)] p-2 text-center shadow-2xs ab-panel ">
+            <Clock3 className="mx-auto h-4 w-4 text-[var(--ab-heading)]" />
+            <span className="mt-1 block text-[8px] font-bold text-[var(--ab-text-muted)]">
               {serviceCopy('مدة التنفيذ', language)}
             </span>
-            <span className="mt-0.5 block text-[9px] font-bold text-[var(--mn-text)]">
+            <span className="mt-0.5 block text-[9px] font-bold text-[var(--ab-text)]">
               {service.turnaround}
             </span>
           </div>
-          <div className="rounded-xl border border-[var(--mn-border-gold)] bg-[var(--mn-surface)] p-2 text-center shadow-2xs mn-panel ">
-            <Layers3 className="mx-auto h-4 w-4 text-[var(--mn-heading)]" />
-            <span className="mt-1 block text-[8px] font-bold text-[var(--mn-text-muted)]">
+          <div className="rounded-xl border border-[var(--ab-border-gold)] bg-[var(--ab-surface)] p-2 text-center shadow-2xs ab-panel ">
+            <Layers3 className="mx-auto h-4 w-4 text-[var(--ab-heading)]" />
+            <span className="mt-1 block text-[8px] font-bold text-[var(--ab-text-muted)]">
               {serviceCopy('التنفيذ', language)}
             </span>
-            <span className="mt-0.5 block text-[9px] font-bold leading-4 text-[var(--mn-text)]">
+            <span className="mt-0.5 block text-[9px] font-bold leading-4 text-[var(--ab-text)]">
               {service.deliveryMode}
             </span>
           </div>
         </section>
 
-        <section className="mb-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
+        <section className="mb-3 rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3 shadow-sm ab-panel ">
           <SectionTitle
             icon={<Info className="h-4 w-4" />}
             id="service-about"
             title={serviceCopy('عن الخدمة', language)}
           />
-          <p className="text-[10px] font-semibold leading-5 text-[var(--mn-text-muted)]">
+          <p className="text-[10px] font-semibold leading-5 text-[var(--ab-text-muted)]">
             {service.description}
           </p>
         </section>
 
-        <section className="mb-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
+        <section className="mb-3 rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3 shadow-sm ab-panel ">
           <SectionTitle
             icon={<BadgeCheck className="h-4 w-4" />}
             id="service-includes"
@@ -188,16 +188,16 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
             {service.includes.map((item) => (
               <li
                 key={item}
-                className="flex items-start gap-1.5 text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)]"
+                className="flex items-start gap-1.5 text-[9.5px] font-semibold leading-4 text-[var(--ab-text-muted)]"
               >
-                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mn-success-text)]" />
+                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--ab-success-text)]" />
                 <span>{item}</span>
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="mb-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
+        <section className="mb-3 rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3 shadow-sm ab-panel ">
           <SectionTitle
             icon={<AlertCircle className="h-4 w-4" />}
             id="service-excludes"
@@ -207,9 +207,9 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
             {service.excludes.map((item) => (
               <li
                 key={item}
-                className="flex items-start gap-1.5 text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)]"
+                className="flex items-start gap-1.5 text-[9.5px] font-semibold leading-4 text-[var(--ab-text-muted)]"
               >
-                <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mn-danger-text)]" />
+                <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--ab-danger-text)]" />
                 <span>{item}</span>
               </li>
             ))}
@@ -217,7 +217,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
         </section>
 
         {service.packages?.length ? (
-          <section className="mb-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
+          <section className="mb-3 rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3 shadow-sm ab-panel ">
             <SectionTitle
               icon={<DollarSign className="h-4 w-4" />}
               id="service-packages"
@@ -228,15 +228,15 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
               {service.packages.map((pkg) => (
                 <div
                   key={pkg.name}
-                  className="rounded-xl border border-[var(--mn-border-gold)] bg-[var(--mn-page)] p-2.5 mn-panel "
+                  className="rounded-xl border border-[var(--ab-border-gold)] bg-[var(--ab-page)] p-2.5 ab-panel "
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-[10px] font-bold text-[var(--mn-heading)]">{pkg.name}</h3>
-                    <span className="rounded-full bg-[var(--mn-accent)]/10 px-2 py-0.5 text-[9px] font-bold text-[var(--mn-accent-text)]">
+                    <h3 className="text-[10px] font-bold text-[var(--ab-heading)]">{pkg.name}</h3>
+                    <span className="rounded-full bg-[var(--ab-accent)]/10 px-2 py-0.5 text-[9px] font-bold text-[var(--ab-accent-text)]">
                       {pkg.price}
                     </span>
                   </div>
-                  <p className="mt-1 text-[9px] font-semibold leading-4 text-[var(--mn-text-muted)]">
+                  <p className="mt-1 text-[9px] font-semibold leading-4 text-[var(--ab-text-muted)]">
                     {pkg.description}
                   </p>
                 </div>
@@ -245,7 +245,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
           </section>
         ) : null}
 
-        <section className="mb-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
+        <section className="mb-3 rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3 shadow-sm ab-panel ">
           <SectionTitle
             icon={<FileText className="h-4 w-4" />}
             id="service-requirements"
@@ -255,7 +255,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
             {service.requirements.map((item) => (
               <li
                 key={item}
-                className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-2 text-[9.5px] font-bold leading-4 text-[var(--mn-text-muted)] mn-panel "
+                className="rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] px-2.5 py-2 text-[9.5px] font-bold leading-4 text-[var(--ab-text-muted)] ab-panel "
               >
                 {item}
               </li>
@@ -263,18 +263,18 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
           </ul>
         </section>
 
-        <section className="mb-3 rounded-2xl border border-[var(--mn-accent)]/25 bg-[var(--mn-accent)]/5 p-3 shadow-sm">
+        <section className="mb-3 rounded-2xl border border-[var(--ab-accent)]/25 bg-[var(--ab-accent)]/5 p-3 shadow-sm">
           <SectionTitle
             icon={<Globe2 className="h-4 w-4" />}
             id="service-context"
-            title={serviceCopy('استكشف في منارتك', language)}
+            title={serviceCopy('استكشف في أبشر', language)}
             subtitle={serviceCopy(
               'ظهور سياقي فقط — لا يعني أن الخدمة مرتبطة أو معتمدة من هذه الكيانات',
               language,
             )}
           />
-          <div className="mb-2 rounded-xl border border-[var(--mn-accent)]/20 bg-[var(--mn-surface)] px-2.5 py-2 text-[9px] font-bold leading-4 text-[var(--mn-text-muted)] mn-panel ">
-            <span className="font-bold text-[var(--mn-heading)]">
+          <div className="mb-2 rounded-xl border border-[var(--ab-accent)]/20 bg-[var(--ab-surface)] px-2.5 py-2 text-[9px] font-bold leading-4 text-[var(--ab-text-muted)] ab-panel ">
+            <span className="font-bold text-[var(--ab-heading)]">
               {serviceCopy('فصل الترابط:', language)}
             </span>
             {serviceCopy(
@@ -288,31 +288,31 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
                 key={`${link.category}-${link.label}`}
                 type="button"
                 onClick={() => onOpenContext?.(link.category)}
-                className="group flex min-h-12 items-center justify-between gap-2 rounded-xl border border-[var(--mn-border-gold)] bg-[var(--mn-surface)] px-2.5 py-2 text-right transition hover:border-[var(--mn-accent)] active:scale-[0.99] mn-panel "
+                className="group flex min-h-12 items-center justify-between gap-2 rounded-xl border border-[var(--ab-border-gold)] bg-[var(--ab-surface)] px-2.5 py-2 text-right transition hover:border-[var(--ab-accent)] active:scale-[0.99] ab-panel "
               >
                 <div className="min-w-0">
-                  <span className="block text-[9.5px] font-bold text-[var(--mn-heading)]">
+                  <span className="block text-[9.5px] font-bold text-[var(--ab-heading)]">
                     {link.label}
                   </span>
-                  <span className="mt-0.5 block text-[8.5px] font-semibold leading-4 text-[var(--mn-text-muted)]">
+                  <span className="mt-0.5 block text-[8.5px] font-semibold leading-4 text-[var(--ab-text-muted)]">
                     {link.description}
                   </span>
                 </div>
-                <ArrowLeft className="h-4 w-4 shrink-0 text-[var(--mn-accent-text)] transition-transform group-hover:-translate-x-0.5" />
+                <ArrowLeft className="h-4 w-4 shrink-0 text-[var(--ab-accent-text)] transition-transform group-hover:-translate-x-0.5" />
               </button>
             ))}
           </div>
         </section>
 
         {service.availabilityNote && (
-          <section className="mb-3 rounded-2xl border border-[var(--mn-border-brand)] bg-[var(--mn-surface-muted)]/60 p-3">
+          <section className="mb-3 rounded-2xl border border-[var(--ab-border-brand)] bg-[var(--ab-surface-muted)]/60 p-3">
             <div className="flex items-start gap-2">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--mn-heading)]" />
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--ab-heading)]" />
               <div>
-                <h2 className="text-[10px] font-bold text-[var(--mn-heading)]">
+                <h2 className="text-[10px] font-bold text-[var(--ab-heading)]">
                   {serviceCopy('التوفر ليس مجرد ظهور سياقي', language)}
                 </h2>
-                <p className="mt-1 text-[9px] font-semibold leading-4 text-[var(--mn-text-muted)]">
+                <p className="mt-1 text-[9px] font-semibold leading-4 text-[var(--ab-text-muted)]">
                   {service.availabilityNote}
                 </p>
               </div>
@@ -320,7 +320,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
           </section>
         )}
 
-        <section className="mb-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
+        <section className="mb-3 rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3 shadow-sm ab-panel ">
           <SectionTitle
             icon={<MessageSquareText className="h-4 w-4" />}
             id="service-request-context"
@@ -330,7 +330,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
           {onRequestService ? (
             <div className="grid gap-2 sm:grid-cols-2">
               {service.requestContextFields.map((field) => (
-                <label key={field} className="text-[9px] font-bold text-[var(--mn-text-muted)]">
+                <label key={field} className="text-[9px] font-bold text-[var(--ab-text-muted)]">
                   {field}
                   <input
                     required
@@ -341,7 +341,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
                         [field]: event.target.value,
                       }))
                     }
-                    className="mt-1 w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-2 text-[10px] text-[var(--mn-text)] outline-none focus:ring-2 focus:ring-[var(--mn-focus)]"
+                    className="mt-1 w-full rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] px-2.5 py-2 text-[10px] text-[var(--ab-text)] outline-none focus:ring-2 focus:ring-[var(--ab-focus)]"
                     placeholder={publicT('public_enter_field', { v0: field })}
                   />
                 </label>
@@ -352,7 +352,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
               {service.requestContextFields.map((field) => (
                 <span
                   key={field}
-                  className="rounded-full border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-1 text-[8.5px] font-bold text-[var(--mn-text-muted)] mn-panel "
+                  className="rounded-full border border-[var(--ab-border)] bg-[var(--ab-page)] px-2 py-1 text-[8.5px] font-bold text-[var(--ab-text-muted)] ab-panel "
                 >
                   {field}
                 </span>
@@ -361,7 +361,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
           )}
         </section>
 
-        <section className="mb-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
+        <section className="mb-3 rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3 shadow-sm ab-panel ">
           <SectionTitle
             icon={<HelpCircle className="h-4 w-4" />}
             id="service-faq"
@@ -371,10 +371,10 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
             {service.faqs.map((faq) => (
               <div
                 key={faq.question}
-                className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 mn-panel "
+                className="rounded-xl border border-[var(--ab-border)] bg-[var(--ab-page)] p-2.5 ab-panel "
               >
-                <h3 className="text-[9.5px] font-bold text-[var(--mn-text)]">{faq.question}</h3>
-                <p className="mt-1 text-[9px] font-semibold leading-4 text-[var(--mn-text-muted)]">
+                <h3 className="text-[9.5px] font-bold text-[var(--ab-text)]">{faq.question}</h3>
+                <p className="mt-1 text-[9px] font-semibold leading-4 text-[var(--ab-text-muted)]">
                   {faq.answer}
                 </p>
               </div>
@@ -382,13 +382,13 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
           </div>
         </section>
 
-        <section className="mb-4 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 shadow-sm mn-panel ">
+        <section className="mb-4 rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3 shadow-sm ab-panel ">
           <SectionTitle
             icon={<ShieldCheck className="h-4 w-4" />}
             id="service-cancellation"
             title={serviceCopy('سياسة الإلغاء', language)}
           />
-          <p className="text-[9.5px] font-semibold leading-4 text-[var(--mn-text-muted)]">
+          <p className="text-[9.5px] font-semibold leading-4 text-[var(--ab-text-muted)]">
             {service.cancellationPolicy}
           </p>
         </section>
@@ -445,9 +445,9 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
               setRequesting(false);
             }
           }}
-          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-l from-[var(--mn-primary)] to-[var(--mn-hero-secondary)] px-4 text-[11px] font-bold text-white shadow-md transition active:scale-[0.99] disabled:opacity-60 mn-inverse "
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-l from-[var(--ab-primary)] to-[var(--ab-hero-secondary)] px-4 text-[11px] font-bold text-white shadow-md transition active:scale-[0.99] disabled:opacity-60 ab-inverse "
         >
-          <Sparkles className="h-4 w-4 text-[var(--mn-accent-text)]" />
+          <Sparkles className="h-4 w-4 text-[var(--ab-accent-text)]" />
           {requesting
             ? serviceCopy('جارٍ إنشاء الطلب...', language)
             : service.requestable === false
@@ -457,7 +457,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
         {requestError && (
           <p
             role="alert"
-            className="mt-3 rounded-xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] p-3 text-sm leading-6 text-[var(--mn-danger-text)]"
+            className="mt-3 rounded-xl border border-[var(--ab-danger-border)] bg-[var(--ab-danger-soft)] p-3 text-sm leading-6 text-[var(--ab-danger-text)]"
           >
             {requestError}
           </p>
@@ -465,7 +465,7 @@ export const ServiceDetail: React.FC<ServiceDetailProps> = ({
         {showRequestNotice && !onRequestService && (
           <p
             role="status"
-            className="mt-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3 text-sm leading-6 text-[var(--mn-text-muted)]"
+            className="mt-3 rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3 text-sm leading-6 text-[var(--ab-text-muted)]"
           >
             {serviceCopy(
               'هذه معاينة prototype فقط؛ لا يتم إنشاء طلب حقيقي في وضع المعاينة.',

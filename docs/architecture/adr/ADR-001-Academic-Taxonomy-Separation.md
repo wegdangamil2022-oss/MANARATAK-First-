@@ -17,7 +17,7 @@
 
 ## 3. Context
 
-In the initial conceptualization of the MANARATAK 2.0 architecture, academic classification entities (such as Fields of Study, Degree Types, Academic Disciplines, and Certification Levels) were grouped within a generic "Reference Platform." This broad Bounded Context was intended to house all read-heavy, static, or semi-static lookup data required across the enterprise.
+In the initial conceptualization of the ABSHEER 2.0 architecture, academic classification entities (such as Fields of Study, Degree Types, Academic Disciplines, and Certification Levels) were grouped within a generic "Reference Platform." This broad Bounded Context was intended to house all read-heavy, static, or semi-static lookup data required across the enterprise.
 
 However, as the architectural design matured, it became evident that grouping deeply specialized academic hierarchies with generic enterprise lookups (e.g., Countries, Currencies, Languages) created artificial coupling. The academic data possesses a distinct business lifecycle, complex hierarchical relationships, and localized editorial requirements that do not apply to standard reference data.
 
@@ -157,8 +157,8 @@ This ADR dictates a fundamental shift in the logical architecture and the Bounde
 
 ## 18. Related Documents
 
-- MANARATAK-2.0-Master-Blueprint.md
-- MANARATAK-2.0-Roadmap-v4.1.md
+- ABSHEER-2.0-Master-Blueprint.md
+- ABSHEER-2.0-Roadmap-v4.1.md
 - Enterprise Architecture Governance (Phase 1.30)
 - Enterprise Architecture Decision Management (Phase 1.31)
 

@@ -1,8 +1,8 @@
 import { useTranslation } from '../../i18n/I18nProvider';
-import { certificateCopy } from '@manaratak/shared';
+import { certificateCopy } from '@absheer/shared';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { createQrMatrix } from '@manaratak/shared';
+import { createQrMatrix } from '@absheer/shared';
 import { ApiClient, type StudentCertificateProjectionDto } from '../../api/client';
 
 export function StudentCertificateActions({
@@ -121,13 +121,13 @@ export function StudentCertificateActions({
             type="button"
             disabled={previewBusy}
             onClick={() => void viewPreview()}
-            className="text-[var(--mn-secondary)] underline disabled:opacity-50"
+            className="text-[var(--ab-secondary)] underline disabled:opacity-50"
           >
             {previewBusy ? copy('جارٍ التحميل…') : copy('عرض الشهادة')}
           </button>
         )}
         {verifyPath && (
-          <Link to={verifyPath} className="text-[var(--mn-secondary)] underline">
+          <Link to={verifyPath} className="text-[var(--ab-secondary)] underline">
             {copy('التحقق من الشهادة')}
           </Link>
         )}
@@ -136,12 +136,12 @@ export function StudentCertificateActions({
             type="button"
             disabled={busy}
             onClick={() => void download()}
-            className="text-[var(--mn-secondary)] underline disabled:opacity-50"
+            className="text-[var(--ab-secondary)] underline disabled:opacity-50"
           >
             {busy ? copy('جارٍ التحميل…') : copy('تحميل الشهادة PDF')}
           </button>
         ) : (
-          <span className="text-[var(--mn-text-muted)]">{copy('ملف الشهادة قيد التجهيز')}</span>
+          <span className="text-[var(--ab-text-muted)]">{copy('ملف الشهادة قيد التجهيز')}</span>
         )}
       </div>
       {preview && (
@@ -155,12 +155,12 @@ export function StudentCertificateActions({
         </div>
       )}
       {!matrix && verifyPath && (
-        <p className="text-xs text-[var(--mn-text-muted)]">
+        <p className="text-xs text-[var(--ab-text-muted)]">
           {copy('يمكن التحقق عبر الرابط أو رمز الشهادة.')}
         </p>
       )}
       {error && (
-        <p role="alert" className="text-xs text-[var(--mn-danger-text)]">
+        <p role="alert" className="text-xs text-[var(--ab-danger-text)]">
           {error}
         </p>
       )}

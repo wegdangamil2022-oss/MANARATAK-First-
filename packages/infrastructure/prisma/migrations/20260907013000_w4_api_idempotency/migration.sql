@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: foundation_control_plane
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: foundation_control_plane
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 
 CREATE TABLE "ApiIdempotencyRecord" (
   "id" UUID NOT NULL DEFAULT gen_random_uuid(),

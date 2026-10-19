@@ -10,7 +10,7 @@ describe('CMS signed editorial facts', () => {
       lastModifiedBy: 'author',
       title: 'Original approved root',
       contentType: 'ARTICLE',
-      siteIdentifier: 'manaratak',
+      siteIdentifier: 'absheer',
     };
     const localization = {
       id: 'localized',

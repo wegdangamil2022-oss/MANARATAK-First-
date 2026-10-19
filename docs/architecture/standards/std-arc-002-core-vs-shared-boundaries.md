@@ -5,12 +5,12 @@
 **Title:** Core vs. Shared Architecture Boundaries Specification
 
 ## 1. Purpose and Scope
-This document establishes the official architectural boundaries, responsibilities, and placement rules between `packages/core` and `packages/shared` within the MANARATAK 2.0 platform. As the system scales, maintaining strict separation between architectural primitives (Core) and cross-domain utilities (Shared) is critical to prevent circular dependencies, reduce technical debt, and ensure a stable, predictable foundation.
+This document establishes the official architectural boundaries, responsibilities, and placement rules between `packages/core` and `packages/shared` within the ABSHEER 2.0 platform. As the system scales, maintaining strict separation between architectural primitives (Core) and cross-domain utilities (Shared) is critical to prevent circular dependencies, reduce technical debt, and ensure a stable, predictable foundation.
 
 ## 2. Package Responsibilities
 
 ### 2.1 `packages/core` (The Architectural Foundation)
-*   **Purpose:** Provides the fundamental structural scaffolding, architectural patterns, and foundational interfaces required to build a MANARATAK application. It represents the "framework" level of the platform.
+*   **Purpose:** Provides the fundamental structural scaffolding, architectural patterns, and foundational interfaces required to build a ABSHEER application. It represents the "framework" level of the platform.
 *   **Allowed Contents:** 
     *   Architectural Base Classes (`Entity`, `ValueObject`, `AggregateRoot`).
     *   Infrastructure Abstractions (`IRepository`, `IUnitOfWork`, `IEventBus`, `ILogger`).
@@ -68,7 +68,7 @@ To eliminate redundancy and prevent divergence:
    * *Does this artifact define how the system operates at an architectural or infrastructural level?* → Move to `core`.
    * *Is this artifact merely a piece of reusable data, a helper function, or a cross-domain data shape?* → Move to `shared`.
 3. **Refactoring Mandate:** Any existing duplicate interfaces or classes across packages must be consolidated into their designated canonical location without changing their internal structure.
-4. **Import Rules:** Bounded contexts must import architectural primitives from `@manaratak/core` and cross-cutting utilities from `@manaratak/shared`. `shared` may import from `core`, but `core` must never import from `shared`.
+4. **Import Rules:** Bounded contexts must import architectural primitives from `@absheer/core` and cross-cutting utilities from `@absheer/shared`. `shared` may import from `core`, but `core` must never import from `shared`.
 
 ## 5. Future Extension Rules
 

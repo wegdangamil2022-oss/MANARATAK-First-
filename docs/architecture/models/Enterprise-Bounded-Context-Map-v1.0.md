@@ -9,7 +9,7 @@
 - **Owner:** Chief Enterprise Software Architect
 - **Approval Authority:** Architecture Review Board (ARB)
 - **Artifact Type:** Domain-Driven Design (DDD) Artifact
-- **Authority:** `docs/governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md`
+- **Authority:** `docs/governance/roadmap/ABSHEER-2.0-Roadmap-v6.0.md`
 
 > **P13 Final Source Alignment — 2026-09-03:** Re-audited against Roadmap v6.0 and the final source implementation. Ownership and dependency direction remain authoritative. Student Workspace composes P10/P11/P12 saved-item owner reads plus P13 learning and P14 certificate reads through application contracts; P24 live composition consumes P15 session/API state. Runtime/DB/E2E proof remains explicitly pending and is not certified by this document.
 

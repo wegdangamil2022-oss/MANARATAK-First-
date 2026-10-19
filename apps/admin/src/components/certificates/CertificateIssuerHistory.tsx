@@ -1,4 +1,4 @@
-import { certificateCopy, certificateStatusCopy } from '@manaratak/shared';
+import { certificateCopy, certificateStatusCopy } from '@absheer/shared';
 import { useTranslation } from '../../i18n/I18nProvider';
 export type CertificateIssuerHistoryEntry = {
   id: string;

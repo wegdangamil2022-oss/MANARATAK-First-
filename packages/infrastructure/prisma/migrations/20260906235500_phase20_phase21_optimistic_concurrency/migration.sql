@@ -1,7 +1,7 @@
--- MANARATAK_MIGRATION_OWNER: shared-services-career
--- MANARATAK_MIGRATION_SCOPE: cross_context_approved
--- MANARATAK_ARCH_DECISION: ADR-028
--- MNT-AUD-0096: version fencing for mutable Phase 20/21 admin-managed aggregates.
+-- ABSHEER_MIGRATION_OWNER: shared-services-career
+-- ABSHEER_MIGRATION_SCOPE: cross_context_approved
+-- ABSHEER_ARCH_DECISION: ADR-028
+-- ABSH-AUD-0096: version fencing for mutable Phase 20/21 admin-managed aggregates.
 
 ALTER TABLE "ServiceCatalogRecord" ADD COLUMN "version" INTEGER NOT NULL DEFAULT 1;
 ALTER TABLE "ServiceRequestRecord" ADD COLUMN "version" INTEGER NOT NULL DEFAULT 1;

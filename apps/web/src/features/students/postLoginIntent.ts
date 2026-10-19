@@ -1,7 +1,7 @@
 import { clearLegacyStudentCache } from '../../api/legacyStudentCache';
 
-const KEY = 'manaratak_post_login_return';
-const ACCOUNT_KEY = 'manaratak_active_identity';
+const KEY = 'absheer_post_login_return';
+const ACCOUNT_KEY = 'absheer_active_identity';
 
 function safeInternalPath(value: string | null | undefined): string | null {
   const path = value?.trim();
@@ -35,8 +35,8 @@ export function rememberAuthenticatedIdentity(identityId: string): boolean {
     const previous = sessionStorage.getItem(ACCOUNT_KEY);
     const changed = Boolean(previous && previous !== identityId);
     if (changed) {
-      sessionStorage.removeItem('manaratak_post_login_action');
-      sessionStorage.removeItem('manaratak_student_tools_session');
+      sessionStorage.removeItem('absheer_post_login_action');
+      sessionStorage.removeItem('absheer_student_tools_session');
       clearLegacyStudentCache();
     }
     sessionStorage.setItem(ACCOUNT_KEY, identityId);
@@ -45,7 +45,7 @@ export function rememberAuthenticatedIdentity(identityId: string): boolean {
 }
 
 
-const ACTION_KEY = 'manaratak_post_login_action';
+const ACTION_KEY = 'absheer_post_login_action';
 export type PendingPostLoginAction =
   | { kind: 'SAVE_FAVORITE'; entityType: string; entityId: string; entitySlug?: string | null }
   | { kind: 'TRACK_APPLICATION'; scholarshipId: string; scholarshipSlug?: string | null; notes?: string | null }

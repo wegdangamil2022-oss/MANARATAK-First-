@@ -13,7 +13,7 @@ import {
   ImportAdminUseCases,
   MajorImportStagingUseCase,
   type ISourceRegistryGateway,
-} from '@manaratak/application';
+} from '@absheer/application';
 import {
   IAssetRecordRepository,
   IAssetStorageGateway,
@@ -22,7 +22,7 @@ import {
   SourceStatus,
   SourceAccessClassification,
   SourceConnectorCategory,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class ImportAdminRouter {
   public static create(cradle: {
@@ -252,13 +252,13 @@ export class ImportAdminRouter {
     const DEFAULT_PAGE_SIZE = 50;
     const MAX_PAGE_SIZE = 100;
     const MAJOR_CATALOG_FILES = {
-      BACHELOR: 'MANARATAK_Bachelor_Majors_By_Colleges_v1.0.md',
-      MASTER: 'MANARATAK_Master_Specializations_By_Academic_Fields_v1.0.md',
-      DOCTORATE: 'MANARATAK_Doctoral_Specializations_By_Academic_Fields_v1.0.md',
-      FELLOWSHIP: 'MANARATAK_Fellowships_By_Professional_Domains_v1.0.md',
+      BACHELOR: 'ABSHEER_Bachelor_Majors_By_Colleges_v1.0.md',
+      MASTER: 'ABSHEER_Master_Specializations_By_Academic_Fields_v1.0.md',
+      DOCTORATE: 'ABSHEER_Doctoral_Specializations_By_Academic_Fields_v1.0.md',
+      FELLOWSHIP: 'ABSHEER_Fellowships_By_Professional_Domains_v1.0.md',
     } as const;
     const MAJOR_DETAIL_DOSSIER_FILES = {
-      BACHELOR: 'MANARATAK_Bachelor_Majors_Medicine_01_First_10.md',
+      BACHELOR: 'ABSHEER_Bachelor_Majors_Medicine_01_First_10.md',
       MASTER: 'masters_MAS-0001_to_MAS-0010.md',
       DOCTORATE: 'doctorate_specialties_DOC-0001_to_DOC-0010.md',
       FELLOWSHIP: 'fellowships_FEL-0001_to_FEL-0010.md',

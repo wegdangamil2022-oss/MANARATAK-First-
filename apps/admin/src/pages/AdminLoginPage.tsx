@@ -1,7 +1,7 @@
 import { useTranslation } from '../i18n/I18nProvider';
 import { type FormEvent, useState } from 'react';
 import { adminApiClient } from '../api/client';
-import { canAccessAdminPath, firstAllowedAdminPath } from '@manaratak/shared';
+import { canAccessAdminPath, firstAllowedAdminPath } from '@absheer/shared';
 
 type Session = { kind: 'authorized'; permissions: string[] } | { kind: 'student' | 'noAdmin' | 'unauthorized' | 'error' };
 type DisplaySession = Session | { kind: 'loading' };

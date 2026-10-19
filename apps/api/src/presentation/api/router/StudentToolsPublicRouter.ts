@@ -4,9 +4,9 @@ import {
   StudentToolAnonymousSessionService,
   StudentToolExecutionUseCases,
   StudentToolRegistryUseCases,
-} from '@manaratak/application';
-import { assertBoundedStudentToolInput } from '@manaratak/domain';
-import type { PrismaApiIdempotencyStore } from '@manaratak/infrastructure';
+} from '@absheer/application';
+import { assertBoundedStudentToolInput } from '@absheer/domain';
+import type { PrismaApiIdempotencyStore } from '@absheer/infrastructure';
 import { createCanonicalIdempotencyMiddleware } from '../../middleware/CanonicalIdempotencyMiddleware.js';
 
 export class StudentToolsPublicRouter {

@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 import {
   BackgroundJob,
   BackgroundJobId,
@@ -15,7 +15,7 @@ import {
   JobReference,
   JobRetryPolicy,
   JobScheduleMetadata,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class PrismaBackgroundJobRepository implements IBackgroundJobRepository {
   public readonly capabilityStatus = 'PRODUCTION_CAPABLE';

@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { AssetId, ImportRecordStatus, MajorDeduplicationService, type AtomicPersistenceContext, type MajorImportPayload } from '@manaratak/domain';
-import { MajorImportPromotionUseCase, type CanonicalMajorReferenceService, type IMajorImportReviewGateway, type MajorImportReview } from '@manaratak/application';
+import { AssetId, ImportRecordStatus, MajorDeduplicationService, type AtomicPersistenceContext, type MajorImportPayload } from '@absheer/domain';
+import { MajorImportPromotionUseCase, type CanonicalMajorReferenceService, type IMajorImportReviewGateway, type MajorImportReview } from '@absheer/application';
 import { PrismaAssetRecordRepository } from '../asset-platform/PrismaAssetRecordRepository';
 import { PrismaMajorRepository } from './PrismaMajorRepository';
 export class PrismaMajorImportReviewGateway implements IMajorImportReviewGateway {

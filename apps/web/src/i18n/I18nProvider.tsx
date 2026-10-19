@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import {
   getLocaleDirection,
   type SupportedLocale,
-} from '@manaratak/shared';
+} from '@absheer/shared';
 import { readStoredLocale, writeStoredLocale } from './browserStorage';
 import { localizeLocation, getPathLocale } from './localeRouting';
 import { resolvePublicLocationLocale } from './localeRouting';

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { PrismaClient } from '@prisma/client';
-import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@manaratak/shared';
+import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@absheer/shared';
 import { ReferenceDataImportHandoffService } from '../packages/application/src/reference-data/services/ReferenceDataImportHandoffService';
 import { ReferenceDataSeedApplyService } from '../packages/application/src/reference-data/services/ReferenceDataSeedApplyService';
 import { CountrySourceRecord, mapCountrySourceRecord } from '../packages/application/src/reference-data/services/CountryImportPreviewService';

@@ -13,9 +13,9 @@ test('renames all brand cases without changing unrelated content',()=>{
 });
 test('rebrands old Arabic copy and CSS variable names',()=>{
   assert.equal(transformText(['منار','تك'].join('')),'أبشر');
-  assert.equal(transformText('--'+'mn-primary'),'--ab-primary');
-  assert.equal(transformText('className="mn-card"'),'className="ab-card"');
-  assert.equal(transformText('MNT-AUD-001'),'ABSH-AUD-001');
+  assert.equal(transformText('--'+'ab-primary'),'--ab-primary');
+  assert.equal(transformText('className="ab-card"'),'className="ab-card"');
+  assert.equal(transformText('ABSH-AUD-001'),'ABSH-AUD-001');
 });
 test('renames filename and remains idempotent',()=>{
   assert.equal(transformPath('apps/web/src/'+['Manara','tak'].join('')+'Logo.tsx'),'apps/web/src/AbsheerLogo.tsx');

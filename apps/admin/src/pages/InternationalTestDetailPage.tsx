@@ -3,9 +3,9 @@ import {TestAdmissionScoreEditor} from '../features/integration/TestAdmissionSco
 import { InternationalTestGovernanceWorkspace } from '../components/InternationalTestGovernanceWorkspace';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
-import type { InternationalTestStatus as CanonicalTestStatus } from '@manaratak/domain';
+import type { InternationalTestStatus as CanonicalTestStatus } from '@absheer/domain';
 type InternationalTestStatus = `${CanonicalTestStatus}`;
-import type { InternationalTestDto } from '@manaratak/domain';
+import type { InternationalTestDto } from '@absheer/domain';
 import {
 AlertCircle,
 Archive,
@@ -29,7 +29,7 @@ ShieldCheck,
 X
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ExamDetails, mapInternationalTestToExam } from '@manaratak/ui';
+import { ExamDetails, mapInternationalTestToExam } from '@absheer/ui';
 import { TestEditorSaveContext, useTestEditorForm, type TestEditorEntry } from '../components/TestEditorSaveRegistry';
 import { Link,useParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';

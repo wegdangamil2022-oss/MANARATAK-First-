@@ -23,7 +23,7 @@ import {
   IAssetRecordRepository,
   NativeCourseReadinessCheckDto,
   NativeCourseReadinessDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class NativeCourseUseCases {
   public constructor(
@@ -62,12 +62,12 @@ export class NativeCourseUseCases {
       canonicalDedupKey,
       displayName: titleAr,
       accessType: input.accessType ? CourseAccessType[input.accessType] : CourseAccessType.FREE_STUDY,
-      originType: CourseOriginType.NATIVE_MANARATAK_COURSE,
+      originType: CourseOriginType.NATIVE_ABSHEER_COURSE,
       directCourseUrl: `/courses/${slug}`,
       status: CourseStatus.DRAFT,
       completenessStatus: CourseImportCompletenessState.INCOMPLETE,
-      platformName: 'MANARATAK',
-      providerName: 'MANARATAK',
+      platformName: 'ABSHEER',
+      providerName: 'ABSHEER',
       learningLanguage: input.learningLanguage,
       learningLanguageRaw: input.learningLanguage,
       category: input.category,
@@ -274,7 +274,7 @@ export class NativeCourseUseCases {
         'completion-policy',
         'سياسة إكمال صالحة',
         completionPolicyValid,
-        'إكمال دورة منارتك يتطلب 100% من الدروس القابلة للتتبع.',
+        'إكمال دورة أبشر يتطلب 100% من الدروس القابلة للتتبع.',
         'completion',
       ),
       this.check(
@@ -342,7 +342,7 @@ export class NativeCourseUseCases {
   private async requireNative(courseId: string): Promise<CourseDto> {
     const course = await this.courseRepository.findById(courseId);
     if (!course) throw new Error('NATIVE_COURSE_NOT_FOUND');
-    if (course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) {
+    if (course.originType !== CourseOriginType.NATIVE_ABSHEER_COURSE) {
       throw new Error('NATIVE_COURSE_ORIGIN_REQUIRED');
     }
     return course;

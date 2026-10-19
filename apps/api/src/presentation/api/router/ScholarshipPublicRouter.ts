@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { PublicScholarshipUseCases } from '@manaratak/application';
+import { PublicScholarshipUseCases } from '@absheer/application';
 import { parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
 
 export class ScholarshipPublicRouter {

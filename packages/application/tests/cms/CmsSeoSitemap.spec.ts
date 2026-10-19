@@ -9,11 +9,11 @@ const paths = [
 
 describe('live CMS sitemap authority', () => {
   it('emits per-content multilingual links using each published locale own slug', () => {
-    const xml = buildCmsSitemapXml(paths, 'https://manaratak.example');
-    expect(xml).toContain('<loc>https://manaratak.example/ar/news/arabic-news</loc>');
-    expect(xml).not.toContain('<loc>https://manaratak.example/en/news/english-news</loc>');
+    const xml = buildCmsSitemapXml(paths, 'https://absheer.example');
+    expect(xml).toContain('<loc>https://absheer.example/ar/news/arabic-news</loc>');
+    expect(xml).not.toContain('<loc>https://absheer.example/en/news/english-news</loc>');
     expect(xml).not.toContain('hreflang="en"');
-    const single = xml.split('<loc>https://manaratak.example/ar/study-guides/guide-only</loc>')[1].split('</url>')[0];
+    const single = xml.split('<loc>https://absheer.example/ar/study-guides/guide-only</loc>')[1].split('</url>')[0];
     expect(single).not.toContain('hreflang="en"');
     expect(single).toContain('hreflang="x-default"');
   });
@@ -24,20 +24,20 @@ describe('live CMS sitemap authority', () => {
     }
     expect(() => buildCmsSitemapXml([
       { contentId: 'draft', locale: 'ar', canonicalPath: '/ar/news/<script>alert(1)</script>' },
-    ], 'https://manaratak.example')).toThrow('CMS_SITEMAP_CANONICAL_INVALID');
+    ], 'https://absheer.example')).toThrow('CMS_SITEMAP_CANONICAL_INVALID');
     expect(() => buildCmsSitemapXml([
       { contentId: 'other', locale: 'en', canonicalPath: '/ar/articles/arabic-only' },
-    ], 'https://manaratak.example')).toThrow('CMS_SITEMAP_CANONICAL_INVALID');
+    ], 'https://absheer.example')).toThrow('CMS_SITEMAP_CANONICAL_INVALID');
   });
 
   it('rejects duplicate locale publications instead of emitting an ambiguous hreflang graph', () => {
     expect(() => buildCmsSitemapXml([
       paths[0], { contentId: 'news-1', locale: 'ar', canonicalPath: '/ar/news/conflicting-slug' },
-    ], 'https://manaratak.example')).toThrow('CMS_SITEMAP_DUPLICATE_LOCALE');
+    ], 'https://absheer.example')).toThrow('CMS_SITEMAP_DUPLICATE_LOCALE');
   });
 
   it('emits a well-formed empty XML sitemap when there are no published CMS pages', () => {
-    const xml = buildCmsSitemapXml([], 'https://manaratak.example');
+    const xml = buildCmsSitemapXml([], 'https://absheer.example');
     expect(xml).toContain('<urlset ');
     expect(xml).toContain('</urlset>');
     expect(xml).not.toContain('<url>');

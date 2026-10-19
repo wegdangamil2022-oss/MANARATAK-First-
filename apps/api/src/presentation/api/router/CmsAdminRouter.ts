@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
-import { AdminCmsUseCases } from '@manaratak/application';
+import { AdminCmsUseCases } from '@absheer/application';
 import {
   AuthorizationEvaluatorService,
   CmsCategoryStatus,
@@ -8,7 +8,7 @@ import {
   CmsContentType,
   CmsDomainRelationType,
   CmsDomainTargetType,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const nullableAsset = z.string().trim().min(1).nullable().optional();
@@ -119,14 +119,14 @@ export class CmsAdminRouter {
       categorySlug: slug.optional(),
       tag: z.string().optional(),
       locale: z.enum(['ar', 'en']).optional(),
-      siteIdentifier: z.literal('manaratak').optional(),
+      siteIdentifier: z.literal('absheer').optional(),
       q: z.string().trim().max(200).optional(),
       page: z.coerce.number().int().positive().max(500).default(1),
       pageSize: z.coerce.number().int().min(1).max(100).default(20),
     });
     const contentSchema = z.object({
       slug,
-      siteIdentifier: z.literal('manaratak').default('manaratak'),
+      siteIdentifier: z.literal('absheer').default('absheer'),
       primaryLocale: z.enum(['ar', 'en']).default('ar'),
       contentType: z.nativeEnum(CmsContentType),
       title: z.string().trim().min(1),
@@ -441,7 +441,7 @@ export class CmsAdminRouter {
       asyncHandler(async (req, res) => {
         const query = z
           .object({
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             locale: z.enum(['ar', 'en']).optional(),
             q: z.string().trim().max(200).optional(),
             active: z
@@ -461,7 +461,7 @@ export class CmsAdminRouter {
       asyncHandler(async (req, res) => {
         const body = z
           .object({
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             locale: z.enum(['ar', 'en']),
             sourcePath: z.string().min(2),
             destinationPath: z.string().min(2),
@@ -494,7 +494,7 @@ export class CmsAdminRouter {
       asyncHandler(async (req, res) => {
         const query = z
           .object({
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             locale: z.enum(['ar', 'en']).default('ar'),
           })
           .parse(req.query);
@@ -510,7 +510,7 @@ export class CmsAdminRouter {
           .object({
             id: z.string().optional(),
             expectedVersion: z.number().int().positive().optional(),
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             locale: z.enum(['ar', 'en']),
             locationKey: z.enum(['HEADER', 'FOOTER', 'SIDEBAR', 'OTHER']),
             nodes: z
@@ -580,7 +580,7 @@ export class CmsAdminRouter {
       asyncHandler(async (req, res) => {
         const query = z
           .object({
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             locale: z.enum(['ar', 'en']).default('ar'),
           })
           .parse(req.query);
@@ -594,7 +594,7 @@ export class CmsAdminRouter {
           .object({
             id: z.string().optional(),
             expectedVersion: z.number().int().positive().optional(),
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             locale: z.enum(['ar', 'en']),
             schemaId: z.string(),
             name: z.string().trim().min(1),
@@ -634,7 +634,7 @@ export class CmsAdminRouter {
       asyncHandler(async (req, res) => {
         const query = z
           .object({
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             locale: z.enum(['ar', 'en']).default('ar'),
           })
           .parse(req.query);
@@ -650,7 +650,7 @@ export class CmsAdminRouter {
           .object({
             id: z.string().optional(),
             expectedVersion: z.number().int().positive().optional(),
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             locale: z.enum(['ar', 'en']),
             title: z.string().trim().min(1),
             body: z.string().trim().min(1),
@@ -700,7 +700,7 @@ export class CmsAdminRouter {
       asyncHandler(async (req, res) => {
         const query = z
           .object({
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             locale: z.enum(['ar', 'en']).optional(),
             limit: z.coerce.number().int().min(1).max(100).default(50),
           })

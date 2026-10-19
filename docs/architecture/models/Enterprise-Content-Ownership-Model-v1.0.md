@@ -12,7 +12,7 @@
 
 ## 2. Executive Summary
 
-This document serves as the definitive architectural standard for Enterprise Content Ownership across the MANARATAK 2.0 platform. It explicitly delineates boundaries between Editorial Content, Business Data, and Media Assets, ensuring absolute compliance with Domain-Driven Design (DDD), Clean Architecture, and the Enterprise Modular Monolith strategy.
+This document serves as the definitive architectural standard for Enterprise Content Ownership across the ABSHEER 2.0 platform. It explicitly delineates boundaries between Editorial Content, Business Data, and Media Assets, ensuring absolute compliance with Domain-Driven Design (DDD), Clean Architecture, and the Enterprise Modular Monolith strategy.
 
 The primary architectural principle established herein is: **Business Domains own Business Data. Enterprise CMS owns Editorial Content.**
 
@@ -74,7 +74,7 @@ The Learning Platform maintains absolute sovereignty over the educational domain
 
 ## 6. Architectural Impact & Future Phases
 
-The formal adoption of this Enterprise Content Ownership Model provides critical architectural benefits as MANARATAK 2.0 scales:
+The formal adoption of this Enterprise Content Ownership Model provides critical architectural benefits as ABSHEER 2.0 scales:
 
 - **Bounded Context Isolation:** Strictly isolating editorial workflows from business logic prevents the dreaded "god CMS" anti-pattern, ensuring the Enterprise CMS does not become a bottleneck for business domain evolution.
 - **Clean Architecture & CQRS:** By enforcing the consumption of Read Models for cross-domain data (e.g., the CMS displaying a list of featured courses), the platform maintains high availability and decoupled performance.
@@ -87,6 +87,6 @@ This document mandates the following directives for all current and future devel
 
 1. **No Architecture Redesign Required:** The current implementation conforms to this model. No code generation, repository changes, or API modifications are required.
 2. **Documentation Alignment:** All architecture documents, implementation guides, and foundation documents must use the terminology defined in Section 3.1.
-3. **Phase 16 Readiness:** MANARATAK 2.0 is officially ready to commence Phase 16 (Enterprise CMS Platform) under these strict ownership guidelines.
+3. **Phase 16 Readiness:** ABSHEER 2.0 is officially ready to commence Phase 16 (Enterprise CMS Platform) under these strict ownership guidelines.
 
 **Final Verdict:** APPROVED. The Enterprise Content Ownership Model is hereby adopted as the official architectural standard.

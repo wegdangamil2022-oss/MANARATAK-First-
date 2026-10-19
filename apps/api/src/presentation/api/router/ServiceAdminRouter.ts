@@ -1,5 +1,5 @@
 import { testDiscoveryOwnerRouter } from './TestDiscoveryOwnerRouter.js';
-import type {TestDiscoveryOwnerUseCases} from '@manaratak/application';
+import type {TestDiscoveryOwnerUseCases} from '@absheer/application';
 import { randomUUID } from 'node:crypto';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
@@ -13,12 +13,12 @@ import {
   ServiceCompletenessStatus,
   ServiceRequestStatus,
   UpdateServiceCatalogItemDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   ServiceOperationsUseCases,
   AdminServiceCatalogUseCases,
   AdminServiceFulfillmentUseCases,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 export class ServiceAdminRouter {
   public static create(cradle: {

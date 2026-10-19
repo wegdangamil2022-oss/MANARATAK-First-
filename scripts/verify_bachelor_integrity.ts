@@ -11,7 +11,7 @@ const prisma = new PrismaClient({ datasources: { db: { url } } });
 
 async function runVerification() {
   console.log('================================================================');
-  console.log('🔍 MANARATAK Bachelor Major Dataset Integrity Verification');
+  console.log('🔍 ABSHEER Bachelor Major Dataset Integrity Verification');
   console.log('================================================================\n');
 
   let failedChecks = 0;

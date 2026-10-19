@@ -17,7 +17,7 @@ import {
   AcademicTaxonomyStatus,
   AcademicStandardType,
   AcademicTaxonomyDeterministicKey,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class PrismaAcademicTaxonomyRepository implements IAcademicTaxonomyRepository {
   constructor(private readonly prisma: PrismaClient, private readonly bound = false) {}

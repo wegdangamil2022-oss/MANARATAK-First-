@@ -8,7 +8,7 @@ import {
   NotificationChannel,
   NotificationDeliveryCandidate,
   NotificationRecipientReference,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   BackgroundJobHandlerContext,
   IBackgroundJobHandler,

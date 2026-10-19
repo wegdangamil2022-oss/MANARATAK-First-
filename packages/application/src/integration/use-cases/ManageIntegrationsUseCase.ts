@@ -19,7 +19,7 @@ import {
   IntegrationVersionPublishedEvent,
   IntegrationDeprecatedEvent,
   IntegrationArchivedEvent
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   CreateIntegrationDto,
   UpdateIntegrationDto,

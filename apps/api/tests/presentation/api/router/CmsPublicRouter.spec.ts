@@ -1,8 +1,8 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { CmsContentType } from '@manaratak/domain';
-import { PublicCmsUseCases } from '@manaratak/application';
+import { CmsContentType } from '@absheer/domain';
+import { PublicCmsUseCases } from '@absheer/application';
 import { CmsPublicRouter } from '../../../../src/presentation/api/router/CmsPublicRouter';
 
 describe('CmsPublicRouter', () => {
@@ -26,12 +26,12 @@ describe('CmsPublicRouter', () => {
 
   it('delivers fresh HTTP HTML, safe redirects, and 404 after archive without any static fallback', async () => {
     const previous = process.env.PUBLIC_WEB_URL;
-    process.env.PUBLIC_WEB_URL = 'https://manaratak.example';
+    process.env.PUBLIC_WEB_URL = 'https://absheer.example';
     try {
       const cms = createUseCases();
       cms.resolveRedirect.mockResolvedValue(null);
       const content = {
-        siteIdentifier: 'manaratak',
+        siteIdentifier: 'absheer',
         locale: 'ar',
         slug: 'fresh-news',
         contentType: CmsContentType.NEWS,
@@ -135,7 +135,7 @@ describe('CmsPublicRouter', () => {
 
   it('serves authoritative live CMS XML with content-bound locale alternates and conditional caching', async () => {
     const previous = process.env.PUBLIC_WEB_URL;
-    process.env.PUBLIC_WEB_URL = 'https://manaratak.example';
+    process.env.PUBLIC_WEB_URL = 'https://absheer.example';
     try {
       const cms = createUseCases();
       cms.listIndexableSitemapEntries.mockResolvedValue([
@@ -146,7 +146,7 @@ describe('CmsPublicRouter', () => {
       const response = await request(server).get('/cms/sitemap.xml');
       expect(response.status).toBe(200);
       expect(response.headers['content-type']).toMatch(/application\/xml/);
-      expect(response.text).toContain('<loc>https://manaratak.example/ar/news/arabic-news</loc>');
+      expect(response.text).toContain('<loc>https://absheer.example/ar/news/arabic-news</loc>');
       expect(response.text).not.toContain('hreflang="en"');
       expect(response.headers['cache-control']).toContain('must-revalidate');
       const notModified = await request(server)
@@ -201,7 +201,7 @@ describe('CmsPublicRouter', () => {
       .query({ path: '/ar/articles/old' });
     expect(result.status).toBe(301);
     expect(result.headers.location).toBe('/ar/articles/new');
-    expect(useCases.resolveRedirect).toHaveBeenCalledWith('manaratak', 'ar', '/ar/articles/old');
+    expect(useCases.resolveRedirect).toHaveBeenCalledWith('absheer', 'ar', '/ar/articles/old');
   });
 
   it('rejects traversal and refuses a cross-locale HTTP redirect', async () => {

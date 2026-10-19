@@ -1,4 +1,4 @@
-import type { HealthStatus } from '@manaratak/core';
+import type { HealthStatus } from '@absheer/core';
 type Sample = { checkedAt: string; components: Array<{ id: string; status: HealthStatus }> };
 /** Actual diagnostic observations, never a claim of continuous monitoring. No payload/PII. */
 export class HealthObservationHistory {

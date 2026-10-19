@@ -1,4 +1,4 @@
-import { ImportTargetDomain } from '@manaratak/domain';
+import { ImportTargetDomain } from '@absheer/domain';
 
 export const LEGACY_DATATYPE_MAP: Record<string, ImportTargetDomain> = {
   TAXONOMY: ImportTargetDomain.AcademicTaxonomy,

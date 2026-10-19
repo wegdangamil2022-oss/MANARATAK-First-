@@ -21,7 +21,7 @@
 - `docs/architecture/adr/ADR-001-Academic-Taxonomy-Separation.md`
 - `docs/architecture/reviews/Contract-Freeze-Review-v1.0.md`
 - `docs/architecture/reviews/Architecture-Freeze-Review-v1.0.md`
-- `docs/governance/blueprint/MANARATAK-2.0-Master-Blueprint.md`
+- `docs/governance/blueprint/ABSHEER-2.0-Master-Blueprint.md`
 
 ## Required Documentation Updates
 
@@ -55,7 +55,7 @@ The following occurrences must be updated to align with the Enterprise Content O
    - **Compliant:** NO
    - **Reasoning:** "Headless CMS" and other variations must be replaced by the official ubiquitous term "Enterprise CMS".
 
-5. **Document:** `docs/governance/blueprint/MANARATAK-2.0-Master-Blueprint.md`
+5. **Document:** `docs/governance/blueprint/ABSHEER-2.0-Master-Blueprint.md`
    - **Section:** Architecture Components
    - **Exact Term:** Content Engine
    - **Context:** "Enterprise CMS: A headless content engine..."

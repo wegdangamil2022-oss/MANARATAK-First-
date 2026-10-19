@@ -1,6 +1,6 @@
 import { lockImportOwnerCommand } from './ImportReviewLeaseGuard';
 import { PrismaClient } from '@prisma/client';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import { createHash } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import {

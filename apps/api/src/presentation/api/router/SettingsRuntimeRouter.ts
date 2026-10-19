@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { ResolveConfigurationUseCase } from '@manaratak/application';
+import { ResolveConfigurationUseCase } from '@absheer/application';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { z } from 'zod';
 

@@ -1,4 +1,4 @@
-import { IDomainEvent } from '@manaratak/core';
+import { IDomainEvent } from '@absheer/core';
 import { IdentityType } from '../enums/IdentityType';
 
 export class IdentityCreatedEvent implements IDomainEvent {

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { referenceStandardsReadiness, validateStandardSnapshotEvidence } from '@manaratak/domain';
+import { referenceStandardsReadiness, validateStandardSnapshotEvidence } from '@absheer/domain';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { IReferenceOwnerReviewGateway, ReferenceOwnerReview, ReferenceSnapshotRecord } from '../services/IReferenceOwnerReviewGateway';
 import { referenceImportPayloadDigest } from '../services/ReferenceDataScreeningHandoffConsumer';
@@ -10,7 +10,7 @@ export class ReferenceOwnerReviewUseCases {
   list(page: number, status?: string) { return this.gateway.list(page, status); }
   snapshots(page: number) { return this.gateway.snapshots(page); }
   async readiness() { return referenceStandardsReadiness(await this.gateway.reviewedSnapshots()); }
-  private command<T>(id: string, action: string, context: AtomicMutationRequestContext, work: (gateway: IReferenceOwnerReviewGateway, tx: import('@manaratak/domain').AtomicPersistenceContext) => Promise<T>, record?: (value: T) => boolean) {
+  private command<T>(id: string, action: string, context: AtomicMutationRequestContext, work: (gateway: IReferenceOwnerReviewGateway, tx: import('@absheer/domain').AtomicPersistenceContext) => Promise<T>, record?: (value: T) => boolean) {
     if (!context.actorId?.trim()) throw new Error('REFERENCE_OWNER_ACTOR_REQUIRED');
     return this.atomic.execute({ domain: 'REFERENCE_DATA', aggregateType: 'REFERENCE_REVIEW', aggregateId: id, action, context }, async tx => {
       const gateway = this.gateway.withTransaction(tx); await gateway.lock(id); return work(gateway, tx);

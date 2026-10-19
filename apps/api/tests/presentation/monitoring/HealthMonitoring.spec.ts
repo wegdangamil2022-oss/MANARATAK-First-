@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import { HealthStatus, IHealthIndicator, IMonitoringService } from '@manaratak/core';
+import { HealthStatus, IHealthIndicator, IMonitoringService } from '@absheer/core';
 import { MonitoringService } from '../../../../../packages/infrastructure/src/monitoring/MonitoringService';
 import { DatabaseHealthChecker } from '../../../../../packages/infrastructure/src/monitoring/DatabaseHealthChecker';
 import { RedisHealthChecker } from '../../../../../packages/infrastructure/src/monitoring/RedisHealthChecker';

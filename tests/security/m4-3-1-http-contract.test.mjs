@@ -7,7 +7,7 @@ import {
   InMemoryPasswordResetTokenRepository,
   CapturedEmailDeliveryGateway,
   PasswordHasher,
-} from '@manaratak/infrastructure';
+} from '@absheer/infrastructure';
 import {
   Identity,
   User,
@@ -17,7 +17,7 @@ import {
   TechnicalMetadata,
   IdentityType,
   LifeStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { randomUUID } from 'node:crypto';
 
 test('AuthRouter - POST /forgot-password & POST /reset-password HTTP Contract', async (t) => {

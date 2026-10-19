@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { AuthService } from '../../src/auth/AuthService';
-import type { IPrincipalAccessValidator, ITokenProvider, TokenPayload, AuthTokens } from '@manaratak/core';
+import type { IPrincipalAccessValidator, ITokenProvider, TokenPayload, AuthTokens } from '@absheer/core';
 import { InMemorySessionManager } from '../../src/auth/InMemorySessionManager';
 import { ICredentialVerifier } from '../../src/auth/ICredentialVerifier';
 

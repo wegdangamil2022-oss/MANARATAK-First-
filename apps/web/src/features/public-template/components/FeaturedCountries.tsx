@@ -32,7 +32,7 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
   return (
     <section id="featured-countries-section" className="px-0 py-3 w-full font-['Cairo',sans-serif]">
       {/* Standard Framed Container with top accent border only */}
-      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-sm overflow-hidden mn-panel ">
+      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--ab-surface)] to-[var(--ab-page)]/80 border border-[var(--ab-border)] shadow-sm overflow-hidden ab-panel ">
         {/* Elegant top gradient border line */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
 
@@ -49,7 +49,7 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">
+            <p className="text-[11px] sm:text-xs text-[var(--ab-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">
               {publicT('public_discover_leading_countries_for_studying_abroad_their_cultures')}
             </p>
           </div>
@@ -75,8 +75,8 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
                   {/* Larger Circular Ring & Photo with Flag Badge */}
                   <div className="relative mb-1.5">
                     {/* Outer indigo ring in light mode, gold in dark mode */}
-                    <div className="w-[66px] h-[66px] sm:w-[78px] sm:h-[78px] rounded-full p-[2px] bg-[#142b5f] dark:bg-[var(--mn-accent)] shadow-xs group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
-                      <div className="w-full h-full rounded-full overflow-hidden border-2 border-white bg-[var(--mn-primary)] mn-inverse ">
+                    <div className="w-[66px] h-[66px] sm:w-[78px] sm:h-[78px] rounded-full p-[2px] bg-[#142b5f] dark:bg-[var(--ab-accent)] shadow-xs group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
+                      <div className="w-full h-full rounded-full overflow-hidden border-2 border-white bg-[var(--ab-primary)] ab-inverse ">
                         {item.imageUrl ? (
                           <img
                             src={item.imageUrl}
@@ -93,18 +93,18 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
                     </div>
 
                     {/* Country Flag Badge Pin (Prominent & Elevated) */}
-                    <div className="absolute -bottom-0.5 -right-0.5 bg-[var(--mn-surface)] rounded-full w-6 h-6 sm:w-6.5 sm:h-6.5 shadow-xs border border-[var(--mn-border)] flex items-center justify-center mn-panel ">
+                    <div className="absolute -bottom-0.5 -right-0.5 bg-[var(--ab-surface)] rounded-full w-6 h-6 sm:w-6.5 sm:h-6.5 shadow-xs border border-[var(--ab-border)] flex items-center justify-center ab-panel ">
                       <span className="text-xs sm:text-sm leading-none">{item.flag}</span>
                     </div>
                   </div>
 
                   {/* Country Name (Bigger & Bolder) */}
-                  <h4 className="font-bold text-xs sm:text-sm text-[var(--mn-heading)] group-hover:text-[var(--mn-heading)] transition-colors truncate max-w-full leading-tight mb-0.5">
+                  <h4 className="font-bold text-xs sm:text-sm text-[var(--ab-heading)] group-hover:text-[var(--ab-heading)] transition-colors truncate max-w-full leading-tight mb-0.5">
                     {item.name}
                   </h4>
 
                   {/* Opportunity Count Badge (Clear & Visible) */}
-                  <span className="text-[9px] sm:text-[10px] text-[var(--mn-heading)] font-bold bg-[var(--mn-primary)]/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+                  <span className="text-[9px] sm:text-[10px] text-[var(--ab-heading)] font-bold bg-[var(--ab-primary)]/10 px-2 py-0.5 rounded-full whitespace-nowrap">
                     {publicT('public_explore_country')}
                   </span>
                 </div>
@@ -116,7 +116,7 @@ export const FeaturedCountries: React.FC<FeaturedCountriesProps> = ({
             <button
               id="btn-view-all-countries"
               onClick={onViewAllClick}
-              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
+              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--ab-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
             >
               <span className="text-[12px] sm:text-sm font-bold">
                 {publicT('public_browse_all_destinations_and_countries')}

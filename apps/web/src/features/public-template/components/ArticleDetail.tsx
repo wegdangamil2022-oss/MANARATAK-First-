@@ -1,6 +1,6 @@
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
 import React from 'react';
-import { CmsRichText } from '@manaratak/ui';
+import { CmsRichText } from '@absheer/ui';
 import {
   ArrowRight,
   BookOpenText,
@@ -100,12 +100,12 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
 
   return (
     <div
-      className="min-h-screen bg-[var(--mn-page)] pb-20 font-['Cairo',sans-serif] mn-panel "
+      className="min-h-screen bg-[var(--ab-page)] pb-20 font-['Cairo',sans-serif] ab-panel "
       dir={publicDir}
     >
-      <header className="relative overflow-hidden border-b-[3px] border-[var(--mn-accent)]/70 bg-gradient-to-b from-[var(--mn-primary)] via-[var(--mn-hero-secondary)] to-[var(--mn-primary)] px-4 pb-6 pt-3 text-white shadow-md mn-inverse ">
-        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full border border-[var(--mn-accent)]/20" />
-        <div className="pointer-events-none absolute -right-20 bottom-0 h-48 w-48 rounded-full bg-[var(--mn-accent)]/10 blur-2xl" />
+      <header className="relative overflow-hidden border-b-[3px] border-[var(--ab-accent)]/70 bg-gradient-to-b from-[var(--ab-primary)] via-[var(--ab-hero-secondary)] to-[var(--ab-primary)] px-4 pb-6 pt-3 text-white shadow-md ab-inverse ">
+        <div className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full border border-[var(--ab-accent)]/20" />
+        <div className="pointer-events-none absolute -right-20 bottom-0 h-48 w-48 rounded-full bg-[var(--ab-accent)]/10 blur-2xl" />
         <div className="relative mx-auto max-w-3xl">
           {onToggleFavorite && (
             <FavoriteButton
@@ -114,7 +114,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
                 event.stopPropagation();
                 onToggleFavorite(article.id);
               }}
-              className="absolute left-0 top-0 z-20 bg-[var(--mn-surface)]/95 mn-panel "
+              className="absolute left-0 top-0 z-20 bg-[var(--ab-surface)]/95 ab-panel "
             />
           )}
           <div className="mb-4">
@@ -122,7 +122,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
           </div>
 
           <div className="mb-3 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--mn-accent)]/35 bg-[var(--mn-accent)]/10 px-2.5 py-1 text-[9px] font-bold text-[var(--mn-accent-text)]">
+            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--ab-accent)]/35 bg-[var(--ab-accent)]/10 px-2.5 py-1 text-[9px] font-bold text-[var(--ab-accent-text)]">
               <Newspaper className="h-3 w-3" />
               {article.contentTypeLabelAr}
             </span>
@@ -133,12 +133,12 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
 
           <h1 className="text-[22px] font-bold leading-9 sm:text-[28px]">{article.titleAr}</h1>
           <p
-            className="mt-1 text-left text-[10px] font-semibold leading-5 text-[var(--mn-on-dark-muted)]"
+            className="mt-1 text-left text-[10px] font-semibold leading-5 text-[var(--ab-on-dark-muted)]"
             dir="ltr"
           >
             {article.titleEn}
           </p>
-          <p className="mt-3 text-[11px] font-semibold leading-6 text-[var(--mn-on-dark-muted)]">
+          <p className="mt-3 text-[11px] font-semibold leading-6 text-[var(--ab-on-dark-muted)]">
             {article.excerptAr}
           </p>
 
@@ -162,15 +162,15 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl space-y-3 mn-inline-gutter pt-4">
+      <main className="mx-auto max-w-3xl space-y-3 ab-inline-gutter pt-4">
         {article.tags && article.tags.length > 0 && (
           <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
             {article.tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2.5 py-1.5 text-[9px] font-bold text-[var(--mn-text-muted)] shadow-sm mn-panel "
+                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--ab-border)] bg-[var(--ab-surface)] px-2.5 py-1.5 text-[9px] font-bold text-[var(--ab-text-muted)] shadow-sm ab-panel "
               >
-                <Tag className="h-3 w-3 text-[var(--mn-accent-text)]" />
+                <Tag className="h-3 w-3 text-[var(--ab-accent-text)]" />
                 {tag}
               </span>
             ))}
@@ -179,17 +179,17 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
 
         <article className="space-y-3">
           {article.body !== undefined ? (
-            <section className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-sm mn-panel">
+            <section className="rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-4 shadow-sm ab-panel">
               <CmsRichText
                 body={article.body}
-                className="cms-rich-text text-sm leading-8 text-[var(--mn-text)]"
+                className="cms-rich-text text-sm leading-8 text-[var(--ab-text)]"
               />
             </section>
           ) : (
             article.sections.map((section, index) => (
               <section
                 key={`${article.id}-${index}`}
-                className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-sm sm:p-4 mn-panel "
+                className="rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3.5 shadow-sm sm:p-4 ab-panel "
               >
                 <DetailSectionHeader
                   id={`article-section-${index + 1}`}
@@ -199,7 +199,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
                 {section.paragraphs?.map((paragraph) => (
                   <p
                     key={paragraph}
-                    className="mb-2 last:mb-0 text-[10.5px] font-semibold leading-6 text-[var(--mn-text-muted)]"
+                    className="mb-2 last:mb-0 text-[10.5px] font-semibold leading-6 text-[var(--ab-text-muted)]"
                   >
                     {paragraph}
                   </p>
@@ -209,9 +209,9 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
                     {section.bullets.map((item) => (
                       <li
                         key={item}
-                        className="flex items-start gap-1.5 text-[10px] font-semibold leading-5 text-[var(--mn-text-muted)]"
+                        className="flex items-start gap-1.5 text-[10px] font-semibold leading-5 text-[var(--ab-text-muted)]"
                       >
-                        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)]" />
+                        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--ab-accent-text)]" />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -223,11 +223,11 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
         </article>
 
         {article.linkedEntities && article.linkedEntities.length > 0 && (
-          <section className="rounded-2xl border border-[var(--mn-border-brand)]/30 bg-[var(--mn-surface)] p-3.5 shadow-sm mn-panel ">
+          <section className="rounded-2xl border border-[var(--ab-border-brand)]/30 bg-[var(--ab-surface)] p-3.5 shadow-sm ab-panel ">
             <DetailSectionHeader
               id="article-related"
               icon={Globe2}
-              title={publicT('public_related_in_manaratak')}
+              title={publicT('public_related_in_absheer')}
               subtitle={publicT('public_go_directly_to_the_entity_related_to_this')}
             />
             <div className="grid grid-cols-2 gap-2">
@@ -236,19 +236,19 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
                   key={`${entity.type}-${entity.id || entity.name}`}
                   type="button"
                   onClick={() => openEntity(entity)}
-                  className="min-h-[84px] rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2.5 text-start transition hover:border-[var(--mn-accent)] active:scale-[0.99] mn-panel "
+                  className="min-h-[84px] rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-2.5 text-start transition hover:border-[var(--ab-accent)] active:scale-[0.99] ab-panel "
                 >
-                  <div className="flex items-center gap-1.5 text-[var(--mn-heading)]">
+                  <div className="flex items-center gap-1.5 text-[var(--ab-heading)]">
                     {entityIcon(entity.type)}
-                    <span className="text-[8px] font-bold text-[var(--mn-text-muted)]">
+                    <span className="text-[8px] font-bold text-[var(--ab-text-muted)]">
                       {entityLabel(entity.type)}
                     </span>
                   </div>
-                  <p className="mt-1.5 text-[10px] font-bold leading-4 text-[var(--mn-heading)]">
+                  <p className="mt-1.5 text-[10px] font-bold leading-4 text-[var(--ab-heading)]">
                     {entity.name}
                   </p>
                   {entity.meta && (
-                    <p className="mt-1 line-clamp-2 text-[8.5px] font-semibold leading-4 text-[var(--mn-text-muted)]">
+                    <p className="mt-1 line-clamp-2 text-[8.5px] font-semibold leading-4 text-[var(--ab-text-muted)]">
                       {entity.meta}
                     </p>
                   )}
@@ -259,7 +259,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
         )}
 
         {article.officialLinks && article.officialLinks.length > 0 && (
-          <section className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-sm mn-panel ">
+          <section className="rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-3.5 shadow-sm ab-panel ">
             <DetailSectionHeader
               id="article-official-links"
               icon={ExternalLink}
@@ -272,17 +272,17 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mn-external-link inline-flex min-h-10 items-center justify-between gap-3 rounded-xl px-3 py-2 mn-panel "
+                  className="ab-external-link inline-flex min-h-10 items-center justify-between gap-3 rounded-xl px-3 py-2 ab-panel "
                 >
                   <div>
-                    <p className="text-[10px] font-bold text-[var(--mn-heading)]">{link.label}</p>
+                    <p className="text-[10px] font-bold text-[var(--ab-heading)]">{link.label}</p>
                     {link.note && (
-                      <p className="mt-0.5 text-[8.5px] font-semibold text-[var(--mn-text-muted)]">
+                      <p className="mt-0.5 text-[8.5px] font-semibold text-[var(--ab-text-muted)]">
                         {link.note}
                       </p>
                     )}
                   </div>
-                  <ExternalLink className="h-3.5 w-3.5 shrink-0 text-[var(--mn-accent-text)]" />
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0 text-[var(--ab-accent-text)]" />
                 </a>
               ))}
             </div>
@@ -296,7 +296,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({
 function MetaTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-white/15 bg-white/10 px-2 py-2 text-center backdrop-blur-sm">
-      <div className="mx-auto flex w-fit items-center gap-1 text-[8px] font-bold text-[var(--mn-on-dark-muted)]">
+      <div className="mx-auto flex w-fit items-center gap-1 text-[8px] font-bold text-[var(--ab-on-dark-muted)]">
         {icon}
         <span>{label}</span>
       </div>

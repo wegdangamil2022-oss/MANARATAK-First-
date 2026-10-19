@@ -4,14 +4,14 @@ Document Status: APPROVED
 Architecture Program: Enterprise Shared Contracts Consolidation Program
 Version: 1.0
 Owner: Architecture Review Board (ARB)
-Project: MANARATAK 2.0
+Project: ABSHEER 2.0
 Last Updated: 2026-07-21
 ---
 
 # Enterprise Shared Contracts Migration & Integration Plan
 
 ## 1. Executive Summary
-This document provides the ARB-approved incremental migration roadmap to integrate the unified Enterprise Shared Contracts across MANARATAK 2.0 without causing regressions.
+This document provides the ARB-approved incremental migration roadmap to integrate the unified Enterprise Shared Contracts across ABSHEER 2.0 without causing regressions.
 
 ## 2. Migration Readiness Assessment
 - **Prerequisites**: Identification of phantom namespaces and duplicate legacy documents completed.
@@ -36,7 +36,7 @@ This document provides the ARB-approved incremental migration roadmap to integra
 - `packages/application`: Must utilize `IUnitOfWork` and `IRepository` from `core`.
 
 ## 6. Documentation Integration Plan
-- Standardize all documentation snippets to reference the canonical TypeScript `@manaratak/core-contracts` and interfaces in `packages/core`.
+- Standardize all documentation snippets to reference the canonical TypeScript `@absheer/core-contracts` and interfaces in `packages/core`.
 - Update architectural index to catalog these new Governance standards.
 - Append cross-references pointing to this Shared Contracts folder.
 

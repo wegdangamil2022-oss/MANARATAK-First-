@@ -6,7 +6,7 @@ import {AtomicDomainMutationCoordinator} from '../../src/event-foundation/use-ca
 import {AtomicAuditedOutboxMutationExecutor} from '../../src/event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
 const enrolledAt=new Date('2026-10-01T00:00:00.000Z');
 function harness(){
- const original:any={id:'c',version:3,status:'PUBLISHED',originType:'NATIVE_MANARATAK_COURSE',certificateAvailable:false,optionalFields:{completionCriteria:{assessmentRequired:true}}};
+ const original:any={id:'c',version:3,status:'PUBLISHED',originType:'NATIVE_ABSHEER_COURSE',certificateAvailable:false,optionalFields:{completionCriteria:{assessmentRequired:true}}};
  const latest:any={...original,version:7,certificateAvailable:true,optionalFields:{completionCriteria:{assessmentRequired:false}}};
  const enrollment:any={id:'e',courseId:'c',studentReferenceId:'s',status:'ACTIVE',progressPercentage:100,enrolledAt,metadata:{courseVersion:3}};
  const curriculum:any={modules:[{id:'m',courseId:'c',title:'Original module',position:1,status:'PUBLISHED'}],lessons:[{id:'l',courseId:'c',moduleId:'m',title:'Original lesson',lessonType:'ARTICLE',position:1,status:'PUBLISHED'}],

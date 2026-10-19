@@ -5,8 +5,8 @@ import {
   UniversityImportCompletenessState,
   UniversityStatus,
   UpdateUniversityDto,
-} from '@manaratak/domain';
-import { AdminUniversityUseCases } from '@manaratak/application';
+} from '@absheer/domain';
+import { AdminUniversityUseCases } from '@absheer/application';
 
 export class UniversityAdminRouter {
   public static create(cradle: { adminUniversityUseCases: AdminUniversityUseCases }): Router {

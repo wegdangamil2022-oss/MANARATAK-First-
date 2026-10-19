@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import { AuthorizationAdminRouter } from '../../../../src/presentation/api/router/AuthorizationAdminRouter';
-import { ManageEmergencyAccessUseCase } from '@manaratak/application';
-import { InMemoryEmergencyAccessRepository } from '@manaratak/infrastructure';
+import { ManageEmergencyAccessUseCase } from '@absheer/application';
+import { InMemoryEmergencyAccessRepository } from '@absheer/infrastructure';
 
 describe('AuthorizationAdminRouter bootstrap verification', () => {
   const useCases = { createRole: vi.fn(), getRole: vi.fn() };

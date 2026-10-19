@@ -19,7 +19,7 @@ import {
   ConfigurationVersionPublishedEvent,
   ConfigurationDeprecatedEvent,
   ConfigurationArchivedEvent
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   CreateConfigurationDto,
   UpdateConfigurationDto,

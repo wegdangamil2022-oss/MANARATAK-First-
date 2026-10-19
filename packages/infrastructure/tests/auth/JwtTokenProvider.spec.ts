@@ -4,8 +4,8 @@ import { generateEphemeralJwtKeySet, JwtTokenProvider } from '../../src/auth/Jwt
 function createProvider(keyId = 'test-key') {
   return new JwtTokenProvider(generateEphemeralJwtKeySet(keyId), {
     accessTokenTtl: 900,
-    issuer: 'manaratak-test',
-    audience: 'manaratak-test-client',
+    issuer: 'absheer-test',
+    audience: 'absheer-test-client',
   });
 }
 

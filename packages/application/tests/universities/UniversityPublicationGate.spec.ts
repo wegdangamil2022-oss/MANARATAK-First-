@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { UniversityPublicationReadinessPolicy, UniversityImportCompletenessState,
-  UniversityStatus, type UniversityDto } from '@manaratak/domain';
+  UniversityStatus, type UniversityDto } from '@absheer/domain';
 
 const ready = (): UniversityDto => ({
   id: 'university-1',

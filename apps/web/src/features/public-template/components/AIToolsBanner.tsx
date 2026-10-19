@@ -63,7 +63,7 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
 
   return (
     <section id="ai-tools-section" className="px-0 py-3 w-full">
-      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-sm overflow-hidden mn-panel ">
+      <div className="relative rounded-3xl p-3.5 sm:p-4 bg-gradient-to-b from-[var(--ab-surface)] to-[var(--ab-page)]/80 border border-[var(--ab-border)] shadow-sm overflow-hidden ab-panel ">
         {/* Elegant top gradient border line */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
         
@@ -74,16 +74,16 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
                 <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#142B5F] border border-[#D6A43B]/60 flex items-center justify-center shrink-0 shadow-2xs">
                   <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D6A43B]" />
                 </span>
-                <span>{publicT('public_manaratak_tools')}</span>
+                <span>{publicT('public_absheer_tools')}</span>
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_smart_tools_and_calculators_for_comparison_planning_applications')}</p>
+            <p className="text-[11px] sm:text-xs text-[var(--ab-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_smart_tools_and_calculators_for_comparison_planning_applications')}</p>
           </div>
 
           {/* Horizontal Scrollable Container with 2-by-2 Stacked Tools */}
           {dataMode !== 'prototype' && (
-            <p id="home-tools-preview-note" role="note" className="mb-2 text-center text-[10px] font-medium text-[var(--mn-text-muted)]">{publicT('public_home_tools_preview_notice')}</p>
+            <p id="home-tools-preview-note" role="note" className="mb-2 text-center text-[10px] font-medium text-[var(--ab-text-muted)]">{publicT('public_home_tools_preview_notice')}</p>
           )}
           <div className="relative w-full">
             <div className="flex overflow-x-auto gap-2 sm:gap-2.5 pb-2 pt-1 no-scrollbar snap-x snap-mandatory scroll-smooth" dir={publicDir}>
@@ -95,9 +95,9 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
                       onClick={() => onOpenAiTools(tool.id)}
                       disabled={dataMode !== 'prototype'}
                       aria-describedby={dataMode !== 'prototype' ? 'home-tools-preview-note' : undefined}
-                      className="w-full text-start rounded-2xl border border-[var(--mn-border)] hover:border-[var(--mn-accent)]/60 bg-[var(--mn-surface)] p-2.5 shadow-2xs hover:shadow-sm transition-all active:scale-[0.98] cursor-pointer disabled:cursor-default disabled:opacity-75 min-w-0 mn-panel group flex items-start gap-2.5"
+                      className="w-full text-start rounded-2xl border border-[var(--ab-border)] hover:border-[var(--ab-accent)]/60 bg-[var(--ab-surface)] p-2.5 shadow-2xs hover:shadow-sm transition-all active:scale-[0.98] cursor-pointer disabled:cursor-default disabled:opacity-75 min-w-0 ab-panel group flex items-start gap-2.5"
                     >
-                      <div className="w-8 h-8 rounded-full overflow-hidden p-[1px] bg-[#142B5F] dark:bg-[var(--mn-accent)] border border-[#D6A43B]/60 shrink-0 shadow-2xs flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full overflow-hidden p-[1px] bg-[#142B5F] dark:bg-[var(--ab-accent)] border border-[#D6A43B]/60 shrink-0 shadow-2xs flex items-center justify-center">
                         <img
                           src={dataMode === 'prototype' ? tool.imageUrl : '/preview-art/tools.svg'}
                           alt={publicT(tool.title)}
@@ -110,16 +110,16 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-[11px] sm:text-xs font-bold text-[var(--mn-heading)] leading-snug font-['Cairo',sans-serif] group-hover:text-[var(--mn-accent-text)] transition-colors">
+                        <h4 className="text-[11px] sm:text-xs font-bold text-[var(--ab-heading)] leading-snug font-['Cairo',sans-serif] group-hover:text-[var(--ab-accent-text)] transition-colors">
                           {publicT(tool.title)}
                         </h4>
-                        <p className="mt-0.5 text-[9px] sm:text-[10px] text-[var(--mn-text-muted)] leading-4 font-medium font-['Cairo',sans-serif] line-clamp-1">
+                        <p className="mt-0.5 text-[9px] sm:text-[10px] text-[var(--ab-text-muted)] leading-4 font-medium font-['Cairo',sans-serif] line-clamp-1">
                           {publicT(tool.subtitle)}
                         </p>
                       </div>
                       {/* Navigation Arrow Badge */}
-                      <div className="w-6 h-6 rounded-full bg-[var(--mn-page)] dark:bg-[#142B5F]/50 border border-[var(--mn-border)] dark:border-[#D6A43B]/40 flex items-center justify-center shrink-0 self-center transition-all group-hover:bg-[#142B5F] dark:group-hover:bg-[#D6A43B] group-hover:border-transparent group-hover:scale-105 shadow-2xs">
-                        <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--mn-text-muted)] dark:text-[#D6A43B] group-hover:text-white dark:group-hover:text-[#142B5F] transition-colors" />
+                      <div className="w-6 h-6 rounded-full bg-[var(--ab-page)] dark:bg-[#142B5F]/50 border border-[var(--ab-border)] dark:border-[#D6A43B]/40 flex items-center justify-center shrink-0 self-center transition-all group-hover:bg-[#142B5F] dark:group-hover:bg-[#D6A43B] group-hover:border-transparent group-hover:scale-105 shadow-2xs">
+                        <ArrowUpLeft className="w-3.5 h-3.5 text-[var(--ab-text-muted)] dark:text-[#D6A43B] group-hover:text-white dark:group-hover:text-[#142B5F] transition-colors" />
                       </div>
                     </button>
                   ))}
@@ -132,9 +132,9 @@ export const AIToolsBanner: React.FC<AIToolsBannerProps> = ({ onOpenAiTools, dat
             <button
               id="btn-view-all-ai-tools"
               onClick={() => onOpenAiTools()}
-              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
+              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-[var(--ab-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs "
             >
-              <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_manaratak_tools')}</span>
+              <span className="text-[12px] sm:text-sm font-bold">{publicT('public_browse_absheer_tools')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />
             </button>
           </div>

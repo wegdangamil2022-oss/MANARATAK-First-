@@ -1,6 +1,6 @@
 import {parsePublicRelationshipGraphPage,type PublicRelationshipGraphPage} from '../features/public-template/PublicGraphPageContract';
 import {parseTestDiscoveryPage,type TestDiscoveryPublicPage} from '../features/public-template/TestDiscoveryContract';
-import { CsrfClientManager } from '@manaratak/shared';
+import { CsrfClientManager } from '@absheer/shared';
 
 function currentPublicLocale(): 'ar' | 'en' {
   if (typeof window !== 'undefined') {
@@ -239,7 +239,7 @@ export interface NativeCourseDto {
   slug: string;
   displayName: string;
   canonicalName: string;
-  originType: 'NATIVE_MANARATAK_COURSE';
+  originType: 'NATIVE_ABSHEER_COURSE';
   status: NativeCourseStatus;
   accessType: 'FREE_STUDY' | 'FREE_CERTIFICATE' | 'FREE_STUDY_AND_CERTIFICATE' | 'PAID';
   directCourseUrl: string;
@@ -1574,8 +1574,8 @@ export async function apiFetch(
             const payload = await refreshRes.json().catch(() => ({}));
             if (payload?.data?.authenticated === true) {
               try {
-                window.localStorage?.removeItem('manaratak_refresh_token');
-                window.sessionStorage?.removeItem('manaratak_refresh_token');
+                window.localStorage?.removeItem('absheer_refresh_token');
+                window.sessionStorage?.removeItem('absheer_refresh_token');
               } catch {}
               csrfManager.clearToken();
               webRefreshFailedPermanently = false;
@@ -1606,7 +1606,7 @@ export async function apiFetch(
   return response;
 }
 
-const STUDENT_TOOLS_SESSION_STORAGE_KEY = 'manaratak_student_tools_session';
+const STUDENT_TOOLS_SESSION_STORAGE_KEY = 'absheer_student_tools_session';
 let studentToolsSessionToken: string | null = null;
 const studentToolIntents = new Map<string, { digest: string; key: string }>();
 
@@ -2751,23 +2751,23 @@ export class ApiClient {
     if (typeof window !== 'undefined') {
       try {
         // Keep the short-lived anonymous tools session for explicit post-login result adoption.
-        window.sessionStorage.removeItem('manaratak_admin_bearer_token');
-        window.sessionStorage.removeItem('manaratak_admin_bearer');
-        window.sessionStorage.removeItem('manaratak_access_token');
+        window.sessionStorage.removeItem('absheer_admin_bearer_token');
+        window.sessionStorage.removeItem('absheer_admin_bearer');
+        window.sessionStorage.removeItem('absheer_access_token');
       } catch {}
       if (window.localStorage) {
-        window.localStorage.removeItem('manaratak_admin_bearer_token');
-        window.localStorage.removeItem('manaratak_admin_bearer');
-        window.localStorage.removeItem('manaratak_admin_access');
-        window.localStorage.removeItem('manaratak_admin_permissions');
-        window.localStorage.removeItem('manaratak_access_token');
+        window.localStorage.removeItem('absheer_admin_bearer_token');
+        window.localStorage.removeItem('absheer_admin_bearer');
+        window.localStorage.removeItem('absheer_admin_access');
+        window.localStorage.removeItem('absheer_admin_permissions');
+        window.localStorage.removeItem('absheer_access_token');
       }
     }
     webRefreshFailedPermanently = false;
     csrfManager.clearToken();
     try {
-      window.localStorage?.removeItem('manaratak_refresh_token');
-      window.sessionStorage?.removeItem('manaratak_refresh_token');
+      window.localStorage?.removeItem('absheer_refresh_token');
+      window.sessionStorage?.removeItem('absheer_refresh_token');
     } catch {}
   }
 
@@ -2854,24 +2854,24 @@ export class ApiClient {
       if (typeof window !== 'undefined') {
         try {
           sessionStorage.removeItem(STUDENT_TOOLS_SESSION_STORAGE_KEY);
-          sessionStorage.removeItem('manaratak_post_login_return');
-          sessionStorage.removeItem('manaratak_post_login_action');
-          sessionStorage.removeItem('manaratak_active_identity');
-          sessionStorage.removeItem('manaratak_access_token');
-          sessionStorage.removeItem('manaratak_admin_bearer_token');
-          sessionStorage.removeItem('manaratak_admin_bearer');
+          sessionStorage.removeItem('absheer_post_login_return');
+          sessionStorage.removeItem('absheer_post_login_action');
+          sessionStorage.removeItem('absheer_active_identity');
+          sessionStorage.removeItem('absheer_access_token');
+          sessionStorage.removeItem('absheer_admin_bearer_token');
+          sessionStorage.removeItem('absheer_admin_bearer');
         } catch { /* session storage can be restricted */ }
         try {
-          localStorage.removeItem('manaratak_access_token');
-          localStorage.removeItem('manaratak_refresh_token');
-          localStorage.removeItem('manaratak_admin_bearer_token');
-          localStorage.removeItem('manaratak_admin_bearer');
-          localStorage.removeItem('manaratak_admin_access');
-          localStorage.removeItem('manaratak_admin_permissions');
-          localStorage.removeItem('manaratak_favorites_v2');
-          localStorage.removeItem('manaratak_milestones');
-          localStorage.removeItem('manaratak_notifications');
-          localStorage.removeItem('manaratak_nav_state_v2');
+          localStorage.removeItem('absheer_access_token');
+          localStorage.removeItem('absheer_refresh_token');
+          localStorage.removeItem('absheer_admin_bearer_token');
+          localStorage.removeItem('absheer_admin_bearer');
+          localStorage.removeItem('absheer_admin_access');
+          localStorage.removeItem('absheer_admin_permissions');
+          localStorage.removeItem('absheer_favorites_v2');
+          localStorage.removeItem('absheer_milestones');
+          localStorage.removeItem('absheer_notifications');
+          localStorage.removeItem('absheer_nav_state_v2');
         } catch { /* local storage can be restricted */ }
       }
     }
@@ -3784,7 +3784,7 @@ export class ApiClient {
         params.append(key, value as string);
       }
     });
-    params.set('originType', 'NATIVE_MANARATAK_COURSE');
+    params.set('originType', 'NATIVE_ABSHEER_COURSE');
     return adminCourseRequest<PaginatedResult<NativeCourseDto>>(`?${params.toString()}`);
   }
 

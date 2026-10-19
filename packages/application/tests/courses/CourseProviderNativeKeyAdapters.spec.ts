@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ExternalCourseProviderImportStrategy,
   ExternalCourseProviderStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseProviderNativeKeyAdapters } from '../../src/courses/services/CourseProviderNativeKeyAdapters';
 
 const provider = {

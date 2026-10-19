@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { ValidationException } from '@manaratak/core';
+import { ValidationException } from '@absheer/core';
 import { 
   ProvisionIdentityUseCase,
   ActivateIdentityUseCase,
@@ -11,8 +11,8 @@ import {
   UpdateContactUseCase,
   GetIdentityUseCase,
   ListIdentitiesUseCase
-} from '@manaratak/application';
-import { IAuditRecordRepository } from '@manaratak/domain';
+} from '@absheer/application';
+import { IAuditRecordRepository } from '@absheer/domain';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 import {

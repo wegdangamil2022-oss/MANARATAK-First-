@@ -1,4 +1,4 @@
-import { ICareerStudentOwnershipGateway, IStudentWorkspaceRepository, StudentWorkspaceStatus } from '@manaratak/domain';
+import { ICareerStudentOwnershipGateway, IStudentWorkspaceRepository, StudentWorkspaceStatus } from '@absheer/domain';
 
 export class Phase15CareerStudentOwnershipGateway implements ICareerStudentOwnershipGateway {
   constructor(private readonly students: IStudentWorkspaceRepository) {}

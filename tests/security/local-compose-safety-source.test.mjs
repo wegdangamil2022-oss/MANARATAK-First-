@@ -7,7 +7,7 @@ test('local compose exposes dependencies only on loopback with authentication an
   const compose = read('docker-compose.yml');
   assert.match(compose, /profiles: \["development"\]/);
   assert.match(compose, /development-safety-gate/);
-  assert.match(compose, /MANARATAK_COMPOSE_ENVIRONMENT.*development/);
+  assert.match(compose, /ABSHEER_COMPOSE_ENVIRONMENT.*development/);
   assert.match(compose, /127\.0\.0\.1:\$\{POSTGRES_PORT:-5432\}:5432/);
   assert.match(compose, /127\.0\.0\.1:\$\{REDIS_PORT:-6379\}:6379/);
   assert.doesNotMatch(compose, /POSTGRES_PASSWORD:\s*(password|root)/i);
@@ -24,6 +24,6 @@ test('local compose credentials are generated into ignored file and production-l
   assert.match(init, /mode: 0o600/);
   assert.match(gitignore, /^\.env\.\*$/m);
   assert.match(wrapper, /runtime === 'production' \|\| runtime === 'staging'/);
-  assert.match(wrapper, /MANARATAK_COMPOSE_ENVIRONMENT !== 'development'/);
+  assert.match(wrapper, /ABSHEER_COMPOSE_ENVIRONMENT !== 'development'/);
   assert.match(wrapper, /value\.length < 20/);
 });

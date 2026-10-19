@@ -6,7 +6,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
 import { Loader2, Search, Filter, Plus, Edit, X } from 'lucide-react';
-import { AcademicTaxonomyDeterministicKey, iscedFBaselineNodes } from '@manaratak/domain';
+import { AcademicTaxonomyDeterministicKey, iscedFBaselineNodes } from '@absheer/domain';
 
 interface AcademicTaxonomyNode {
   nodeId: string;

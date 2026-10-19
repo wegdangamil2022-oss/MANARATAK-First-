@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
-import { APPROVED_CERTIFICATE_DESIGN, approvedCertificateCopy } from '@manaratak/shared';
-import type { CertificateRenderInput } from '@manaratak/domain';
+import { APPROVED_CERTIFICATE_DESIGN, approvedCertificateCopy } from '@absheer/shared';
+import type { CertificateRenderInput } from '@absheer/domain';
 import { ProviderNeutralCertificateRenderingService } from '../../src/certificates/ProviderNeutralCertificateRenderingService';
 const input = {
   certificate: {
@@ -11,7 +11,7 @@ const input = {
     recipientDisplayName: 'وجدان جميل عبدالهادي علي السروري',
     achievementDisplayName: 'دورة المنح الدراسية',
     issuedAt: new Date('2026-10-10T00:00:00Z'),
-    issuerName: 'MANARATAK',
+    issuerName: 'ABSHEER',
     verificationUrl: 'https://example.org/certificates/verify?code=CODE',
   },
   templateVersion: {

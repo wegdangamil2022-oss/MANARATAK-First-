@@ -1,12 +1,12 @@
 import { PrismaUniversityProgramReadPort } from '../universities/PrismaUniversityProgramReadPort';
-import type { IUniversityProgramReadPort } from '@manaratak/domain';
+import type { IUniversityProgramReadPort } from '@absheer/domain';
 import type { PrismaClient } from '@prisma/client';
 import type {
   IScholarshipCanonicalLookupGateway,
   ScholarshipCanonicalCandidate,
   ScholarshipCanonicalLookupTarget,
   ScholarshipCanonicalResolutionRequest,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 export class PrismaScholarshipCanonicalLookupGateway
   implements IScholarshipCanonicalLookupGateway

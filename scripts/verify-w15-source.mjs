@@ -12,7 +12,7 @@ const check = (name, ok, detail = '') => checks.push({ name, ok: Boolean(ok), de
 
 const phase2Path = 'docs/phases/phase-02-solution-architecture/phase-2-arb-compliance-report.md';
 const phase4Path = 'docs/phases/phase-04-architecture-governance/baselines/phase-04-21-report.md';
-const registerPath = 'docs/governance/audits/remediation/MANARATAK_MASTER_DEEP_AUDIT_REGISTER_PHASES_2_TO_19_v1.2.md';
+const registerPath = 'docs/governance/audits/remediation/ABSHEER_MASTER_DEEP_AUDIT_REGISTER_PHASES_2_TO_19_v1.2.md';
 const closurePath = 'docs/governance/audits/remediation/W15_SOURCE_REMEDIATION_CLOSURE.md';
 
 for (const p of [phase2Path, phase4Path, registerPath, closurePath]) {

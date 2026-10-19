@@ -88,7 +88,7 @@ function AvailableTool({ toolKey }: { toolKey: string }) {
       {pendingExecution && (
         <section
           dir={uiLocale === 'ar' ? 'rtl' : 'ltr'}
-          className="mn-card mx-auto my-4 max-w-5xl p-5"
+          className="ab-card mx-auto my-4 max-w-5xl p-5"
         >
           <p className="mb-3">{studentToolCopy('student_tools_copy_3', uiLocale)}</p>
           <SaveResult executionId={pendingExecution} />
@@ -134,7 +134,7 @@ function LoginForTool({ executionId }: { executionId?: string }) {
   return (
     <button
       type="button"
-      className="mt-3 rounded-xl bg-[var(--mn-primary)] px-5 py-3 text-white"
+      className="mt-3 rounded-xl bg-[var(--ab-primary)] px-5 py-3 text-white"
       onClick={() => {
         const query = new URLSearchParams(location.search);
         if (executionId) query.set('claimExecution', executionId);
@@ -155,7 +155,7 @@ function SaveResult({ executionId, expiresAt }: { executionId: string; expiresAt
   useEffect(() => { if (!expiresAt) return; const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, [expiresAt]);
   const remaining = expiresAt ? Math.max(0, Math.ceil((Date.parse(expiresAt) - now) / 1000)) : null;
   return (
-    <div className="mt-5 border-t border-[var(--mn-border)] pt-4">
+    <div className="mt-5 border-t border-[var(--ab-border)] pt-4">
       <button
         type="button"
         disabled={state.loading || Boolean(state.message) || remaining === 0}
@@ -180,7 +180,7 @@ function SaveResult({ executionId, expiresAt }: { executionId: string; expiresAt
             busy.current = false;
           }
         }}
-        className="rounded-xl border border-[var(--mn-success-border)] px-4 py-2 font-semibold text-[var(--mn-success-text)] disabled:opacity-60"
+        className="rounded-xl border border-[var(--ab-success-border)] px-4 py-2 font-semibold text-[var(--ab-success-text)] disabled:opacity-60"
       >
         {state.loading
           ? studentToolCopy('student_tools_copy_11', uiLocale)
@@ -190,7 +190,7 @@ function SaveResult({ executionId, expiresAt }: { executionId: string; expiresAt
       </button>
       {remaining !== null && !state.message && <p>{studentToolCopy(remaining === 0 ? 'student_tools_copy_89' : 'student_tools_adoption_countdown', uiLocale)} {remaining > 0 ? `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}` : ''}</p>}
       {state.message && (
-        <p role="status" className="mt-3 text-[var(--mn-success-text)]">
+        <p role="status" className="mt-3 text-[var(--ab-success-text)]">
           {state.message}{' '}
           <Link to="/student?tab=saved" className="underline">
             {studentToolCopy('student_tools_copy_14', uiLocale)}
@@ -198,7 +198,7 @@ function SaveResult({ executionId, expiresAt }: { executionId: string; expiresAt
         </p>
       )}
       {state.error && (
-        <p role="alert" className="mt-3 text-[var(--mn-danger-text)]">
+        <p role="alert" className="mt-3 text-[var(--ab-danger-text)]">
           {translateError(state.error, uiLocale)}
         </p>
       )}
@@ -222,16 +222,16 @@ function Shell({
   return (
     <main
       dir={uiLocale === 'ar' ? 'rtl' : 'ltr'}
-      className="manaratak-public mn-page-shell mx-auto min-h-screen max-w-5xl space-y-6 p-3 pb-16 font-['Cairo',sans-serif] sm:p-6"
+      className="absheer-public ab-page-shell mx-auto min-h-screen max-w-5xl space-y-6 p-3 pb-16 font-['Cairo',sans-serif] sm:p-6"
     >
-      <Seo title={`${title} | منارتك`} description={description} />
+      <Seo title={`${title} | أبشر`} description={description} />
       <Link
         to="/tools"
-        className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-[var(--mn-secondary)]"
+        className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-[var(--ab-secondary)]"
       >
         <ArrowRight className="h-4 w-4" /> {studentToolCopy('student_tools_copy_15', uiLocale)}
       </Link>
-      <header className="mn-search-hero rounded-3xl border border-[var(--mn-border-gold)] p-5 text-white shadow-xl sm:p-7 mn-inverse">
+      <header className="ab-search-hero rounded-3xl border border-[var(--ab-border-gold)] p-5 text-white shadow-xl sm:p-7 ab-inverse">
         <h1 className="text-3xl font-bold">{title}</h1>
         <p className="mt-3 leading-7 text-white/80">{description}</p>
       </header>
@@ -239,7 +239,7 @@ function Shell({
       {tool && (
         <nav
           aria-label={studentToolCopy('student_tools_copy_16', uiLocale)}
-          className="flex flex-wrap gap-3 text-sm font-semibold text-[var(--mn-secondary)]"
+          className="flex flex-wrap gap-3 text-sm font-semibold text-[var(--ab-secondary)]"
         >
           {tool.toolKey === 'university-comparison' && (
             <Link to="/universities">{studentToolCopy('student_tools_copy_17', uiLocale)}</Link>
@@ -256,20 +256,20 @@ function Shell({
 }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="grid gap-2 text-sm font-semibold text-[var(--mn-heading)]">
+    <label className="grid gap-2 text-sm font-semibold text-[var(--ab-heading)]">
       <span>{label}</span>
       {children}
     </label>
   );
 }
 const inputClass =
-  'min-h-12 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 font-normal text-[var(--mn-text)] outline-none focus:border-[var(--mn-accent)] focus:ring-2 focus:ring-[var(--mn-focus)]';
+  'min-h-12 rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface)] px-3 py-2 font-normal text-[var(--ab-text)] outline-none focus:border-[var(--ab-accent)] focus:ring-2 focus:ring-[var(--ab-focus)]';
 function Submit({ loading }: { loading: boolean }) {
   const { language: uiLocale } = useTranslation();
   return (
     <button
       disabled={loading}
-      className="rounded-xl bg-[var(--mn-primary)] px-6 py-3 font-semibold text-white hover:bg-[var(--mn-primary-hover)] disabled:opacity-60 mn-inverse"
+      className="rounded-xl bg-[var(--ab-primary)] px-6 py-3 font-semibold text-white hover:bg-[var(--ab-primary-hover)] disabled:opacity-60 ab-inverse"
     >
       {loading
         ? studentToolCopy('student_tools_copy_21', uiLocale)
@@ -283,7 +283,7 @@ function Result({ run }: { run: RunState }) {
     return (
       <div
         role="alert"
-        className="rounded-2xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] p-4 text-[var(--mn-danger-text)]"
+        className="rounded-2xl border border-[var(--ab-danger-border)] bg-[var(--ab-danger-soft)] p-4 text-[var(--ab-danger-text)]"
       >
         {translateError(run.error, uiLocale)}
       </div>
@@ -292,9 +292,9 @@ function Result({ run }: { run: RunState }) {
   return (
     <section
       aria-live="polite"
-      className="mn-card rounded-3xl border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)]/40 p-5 sm:p-6"
+      className="ab-card rounded-3xl border-[var(--ab-border-gold)] bg-[var(--ab-gold-surface)]/40 p-5 sm:p-6"
     >
-      <h2 className="mb-4 text-xl font-bold text-[var(--mn-heading)]">
+      <h2 className="mb-4 text-xl font-bold text-[var(--ab-heading)]">
         {studentToolCopy('student_tools_copy_23', uiLocale)}
       </h2>
       <StudentToolResultView value={run.result} />
@@ -410,7 +410,7 @@ function GpaTool() {
       <form onSubmit={submit}>
         <fieldset
           disabled={run.loading}
-          className="min-w-0 mn-card space-y-5 rounded-3xl p-5 sm:p-6"
+          className="min-w-0 ab-card space-y-5 rounded-3xl p-5 sm:p-6"
         >
           <div className="grid gap-4 sm:grid-cols-3">
             <Field label={studentToolCopy('student_tools_copy_29', uiLocale)}>
@@ -451,7 +451,7 @@ function GpaTool() {
             {courses.map((course, index) => (
               <div
                 key={index}
-                className="grid gap-3 rounded-2xl bg-[var(--mn-surface-muted)] p-3 sm:grid-cols-[1fr_140px_140px_44px]"
+                className="grid gap-3 rounded-2xl bg-[var(--ab-surface-muted)] p-3 sm:grid-cols-[1fr_140px_140px_44px]"
               >
                 <input
                   required
@@ -530,7 +530,7 @@ function GpaTool() {
             <div className="flex gap-3">
               <button
                 type="button"
-                className="rounded-xl border border-[var(--mn-border)] px-4 py-2 font-bold text-[var(--mn-text)]"
+                className="rounded-xl border border-[var(--ab-border)] px-4 py-2 font-bold text-[var(--ab-text)]"
                 onClick={() => {
                   setScale(4);
                   setCourses(defaultCourses());
@@ -603,7 +603,7 @@ function UniversityTool() {
       <form onSubmit={submit}>
         <fieldset
           disabled={run.loading}
-          className="mn-card min-w-0 space-y-5 rounded-3xl p-5 sm:p-6"
+          className="ab-card min-w-0 space-y-5 rounded-3xl p-5 sm:p-6"
         >
           <Field label={studentToolCopy('student_tools_copy_42', uiLocale)}>
             <input
@@ -623,7 +623,7 @@ function UniversityTool() {
                     current.filter((value) => value.publicId !== item.publicId),
                   )
                 }
-                className="rounded-xl bg-[var(--mn-info-soft)] px-3 py-2"
+                className="rounded-xl bg-[var(--ab-info-soft)] px-3 py-2"
               >
                 {item.displayName} ×
               </button>
@@ -644,7 +644,7 @@ function UniversityTool() {
               {choices.map((item) => (
                 <label
                   key={item.publicId}
-                  className="flex items-center gap-3 rounded-xl border border-[var(--mn-border)] p-3"
+                  className="flex items-center gap-3 rounded-xl border border-[var(--ab-border)] p-3"
                 >
                   <input
                     type="checkbox"
@@ -663,7 +663,7 @@ function UniversityTool() {
                   />
                   <span>
                     {item.displayName}
-                    <small className="block text-[var(--mn-text-muted)]">{item.country}</small>
+                    <small className="block text-[var(--ab-text-muted)]">{item.country}</small>
                   </span>
                 </label>
               ))}
@@ -791,9 +791,9 @@ function MotivationTool() {
       <form onSubmit={submit}>
         <fieldset
           disabled={run.loading}
-          className="min-w-0 grid gap-5 rounded-3xl border bg-[var(--mn-surface)] p-6 sm:grid-cols-2"
+          className="min-w-0 grid gap-5 rounded-3xl border bg-[var(--ab-surface)] p-6 sm:grid-cols-2"
         >
-          <div className="sm:col-span-2 rounded-2xl border border-[var(--mn-warning-border)] bg-[var(--mn-warning-soft)] p-4 text-sm leading-7 text-[var(--mn-warning-text)]">
+          <div className="sm:col-span-2 rounded-2xl border border-[var(--ab-warning-border)] bg-[var(--ab-warning-soft)] p-4 text-sm leading-7 text-[var(--ab-warning-text)]">
             {studentToolCopy('student_tools_copy_65', uiLocale)}
           </div>
           <ol
@@ -803,7 +803,7 @@ function MotivationTool() {
             {steps.map((item, index) => (
               <li
                 key={item.title}
-                className={`rounded-xl px-3 py-2 text-center text-xs font-bold ${index === step ? 'bg-[var(--mn-primary)] text-white' : index < step ? 'bg-[var(--mn-info-soft)] text-[var(--mn-secondary)]' : 'bg-[var(--mn-surface-muted)] text-[var(--mn-text-muted)]'}`}
+                className={`rounded-xl px-3 py-2 text-center text-xs font-bold ${index === step ? 'bg-[var(--ab-primary)] text-white' : index < step ? 'bg-[var(--ab-info-soft)] text-[var(--ab-secondary)]' : 'bg-[var(--ab-surface-muted)] text-[var(--ab-text-muted)]'}`}
               >
                 {index + 1}. {item.title}
               </li>
@@ -821,7 +821,7 @@ function MotivationTool() {
           ))}
           {step === 3 ? (
             <>
-              <div className="sm:col-span-2 rounded-2xl bg-[var(--mn-surface-muted)] p-4 text-sm leading-7 text-[var(--mn-text)]">
+              <div className="sm:col-span-2 rounded-2xl bg-[var(--ab-surface-muted)] p-4 text-sm leading-7 text-[var(--ab-text)]">
                 {studentToolCopy('student_tools_copy_67', uiLocale)}
               </div>
               <Field label={studentToolCopy('student_tools_copy_68', uiLocale)}>
@@ -852,7 +852,7 @@ function MotivationTool() {
                 onClick={(event) => {
                   if (event.currentTarget.form?.reportValidity()) setStep((value) => value + 1);
                 }}
-                className="rounded-xl bg-[var(--mn-primary)] px-5 py-2 font-bold text-white"
+                className="rounded-xl bg-[var(--ab-primary)] px-5 py-2 font-bold text-white"
               >
                 {studentToolCopy('student_tools_copy_70', uiLocale)}
               </button>
@@ -915,7 +915,7 @@ function ScholarshipTool() {
       <form onSubmit={submit}>
         <fieldset
           disabled={run.loading}
-          className="min-w-0 grid gap-5 rounded-3xl border bg-[var(--mn-surface)] p-6 sm:grid-cols-2"
+          className="min-w-0 grid gap-5 rounded-3xl border bg-[var(--ab-surface)] p-6 sm:grid-cols-2"
         >
           <Field label={studentToolCopy('student_tools_copy_73', uiLocale)}>
             <input

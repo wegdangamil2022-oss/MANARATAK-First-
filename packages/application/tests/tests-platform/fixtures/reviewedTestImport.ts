@@ -1,4 +1,4 @@
-import { InternationalTestCategory } from '@manaratak/domain';
+import { InternationalTestCategory } from '@absheer/domain';
 import { internationalTestSourceHash } from '../../../src/tests-platform/use-cases/InternationalTestImportChangeSet';
 
 export const actorId = '00000000-0000-4000-8000-000000000001';

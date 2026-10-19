@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { type AtomicPersistenceContext, CanonicalDegreeLevelCode, DegreeLevelStatus, IDegreeLevelRepository, DegreeLevelDto, UpsertDegreeLevelDto } from '@manaratak/domain';
+import { type AtomicPersistenceContext, CanonicalDegreeLevelCode, DegreeLevelStatus, IDegreeLevelRepository, DegreeLevelDto, UpsertDegreeLevelDto } from '@absheer/domain';
 
 export class DegreeLevelRepository implements IDegreeLevelRepository {
   constructor(private readonly prisma: PrismaClient) {}

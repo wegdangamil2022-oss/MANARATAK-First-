@@ -160,7 +160,7 @@ const ArticleVectorCover: React.FC<{ category: string; title: string; className?
       <path d="M 200 65 L 235 80 L 200 95 L 165 80 Z" fill="#D6A43B" />
       <rect x="20" y="175" width="360" height="42" rx="10" fill="black" fillOpacity="0.4" />
       <text x="200" y="202" textAnchor="middle" fill="#D6A43B" fontSize="17" fontWeight="900" fontFamily="'Cairo', sans-serif">
-        {category}{' '}{publicT('public_manaratak_academy')}</text>
+        {category}{' '}{publicT('public_absheer_academy')}</text>
     </svg>
   );
 };
@@ -245,7 +245,7 @@ export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, da
       className="px-0 py-1.5 w-full font-['Cairo',sans-serif]"
     >
       {/* Standard Framed Container matching other sections */}
-      <div className="relative rounded-2xl p-2.5 sm:p-3 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-xs overflow-hidden mn-panel">
+      <div className="relative rounded-2xl p-2.5 sm:p-3 bg-gradient-to-b from-[var(--ab-surface)] to-[var(--ab-page)]/80 border border-[var(--ab-border)] shadow-xs overflow-hidden ab-panel">
         {/* Top gradient border line */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
 
@@ -261,7 +261,7 @@ export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, da
               </h3>
               <div className="absolute -bottom-0.5 left-0 right-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
             </div>
-            <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_the_latest_tips_and_comprehensive_guides_for_your')}</p>
+            <p className="text-[11px] sm:text-xs text-[var(--ab-text-muted)] font-medium max-w-md mx-auto font-['Cairo',sans-serif]">{publicT('public_the_latest_tips_and_comprehensive_guides_for_your')}</p>
           </div>
 
           {/* Horizontal Scrollable Articles List - 6 cards with left drag/swipe */}
@@ -281,13 +281,13 @@ export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, da
                   }
                 }}
                 onClick={() => onSelectArticle(article.id)}
-                className="snap-start shrink-0 w-[155px] sm:w-[180px] relative group flex flex-col rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border)] hover:border-[#142B5F]/40 dark:hover:border-[#D6A43B]/50 shadow-2xs hover:shadow-xs transition-all duration-300 cursor-pointer overflow-hidden active:scale-[0.99]"
+                className="snap-start shrink-0 w-[155px] sm:w-[180px] relative group flex flex-col rounded-xl bg-[var(--ab-surface)] border border-[var(--ab-border)] hover:border-[#142B5F]/40 dark:hover:border-[#D6A43B]/50 shadow-2xs hover:shadow-xs transition-all duration-300 cursor-pointer overflow-hidden active:scale-[0.99]"
               >
                 {/* Partial Box Header Line: Top, Right, and Left edges down to middle (50%), Indigo in light mode, Gold in dark mode */}
                 <div className="absolute top-0 left-0 right-0 h-1/2 border-t-[3px] border-r-[3px] border-l-[3px] border-[#142B5F] dark:border-[#D6A43B] rounded-t-xl pointer-events-none z-20" />
 
                 {/* Thumbnail Header */}
-                <div className="w-full h-20 sm:h-24 relative overflow-hidden bg-[var(--mn-surface-muted)]">
+                <div className="w-full h-20 sm:h-24 relative overflow-hidden bg-[var(--ab-surface-muted)]">
                   {!imageErrorIds[article.id] ? (
                     <img
                       src={article.image}
@@ -315,17 +315,17 @@ export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, da
 
                 {/* Content Body */}
                 <div className="flex flex-col p-2 sm:p-2.5 flex-1">
-                  <h4 className="font-bold text-[11px] sm:text-xs text-[var(--mn-heading)] leading-snug line-clamp-2 group-hover:text-[#142B5F] dark:group-hover:text-[#D6A43B] transition-colors mb-1.5 font-['Cairo',sans-serif]">
+                  <h4 className="font-bold text-[11px] sm:text-xs text-[var(--ab-heading)] leading-snug line-clamp-2 group-hover:text-[#142B5F] dark:group-hover:text-[#D6A43B] transition-colors mb-1.5 font-['Cairo',sans-serif]">
                     {article.title}
                   </h4>
 
                   {/* Footer (Time & Icon) */}
-                  <div className="mt-auto flex items-center justify-between pt-1.5 border-t border-[var(--mn-border)]/60">
-                    <span className="flex items-center gap-1 text-[var(--mn-text-muted)] text-[8.5px] sm:text-[9.5px] font-semibold">
-                      <Clock className="w-3 h-3 text-[var(--mn-text-muted)] shrink-0" />
+                  <div className="mt-auto flex items-center justify-between pt-1.5 border-t border-[var(--ab-border)]/60">
+                    <span className="flex items-center gap-1 text-[var(--ab-text-muted)] text-[8.5px] sm:text-[9.5px] font-semibold">
+                      <Clock className="w-3 h-3 text-[var(--ab-text-muted)] shrink-0" />
                       {article.readTime}
                     </span>
-                    <div className="w-4.5 h-4.5 rounded-full bg-[var(--mn-surface-muted)] text-[var(--mn-text-muted)] group-hover:bg-[#142B5F] dark:group-hover:bg-[#D6A43B] group-hover:text-white dark:group-hover:text-[#142B5F] flex items-center justify-center transition-colors shadow-2xs">
+                    <div className="w-4.5 h-4.5 rounded-full bg-[var(--ab-surface-muted)] text-[var(--ab-text-muted)] group-hover:bg-[#142B5F] dark:group-hover:bg-[#D6A43B] group-hover:text-white dark:group-hover:text-[#142B5F] flex items-center justify-center transition-colors shadow-2xs">
                       <ArrowUpLeft className="w-3 h-3 transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
                     </div>
                   </div>
@@ -339,7 +339,7 @@ export const FeaturedArticles: React.FC<FeaturedArticlesProps> = ({ articles, da
             <button
               id="btn-view-all-articles"
               onClick={onViewAllClick}
-              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-1.5 sm:py-2 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs"
+              className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-1.5 sm:py-2 bg-[var(--ab-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs"
             >
               <span className="text-[12px] sm:text-sm font-bold">{publicT('public_more_articles_and_guides')}</span>
               <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />

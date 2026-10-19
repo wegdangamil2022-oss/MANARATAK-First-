@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { writeXlsxWorkbook } from '@manaratak/shared';
+import { writeXlsxWorkbook } from '@absheer/shared';
 import {
   AssetLifecycleState,
   AssetStorageLocator,
   AssetStorageZone,
   ExternalCourseProviderImportStrategy,
   ExternalCourseProviderStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseImportArtifactUseCase } from '../../src/courses/use-cases/CourseImportArtifactUseCase';
 
 const HEADERS = [

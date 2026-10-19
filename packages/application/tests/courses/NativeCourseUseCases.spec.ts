@@ -8,7 +8,7 @@ import {
   CourseStatus,
   ICourseCurriculumRepository,
   ICourseRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { NativeCourseUseCases } from '../../src/courses/use-cases/NativeCourseUseCases';
 
 describe('NativeCourseUseCases', () => {
@@ -79,7 +79,7 @@ describe('NativeCourseUseCases', () => {
     canonicalDedupKey: 'native:دورة',
     displayName: 'دورة',
     accessType: CourseAccessType.FREE_STUDY,
-    originType: CourseOriginType.NATIVE_MANARATAK_COURSE,
+    originType: CourseOriginType.NATIVE_ABSHEER_COURSE,
     directCourseUrl: '/courses/course-1',
     status: CourseStatus.DRAFT,
     completenessStatus: CourseImportCompletenessState.INCOMPLETE,
@@ -102,7 +102,7 @@ describe('NativeCourseUseCases', () => {
     expect(result.id).toBe('course-1');
     expect(courses.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        originType: CourseOriginType.NATIVE_MANARATAK_COURSE,
+        originType: CourseOriginType.NATIVE_ABSHEER_COURSE,
         status: CourseStatus.DRAFT,
         directCourseUrl: expect.stringMatching(/^\/courses\/ai-course-/),
         publicId: expect.stringMatching(/^CRS-NAT-/),

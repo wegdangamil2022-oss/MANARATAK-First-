@@ -53,20 +53,20 @@ export function StudentNotificationsView({
     : items;
   return (
     <section className="space-y-4">
-      <header className="mn-panel rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 sm:p-5">
+      <header className="ab-panel rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 font-bold text-[var(--mn-heading)]">
+          <h2 className="flex items-center gap-2 font-bold text-[var(--ab-heading)]">
             <Bell className="h-5 w-5" /> إشعاراتي
           </h2>
           <button
             type="button"
             onClick={onRefresh}
-            className="rounded-xl border border-[var(--mn-border)] px-3 py-2 text-xs font-bold"
+            className="rounded-xl border border-[var(--ab-border)] px-3 py-2 text-xs font-bold"
           >
             تحديث
           </button>
         </div>
-        <p className="mt-2 text-xs text-[var(--mn-text-muted)]">
+        <p className="mt-2 text-xs text-[var(--ab-text-muted)]">
           آخر الإشعارات المرتبطة بحسابك ودوراتك وطلباتك.
         </p>
         <div className="mt-4 flex gap-2">
@@ -76,7 +76,7 @@ export function StudentNotificationsView({
               type="button"
               aria-pressed={unreadOnly === unread}
               onClick={() => setUnreadOnly(unread)}
-              className={`rounded-xl px-3 py-2 text-xs font-bold ${unreadOnly === unread ? 'bg-[var(--mn-primary)] text-white' : 'bg-[var(--mn-page)] text-[var(--mn-text)]'}`}
+              className={`rounded-xl px-3 py-2 text-xs font-bold ${unreadOnly === unread ? 'bg-[var(--ab-primary)] text-white' : 'bg-[var(--ab-page)] text-[var(--ab-text)]'}`}
             >
               {unread ? 'غير المقروءة' : 'الكل'}
             </button>
@@ -93,7 +93,7 @@ export function StudentNotificationsView({
           تعذر تحميل الإشعارات. أعد المحاولة.
         </p>
       ) : !visible.length ? (
-        <p className="mn-panel rounded-2xl border border-[var(--mn-border)] p-6 text-center text-sm text-[var(--mn-text-muted)]">
+        <p className="ab-panel rounded-2xl border border-[var(--ab-border)] p-6 text-center text-sm text-[var(--ab-text-muted)]">
           {unreadOnly
             ? 'لا توجد إشعارات غير مقروءة ضمن القائمة الحالية.'
             : 'لا توجد إشعارات حالياً.'}
@@ -105,20 +105,20 @@ export function StudentNotificationsView({
           return (
             <article
               key={item.id}
-              className="mn-panel rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4"
+              className="ab-panel rounded-2xl border border-[var(--ab-border)] bg-[var(--ab-surface)] p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="font-bold text-[var(--mn-heading)]">{item.title}</h3>
+                <h3 className="font-bold text-[var(--ab-heading)]">{item.title}</h3>
                 {!item.readAt && !readIds.has(item.id) && (
                   <span className="rounded-full bg-teal-50 px-2 py-1 text-xs text-teal-800">
                     غير مقروء
                   </span>
                 )}
               </div>
-              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7 text-[var(--mn-text-muted)]">
+              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7 text-[var(--ab-text-muted)]">
                 {item.message}
               </p>
-              <div className="mt-3 flex items-center justify-between gap-3 text-xs text-[var(--mn-text-muted)]">
+              <div className="mt-3 flex items-center justify-between gap-3 text-xs text-[var(--ab-text-muted)]">
                 <time>
                   {Number.isNaN(occurred.getTime()) ? '—' : occurred.toLocaleString('ar')}
                 </time>
@@ -127,7 +127,7 @@ export function StudentNotificationsView({
                     type="button"
                     disabled={Boolean(reading)}
                     onClick={() => void markRead(item.id)}
-                    className="rounded-lg border px-3 py-2 font-bold text-[var(--mn-primary)] disabled:opacity-50"
+                    className="rounded-lg border px-3 py-2 font-bold text-[var(--ab-primary)] disabled:opacity-50"
                   >
                     {reading === item.id ? 'جارٍ الحفظ…' : 'تحديد كمقروء'}
                   </button>
@@ -135,7 +135,7 @@ export function StudentNotificationsView({
                 {href && (
                   <Link
                     to={href}
-                    className="inline-flex items-center gap-1 font-bold text-[var(--mn-primary)]"
+                    className="inline-flex items-center gap-1 font-bold text-[var(--ab-primary)]"
                   >
                     عرض التفاصيل <ExternalLink className="h-3 w-3" />
                   </Link>

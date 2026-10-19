@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { container, registerDependencies } from '../../../../src/infrastructure/di/container';
-import { AdminMajorUseCases } from '@manaratak/application';
+import { AdminMajorUseCases } from '@absheer/application';
 
 describe('Check API E2E', () => {
   it('count all', async () => {

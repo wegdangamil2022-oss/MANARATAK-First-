@@ -1,4 +1,4 @@
-import { CsrfClientManager } from '@manaratak/shared';
+import { CsrfClientManager } from '@absheer/shared';
 import { assertLocalReadOnlyRequestAllowed } from '../security/LocalAdminReadOnlyPolicy';
 
 const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '/api/v1';
@@ -313,21 +313,21 @@ async function executeRequest<T>(endpoint: string, options: AdminRequestOptions 
     }
     if (response.status === 401 && !endpoint.includes('/auth/me')) {
       setAdminAuthStatus('UNAUTHORIZED');
-      if (typeof window !== 'undefined') window.dispatchEvent(new Event('manaratak-admin-session-expired'));
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('absheer-admin-session-expired'));
     }
   }
 
   if (!response.ok) {
     if (response.status === 403 && endpoint.startsWith('/admin/') && Date.now() - lastPermissionRecheckAt > 1000) {
       lastPermissionRecheckAt = Date.now();
-      window.dispatchEvent(new Event('manaratak-admin-permission-changed'));
+      window.dispatchEvent(new Event('absheer-admin-permission-changed'));
     }
     let errorMessage = `API Error: ${response.statusText}`;
     let retryAfter = response.headers.get('Retry-After');
     try {
       const errorData = (await response.json()) as any;
       const mfaCode=errorData?.error?.code ?? errorData?.code;
-      if(response.status===403&&['MFA_ENROLLMENT_REQUIRED','MFA_STEP_UP_REQUIRED'].includes(mfaCode)&&typeof window!=='undefined')window.dispatchEvent(new CustomEvent('manaratak-admin-mfa-required',{detail:{code:mfaCode}}));
+      if(response.status===403&&['MFA_ENROLLMENT_REQUIRED','MFA_STEP_UP_REQUIRED'].includes(mfaCode)&&typeof window!=='undefined')window.dispatchEvent(new CustomEvent('absheer-admin-mfa-required',{detail:{code:mfaCode}}));
       if (errorData?.meta?.retryAfter) {
         retryAfter = String(errorData.meta.retryAfter);
       }
@@ -434,8 +434,8 @@ export const adminApiClient = {
     csrfManager.clearToken();
     abortAllPendingAdminRequests();
     try {
-      window.localStorage?.removeItem('manaratak_refresh_token');
-      window.sessionStorage?.removeItem('manaratak_refresh_token');
+      window.localStorage?.removeItem('absheer_refresh_token');
+      window.sessionStorage?.removeItem('absheer_refresh_token');
     } catch {}
   },
 

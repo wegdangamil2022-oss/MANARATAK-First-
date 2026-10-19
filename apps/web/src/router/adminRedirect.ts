@@ -3,7 +3,7 @@ export function canonicalAdminTarget(legacyPath: string, configuredAdminUrl?: st
   const safePath = legacyPath.startsWith('/') && !legacyPath.startsWith('//')
     ? legacyPath
     : '/admin/dashboard';
-  const current = new URL(safePath, 'https://manaratak.invalid');
+  const current = new URL(safePath, 'https://absheer.invalid');
   const normalizedPath = current.pathname.replace(/^\/(?:ar|en)(?=\/)/, '');
   const adminPath = normalizedPath.replace(/^\/admin(?=\/|$)/, '') || '/dashboard';
   const suffix = `${adminPath}${current.search}${current.hash}`;

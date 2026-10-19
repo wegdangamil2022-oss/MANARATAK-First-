@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { RetentionDisposition } from '@manaratak/domain';
+import { RetentionDisposition } from '@absheer/domain';
 import { PrismaAssetRetentionGateway } from '../../src/retention/PrismaAssetRetentionGateway';
 
 describe('EAP retention worker lease ownership', () => {

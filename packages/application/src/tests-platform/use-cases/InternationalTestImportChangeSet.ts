@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
-import { InternationalTestCategory } from '@manaratak/domain';
+import { InternationalTestCategory } from '@absheer/domain';
 import { InternationalTestMarkdownParser } from '../utils/InternationalTestMarkdownParser';
 
 const digest = z.string().regex(/^[a-f0-9]{64}$/);

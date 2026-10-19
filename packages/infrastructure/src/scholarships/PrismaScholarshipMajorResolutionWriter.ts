@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import type {NewMajorCandidateSourceRef} from '@manaratak/domain';
+import type {NewMajorCandidateSourceRef} from '@absheer/domain';
 
 const RESOLVED_STATES = ['RESOLVED', 'NOT_APPLICABLE'];
 

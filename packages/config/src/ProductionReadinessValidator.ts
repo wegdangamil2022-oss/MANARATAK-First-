@@ -179,18 +179,18 @@ export class ProductionReadinessValidator {
 
   private static validateProviderDependencies(config: RuntimeConfig, findings: ProductionReadinessFinding[], isProduction: boolean): void {
     if (!isProduction) return;
-    if (!this.isHttpsUrl(config.MANARATAK_ASSET_PROVIDER_BASE_URL)) {
-      findings.push({ id: 'provider.asset_https_required', severity: 'BLOCKER', area: 'Providers', message: 'The mandatory asset/import provider base URL is missing or is not HTTPS.', recommendation: 'Configure MANARATAK_ASSET_PROVIDER_BASE_URL with the authorized HTTPS provider endpoint.' });
+    if (!this.isHttpsUrl(config.ABSHEER_ASSET_PROVIDER_BASE_URL)) {
+      findings.push({ id: 'provider.asset_https_required', severity: 'BLOCKER', area: 'Providers', message: 'The mandatory asset/import provider base URL is missing or is not HTTPS.', recommendation: 'Configure ABSHEER_ASSET_PROVIDER_BASE_URL with the authorized HTTPS provider endpoint.' });
     }
-    if (!this.asString(config.MANARATAK_ASSET_PROVIDER_API_KEY)) {
-      findings.push({ id: 'provider.asset_api_key_required', severity: 'BLOCKER', area: 'Providers', message: 'The mandatory asset/import provider API key is missing.', recommendation: 'Inject MANARATAK_ASSET_PROVIDER_API_KEY from deployment-managed secret custody.' });
+    if (!this.asString(config.ABSHEER_ASSET_PROVIDER_API_KEY)) {
+      findings.push({ id: 'provider.asset_api_key_required', severity: 'BLOCKER', area: 'Providers', message: 'The mandatory asset/import provider API key is missing.', recommendation: 'Inject ABSHEER_ASSET_PROVIDER_API_KEY from deployment-managed secret custody.' });
     }
-    if (!this.isStrongSecret(config.MANARATAK_ASSET_PROVIDER_SIGNING_SECRET)) {
-      findings.push({ id: 'provider.asset_signing_secret_required', severity: 'BLOCKER', area: 'Providers', message: 'The provider signing secret is missing or weak.', recommendation: 'Inject a high-entropy MANARATAK_ASSET_PROVIDER_SIGNING_SECRET of at least 32 characters.' });
+    if (!this.isStrongSecret(config.ABSHEER_ASSET_PROVIDER_SIGNING_SECRET)) {
+      findings.push({ id: 'provider.asset_signing_secret_required', severity: 'BLOCKER', area: 'Providers', message: 'The provider signing secret is missing or weak.', recommendation: 'Inject a high-entropy ABSHEER_ASSET_PROVIDER_SIGNING_SECRET of at least 32 characters.' });
     }
-    const retentionDays = this.asNumber(config.MANARATAK_IMPORT_RAW_RETENTION_DAYS);
+    const retentionDays = this.asNumber(config.ABSHEER_IMPORT_RAW_RETENTION_DAYS);
     if (!Number.isInteger(retentionDays) || retentionDays! < 1 || retentionDays! > 3650) {
-      findings.push({ id: 'provider.import_raw_retention_invalid', severity: 'BLOCKER', area: 'Providers', message: 'Import raw snapshot retention is not explicitly configured.', recommendation: 'Set MANARATAK_IMPORT_RAW_RETENTION_DAYS to the approved policy value (1-3650).' });
+      findings.push({ id: 'provider.import_raw_retention_invalid', severity: 'BLOCKER', area: 'Providers', message: 'Import raw snapshot retention is not explicitly configured.', recommendation: 'Set ABSHEER_IMPORT_RAW_RETENTION_DAYS to the approved policy value (1-3650).' });
     }
   }
 

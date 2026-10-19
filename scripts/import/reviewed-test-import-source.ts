@@ -1,7 +1,7 @@
 import { readFile, realpath } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { z } from 'zod';
-import { internationalTestImportEntrySchema, internationalTestSourceHash, prepareInternationalTestImport, type InternationalTestImportPlan } from '@manaratak/application';
+import { internationalTestImportEntrySchema, internationalTestSourceHash, prepareInternationalTestImport, type InternationalTestImportPlan } from '@absheer/application';
 
 const manifestPath = 'workspace/import-sources/international-tests/reconciliation/final_matching_data.json';
 const sourcePath = 'workspace/import-sources/international-tests/unified-56';

@@ -1,8 +1,8 @@
-# MANARATAK Canonical API Idempotency Policy
+# ABSHEER Canonical API Idempotency Policy
 
 Status: **ACTIVE**  
 Standard: `STD-API-001`  
-Remediation: `MNT-AUD-0098`
+Remediation: `ABSH-AUD-0098`
 
 ## Required command boundary
 

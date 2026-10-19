@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { AtomicPersistenceContext, CanonicalAcademicReferenceKind, CanonicalAcademicUsageSummary, ICanonicalAcademicUsageGateway } from '@manaratak/domain';
+import { AtomicPersistenceContext, CanonicalAcademicReferenceKind, CanonicalAcademicUsageSummary, ICanonicalAcademicUsageGateway } from '@absheer/domain';
 
 const taxonomyRelations = ['majorAcademicFieldLinks', 'majorDisciplineLinks', 'majorProfileAcademicFieldLinks', 'majorProfileDisciplineLinks',
   'majorClassificationMappings', 'internationalTestRelationships', 'courseTaxonomyResolutions', 'courseTaxonomyLinks', 'courseMajorProjections',

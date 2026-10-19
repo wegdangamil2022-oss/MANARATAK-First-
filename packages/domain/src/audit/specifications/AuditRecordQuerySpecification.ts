@@ -1,4 +1,4 @@
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 import { AuditRecord } from '../aggregates/AuditRecord';
 
 export class AuditRecordQuerySpecification implements ISpecification<AuditRecord> {

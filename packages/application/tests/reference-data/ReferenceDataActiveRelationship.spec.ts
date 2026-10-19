@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { IReferenceDataRepository } from '@manaratak/domain';
+import type { IReferenceDataRepository } from '@absheer/domain';
 import { ReferenceDataUseCases } from '../../src';
 
 describe('P7 canonical active relationship resolution', () => {

@@ -13,9 +13,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreClick }) => {
   return (
     <div className="w-full mt-1 mb-1 px-0">
       {/* Compact Proportional Hero Card Container */}
-      <div className="relative w-full overflow-hidden shadow-sm border border-[var(--mn-accent)]/25 rounded-2xl group bg-[var(--mn-primary)] mn-inverse ">
+      <div className="relative w-full overflow-hidden shadow-sm border border-[var(--ab-accent)]/25 rounded-2xl group bg-[var(--ab-primary)] ab-inverse ">
         {/* Background Image: Positioned to top, height tightly frames image without extra bottom space */}
-        <div className="relative h-32 sm:h-40 md:h-44 w-full overflow-hidden bg-[var(--mn-primary)] mn-inverse ">
+        <div className="relative h-32 sm:h-40 md:h-44 w-full overflow-hidden bg-[var(--ab-primary)] ab-inverse ">
           <img
             src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
             alt={publicT('public_a_graduate_on_a_university_campus')}
@@ -25,27 +25,27 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onExploreClick }) => {
           />
 
           {/* Vignette Gradient: Soft shadow on text side */}
-          <div className="absolute inset-0 bg-gradient-to-l from-[var(--mn-primary)]/95 via-[var(--mn-hero-secondary)]/70 to-transparent pointer-events-none mn-inverse " />
+          <div className="absolute inset-0 bg-gradient-to-l from-[var(--ab-primary)]/95 via-[var(--ab-hero-secondary)]/70 to-transparent pointer-events-none ab-inverse " />
 
           {/* Content Layer: Compact layout */}
           <div className="absolute inset-0 flex flex-col justify-center items-start p-2.5 sm:p-4 z-10 rtl:items-start ltr:items-end">
             {/* Elegant Slim High-Contrast Card */}
             <div className="max-w-[210px] sm:max-w-[250px] md:max-w-xs text-start rtl:text-start ltr:text-left backdrop-blur-md p-2 sm:p-3 rounded-xl bg-black/45 border border-white/15 shadow-lg">
               {/* Compact Headline */}
-              <h2 className="text-xs sm:text-sm md:text-base font-bold text-white tracking-wide leading-tight mb-1 drop-shadow-md font-['Cairo',sans-serif]">{publicT('public_your_academic_future_starts')}<span className="inline-block mx-1 text-[var(--mn-accent-text)] font-semibold">{publicT('public_here')}</span>
+              <h2 className="text-xs sm:text-sm md:text-base font-bold text-white tracking-wide leading-tight mb-1 drop-shadow-md font-['Cairo',sans-serif]">{publicT('public_your_academic_future_starts')}<span className="inline-block mx-1 text-[var(--ab-accent-text)] font-semibold">{publicT('public_here')}</span>
               </h2>
 
               {/* Compact Subtitle */}
-              <p className="text-[9px] sm:text-[10px] text-[var(--mn-on-dark-muted)] font-medium leading-tight mb-1.5 drop-shadow-xs font-['Cairo',sans-serif] line-clamp-2">{publicT('public_discover_scholarships_and_educational_opportunities_from_leading_universities')}</p>
+              <p className="text-[9px] sm:text-[10px] text-[var(--ab-on-dark-muted)] font-medium leading-tight mb-1.5 drop-shadow-xs font-['Cairo',sans-serif] line-clamp-2">{publicT('public_discover_scholarships_and_educational_opportunities_from_leading_universities')}</p>
 
               {/* Compact Golden Action Button */}
               <button
                 id="btn-hero-explore"
                 onClick={onExploreClick}
-                className="w-auto px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-[var(--mn-accent)] hover:bg-[var(--mn-accent)] text-[var(--mn-on-accent)] font-bold text-[10px] sm:text-xs shadow-sm hover:shadow-[var(--mn-accent)]/30 active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer font-['Cairo',sans-serif] mn-gold hover:mn-gold "
+                className="w-auto px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-[var(--ab-accent)] hover:bg-[var(--ab-accent)] text-[var(--ab-on-accent)] font-bold text-[10px] sm:text-xs shadow-sm hover:shadow-[var(--ab-accent)]/30 active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer font-['Cairo',sans-serif] ab-gold hover:ab-gold "
               >
                 <span className="text-[10px] sm:text-xs font-bold leading-normal text-center">{publicT('public_discover_opportunities')}</span>
-                <ArrowLeft className="w-3 h-3 text-[var(--mn-heading)]" />
+                <ArrowLeft className="w-3 h-3 text-[var(--ab-heading)]" />
               </button>
             </div>
           </div>

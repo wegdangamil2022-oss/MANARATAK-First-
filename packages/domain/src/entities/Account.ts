@@ -1,4 +1,4 @@
-import { Entity, Identifier } from '@manaratak/core';
+import { Entity, Identifier } from '@absheer/core';
 
 export enum AccountAccessState {
   ACTIVE = 'Active',

@@ -32,11 +32,11 @@ CREATE INDEX "cert_authority_owner_idx" ON "CertificateAuthorityDelegation"("can
 -- changes using the existing P3 share-lock owner-reference guard.
 CREATE TRIGGER "eap_asset_reference_owner" BEFORE INSERT OR UPDATE OF "evidenceAssetId"
   ON "CertificateAuthorityDelegation" FOR EACH ROW
-  EXECUTE FUNCTION "manaratak_require_active_asset_reference"('evidenceAssetId','false','false');
+  EXECUTE FUNCTION "absheer_require_active_asset_reference"('evidenceAssetId','false','false');
 
 -- Preserve immutable legal evidence, including withdrawn delegation history.
 -- Normal P3 guards still protect every other existing consumer.
-CREATE FUNCTION "manaratak_guard_certificate_delegation_evidence_lifecycle"() RETURNS TRIGGER
+CREATE FUNCTION "absheer_guard_certificate_delegation_evidence_lifecycle"() RETURNS TRIGGER
 LANGUAGE plpgsql AS $$
 BEGIN
   IF TG_OP = 'DELETE' THEN
@@ -55,4 +55,4 @@ END;
 $$;
 CREATE TRIGGER "eap_asset_lifecycle_certificate_delegation" BEFORE DELETE OR UPDATE OF "lifecycleState"
   ON "AssetRecord" FOR EACH ROW
-  EXECUTE FUNCTION "manaratak_guard_certificate_delegation_evidence_lifecycle"();
+  EXECUTE FUNCTION "absheer_guard_certificate_delegation_evidence_lifecycle"();

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ServiceCatalogItemDto } from '@manaratak/domain';
+import type { ServiceCatalogItemDto } from '@absheer/domain';
 import { adminApiClient } from '../api/client';
 
 /** Filters use canonical owner IDs, including historical services with existing requests. */

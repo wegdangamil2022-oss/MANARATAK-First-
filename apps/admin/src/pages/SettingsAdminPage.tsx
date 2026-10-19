@@ -2,7 +2,7 @@ import { SettingsGovernancePanel } from '../components/SettingsGovernancePanel';
 import { SettingsResolutionInspector } from '../components/SettingsResolutionInspector';
 import { canEditSettingsAssignment, canEditSettingsScope } from './settingsAssignmentGovernance';
 import { SettingsIdentityScopePicker } from '../components/SettingsIdentityScopePicker';
-import { ADMIN_PERMISSION_CATALOG } from '@manaratak/shared';
+import { ADMIN_PERMISSION_CATALOG } from '@absheer/shared';
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { OutboxProcessingState, TransactionalOutboxEntry } from '@manaratak/domain';
+import { OutboxProcessingState, TransactionalOutboxEntry } from '@absheer/domain';
 import { PrismaTransactionalOutboxStore } from '../../src/event-foundation/PrismaTransactionalOutboxStore';
 
 const entry: TransactionalOutboxEntry = {

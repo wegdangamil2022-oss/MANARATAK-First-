@@ -7,7 +7,7 @@ function findRepoRoot(start = process.cwd()): string {
   for (;;) {
     if (existsSync(join(current, 'packages/infrastructure/prisma/schema.prisma'))) return current;
     const parent = dirname(current);
-    if (parent === current) throw new Error('MANARATAK_REPO_ROOT_NOT_FOUND');
+    if (parent === current) throw new Error('ABSHEER_REPO_ROOT_NOT_FOUND');
     current = parent;
   }
 }

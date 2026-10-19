@@ -1,7 +1,7 @@
-import { SourceConnectorCategory, SourceAccessExecutionPolicy } from '@manaratak/domain';
+import { SourceConnectorCategory, SourceAccessExecutionPolicy } from '@absheer/domain';
 import { BaseSourceConnector } from './BaseSourceConnector';
-import type { SourceAcquisitionRequest, SourceAcquisitionResult } from '@manaratak/application';
-import type { ImportSourceDefinition } from '@manaratak/domain';
+import type { SourceAcquisitionRequest, SourceAcquisitionResult } from '@absheer/application';
+import type { ImportSourceDefinition } from '@absheer/domain';
 
 export class ManualUploadSourceConnector extends BaseSourceConnector {
   readonly connectorId = 'manual-upload';

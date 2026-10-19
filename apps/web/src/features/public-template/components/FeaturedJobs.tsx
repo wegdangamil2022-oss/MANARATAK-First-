@@ -15,7 +15,7 @@ export const FeaturedJobs: React.FC<FeaturedJobsProps> = ({ onViewAllClick }) =>
       className="px-0 py-3 w-full font-['Cairo',sans-serif]"
     >
       {/* Standard Framed Container matching all other sections */}
-      <div className="relative rounded-3xl p-5 sm:p-6 bg-gradient-to-b from-[var(--mn-surface)] to-[var(--mn-page)]/80 border border-[var(--mn-border)] shadow-xs overflow-hidden mn-panel text-center">
+      <div className="relative rounded-3xl p-5 sm:p-6 bg-gradient-to-b from-[var(--ab-surface)] to-[var(--ab-page)]/80 border border-[var(--ab-border)] shadow-xs overflow-hidden ab-panel text-center">
         {/* Top gradient accent line */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#142B5F] dark:via-[#D6A43B] to-transparent" />
 
@@ -32,13 +32,13 @@ export const FeaturedJobs: React.FC<FeaturedJobsProps> = ({ onViewAllClick }) =>
           </div>
 
           {/* Description Text */}
-          <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] font-medium max-w-xl mx-auto leading-relaxed mt-1 mb-4 sm:mb-5">{publicT('public_explore_jobs_internships_and_graduate_programs_in_one')}</p>
+          <p className="text-[11px] sm:text-xs text-[var(--ab-text-muted)] font-medium max-w-xl mx-auto leading-relaxed mt-1 mb-4 sm:mb-5">{publicT('public_explore_jobs_internships_and_graduate_programs_in_one')}</p>
 
           {/* Action Button */}
           <button
             id="btn-explore-jobs"
             onClick={onViewAllClick}
-            className="group inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-3 bg-[var(--mn-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs cursor-pointer"
+            className="group inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-3 bg-[var(--ab-surface-muted)] hover:bg-[#142B5F]/5 dark:hover:bg-[#D6A43B]/10 text-[#142B5F] dark:text-[#D6A43B] border border-[#142B5F]/50 dark:border-[#D6A43B]/50 rounded-full transition-all active:scale-95 font-['Cairo',sans-serif] shadow-xs cursor-pointer"
           >
             <span className="text-xs sm:text-sm font-bold">{publicT('public_explore_career_opportunities')}</span>
             <ChevronLeft className="w-4 h-4 text-[#142B5F] dark:text-[#D6A43B] transition-transform group-hover:-translate-x-1" />

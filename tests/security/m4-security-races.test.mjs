@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { AuthService, InMemorySessionManager, ResetPasswordUseCase } from '@manaratak/application';
+import { AuthService, InMemorySessionManager, ResetPasswordUseCase } from '@absheer/application';
 
 test('login credential change during session creation revokes the new session before returning tokens', async () => {
   const sessions = new InMemorySessionManager();

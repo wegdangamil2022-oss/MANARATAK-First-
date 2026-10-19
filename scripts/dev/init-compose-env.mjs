@@ -12,10 +12,10 @@ if (fs.existsSync(target)) {
 }
 const secret = (bytes = 24) => randomBytes(bytes).toString('base64url');
 const content = [
-  'MANARATAK_COMPOSE_ENVIRONMENT=development',
-  'POSTGRES_USER=manaratak_dev',
+  'ABSHEER_COMPOSE_ENVIRONMENT=development',
+  'POSTGRES_USER=absheer_dev',
   `POSTGRES_PASSWORD=${secret(24)}`,
-  'POSTGRES_DB=manaratak_dev',
+  'POSTGRES_DB=absheer_dev',
   'POSTGRES_PORT=5432',
   `REDIS_PASSWORD=${secret(32)}`,
   'REDIS_PORT=6379',
@@ -29,9 +29,9 @@ const db = `postgresql://${encodeURIComponent(values.POSTGRES_USER)}:${encodeURI
 const redis = `redis://:${encodeURIComponent(values.REDIS_PASSWORD)}@127.0.0.1:${values.REDIS_PORT}`;
 const runtime = [
   'NODE_ENV=development', `DATABASE_URL=${db}`, `DIRECT_URL=${db}`, `REDIS_URL=${redis}`,
-  'REDIS_NAMESPACE=manaratak:', 'EMAIL_DELIVERY_PROVIDER=smtp', 'SMTP_HOST=127.0.0.1',
+  'REDIS_NAMESPACE=absheer:', 'EMAIL_DELIVERY_PROVIDER=smtp', 'SMTP_HOST=127.0.0.1',
   `SMTP_PORT=${values.MAILPIT_SMTP_PORT}`, 'SMTP_SECURE=false',
-  'SMTP_FROM=MANARATAK <no-reply@localhost>', '',
+  'SMTP_FROM=ABSHEER <no-reply@localhost>', '',
 ].join('\n');
 fs.writeFileSync(target, content, { mode: 0o600, flag: 'wx' });
 fs.writeFileSync(runtimeTarget, runtime, { mode: 0o600, flag: 'wx' });

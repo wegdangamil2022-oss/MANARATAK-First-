@@ -19,8 +19,8 @@ import {
   PublicationReadinessEngine,
   PublicationReadinessResult,
   UniversityPublicationReadinessPolicy,
-} from '@manaratak/domain';
-import { assertNoTranslationPayloadFields, assertTranslationContentAuthoringEnabled } from '@manaratak/shared';
+} from '@absheer/domain';
+import { assertNoTranslationPayloadFields, assertTranslationContentAuthoringEnabled } from '@absheer/shared';
 import {
   AtomicDomainMutationCoordinator,
   AtomicMutationRequestContext,

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { StudyDestinationPublishingPolicy } from '@manaratak/domain';
+import { StudyDestinationPublishingPolicy } from '@absheer/domain';
 import {
   StudyDestinationUseCases,
   studyDestinationFingerprint,

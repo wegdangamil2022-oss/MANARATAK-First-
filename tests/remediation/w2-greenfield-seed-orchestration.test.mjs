@@ -7,7 +7,7 @@ import { inspectSeedManifest } from '../../scripts/database/seed-manifest-inspec
 const root = path.resolve(import.meta.dirname, '../..');
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
 
-test('MNT-AUD-0035 manifest is ordered, versioned and separates operator/catalog workflows', () => {
+test('ABSH-AUD-0035 manifest is ordered, versioned and separates operator/catalog workflows', () => {
   const manifest = JSON.parse(read('scripts/database/greenfield-seed.manifest.json'));
   assert.equal(manifest.version, 1);
   assert.ok(manifest.seedSetVersion);
@@ -18,7 +18,7 @@ test('MNT-AUD-0035 manifest is ordered, versioned and separates operator/catalog
   assert.equal(manifest.policy.largeCatalogImportsExcluded, true);
 });
 
-test('MNT-AUD-0035 source inspection preserves declared blockers without executing seeds', () => {
+test('ABSH-AUD-0035 source inspection preserves declared blockers without executing seeds', () => {
   const manifest = JSON.parse(read('scripts/database/greenfield-seed.manifest.json'));
   const states = ['BLOCKED_SOURCE_REVIEW', 'BLOCKED_SOURCE_DATASET_MISSING', 'BLOCKED_SOURCE_DATASET_MISSING'];
   for (const [index, id] of ['reference-countries', 'reference-currencies', 'reference-languages'].entries()) {
@@ -31,14 +31,14 @@ test('MNT-AUD-0035 source inspection preserves declared blockers without executi
   ]);
 });
 
-test('MNT-AUD-0035 current ready sources exist and match their governed hashes', () => {
+test('ABSH-AUD-0035 current ready sources exist and match their governed hashes', () => {
   const manifest = JSON.parse(read('scripts/database/greenfield-seed.manifest.json'));
   const output = inspectSeedManifest(manifest, root);
   assert.deepEqual(output.sourceErrors, []);
   assert.equal(output.steps.length, manifest.steps.length);
 });
 
-test('MNT-AUD-0035 missing, changed and incomplete ready sources are rejected', () => {
+test('ABSH-AUD-0035 missing, changed and incomplete ready sources are rejected', () => {
   const manifest = JSON.parse(read('scripts/database/greenfield-seed.manifest.json'));
   const step = manifest.steps.find(item => item.id === 'reference-currencies');
   step.sourcePath = 'workspace/reference-data/does-not-exist.csv';
@@ -49,7 +49,7 @@ test('MNT-AUD-0035 missing, changed and incomplete ready sources are rejected', 
   assert.ok(inspectSeedManifest(manifest, root).sourceErrors.includes('READY_SOURCE_CONTRACT_MISSING:reference-currencies'));
 });
 
-test('MNT-AUD-0035 all approval and source gates precede migration status and seed execution', () => {
+test('ABSH-AUD-0035 all approval and source gates precede migration status and seed execution', () => {
   const source = read('scripts/database/seed-orchestrator.mjs');
   const gate = source.indexOf("requireDatabaseMutationGate('greenfield-db-seed'");
   const migration = source.indexOf('requireMigrationStatusClean();');
@@ -59,7 +59,7 @@ test('MNT-AUD-0035 all approval and source gates precede migration status and se
   assert.ok(source.indexOf('for (const step of inspection.steps.filter') > migration);
 });
 
-test('MNT-AUD-0035 country seed is hash/review/gate controlled and reconciliation is explicit', () => {
+test('ABSH-AUD-0035 country seed is hash/review/gate controlled and reconciliation is explicit', () => {
   const countries = read('scripts/seed-reference-countries.ts');
   const reconcile = read('scripts/database/verify-seed-reconciliation.ts');
   assert.match(countries, /REFERENCE_COUNTRY_SEED_SOURCE_HASH_MISMATCH/);
@@ -70,7 +70,7 @@ test('MNT-AUD-0035 country seed is hash/review/gate controlled and reconciliatio
   assert.match(reconcile, /SEED_RECONCILIATION_MINIMUM_MISMATCH/);
 });
 
-test('MNT-AUD-0035 root commands distinguish deploy, seed, provision and development-only Prisma mutations', () => {
+test('ABSH-AUD-0035 root commands distinguish deploy, seed, provision and development-only Prisma mutations', () => {
   const pkg = JSON.parse(read('package.json'));
   for (const name of ['db:migrate:deploy','db:seed','db:seed:plan','db:seed:source-verify','db:provision','db:provision:verify','db:dev:push','db:dev:migrate']) {
     assert.ok(pkg.scripts[name], `missing ${name}`);

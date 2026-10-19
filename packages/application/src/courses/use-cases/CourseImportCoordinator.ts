@@ -5,7 +5,7 @@ import {
   CourseStatus,
   ICourseRepository,
   ITransactionalCourseRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AtomicDomainMutationCoordinator } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import { CourseImportMasterMapper, CourseImportMappedData } from '../services/CourseImportMasterMapper';
 import {

@@ -3,7 +3,7 @@ import { Prisma, type PrismaClient } from '@prisma/client';
 import type {
   TranslationWorkspaceQuery,
   ITranslationWorkspaceReadGateway,
-} from '@manaratak/application';
+} from '@absheer/application';
 /** Read projection only: owner rows retain all authoring/review/publication authority. */
 export class PrismaTranslationWorkspaceReadGateway implements ITranslationWorkspaceReadGateway {
   constructor(private readonly prisma: PrismaClient) {}

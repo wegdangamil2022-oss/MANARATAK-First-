@@ -1,8 +1,8 @@
 import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
-import type { IAuditRecordRepository } from '@manaratak/domain';
+import type { IAuditRecordRepository } from '@absheer/domain';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { CrossDomainGraphReadService, InternationalTestAdminUseCases } from '@manaratak/application';
+import { CrossDomainGraphReadService, InternationalTestAdminUseCases } from '@absheer/application';
 import {
   InternationalTestCategory,
   InternationalTestCompletenessStatus,
@@ -10,7 +10,7 @@ import {
   InternationalTestStatus,
   InternationalTestSourceTrustLevel,
   UpsertInternationalTestDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class InternationalTestAdminRouter {
   public static create(cradle: { internationalTestAdminUseCases: InternationalTestAdminUseCases; crossDomainGraphReadService: CrossDomainGraphReadService; internationalTestConsumerReadGateway?: {usage(id:string,page:number,publishedOnly?:boolean):Promise<unknown>}; auditRecordRepo?: IAuditRecordRepository }): Router {

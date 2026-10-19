@@ -2,7 +2,7 @@ import type {
   IStudentApplicationScholarshipGateway,
   IIdentityRepository, IRoleAssignmentRepository, IStudentApplicationTrackerRepository,
   INotificationDeliveryEligibilityPolicy, NotificationDeliveryCandidate,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 /** P15 authorizes its reminder immediately before P23 delivery, using current owner facts. */
 export class StudentApplicationReminderDeliveryPolicy implements INotificationDeliveryEligibilityPolicy {

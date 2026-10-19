@@ -1,6 +1,6 @@
 # API Runtime Resource Lifecycle
 
-**Authority:** active W1/W2 runtime lifecycle contract after `MNT-AUD-0040` remediation.
+**Authority:** active W1/W2 runtime lifecycle contract after `ABSH-AUD-0040` remediation.
 
 ## Ownership
 
@@ -65,7 +65,7 @@ On Vercel, telemetry has no periodic export timer: the adapter awaits a bounded
 export after the response. Pools are reused within the warm instance, not closed
 after each request. The traditional process keeps its periodic export and shutdown.
 
-Run `npm run build -w @manaratak/api` then `npm run runtime:verify -w @manaratak/api`
+Run `npm run build -w @absheer/api` then `npm run runtime:verify -w @absheer/api`
 to exercise the emitted Node ESM entrypoint, export contract, concurrent bootstrap,
 real local HTTP requests, workspace/Prisma loading and failure handling without
 external connections or SQL. This is not a replacement for deployment runtime tests.

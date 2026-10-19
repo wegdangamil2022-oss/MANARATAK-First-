@@ -30,8 +30,8 @@ const taxonomyLegacyPreview = exists(taxonomyLegacyPreviewPath) ? read(taxonomyL
 const adminRoutes = read('apps/admin/src/App.tsx');
 const phase23Arch = read('docs/phases/phase-23-enterprise-administration-portal/phase-23-01-enterprise-administration-portal-architecture-specification.md');
 const phase23Workflow = read('docs/phases/phase-23-enterprise-administration-portal/phase-23-03-enterprise-administration-portal-workflows-operational-experience.md');
-const settingsHistoryDoc = read('docs/implementation-status/MANARATAK-2.0-Settings-Access-Admin-Workspace-Phase23-Alignment-Report.md');
-const closureDoc = read('docs/implementation-status/MANARATAK-ACADEMIC-TAXONOMY-SETTINGS-SOURCE-CLOSURE-2026-09-05.md');
+const settingsHistoryDoc = read('docs/implementation-status/ABSHEER-2.0-Settings-Access-Admin-Workspace-Phase23-Alignment-Report.md');
+const closureDoc = read('docs/implementation-status/ABSHEER-ACADEMIC-TAXONOMY-SETTINGS-SOURCE-CLOSURE-2026-09-05.md');
 
 const checks = {
   taxonomy_domain_surface_present: exists('packages/domain/src/academic-taxonomy'),

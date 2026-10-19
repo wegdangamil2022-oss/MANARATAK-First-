@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { AssetId, AtomicPersistenceContext, referenceCityScopeKey, normalizeReferenceIdentityToken } from '@manaratak/domain';
-import type { IReferenceOwnerReviewGateway, ReferenceOwnerReview, ReferenceSnapshotRecord, P7ScreeningDecision } from '@manaratak/application';
-import { referenceImportPayloadDigest } from '@manaratak/application';
+import { AssetId, AtomicPersistenceContext, referenceCityScopeKey, normalizeReferenceIdentityToken } from '@absheer/domain';
+import type { IReferenceOwnerReviewGateway, ReferenceOwnerReview, ReferenceSnapshotRecord, P7ScreeningDecision } from '@absheer/application';
+import { referenceImportPayloadDigest } from '@absheer/application';
 import { PrismaAssetRecordRepository } from '../asset-platform/PrismaAssetRecordRepository';
 import { PrismaReferenceDataRepository } from './PrismaReferenceDataRepository';
 const tables = { COUNTRY: 'ReferenceCountry', CURRENCY: 'ReferenceCurrency', LANGUAGE: 'ReferenceLanguage', CITY: 'ReferenceCity' } as const;

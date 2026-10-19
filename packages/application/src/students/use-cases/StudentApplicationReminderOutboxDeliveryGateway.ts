@@ -1,7 +1,7 @@
 import {
   IOutboxDeliveryGateway, OutboxDeliveryContext, TransactionalOutboxEntry,
   IStudentApplicationReminderGateway, IStudentApplicationTrackerRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 /** Retryable P15 owner fact -> versioned notification intent. Never trusts event status alone. */
 export class StudentApplicationReminderOutboxDeliveryGateway implements IOutboxDeliveryGateway {

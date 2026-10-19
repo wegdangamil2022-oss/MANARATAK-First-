@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { SourceStatus, type ImportSourceDefinition } from '@manaratak/domain';
+import { SourceStatus, type ImportSourceDefinition } from '@absheer/domain';
 import type { IImportRawSnapshotStore, StoredImportRawSnapshot, IImportSourceObservationGateway } from '../contracts/IImportRawSnapshotStore';
 import type { SourceAcquisitionRequest, SourceAcquisitionResult } from '../contracts/ISourceConnector';
 import { SourceConnectorRegistry } from '../services/SourceConnectorRegistry';

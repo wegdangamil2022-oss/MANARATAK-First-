@@ -1,4 +1,4 @@
-import { ISecurityService, IRateLimiter } from '@manaratak/core';
+import { ISecurityService, IRateLimiter } from '@absheer/core';
 import { DefaultRateLimiter } from './DefaultRateLimiter';
 import { randomBytes, createHash, createHmac, timingSafeEqual } from 'node:crypto';
 

@@ -19,7 +19,7 @@
 
 ## 3. Context
 
-Under the current MANARATAK 2.0 system architecture, file management capabilities were initially conceived as a basic core platform component ("Phase 05 File Management"). While this baseline successfully established standard localized read/write operations, it has several critical limitations and presents architectural challenges as the enterprise scales:
+Under the current ABSHEER 2.0 system architecture, file management capabilities were initially conceived as a basic core platform component ("Phase 05 File Management"). While this baseline successfully established standard localized read/write operations, it has several critical limitations and presents architectural challenges as the enterprise scales:
 
 - **Fragmented Storage Logic:** Multiple business domains (such as Universities, Scholarships, Courses, and Articles) are individually responsible for managing media files, uploading content, and handling raw disk/blob storage logic. This duplication leads to divergent implementations, complex code patterns, and an increased maintenance footprint.
 - **Security & Vulnerabilities:** Distributing upload handlers directly across business domains increases the attack surface. It leaves the system vulnerable to unvetted file types, arbitrary script execution, and missed security checkpoints like automated virus scanning or centralized access control list (ACL) enforcement.
@@ -33,7 +33,7 @@ To address these concerns and support long-term scalability across all core busi
 
 ## 4. Decision
 
-The MANARATAK Architecture Review Board (ARB) has decided to adopt the **Enterprise Asset Platform (EAP)**.
+The ABSHEER Architecture Review Board (ARB) has decided to adopt the **Enterprise Asset Platform (EAP)**.
 
 - **Architectural Classification:** The EAP is officially classified as a **Cross-Cutting Shared Platform**. It will reside in the foundational infrastructure and shared platform layer of the enterprise.
 - **Evolution of Phase 05:** The existing "Phase 05 File Management" baseline is officially evolved and restructured into the **Enterprise Asset Platform (EAP)**.
@@ -52,7 +52,7 @@ The MANARATAK Architecture Review Board (ARB) has decided to adopt the **Enterpr
 
 ### Alternative B: Independent Standalone Asset System (External SaaS / Isolated Microservice)
 
-- **Description:** Integrate a third-party asset management system or deploy a completely separate external service outside of the MANARATAK framework.
+- **Description:** Integrate a third-party asset management system or deploy a completely separate external service outside of the ABSHEER framework.
 - **Rationale for Rejection:** Rejected. An external third-party service introduces licensing overhead, potential vendor lock-in, and integration latency. It also operates outside of the shared enterprise database constraints, complicating transaction boundaries, identity propagation, and local development baselines.
 
 ### Alternative C: Adopt the Enterprise Asset Platform (EAP) as a Cross-Cutting Shared Platform
@@ -64,7 +64,7 @@ The MANARATAK Architecture Review Board (ARB) has decided to adopt the **Enterpr
 
 ## 6. Architecture Constraints
 
-To preserve the integrity of the MANARATAK 2.0 system architecture, the adoption of the Enterprise Asset Platform enforces the following mandatory rules:
+To preserve the integrity of the ABSHEER 2.0 system architecture, the adoption of the Enterprise Asset Platform enforces the following mandatory rules:
 
 1. **Single Source of Truth:** The EAP is the sole owner and authorizer of physical assets, storage structures, and media metadata. No other system component may query the storage layer directly.
 2. **Abstract References (`AssetId`):** Domain databases are only allowed to store the `AssetId` string/GUID. They must never store raw S3 keys, public paths, or physical URLs.
@@ -117,7 +117,7 @@ To preserve the integrity of the MANARATAK 2.0 system architecture, the adoption
 
 ## 9. References
 
-- **MANARATAK 2.0 Master Blueprint:** Sections detailing platform foundations and core shared capabilities.
+- **ABSHEER 2.0 Master Blueprint:** Sections detailing platform foundations and core shared capabilities.
 - **Enterprise Roadmap v5.0:** Milestone mapping and sequence rules.
 - **Phase 05 File Management Architecture Baseline:** The original baseline specification.
 - **Enterprise Architecture Governance Index:** Precedence and document authority tables.

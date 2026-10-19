@@ -166,22 +166,22 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
   }
 
   return (
-    <main dir="rtl" className="mn-page-shell flex min-h-[72vh] w-full items-center py-8">
-      <div className="mn-public-container flex justify-center">
-        <form onSubmit={submit} className="mn-card w-full max-w-md p-5 sm:p-7" noValidate>
+    <main dir="rtl" className="ab-page-shell flex min-h-[72vh] w-full items-center py-8">
+      <div className="ab-public-container flex justify-center">
+        <form onSubmit={submit} className="ab-card w-full max-w-md p-5 sm:p-7" noValidate>
           {mode === 'login' && <label className="block text-sm">رمز تطبيق المصادقة — إذا كان مفعّلًا<input className="mt-2 block w-full rounded border p-2" autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={mfaCode} onChange={event=>setMfaCode(event.target.value.replace(/\D/g,''))}/></label>}
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--mn-border-gold)] bg-[var(--mn-gold-surface)] text-[var(--mn-accent-text)]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--ab-border-gold)] bg-[var(--ab-gold-surface)] text-[var(--ab-accent-text)]">
               {mode === 'verify' ? <MailCheck className="h-5 w-5" /> : <ShieldCheck className="h-5 w-5" />}
             </span>
             <div>
-              <p className="text-[11px] font-semibold text-[var(--mn-accent-text)]">بوابة حساب موحّدة وآمنة</p>
-              <h1 className="text-[20px] font-bold leading-7 text-[var(--mn-heading)]">
-                {mode === 'signup' ? 'إنشاء حساب جديد في منارتك' : mode === 'verify' ? 'تأكيد البريد الإلكتروني' : mode === 'forgot' ? 'استعادة كلمة المرور' : mode === 'reset' ? 'تعيين كلمة مرور جديدة' : 'تسجيل الدخول إلى منارتك'}
+              <p className="text-[11px] font-semibold text-[var(--ab-accent-text)]">بوابة حساب موحّدة وآمنة</p>
+              <h1 className="text-[20px] font-bold leading-7 text-[var(--ab-heading)]">
+                {mode === 'signup' ? 'إنشاء حساب جديد في أبشر' : mode === 'verify' ? 'تأكيد البريد الإلكتروني' : mode === 'forgot' ? 'استعادة كلمة المرور' : mode === 'reset' ? 'تعيين كلمة مرور جديدة' : 'تسجيل الدخول إلى أبشر'}
               </h1>
             </div>
           </div>
-          <p className="mt-2 text-xs leading-5 text-[var(--mn-text-muted)] sm:text-sm">
+          <p className="mt-2 text-xs leading-5 text-[var(--ab-text-muted)] sm:text-sm">
             {mode === 'signup'
               ? 'أنشئ حسابك للوصول إلى أدوات الطالب والخدمات الأكاديمية.'
               : mode === 'verify'
@@ -192,25 +192,25 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
           </p>
 
           {/* Mode Switcher Tabs */}
-          {mode !== 'forgot' && mode !== 'reset' && <div className="mt-4 flex rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] p-1">
+          {mode !== 'forgot' && mode !== 'reset' && <div className="mt-4 flex rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface-elevated)] p-1">
             <button
               type="button"
               onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
-              className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${mode === 'login' ? 'bg-[var(--mn-surface)] text-[var(--mn-heading)] shadow-sm' : 'text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)]'}`}
+              className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${mode === 'login' ? 'bg-[var(--ab-surface)] text-[var(--ab-heading)] shadow-sm' : 'text-[var(--ab-text-muted)] hover:text-[var(--ab-heading)]'}`}
             >
               تسجيل الدخول
             </button>
             <button
               type="button"
               onClick={() => { setMode('signup'); setError(null); setSuccess(null); }}
-              className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${mode === 'signup' ? 'bg-[var(--mn-surface)] text-[var(--mn-heading)] shadow-sm' : 'text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)]'}`}
+              className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${mode === 'signup' ? 'bg-[var(--ab-surface)] text-[var(--ab-heading)] shadow-sm' : 'text-[var(--ab-text-muted)] hover:text-[var(--ab-heading)]'}`}
             >
               إنشاء حساب
             </button>
             <button
               type="button"
               onClick={() => { setMode('verify'); setError(null); setSuccess(null); }}
-              className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${mode === 'verify' ? 'bg-[var(--mn-surface)] text-[var(--mn-heading)] shadow-sm' : 'text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)]'}`}
+              className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${mode === 'verify' ? 'bg-[var(--ab-surface)] text-[var(--ab-heading)] shadow-sm' : 'text-[var(--ab-text-muted)] hover:text-[var(--ab-heading)]'}`}
             >
               تأكيد البريد
             </button>
@@ -219,9 +219,9 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
           {/* SIGNUP FIELDS */}
           {mode === 'signup' && (
             <>
-              <label htmlFor="account-display-name" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">الاسم الكامل</label>
+              <label htmlFor="account-display-name" className="mt-4 block text-sm font-semibold text-[var(--ab-heading)]">الاسم الكامل</label>
               <div className="relative mt-1.5">
-                <User className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-text-muted)]" />
+                <User className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ab-text-muted)]" />
                 <input
                   id="account-display-name"
                   type="text"
@@ -230,7 +230,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                   onChange={(event) => setDisplayName(event.target.value)}
                   disabled={loading}
                   placeholder="مثال: وجدان جميل"
-                  className="mn-search-control w-full pr-10 pl-3 text-sm outline-none"
+                  className="ab-search-control w-full pr-10 pl-3 text-sm outline-none"
                 />
               </div>
             </>
@@ -239,9 +239,9 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
           {/* LOGIN / SIGNUP EMAIL & PASSWORD */}
           {(mode === 'login' || mode === 'signup' || mode === 'forgot') && (
             <>
-              <label htmlFor="account-email" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">البريد الإلكتروني</label>
+              <label htmlFor="account-email" className="mt-4 block text-sm font-semibold text-[var(--ab-heading)]">البريد الإلكتروني</label>
               <div className="relative mt-1.5">
-                <Mail className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-text-muted)]" />
+                <Mail className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ab-text-muted)]" />
                 <input
                   id="account-email"
                   type="email"
@@ -250,13 +250,13 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                   onChange={(event) => { setEmail(event.target.value); setResendEmail(event.target.value); }}
                   disabled={loading}
                   placeholder="name@example.com"
-                  className="mn-search-control w-full pr-10 pl-3 text-sm outline-none"
+                  className="ab-search-control w-full pr-10 pl-3 text-sm outline-none"
                 />
               </div>
 
-              {mode !== 'forgot' && <><label htmlFor="account-password" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">كلمة المرور</label>
+              {mode !== 'forgot' && <><label htmlFor="account-password" className="mt-4 block text-sm font-semibold text-[var(--ab-heading)]">كلمة المرور</label>
               <div className="relative mt-1.5">
-                <LockKeyhole className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-text-muted)]" />
+                <LockKeyhole className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ab-text-muted)]" />
                 <input
                   id="account-password"
                   type="password"
@@ -265,7 +265,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                   onChange={(event) => setPassword(event.target.value)}
                   disabled={loading}
                   placeholder={mode === 'signup' ? '8 أحرف على الأقل' : '••••••••'}
-                  className="mn-search-control w-full pr-10 pl-3 text-sm outline-none"
+                  className="ab-search-control w-full pr-10 pl-3 text-sm outline-none"
                 />
               </div></>}
 
@@ -277,9 +277,9 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                     checked={rememberMe}
                     onChange={(event) => setRememberMe(event.target.checked)}
                     disabled={loading}
-                    className="h-4 w-4 rounded border-[var(--mn-border)] text-[var(--mn-accent-text)] focus:ring-[var(--mn-accent-text)] cursor-pointer"
+                    className="h-4 w-4 rounded border-[var(--ab-border)] text-[var(--ab-accent-text)] focus:ring-[var(--ab-accent-text)] cursor-pointer"
                   />
-                  <label htmlFor="remember-me" className="text-xs font-semibold text-[var(--mn-text-muted)] cursor-pointer">
+                  <label htmlFor="remember-me" className="text-xs font-semibold text-[var(--ab-text-muted)] cursor-pointer">
                     البقاء مسجّلًا على هذا الجهاز لمدة 30 يومًا
                   </label>
                 </div>
@@ -290,9 +290,9 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
           {/* VERIFY MODE FIELDS */}
           {mode === 'verify' && (
             <>
-              <label htmlFor="verification-token" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">رمز التحقق (Verification Token)</label>
+              <label htmlFor="verification-token" className="mt-4 block text-sm font-semibold text-[var(--ab-heading)]">رمز التحقق (Verification Token)</label>
               <div className="relative mt-1.5">
-                <KeyRound className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mn-text-muted)]" />
+                <KeyRound className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ab-text-muted)]" />
                 <input
                   id="verification-token"
                   type="text"
@@ -300,35 +300,35 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                   onChange={(event) => setVerificationToken(event.target.value)}
                   disabled={loading}
                   placeholder="الصق رمز التحقق المكون من 64 رمزاً..."
-                  className="mn-search-control w-full pr-10 pl-3 font-mono text-xs outline-none"
+                  className="ab-search-control w-full pr-10 pl-3 font-mono text-xs outline-none"
                 />
               </div>
-              <p className="mt-1.5 text-[11px] leading-4 text-[var(--mn-text-muted)]">
+              <p className="mt-1.5 text-[11px] leading-4 text-[var(--ab-text-muted)]">
                 يمكنك نسخ الرمز من رسالة البريد في Mailpit ولصقه هنا، أو النقر مباشرة على رابط التحقق في الرسالة.
               </p>
             </>
           )}
 
           {mode === 'reset' && <>
-            <label htmlFor="reset-token" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">رمز الاستعادة</label>
-            <input id="reset-token" value={resetToken} onChange={event => setResetToken(event.target.value)} required className="mn-search-control mt-1.5 w-full text-xs outline-none" />
-            <label htmlFor="reset-password" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">كلمة المرور الجديدة</label>
-            <input id="reset-password" type="password" autoComplete="new-password" value={password} onChange={event => setPassword(event.target.value)} minLength={8} required className="mn-search-control mt-1.5 w-full text-xs outline-none" />
-            <label htmlFor="reset-password-confirm" className="mt-4 block text-sm font-semibold text-[var(--mn-heading)]">تأكيد كلمة المرور</label>
-            <input id="reset-password-confirm" type="password" autoComplete="new-password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} minLength={8} required className="mn-search-control mt-1.5 w-full text-xs outline-none" />
+            <label htmlFor="reset-token" className="mt-4 block text-sm font-semibold text-[var(--ab-heading)]">رمز الاستعادة</label>
+            <input id="reset-token" value={resetToken} onChange={event => setResetToken(event.target.value)} required className="ab-search-control mt-1.5 w-full text-xs outline-none" />
+            <label htmlFor="reset-password" className="mt-4 block text-sm font-semibold text-[var(--ab-heading)]">كلمة المرور الجديدة</label>
+            <input id="reset-password" type="password" autoComplete="new-password" value={password} onChange={event => setPassword(event.target.value)} minLength={8} required className="ab-search-control mt-1.5 w-full text-xs outline-none" />
+            <label htmlFor="reset-password-confirm" className="mt-4 block text-sm font-semibold text-[var(--ab-heading)]">تأكيد كلمة المرور</label>
+            <input id="reset-password-confirm" type="password" autoComplete="new-password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} minLength={8} required className="ab-search-control mt-1.5 w-full text-xs outline-none" />
           </>}
 
-          {error && <p role="alert" className="mt-4 rounded-xl border border-[var(--mn-danger-border)] bg-[var(--mn-danger-soft)] p-3 text-xs font-semibold leading-5 text-[var(--mn-danger-text)]">{error}</p>}
+          {error && <p role="alert" className="mt-4 rounded-xl border border-[var(--ab-danger-border)] bg-[var(--ab-danger-soft)] p-3 text-xs font-semibold leading-5 text-[var(--ab-danger-text)]">{error}</p>}
           {success && (
-            <div role="status" className="mt-4 rounded-xl border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] p-3.5 text-xs font-medium leading-5 text-[var(--mn-success-text)]">
-              <p className="font-bold text-[var(--mn-success-text)]">{success}</p>
+            <div role="status" className="mt-4 rounded-xl border border-[var(--ab-success-border)] bg-[var(--ab-success-soft)] p-3.5 text-xs font-medium leading-5 text-[var(--ab-success-text)]">
+              <p className="font-bold text-[var(--ab-success-text)]">{success}</p>
               {mode === 'signup' && (
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                   <a
                     href="/mailpit/"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--mn-success-solid)] px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-110"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--ab-success-solid)] px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-110"
                   >
                     <span>فتح صندوق البريد (Mailpit)</span>
                     <ExternalLink className="h-3.5 w-3.5" />
@@ -336,7 +336,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                   <button
                     type="button"
                     onClick={() => { setMode('verify'); setError(null); }}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] px-3 py-1.5 text-xs font-bold text-[var(--mn-success-text)] hover:bg-[var(--mn-success-soft)]"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--ab-success-border)] bg-[var(--ab-success-soft)] px-3 py-1.5 text-xs font-bold text-[var(--ab-success-text)] hover:bg-[var(--ab-success-soft)]"
                   >
                     <span>إدخال رمز التحقق</span>
                   </button>
@@ -346,7 +346,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                 <button
                   type="button"
                   onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
-                  className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--mn-success-solid)] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-110"
+                  className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[var(--ab-success-solid)] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-110"
                 >
                   <LogIn className="h-3.5 w-3.5" />
                   <span>الانتقال لتسجيل الدخول</span>
@@ -358,7 +358,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
           <button
             type="submit"
             disabled={loading}
-            className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--mn-primary)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--mn-primary-hover)] disabled:opacity-60 mn-inverse"
+            className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--ab-primary)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--ab-primary-hover)] disabled:opacity-60 ab-inverse"
           >
             {mode === 'signup' ? <UserPlus className="h-4 w-4" /> : mode === 'verify' || mode === 'forgot' ? <MailCheck className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
             {loading ? 'جارٍ المعالجة...' : mode === 'signup' ? 'إنشاء الحساب' : mode === 'verify' ? 'تأكيد الحساب' : mode === 'forgot' ? 'إرسال تعليمات الاستعادة' : mode === 'reset' ? 'تغيير كلمة المرور' : 'تسجيل الدخول'}
@@ -370,7 +370,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
               href="/mailpit/"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--mn-accent-text)] hover:underline"
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--ab-accent-text)] hover:underline"
             >
               <span>فتح صندوق البريد الداخلي (Mailpit)</span>
               <ExternalLink className="h-3 w-3" />
@@ -378,8 +378,8 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
           </div>
 
           {/* RESEND VERIFICATION SECTION (Available in verify mode or login mode) */}
-          <div className="mt-5 border-t border-[var(--mn-border)] pt-4">
-            <p className="text-xs font-bold text-[var(--mn-heading)]">لم يصلك رابط أو رمز التحقق؟</p>
+          <div className="mt-5 border-t border-[var(--ab-border)] pt-4">
+            <p className="text-xs font-bold text-[var(--ab-heading)]">لم يصلك رابط أو رمز التحقق؟</p>
             <div className="mt-2 flex gap-2">
               <input
                 id="resend-email-input"
@@ -387,20 +387,20 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
                 value={resendEmail}
                 onChange={(event) => setResendEmail(event.target.value)}
                 placeholder="أدخل بريدك المسجل لإعادة الإرسال"
-                className="mn-search-control flex-1 text-xs outline-none"
+                className="ab-search-control flex-1 text-xs outline-none"
               />
               <button
                 type="button"
                 onClick={handleResend}
                 disabled={resendLoading}
-                className="flex items-center gap-1 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface-elevated)] px-3 py-2 text-xs font-bold text-[var(--mn-heading)] transition hover:bg-[var(--mn-surface)] disabled:opacity-50"
+                className="flex items-center gap-1 rounded-xl border border-[var(--ab-border)] bg-[var(--ab-surface-elevated)] px-3 py-2 text-xs font-bold text-[var(--ab-heading)] transition hover:bg-[var(--ab-surface)] disabled:opacity-50"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${resendLoading ? 'animate-spin' : ''}`} />
                 <span>إعادة الإرسال</span>
               </button>
             </div>
-            {resendError && <p className="mt-2 text-[11px] font-semibold text-[var(--mn-danger-text)]">{resendError}</p>}
-            {resendMessage && <p className="mt-2 text-[11px] font-semibold text-[var(--mn-success-text)]">{resendMessage}</p>}
+            {resendError && <p className="mt-2 text-[11px] font-semibold text-[var(--ab-danger-text)]">{resendError}</p>}
+            {resendMessage && <p className="mt-2 text-[11px] font-semibold text-[var(--ab-success-text)]">{resendMessage}</p>}
           </div>
 
           <div className="mt-4 text-center">
@@ -408,7 +408,7 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
               <button
                 type="button"
                 onClick={() => { setMode('signup'); setError(null); setSuccess(null); }}
-                className="text-xs font-semibold text-[var(--mn-primary)] hover:underline"
+                className="text-xs font-semibold text-[var(--ab-primary)] hover:underline"
               >
                 ليس لديك حساب؟ إنشاء حساب جديد
               </button>
@@ -416,14 +416,14 @@ export function StudentAuthPage({ onAuthenticated }: { onAuthenticated: (destina
               <button
                 type="button"
                 onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
-                className="text-xs font-semibold text-[var(--mn-primary)] hover:underline"
+                className="text-xs font-semibold text-[var(--ab-primary)] hover:underline"
               >
                 لديك حساب بالفعل؟ تسجيل الدخول
               </button>
             )}
           </div>
-          {mode === 'login' && <button type="button" onClick={() => { setMode('forgot'); setError(null); setSuccess(null); }} className="mt-2 block w-full text-center text-xs font-semibold text-[var(--mn-primary)] hover:underline">نسيت كلمة المرور؟</button>}
-          <p className="mt-3 text-center text-[10px] leading-4 text-[var(--mn-text-muted)]">
+          {mode === 'login' && <button type="button" onClick={() => { setMode('forgot'); setError(null); setSuccess(null); }} className="mt-2 block w-full text-center text-xs font-semibold text-[var(--ab-primary)] hover:underline">نسيت كلمة المرور؟</button>}
+          <p className="mt-3 text-center text-[10px] leading-4 text-[var(--ab-text-muted)]">
             طلاب ومديرو المنصة يستخدمون نفس المصادقة؛ يتم اعتماد الحساب بعد التحقق من ملكية البريد الإلكتروني.
           </p>
         </form>

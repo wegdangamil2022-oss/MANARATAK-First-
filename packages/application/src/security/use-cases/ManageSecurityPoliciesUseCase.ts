@@ -19,7 +19,7 @@ import {
   SecurityVersionPublishedEvent,
   SecurityPolicyDeprecatedEvent,
   SecurityPolicyArchivedEvent
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   CreateSecurityPolicyDto,
   UpdateSecurityPolicyDto,

@@ -10,7 +10,7 @@ import {
   CourseRelationshipAnalysisResult,
   CourseRelationshipReviewReadModel,
   ICourseRelationshipRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { courseSourceRelationshipReviewRequired } from './CourseSourceRelationshipReadiness';
 
 const TOPIC_SEPARATOR = /\s*(?:•|\||;|\n)\s*/g;

@@ -10,7 +10,7 @@ const verifier = fileURLToPath(
   new URL('../../scripts/verify/verify-final-repository-organization.mjs', import.meta.url),
 );
 function inspect(files = {}, directories = []) {
-  const temporary = mkdtempSync(path.join(tmpdir(), 'manaratak-organization-'));
+  const temporary = mkdtempSync(path.join(tmpdir(), 'absheer-organization-'));
   // Managed checkouts commonly live under /workspace; that parent directory
   // must not make the entire checkout look like the repository's datasets.
   const root = path.join(temporary, 'workspace', 'fixture');

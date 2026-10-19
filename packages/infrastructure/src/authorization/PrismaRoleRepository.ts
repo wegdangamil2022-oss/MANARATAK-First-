@@ -1,7 +1,7 @@
 import { PrismaDutyGuard } from './PrismaDutyGuard';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { AtomicPersistenceContext, Role, PermissionReference, IRoleRepository, ITransactionalRoleRepository } from '@manaratak/domain';
-import { ISpecification } from '@manaratak/core';
+import { AtomicPersistenceContext, Role, PermissionReference, IRoleRepository, ITransactionalRoleRepository } from '@absheer/domain';
+import { ISpecification } from '@absheer/core';
 
 export interface RoleRecordRow {
   id: string;

@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: majors
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
+-- ABSHEER_MIGRATION_OWNER: majors
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
 -- SOURCE ONLY: not applied; historical publications require separate reviewed activation.
 CREATE TABLE "NewMajorCandidateDecision" (
  "id" TEXT PRIMARY KEY, "candidateKey" TEXT NOT NULL, "sourceDigest" TEXT NOT NULL,

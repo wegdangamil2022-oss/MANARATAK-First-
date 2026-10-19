@@ -2,7 +2,7 @@ import { CacheEntry } from '../aggregates/CacheEntry';
 import { CacheReference } from '../value-objects/CacheReference';
 import { CacheScope } from '../value-objects/CacheScope';
 import { CacheKey } from '../value-objects/CacheKey';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 
 export class CacheEntrySpecification implements ISpecification<CacheEntry> {
   private constructor(

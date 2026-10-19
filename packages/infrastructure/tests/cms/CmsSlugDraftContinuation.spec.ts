@@ -17,7 +17,7 @@ function fixture() {
         .fn()
         .mockResolvedValue({
           id: 'content-1',
-          siteIdentifier: 'manaratak',
+          siteIdentifier: 'absheer',
           primaryLocale: 'ar',
           contentType: 'ARTICLE',
         }),

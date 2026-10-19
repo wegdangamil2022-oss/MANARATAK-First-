@@ -1,4 +1,4 @@
-import { HealthStatus, HealthCheckResult, IHealthIndicator } from '@manaratak/core';
+import { HealthStatus, HealthCheckResult, IHealthIndicator } from '@absheer/core';
 
 export class DatabaseHealthChecker implements IHealthIndicator {
   public readonly name = 'database';

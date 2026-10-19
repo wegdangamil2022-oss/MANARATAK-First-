@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
-import type { ImportSourceDefinition } from '@manaratak/domain';
-import type { ISourceAcquisitionLimiter } from '@manaratak/application';
+import type { ImportSourceDefinition } from '@absheer/domain';
+import type { ISourceAcquisitionLimiter } from '@absheer/application';
 /** All API processes reserve origin and deployment slots in one PostgreSQL transaction. */
 export class PrismaSourceAcquisitionLimiter implements ISourceAcquisitionLimiter {
   constructor(private readonly prisma: PrismaClient, private readonly sleep: (ms: number) => Promise<void> = ms => new Promise(resolve => setTimeout(resolve, ms)),

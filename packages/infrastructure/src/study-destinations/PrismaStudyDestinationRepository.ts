@@ -19,7 +19,7 @@ import {
   StudyDestinationVerificationStatus,
   ReferenceCountryDto,
   ReferenceLifecycleState,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 const include = { studyLanguages: true } as const;
 type ProfileRow = Prisma.StudyDestinationProfileGetPayload<{ include: typeof include }>;
 const array = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);

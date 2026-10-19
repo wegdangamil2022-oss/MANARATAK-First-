@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import type {NewMajorCandidateSourceRef} from '@manaratak/domain';
+import type {NewMajorCandidateSourceRef} from '@absheer/domain';
 
 /** University-owned mutation port used by the Major discovery workflow. */
 export class PrismaUniversityMajorResolutionWriter {

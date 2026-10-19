@@ -7,7 +7,7 @@ import {
   ConnectorSignature,
   DriftType,
   DriftSeverity
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { DriftDetectionService } from '../../src/import-foundation/services/DriftDetectionService';
 
 describe('DriftDetectionService', () => {

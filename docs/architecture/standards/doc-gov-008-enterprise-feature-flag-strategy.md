@@ -1,12 +1,12 @@
-# MANARATAK 2.0: Enterprise Feature Flag Strategy
+# ABSHEER 2.0: Enterprise Feature Flag Strategy
 
 ## 1. Purpose
 
-The Enterprise Feature Flag Strategy defines the official, unified approach for defining, managing, and retiring feature flags across the MANARATAK 2.0 platform. Feature flags (or toggles) are a critical mechanism for controlled rollout, experimentation, operational safety, and decoupling deployment from release. This strategy ensures that feature flags are used consistently, governed properly, and retired when no longer needed to prevent technical debt and operational ambiguity.
+The Enterprise Feature Flag Strategy defines the official, unified approach for defining, managing, and retiring feature flags across the ABSHEER 2.0 platform. Feature flags (or toggles) are a critical mechanism for controlled rollout, experimentation, operational safety, and decoupling deployment from release. This strategy ensures that feature flags are used consistently, governed properly, and retired when no longer needed to prevent technical debt and operational ambiguity.
 
 ## 2. Scope
 
-This strategy governs the use of feature flags across all components within the approved MANARATAK 2.0 architecture.
+This strategy governs the use of feature flags across all components within the approved ABSHEER 2.0 architecture.
 
 **Covered Areas:**
 *   **Enterprise Features:** Global capabilities spanning multiple domains.
@@ -124,7 +124,7 @@ Feature_Flag:
   Rollout_Strategy: "Canary rollout, starting at 10% of traffic."
   Rollback_Strategy: "Disable flag via control plane. Reverts to legacy authentication flow. No data loss expected."
   Related_ADR: "ADR-0050"
-  Related_Baseline: "MANARATAK 2.0 - Phase 4"
+  Related_Baseline: "ABSHEER 2.0 - Phase 4"
 ```
 
 ## 10. Compliance Checklist

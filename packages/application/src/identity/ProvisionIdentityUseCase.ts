@@ -1,4 +1,4 @@
-import { UseCase, Result, ResultFactory } from '@manaratak/core';
+import { UseCase, Result, ResultFactory } from '@absheer/core';
 import {
   ContactRegistry,
   Identity,
@@ -8,7 +8,7 @@ import {
   Profile,
   TechnicalMetadata,
   User,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { ProvisionIdentityInput, IdentityDto } from './dtos';
 import { IdentityDtoMapper } from './mapper';
 

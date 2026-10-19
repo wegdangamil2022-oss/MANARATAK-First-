@@ -1,7 +1,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { referenceImportPayloadDigest, ReferenceDataScreeningHandoffConsumer } from '../../src/reference-data/services/ReferenceDataScreeningHandoffConsumer';
-import type { UniversalImportHandoff } from '@manaratak/domain';
+import type { UniversalImportHandoff } from '@absheer/domain';
 
 const handoff = (referenceMetadata: Record<string, string> | undefined, normalizedPayload: Record<string, unknown>): UniversalImportHandoff => ({
   handoffId: 'p7-screen-1',

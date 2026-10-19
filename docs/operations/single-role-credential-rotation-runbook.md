@@ -1,11 +1,11 @@
-# Single-Role Credential Rotation Runbook (manaratak_application)
+# Single-Role Credential Rotation Runbook (absheer_application)
 
-This runbook defines the controlled procedure for rotating the password of the single existing PostgreSQL role `manaratak_application` without affecting `manaratak_probe`, `manaratak_migration`, or table schemas/data.
+This runbook defines the controlled procedure for rotating the password of the single existing PostgreSQL role `absheer_application` without affecting `absheer_probe`, `absheer_migration`, or table schemas/data.
 
 ---
 
 ## 1. Safety Invariants
-- **Scope Isolation:** Affects ONLY `manaratak_application`.
+- **Scope Isolation:** Affects ONLY `absheer_application`.
 - **Zero RBAC / Schema Mutations:** NEVER invokes `scripts/database/provision-roles.mjs`. Modifies no tables, grants, sequences, or schemas.
 - **Approval Governance:** Supports explicit Dual-Control Approval (`ROTATION_ACTOR_ID` !== `ROTATION_APPROVER_ID`) OR Solo Project Owner Governance (`PROJECT_OWNER_POLICY=SOLO_OWNER` with verified `ROTATION_OWNER_ID`).
 - **Gate Contract:** Mutation gate purpose must be exactly `maintenance`.
@@ -58,7 +58,7 @@ node scripts/rotate-application-role.mjs
 ```json
 {
   "status": "SUCCESS",
-  "role": "manaratak_application",
+  "role": "absheer_application",
   "databaseMutated": true,
   "configUpdated": true
 }
@@ -91,7 +91,7 @@ node -e '
 import { PrismaClient } from "@prisma/client";
 const password = process.env.DB_APPLICATION_PASSWORD;
 if (!password) throw new Error("DB_APPLICATION_PASSWORD not set");
-const url = `postgresql://manaratak_application:${encodeURIComponent(password)}@localhost/${process.env.SQL_DB_NAME}?host=${encodeURIComponent(process.env.SQL_HOST)}`;
+const url = `postgresql://absheer_application:${encodeURIComponent(password)}@localhost/${process.env.SQL_DB_NAME}?host=${encodeURIComponent(process.env.SQL_HOST)}`;
 const prisma = new PrismaClient({ datasources: { db: { url } } });
 prisma.$connect()
   .then(() => {
@@ -154,7 +154,7 @@ prisma.$connect()
 ---
 
 ## 6. Post-Rotation Read-Only Verification
-Verify that `manaratak_application` can connect and has table write privileges:
+Verify that `absheer_application` can connect and has table write privileges:
 ```bash
 node -e '
 import("@prisma/client").then(async ({ PrismaClient }) => {

@@ -1,4 +1,4 @@
-import { ValueType, SettingValidationRules } from '@manaratak/domain';
+import { ValueType, SettingValidationRules } from '@absheer/domain';
 
 export interface CreateSettingDefinitionInput {
   id: string;

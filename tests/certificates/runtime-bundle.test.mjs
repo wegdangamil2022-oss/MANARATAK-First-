@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
-import { APPROVED_CERTIFICATE_DESIGN } from '@manaratak/shared';
+import { APPROVED_CERTIFICATE_DESIGN } from '@absheer/shared';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 test('API-format certificate bundle renders real PDFs with packaged fonts and logo', async () => {
@@ -43,7 +43,7 @@ test('API-format certificate bundle renders real PDFs with packaged fonts and lo
         verificationUrl: 'https://example.test/certificates/verify?code=TEST',
         recipientDisplayName: 'محمد أحمد',
         achievementDisplayName: 'Course',
-        issuerName: 'MANARATAK',
+        issuerName: 'ABSHEER',
         issuedAt: new Date('2026-10-10T00:00:00Z'),
       },
       templateVersion: {

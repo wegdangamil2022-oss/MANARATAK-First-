@@ -3,7 +3,7 @@ import {
   AuditRecord, AuditReference, AuditRetentionMetadata, AuditSeverity, AuditTimestamp,
   ComplianceMetadata, ContextMetadata, CorrelationReference, SourceReference,
   TargetReference, TraceReference,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CreateAuditRecordDto } from '../dtos/AuditDtos';
 import { AuditRetentionPolicyResolver } from './AuditRetentionPolicyResolver';
 

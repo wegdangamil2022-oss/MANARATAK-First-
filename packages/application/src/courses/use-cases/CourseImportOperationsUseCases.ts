@@ -2,7 +2,7 @@ import {
   CourseImportOperationsOverview,
   CourseImportReviewPage,
   IImportedCourseOperationsRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseImportCoordinator } from './CourseImportCoordinator';
 import { CourseImportIdentityDiffUseCase } from './CourseImportIdentityDiffUseCase';
 import type { CourseImportTransferApproval } from '../contracts/CourseImportTransferContracts';

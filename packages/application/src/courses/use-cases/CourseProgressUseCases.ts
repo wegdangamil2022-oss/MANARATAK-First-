@@ -26,7 +26,7 @@ import {
   StudentCourseProgressSnapshotDto,
   SubmitQuizAttemptDto,
   UpsertLessonProgressDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AtomicDomainMutationCoordinator, AtomicMutationRequestContext } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 
 export class CourseProgressUseCases {
@@ -59,7 +59,7 @@ export class CourseProgressUseCases {
     const course = await this.courseRepository.findById(courseId);
     if (!course) throw new Error(`Course with id ${courseId} not found`);
     if (course.originType === CourseOriginType.EXTERNAL_LINKED_COURSE) {
-      throw new Error('External linked courses do not support MANARATAK enrollment or local progress tracking');
+      throw new Error('External linked courses do not support ABSHEER enrollment or local progress tracking');
     }
     if (course.status !== CourseStatus.PUBLISHED) throw new Error('COURSE_LEARNING_REQUIRES_PUBLISHED_COURSE');
     return course;

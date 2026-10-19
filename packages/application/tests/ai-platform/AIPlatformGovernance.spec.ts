@@ -7,7 +7,7 @@ import {
   evaluationDefinitionChecksum,
   estimateQuotaReservation,
 } from '../../src/ai-platform/use-cases/AIPlatformUseCases';
-import { AISafetyDecision } from '@manaratak/domain';
+import { AISafetyDecision } from '@absheer/domain';
 
 describe('Phase 17 safety and resilience', () => {
   it('redacts PII and blocks prompt injection before provider routing', () => {

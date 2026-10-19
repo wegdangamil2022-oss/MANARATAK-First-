@@ -1,4 +1,4 @@
--- MANARATAK Translation Program — TR-WP06
+-- ABSHEER Translation Program — TR-WP06
 -- SOURCE-ONLY migration draft.
 -- Do not apply to preserved Cloud SQL during source programming.
 

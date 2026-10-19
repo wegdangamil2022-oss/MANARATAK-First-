@@ -1,7 +1,7 @@
--- MANARATAK_MIGRATION_OWNER: career
--- MANARATAK_MIGRATION_SCOPE: owner_only
--- MANARATAK_ARCH_DECISION: ADR-028
--- MNT-AUD-0055: retained Phase 21 owner scope: career profile, applications/CV and alumni privacy.
+-- ABSHEER_MIGRATION_OWNER: career
+-- ABSHEER_MIGRATION_SCOPE: owner_only
+-- ABSHEER_ARCH_DECISION: ADR-028
+-- ABSH-AUD-0055: retained Phase 21 owner scope: career profile, applications/CV and alumni privacy.
 
 CREATE TABLE "CareerProfileRecord" (
   "id" TEXT NOT NULL,

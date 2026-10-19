@@ -6,7 +6,7 @@ import type {
   ServiceCatalogItemDto,
   CareerJobPostingDto,
   ReferenceCountryDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { publishedCareerJob, careerRecord } from '../career-alumni/CareerPolicy';
 import { reviewedGraphLabel } from './GraphReadPolicy';
 export function graphPublishedLabel(

@@ -11,7 +11,7 @@ describe('MajorPhaseLinkingService', () => {
       canonicalDedupKey: 'computer-science',
       displayName: 'Computer Science',
       degreeLevel: 'Bachelor',
-      sourceClassificationSystem: 'MANARATAK',
+      sourceClassificationSystem: 'ABSHEER',
       academicFieldOrDiscipline: 'Computing',
       collegeOrFaculty: 'College of Computing',
       academicFieldId: 'field-computing',

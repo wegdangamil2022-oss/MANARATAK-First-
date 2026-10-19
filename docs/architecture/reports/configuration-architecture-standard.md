@@ -1,7 +1,7 @@
 # Configuration Architecture Standard
 
 ## 1. Executive Summary
-This document establishes the official Configuration Architecture for the MANARATAK monorepo. It defines how configuration data, environment variables, and secrets are loaded, validated, cached, and consumed across all packages. Direct usage of `process.env` is strictly prohibited in business logic to ensure testability, type safety, and predictable environments. Furthermore, configuration is treated as a versioned architectural contract with a strict lifecycle to ensure operational stability. An audit has been conducted to identify existing `process.env` usages, accompanied by a migration plan.
+This document establishes the official Configuration Architecture for the ABSHEER monorepo. It defines how configuration data, environment variables, and secrets are loaded, validated, cached, and consumed across all packages. Direct usage of `process.env` is strictly prohibited in business logic to ensure testability, type safety, and predictable environments. Furthermore, configuration is treated as a versioned architectural contract with a strict lifecycle to ensure operational stability. An audit has been conducted to identify existing `process.env` usages, accompanied by a migration plan.
 
 ## 2. Configuration Architecture
 
@@ -100,7 +100,7 @@ To bring the monorepo into full compliance with the Configuration Architecture S
 2.  **Exclusions:** Explicitly exclude `packages/config/src/providers/EnvironmentConfigurationProvider.ts`, `packages/testing/*`, and build tools (e.g., `vite.config.ts`) from the ESLint rule.
 
 ### Phase 2: Schema Definition & Versioning (Iterative)
-1.  Define Zod schemas in `@manaratak/config` (or `@manaratak/core`) representing the required Configuration Domains (Database, Authentication, Storage, etc.).
+1.  Define Zod schemas in `@absheer/config` (or `@absheer/core`) representing the required Configuration Domains (Database, Authentication, Storage, etc.).
 2.  Implement the Configuration Schema Versioning checks (`CONFIG_VERSION`) within the `ConfigurationService` bootstrap sequence.
 3.  Update the concrete `ConfigurationService` to parse the payload from `EnvironmentConfigurationProvider` against these schemas.
 

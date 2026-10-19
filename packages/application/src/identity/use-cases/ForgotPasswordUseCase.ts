@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { IIdentityRepository, IPasswordResetTokenRepository, IEmailDeliveryGateway } from '@manaratak/domain';
+import { IIdentityRepository, IPasswordResetTokenRepository, IEmailDeliveryGateway } from '@absheer/domain';
 
 export interface ForgotPasswordInput {
   primaryEmail?: string;

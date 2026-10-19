@@ -1,11 +1,11 @@
 import { testDiscoveryOwnerRouter } from './TestDiscoveryOwnerRouter.js';
-import type {TestDiscoveryOwnerUseCases} from '@manaratak/application';
+import type {TestDiscoveryOwnerUseCases} from '@absheer/application';
 import { Router, Request, Response, NextFunction } from 'express';
-import { ValidationException } from '@manaratak/core';
-import { StudentToolExecutionUseCases, StudentToolRegistryUseCases } from '@manaratak/application';
+import { ValidationException } from '@absheer/core';
+import { StudentToolExecutionUseCases, StudentToolRegistryUseCases } from '@absheer/application';
 import { z } from 'zod';
-import { AuthorizationEvaluatorService } from '@manaratak/domain';
-import { StudentToolExecutionStatus, StudentToolLifecycleStatus } from '@manaratak/domain';
+import { AuthorizationEvaluatorService } from '@absheer/domain';
+import { StudentToolExecutionStatus, StudentToolLifecycleStatus } from '@absheer/domain';
 import {
   parseStrict,
   studentToolAdminListQuerySchema,

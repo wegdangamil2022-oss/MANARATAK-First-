@@ -1,4 +1,4 @@
-import { IPasswordResetTokenRepository, PasswordResetTokenRecord } from '@manaratak/domain';
+import { IPasswordResetTokenRepository, PasswordResetTokenRecord } from '@absheer/domain';
 
 export class InMemoryPasswordResetTokenRepository implements IPasswordResetTokenRepository {
   private readonly tokens = new Map<string, PasswordResetTokenRecord>();

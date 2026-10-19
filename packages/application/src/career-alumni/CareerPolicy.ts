@@ -1,4 +1,4 @@
-import type { CareerEmployerDto, CareerJobPostingDto, CareerAlumniProfileDto } from '@manaratak/domain';
+import type { CareerEmployerDto, CareerJobPostingDto, CareerAlumniProfileDto } from '@absheer/domain';
 export const careerRecord = (value: unknown): Record<string, any> =>
   value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
 export const careerGovernance = (value: { metadata?: Record<string, unknown> | null }) => careerRecord(value.metadata?._career);

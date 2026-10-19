@@ -11,7 +11,7 @@ function fixture(completionCount = 1) {
     tags: [], attachments: [], publishedAt: null,
   };
   const root = {
-    id: 'content-1', authorId: 'editor', siteIdentifier: 'manaratak',
+    id: 'content-1', authorId: 'editor', siteIdentifier: 'absheer',
     contentType: 'STUDY_GUIDE', categorySlug: 'guide', publicId: 'CMS-001',
   };
   const tx = {

@@ -1,12 +1,12 @@
-# MANARATAK 2.0: Enterprise Architecture Glossary
+# ABSHEER 2.0: Enterprise Architecture Glossary
 
 ## 1. Purpose
 
-The Enterprise Architecture Glossary establishes the official, unified vocabulary for the MANARATAK 2.0 platform. Its purpose is to ensure that all stakeholders—architects, developers, product owners, and governance bodies—use the exact same terminology when discussing, designing, and documenting the system. This eliminates ambiguity, accelerates onboarding, ensures documentation quality, and provides a strict semantic foundation for the enterprise architecture.
+The Enterprise Architecture Glossary establishes the official, unified vocabulary for the ABSHEER 2.0 platform. Its purpose is to ensure that all stakeholders—architects, developers, product owners, and governance bodies—use the exact same terminology when discussing, designing, and documenting the system. This eliminates ambiguity, accelerates onboarding, ensures documentation quality, and provides a strict semantic foundation for the enterprise architecture.
 
 ## 2. Scope
 
-This glossary covers the mandatory terminology for the approved MANARATAK 2.0 architecture, including at minimum:
+This glossary covers the mandatory terminology for the approved ABSHEER 2.0 architecture, including at minimum:
 
 *   **Enterprise Architecture Terms:** Global concepts, layers, and structural definitions.
 *   **Domain-Driven Design (DDD) Terms:** Bounded contexts, aggregates, entities, and events.
@@ -45,7 +45,7 @@ This glossary covers the mandatory terminology for the approved MANARATAK 2.0 ar
 | **Architecture Decision Record (ADR)** | A formalized document that captures a single, significant architectural decision and its context. | Governance | Enterprise | Phase 3 Baseline | Immutable once approved. |
 | **Architecture Review Board (ARB)** | The governing body responsible for reviewing, approving, and enforcing architectural standards. | Governance | Enterprise | Enterprise Baseline | Final authority on architecture. |
 | **Bounded Context** | A semantic contextual boundary within which a specific domain model is defined and applicable. | DDD | Enterprise | Phase 2 Baseline | Enforces strict boundaries. |
-| **Clean Architecture** | The architectural pattern separating enterprise logic from infrastructure, ensuring zero upward dependency. | Architecture | Enterprise | Phase 3 Baseline | Core architectural style for MANARATAK 2.0. |
+| **Clean Architecture** | The architectural pattern separating enterprise logic from infrastructure, ensuring zero upward dependency. | Architecture | Enterprise | Phase 3 Baseline | Core architectural style for ABSHEER 2.0. |
 | **Domain Event** | An asynchronous message capturing a business-relevant occurrence that happened within a domain. | DDD / Platform | Event Foundation | Phase 5.11 Baseline | Used for eventual consistency. |
 | **Enterprise CMS** | The autonomous Bounded Context dedicated exclusively to Editorial Content Governance. It strictly owns editorial content (Articles, Pages, Navigation) and never owns Business Entities. | Domain | Enterprise CMS | Enterprise Content Ownership Model | Must not be confused with Business Domains. |
 | **International Tests Domain** | The enterprise domain responsible for the lifecycle and processing of international test structures. | Domain | International Tests | Phase 9 Baseline | Adheres to strict compliance requirements. |

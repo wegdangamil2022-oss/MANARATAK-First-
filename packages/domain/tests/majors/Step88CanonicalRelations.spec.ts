@@ -5,7 +5,7 @@ import {
   MajorLevelProfileDto,
   MajorImportCompletenessState,
   MajorStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   AcademicTaxonomyResolver,
   TaxonomyResolutionOutcome,

@@ -1,11 +1,11 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { LocalizedPublicAcademicTaxonomyUseCases } from '@manaratak/application';
+import { LocalizedPublicAcademicTaxonomyUseCases } from '@absheer/application';
 import {
   AcademicTaxonomyNodeType,
   AcademicStandardType,
   IAcademicTaxonomyRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { localeQuerySchema, parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
 
 export class AcademicTaxonomyPublicRouter {

@@ -9,7 +9,7 @@ import {
   OutboxProcessingState,
   SanitizedOutboxFailure,
   TransactionalOutboxEntry,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 type OutboxDelegate = {
   create(args: Record<string, unknown>): Promise<unknown>;

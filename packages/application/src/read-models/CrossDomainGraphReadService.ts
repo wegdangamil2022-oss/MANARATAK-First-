@@ -1,6 +1,6 @@
 import {finalizeGraph,type GraphEdgeCursors} from './GraphPagination';
 import {graphProgramLabel,graphPublishedLabel,graphMajorLabel,graphUniversityLabel,graphScholarshipLabel,graphTestLabel,graphServiceLabel,graphCareerLabel,graphCountryLabel} from './GraphOwnerLabels';
-import type {TestDiscoveryPage} from '@manaratak/domain';
+import type {TestDiscoveryPage} from '@absheer/domain';
 import type {TestDiscoveryOwnerUseCases} from '../integration/TestDiscoveryOwnerUseCases';
 import {
   createGraphReadScope,
@@ -31,7 +31,7 @@ import {
   UniversityAcademicProgramReadDto,
   UniversityDto,
   UniversityStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 type MajorGraphReadRepository = IMajorRepository & Required<Pick<IMajorRepository, 'findPublishedByIds'>>;
 type UniversityGraphReadRepository = IUniversityRepository & Required<
@@ -651,7 +651,7 @@ export class CrossDomainGraphReadService {
   private async relatedEditorial(targetType: CmsDomainTargetType, targetId: string, locale: string,options:CrossDomainGraphReadOptions={},scope?:GraphReadScope): Promise<EditorialGraphIdentity[]> {
     if (!this.cmsRepository?.listPublishedByDomainTarget) return [];
     const ownerPage=this.cmsRepository.listPublishedDomainTargetPage?await this.cmsRepository.listPublishedDomainTargetPage(targetType,targetId,locale,options.editorialCursor,options.pageSize??12):null;
-    const rows=ownerPage?.data??await this.cmsRepository.listPublishedByDomainTarget(targetType,targetId,locale,'manaratak',6);
+    const rows=ownerPage?.data??await this.cmsRepository.listPublishedByDomainTarget(targetType,targetId,locale,'absheer',6);
     if(ownerPage&&scope)scope.collections.editorialContent={state:'AVAILABLE',scope:'OWNER_QUERY',total:ownerPage.total,hasMore:ownerPage.hasMore,nextCursor:ownerPage.nextCursor};
     return rows.map((item: PublicCmsContentDto) => ({
       contentId: item.contentId,

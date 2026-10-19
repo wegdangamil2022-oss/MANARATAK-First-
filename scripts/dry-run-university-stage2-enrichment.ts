@@ -1,12 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@manaratak/shared';
+import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@absheer/shared';
 import { UniversityStage2EnrichmentDryRunUseCase } from '../packages/application/src/universities/use-cases/UniversityStage2EnrichmentDryRunUseCase';
-import type { UniversalImportHandoff } from '@manaratak/domain';
+import type { UniversalImportHandoff } from '@absheer/domain';
 
 const sourceDirectory = path.resolve(process.argv[2] ?? 'workspace/import-sources/universities/stage-2-enrichment');
-const countrySourcePath = path.resolve(process.argv[3] ?? 'workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx');
+const countrySourcePath = path.resolve(process.argv[3] ?? 'workspace/reference-data/countries/ABSHEER_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx');
 const files = fs.readdirSync(sourceDirectory).filter(file => file.toLowerCase().endsWith('.xlsx')).sort();
 if (!files.length) throw new Error(`No Stage 2 XLSX files found in ${sourceDirectory}`);
 

@@ -1,8 +1,8 @@
-import { ASSET_LIFECYCLE_RECOVERY_JOB_TYPE } from '@manaratak/application';
-import { AUDIT_ALERT_EVALUATION_JOB_TYPE } from '@manaratak/application';
-import { CAREER_MAINTENANCE_JOB_TYPE, SERVICE_MAINTENANCE_JOB_TYPE, ASSET_ACTIVATION_RECOVERY_JOB_TYPE, RETENTION_SWEEP_JOB_TYPE, CMS_SCHEDULED_PUBLISH_JOB_TYPE, IMPORT_QUEUE_SWEEP_JOB_TYPE, AI_ASYNC_SWEEP_JOB_TYPE, FINANCE_RECONCILIATION_JOB_TYPE, NOTIFICATION_DELIVERY_JOB_TYPE } from '@manaratak/application';
-import type { AwilixContainer } from '@manaratak-vendor/awilix-core';
-import type { IConfigurationService } from '@manaratak/core';
+import { ASSET_LIFECYCLE_RECOVERY_JOB_TYPE } from '@absheer/application';
+import { AUDIT_ALERT_EVALUATION_JOB_TYPE } from '@absheer/application';
+import { CAREER_MAINTENANCE_JOB_TYPE, SERVICE_MAINTENANCE_JOB_TYPE, ASSET_ACTIVATION_RECOVERY_JOB_TYPE, RETENTION_SWEEP_JOB_TYPE, CMS_SCHEDULED_PUBLISH_JOB_TYPE, IMPORT_QUEUE_SWEEP_JOB_TYPE, AI_ASYNC_SWEEP_JOB_TYPE, FINANCE_RECONCILIATION_JOB_TYPE, NOTIFICATION_DELIVERY_JOB_TYPE } from '@absheer/application';
+import type { AwilixContainer } from '@absheer-vendor/awilix-core';
+import type { IConfigurationService } from '@absheer/core';
 
 /** Idempotent definitions; the durable queue owns scheduling, leases, retry and DLQ. */
 export async function registerRecurringJobs(container: AwilixContainer, config: IConfigurationService): Promise<void> {

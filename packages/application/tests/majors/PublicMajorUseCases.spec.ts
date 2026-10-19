@@ -3,7 +3,7 @@ import {
   IMajorRepository,
   MajorImportCompletenessState,
   MajorStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { PublicMajorUseCases } from '../../src/majors/use-cases/PublicMajorUseCases';
 
 describe('PublicMajorUseCases', () => {

@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 import { CanonicalPicker } from '../components/CanonicalPicker';
 import { canonicalPickerApi } from '../api/canonicalPickers';
-import type { InternationalTestStatus as CanonicalTestStatus } from '@manaratak/domain';
+import type { InternationalTestStatus as CanonicalTestStatus } from '@absheer/domain';
 type InternationalTestStatus = `${CanonicalTestStatus}`;
 import { AlertCircle,Archive,BookOpen,CheckCircle2,Eye,Filter,GraduationCap,Loader2,Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';

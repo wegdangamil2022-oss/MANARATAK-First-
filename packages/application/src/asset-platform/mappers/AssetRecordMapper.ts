@@ -1,4 +1,4 @@
-import { AssetRecord } from '@manaratak/domain';
+import { AssetRecord } from '@absheer/domain';
 import { AssetRecordDto } from '../dtos/AssetDtos';
 
 export class AssetRecordMapper {

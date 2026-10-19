@@ -1,9 +1,9 @@
-# MANARATAK 2.0
+# ABSHEER 2.0
 # P0-3 Prevent Reimplementation of Core Foundations
 # Documentation Governance & Baseline Adoption
 
 ## 1. Governance Summary
-The Enterprise Foundation Program has successfully completed all phases of Discovery, Blueprinting, Specification, and Migration Planning. Following Final ARB Validation, all documentation has been registered and verified. The program's artifacts are now officially adopted into the MANARATAK 2.0 Enterprise Architecture Baseline.
+The Enterprise Foundation Program has successfully completed all phases of Discovery, Blueprinting, Specification, and Migration Planning. Following Final ARB Validation, all documentation has been registered and verified. The program's artifacts are now officially adopted into the ABSHEER 2.0 Enterprise Architecture Baseline.
 
 ## 2. Documentation Registration Report
 All documents have been assigned formal IDs and registered in the Enterprise Documentation Index:
@@ -64,4 +64,4 @@ The governance review is successful. No duplicate baselines, conflicting specifi
 
 The Enterprise Foundation Program is officially closed.
 
-P0-3 Prevent Reimplementation of Core Foundations is completed and permanently adopted as part of the MANARATAK 2.0 Enterprise Architecture Baseline.
+P0-3 Prevent Reimplementation of Core Foundations is completed and permanently adopted as part of the ABSHEER 2.0 Enterprise Architecture Baseline.

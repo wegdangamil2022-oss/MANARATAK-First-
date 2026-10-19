@@ -12,7 +12,7 @@ const execute = new (Object.getPrototypeOf(async function () {}).constructor)(
   'spawnSync',
   source,
 );
-const local = 'postgresql://fixture:fixture@localhost/manaratak_certificate_verification';
+const local = 'postgresql://fixture:fixture@localhost/absheer_certificate_verification';
 async function run(overrides = {}, tables = []) {
   let clients = 0,
     spawns = 0;
@@ -55,7 +55,7 @@ test('certificate rehearsal rejects foreign/wrong/mismatched targets before Pris
   for (const env of [
     {
       DATABASE_URL:
-        'postgresql://fixture:fixture@invalid.example/manaratak_certificate_verification',
+        'postgresql://fixture:fixture@invalid.example/absheer_certificate_verification',
     },
     { DATABASE_URL: local.replace('verification', 'production') },
     { CERTIFICATE_RUNTIME_ISOLATED: '0' },

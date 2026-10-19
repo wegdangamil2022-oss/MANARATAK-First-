@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { ServiceCatalogItemDto } from '@manaratak/domain';
+import { ServiceCatalogItemDto } from '@absheer/domain';
 
 export function stableServicePayload(value: unknown): string {
   if (Array.isArray(value))

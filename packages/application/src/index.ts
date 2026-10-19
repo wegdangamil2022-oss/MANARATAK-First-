@@ -112,7 +112,7 @@ export * from './shared-components/dtos/SharedComponentDtos';
 export * from './shared-components/gateways/IComponentRenderingGateway';
 export * from './shared-components/use-cases/ManageSharedComponentsUseCase';
 
-// MNT-AUD-0109: legacy registry-style foundation orchestrators are formally deferred.
+// ABSH-AUD-0109: legacy registry-style foundation orchestrators are formally deferred.
 // Their typed DTO/gateway contracts remain available internally, but no deferred use case is
 // exported from the canonical application barrel or registered in production DI.
 

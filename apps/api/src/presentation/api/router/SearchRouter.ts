@@ -1,7 +1,7 @@
 import { Router, type RequestHandler } from 'express';
-import { ManageSearchUseCase, INTERNAL_SEARCH_SCOPE, type IPublicSearchGateway, type MfaUseCases } from '@manaratak/application';
-import type { AuthorizationEvaluatorService } from '@manaratak/domain';
-import type { ITokenProvider, ISessionManager, IPrincipalAccessValidator } from '@manaratak/core';
+import { ManageSearchUseCase, INTERNAL_SEARCH_SCOPE, type IPublicSearchGateway, type MfaUseCases } from '@absheer/application';
+import type { AuthorizationEvaluatorService } from '@absheer/domain';
+import type { ITokenProvider, ISessionManager, IPrincipalAccessValidator } from '@absheer/core';
 import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory';
 import { z } from 'zod';
 

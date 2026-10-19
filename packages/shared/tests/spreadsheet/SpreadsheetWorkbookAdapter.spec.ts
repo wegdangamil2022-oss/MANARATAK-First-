@@ -10,7 +10,7 @@ import {
 describe('SpreadsheetWorkbookAdapter', () => {
   it('reads the tracked canonical Country workbook fixture', async () => {
     const fixture = readFileSync(resolve(
-      'workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx',
+      'workspace/reference-data/countries/ABSHEER_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx',
     ));
     const workbook = await readXlsxWorkbook(fixture);
     const countries = workbook.sheets.get('Countries');

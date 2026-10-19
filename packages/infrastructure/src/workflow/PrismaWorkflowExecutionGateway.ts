@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { WorkflowReference } from '@manaratak/domain';
-import { IWorkflowExecutionGateway } from '@manaratak/application';
+import { WorkflowReference } from '@absheer/domain';
+import { IWorkflowExecutionGateway } from '@absheer/application';
 
 export class PrismaWorkflowExecutionGateway implements IWorkflowExecutionGateway {
   constructor(private readonly prisma: PrismaClient) {}

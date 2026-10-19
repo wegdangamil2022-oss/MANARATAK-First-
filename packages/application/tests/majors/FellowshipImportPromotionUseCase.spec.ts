@@ -5,7 +5,7 @@ import {
   ImportRecordStatus,
   MajorImportCompletenessState,
   MajorStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { FellowshipImportPromotionUseCase } from '../../src/majors/use-cases/FellowshipImportPromotionUseCase';
 
 describe('FellowshipImportPromotionUseCase', () => {
@@ -30,7 +30,7 @@ describe('FellowshipImportPromotionUseCase', () => {
 
     const result = await useCase.promote(createRecord({
       canonicalMajorName: 'Clinical Cardiology Fellowship',
-      sourceClassificationSystem: 'MANARATAK_PHASE_10_CATALOG',
+      sourceClassificationSystem: 'ABSHEER_PHASE_10_CATALOG',
       classificationCode: 'FEL-0001',
       fellowshipType: 'Clinical Fellowship',
       professionalDomain: 'Medicine',
@@ -64,7 +64,7 @@ describe('FellowshipImportPromotionUseCase', () => {
 
     const result = await useCase.promote(createRecord({
       canonicalMajorName: 'Clinical Cardiology Fellowship',
-      sourceClassificationSystem: 'MANARATAK_PHASE_10_DETAIL_DOSSIER',
+      sourceClassificationSystem: 'ABSHEER_PHASE_10_DETAIL_DOSSIER',
       classificationCode: 'FEL-0001',
       fellowshipType: 'Clinical Fellowship',
       professionalDomain: 'Medicine',

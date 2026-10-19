@@ -15,7 +15,7 @@ import {
 } from '../../scripts/architecture/source-architecture-guard-core.mjs';
 
 function fixture(files) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'manaratak-p11-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'absheer-p11-'));
   for (const [relative, source] of Object.entries(files)) {
     const target = path.join(root, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
@@ -64,7 +64,7 @@ test('blocks a static prototype import even if the mode switch also has a dynami
 });
 
 test('blocks Admin persistence and Application bypass imports', () => {
-  const root = fixture({ 'apps/admin/src/page.tsx': "import { X } from '@manaratak/application'; import { PrismaClient } from '@prisma/client';" });
+  const root = fixture({ 'apps/admin/src/page.tsx': "import { X } from '@absheer/application'; import { PrismaClient } from '@prisma/client';" });
   assert.deepEqual(new Set(kinds(collectAdminBoundaryViolations(root))), new Set(['p23-application-bypass', 'p23-persistence-import']));
 });
 

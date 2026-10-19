@@ -4,8 +4,8 @@ import {
   AssetLifecycleState,
   AssetSecurityClassification,
   type IAssetRecordRepository,
-} from '@manaratak/domain';
-import type { ProcessAssetLifecycleUseCase } from '@manaratak/application';
+} from '@absheer/domain';
+import type { ProcessAssetLifecycleUseCase } from '@absheer/application';
 export class CertificateArtifactReadinessProbe {
   constructor(
     private readonly assets: IAssetRecordRepository,

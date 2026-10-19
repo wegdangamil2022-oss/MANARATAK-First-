@@ -144,10 +144,10 @@ export function collectAdminBoundaryViolations(root) {
   for (const file of walk(root, 'apps/admin/src')) {
     const source = fs.readFileSync(file, 'utf8');
     for (const item of importsOf(source)) {
-      if (item.specifier === '@prisma/client' || item.specifier === '@manaratak/infrastructure' || item.specifier.startsWith('@manaratak/infrastructure/')) {
+      if (item.specifier === '@prisma/client' || item.specifier === '@absheer/infrastructure' || item.specifier.startsWith('@absheer/infrastructure/')) {
         violations.push(violation('p23-persistence-import', root, file, source, item.index, `Admin cannot import persistence/infrastructure module ${item.specifier}.`));
       }
-      if (item.specifier === '@manaratak/application' || item.specifier.startsWith('@manaratak/application/')) {
+      if (item.specifier === '@absheer/application' || item.specifier.startsWith('@absheer/application/')) {
         violations.push(violation('p23-application-bypass', root, file, source, item.index, `Admin must use owner HTTP/API contracts instead of directly importing Application module ${item.specifier}.`));
       }
     }
@@ -211,7 +211,7 @@ export function collectCertificateBoundaryViolations(root) {
 export function collectAuthorityDocumentViolations(root) {
   const violations = [];
   const required = [
-    ['docs/governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md', ['Phase 10:** Majors & Disciplines Platform', 'Phase 11:** Universities & Institutions Platform', 'Phase 13:** Learning Platform', 'Phase 14:** Enterprise Certificates Platform', 'Phase 15:** Enterprise Student Platform (Student Workspace)', 'Phase 23:** Enterprise Administration Portal', 'Phase 24:** Enterprise Public Platform']],
+    ['docs/governance/roadmap/ABSHEER-2.0-Roadmap-v6.0.md', ['Phase 10:** Majors & Disciplines Platform', 'Phase 11:** Universities & Institutions Platform', 'Phase 13:** Learning Platform', 'Phase 14:** Enterprise Certificates Platform', 'Phase 15:** Enterprise Student Platform (Student Workspace)', 'Phase 23:** Enterprise Administration Portal', 'Phase 24:** Enterprise Public Platform']],
     ['docs/architecture/models/Enterprise-Domain-Ownership-Matrix-v1.0.md', ['P10:** owns canonical Major identity', 'P13:** owns learning catalog/progression/completion truth', 'does **not** issue certificates', 'P14:** is the sole authority for certificate issuance', 'P15:** owns authenticated student workspace', 'P23:** owns admin UI/control-plane composition', 'P24:** owns public composition']],
     ['docs/architecture/models/Enterprise-API-Registry-v1.0.md', ['no synchronous Certificate Generation API is registered', 'no general Student Application API is registered under Phase 15']],
     ['docs/architecture/models/Enterprise-Event-Catalog-v1.0.md', ['Producer:** Phase 13 (Learning Platform)', 'Consumers:** Phase 14 (Enterprise Certificates Platform)', 'no P15 `ApplicationSubmitted` enterprise event']],

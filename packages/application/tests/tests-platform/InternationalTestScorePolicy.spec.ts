@@ -6,7 +6,7 @@ const atomic = new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutati
 const mutationContext = {actorId: 'reviewer-1', reason: 'Reviewed official source', expectedRevision: 1};
 import { describe, expect, it, vi } from 'vitest';
 import { InternationalTestAdminUseCases } from '../../src/tests-platform/use-cases/InternationalTestUseCases';
-import { InternationalTestPublicationReadinessPolicy, type IInternationalTestRepository, type InternationalTestDto } from '@manaratak/domain';
+import { InternationalTestPublicationReadinessPolicy, type IInternationalTestRepository, type InternationalTestDto } from '@absheer/domain';
 
 describe('M10-15 score policy negative cases', () => {
   const fixture = () => {

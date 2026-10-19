@@ -1,6 +1,6 @@
--- MANARATAK_MIGRATION_OWNER: core_platform
--- MANARATAK_MIGRATION_SCOPE: structural_batch_a2
--- MANARATAK_ARCH_DECISION: ADR-M7-A2
+-- ABSHEER_MIGRATION_OWNER: core_platform
+-- ABSHEER_MIGRATION_SCOPE: structural_batch_a2
+-- ABSHEER_ARCH_DECISION: ADR-M7-A2
 -- Batch A2: New Token Tables, DegreeLevel Relationship, Certificate Nullability, CertificateTemplate Legacy Columns Removal
 
 -- CreateTable

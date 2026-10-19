@@ -13,7 +13,7 @@ import {
   ICacheEntryRepository,
   CacheEntrySpecification,
   CacheEntryStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { ICacheExecutionGateway } from '../gateways/ICacheExecutionGateway';
 import { AllocateCacheDto, GetCacheDto, InvalidateCacheDto } from '../dtos/CacheDtos';
 

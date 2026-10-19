@@ -1,7 +1,7 @@
 import { assertImportReviewLease } from '../import-foundation/ImportReviewLeaseGuard';
 import { randomUUID } from 'node:crypto';
 import type { PrismaClient } from '@prisma/client';
-import type { IScholarshipImportCanonicalResolutionDecisionPort, IScholarshipImportVerificationDecisionPort, ScholarshipImportCanonicalResolutionDecision, ScholarshipImportVerificationDecision } from '@manaratak/application';
+import type { IScholarshipImportCanonicalResolutionDecisionPort, IScholarshipImportVerificationDecisionPort, ScholarshipImportCanonicalResolutionDecision, ScholarshipImportVerificationDecision } from '@absheer/application';
 
 export class PrismaScholarshipImportVerificationDecisionPort implements IScholarshipImportVerificationDecisionPort {
   constructor(private readonly prisma: PrismaClient) {}

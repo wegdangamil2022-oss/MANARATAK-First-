@@ -11,7 +11,7 @@ import {
   ScholarshipStatus,
   ScholarshipCompletenessState,
   ScholarshipPublicationStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('AdminScholarshipUseCases', () => {
   const publicationReady = { publicationStatus: ScholarshipPublicationStatus.DRAFT, officialSourceUrl: 'https://example.edu/scholarship',

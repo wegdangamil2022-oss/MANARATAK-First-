@@ -16,14 +16,14 @@ describe('destructive database test guard', () => {
     process.env.RUN_DATABASE_INTEGRATION_TESTS = 'true';
     process.env.DATABASE_MUTATIONS_ALLOWED = 'true';
 
-    expect(destructiveDatabaseTestsEnabled('postgresql://postgres:secret@db.example.com:5432/manaratak_test')).toBe(false);
-    expect(destructiveDatabaseTestsEnabled('postgresql://postgres:secret@localhost:5432/manaratak_production')).toBe(false);
-    expect(destructiveDatabaseTestsEnabled('postgresql://postgres:secret@localhost:5432/manaratak_wpic10_test')).toBe(true);
+    expect(destructiveDatabaseTestsEnabled('postgresql://postgres:secret@db.example.com:5432/absheer_test')).toBe(false);
+    expect(destructiveDatabaseTestsEnabled('postgresql://postgres:secret@localhost:5432/absheer_production')).toBe(false);
+    expect(destructiveDatabaseTestsEnabled('postgresql://postgres:secret@localhost:5432/absheer_wpic10_test')).toBe(true);
   });
 
   it('rejects a disposable URL unless both explicit opt-ins are present', () => {
     process.env.RUN_DATABASE_INTEGRATION_TESTS = 'true';
     delete process.env.DATABASE_MUTATIONS_ALLOWED;
-    expect(destructiveDatabaseTestsEnabled('postgresql://postgres:secret@localhost:5432/manaratak_test')).toBe(false);
+    expect(destructiveDatabaseTestsEnabled('postgresql://postgres:secret@localhost:5432/absheer_test')).toBe(false);
   });
 });

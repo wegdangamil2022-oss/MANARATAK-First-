@@ -13,7 +13,7 @@ import {
   PaginatedCourseResult,
   PublicCourseFilters,
   UpdateCourseDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 interface CourseTransactionContext extends AtomicPersistenceContext {
   readonly transactionClient: Prisma.TransactionClient;
@@ -74,7 +74,7 @@ function parseAccessType(value: string): CourseAccessType {
 function parseOriginType(value: string): CourseOriginType {
   switch (value) {
     case CourseOriginType.EXTERNAL_LINKED_COURSE:
-    case CourseOriginType.NATIVE_MANARATAK_COURSE:
+    case CourseOriginType.NATIVE_ABSHEER_COURSE:
     case CourseOriginType.PAID_COURSE:
       return value as CourseOriginType;
     default:
@@ -334,8 +334,8 @@ export class PrismaCourseRepository implements ITransactionalCourseRepository {
     if (filters.isFreeCertificate !== undefined) where.OR = [
       { originType: 'EXTERNAL_LINKED_COURSE', isFreeCertificate: filters.isFreeCertificate },
       filters.isFreeCertificate
-        ? { originType: 'NATIVE_MANARATAK_COURSE', certificateAvailable: true, accessType: { in: ['FREE_CERTIFICATE', 'FREE_STUDY_AND_CERTIFICATE'] } }
-        : { originType: 'NATIVE_MANARATAK_COURSE', NOT: { certificateAvailable: true, accessType: { in: ['FREE_CERTIFICATE', 'FREE_STUDY_AND_CERTIFICATE'] } } },
+        ? { originType: 'NATIVE_ABSHEER_COURSE', certificateAvailable: true, accessType: { in: ['FREE_CERTIFICATE', 'FREE_STUDY_AND_CERTIFICATE'] } }
+        : { originType: 'NATIVE_ABSHEER_COURSE', NOT: { certificateAvailable: true, accessType: { in: ['FREE_CERTIFICATE', 'FREE_STUDY_AND_CERTIFICATE'] } } },
     ];
     if (filters.majorId) where.majorProjections = { some: { majorId: filters.majorId, projectionState: 'APPROVED' } };
     if (filters.search) where.AND = [{ OR: [

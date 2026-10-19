@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { DegreeLevelSeedService } from '../../src/degree-level/DegreeLevelSeedService';
-import { IDegreeLevelRepository } from '@manaratak/domain';
+import { IDegreeLevelRepository } from '@absheer/domain';
 
 describe('DegreeLevelSeedService', () => {
   let mockRepo: IDegreeLevelRepository;

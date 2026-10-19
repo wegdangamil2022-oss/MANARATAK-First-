@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ReferenceDataUseCases } from '../../src';
-import type { IReferenceDataRepository } from '@manaratak/domain';
+import type { IReferenceDataRepository } from '@absheer/domain';
 
 describe('P7 owner list status filter', () => {
   const records = [{ id: 'x', isoCode: 'USD', name: 'US Dollar', isActive: false, lifecycleState: 'DEPRECATED' }];

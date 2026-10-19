@@ -9,9 +9,9 @@ import {
   Action,
   AccessDecision,
   IPolicyEvaluator
-} from '@manaratak/domain';
-import { EvaluateAccessUseCase } from '@manaratak/application';
-import { ISpecification } from '@manaratak/core';
+} from '@absheer/domain';
+import { EvaluateAccessUseCase } from '@absheer/application';
+import { ISpecification } from '@absheer/core';
 
 import { 
   PrismaRoleRepository, 

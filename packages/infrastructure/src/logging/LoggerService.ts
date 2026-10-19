@@ -1,4 +1,4 @@
-import { ILogger, ILoggerProvider, ILogContext, IConfigurationService, LogLevel, StructuredLogMessage } from '@manaratak/core';
+import { ILogger, ILoggerProvider, ILogContext, IConfigurationService, LogLevel, StructuredLogMessage } from '@absheer/core';
 import { PinoLoggerProvider } from './PinoLoggerProvider';
 import { AuditSecretSanitizer } from '../audit/AuditSecretSanitizer';
 

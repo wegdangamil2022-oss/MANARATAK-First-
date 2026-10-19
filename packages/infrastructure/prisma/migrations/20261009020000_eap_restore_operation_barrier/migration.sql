@@ -3,7 +3,7 @@ BEGIN;
 
 -- statement-breakpoint
 
-CREATE FUNCTION manaratak_protect_pending_asset_restore() RETURNS trigger LANGUAGE plpgsql VOLATILE AS $$
+CREATE FUNCTION absheer_protect_pending_asset_restore() RETURNS trigger LANGUAGE plpgsql VOLATILE AS $$
 DECLARE
   old_operation jsonb := OLD."malwareScanStatus" -> 'restoreOperation';
   new_operation jsonb;
@@ -42,7 +42,7 @@ $$;
 -- statement-breakpoint
 
 CREATE TRIGGER "eap_asset_restore_barrier" BEFORE UPDATE OR DELETE ON "AssetRecord"
-FOR EACH ROW EXECUTE FUNCTION manaratak_protect_pending_asset_restore();
+FOR EACH ROW EXECUTE FUNCTION absheer_protect_pending_asset_restore();
 
 -- statement-breakpoint
 

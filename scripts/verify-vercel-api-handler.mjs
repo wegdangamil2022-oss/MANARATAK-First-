@@ -90,7 +90,7 @@ await app.locals.runtimeResourceRegistry.closeAll();
 // Exercise the actual deployment entrypoint with Preview + production NODE_ENV,
 // deliberately malformed provider values, and all worker flags enabled.
 Object.assign(process.env, { VERCEL_ENV: 'preview', NODE_ENV: 'production',
-  LOG_LEVEL: '', MANARATAK_ASSET_PROVIDER_BASE_URL: '',
+  LOG_LEVEL: '', ABSHEER_ASSET_PROVIDER_BASE_URL: '',
   BACKGROUND_WORKER_ENABLED: 'true', CERTIFICATE_COMPLETION_WORKER_ENABLED: 'true',
   STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED: 'true', OWNER_DOMAIN_OUTBOX_WORKER_ENABLED: 'true' });
 const previewEntry = await import(pathToFileURL(path.join(root, 'apps/api/dist/app.js')).href + '?preview-contract');
@@ -110,16 +110,16 @@ for (const [path, source] of [
   ['/api/v1/monitoring/health/database/direct', 'DIRECT_URL'],
   ['/api/v1/monitoring/health/database/schema', 'DATABASE_URL'],
 ]) {
-  delete process.env.MANARATAK_PREVIEW_DATABASE_PROBE;
+  delete process.env.ABSHEER_PREVIEW_DATABASE_PROBE;
   const disabled = await request(previewEntry.default, path);
   assert.equal(disabled.status, 503);
   assert.equal(JSON.parse(disabled.body).error, 'PREVIEW_DATABASE_PROBE_DISABLED');
-  process.env.MANARATAK_PREVIEW_DATABASE_PROBE = 'true';
+  process.env.ABSHEER_PREVIEW_DATABASE_PROBE = 'true';
   const missing = await request(previewEntry.default, path);
   assert.equal(missing.status, 503);
   assert.equal(JSON.parse(missing.body).error, source + '_MISSING');
 }
-delete process.env.MANARATAK_PREVIEW_DATABASE_PROBE;
+delete process.env.ABSHEER_PREVIEW_DATABASE_PROBE;
 console.log('PASS: compiled Preview database routes gated; correct datasource required; no connections');
 for (const url of ['/api/v1/admin/assets', '/api/v1/auth/login', '/api/v1/public/scholarships']) {
   for (const method of ['GET', 'POST', 'PUT', 'DELETE']) {

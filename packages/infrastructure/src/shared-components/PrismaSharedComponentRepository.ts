@@ -12,7 +12,7 @@ import {
   SharedComponentId,
   SharedComponentOwnerReference,
   SharedComponentReference,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 type ComponentSnapshot = {
   id: string; reference: string; ownerReference: string;

@@ -171,7 +171,7 @@ export interface UniversityScholarship {
   type?: string;
   audience?: string;
   officialUrl: string;
-  /** Canonical scholarship identity inside MANARATAK when this university scholarship is mapped. */
+  /** Canonical scholarship identity inside ABSHEER when this university scholarship is mapped. */
   platformScholarshipId?: string;
 }
 
@@ -649,7 +649,7 @@ export interface ExamOfficialLink {
 }
 
 export interface Exam {
-  localization?: import('@manaratak/ui').PublicExam['localization'];
+  localization?: import('@absheer/ui').PublicExam['localization'];
   /** Stable public route key (slug in live mode). */
   id: string;
   publicId?: string;

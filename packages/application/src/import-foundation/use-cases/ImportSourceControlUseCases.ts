@@ -1,7 +1,7 @@
-import { ParsedImportRow } from '@manaratak/domain';
+import { ParsedImportRow } from '@absheer/domain';
 import type { ImportGovernanceUseCases } from './ImportGovernanceUseCases';
 import type { IImportSourceObservationGateway } from '../contracts/IImportRawSnapshotStore';
-import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
+import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@absheer/domain';
 import type { ISourceRegistryGateway } from '../contracts/ISourceRegistryGateway';
 import { SourceConnectorRegistry } from '../services/SourceConnectorRegistry';
 import type { AcquireImportSourceUseCase } from './AcquireImportSourceUseCase';

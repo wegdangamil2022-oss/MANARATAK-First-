@@ -12,7 +12,7 @@ const artifact = (overrides = {}) => ({
   mode: 'READ_ONLY_BASELINE',
   status: 'PASS',
   manifestVersion: 1,
-  database: { target: 'db.internal:5432/manaratak' },
+  database: { target: 'db.internal:5432/absheer' },
   source: { schemaSha256: 'schema-a', migrationChainSha256: 'migrations-a' },
   migrationLedger: { rows: [{ name: '001', applied: true, rolledBack: false }] },
   counts: {
@@ -24,7 +24,7 @@ const artifact = (overrides = {}) => ({
 });
 
 function compare(before, after, declarations) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mnt-baseline-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'absh-baseline-'));
   const beforePath = path.join(dir, 'before.json');
   const afterPath = path.join(dir, 'after.json');
   const declarationPath = path.join(dir, 'expected.json');
@@ -38,7 +38,7 @@ function compare(before, after, declarations) {
   return spawnSync(process.execPath, args, { cwd: root, encoding: 'utf8' });
 }
 
-test('MNT-AUD-0083 baseline source fails closed instead of swallowing ledger/counter errors', () => {
+test('ABSH-AUD-0083 baseline source fails closed instead of swallowing ledger/counter errors', () => {
   const source = read('scripts/db-remediation-gate.ts');
   assert.doesNotMatch(source, /_prisma_migrations[\s\S]{0,300}\.catch\(\(\) => \[\]\)/);
   assert.doesNotMatch(source, /'UNAVAILABLE'\s*\|/);
@@ -47,7 +47,7 @@ test('MNT-AUD-0083 baseline source fails closed instead of swallowing ledger/cou
   assert.match(source, /DATABASE_BASELINE_OUTPUT/);
 });
 
-test('MNT-AUD-0083 baseline manifest covers every persistence-owned Prisma model', () => {
+test('ABSH-AUD-0083 baseline manifest covers every persistence-owned Prisma model', () => {
   const baseline = JSON.parse(read('scripts/database/database-baseline.manifest.json'));
   const ownership = JSON.parse(read('docs/architecture/persistence/persistence-ownership.manifest.json'));
   assert.deepEqual(Object.keys(baseline.models).sort(), Object.keys(ownership.models).sort());
@@ -55,7 +55,7 @@ test('MNT-AUD-0083 baseline manifest covers every persistence-owned Prisma model
   assert.ok(Object.values(baseline.models).every((item) => item.required === true && item.owner));
 });
 
-test('MNT-AUD-0083 before/after comparison is fail-closed by default and declaration-aware', () => {
+test('ABSH-AUD-0083 before/after comparison is fail-closed by default and declaration-aware', () => {
   const before = artifact();
   const afterUnexpected = artifact({ counts: { ...before.counts, Course: { owner: 'learning', count: '11' } } });
   const rejected = compare(before, afterUnexpected);
@@ -67,7 +67,7 @@ test('MNT-AUD-0083 before/after comparison is fail-closed by default and declara
   assert.match(allowed.stdout, /DATABASE_BASELINE_COMPARISON = PASS/);
 });
 
-test('MNT-AUD-0083 comparison rejects source fingerprint drift unless explicitly declared', () => {
+test('ABSH-AUD-0083 comparison rejects source fingerprint drift unless explicitly declared', () => {
   const before = artifact();
   const after = artifact({ source: { schemaSha256: 'schema-b', migrationChainSha256: 'migrations-b' } });
   const rejected = compare(before, after);

@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
-import type { AuthorizationEvaluatorService } from '@manaratak/domain';
-import type { TestDiscoveryOwnerUseCases } from '@manaratak/application';
+import type { AuthorizationEvaluatorService } from '@absheer/domain';
+import type { TestDiscoveryOwnerUseCases } from '@absheer/application';
 /** Mounted by the producing owner, never by Tests as a mutation authority. */
 export function testDiscoveryOwnerRouter(
   useCases: TestDiscoveryOwnerUseCases,

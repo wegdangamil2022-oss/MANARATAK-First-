@@ -10,7 +10,7 @@ import {
   IUniversityRepository,
   UniversityImportCompletenessState,
   UniversityStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('AdminUniversityUseCases', () => {
   let mockRepo: IUniversityRepository;

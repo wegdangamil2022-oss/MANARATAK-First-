@@ -7,7 +7,7 @@ vi.mock('../../src/i18n/I18nProvider', () => ({
   useTranslation: () => ({ t: controls.t, language: 'en', dir: 'ltr' }),
 }));
 vi.mock('../../src/api/client', () => ({ adminApiClient: { request: controls.request } }));
-vi.mock('@manaratak/shared', async (importer) => ({
+vi.mock('@absheer/shared', async (importer) => ({
   ...(await importer<any>()),
   canAuthorDomainTranslations: () => controls.canWrite,
 }));

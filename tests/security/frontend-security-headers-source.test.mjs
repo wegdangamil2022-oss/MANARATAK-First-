@@ -13,7 +13,7 @@ function walk(dir) {
   });
 }
 
-test('MNT-AUD-0101 Web/Admin share one source-controlled HTML header policy', () => {
+test('ABSH-AUD-0101 Web/Admin share one source-controlled HTML header policy', () => {
   const policy = read('apps/frontend-security/ViteFrontendSecurityHeaders.ts');
   assert.match(policy, /frame-ancestors 'none'/);
   assert.match(policy, /'X-Frame-Options': 'DENY'/);
@@ -29,7 +29,7 @@ test('MNT-AUD-0101 Web/Admin share one source-controlled HTML header policy', ()
   }
 });
 
-test('MNT-AUD-0101 API defense-in-depth CSP no longer permits inline styles and denies framing', () => {
+test('ABSH-AUD-0101 API defense-in-depth CSP no longer permits inline styles and denies framing', () => {
   const security = read('apps/api/src/presentation/security/SecurityMiddlewareFactory.ts');
   assert.match(security, /styleSrc: \["'self'"\]/);
   assert.match(security, /styleSrcAttr: \["'none'"\]/);
@@ -37,9 +37,9 @@ test('MNT-AUD-0101 API defense-in-depth CSP no longer permits inline styles and 
   assert.doesNotMatch(security, /styleSrc: \[[^\]]*unsafe-inline/);
 });
 
-test('MNT-AUD-0114 Web/Admin source contains no inline style attributes or inline style elements', () => {
+test('ABSH-AUD-0114 Web/Admin source contains no inline style attributes or inline style elements', () => {
   const policy = read('apps/frontend-security/ViteFrontendSecurityHeaders.ts');
-  assert.match(policy, /MNT-AUD-0114/);
+  assert.match(policy, /ABSH-AUD-0114/);
   assert.match(policy, /"style-src-attr 'none'"/);
   assert.doesNotMatch(policy, /unsafe-inline/);
 

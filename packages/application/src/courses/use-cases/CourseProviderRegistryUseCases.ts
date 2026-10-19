@@ -3,7 +3,7 @@ import {
   CourseProviderRegistryError, ExternalCourseProviderStatus, OutboxProcessingState,
   normalizeExternalCourseProviderName, type CourseProviderRegistryFilters,
   type ICourseProviderRegistryRepository, type UpdateCourseProviderMappings,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AtomicAuditedOutboxMutationExecutor } from '../../event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
 
 export function validateProviderMappings(input: UpdateCourseProviderMappings): void {

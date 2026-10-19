@@ -4,7 +4,7 @@ const contract = JSON.parse(
   fs.readFileSync('config/recovery/production-recovery-contract.json', 'utf8'),
 );
 const required = [
-  ['identity', contract.kind === 'MANARATAK_PRODUCTION_RECOVERY_CONTRACT'],
+  ['identity', contract.kind === 'ABSHEER_PRODUCTION_RECOVERY_CONTRACT'],
   ['RPO <= 5m', Number(contract.objectives?.regionalLossRpoMinutes) <= 5],
   ['RTO <= 60m', Number(contract.objectives?.regionalLossRtoMinutes) <= 60],
   ['PITR >= 30d', Number(contract.objectives?.pitrWindowDays) >= 30],

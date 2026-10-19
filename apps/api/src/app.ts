@@ -1,7 +1,7 @@
 import { createTranslationWorkspaceRouter } from './presentation/api/router/TranslationWorkspaceRouter.js';
-import { PrismaTranslationWorkspaceReadGateway, PrismaTranslationImportGateway } from '@manaratak/infrastructure';
+import { PrismaTranslationWorkspaceReadGateway, PrismaTranslationImportGateway } from '@absheer/infrastructure';
 import { freshWorkerEvidence, successfulPublicWebStatus } from './presentation/monitoring/RuntimeHealthPolicy.js';
-import * as awilix from '@manaratak-vendor/awilix-core';
+import * as awilix from '@absheer-vendor/awilix-core';
 import { createVercelHttpHandler } from './infrastructure/runtime/VercelHttpHandler.js';
 import { createPreviewAvailabilityApp, isProvisioningPreview } from './infrastructure/runtime/PreviewAvailabilityApp.js';
 import express, { Router, Express, Request, Response } from 'express';
@@ -21,9 +21,9 @@ import {
   DatabaseHealthChecker,
   assertAssetReferenceIntegrityInstalled,
   RedisHealthChecker
-} from '@manaratak/infrastructure';
-import { ConfigurationRegistry, EnvironmentLoader, EnvironmentConfigurationProvider, ProductionReadinessValidator, ZodEnvironmentValidator, loadAppConfig } from '@manaratak/config';
-import { IConfigurationService, ILogger, ISecurityService, IMonitoringService, IRateLimiter, ITokenProvider, ISessionManager, HealthStatus } from '@manaratak/core';
+} from '@absheer/infrastructure';
+import { ConfigurationRegistry, EnvironmentLoader, EnvironmentConfigurationProvider, ProductionReadinessValidator, ZodEnvironmentValidator, loadAppConfig } from '@absheer/config';
+import { IConfigurationService, ILogger, ISecurityService, IMonitoringService, IRateLimiter, ITokenProvider, ISessionManager, HealthStatus } from '@absheer/core';
 
 class AppSecurityService extends SecurityService implements ISecurityService {}
 
@@ -60,7 +60,7 @@ let bootstrapPromise: Promise<Express> | null = null;
 
 export async function createApiApp(options?: CreateApiAppOptions): Promise<Express> {
   const profile = options?.env ?? process.env;
-  if ((profile.MANARATAK_RUNTIME_PROFILE === 'google-ai-studio' || profile.MANARATAK_GOOGLE_AI_STUDIO === 'true') && !profile.DATABASE_URL) {
+  if ((profile.ABSHEER_RUNTIME_PROFILE === 'google-ai-studio' || profile.ABSHEER_GOOGLE_AI_STUDIO === 'true') && !profile.DATABASE_URL) {
     throw new Error('AI_STUDIO_WEB_ONLY_BACKEND_DISABLED');
   }
   if (options?.resetCache || options?.env) {
@@ -157,7 +157,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       const monitoringProvider = currentEnv.OTEL_EXPORTER_OTLP_ENDPOINT
         ? new OtlpHttpMonitoringProvider({
             endpoint: currentEnv.OTEL_EXPORTER_OTLP_ENDPOINT,
-            serviceName: currentEnv.OTEL_SERVICE_NAME || 'manaratak-api',
+            serviceName: currentEnv.OTEL_SERVICE_NAME || 'absheer-api',
             environment: currentEnv.NODE_ENV || 'development',
             exportIntervalMs: Number(currentEnv.OTEL_EXPORT_INTERVAL_MS || 10_000),
             periodicExport: currentEnv.VERCEL !== '1',
@@ -181,7 +181,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       // Bootstrap API
       const apiRouter = new ApiRouter();
       const app = express();
-      const isAiStudio = process.env.MANARATAK_GOOGLE_AI_STUDIO === 'true';
+      const isAiStudio = process.env.ABSHEER_GOOGLE_AI_STUDIO === 'true';
     const trustProxyHops = Number(config.getOptional<string>('TRUST_PROXY_HOPS') || currentEnv.TRUST_PROXY_HOPS || (isAiStudio ? 1 : 0));
     if (Number.isInteger(trustProxyHops) && trustProxyHops > 0) {
       app.set('trust proxy', trustProxyHops);

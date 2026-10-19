@@ -1,5 +1,5 @@
-import { IdentityType } from '@manaratak/domain';
-import { LifeStatus } from '@manaratak/domain';
+import { IdentityType } from '@absheer/domain';
+import { LifeStatus } from '@absheer/domain';
 
 export interface IdentityDto {
   id: string;

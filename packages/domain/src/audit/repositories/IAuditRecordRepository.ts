@@ -1,5 +1,5 @@
 import { AuditRecord } from '../aggregates/AuditRecord';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 import { AtomicPersistenceContext } from '../../event-foundation/outbox/TransactionalOutbox';
 
 export interface AuditRecordPageQuery {

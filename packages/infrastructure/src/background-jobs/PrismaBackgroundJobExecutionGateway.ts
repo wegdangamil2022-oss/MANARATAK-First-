@@ -9,7 +9,7 @@ import {
   DurableBackgroundJobClaim,
   IBackgroundJobExecutionGateway,
   IDurableBackgroundJobQueue,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 export class PrismaBackgroundJobExecutionGateway implements IBackgroundJobExecutionGateway, IDurableBackgroundJobQueue {
   public readonly capabilityStatus = 'PRODUCTION_CAPABLE' as const;

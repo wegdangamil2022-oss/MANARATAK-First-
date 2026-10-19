@@ -1,7 +1,7 @@
 import { BackgroundJob } from '../aggregates/BackgroundJob';
 import { JobReference } from '../value-objects/JobReference';
 import { BackgroundJobStatus } from '../enums/BackgroundJobStatus';
-import { ISpecification } from '@manaratak/core';
+import { ISpecification } from '@absheer/core';
 import { JobOwnerReference } from '../value-objects/JobOwnerReference';
 
 export class BackgroundJobSpecification implements ISpecification<BackgroundJob> {

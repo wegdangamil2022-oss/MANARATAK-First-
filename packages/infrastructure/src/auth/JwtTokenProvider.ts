@@ -1,5 +1,5 @@
 import * as crypto from 'node:crypto';
-import { ITokenProvider, AuthTokens, TokenPayload } from '@manaratak/core';
+import { ITokenProvider, AuthTokens, TokenPayload } from '@absheer/core';
 
 export interface JwtSigningKeySet {
   readonly activeKeyId: string;
@@ -71,8 +71,8 @@ export class JwtTokenProvider implements ITokenProvider {
       throw new Error(`Access-token TTL must be between 60 and ${ACCESS_TOKEN_MAX_TTL_SECONDS} seconds`);
     }
 
-    this.issuer = options.issuer || 'manaratak-api';
-    this.audience = options.audience || 'manaratak-browser';
+    this.issuer = options.issuer || 'absheer-api';
+    this.audience = options.audience || 'absheer-browser';
     this.activePrivateKey = crypto.createPrivateKey(keySet.privateKeyPem);
 
     for (const [kid, publicKeyPem] of Object.entries(keySet.publicKeys)) {
@@ -82,7 +82,7 @@ export class JwtTokenProvider implements ITokenProvider {
     }
 
     // Fail startup if the active private/public pair does not match.
-    const probe = Buffer.from('manaratak-jwt-key-pair-probe');
+    const probe = Buffer.from('absheer-jwt-key-pair-probe');
     const signature = crypto.sign('RSA-SHA256', probe, this.activePrivateKey);
     const activePublicKey = this.verificationKeys.get(keySet.activeKeyId)!;
     if (!crypto.verify('RSA-SHA256', probe, activePublicKey, signature)) {

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { CertificateReadModelService } from '@manaratak/application';
+import { CertificateReadModelService } from '@absheer/application';
 
 export class CertificatePublicRouter {
   public static create(cradle: { certificateReadModelService: CertificateReadModelService;

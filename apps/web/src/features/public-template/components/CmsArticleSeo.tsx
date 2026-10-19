@@ -1,4 +1,4 @@
-import { PUBLIC_TEMPLATE_LOCALES } from '@manaratak/shared';
+import { PUBLIC_TEMPLATE_LOCALES } from '@absheer/shared';
 import { useEffect } from 'react';
 import type { PublicArticle } from '../types';
 
@@ -33,7 +33,7 @@ export function cmsArticleSeoProjection(article: PublicArticle, baseUrl: string)
     }));
   if (new Set(alternates.map((entry) => entry.locale)).size !== alternates.length) return null;
   return {
-    title: `${seo.title} | MANARATAK`,
+    title: `${seo.title} | ABSHEER`,
     description: seo.description,
     canonical: origin.origin + canonical,
     robots: `${seo.noIndex || !PUBLIC_TEMPLATE_LOCALES.some((locale) => locale === seo.locale) ? 'noindex' : 'index'},${seo.noFollow ? 'nofollow' : 'follow'}`,
@@ -105,7 +105,7 @@ export function CmsArticleSeo({ article }: { article: PublicArticle }) {
     });
     return () => {
       elements.forEach((element) => element.remove());
-      document.title = 'MANARATAK';
+      document.title = 'ABSHEER';
     };
   }, [article]);
   return null;

@@ -1,4 +1,4 @@
-import { PUBLIC_TEMPLATE_LOCALES } from '@manaratak/shared';
+import { PUBLIC_TEMPLATE_LOCALES } from '@absheer/shared';
 import { NextFunction, Request, Response, Router } from 'express';
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
@@ -6,8 +6,8 @@ import {
   PublicCmsUseCases,
   buildCmsSitemapXml,
   renderCmsPublishedPage,
-} from '@manaratak/application';
-import { CmsContentType, CmsDomainTargetType, CmsPublishingPolicy } from '@manaratak/domain';
+} from '@absheer/application';
+import { CmsContentType, CmsDomainTargetType, CmsPublishingPolicy } from '@absheer/domain';
 
 export class CmsPublicRouter {
   public static create(cradle: { publicCmsUseCases: PublicCmsUseCases }): Router {
@@ -23,7 +23,7 @@ export class CmsPublicRouter {
       tag: z.string().optional(),
       q: z.string().trim().max(200).optional(),
       locale: z.enum(['ar', 'en']).default('ar'),
-      siteIdentifier: z.literal('manaratak').default('manaratak'),
+      siteIdentifier: z.literal('absheer').default('absheer'),
       page: z.coerce.number().int().positive().max(500).default(1),
       pageSize: z.coerce.number().int().min(1).max(50).default(20),
     });
@@ -91,7 +91,7 @@ export class CmsPublicRouter {
         const query = z
           .object({
             locale: z.enum(['ar', 'en']).default('ar'),
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
           })
           .parse(req.query);
         const payload = await publicCmsUseCases.getBySlug(
@@ -112,7 +112,7 @@ export class CmsPublicRouter {
             targetType: z.nativeEnum(CmsDomainTargetType),
             targetId: z.string().trim().uuid(),
             locale: z.enum(['ar', 'en']).default('ar'),
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             limit: z.coerce.number().int().min(1).max(24).default(6),
           })
           .parse(req.query);
@@ -135,7 +135,7 @@ export class CmsPublicRouter {
         const query = z
           .object({
             locale: z.enum(['ar', 'en']).default('ar'),
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
           })
           .parse(req.query);
         const menus = await publicCmsUseCases.listNavigation(query.siteIdentifier, query.locale);
@@ -151,7 +151,7 @@ export class CmsPublicRouter {
         const query = z
           .object({
             locale: z.enum(['ar', 'en']).default('ar'),
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
           })
           .parse(req.query);
         const payload = {
@@ -167,7 +167,7 @@ export class CmsPublicRouter {
         const query = z
           .object({
             locale: z.enum(['ar', 'en']).default('ar'),
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
           })
           .parse(req.query);
         const data = await publicCmsUseCases.listAnnouncements(query.siteIdentifier, query.locale);
@@ -206,7 +206,7 @@ export class CmsPublicRouter {
           return;
         }
 
-        const redirect = await publicCmsUseCases.resolveRedirect('manaratak', locale, path);
+        const redirect = await publicCmsUseCases.resolveRedirect('absheer', locale, path);
         if (redirect) {
           if (
             !redirect.destinationPath.startsWith(`/${locale}/`) ||
@@ -218,7 +218,7 @@ export class CmsPublicRouter {
           res.redirect(redirect.statusCode, redirect.destinationPath);
           return;
         }
-        const content = await publicCmsUseCases.getBySlug(slug, locale, 'manaratak');
+        const content = await publicCmsUseCases.getBySlug(slug, locale, 'absheer');
         if (CmsPublishingPolicy.canonicalPath(locale, content.contentType, content.slug) !== path) {
           res.status(404).end();
           return;
@@ -228,7 +228,7 @@ export class CmsPublicRouter {
           res.status(503).end();
           return;
         }
-        const blocks = await publicCmsUseCases.listPublishedBlocks('manaratak', locale);
+        const blocks = await publicCmsUseCases.listPublishedBlocks('absheer', locale);
         res.type('html').send(renderCmsPublishedPage(content, origin, blocks));
       }),
     );
@@ -252,7 +252,7 @@ export class CmsPublicRouter {
           return;
         }
 
-        const result = await publicCmsUseCases.resolveRedirect('manaratak', locale, path);
+        const result = await publicCmsUseCases.resolveRedirect('absheer', locale, path);
         if (!result) {
           res.status(404).end();
           return;
@@ -276,7 +276,7 @@ export class CmsPublicRouter {
         const query = z
           .object({
             locale: z.enum(['ar', 'en']).default('ar'),
-            siteIdentifier: z.literal('manaratak').default('manaratak'),
+            siteIdentifier: z.literal('absheer').default('absheer'),
             path: z.string().min(1),
           })
           .parse(req.query);

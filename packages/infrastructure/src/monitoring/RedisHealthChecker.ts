@@ -1,4 +1,4 @@
-import { HealthStatus, HealthCheckResult } from '@manaratak/core';
+import { HealthStatus, HealthCheckResult } from '@absheer/core';
 import { RedisClientFactory } from '../redis/RedisClientFactory';
 
 export class RedisHealthChecker {

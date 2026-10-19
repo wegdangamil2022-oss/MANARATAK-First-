@@ -37,7 +37,7 @@ import {
   UpdateCmsContentDto,
   UpsertCmsContentDomainLinkDto,
   UpsertCmsLocalizedContentDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 type CreateContentInput = Omit<
   CreateCmsContentDto,
@@ -608,7 +608,7 @@ export class PublicCmsUseCases {
   public async listIndexableSitemapEntries(): Promise<CmsSitemapEntryDto[]> {
     if (!this.repository.listIndexableSitemapEntries)
       throw new Error('CMS_SITEMAP_OWNER_UNAVAILABLE');
-    return this.repository.listIndexableSitemapEntries('manaratak');
+    return this.repository.listIndexableSitemapEntries('absheer');
   }
 
   public async listPublished(
@@ -623,7 +623,7 @@ export class PublicCmsUseCases {
     locale?: string,
     siteIdentifier?: string,
   ): Promise<PublicCmsContentDto> {
-    const site = siteIdentifier ?? 'manaratak';
+    const site = siteIdentifier ?? 'absheer';
     const language = locale ?? 'ar';
     // Redis invalidation is best-effort. A stale cached publication can survive
     // failed invalidation after archive, so the canonical published repository
@@ -668,7 +668,7 @@ export class PublicCmsUseCases {
     targetType: CmsDomainTargetType,
     targetId: string,
     locale = 'ar',
-    siteIdentifier = 'manaratak',
+    siteIdentifier = 'absheer',
     limit = 6,
   ): Promise<PublicCmsContentDto[]> {
     if (!this.repository.listPublishedByDomainTarget) return [];

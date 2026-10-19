@@ -10,7 +10,7 @@ const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
 const checks = [];
 const check = (name, ok, detail='') => checks.push({ name, ok: Boolean(ok), detail });
 
-const roadmap = read('docs/governance/roadmap/MANARATAK-2.0-Roadmap-v6.0.md');
+const roadmap = read('docs/governance/roadmap/ABSHEER-2.0-Roadmap-v6.0.md');
 check('roadmap_version_6', roadmap.includes('**Version:** 6.0'));
 check('roadmap_source_through_phase19', roadmap.includes('Source implementation is present through **Phase 19'));
 check('roadmap_runtime_boundary', roadmap.includes('runtime-pending') && roadmap.includes('Greenfield database mutation gate'));
@@ -141,7 +141,7 @@ check('phase4_git_reconciled', p415.includes('ACTIVE_IMPLEMENTED — CI_ENFORCED
 check('phase4_container_deferred', /Phase 4\.17\r?\nDEFERRED/.test(p417));
 check('phase4_master_matrix_reconciled', p421.includes('W0 Current Capability Reconciliation'));
 check('phase4_no_active_production_ready_checkmarks', !read('docs/phases/phase-04-architecture-governance/baselines/phase-04-12-report.md').includes('Production Readiness: ✓') && !read('docs/phases/phase-04-architecture-governance/baselines/phase-04-13-report.md').includes('Production Readiness: ✓') && !read('docs/phases/phase-04-architecture-governance/baselines/phase-04-16-report.md').includes('Production Readiness: ✓') && !read('docs/phases/phase-04-architecture-governance/baselines/phase-04-18-report.md').includes('Production Readiness: ✓') && !read('docs/phases/phase-04-architecture-governance/baselines/phase-04-19-report.md').includes('Production Readiness: ✓') && !read('docs/phases/phase-04-architecture-governance/baselines/phase-04-20-report.md').includes('Production Readiness: ✓'));
-check('w0_execution_report_exists', fs.existsSync(path.join(root, 'docs/governance/audits/remediation/MANARATAK-W0-Authority-Quality-Gate-Execution-Report.md')));
+check('w0_execution_report_exists', fs.existsSync(path.join(root, 'docs/governance/audits/remediation/ABSHEER-W0-Authority-Quality-Gate-Execution-Report.md')));
 
 try {
   const quality = execFileSync(process.execPath, [path.join(root, 'scripts/quality/verify-source-quality.mjs')], { encoding: 'utf8' });

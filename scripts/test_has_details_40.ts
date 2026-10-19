@@ -23,7 +23,7 @@ async function run() {
     if (md?.metadata?.contentBlockCount > 0) {
       sectionCount++;
     }
-    if (md?.sourceClassificationSystem === 'MANARATAK_PHASE_10_DETAIL_DOSSIER') {
+    if (md?.sourceClassificationSystem === 'ABSHEER_PHASE_10_DETAIL_DOSSIER') {
       sourceTypeDossier++;
     }
   }

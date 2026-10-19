@@ -6,7 +6,7 @@ interface PhoneContainerProps {
 
 export const PhoneContainer: React.FC<PhoneContainerProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-[var(--mn-page)] w-full flex flex-col text-right selection:bg-[var(--mn-accent)]/30 mn-panel ">
+    <div className="min-h-screen bg-[var(--ab-page)] w-full flex flex-col text-right selection:bg-[var(--ab-accent)]/30 ab-panel ">
       {children}
     </div>
   );

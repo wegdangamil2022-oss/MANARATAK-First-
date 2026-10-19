@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { NextFunction, Request, Response } from 'express';
-import { IMonitoringService } from '@manaratak/core';
+import { IMonitoringService } from '@absheer/core';
 
 function normalizedRoute(req: Request): string {
   const raw = `${req.baseUrl || ''}${req.path || '/'}` || '/';

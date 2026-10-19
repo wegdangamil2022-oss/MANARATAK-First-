@@ -3,7 +3,7 @@ import {
   SourceAccessClassification,
   SourceConnectorCategory,
   SourceStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import type { ISourceRegistryGateway } from '../../import-foundation/contracts/ISourceRegistryGateway';
 import type {
   ScholarshipAcquisitionMode,

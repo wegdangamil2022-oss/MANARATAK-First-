@@ -12,7 +12,7 @@ import {
   AcademicStandardMappingDto,
   AcademicMappingStrength,
   AcademicTaxonomySeedStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('AcademicTaxonomyAdminRouter', () => {
   const mockNode: AcademicTaxonomyNodeDto = {

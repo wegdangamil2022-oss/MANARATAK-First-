@@ -1,5 +1,5 @@
-import { PUBLIC_TEMPLATE_LOCALES } from '@manaratak/shared';
-import { CmsPublishingPolicy, PublicCmsContentDto, PublicCmsBlockDto } from '@manaratak/domain';
+import { PUBLIC_TEMPLATE_LOCALES } from '@absheer/shared';
+import { CmsPublishingPolicy, PublicCmsContentDto, PublicCmsBlockDto } from '@absheer/domain';
 import { cmsPublicOrigin } from './CmsSeoSitemap';
 
 const escape = (value: unknown): string =>
@@ -17,7 +17,7 @@ export function renderCmsPublishedPage(
   blocks: readonly PublicCmsBlockDto[] = [],
 ): string {
   const origin = cmsPublicOrigin(baseUrl);
-  if (content.siteIdentifier !== 'manaratak' || !['ar', 'en'].includes(content.locale)) {
+  if (content.siteIdentifier !== 'absheer' || !['ar', 'en'].includes(content.locale)) {
     throw new Error('CMS_PAGE_SCOPE_INVALID');
   }
   if (!PUBLIC_TEMPLATE_LOCALES.some((locale) => locale === content.locale))
@@ -83,7 +83,7 @@ export function renderCmsPublishedPage(
     .join('');
   return `<!doctype html><html lang="${content.locale}" dir="${ar ? 'rtl' : 'ltr'}"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escape(title)} | MANARATAK</title>
+<title>${escape(title)} | ABSHEER</title>
 <meta name="description" content="${escape(description)}">
 <meta name="robots" content="${seo?.noIndex ? 'noindex' : 'index'},${seo?.noFollow ? 'nofollow' : 'follow'}">
 <link rel="canonical" href="${escape(origin + canonical)}">${alternates}
@@ -95,6 +95,6 @@ ${languages.has('ar') ? `<link rel="alternate" hreflang="x-default" href="${esca
 ${languages.has('ar') && languages.has('en') ? `<meta property="og:locale:alternate" content="${ar ? 'en_US' : 'ar_AR'}">` : ''}
 <script data-cms-owner-seo type="application/ld+json">${jsonLd}</script>
 <style>body{margin:0;background:#f8fafc;color:#142b5f;font:18px/1.8 system-ui}header,main{max-width:900px;margin:auto;padding:24px}header{display:flex;flex-wrap:wrap;gap:20px}a{color:#0e7c86}article{background:white;padding:32px;border-radius:20px;overflow-wrap:anywhere}h1{line-height:1.4}nav{display:flex;gap:16px}</style>
-</head><body><div id="root"><header><a href="/${content.locale}">MANARATAK</a><a href="/${content.locale}/articles">${ar ? 'المقالات' : 'Articles'}</a><nav aria-label="${ar ? 'لغة المحتوى' : 'Content language'}">${[...languages].map(([locale, url]) => `<a href="${escape(url)}" lang="${locale}" hreflang="${locale}">${locale === 'ar' ? 'العربية' : 'English'}</a>`).join('')}</nav></header>
+</head><body><div id="root"><header><a href="/${content.locale}">ABSHEER</a><a href="/${content.locale}/articles">${ar ? 'المقالات' : 'Articles'}</a><nav aria-label="${ar ? 'لغة المحتوى' : 'Content language'}">${[...languages].map(([locale, url]) => `<a href="${escape(url)}" lang="${locale}" hreflang="${locale}">${locale === 'ar' ? 'العربية' : 'English'}</a>`).join('')}</nav></header>
 <main><article><h1>${escape(content.title)}</h1>${content.summary ? `<p>${escape(content.summary)}</p>` : ''}<div>${body}</div></article>${publishedBlocks}</main></div><script type="module" src="/cms-app-entry.js"></script></body></html>`;
 }

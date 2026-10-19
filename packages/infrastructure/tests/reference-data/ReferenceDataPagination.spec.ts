@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
-import type { ReferenceDataCollection } from '@manaratak/domain';
+import type { ReferenceDataCollection } from '@absheer/domain';
 import { PrismaReferenceDataRepository } from '../../src/reference-data/PrismaReferenceDataRepository';
 
 describe('ReferenceData Prisma pagination queries (no database)', () => {

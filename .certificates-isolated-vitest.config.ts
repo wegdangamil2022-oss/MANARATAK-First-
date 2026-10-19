@@ -5,7 +5,7 @@ export default defineConfig({
     alias: Object.fromEntries(
       ['core', 'domain', 'shared', 'application', 'infrastructure'].map(
         (name) => [
-          `@manaratak/${name}`,
+          `@absheer/${name}`,
           resolve(`packages/${name}/src/index.ts`),
         ],
       ),

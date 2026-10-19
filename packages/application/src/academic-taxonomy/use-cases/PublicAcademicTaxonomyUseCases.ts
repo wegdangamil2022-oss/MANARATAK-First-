@@ -5,7 +5,7 @@ import {
   AcademicTaxonomyNodeType,
   AcademicTaxonomyStatus,
   AcademicStandardType,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class PublicAcademicTaxonomyUseCases {
   constructor(private readonly repository: IAcademicTaxonomyRepository) {}

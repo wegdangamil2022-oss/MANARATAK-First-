@@ -1,8 +1,8 @@
-# MANARATAK 2.0: Enterprise Data Retention Policy
+# ABSHEER 2.0: Enterprise Data Retention Policy
 
 ## 1. Purpose
 
-The Enterprise Data Retention Policy defines the official, unified approach for the classification, retention, archival, protection, disposal, and governance of all data within the MANARATAK 2.0 platform. 
+The Enterprise Data Retention Policy defines the official, unified approach for the classification, retention, archival, protection, disposal, and governance of all data within the ABSHEER 2.0 platform. 
 
 This policy exists to ensure:
 *   **Governance:** Enforcing strict, authorized ownership and lifecycle management for all data assets.
@@ -15,7 +15,7 @@ This policy exists to ensure:
 
 ## 2. Scope
 
-This policy governs all data managed within the approved MANARATAK 2.0 architecture.
+This policy governs all data managed within the approved ABSHEER 2.0 architecture.
 
 **Covered Data Categories:**
 *   **Domain Data:** Core transactional and business entity data managed by specific bounded contexts.
@@ -34,7 +34,7 @@ This policy governs all data managed within the approved MANARATAK 2.0 architect
 
 **Excluded Data:**
 *   Ephemeral in-memory data that is never persisted to disk.
-*   Third-party data that is strictly pass-through and not retained or cached within the MANARATAK boundary.
+*   Third-party data that is strictly pass-through and not retained or cached within the ABSHEER boundary.
 
 ## 3. Data Classification
 
@@ -109,7 +109,7 @@ Data_Retention_Rule:
   Recovery_Requirements: "RTO: 24 hours. RPO: 1 hour."
   Security_Classification: "Restricted"
   Related_ADR: "ADR-0034"
-  Related_Baseline: "MANARATAK 2.0 - Phase 4"
+  Related_Baseline: "ABSHEER 2.0 - Phase 4"
   Status: "Active"
 ```
 

@@ -1,5 +1,5 @@
 import type { IImportScreeningReceiptStore } from '../contracts/IImportGovernanceGateway';
-import type { IImportHandoffConsumer, UniversalImportHandoff } from '@manaratak/domain';
+import type { IImportHandoffConsumer, UniversalImportHandoff } from '@absheer/domain';
 
 /** Generic Phase 6 dispatcher. It routes owner domains and knows no domain semantics. */
 export class ImportHandoffDispatcher {

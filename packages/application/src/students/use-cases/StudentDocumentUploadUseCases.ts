@@ -5,7 +5,7 @@ import {
   AssetRetentionCategory,
   type IAssetRecordRepository,
   type IStudentWorkspaceRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import type { IngestAssetUseCase } from '../../asset-platform/use-cases/IngestAssetUseCase';
 import type { ProcessAssetLifecycleUseCase } from '../../asset-platform/use-cases/ProcessAssetLifecycleUseCase';
 /** P15 chooses identity/purpose; P3 retains exclusive control of quarantine, verification, scanning and activation. */

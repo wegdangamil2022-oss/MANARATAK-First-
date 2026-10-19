@@ -4,7 +4,7 @@ import type {
   AssetRecord,
   IAssetStorageGateway,
   AssetLifecycleReconciliationProof,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import type { AtomicDomainMutationCoordinator } from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 export interface AssetLifecycleRecoveryCandidate {
   assetId: string;

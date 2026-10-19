@@ -1,4 +1,4 @@
-import { IUniversityRepository } from '@manaratak/domain';
+import { IUniversityRepository } from '@absheer/domain';
 
 export type UniversityPromotionResult = {
   type: 'REJECTED';

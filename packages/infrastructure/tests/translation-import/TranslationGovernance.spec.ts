@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { governanceApprovalDigest } from '../../../application/src/authorization/use-cases/GovernanceApprovalUseCases';
 const policy = vi.hoisted(() => ({ enable: false }));
-vi.mock('@manaratak/shared', async (importOriginal) => {
+vi.mock('@absheer/shared', async (importOriginal) => {
   const original = await importOriginal<any>();
   return {
     ...original,

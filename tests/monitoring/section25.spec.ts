@@ -2,8 +2,8 @@ import { parseHistory } from '../../apps/admin/src/features/health/HealthHistory
 import { describe, it, expect, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { HealthStatus } from '@manaratak/core';
-import { operationalProbeIds } from '@manaratak/config';
+import { HealthStatus } from '@absheer/core';
+import { operationalProbeIds } from '@absheer/config';
 import { MonitoringService } from '../../packages/infrastructure/src/monitoring/MonitoringService';
 import { OtlpHttpMonitoringProvider } from '../../packages/infrastructure/src/monitoring/OtlpHttpMonitoringProvider';
 import { SignedProviderHttpClient } from '../../packages/infrastructure/src/provider-http/SignedProviderHttpClient';

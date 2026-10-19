@@ -13,8 +13,8 @@ import {
   User,
   IEmailVerificationTokenRepository,
   IEmailDeliveryGateway,
-} from '@manaratak/domain';
-import { Identifier, IPasswordHasher } from '@manaratak/core';
+} from '@absheer/domain';
+import { Identifier, IPasswordHasher } from '@absheer/core';
 import { assertPasswordPolicy } from './PasswordPolicy';
 
 export interface RegisterUserInput {

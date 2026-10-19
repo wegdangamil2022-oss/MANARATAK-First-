@@ -1,5 +1,5 @@
 import type { ISourceAccessAuthority } from '../contracts/ISourceAccessAuthority';
-import { SourceAccessExecutionPolicy, type ImportSourceDefinition } from '@manaratak/domain';
+import { SourceAccessExecutionPolicy, type ImportSourceDefinition } from '@absheer/domain';
 import type { ISourceConnector } from '../contracts/ISourceConnector';
 export class SourceConnectorRegistry {
   private readonly connectors = new Map<string, ISourceConnector>();

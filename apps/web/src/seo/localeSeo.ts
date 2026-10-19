@@ -1,7 +1,7 @@
 import {
   PUBLIC_TEMPLATE_LOCALES,
   type SupportedLocale,
-} from '@manaratak/shared';
+} from '@absheer/shared';
 import {
   localizePathname,
   stripLocalePrefix,

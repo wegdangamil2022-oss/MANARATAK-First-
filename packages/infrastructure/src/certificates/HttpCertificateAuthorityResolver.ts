@@ -1,4 +1,4 @@
-import type { CertificateIssuerDto } from '@manaratak/domain';
+import type { CertificateIssuerDto } from '@absheer/domain';
 export interface CertificateAuthorityEvidence {
   authorityReference: string;
   evidenceChecksum: string;

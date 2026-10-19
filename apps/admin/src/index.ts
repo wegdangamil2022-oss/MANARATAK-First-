@@ -1,2 +1,2 @@
-// @manaratak/admin entry point
+// @absheer/admin entry point
 export {};

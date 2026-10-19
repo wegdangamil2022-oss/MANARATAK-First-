@@ -1,8 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { referenceDataQueryShape, cityReferenceDataQueryShape } from './ReferenceDataQueryContract.js';
-import { LocalizedPublicUniversityUseCases, LocalizedReferenceDataQueries, ReferenceDataNotFoundError } from '@manaratak/application';
-import { IReferenceDataRepository, IUniversityRepository } from '@manaratak/domain';
+import { LocalizedPublicUniversityUseCases, LocalizedReferenceDataQueries, ReferenceDataNotFoundError } from '@absheer/application';
+import { IReferenceDataRepository, IUniversityRepository } from '@absheer/domain';
 import { localeQuerySchema, parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
 
 export class ReferenceDataPublicRouter {

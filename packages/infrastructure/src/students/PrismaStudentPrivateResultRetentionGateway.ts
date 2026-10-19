@@ -1,11 +1,11 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { IRetentionOwnerGateway } from '@manaratak/application';
+import { IRetentionOwnerGateway } from '@absheer/application';
 import {
   RetentionCandidate,
   RetentionDecision,
   RetentionDisposition,
   RetentionOwner,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 export class PrismaStudentPrivateResultRetentionGateway implements IRetentionOwnerGateway {
   readonly owner = RetentionOwner.STUDENT_PRIVATE_RESULT;
   constructor(private readonly prisma: PrismaClient) {}

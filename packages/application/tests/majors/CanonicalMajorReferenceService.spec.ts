@@ -7,7 +7,7 @@ import {
   IDegreeLevelRepository,
   MajorImportCompletenessState,
   MajorStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CanonicalMajorReferenceService } from '../../src/majors/services/CanonicalMajorReferenceService';
 
 const date = new Date('2026-08-25T00:00:00.000Z');

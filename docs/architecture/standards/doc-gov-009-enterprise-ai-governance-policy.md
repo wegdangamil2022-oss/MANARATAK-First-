@@ -4,11 +4,11 @@
 **Status:** Approved & Baselined
 **Title:** Enterprise AI Governance Policy
 **Authority:** Architecture Review Board (ARB)
-**Applicability:** Mandatory for all existing and future architecture documents, technical implementations, and business operations involving Artificial Intelligence within MANARATAK 2.0.
+**Applicability:** Mandatory for all existing and future architecture documents, technical implementations, and business operations involving Artificial Intelligence within ABSHEER 2.0.
 
 ## 1. Purpose
 
-The purpose of this standard is to establish a comprehensive, enterprise-wide governance framework for all Artificial Intelligence (AI) capabilities within the MANARATAK 2.0 ecosystem. It defines the ownership, policies, lifecycle, risk management, and operational governance required to ensure that AI is deployed securely, ethically, and cost-effectively, without stifling innovation.
+The purpose of this standard is to establish a comprehensive, enterprise-wide governance framework for all Artificial Intelligence (AI) capabilities within the ABSHEER 2.0 ecosystem. It defines the ownership, policies, lifecycle, risk management, and operational governance required to ensure that AI is deployed securely, ethically, and cost-effectively, without stifling innovation.
 
 ## 2. Scope
 
@@ -71,12 +71,12 @@ The Enterprise AI Platform must maintain an authoritative **AI Model Registry** 
 ## 11. AI Usage Policies
 
 *   **Data Privacy:** Personally Identifiable Information (PII) and sensitive academic records must be anonymized or redacted before being transmitted to external AI providers.
-*   **No Training on Customer Data:** Enterprise contracts with external AI providers must explicitly prohibit the use of MANARATAK user data for training their foundational models.
+*   **No Training on Customer Data:** Enterprise contracts with external AI providers must explicitly prohibit the use of ABSHEER user data for training their foundational models.
 *   **Transparency:** Any content substantially generated or altered by AI must be transparently identified to the end-user (e.g., "Drafted by AI").
 
 ## 12. AI Risk Management
 
-*   **Hallucination Mitigation:** Tools must employ grounding techniques (e.g., RAG - Retrieval-Augmented Generation) referencing authoritative MANARATAK databases to minimize factual errors.
+*   **Hallucination Mitigation:** Tools must employ grounding techniques (e.g., RAG - Retrieval-Augmented Generation) referencing authoritative ABSHEER databases to minimize factual errors.
 *   **Fallback Strategies:** If an AI provider experiences an outage, the gateway must automatically failover to a secondary provider or return a graceful degradation response.
 
 ## 13. AI Security Governance

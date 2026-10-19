@@ -1,4 +1,4 @@
-import { SecuritySensitivity } from '@manaratak/domain';
+import { SecuritySensitivity } from '@absheer/domain';
 
 export interface CreateSecurityRuleDto {
   name: string;

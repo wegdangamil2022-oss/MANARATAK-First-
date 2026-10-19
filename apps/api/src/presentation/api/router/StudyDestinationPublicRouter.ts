@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
-import { StudyDestinationUseCases } from '@manaratak/application';
+import { StudyDestinationUseCases } from '@absheer/application';
 
 export class StudyDestinationPublicRouter {
   public static create(cradle: { studyDestinationUseCases: StudyDestinationUseCases }): Router {

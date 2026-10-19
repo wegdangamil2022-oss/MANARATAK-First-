@@ -11,7 +11,7 @@ import {
   AssetStorageZone,
   AssetLifecycleState,
   AssetSecurityClassification,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 import {
   RequestAssetUploadLocatorDto,
@@ -149,8 +149,8 @@ export class IngestAssetUseCase {
         ? {
             rights: {
               rightsSource:
-                'Original MANARATAK-generated verification QR graphic',
-              attribution: 'MANARATAK',
+                'Original ABSHEER-generated verification QR graphic',
+              attribution: 'ABSHEER',
               usageScope: 'PUBLIC',
               publicationPolicy: 'MANDATORY',
             },

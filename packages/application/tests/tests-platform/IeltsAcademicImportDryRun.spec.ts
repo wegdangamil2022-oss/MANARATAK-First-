@@ -8,10 +8,10 @@ import {
   InternationalTestStatus,
   IInternationalTestRepository,
   IReferenceResolver
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { 
   InternationalTestImportPromotionUseCase 
-} from '@manaratak/application';
+} from '@absheer/application';
 
 export const ieltsAcademicDryRunPayload = {
   testName: 'IELTS Academic',

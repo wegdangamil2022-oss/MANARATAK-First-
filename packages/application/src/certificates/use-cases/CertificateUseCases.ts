@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'crypto';
-import { APPROVED_CERTIFICATE_DESIGN, approvedCertificateCopy } from '@manaratak/shared';
+import { APPROVED_CERTIFICATE_DESIGN, approvedCertificateCopy } from '@absheer/shared';
 import {
   AssetId,
   AssetLifecycleState,
@@ -29,7 +29,7 @@ import {
   LearningPathCompletedEventPayload,
   UpdateCertificateIssuerDto,
   UpdateCertificateTemplateDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CertificateSigningRuntimeConfiguration, CertificateTrustPolicy } from '../services/CertificateTrustPolicy';
 
 export type CertificateTemplateAuthoringInput = Omit<
@@ -119,7 +119,7 @@ export class CertificateUseCases {
     try {
       const template=await this.requireDefaultActiveTemplate();
       const issuer=await this.requireActiveIssuer(template.issuerId);
-      if(issuer.issuerType!=='MANARATAK' || issuer.code!=='MANARATAK')throw new Error('CERTIFICATE_DEFAULT_ISSUER_BINDING_INVALID');
+      if(issuer.issuerType!=='ABSHEER' || issuer.code!=='ABSHEER')throw new Error('CERTIFICATE_DEFAULT_ISSUER_BINDING_INVALID');
       await this.trustPolicy.assertIssuerKeyAvailable(issuer.signingKeyReference,issuer.code);
       await this.assertAssetProvenance(template.currentVersion);
       defaultCompletionReady=runtime.signingProviderVerified && runtime.signingProviderConfigured && runtime.publicVerificationBaseUrlConfigured;
@@ -172,8 +172,8 @@ export class CertificateUseCases {
     if (!this.assetRepository) throw new Error('CERTIFICATE_ASSET_PLATFORM_NOT_CONFIGURED');
     const evidence = await this.assetRepository.findById(new AssetId(evidenceAssetId));
     if (!evidence || evidence.state !== AssetLifecycleState.ACTIVE || evidence.classification === AssetSecurityClassification.PUBLIC || evidence.owner.ownerType !== 'CertificateIssuer' || evidence.owner.ownerId !== id) throw new Error('CERTIFICATE_ISSUER_AUTHORITY_EVIDENCE_INVALID');
-    if (issuer.issuerType === 'MANARATAK') {
-      if (issuer.code !== 'MANARATAK' || issuer.universityId || issuer.organizationId) throw new Error('CERTIFICATE_OFFICIAL_ISSUER_BINDING_INVALID');
+    if (issuer.issuerType === 'ABSHEER') {
+      if (issuer.code !== 'ABSHEER' || issuer.universityId || issuer.organizationId) throw new Error('CERTIFICATE_OFFICIAL_ISSUER_BINDING_INVALID');
     } else if (!this.authorityResolver || !evidence.checksum?.hash || !await this.authorityResolver.validate(issuer, {authorityReference,evidenceChecksum:evidence.checksum.hash,reviewerId:context.actorId})) {
       throw new Error('CERTIFICATE_ISSUER_CANONICAL_AUTHORITY_UNVERIFIED');
     }
@@ -187,9 +187,9 @@ export class CertificateUseCases {
     if (existing) return existing;
     return this.createTemplate({
       code: 'MNR-SIGNATURE',
-      name: 'MANARATAK Signature Certificate',
-      nameAr: 'قالب مناراتك الاحترافي',
-      nameEn: 'MANARATAK Signature Certificate',
+      name: 'ABSHEER Signature Certificate',
+      nameAr: 'قالب أبشر الاحترافي',
+      nameEn: 'ABSHEER Signature Certificate',
       templateVersion: '1.0.0',
       issuerId,
       language: 'BILINGUAL',
@@ -200,8 +200,8 @@ export class CertificateUseCases {
       titleEn: approvedCertificateCopy.titleEn,
       bodyAr: approvedCertificateCopy.bodyAr,
       bodyEn: approvedCertificateCopy.bodyEn,
-      signatoryNameAr: 'إدارة منصة منارتك',
-      signatoryNameEn: 'MANARATAK Management',
+      signatoryNameAr: 'إدارة منصة أبشر',
+      signatoryNameEn: 'ABSHEER Management',
       signatoryTitleAr: 'توقيع الإصدار الرقمي',
       signatoryTitleEn: 'Digital Issuance Signature',
       validityPolicy: 'PERMANENT',
@@ -214,7 +214,7 @@ export class CertificateUseCases {
     this.validateTemplate(input);
     await this.ensureActiveAssets(input);
     const issuer = await this.requireActiveIssuer(input.issuerId);
-    if(input.metadata?.designId === APPROVED_CERTIFICATE_DESIGN && (issuer.issuerType !== 'MANARATAK' || issuer.code !== 'MANARATAK')) throw new Error('CERTIFICATE_APPROVED_DESIGN_ISSUER_INVALID');
+    if(input.metadata?.designId === APPROVED_CERTIFICATE_DESIGN && (issuer.issuerType !== 'ABSHEER' || issuer.code !== 'ABSHEER')) throw new Error('CERTIFICATE_APPROVED_DESIGN_ISSUER_INVALID');
     return this.certificateRepository.createTemplate({
       ...input,
       metadata: { ...input.metadata, assetProvenance: await this.assetProvenance(input) },
@@ -233,7 +233,7 @@ export class CertificateUseCases {
     this.validateTemplate(combined);
     if(combined.metadata?.designId === APPROVED_CERTIFICATE_DESIGN) {
       const issuer=await this.requireActiveIssuer(combined.issuerId);
-      if(issuer.issuerType !== 'MANARATAK' || issuer.code !== 'MANARATAK') throw new Error('CERTIFICATE_APPROVED_DESIGN_ISSUER_INVALID');
+      if(issuer.issuerType !== 'ABSHEER' || issuer.code !== 'ABSHEER') throw new Error('CERTIFICATE_APPROVED_DESIGN_ISSUER_INVALID');
     }
     return this.certificateRepository.updateTemplate(id, { ...input, metadata: { ...combined.metadata, assetProvenance: await this.assetProvenance(combined) } }, context);
   }
@@ -404,8 +404,8 @@ export class CertificateUseCases {
       throw new Error('CERTIFICATE_COURSE_VERSION_REQUIRED');
     }
     if (!course) throw new Error('COURSE_NOT_FOUND');
-    if (course.originType !== CourseOriginType.NATIVE_MANARATAK_COURSE) {
-      throw new Error('MANARATAK_CERTIFICATE_NATIVE_COURSE_REQUIRED');
+    if (course.originType !== CourseOriginType.NATIVE_ABSHEER_COURSE) {
+      throw new Error('ABSHEER_CERTIFICATE_NATIVE_COURSE_REQUIRED');
     }
     if (!course.certificateAvailable) throw new Error('COURSE_CERTIFICATE_DISABLED');
     const template = await this.requireDefaultActiveTemplate();
@@ -690,7 +690,7 @@ export class CertificateUseCases {
   }
 
   private async requireDefaultActiveTemplate(): Promise<CertificateTemplateDto> {
-    const template = await this.certificateRepository.findActiveTemplateByName('MANARATAK Signature Certificate');
+    const template = await this.certificateRepository.findActiveTemplateByName('ABSHEER Signature Certificate');
     if (!template || template.status !== CertificateTemplateStatus.ACTIVE) throw new Error('ACTIVE_CERTIFICATE_TEMPLATE_REQUIRED');
     if (template.currentVersion.status !== CertificateTemplateStatus.ACTIVE) throw new Error('ACTIVE_CERTIFICATE_TEMPLATE_VERSION_REQUIRED');
     return template;
@@ -705,9 +705,9 @@ export class CertificateUseCases {
 
   private async requireActiveIssuer(id: string) {
     const issuer = await this.certificateRepository.findIssuerById(id);
-    if (!issuer || issuer.status !== 'ACTIVE' || (issuer.issuerType !== 'MANARATAK' && !(issuer.metadata?.trust as { approvedBy?: string } | undefined)?.approvedBy)) throw new Error('ACTIVE_CERTIFICATE_ISSUER_REQUIRED');
+    if (!issuer || issuer.status !== 'ACTIVE' || (issuer.issuerType !== 'ABSHEER' && !(issuer.metadata?.trust as { approvedBy?: string } | undefined)?.approvedBy)) throw new Error('ACTIVE_CERTIFICATE_ISSUER_REQUIRED');
     if (!issuer.issuerLogoAssetId || !issuer.signingKeyReference) throw new Error('CERTIFICATE_ISSUER_AUTHORITY_INCOMPLETE');
-    if (issuer.issuerType !== 'MANARATAK') {
+    if (issuer.issuerType !== 'ABSHEER') {
       const trust=issuer.metadata?.trust as {authorityReference?:string;evidenceAssetId?:string;evidenceChecksum?:string;approvedBy?:string} | undefined;
       const evidence=trust?.evidenceAssetId && this.assetRepository ? await this.assetRepository.findById(new AssetId(trust.evidenceAssetId)) : null;
       if (!trust?.authorityReference || !trust.evidenceChecksum || !trust.approvedBy || !evidence || evidence.state!==AssetLifecycleState.ACTIVE || evidence.classification===AssetSecurityClassification.PUBLIC || evidence.owner.ownerType!=='CertificateIssuer' || evidence.owner.ownerId!==issuer.id || evidence.checksum?.hash!==trust.evidenceChecksum || !this.authorityResolver || !await this.authorityResolver.validate(issuer,{authorityReference:trust.authorityReference,evidenceChecksum:trust.evidenceChecksum,reviewerId:trust.approvedBy})) throw new Error('CERTIFICATE_ISSUER_CANONICAL_AUTHORITY_UNVERIFIED');
@@ -734,7 +734,7 @@ export class CertificateUseCases {
     if (!input.issuerLogoAssetId.trim()) throw new Error('CERTIFICATE_ISSUER_LOGO_REQUIRED');
     if (!input.signingKeyReference.trim()) throw new Error('CERTIFICATE_ISSUER_SIGNING_KEY_REQUIRED');
     if (input.issuerType === 'UNIVERSITY' && !input.universityId?.trim()) throw new Error('CERTIFICATE_ISSUER_CANONICAL_UNIVERSITY_REQUIRED');
-    if (input.issuerType !== 'MANARATAK' && (!input.accreditationAuthority?.trim() || !input.accreditationReference?.trim())) {
+    if (input.issuerType !== 'ABSHEER' && (!input.accreditationAuthority?.trim() || !input.accreditationReference?.trim())) {
       throw new Error('CERTIFICATE_ISSUER_ACCREDITATION_REQUIRED');
     }
   }

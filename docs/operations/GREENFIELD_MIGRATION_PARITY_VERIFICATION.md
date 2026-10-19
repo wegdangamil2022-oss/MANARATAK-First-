@@ -1,6 +1,6 @@
 # Greenfield Migration Parity Verification
 
-`npm run db:greenfield:verify` is the authoritative disposable-PostgreSQL verification for `MNT-AUD-0041`.
+`npm run db:greenfield:verify` is the authoritative disposable-PostgreSQL verification for `ABSH-AUD-0041`.
 
 It requires two explicitly disposable PostgreSQL databases: a target database for full `prisma migrate deploy` replay and a separate shadow database for migration-directory evaluation. The verifier refuses production/live-looking database names, requires explicit disposable flags, and requires an additional opt-in for non-local CI hosts.
 

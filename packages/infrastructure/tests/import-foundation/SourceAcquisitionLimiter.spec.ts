@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
+import { ImportSourceDefinition, SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@absheer/domain';
 import { SourceAcquisitionLimiter } from '../../src/import-foundation/SourceAcquisitionLimiter';
 function source(id: string, minimumDelayMs = 0) { return new ImportSourceDefinition({ sourceId: id, displayName: id, baseUrl: `https://${id}.example.com`, category: SourceConnectorCategory.OFFICIAL_API, accessClassification: SourceAccessClassification.PUBLIC_ALLOWED, status: SourceStatus.ACTIVE, rateLimitPerMinute: 60, connectorId: 'official-api', connectorVersion: '2.0.0', metadata: { rateLimitPolicy: { requestsPerMinute: 60, burstLimit: 2, minimumDelayMs } } }); }
 describe('SourceAcquisitionLimiter', () => {

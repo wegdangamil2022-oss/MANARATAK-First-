@@ -1,6 +1,6 @@
 import { isNotificationPreviewRequest } from '../http/NotificationPreviewRequest.js';
 import { NextFunction, Request, Response } from 'express';
-import { IAuditRecordRepository } from '@manaratak/domain';
+import { IAuditRecordRepository } from '@absheer/domain';
 import { AuditHelper } from './AuditHelper.js';
 
 export type MutationAuditClassification =

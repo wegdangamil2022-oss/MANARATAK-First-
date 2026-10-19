@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { IImportRawSnapshotStore, SourceAcquisitionResult, StoredImportRawSnapshot } from '@manaratak/application';
+import type { IImportRawSnapshotStore, SourceAcquisitionResult, StoredImportRawSnapshot } from '@absheer/application';
 import { SignedProviderHttpClient, type SignedProviderHttpClientOptions } from '../provider-http/SignedProviderHttpClient';
 
 interface ProviderSnapshotDto {

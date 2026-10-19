@@ -10,7 +10,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe('audit center source rendering', () => {
   it.each(['ar', 'en'])('renders the %s workspace and honest bounds', language => {
-    vi.stubGlobal('localStorage', { getItem: (key: string) => key === 'manaratak_admin_lang' ? language : null });
+    vi.stubGlobal('localStorage', { getItem: (key: string) => key === 'absheer_admin_lang' ? language : null });
     const html = renderToStaticMarkup(createElement(MemoryRouter, null,
       createElement(I18nProvider, null, createElement(AuditCenterPage))));
     expect(html).toContain(`dir="${language === 'ar' ? 'rtl' : 'ltr'}"`);

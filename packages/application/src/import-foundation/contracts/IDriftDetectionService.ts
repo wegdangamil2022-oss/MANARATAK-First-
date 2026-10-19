@@ -2,7 +2,7 @@ import {
   ImportSourceDefinition, 
   ConnectorSignature, 
   DriftAlert 
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface IDriftDetectionService {
   compareSignatures(input: { 

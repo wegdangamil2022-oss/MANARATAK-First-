@@ -1,5 +1,5 @@
 import {randomUUID} from 'node:crypto';
-import type {AtomicPersistenceContext,ICourseRepository,ILearningPathRepository} from '@manaratak/domain';
+import type {AtomicPersistenceContext,ICourseRepository,ILearningPathRepository} from '@absheer/domain';
 import {AtomicDomainMutationCoordinator, type AtomicMutationRequestContext} from '../../event-foundation/use-cases/AtomicDomainMutationCoordinator';
 import type {ImportedCourseAdminUseCases} from './ImportedCourseAdminUseCases';
 import type {AdminCourseUseCases} from './AdminCourseUseCases';

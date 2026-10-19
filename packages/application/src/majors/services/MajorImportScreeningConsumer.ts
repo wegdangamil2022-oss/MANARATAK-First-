@@ -1,4 +1,4 @@
-import { MajorImportPayloadSchema, type IImportHandoffConsumer, type UniversalImportHandoff } from '@manaratak/domain';
+import { MajorImportPayloadSchema, type IImportHandoffConsumer, type UniversalImportHandoff } from '@absheer/domain';
 import { z } from 'zod';
 const sourceUrl=z.union([z.literal(''),z.string().url().refine(value=>{try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password;}catch{return false;}})]);
 const schema=MajorImportPayloadSchema.omit({sourceImportRecordId:true}).extend({canonicalMajorName:z.string().trim().min(1).max(300),degreeLevel:z.enum(['BACHELOR','MASTER','DOCTORATE']),degreeLevelId:z.string().uuid(),sourceUrl:sourceUrl.optional(),officialSourceUrl:sourceUrl.optional()}).strict();

@@ -7,8 +7,8 @@ import {
   AssetSecurityClassification,
   IAuditRecordRepository,
   validateAssetRights,
-} from '@manaratak/domain';
-import { ProcessAssetLifecycleUseCase } from '@manaratak/application';
+} from '@absheer/domain';
+import { ProcessAssetLifecycleUseCase } from '@absheer/application';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 
 type ReuseAsset = Pick<

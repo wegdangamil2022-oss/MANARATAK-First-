@@ -9,7 +9,7 @@ async function run() {
   let withDetailsCount = 0;
   for (const major of majors) {
     const opt = major.optionalFields as any;
-    if (opt?.sourceClassificationSystem === 'MANARATAK_PHASE_10_DETAIL_DOSSIER') {
+    if (opt?.sourceClassificationSystem === 'ABSHEER_PHASE_10_DETAIL_DOSSIER') {
       withDetailsCount++;
     }
   }

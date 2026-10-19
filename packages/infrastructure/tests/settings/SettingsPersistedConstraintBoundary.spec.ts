@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
 import { NamespacedKey, NumberValue, ScopeIdentifier, ScopeLevel, SettingAssignment, SettingVersion,
-  StringValue, ValueType, type SettingValidationRules, type SettingValueData } from '@manaratak/domain';
+  StringValue, ValueType, type SettingValidationRules, type SettingValueData } from '@absheer/domain';
 import { PrismaSettingAssignmentRepository } from '../../src/settings/PrismaSettingAssignmentRepository';
 
 describe('Settings persisted constraint boundary', () => {

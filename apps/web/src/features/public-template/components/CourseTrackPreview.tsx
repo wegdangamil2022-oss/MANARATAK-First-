@@ -44,7 +44,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
 
   const isNative = track === 'native';
   const rawCourses = courses;
-  const pageTitle = isNative ? 'دورات منارتك' : 'الدورات المدفوعة';
+  const pageTitle = isNative ? 'دورات أبشر' : 'الدورات المدفوعة';
   const pageSubtitle = isNative
     ? 'برامج تدريبية وتأهيلية معتمدة لإتقان ملفات القبول، خطابات الدافع، وبناء السيرة الذاتية الأكاديمية'
     : 'برامج تدريبية احترافية متقدمة لتطوير مهاراتك الأكاديمية والمهنية مع شهادات تخصصية';
@@ -115,13 +115,13 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
 
   return (
     <div
-      className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel"
+      className="min-h-screen bg-[var(--ab-page)] text-[var(--ab-heading)] pb-24 font-['Cairo',sans-serif] select-none ab-panel"
       dir={publicDir}
     >
       {/* ========================================================================= */}
       {/* HERO CURVED BANNER */}
       {/* ========================================================================= */}
-      <div className="relative mn-search-hero text-white px-3 sm:px-4 pt-4 pb-12 sm:pb-14 overflow-hidden shadow-sm mn-inverse">
+      <div className="relative ab-search-hero text-white px-3 sm:px-4 pt-4 pb-12 sm:pb-14 overflow-hidden shadow-sm ab-inverse">
         {/* Back Button */}
         {onBack && (
           <button
@@ -144,29 +144,29 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
           >
             <path
               d="M-50,50 Q100,-20 250,60 T550,40"
-              stroke="var(--mn-accent)"
+              stroke="var(--ab-accent)"
               strokeWidth="1.5"
               fill="none"
             />
             <path
               d="M-20,120 Q150,40 300,140 T600,100"
-              stroke="var(--mn-accent)"
+              stroke="var(--ab-accent)"
               strokeWidth="1"
               fill="none"
             />
-            <circle cx="30" cy="30" r="1" fill="var(--mn-accent)" />
-            <circle cx="45" cy="30" r="1" fill="var(--mn-accent)" />
-            <circle cx="60" cy="30" r="1" fill="var(--mn-accent)" />
-            <circle cx="30" cy="45" r="1" fill="var(--mn-accent)" />
-            <circle cx="45" cy="45" r="1" fill="var(--mn-accent)" />
-            <circle cx="60" cy="45" r="1" fill="var(--mn-accent)" />
+            <circle cx="30" cy="30" r="1" fill="var(--ab-accent)" />
+            <circle cx="45" cy="30" r="1" fill="var(--ab-accent)" />
+            <circle cx="60" cy="30" r="1" fill="var(--ab-accent)" />
+            <circle cx="30" cy="45" r="1" fill="var(--ab-accent)" />
+            <circle cx="45" cy="45" r="1" fill="var(--ab-accent)" />
+            <circle cx="60" cy="45" r="1" fill="var(--ab-accent)" />
           </svg>
         </div>
 
         <div className="max-w-xl mx-auto text-center relative z-10 space-y-2.5">
           {/* Sparkle Icon */}
           <div className="flex justify-center -mb-1">
-            <Sparkles className="h-4 w-4 text-[var(--mn-accent-text)]" aria-hidden="true" />
+            <Sparkles className="h-4 w-4 text-[var(--ab-accent-text)]" aria-hidden="true" />
           </div>
 
           {/* Headline with Gold Curve */}
@@ -177,14 +177,14 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                 {pageTitle}
                 {/* Gold brush accent line underneath */}
                 <svg
-                  className="absolute -bottom-1.5 inset-x-0 w-full h-2 text-[var(--mn-accent-text)]"
+                  className="absolute -bottom-1.5 inset-x-0 w-full h-2 text-[var(--ab-accent-text)]"
                   viewBox="0 0 100 12"
                   fill="none"
                   preserveAspectRatio="none"
                 >
                   <path
                     d="M2,9 Q50,2 98,6"
-                    stroke="var(--mn-accent)"
+                    stroke="var(--ab-accent)"
                     strokeWidth="2.5"
                     strokeLinecap="round"
                   />
@@ -193,7 +193,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
             </h1>
 
             {/* Subtitle */}
-            <p className="text-[11px] sm:text-xs text-[var(--mn-on-dark-muted)] font-medium font-['Cairo',sans-serif] mt-1.5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">
+            <p className="text-[11px] sm:text-xs text-[var(--ab-on-dark-muted)] font-medium font-['Cairo',sans-serif] mt-1.5 leading-relaxed max-w-xs sm:max-w-sm mx-auto">
               {pageSubtitle}
             </p>
           </div>
@@ -206,15 +206,15 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={publicT('public_search_by_course_instructor_or_skill')}
-                className="w-full py-2 pl-4 pr-10 bg-[var(--mn-surface)] text-[var(--mn-heading)] rounded-full text-[11px] font-bold placeholder:text-[var(--mn-text-muted)] placeholder:text-[11px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--mn-border)] focus:border-[var(--mn-accent)] transition-all text-center font-['Cairo',sans-serif] mn-panel"
-                data-mn-design="8bba664dec"
+                className="w-full py-2 pl-4 pr-10 bg-[var(--ab-surface)] text-[var(--ab-heading)] rounded-full text-[11px] font-bold placeholder:text-[var(--ab-text-muted)] placeholder:text-[11px] placeholder:font-bold placeholder:font-['Cairo',sans-serif] focus:outline-none shadow-md border border-[var(--ab-border)] focus:border-[var(--ab-accent)] transition-all text-center font-['Cairo',sans-serif] ab-panel"
+                data-ab-design="8bba664dec"
               />
-              <Search className="w-3.5 h-3.5 text-[var(--mn-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-[var(--ab-accent-text)] absolute right-3.5 top-1/2 -translate-y-1/2" />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[var(--mn-text-muted)] hover:text-[var(--mn-text)] cursor-pointer"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 p-1 text-[var(--ab-text-muted)] hover:text-[var(--ab-text)] cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -228,7 +228,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
             <button
               type="button"
               onClick={handleResetFilters}
-              className="text-[10px] sm:text-[11px] font-bold text-[var(--mn-danger-text)] bg-[var(--mn-danger-soft)] px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif]"
+              className="text-[10px] sm:text-[11px] font-bold text-[var(--ab-danger-text)] bg-[var(--ab-danger-soft)] px-3 py-1 rounded-full transition-colors flex items-center gap-1 cursor-pointer font-['Cairo',sans-serif]"
             >
               <RotateCcw className="w-3 h-3" />
               <span>{publicT('public_reset_filters')}{activeFiltersCount})</span>
@@ -240,18 +240,18 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
       {/* ========================================================================= */}
       {/* FLOATING FILTER CARD WITH 2 TILES (المجال • المستوى)  */}
       {/* ========================================================================= */}
-      <div className="max-w-xl mx-auto mn-inline-gutter -mt-7 sm:-mt-8 relative z-20 space-y-2.5">
-        <div className="bg-[var(--mn-surface)] border border-[var(--mn-accent)]/50 rounded-3xl p-2 sm:p-2.5 shadow-md mn-panel">
+      <div className="max-w-xl mx-auto ab-inline-gutter -mt-7 sm:-mt-8 relative z-20 space-y-2.5">
+        <div className="bg-[var(--ab-surface)] border border-[var(--ab-accent)]/50 rounded-3xl p-2 sm:p-2.5 shadow-md ab-panel">
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
             {/* Tile 1: المجال / التصنيف */}
-            <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-page)]/80 border border-[var(--mn-border)] rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-2xs transition-colors mn-panel">
-              <div className="flex items-center gap-1 text-[var(--mn-heading)] font-bold text-[10px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight">
-                <Layers className="w-3 h-3 text-[var(--mn-accent-text)]" />
+            <div className="relative bg-[var(--ab-surface)] hover:bg-[var(--ab-page)]/80 border border-[var(--ab-border)] rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-2xs transition-colors ab-panel">
+              <div className="flex items-center gap-1 text-[var(--ab-heading)] font-bold text-[10px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight">
+                <Layers className="w-3 h-3 text-[var(--ab-accent-text)]" />
                 <span className="truncate">
                   {selectedCategory === 'الكل' ? publicT('public_all_domains_2') : selectedCategory}
                 </span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-1" />
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--ab-text-muted)] mt-1" />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -267,14 +267,14 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
             </div>
 
             {/* Tile 2: المستوى */}
-            <div className="relative bg-[var(--mn-surface)] hover:bg-[var(--mn-page)]/80 border border-[var(--mn-border)] rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-2xs transition-colors mn-panel">
-              <div className="flex items-center gap-1 text-[var(--mn-heading)] font-bold text-[10px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight">
-                <GraduationCap className="w-3 h-3 text-[var(--mn-accent-text)]" />
+            <div className="relative bg-[var(--ab-surface)] hover:bg-[var(--ab-page)]/80 border border-[var(--ab-border)] rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-center text-center shadow-2xs transition-colors ab-panel">
+              <div className="flex items-center gap-1 text-[var(--ab-heading)] font-bold text-[10px] sm:text-[11px] font-['Cairo',sans-serif] leading-tight">
+                <GraduationCap className="w-3 h-3 text-[var(--ab-accent-text)]" />
                 <span className="truncate">
                   {selectedLevel === 'الكل' ? publicT('public_all_levels_2') : selectedLevel}
                 </span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[var(--mn-text-muted)] mt-1" />
+              <ChevronDown className="w-3.5 h-3.5 text-[var(--ab-text-muted)] mt-1" />
               <select
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(e.target.value)}
@@ -296,7 +296,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
       {/* RESULTS COUNT */}
       {/* ========================================================================= */}
       <div className="max-w-xl mx-auto px-4 mt-4 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--mn-heading)]">
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--ab-heading)]">
           <BookOpen className="w-4 h-4 text-[#142B5F] dark:text-[#E5B54F]" />
           <span>{publicT('public_available_courses')}{filteredCourses.length})</span>
         </div>
@@ -320,7 +320,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                 }
               }}
               onClick={() => handleCardClick(course)}
-              className="bg-[var(--mn-surface)] rounded-xl sm:rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] dark:hover:border-[#D6A43B] shadow-xs hover:shadow-md transition-all relative overflow-hidden group mn-panel text-start cursor-pointer select-none w-full block active:scale-[0.99]"
+              className="bg-[var(--ab-surface)] rounded-xl sm:rounded-2xl border border-[#142B5F] dark:border-[#D6A43B]/60 hover:border-[#142B5F] dark:hover:border-[#D6A43B] shadow-xs hover:shadow-md transition-all relative overflow-hidden group ab-panel text-start cursor-pointer select-none w-full block active:scale-[0.99]"
             >
               {/* Golden Top Line */}
               <div className="h-1 w-full bg-gradient-to-r from-[#D6A43B] via-[#F3CE74] to-[#D6A43B] shadow-2xs" />
@@ -328,7 +328,7 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
               <div className="p-2.5 sm:p-3.5 space-y-2 sm:space-y-2.5">
                 {/* Header: Image & Badges & Favorite */}
                 <div className="flex items-start gap-2.5 sm:gap-3">
-                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-[var(--mn-border)] shrink-0 shadow-2xs">
+                  <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-[var(--ab-border)] shrink-0 shadow-2xs">
                     <img
                       src={
                         course.imageUrl ||
@@ -344,14 +344,14 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
-                      <span className="px-1.5 py-0.5 rounded-md bg-[var(--mn-page)] dark:bg-white/10 text-[var(--mn-text-muted)] font-bold text-[8.5px] sm:text-[9.5px]">
+                      <span className="px-1.5 py-0.5 rounded-md bg-[var(--ab-page)] dark:bg-white/10 text-[var(--ab-text-muted)] font-bold text-[8.5px] sm:text-[9.5px]">
                         {course.category || publicT('public_academic_preparation')}
                       </span>
 
                       <div className="flex items-center gap-1.5 sm:gap-2">
                         {course.rating && (
-                          <div className="flex items-center gap-0.5 sm:gap-1 text-[var(--mn-accent-text)] text-[9.5px] sm:text-[10.5px] font-bold">
-                            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-[var(--mn-accent-text)]" />
+                          <div className="flex items-center gap-0.5 sm:gap-1 text-[var(--ab-accent-text)] text-[9.5px] sm:text-[10.5px] font-bold">
+                            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-[var(--ab-accent-text)]" />
                             <span>{course.rating}</span>
                           </div>
                         )}
@@ -368,18 +368,18 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                       </div>
                     </div>
 
-                    <h3 className="text-[12px] sm:text-[13.5px] font-bold text-[var(--mn-heading)] mt-0.5 sm:mt-1 leading-snug group-hover:text-[var(--mn-primary)] dark:group-hover:text-[#E5B54F] transition-colors line-clamp-2">
+                    <h3 className="text-[12px] sm:text-[13.5px] font-bold text-[var(--ab-heading)] mt-0.5 sm:mt-1 leading-snug group-hover:text-[var(--ab-primary)] dark:group-hover:text-[#E5B54F] transition-colors line-clamp-2">
                       {course.title}
                     </h3>
 
-                    <p className="text-[9.5px] sm:text-[10px] text-[var(--mn-text-muted)] font-semibold mt-0.5 truncate">{publicT('public_presented_by')}{' '}{course.instructor || course.provider}
+                    <p className="text-[9.5px] sm:text-[10px] text-[var(--ab-text-muted)] font-semibold mt-0.5 truncate">{publicT('public_presented_by')}{' '}{course.instructor || course.provider}
                     </p>
                   </div>
                 </div>
 
                 {/* Footer Badges & Action */}
-                <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-[var(--mn-border)]/60 text-[9.5px] sm:text-[10.5px]">
-                  <div className="flex items-center gap-2 sm:gap-2.5 text-[var(--mn-text-muted)] font-semibold flex-wrap">
+                <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-[var(--ab-border)]/60 text-[9.5px] sm:text-[10.5px]">
+                  <div className="flex items-center gap-2 sm:gap-2.5 text-[var(--ab-text-muted)] font-semibold flex-wrap">
                     <span className="flex items-center gap-1">
                       <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#142B5F] dark:text-[#E5B54F]" />
                       <span>{course.duration || publicT('public_25_hours')}</span>
@@ -398,8 +398,8 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
                       e.stopPropagation();
                       handleCardClick(course);
                     }}
-                    className="flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 bg-[var(--mn-primary)] hover:bg-[#1a3777] text-white rounded-lg sm:rounded-xl text-[9.5px] sm:text-[10.5px] font-bold active:scale-95 transition-all shadow-2xs mn-inverse cursor-pointer"
-                    data-mn-design="26ecd1db9e"
+                    className="flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 bg-[var(--ab-primary)] hover:bg-[#1a3777] text-white rounded-lg sm:rounded-xl text-[9.5px] sm:text-[10.5px] font-bold active:scale-95 transition-all shadow-2xs ab-inverse cursor-pointer"
+                    data-ab-design="26ecd1db9e"
                   >
                     <PlayCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#E5B54F]" />
                     <span>{publicT('public_continue_course')}</span>
@@ -412,14 +412,14 @@ export const CourseTrackPreview: React.FC<CourseTrackPreviewProps> = ({
 
         {/* Empty State */}
         {filteredCourses.length === 0 && (
-          <div className="bg-[var(--mn-surface)] rounded-3xl border border-dashed border-[var(--mn-border)] p-8 text-center space-y-3 mn-panel">
+          <div className="bg-[var(--ab-surface)] rounded-3xl border border-dashed border-[var(--ab-border)] p-8 text-center space-y-3 ab-panel">
             <BookOpen className="w-10 h-10 mx-auto text-[#142B5F] dark:text-[#E5B54F]" />
-            <h3 className="text-sm font-bold text-[var(--mn-heading)]">{publicT('public_no_matching_courses_found')}</h3>
-            <p className="text-[11px] text-[var(--mn-text-muted)]">{publicT('public_try_changing_your_search_terms_or_resetting_the')}</p>
+            <h3 className="text-sm font-bold text-[var(--ab-heading)]">{publicT('public_no_matching_courses_found')}</h3>
+            <p className="text-[11px] text-[var(--ab-text-muted)]">{publicT('public_try_changing_your_search_terms_or_resetting_the')}</p>
             <button
               type="button"
               onClick={handleResetFilters}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[var(--mn-primary)] text-white text-[11px] font-bold mn-inverse cursor-pointer"
+              className="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[var(--ab-primary)] text-white text-[11px] font-bold ab-inverse cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" />
               <span>{publicT('public_reset_filters_2')}</span>

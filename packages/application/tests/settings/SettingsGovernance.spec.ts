@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BooleanValue, ConfigurationResolutionService, ConfigurationValidationService, NamespacedKey, ScopeLevel,
-  ScopeIdentifier, SettingAssignment, SettingDefinition, SettingVersion, ValueType, LifeStatus } from '@manaratak/domain';
+  ScopeIdentifier, SettingAssignment, SettingDefinition, SettingVersion, ValueType, LifeStatus } from '@absheer/domain';
 import { ManageSettingsUseCase } from '../../src/settings/use-cases/ManageSettingsUseCase';
 
 function fixture() {

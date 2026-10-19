@@ -1,11 +1,11 @@
 import type { PrismaClient } from '@prisma/client';
-import type { ISpecification } from '@manaratak/core';
+import type { ISpecification } from '@absheer/core';
 import {
   EnterpriseEvent,
   EnterpriseEventSpecification,
   EventLifecycleState,
   IEnterpriseEventRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 type EnterpriseEventDelegate = {
   upsert(args: Record<string, unknown>): Promise<unknown>;

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { CourseMasterArtifactParser } from '../../packages/application/src/courses/parsers/CourseMasterArtifactParser';
-import { IMPORTED_COURSE_MASTER_COLUMNS } from '@manaratak/domain';
+import { IMPORTED_COURSE_MASTER_COLUMNS } from '@absheer/domain';
 import { createHash } from 'node:crypto';
 import { projectReviewedCourseSources, type CourseSourceRow } from './CourseSourceQuality';
 

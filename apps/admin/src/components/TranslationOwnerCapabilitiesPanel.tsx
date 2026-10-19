@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { TranslationOwnerCapability } from '@manaratak/shared';
+import type { TranslationOwnerCapability } from '@absheer/shared';
 import { adminApiClient } from '../api/client';
 const names: Record<string, string> = {
   UNIVERSITY: 'الجامعات',

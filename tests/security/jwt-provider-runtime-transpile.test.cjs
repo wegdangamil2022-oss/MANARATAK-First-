@@ -12,7 +12,7 @@ async function loadProviderModule() {
       isolatedModules: true,
     },
   }).outputText;
-  assert.doesNotMatch(output, /@manaratak\/core/);
+  assert.doesNotMatch(output, /@absheer\/core/);
   return import(`data:text/javascript;base64,${Buffer.from(output).toString('base64')}`);
 }
 

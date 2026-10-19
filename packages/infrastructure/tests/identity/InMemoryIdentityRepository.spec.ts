@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Identity, IdentityType, User, Profile, ContactRegistry, TechnicalMetadata, Account } from '@manaratak/domain';
+import { Identity, IdentityType, User, Profile, ContactRegistry, TechnicalMetadata, Account } from '@absheer/domain';
 import { InMemoryIdentityRepository } from '../../src/identity/InMemoryIdentityRepository';
 
 describe('InMemoryIdentityRepository', () => {
@@ -14,7 +14,7 @@ describe('InMemoryIdentityRepository', () => {
     const user = new User({
       profile: new Profile({ displayName: 'Test User' }),
       contactRegistry: new ContactRegistry({
-        primaryEmail: 'test@manaratak.local',
+        primaryEmail: 'test@absheer.local',
         isEmailVerified: false,
         isPhoneVerified: false
       })
@@ -33,14 +33,14 @@ describe('InMemoryIdentityRepository', () => {
     expect(retrieved).not.toBeNull();
     expect(retrieved?.id.toString()).toBe(identity.id.toString());
     expect(retrieved?.type).toBe(IdentityType.Human);
-    expect(retrieved?.user?.contactRegistry.primaryEmail).toBe('test@manaratak.local');
+    expect(retrieved?.user?.contactRegistry.primaryEmail).toBe('test@absheer.local');
   });
 
   it('should check email uniqueness', async () => {
     const user = new User({
       profile: new Profile({ displayName: 'Test User' }),
       contactRegistry: new ContactRegistry({
-        primaryEmail: 'unique@manaratak.local',
+        primaryEmail: 'unique@absheer.local',
         isEmailVerified: false,
         isPhoneVerified: false
       })
@@ -55,7 +55,7 @@ describe('InMemoryIdentityRepository', () => {
 
     await repository.save(identity);
 
-    expect(await repository.isEmailUnique('unique@manaratak.local')).toBe(false);
-    expect(await repository.isEmailUnique('new@manaratak.local')).toBe(true);
+    expect(await repository.isEmailUnique('unique@absheer.local')).toBe(false);
+    expect(await repository.isEmailUnique('new@absheer.local')).toBe(true);
   });
 });

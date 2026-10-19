@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { PrismaClient } from '@prisma/client';
-import { IEventPublishingGateway } from '@manaratak/application';
-import { EnterpriseEvent, EventLifecycleState, OutboxProcessingState } from '@manaratak/domain';
+import { IEventPublishingGateway } from '@absheer/application';
+import { EnterpriseEvent, EventLifecycleState, OutboxProcessingState } from '@absheer/domain';
 
 type EnterpriseEventDelegate = {
   updateMany(args: Record<string, unknown>): Promise<{ count: number }>;

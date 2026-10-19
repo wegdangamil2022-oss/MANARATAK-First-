@@ -1,5 +1,5 @@
-import { Role, IRoleRepository } from '@manaratak/domain';
-import { ISpecification } from '@manaratak/core';
+import { Role, IRoleRepository } from '@absheer/domain';
+import { ISpecification } from '@absheer/core';
 
 export class InMemoryRoleRepository implements IRoleRepository {
   private readonly roles = new Map<string, Role>();

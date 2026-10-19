@@ -38,4 +38,4 @@ if (failures.length) {
   for (const failure of failures) console.error(`FAIL ${failure}`);
   process.exit(1);
 }
-console.log('PASS MNT-AUD-0091 Unicode owner canonicalization source guard');
+console.log('PASS ABSH-AUD-0091 Unicode owner canonicalization source guard');

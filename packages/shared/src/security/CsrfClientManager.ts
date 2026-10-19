@@ -4,7 +4,7 @@ export interface CsrfFetchOptions {
 }
 
 /**
- * Central CSRF Client Manager for Manaratak Browser Applications.
+ * Central CSRF Client Manager for Absheer Browser Applications.
  * Handles fetching, in-memory caching, auto-attaching headers to state-mutating requests,
  * and safe single-attempt retry on CSRF authorization failures.
  */

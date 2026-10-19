@@ -1,11 +1,11 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
-import { ParsedImportRow, ImportParseError } from '@manaratak/domain';
+import { ParsedImportRow, ImportParseError } from '@absheer/domain';
 import { ImportAdminUseCases, ImportArtifactUseCase, ImportParserRegistry, CsvImportStreamParser,
-  NdjsonImportStreamParser, ImportSourceControlUseCases, SourceConnectorRegistry } from '@manaratak/application';
+  NdjsonImportStreamParser, ImportSourceControlUseCases, SourceConnectorRegistry } from '@absheer/application';
 import { VerifiedImportArtifactGateway } from '../../src/import-foundation/VerifiedImportArtifactGateway';
 import { PrismaImportRepository } from '../../src/import-foundation/PrismaImportRepository';
-import { SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@manaratak/domain';
+import { SourceAccessClassification, SourceConnectorCategory, SourceStatus } from '@absheer/domain';
 
 const locator = { bucket: 'private', path: 'clean/import.csv', storageClass: 'CLEAN' } as any;
 const sha = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');

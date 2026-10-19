@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RedisHealthChecker } from '@manaratak/infrastructure';
-import { HealthStatus } from '@manaratak/core';
+import { RedisHealthChecker } from '@absheer/infrastructure';
+import { HealthStatus } from '@absheer/core';
 
 describe('RedisHealthChecker', () => {
   beforeEach(() => {

@@ -3,7 +3,7 @@ import {
   AssetId, AssetRecord, AssetReference, AssetOwnerReference, AssetStorageLocator,
   AssetMetadata, AssetRetentionMetadata, AssetRetentionCategory,
   AssetSecurityClassification, AssetLifecycleState, AssetStorageZone,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { PrismaAssetRecordRepository } from '../../src/asset-platform/PrismaAssetRecordRepository';
 
 const revision = new Date('2026-10-09T00:00:00.000Z');

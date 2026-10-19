@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PrismaSettingAssignmentRepository } from '../../src/settings/PrismaSettingAssignmentRepository';
-import { SettingAssignment, NamespacedKey, ScopeIdentifier, SettingVersion, StringValue, ScopeLevel } from '@manaratak/domain';
+import { SettingAssignment, NamespacedKey, ScopeIdentifier, SettingVersion, StringValue, ScopeLevel } from '@absheer/domain';
 
 describe('PrismaSettingAssignmentRepository', () => {
   let mockPrisma: any;

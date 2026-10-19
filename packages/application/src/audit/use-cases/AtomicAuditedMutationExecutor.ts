@@ -1,4 +1,4 @@
-import { AtomicPersistenceContext, ITransactionalAuditRecordRepository } from '@manaratak/domain';
+import { AtomicPersistenceContext, ITransactionalAuditRecordRepository } from '@absheer/domain';
 import { IAtomicPersistenceUnitOfWork } from '../../event-foundation/gateways/IAtomicPersistenceUnitOfWork';
 import { CreateAuditRecordDto } from '../dtos/AuditDtos';
 import { createAuditRecordFromDto } from './AuditRecordFactory';

@@ -1,7 +1,7 @@
 import { createQrMatrix } from '../qr/qrCode';
 
 /** Immutable design identity: changing geometry requires a new design/version. */
-export const APPROVED_CERTIFICATE_DESIGN = 'manaratak-completion-2026-10-10-v1';
+export const APPROVED_CERTIFICATE_DESIGN = 'absheer-completion-2026-10-10-v1';
 export const approvedCertificateCopy = {
   titleAr: 'شهادة إتمام',
   titleEn: 'Certificate of Completion',
@@ -123,8 +123,8 @@ export function renderApprovedCertificateSvg(input: ApprovedCertificateDesignInp
   ${text('title-ar', input.titleAr || approvedCertificateCopy.titleAr, 421, 111, 225, 30, true)}
   ${line(332, 133, 402, 133)}${line(440, 133, 510, 133)}<path d="M407 130L421 123L435 130L421 137Z M412 135V141Q421 146 430 141V135" fill="${gold}"/>
   ${text('title-en', input.titleEn || approvedCertificateCopy.titleEn, 421, 163, 280, 24)}
-  ${text('intro-en', `${input.issuerName || 'MANARATAK'} certifies that`, 250, 210, 325, 17)}
-  ${text('intro-ar', `تشهد ${input.issuerName && input.issuerName !== 'MANARATAK' ? input.issuerName : 'منصة منارتك'} بأن`, 602, 210, 315, 18, true)}
+  ${text('intro-en', `${input.issuerName || 'ABSHEER'} certifies that`, 250, 210, 325, 17)}
+  ${text('intro-ar', `تشهد ${input.issuerName && input.issuerName !== 'ABSHEER' ? input.issuerName : 'منصة أبشر'} بأن`, 602, 210, 315, 18, true)}
   ${text('recipient-en', input.recipient, 250, 246, 325, 20, arName)}
   ${text('recipient-ar', input.recipient, 602, 246, 325, 20, arName)}
   ${line(120, 272, 406, 272)}${line(436, 272, 724, 272)}${diamond(421, 272)}
@@ -144,8 +144,8 @@ export function renderApprovedCertificateSvg(input: ApprovedCertificateDesignInp
   ${input.signatureUrl ? `<image id="signature" href="${escape(input.signatureUrl)}" x="613" y="469" width="119" height="47" preserveAspectRatio="xMidYMid meet"/>` : ''}
   ${input.sealUrl ? `<image id="seal" href="${escape(input.sealUrl)}" x="745" y="473" width="35" height="35"/>` : ''}
   ${line(612, 519, 749, 519, navy)}
-  ${text('signatory-ar', input.signatoryNameAr || 'إدارة منصة منارتك', 681, 538, 170, 9, true)}
-  ${text('signatory-en', input.signatoryNameEn || 'MANARATAK Management', 681, 552, 170, 9)}
+  ${text('signatory-ar', input.signatoryNameAr || 'إدارة منصة أبشر', 681, 538, 170, 9, true)}
+  ${text('signatory-en', input.signatoryNameEn || 'ABSHEER Management', 681, 552, 170, 9)}
   <g id="book-footer" fill="white" stroke="${gold}" stroke-width="1.5"><rect x="397" y="564" width="48" height="27" stroke="none"/><path d="M421 581Q408 570 401 574L399 582Q410 580 421 586Q432 580 443 582L441 574Q434 570 421 581ZM421 581Q414 567 407 567L410 578M421 581Q428 567 435 567L432 578"/></g>
   </svg>`;
 }

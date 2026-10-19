@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import { AcademicTaxonomyAdminRouter } from '../../../../src/presentation/api/router/AcademicTaxonomyAdminRouter';
-import { AdminAcademicTaxonomyUseCases } from '@manaratak/application';
+import { AdminAcademicTaxonomyUseCases } from '@absheer/application';
 const revision = '2026-10-09T00:00:00.000Z';
 const node = { nodeId: 'node', nodeType: 'ACADEMIC_FIELD', canonicalCode: '06', canonicalName: 'ICT', standardType: 'ISCED', status: 'ACTIVE', updatedAt: new Date(revision) };
 function setup() {

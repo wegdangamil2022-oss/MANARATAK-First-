@@ -34,9 +34,9 @@ function delegateRecorder() {
 
 const scalar = (value) => ({ getValue: () => value });
 
-test('MNT-AUD-0049 workflow repository persists durable aggregate snapshot', async () => {
+test('ABSH-AUD-0049 workflow repository persists durable aggregate snapshot', async () => {
   const { prisma, calls } = delegateRecorder();
-  const { PrismaWorkflowRepository } = load('packages/infrastructure/src/workflow/PrismaWorkflowRepository.ts', { '@manaratak/domain': domain, '@prisma/client': {} });
+  const { PrismaWorkflowRepository } = load('packages/infrastructure/src/workflow/PrismaWorkflowRepository.ts', { '@absheer/domain': domain, '@prisma/client': {} });
   const repo = new PrismaWorkflowRepository(prisma);
   const workflow = {
     getId: () => scalar('wf-1'), getReference: () => scalar('workflow.ref'), getOwnerReference: () => scalar('owner.ref'),
@@ -50,9 +50,9 @@ test('MNT-AUD-0049 workflow repository persists durable aggregate snapshot', asy
   assert.equal(calls[0][1].create.snapshot.definitionName, 'Review');
 });
 
-test('MNT-AUD-0049 API and component repositories persist owner snapshots', async () => {
+test('ABSH-AUD-0049 API and component repositories persist owner snapshots', async () => {
   const apiRec = delegateRecorder();
-  const { PrismaApiServiceRepository } = load('packages/infrastructure/src/api-foundation/PrismaApiServiceRepository.ts', { '@manaratak/domain': domain, '@manaratak/core': core, '@prisma/client': {} });
+  const { PrismaApiServiceRepository } = load('packages/infrastructure/src/api-foundation/PrismaApiServiceRepository.ts', { '@absheer/domain': domain, '@absheer/core': core, '@prisma/client': {} });
   const apiRepo = new PrismaApiServiceRepository(apiRec.prisma);
   const endpoint = { getName:()=> 'users', getPurpose:()=> 'users api' };
   const operation = { getName:()=> 'create', getInputType:()=> 'Create', getOutputType:()=> 'User', getIsIdempotent:()=>true };
@@ -70,7 +70,7 @@ test('MNT-AUD-0049 API and component repositories persist owner snapshots', asyn
   assert.equal(apiRec.calls[0][1].create.version, '1.0.0');
 
   const compRec = delegateRecorder();
-  const { PrismaSharedComponentRepository } = load('packages/infrastructure/src/shared-components/PrismaSharedComponentRepository.ts', { '@manaratak/domain': domain, '@manaratak/core': core, '@prisma/client': {} });
+  const { PrismaSharedComponentRepository } = load('packages/infrastructure/src/shared-components/PrismaSharedComponentRepository.ts', { '@absheer/domain': domain, '@absheer/core': core, '@prisma/client': {} });
   const compRepo = new PrismaSharedComponentRepository(compRec.prisma);
   const component = {
     getId:()=>scalar('cmp-1'), getReference:()=>scalar('cmp.ref'), getOwnerReference:()=>scalar('owner'),
@@ -83,20 +83,20 @@ test('MNT-AUD-0049 API and component repositories persist owner snapshots', asyn
   assert.equal(compRec.calls[0][1].create.reference, 'cmp.ref');
 });
 
-test('MNT-AUD-0049 operational projections write through Prisma instead of no-op gateways', async () => {
+test('ABSH-AUD-0049 operational projections write through Prisma instead of no-op gateways', async () => {
   const wf = delegateRecorder();
-  const { PrismaWorkflowExecutionGateway } = load('packages/infrastructure/src/workflow/PrismaWorkflowExecutionGateway.ts', { '@manaratak/domain': domain, '@manaratak/application': app, '@prisma/client': {} });
+  const { PrismaWorkflowExecutionGateway } = load('packages/infrastructure/src/workflow/PrismaWorkflowExecutionGateway.ts', { '@absheer/domain': domain, '@absheer/application': app, '@prisma/client': {} });
   await new PrismaWorkflowExecutionGateway(wf.prisma).execute({ getValue:()=> 'wf.ref' });
   assert.equal(wf.calls[0][0], 'workflowExecutionProjection');
 
   const exposure = delegateRecorder();
-  const { PrismaApiExposureGateway } = load('packages/infrastructure/src/api-foundation/PrismaApiExposureGateway.ts', { '@manaratak/domain': domain, '@manaratak/application': app, '@prisma/client': {} });
+  const { PrismaApiExposureGateway } = load('packages/infrastructure/src/api-foundation/PrismaApiExposureGateway.ts', { '@absheer/domain': domain, '@absheer/application': app, '@prisma/client': {} });
   const api = { getReference:()=>scalar('api.ref'), getId:()=>scalar('api-1'), getLifecycleState:()=> 'ACTIVE', getExposureIntent:()=>({ getExposePublicly:()=>true,getEnvironmentTarget:()=> 'PROD',getNetworkCategory:()=> 'PUBLIC' }) };
   await new PrismaApiExposureGateway(exposure.prisma).expose(api);
   assert.equal(exposure.calls[0][0], 'apiServiceExposureProjection');
 
   const render = delegateRecorder();
-  const { PrismaComponentRenderingGateway } = load('packages/infrastructure/src/shared-components/PrismaComponentRenderingGateway.ts', { '@manaratak/domain': domain, '@manaratak/application': app, '@prisma/client': {} });
+  const { PrismaComponentRenderingGateway } = load('packages/infrastructure/src/shared-components/PrismaComponentRenderingGateway.ts', { '@absheer/domain': domain, '@absheer/application': app, '@prisma/client': {} });
   const cmp = { getReference:()=>scalar('cmp.ref'), getId:()=>scalar('cmp-1'), getVersion:()=>scalar('1.0.0'), getState:()=> 'ACTIVE', getDefinition:()=>({getProperties:()=>[],getSlots:()=>[]}), getRenderingIntent:()=>({getVisualCategory:()=> 'FORM',getInteractionModel:()=> 'STATIC'}) };
   await new PrismaComponentRenderingGateway(render.prisma).synchronize(cmp);
   assert.equal(render.calls[0][0], 'sharedComponentRenderingProjection');

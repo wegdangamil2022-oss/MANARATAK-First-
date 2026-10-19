@@ -3,7 +3,7 @@ import type {
   IRoleAssignmentRepository,
   INotificationRecipientGateway,
   IStudentWorkspaceRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 /** P15 is the owner of student eligibility; P05 never infers recipients from contact strings. */
 export class StudentNotificationRecipientGateway implements INotificationRecipientGateway {
   constructor(

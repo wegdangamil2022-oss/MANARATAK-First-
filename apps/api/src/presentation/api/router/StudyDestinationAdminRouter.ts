@@ -8,8 +8,8 @@ import {
   StudyDestinationLivingCostTier,
   StudyDestinationStatus,
   STUDY_DESTINATION_READINESS_KEYS,
-} from '@manaratak/domain';
-import { CrossDomainGraphReadService, StudyDestinationUseCases } from '@manaratak/application';
+} from '@absheer/domain';
+import { CrossDomainGraphReadService, StudyDestinationUseCases } from '@absheer/application';
 
 const stringList = z.array(z.string().trim().min(1)).max(100);
 const costHighlights = z

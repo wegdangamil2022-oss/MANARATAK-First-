@@ -18,8 +18,8 @@ export function validateMigrationMetadata(name, sql, manifest) {
     return errors;
   }
   const errors = [];
-  if (!/^-- MANARATAK_MIGRATION_OWNER: [^\r\n]+$/m.test(sql)) errors.push(`new migration ${name} missing MANARATAK_MIGRATION_OWNER`);
-  if (!/^-- MANARATAK_MIGRATION_SCOPE: (?:owner_only|cross_context_approved)\r?$/m.test(sql)) errors.push(`new migration ${name} missing/invalid MANARATAK_MIGRATION_SCOPE`);
-  if (!/^-- MANARATAK_ARCH_DECISION: ADR-028\r?$/m.test(sql)) errors.push(`new migration ${name} missing ADR-028 decision marker`);
+  if (!/^-- ABSHEER_MIGRATION_OWNER: [^\r\n]+$/m.test(sql)) errors.push(`new migration ${name} missing ABSHEER_MIGRATION_OWNER`);
+  if (!/^-- ABSHEER_MIGRATION_SCOPE: (?:owner_only|cross_context_approved)\r?$/m.test(sql)) errors.push(`new migration ${name} missing/invalid ABSHEER_MIGRATION_SCOPE`);
+  if (!/^-- ABSHEER_ARCH_DECISION: ADR-028\r?$/m.test(sql)) errors.push(`new migration ${name} missing ADR-028 decision marker`);
   return errors;
 }

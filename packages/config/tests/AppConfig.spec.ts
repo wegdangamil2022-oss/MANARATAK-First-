@@ -10,16 +10,16 @@ const asymmetricJwtEnv = {
 
 const productionBase = {
   NODE_ENV: 'production',
-  DATABASE_URL: 'postgresql://user:pass@prod-db:5432/manaratak',
+  DATABASE_URL: 'postgresql://user:pass@prod-db:5432/absheer',
   REDIS_URL: 'redis://prod-redis:6379',
   ...asymmetricJwtEnv,
   CSRF_SECRET: 'a-very-secure-production-csrf-secret-key-32chars',
-  CORS_ORIGIN: 'https://app.manaratak.com',
-  API_BASE_URL: 'https://api.manaratak.com',
-  PUBLIC_WEB_URL: 'https://app.manaratak.com',
-  ADMIN_WEB_URL: 'https://admin.manaratak.com',
-  JWT_ISSUER: 'manaratak-production-api',
-  JWT_AUDIENCE: 'manaratak-production-browser',
+  CORS_ORIGIN: 'https://app.absheer.com',
+  API_BASE_URL: 'https://api.absheer.com',
+  PUBLIC_WEB_URL: 'https://app.absheer.com',
+  ADMIN_WEB_URL: 'https://admin.absheer.com',
+  JWT_ISSUER: 'absheer-production-api',
+  JWT_AUDIENCE: 'absheer-production-browser',
   SECURE_COOKIE: 'true',
   TRUST_PROXY_HOPS: '1',
   SECURITY_CSP_ENABLED: 'true',
@@ -33,10 +33,10 @@ const productionBase = {
   BACKGROUND_WORKER_LEASE_MS: '60000',
   BACKGROUND_WORKER_HEARTBEAT_MS: '15000',
   BACKGROUND_RETENTION_CRON: '15 2 * * *',
-  MANARATAK_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.manaratak.internal/api/',
-  MANARATAK_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
-  MANARATAK_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
-  MANARATAK_IMPORT_RAW_RETENTION_DAYS: '365',
+  ABSHEER_ASSET_PROVIDER_BASE_URL: 'https://asset-provider.absheer.internal/api/',
+  ABSHEER_ASSET_PROVIDER_API_KEY: 'asset-provider-key',
+  ABSHEER_ASSET_PROVIDER_SIGNING_SECRET: '0123456789abcdef0123456789abcdef',
+  ABSHEER_IMPORT_RAW_RETENTION_DAYS: '365',
   ADMIN_AUTH_MODE: 'strict',
 };
 
@@ -51,7 +51,7 @@ describe('AppConfig', () => {
 
   it('development/test config leaves Redis optional unless explicitly configured', () => {
     const config = loadAppConfig({ NODE_ENV: 'development' });
-    expect(config.DATABASE_URL).toBe('postgresql://postgres:postgres@localhost:5432/manaratak_dev');
+    expect(config.DATABASE_URL).toBe('postgresql://postgres:postgres@localhost:5432/absheer_dev');
     expect(config.REDIS_URL).toBeUndefined();
     expect(loadAppConfig({ NODE_ENV: 'test', REDIS_URL: 'redis://localhost:6379' }).REDIS_URL).toBe('redis://localhost:6379');
   });
@@ -73,7 +73,7 @@ describe('AppConfig', () => {
   it('fails in production with weak CSRF signing secret', () => {
     expect(() => loadAppConfig({
       ...productionBase,
-      CSRF_SECRET: 'manaratak-default-csrf-secret-must-be-changed-in-prod-long',
+      CSRF_SECRET: 'absheer-default-csrf-secret-must-be-changed-in-prod-long',
     })).toThrowError(/insecure default/);
   });
 

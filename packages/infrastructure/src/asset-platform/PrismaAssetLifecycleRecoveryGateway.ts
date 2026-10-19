@@ -4,12 +4,12 @@ import {
   AssetId,
   type AtomicPersistenceContext,
   type AssetLifecycleReconciliationProof,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   assertLifecycleProof,
   type IAssetLifecycleRecoveryGateway,
   type AssetLifecycleRecoveryCandidate,
-} from '@manaratak/application';
+} from '@absheer/application';
 import { PrismaAssetRecordRepository } from './PrismaAssetRecordRepository';
 export class PrismaAssetLifecycleRecoveryGateway implements IAssetLifecycleRecoveryGateway {
   constructor(private readonly db: PrismaClient) {}

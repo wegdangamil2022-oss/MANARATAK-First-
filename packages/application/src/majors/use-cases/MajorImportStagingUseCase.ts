@@ -1,4 +1,4 @@
-import { ImportTargetDomain } from '@manaratak/domain';
+import { ImportTargetDomain } from '@absheer/domain';
 import { ImportAdminUseCases } from '../../import-foundation/use-cases/ImportAdminUseCases';
 import { MajorCatalogKind, MajorCatalogMarkdownParser, MajorCatalogRow } from '../services/MajorCatalogMarkdownParser';
 import { MajorDetailDossierMarkdownParser, MajorDetailDossierRow } from '../services/MajorDetailDossierMarkdownParser';

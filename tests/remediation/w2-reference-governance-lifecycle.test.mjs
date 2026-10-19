@@ -18,7 +18,7 @@ function loadGovernanceModule() {
   return module.exports;
 }
 
-test('MNT-AUD-0013 lifecycle state machine is linear and terminal', () => {
+test('ABSH-AUD-0013 lifecycle state machine is linear and terminal', () => {
   const g = loadGovernanceModule();
   assert.doesNotThrow(() => g.assertReferenceLifecycleTransition(g.ReferenceLifecycleState.ACTIVE, g.ReferenceLifecycleState.DEPRECATED));
   assert.doesNotThrow(() => g.assertReferenceLifecycleTransition(g.ReferenceLifecycleState.DEPRECATED, g.ReferenceLifecycleState.ARCHIVED));
@@ -29,7 +29,7 @@ test('MNT-AUD-0013 lifecycle state machine is linear and terminal', () => {
   assert.throws(() => g.assertReferenceLifecycleTransition(g.ReferenceLifecycleState.ARCHIVED, g.ReferenceLifecycleState.ACTIVE), /TERMINAL_STATE/);
 });
 
-test('MNT-AUD-0013 persistence no longer resolves aliases/provider IDs from opaque metadata', () => {
+test('ABSH-AUD-0013 persistence no longer resolves aliases/provider IDs from opaque metadata', () => {
   const repo = read('packages/infrastructure/src/reference-data/PrismaReferenceDataRepository.ts');
   assert.match(repo, /FROM "ReferenceAliasRecord"/);
   assert.match(repo, /FROM "ReferenceProviderMappingRecord"/);
@@ -39,19 +39,19 @@ test('MNT-AUD-0013 persistence no longer resolves aliases/provider IDs from opaq
   assert.match(repo, /REFERENCE_LIFECYCLE_COMMAND_REQUIRED/);
 });
 
-test('MNT-AUD-0013 migration preserves legacy governance and creates explicit immutable history tables', () => {
+test('ABSH-AUD-0013 migration preserves legacy governance and creates explicit immutable history tables', () => {
   const sql = read('packages/infrastructure/prisma/migrations/20260906204000_reference_governance_lifecycle/migration.sql');
   for (const table of ['ReferenceVersionRecord', 'ReferenceAliasRecord', 'ReferenceProviderMappingRecord', 'ReferenceRelationshipRecord']) {
     assert.match(sql, new RegExp(`CREATE TABLE "${table}"`));
   }
   assert.match(sql, /metadata"->'aliases'/);
   assert.match(sql, /metadata"->'providerMappings'/);
-  assert.match(sql, /MNT-AUD-0013_BASELINE/);
+  assert.match(sql, /ABSH-AUD-0013_BASELINE/);
   assert.match(sql, /lifecycleState_check/);
   assert.match(sql, /ReferenceRelationshipRecord_no_self_check/);
 });
 
-test('MNT-AUD-0013 Admin boundary separates data updates from lifecycle authority', () => {
+test('ABSH-AUD-0013 Admin boundary separates data updates from lifecycle authority', () => {
   const router = read('apps/api/src/presentation/api/router/ReferenceDataAdminRouter.ts');
   assert.doesNotMatch(router, /isActive:\s*z\.boolean/);
   assert.match(router, /\/governance\/:entityType\/:referenceId\/lifecycle/);
@@ -60,7 +60,7 @@ test('MNT-AUD-0013 Admin boundary separates data updates from lifecycle authorit
   assert.match(router, /AUTHENTICATED_ADMIN_ACTOR_REQUIRED/);
 });
 
-test('MNT-AUD-0013 new governance models remain covered by ADR-028 ownership and recovery baseline manifests', () => {
+test('ABSH-AUD-0013 new governance models remain covered by ADR-028 ownership and recovery baseline manifests', () => {
   const ownership = JSON.parse(read('docs/architecture/persistence/persistence-ownership.manifest.json'));
   const baseline = JSON.parse(read('scripts/database/database-baseline.manifest.json'));
   for (const model of ['ReferenceVersionRecord','ReferenceAliasRecord','ReferenceProviderMappingRecord','ReferenceRelationshipRecord']) {

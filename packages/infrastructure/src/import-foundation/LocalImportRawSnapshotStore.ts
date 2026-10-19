@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import type { IImportRawSnapshotStore, SourceAcquisitionResult, StoredImportRawSnapshot } from '@manaratak/application';
+import type { IImportRawSnapshotStore, SourceAcquisitionResult, StoredImportRawSnapshot } from '@absheer/application';
 export class LocalImportRawSnapshotStore implements IImportRawSnapshotStore {
   public readonly persistenceClassification = 'DEVELOPMENT_ONLY' as const;
 

@@ -1,4 +1,4 @@
-import type { UniversalImportHandoff } from '@manaratak/domain';
+import type { UniversalImportHandoff } from '@absheer/domain';
 import { inspectUniversitySourceStage } from './UniversitySourceQuality';
 
 export type UniversityImportStage = 'STAGE_1' | 'STAGE_2' | 'STAGE_3' | 'STAGE_4' | 'GLOBAL_RANKINGS';

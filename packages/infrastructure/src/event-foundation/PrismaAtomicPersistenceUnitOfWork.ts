@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
-import type { IAtomicPersistenceUnitOfWork } from '@manaratak/application';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { IAtomicPersistenceUnitOfWork } from '@absheer/application';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import type { PrismaAtomicPersistenceContext } from './PrismaTransactionalOutboxStore';
 
 export class PrismaAtomicPersistenceUnitOfWork implements IAtomicPersistenceUnitOfWork {

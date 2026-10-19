@@ -1,7 +1,7 @@
 # Architecture Governance Report
 
 ## Executive Summary
-This report summarizes the governance alignment and architectural documentation updates performed to officially adopt the Enterprise Content Ownership Model across the MANARATAK 2.0 platform.
+This report summarizes the governance alignment and architectural documentation updates performed to officially adopt the Enterprise Content Ownership Model across the ABSHEER 2.0 platform.
 
 ## Standards Adopted
 - **Enterprise Content Ownership Model (v1.0.0):** Formally adopted as a permanent Enterprise Architecture Standard. This model establishes strict ownership boundaries between the Enterprise CMS (Editorial Content) and Business Domains (Business Data), and introduces the Media Platform for all binary assets and media lifecycles.
@@ -35,7 +35,7 @@ This report summarizes the governance alignment and architectural documentation 
 6. **`docs/architecture/adr/ADR-002-CMS-vs-Learning-Boundary.md`**
    - Updated governance rules to explicitly reference the Enterprise Content Ownership Model and reinforce cross-domain communication constraints (APIs, events, Read Models).
 
-7. **`docs/governance/blueprint/MANARATAK-2.0-Master-Blueprint.md`**
+7. **`docs/governance/blueprint/ABSHEER-2.0-Master-Blueprint.md`**
    - Synchronized terminology globally, standardizing variations like "Universal CMS", "Core CMS", and "Headless CMS" to the official term "Enterprise CMS".
 
 ## Final Architectural Status

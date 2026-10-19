@@ -10,7 +10,7 @@ export function useOverlayDialog(open: boolean, onClose: () => void, id: string)
     if (!dialog) return;
     const previousFocus = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
-    const background = Array.from(document.querySelectorAll<HTMLElement>('#manaratak-header, #manaratak-bottom-nav, .manaratak-public > main'));
+    const background = Array.from(document.querySelectorAll<HTMLElement>('#absheer-header, #absheer-bottom-nav, .absheer-public > main'));
     const previousInert = background.map(element => element.inert);
     background.forEach(element => {element.inert = true;});
     document.body.style.overflow = 'hidden';

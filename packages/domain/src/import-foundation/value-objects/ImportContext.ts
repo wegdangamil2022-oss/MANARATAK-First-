@@ -1,4 +1,4 @@
-import { ValueObject } from '@manaratak/core';
+import { ValueObject } from '@absheer/core';
 
 export interface ImportContextProps {
   sourceSystem: string;

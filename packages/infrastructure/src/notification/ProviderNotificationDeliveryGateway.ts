@@ -2,7 +2,7 @@ import type {
   INotificationDeliveryGateway,
   NotificationDeliveryCandidate,
   NotificationDeliveryResult,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   SignedProviderHttpClient,
   SignedProviderHttpClientOptions,

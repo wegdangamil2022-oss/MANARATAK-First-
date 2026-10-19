@@ -1,10 +1,10 @@
-import { asValue } from '@manaratak-vendor/awilix-core';
+import { asValue } from '@absheer-vendor/awilix-core';
 import { container } from '../../../../src/infrastructure/di/container';
 import express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { MajorStatus } from '@manaratak/domain';
-import { AdminMajorUseCases } from '@manaratak/application';
+import { MajorStatus } from '@absheer/domain';
+import { AdminMajorUseCases } from '@absheer/application';
 import { MajorAdminRouter } from '../../../../src/presentation/api/router/MajorAdminRouter';
 
 describe('MajorAdminRouter', () => {

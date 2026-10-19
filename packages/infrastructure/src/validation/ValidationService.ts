@@ -1,4 +1,4 @@
-import { IValidationService, IValidationContext, Result, ResultFactory } from '@manaratak/core';
+import { IValidationService, IValidationContext, Result, ResultFactory } from '@absheer/core';
 import { ZodValidationProvider } from './ZodValidationProvider';
 import { DefaultSanitizer } from './DefaultSanitizer';
 

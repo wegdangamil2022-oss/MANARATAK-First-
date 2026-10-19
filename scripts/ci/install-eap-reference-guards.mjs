@@ -6,7 +6,7 @@ let disposableIdentityValid = false;
 try {
   const target = new URL(expectedUrl ?? '');
   disposableIdentityValid = target.protocol === 'postgresql:' && target.hostname === '127.0.0.1' &&
-    target.port === '5432' && target.pathname === '/manaratak_eap_ci_test' && target.username === 'eap_ci' &&
+    target.port === '5432' && target.pathname === '/absheer_eap_ci_test' && target.username === 'eap_ci' &&
     Boolean(target.password) && target.search === '?schema=public';
 } catch { /* Missing or malformed configuration fails before constructing Prisma. */ }
 
@@ -24,7 +24,7 @@ const prisma = new PrismaClient();
 try {
   await prisma.$transaction(async tx => {
     const identity = await tx.$queryRaw`SELECT current_database() AS database, current_user AS role`;
-    if (identity[0]?.database !== 'manaratak_eap_ci_test' || identity[0]?.role !== 'eap_ci') throw new Error('EAP_DISPOSABLE_DATABASE_IDENTITY_REQUIRED');
+    if (identity[0]?.database !== 'absheer_eap_ci_test' || identity[0]?.role !== 'eap_ci') throw new Error('EAP_DISPOSABLE_DATABASE_IDENTITY_REQUIRED');
     for (const statement of sql.split('-- statement-breakpoint')) {
       if (/(?:^|\n)BEGIN;\s*$/.test(statement) || /^\s*COMMIT;\s*$/.test(statement)) continue;
       await tx.$executeRawUnsafe(statement);

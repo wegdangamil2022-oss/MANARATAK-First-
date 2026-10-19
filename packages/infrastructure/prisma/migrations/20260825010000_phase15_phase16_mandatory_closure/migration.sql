@@ -57,7 +57,7 @@ CREATE INDEX "StudentCertificateReadProjection_studentReferenceId_status_issuedA
 CREATE INDEX "StudentCertificateReadProjection_sourceEventId_idx" ON "StudentCertificateReadProjection"("sourceEventId");
 ALTER TABLE "StudentCertificateReadProjection" ADD CONSTRAINT "StudentCertificateReadProjection_studentReferenceId_fkey" FOREIGN KEY ("studentReferenceId") REFERENCES "StudentWorkspace"("studentReferenceId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
-ALTER TABLE "CmsLocalizedContent" ADD COLUMN "siteIdentifier" TEXT NOT NULL DEFAULT 'MANARATAK';
+ALTER TABLE "CmsLocalizedContent" ADD COLUMN "siteIdentifier" TEXT NOT NULL DEFAULT 'ABSHEER';
 UPDATE "CmsLocalizedContent" AS localized
 SET "siteIdentifier" = content."siteIdentifier"
 FROM "CmsContentNode" AS content

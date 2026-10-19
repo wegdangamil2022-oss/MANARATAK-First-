@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import type { IMajorConsumerReadGateway, MajorConsumerPage, MajorConsumerQuery } from '@manaratak/domain';
+import type { IMajorConsumerReadGateway, MajorConsumerPage, MajorConsumerQuery } from '@absheer/domain';
 /** P11 owns this read model. P10 cannot modify programs or infer admissions decisions. */
 export class PrismaMajorProgramUsageGateway implements IMajorConsumerReadGateway {
   constructor(private readonly prisma: PrismaClient) {}

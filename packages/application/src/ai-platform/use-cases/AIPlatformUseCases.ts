@@ -28,7 +28,7 @@ import {
   IAIProviderRegistry,
   IAIKnowledgeOwnerGateway,
   type AIPlatformResourceValue,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 interface AIOrchestrationResponse {
   executionPublicId: string;
@@ -1664,7 +1664,7 @@ export class AIWorkflowUseCases {
     )
       throw new Error('AI_WORKFLOW_RUN_BUDGET_INVALID');
     const bindings: NonNullable<
-      import('@manaratak/domain').AIWorkflowRun['executionPlan']
+      import('@absheer/domain').AIWorkflowRun['executionPlan']
     >['bindings'] = {};
     for (const step of frozen.definition.steps)
       bindings[step.key] = await this.execution.freezeWorkflowBinding(

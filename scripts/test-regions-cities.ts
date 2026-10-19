@@ -66,11 +66,11 @@ async function main() {
     }
 
     // Extract access & refresh cookies
-    const accessCookie = setCookieHeaders.find(c => c.startsWith('manaratak_access='))?.split(';')[0];
-    const refreshCookie = setCookieHeaders.find(c => c.startsWith('manaratak_refresh='))?.split(';')[0];
+    const accessCookie = setCookieHeaders.find(c => c.startsWith('absheer_access='))?.split(';')[0];
+    const refreshCookie = setCookieHeaders.find(c => c.startsWith('absheer_refresh='))?.split(';')[0];
 
     if (!accessCookie || !refreshCookie) {
-      throw new Error('Required cookies (manaratak_access/manaratak_refresh) not found in response headers.');
+      throw new Error('Required cookies (absheer_access/absheer_refresh) not found in response headers.');
     }
 
     authCookies = `${accessCookie}; ${refreshCookie}`;

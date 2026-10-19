@@ -15,7 +15,7 @@ import {
   SearchScope,
   SearchSorting,
   SortDirection,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export class PrismaSearchRequestRepository implements ISearchRequestRepository {
   public constructor(private readonly prisma: PrismaClient) {}

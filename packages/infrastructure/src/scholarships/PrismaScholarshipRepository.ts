@@ -1,8 +1,8 @@
 import { PrismaUniversityProgramReadPort } from '../universities/PrismaUniversityProgramReadPort';
-import type { IUniversityProgramReadPort, UniversityProgramReferenceV1 } from '@manaratak/domain';
+import type { IUniversityProgramReadPort, UniversityProgramReferenceV1 } from '@absheer/domain';
 import {ScholarshipReferenceLifecycle} from './ScholarshipReferenceLifecycle';
 import {encodeStableCursor} from '../api-foundation/StableCursor';
-import type {PublishedProgramScholarshipPage} from '@manaratak/domain';
+import type {PublishedProgramScholarshipPage} from '@absheer/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   AtomicPersistenceContext,
@@ -21,7 +21,7 @@ import {
   MajorStatus,
   UniversityStatus,
   assertUniversityProgramParent,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 interface ScholarshipTransactionContext extends AtomicPersistenceContext {
   readonly transactionClient: Prisma.TransactionClient;

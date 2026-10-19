@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { IAuthorizationService, Permission, ForbiddenException } from '@manaratak/core';
+import { IAuthorizationService, Permission, ForbiddenException } from '@absheer/core';
 
 export class AuthorizationMiddleware {
   constructor(private readonly authorizationService: IAuthorizationService) {}

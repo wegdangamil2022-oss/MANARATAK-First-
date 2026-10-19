@@ -1,4 +1,4 @@
-import { sourceReviewHash } from '@manaratak/application';
+import { sourceReviewHash } from '@absheer/application';
 import { readScholarshipMasterGuide } from './ScholarshipMasterGuideReader';
 
 export function reconcileScholarshipGuide(content: string, artifactHash: string, declaredImportedCount: number) {

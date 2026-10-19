@@ -103,7 +103,7 @@ check('JOBS-ADM-003 list/filter state', hasAll(adminPage, ["query.set(tab === 'e
 check('JOBS-ADM-004 loading state', adminPage.includes('loading && <p'));
 check('JOBS-ADM-005 error state', adminPage.includes('notice && <p role="status"') && adminPage.includes('Could not load this scope.'));
 check('JOBS-ADM-006 empty state', adminPage.includes('result.data.length === 0') && adminPage.includes('No matching records'));
-check('JOBS-ADM-007 MANARATAK primary color', adminPage.includes('#142B5F'));
+check('JOBS-ADM-007 ABSHEER primary color', adminPage.includes('#142B5F'));
 check('JOBS-ADM-008 Arabic copy no mixed recruitment phrase', !ar.includes('إدارة recruitment employer metadata'));
 
 // Persistence truth

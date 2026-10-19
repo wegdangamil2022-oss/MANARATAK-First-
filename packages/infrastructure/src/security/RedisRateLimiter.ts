@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { IRateLimiter, IRateLimitResult } from '@manaratak/core';
+import { IRateLimiter, IRateLimitResult } from '@absheer/core';
 
 export interface RedisRateLimiterClient {
   eval(script: string, options: { keys: string[]; arguments: string[] }): Promise<unknown>;
@@ -26,7 +26,7 @@ export class RedisRateLimiter implements IRateLimiter {
 
   constructor(
     private readonly client: RedisRateLimiterClient,
-    private readonly keyPrefix = 'manaratak:rate-limit:',
+    private readonly keyPrefix = 'absheer:rate-limit:',
     private readonly now: () => number = Date.now,
   ) {}
 

@@ -14,7 +14,7 @@ import {
   StudentSavedItemDto,
   StudentSavedItemType,
   UniversityStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 /** Existing private history may only resolve the same immutable owner identity. Slug resolution is explicit for a new save. */
 function matchesSavedIdentity(item:StudentSavedItemDto,owner:{id:string;publicId?:unknown},context?:'CANONICALIZE_NEW_SAVE'){

@@ -1,5 +1,5 @@
 {
-  "name": "@manaratak/ui",
+  "name": "@absheer/ui",
   "version": "1.0.0",
   "main": "src/index.tsx",
   "module": "src/index.tsx",

@@ -7,7 +7,7 @@ import {
   DriftSeverity,
   ImportTargetDomain,
   MergeProposalStatus
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface ImportOperationsSummaryDto {
   activeBatches: number;

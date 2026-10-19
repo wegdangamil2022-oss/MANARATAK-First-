@@ -5,8 +5,8 @@ import {
   ServiceCategory,
   ServiceDeliveryMode,
   ServiceFulfillmentType,
-} from '@manaratak/domain';
-import { PublicServiceCatalogUseCases } from '@manaratak/application';
+} from '@absheer/domain';
+import { PublicServiceCatalogUseCases } from '@absheer/application';
 
 export class ServicePublicRouter {
   public static create(cradle: {

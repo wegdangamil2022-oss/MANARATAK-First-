@@ -1,5 +1,5 @@
-import type { ISafeSourceHttpTransport, ISourceAccessAuthority, ISourceConnector, SourceAcquisitionRequest, SourceAcquisitionResult } from '@manaratak/application';
-import { SourceHttpError } from '@manaratak/application';
+import type { ISafeSourceHttpTransport, ISourceAccessAuthority, ISourceConnector, SourceAcquisitionRequest, SourceAcquisitionResult } from '@absheer/application';
+import { SourceHttpError } from '@absheer/application';
 import { 
   ImportSourceDefinition, 
   ConnectorSignature, 
@@ -7,7 +7,7 @@ import {
   SourceStatus,
   SourceAccessClassification,
   SourceAccessExecutionPolicy
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export abstract class BaseSourceConnector implements ISourceConnector {
   get managesRequestBudget() { return this.transport?.managesRequestBudget ?? false; }

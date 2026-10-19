@@ -12,7 +12,7 @@ Superseded Decisions: None
 
 ## 2. Context
 
-The MANARATAK 2.0 enterprise ecosystem encompasses multiple autonomous business domains (e.g., Scholarships, Universities, Courses, CMS, Student Profiles). As Artificial Intelligence capabilities become a core requirement across these domains, there is a risk of architectural fragmentation. If each business domain is permitted to implement or own its own AI capabilities, the enterprise will suffer from duplicated integrations, fragmented governance, and long-term maintenance risks. An inconsistent approach to AI across the ecosystem violates the principles of Clean Architecture and Domain-Driven Design (DDD) by allowing cross-cutting technical concerns to pollute business logic.
+The ABSHEER 2.0 enterprise ecosystem encompasses multiple autonomous business domains (e.g., Scholarships, Universities, Courses, CMS, Student Profiles). As Artificial Intelligence capabilities become a core requirement across these domains, there is a risk of architectural fragmentation. If each business domain is permitted to implement or own its own AI capabilities, the enterprise will suffer from duplicated integrations, fragmented governance, and long-term maintenance risks. An inconsistent approach to AI across the ecosystem violates the principles of Clean Architecture and Domain-Driven Design (DDD) by allowing cross-cutting technical concerns to pollute business logic.
 
 ## 3. Problem Statement
 
@@ -30,7 +30,7 @@ Allowing decentralized AI ownership across business domains introduces critical 
 
 ## 4. Decision
 
-The Enterprise AI Platform is the single and exclusive owner of all Artificial Intelligence capabilities within MANARATAK.
+The Enterprise AI Platform is the single and exclusive owner of all Artificial Intelligence capabilities within ABSHEER.
 
 No business domain may implement, embed, orchestrate, or own AI infrastructure, model integrations, prompt management, or AI business services.
 

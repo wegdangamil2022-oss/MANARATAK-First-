@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ImportParserRegistry } from '../../src/import-foundation/parsers/ImportParserRegistry';
 import { IImportStreamParser, ImportStreamParserInput, ImportStreamParserContext } from '../../src/import-foundation/parsers/IImportStreamParser';
-import { ParsedImportRow, ImportParseError } from '@manaratak/domain';
+import { ParsedImportRow, ImportParseError } from '@absheer/domain';
 
 class MockParser implements IImportStreamParser {
   constructor(

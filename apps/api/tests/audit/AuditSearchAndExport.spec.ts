@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { InMemoryAuditRecordRepository, AsyncLogContext, DefaultErrorSerializer } from '@manaratak/infrastructure';
-import { createAuditRecordFromDto, ManageAuditRecordsUseCase } from '@manaratak/application';
+import { InMemoryAuditRecordRepository, AsyncLogContext, DefaultErrorSerializer } from '@absheer/infrastructure';
+import { createAuditRecordFromDto, ManageAuditRecordsUseCase } from '@absheer/application';
 import { AuditRouter } from '../../src/presentation/api/router/AuditRouter';
 import { GlobalExceptionHandler } from '../../src/presentation/middleware/GlobalExceptionHandler';
 

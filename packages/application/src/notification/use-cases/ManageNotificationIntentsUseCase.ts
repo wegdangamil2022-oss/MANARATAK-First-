@@ -5,17 +5,17 @@ import {
   NotificationIntentQuery,
   INotificationTemplateRepository,
   NotificationIntentSummary,
-} from '@manaratak/domain';
-import { INotificationPreferenceGateway } from '@manaratak/domain';
-import { NotificationIntent } from '@manaratak/domain';
-import { NotificationId } from '@manaratak/domain';
-import { NotificationReference } from '@manaratak/domain';
-import { TemplateId } from '@manaratak/domain';
-import { NotificationRecipientReference } from '@manaratak/domain';
-import { TemplateVariable } from '@manaratak/domain';
-import { SchedulingMetadata } from '@manaratak/domain';
-import { ExpirationMetadata } from '@manaratak/domain';
-import { RetryMetadata } from '@manaratak/domain';
+} from '@absheer/domain';
+import { INotificationPreferenceGateway } from '@absheer/domain';
+import { NotificationIntent } from '@absheer/domain';
+import { NotificationId } from '@absheer/domain';
+import { NotificationReference } from '@absheer/domain';
+import { TemplateId } from '@absheer/domain';
+import { NotificationRecipientReference } from '@absheer/domain';
+import { TemplateVariable } from '@absheer/domain';
+import { SchedulingMetadata } from '@absheer/domain';
+import { ExpirationMetadata } from '@absheer/domain';
+import { RetryMetadata } from '@absheer/domain';
 import { CreateIntentDto } from '../dtos/NotificationDtos';
 
 export class ManageNotificationIntentsUseCase {

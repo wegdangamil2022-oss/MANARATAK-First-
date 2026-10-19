@@ -11,7 +11,7 @@ vi.mock('../api/client', () => ({ adminApiClient: { request: vi.fn() }, createAd
 afterEach(() => vi.unstubAllGlobals());
 
 function render(language: string, child: ReturnType<typeof createElement>) {
-  vi.stubGlobal('localStorage', { getItem: (key: string) => key === 'manaratak_admin_lang' ? language : null });
+  vi.stubGlobal('localStorage', { getItem: (key: string) => key === 'absheer_admin_lang' ? language : null });
   return renderToStaticMarkup(createElement(MemoryRouter, null, createElement(I18nProvider, null, child)));
 }
 const asset = { id: 'isolated', reference: 'isolated-reference', ownerId: 'isolated-owner', ownerType: 'STUDENT', lifecycleState: 'ACTIVE', metadata: {}, versions: [{ versionNumber: 1, createdAt: '2026-01-01T00:00:00Z', checksum: null }] };

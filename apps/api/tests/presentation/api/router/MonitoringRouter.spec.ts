@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import { MonitoringRouter } from '../../../../src/presentation/api/router/MonitoringRouter';
-import { IMonitoringService, HealthStatus } from '@manaratak/core';
+import { IMonitoringService, HealthStatus } from '@absheer/core';
 
 describe('MonitoringRouter', () => {
   it('should return health status', async () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { CsvImportStreamParser } from '../../src/import-foundation/parsers/CsvImportStreamParser';
-import { ParsedImportRow, ImportParseError } from '@manaratak/domain';
+import { ParsedImportRow, ImportParseError } from '@absheer/domain';
 
 describe('CsvImportStreamParser', () => {
   const parser = new CsvImportStreamParser();

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { PrismaConfiguredAuditRetention } from '../../src/audit/PrismaAuditWorkspaceGateway';
 import { PrismaAuditRetentionGateway } from '../../src/retention/PrismaAuditRetentionGateway';
-import { decideRetention, RetentionOwner } from '@manaratak/domain';
+import { decideRetention, RetentionOwner } from '@absheer/domain';
 describe('administrator-configured retention and independent case holds', () => {
   it('does not invent durations when no policy exists', async () => {
     const db = { auditWorkspaceRecord: { findUnique: vi.fn(async () => null) } };

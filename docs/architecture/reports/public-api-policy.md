@@ -2,11 +2,11 @@
 
 > **STATUS: SUPERSEDED / REMEDIATED FINDING**
 > 
-> * **Notice:** The findings, violations, and deep import instances previously cataloged in this report are historical. Every identified deep import violation (all 26 instances across `@manaratak/application` and `apps/api`) has been completely refactored and resolved in accordance with standard architectural boundaries.
+> * **Notice:** The findings, violations, and deep import instances previously cataloged in this report are historical. Every identified deep import violation (all 26 instances across `@absheer/application` and `apps/api`) has been completely refactored and resolved in accordance with standard architectural boundaries.
 > * **Current Reference:** All package-boundary violations are now eliminated. Active package interfaces strictly resolve through root entry points (`index.ts`). This document is preserved solely for audit trails and compliance history.
 
 ## 1. Executive Summary
-This document defines the official Public API boundary policy for all packages within the MANARATAK monorepo. It establishes strict rules for package exports and internal imports to ensure high cohesion, low coupling, and predictable dependency graphs. To ensure the Public API serves as a governed architectural contract, this policy implements explicit export lifecycle classifications. An audit has also revealed internal import violations which must be remediated.
+This document defines the official Public API boundary policy for all packages within the ABSHEER monorepo. It establishes strict rules for package exports and internal imports to ensure high cohesion, low coupling, and predictable dependency graphs. To ensure the Public API serves as a governed architectural contract, this policy implements explicit export lifecycle classifications. An audit has also revealed internal import violations which must be remediated.
 
 ## 2. Public API Policy
 
@@ -14,8 +14,8 @@ Every package in the monorepo must adhere to the following encapsulation policie
 
 ### 2.1 The Entry Point Rule
 *   Every package **MUST** have exactly one official entry point: `src/index.ts`.
-*   All consumers external to the package **MUST** import symbols exclusively from the package root (e.g., `import { Entity } from '@manaratak/domain';`).
-*   Deep imports (e.g., `import { Entity } from '@manaratak/domain/src/entities/Entity';`) are **STRICTLY FORBIDDEN**.
+*   All consumers external to the package **MUST** import symbols exclusively from the package root (e.g., `import { Entity } from '@absheer/domain';`).
+*   Deep imports (e.g., `import { Entity } from '@absheer/domain/src/entities/Entity';`) are **STRICTLY FORBIDDEN**.
 
 ### 2.2 Public API vs. Internal API
 *   **Public API:** Any interface, class, type, or function exported from `src/index.ts`. These symbols form the official contract of the package and are governed by lifecycle statuses.
@@ -44,20 +44,20 @@ The following matrix defines the lifecycle classification and status of key expo
 
 | Symbol (Category or Specific) | Package | Export Status | Stability Level |
 | :--- | :--- | :--- | :--- |
-| `Entity`, `AggregateRoot` | `@manaratak/core` | Allowed | Public |
-| `IController`, `IUseCase` | `@manaratak/core` | Allowed | Public |
+| `Entity`, `AggregateRoot` | `@absheer/core` | Allowed | Public |
+| `IController`, `IUseCase` | `@absheer/core` | Allowed | Public |
 | `BaseController` | `apps/api` | Forbidden | Deprecated |
-| `IValidationContext` | `@manaratak/core` | Allowed | Public |
-| `IValidationContext` | `@manaratak/domain` | Forbidden | Deprecated |
-| `ApiResponse`, `ApiMetadata` | `@manaratak/shared` | Allowed | Experimental |
-| Domain Aggregates (e.g., `Role`) | `@manaratak/domain` | Allowed | Public |
-| Domain Events | `@manaratak/domain` | Allowed | Public |
-| Repositories (e.g., `IRoleRepository`) | `@manaratak/domain` | Allowed | Public |
-| Application Use Cases | `@manaratak/application`| Allowed | Public |
-| Application DTOs | `@manaratak/application`| Allowed | Public |
-| Infrastructure Adapters | `@manaratak/infrastructure`| Allowed | Public |
-| `PrismaIdentityRepository` | `@manaratak/infrastructure`| Allowed | Internal (DI only) |
-| `__SHARED_KERNEL__` | `@manaratak/shared` | Allowed | Internal |
+| `IValidationContext` | `@absheer/core` | Allowed | Public |
+| `IValidationContext` | `@absheer/domain` | Forbidden | Deprecated |
+| `ApiResponse`, `ApiMetadata` | `@absheer/shared` | Allowed | Experimental |
+| Domain Aggregates (e.g., `Role`) | `@absheer/domain` | Allowed | Public |
+| Domain Events | `@absheer/domain` | Allowed | Public |
+| Repositories (e.g., `IRoleRepository`) | `@absheer/domain` | Allowed | Public |
+| Application Use Cases | `@absheer/application`| Allowed | Public |
+| Application DTOs | `@absheer/application`| Allowed | Public |
+| Infrastructure Adapters | `@absheer/infrastructure`| Allowed | Public |
+| `PrismaIdentityRepository` | `@absheer/infrastructure`| Allowed | Internal (DI only) |
+| `__SHARED_KERNEL__` | `@absheer/shared` | Allowed | Internal |
 
 ## 4. Internal Import Audit
 
@@ -67,27 +67,27 @@ An automated audit of the workspace was conducted to detect violations of the En
 
 **Identified Violations (26 Total):**
 
-### 4.1 `@manaratak/application` Boundary Violations (17 instances)
+### 4.1 `@absheer/application` Boundary Violations (17 instances)
 The Application Layer is bypassing the Domain Layer's public API and importing directly from `src/`.
-*   `packages/application/src/notification/use-cases/ManageNotificationIntentsUseCase.ts` (12 violations targeting `@manaratak/domain/src/...`)
-*   `packages/application/src/notification/use-cases/ManageNotificationTemplatesUseCase.ts` (5 violations targeting `@manaratak/domain/src/...`)
+*   `packages/application/src/notification/use-cases/ManageNotificationIntentsUseCase.ts` (12 violations targeting `@absheer/domain/src/...`)
+*   `packages/application/src/notification/use-cases/ManageNotificationTemplatesUseCase.ts` (5 violations targeting `@absheer/domain/src/...`)
 
 ### 4.2 `apps/api` Boundary Violations (9 instances)
 The Presentation/App Layer is bypassing the Application Layer's public API.
-*   `apps/api/src/server.ts` (3 violations targeting `@manaratak/application/src/...`)
-*   `apps/api/src/presentation/api/router/NotificationRouter.ts` (2 violations targeting `@manaratak/application/src/...`)
-*   `apps/api/src/presentation/api/router/AuditRouter.ts` (1 violation targeting `@manaratak/application/src/...`)
-*   `apps/api/src/infrastructure/di/container.ts` (3 violations targeting `@manaratak/application/src/...`)
+*   `apps/api/src/server.ts` (3 violations targeting `@absheer/application/src/...`)
+*   `apps/api/src/presentation/api/router/NotificationRouter.ts` (2 violations targeting `@absheer/application/src/...`)
+*   `apps/api/src/presentation/api/router/AuditRouter.ts` (1 violation targeting `@absheer/application/src/...`)
+*   `apps/api/src/infrastructure/di/container.ts` (3 violations targeting `@absheer/application/src/...`)
 
 ## 5. Migration Strategy
 
 All identified violations can be resolved quickly as the targeted symbols are already exported by the respective packages' `index.ts`.
 
 1.  **Refactor Imports:** Update all 26 identified files to change the deep import path to the package root.
-    *   *Change:* `import { X } from '@manaratak/domain/src/notification/aggregates/X';`
-    *   *To:* `import { X } from '@manaratak/domain';`
-    *   *Change:* `import { Y } from '@manaratak/application/src/notification/use-cases/Y';`
-    *   *To:* `import { Y } from '@manaratak/application';`
+    *   *Change:* `import { X } from '@absheer/domain/src/notification/aggregates/X';`
+    *   *To:* `import { X } from '@absheer/domain';`
+    *   *Change:* `import { Y } from '@absheer/application/src/notification/use-cases/Y';`
+    *   *To:* `import { Y } from '@absheer/application';`
 2.  **Linting Enforcement:** In the future, introduce an ESLint rule (e.g., `no-restricted-imports`) configured to block any imports matching `*/src/*` from external packages.
 3.  **No New Deep Imports:** Effective immediately, PRs containing deep imports across package boundaries will be rejected.
 4.  **Tag Application:** Apply `@public`, `@internal`, `@experimental`, and `@deprecated` JSDoc tags to all exported symbols over the next migration phase.

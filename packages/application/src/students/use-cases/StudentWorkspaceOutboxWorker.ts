@@ -1,5 +1,5 @@
 import { StudentApplicationTrackerUseCases } from './StudentApplicationTrackerUseCases';
-import { ITransactionalOutboxDispatcher, OutboxDispatchResult } from '@manaratak/domain';
+import { ITransactionalOutboxDispatcher, OutboxDispatchResult } from '@absheer/domain';
 import { StudentWorkspaceUseCases } from './StudentWorkspaceUseCases';
 
 export interface StudentWorkspaceOutboxWorkerOptions {

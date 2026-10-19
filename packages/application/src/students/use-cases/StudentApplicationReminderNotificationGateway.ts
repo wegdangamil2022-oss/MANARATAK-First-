@@ -1,4 +1,4 @@
-import { IStudentApplicationReminderGateway } from '@manaratak/domain';
+import { IStudentApplicationReminderGateway } from '@absheer/domain';
 import { ManageNotificationIntentsUseCase } from '../../notification/use-cases/ManageNotificationIntentsUseCase';
 import { ManageNotificationTemplatesUseCase } from '../../notification/use-cases/ManageNotificationTemplatesUseCase';
 

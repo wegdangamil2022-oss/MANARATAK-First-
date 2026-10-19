@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parse } from 'csv-parse/sync';
-import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@manaratak/shared';
+import { readXlsxWorkbook, spreadsheetRowsToObjects } from '@absheer/shared';
 import { GeographySourcePreviewService } from '../packages/application/src/reference-data/services/GeographySourcePreviewService';
 
 const root = process.cwd();
-const countryPath = path.join(root, 'workspace/reference-data/countries/MANARATAK_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx');
+const countryPath = path.join(root, 'workspace/reference-data/countries/ABSHEER_All_Continents_Country_Records_CLEAN_IMPORT_READY.xlsx');
 const regionDirectory = path.join(root, 'workspace/reference-data/regions');
 const cityDirectory = path.join(root, 'workspace/reference-data/cities');
 

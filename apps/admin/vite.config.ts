@@ -42,7 +42,7 @@ function localAdminReadOnlyGuardPlugin(): Plugin {
 
 export default defineConfig(({ mode }) => {
   const rootDir = path.resolve(__dirname, '../..');
-  const studio = isGoogleAiStudio({ ...loadEnv(mode, rootDir, ['MANARATAK_', 'VITE_']), ...process.env });
+  const studio = isGoogleAiStudio({ ...loadEnv(mode, rootDir, ['ABSHEER_', 'VITE_']), ...process.env });
   assertLocalReadOnlyBuildAllowed({ mode, nodeEnv: process.env.NODE_ENV, localReadOnly: process.env.VITE_LOCAL_ADMIN_READ_ONLY });
   const disableHmr = process.env.DISABLE_HMR === 'true';
   return {

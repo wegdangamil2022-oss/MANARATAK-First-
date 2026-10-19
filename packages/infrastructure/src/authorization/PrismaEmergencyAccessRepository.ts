@@ -4,7 +4,7 @@ import type {
   AtomicPersistenceContext,
   EmergencyAccessGrantRecord,
   IEmergencyAccessRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 function map(row: AdminEmergencyAccessRecord): EmergencyAccessGrantRecord {
   return {

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Prisma, type PrismaClient } from '@prisma/client';
-import { type AtomicPersistenceContext, type UpdateCourseProviderMappings } from '@manaratak/domain';
+import { type AtomicPersistenceContext, type UpdateCourseProviderMappings } from '@absheer/domain';
 import { PrismaExternalCourseProviderRepository } from '../../src/courses/PrismaExternalCourseProviderRepository';
 
 const command: UpdateCourseProviderMappings = { expectedUpdatedAt: '2026-10-01T00:00:00.000Z', displayName: 'Edited', officialWebsite: 'https://example.com', aliases: [{ alias: 'Old alias', locale: 'en' }, { alias: 'New alias' }], allowedDomains: ['example.com'], reason: 'Review source', evidenceReference: 'review-1', mappingsReviewed: true };

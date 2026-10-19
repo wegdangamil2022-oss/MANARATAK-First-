@@ -29,7 +29,7 @@ const sandbox = {
   setTimeout,
   clearTimeout,
   require(specifier) {
-    if (specifier === '@manaratak/core') return { HealthStatus };
+    if (specifier === '@absheer/core') return { HealthStatus };
     throw new Error(`unexpected require: ${specifier}`);
   },
 };

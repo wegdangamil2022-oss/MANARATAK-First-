@@ -4,7 +4,7 @@ This private package contains the official Awilix 10.0.2 standalone ESM and UMD
 builds, unchanged. It provides explicit service registration, dependency
 resolution, lifetimes, scopes and disposal in Node.js without filesystem globbing.
 
-MANARATAK does not use `listModules` or `container.loadModules`. The standalone
+ABSHEER does not use `listModules` or `container.loadModules`. The standalone
 build deliberately rejects `loadModules`; register services explicitly instead.
 Its declarations omit the unsupported `listModules` value export.
 

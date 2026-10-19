@@ -5,7 +5,7 @@ import {
   type DutyPolicy,
   type DutyException,
   type AtomicPersistenceContext,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   AtomicDomainMutationCoordinator,
   type AtomicMutationRequestContext,

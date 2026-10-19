@@ -1,5 +1,5 @@
 {
-  "name": "MANARATAK 2.0 Dev Environment",
+  "name": "ABSHEER 2.0 Dev Environment",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}

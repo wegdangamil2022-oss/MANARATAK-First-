@@ -7,7 +7,7 @@ import {
   UniversityStage3Payload,
   UniversityStage4Payload,
   UniversalImportHandoff,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import type { UniversityStage1IdentityLookup } from './UniversityStage1DryRunUseCase';
 
 export type UniversityLaterStage = 'STAGE_3' | 'STAGE_4' | 'GLOBAL_RANKINGS';

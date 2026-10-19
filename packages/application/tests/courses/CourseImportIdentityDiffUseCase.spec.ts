@@ -13,7 +13,7 @@ import {
   IExternalCourseProviderRepository,
   ImportRecordStatus,
   UpsertCourseImportAnalysisInput,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CourseImportIdentityDiffUseCase } from '../../src/courses/use-cases/CourseImportIdentityDiffUseCase';
 
 const now = new Date('2026-08-22T00:00:00.000Z');

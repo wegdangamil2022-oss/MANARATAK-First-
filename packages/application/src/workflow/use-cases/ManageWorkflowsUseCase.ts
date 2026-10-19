@@ -17,7 +17,7 @@ import {
   WorkflowStateChangedEvent,
   WorkflowCompletedEvent,
   WorkflowArchivedEvent
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CreateWorkflowDto, TransitionWorkflowDto, WorkflowResponseDto } from '../dtos/WorkflowDtos';
 import { IWorkflowExecutionGateway } from '../gateways/IWorkflowExecutionGateway';
 import { v4 as uuidv4 } from 'uuid';

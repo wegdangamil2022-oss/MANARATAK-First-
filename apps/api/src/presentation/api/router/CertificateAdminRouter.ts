@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
-import { CertificateUseCases } from '@manaratak/application';
-import { AuthorizationEvaluatorService, CertificateStatus, CertificateTemplateStatus, type ICertificateAuthorityDirectory } from '@manaratak/domain';
+import { CertificateUseCases } from '@absheer/application';
+import { AuthorizationEvaluatorService, CertificateStatus, CertificateTemplateStatus, type ICertificateAuthorityDirectory } from '@absheer/domain';
 
 const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -56,7 +56,7 @@ const templateBody = z.object({
 const issuerBody = z.object({
   code: z.string().min(2).max(32).regex(/^[A-Z0-9_-]+$/),
   name: z.string().min(2).max(160),
-  issuerType: z.enum(['MANARATAK', 'UNIVERSITY', 'EDUCATIONAL_INSTITUTION', 'GOVERNMENT', 'TRAINING_CENTER', 'EXTERNAL_PARTNER']),
+  issuerType: z.enum(['ABSHEER', 'UNIVERSITY', 'EDUCATIONAL_INSTITUTION', 'GOVERNMENT', 'TRAINING_CENTER', 'EXTERNAL_PARTNER']),
   organizationId: z.string().max(160).nullable().optional(),
   universityId: z.string().max(160).nullable().optional(),
   issuerLogoAssetId: z.string().min(1).max(160),

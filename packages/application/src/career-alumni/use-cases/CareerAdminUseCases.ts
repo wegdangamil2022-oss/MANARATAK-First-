@@ -6,7 +6,7 @@ import {
   CareerEmployerDto, CareerEmployerFilters, CareerEmployerStatus, CareerJobFilters, CareerJobPostingDto,
   CareerJobStatus, CareerOpportunityType, EmploymentType, ICareerReferenceGateway, ICareerRepository,
   UpdateCareerEmployerDto, UpdateCareerJobPostingDto,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { assertCareerReady, careerGovernance, careerPublicMetadata, safeCareerUrl } from '../CareerPolicy';
 export interface CreateEmployerInput {
   displayName: string; employerType: string; industry?: string | null; countryReferenceId?: string | null;

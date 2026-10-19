@@ -1,4 +1,4 @@
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CourseAcademicTaxonomyLinkDto,
@@ -19,7 +19,7 @@ import {
   CourseRelationshipPublicCourseDto,
   CourseRelationshipPublicFilters,
   PublicCourseFilters,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { queryStableCursorPage } from '../api-foundation/StableCursor';
 
 function normalize(value: string): string {

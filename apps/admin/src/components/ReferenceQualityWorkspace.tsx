@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { REFERENCE_QUALITY_ISSUES, type ReferenceQualityIssueKind, type ReferenceQualityReport } from '@manaratak/domain';
+import { REFERENCE_QUALITY_ISSUES, type ReferenceQualityIssueKind, type ReferenceQualityReport } from '@absheer/domain';
 import { referenceDataAdminApi } from '../api/referenceData';
 import { useTranslation } from '../i18n/I18nProvider';
 

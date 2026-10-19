@@ -1,9 +1,9 @@
-import type {IAuditRecordRepository, IMajorConsumerReadGateway} from '@manaratak/domain';
+import type {IAuditRecordRepository, IMajorConsumerReadGateway} from '@absheer/domain';
 import {SecurityMiddlewareFactory} from '../../security/SecurityMiddlewareFactory.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { MajorImportCompletenessState, MajorStatus, UpdateMajorDto } from '@manaratak/domain';
-import { MajorOwnerImportUseCases, AdminMajorUseCases } from '@manaratak/application';
+import { MajorImportCompletenessState, MajorStatus, UpdateMajorDto } from '@absheer/domain';
+import { MajorOwnerImportUseCases, AdminMajorUseCases } from '@absheer/application';
 
 export class MajorAdminRouter {
   public static create(cradle: { adminMajorUseCases: AdminMajorUseCases; majorOwnerImportUseCases?:MajorOwnerImportUseCases; auditRecordRepo?:IAuditRecordRepository; majorProgramUsageGateway?:IMajorConsumerReadGateway; majorScholarshipUsageGateway?:IMajorConsumerReadGateway }): Router {

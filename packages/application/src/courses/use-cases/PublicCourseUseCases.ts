@@ -10,8 +10,8 @@ import {
   PaginatedCourseResult,
   PublicCourseDto,
   PublicCourseFilters
-} from '@manaratak/domain';
-import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from '@manaratak/shared';
+} from '@absheer/domain';
+import { DEFAULT_LOCALE, isSupportedLocale, type SupportedLocale } from '@absheer/shared';
 import { ApplicationLocaleProjectionService } from '../../localization/ApplicationLocaleProjectionService';
 
 type LocalizableCourseSummary = {

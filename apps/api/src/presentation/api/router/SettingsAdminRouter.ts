@@ -1,8 +1,8 @@
 import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
-import { ManageSettingsUseCase, SettingsGovernanceUseCases } from '@manaratak/application';
+import { ManageSettingsUseCase, SettingsGovernanceUseCases } from '@absheer/application';
 import { ResponseFormatter } from '../response/ResponseFormatter.js';
 import { z } from 'zod';
-import { ValueType, ScopeLevel, IAuditRecordRepository } from '@manaratak/domain';
+import { ValueType, ScopeLevel, IAuditRecordRepository } from '@absheer/domain';
 import { requireAuthenticatedPrincipal } from '../../security/AuthenticatedPrincipal.js';
 import { AuditHelper } from '../../audit/AuditHelper.js';
 

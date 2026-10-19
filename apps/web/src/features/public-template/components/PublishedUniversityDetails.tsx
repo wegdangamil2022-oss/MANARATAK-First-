@@ -91,7 +91,7 @@ function Value({ value }: { value: unknown }) {
           .filter(([key]) => !key.endsWith('Id'))
           .map(([key, item]) => (
             <div key={key}>
-              <dt className="text-[var(--mn-primary)]">{labels[key] ? publicT(labels[key]) : key}</dt>
+              <dt className="text-[var(--ab-primary)]">{labels[key] ? publicT(labels[key]) : key}</dt>
               <dd>
                 <Value value={item} />
               </dd>
@@ -106,7 +106,7 @@ function Value({ value }: { value: unknown }) {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="break-all underline text-[var(--mn-primary)]"
+        className="break-all underline text-[var(--ab-primary)]"
       >
         {text(value)}
       </a>
@@ -136,8 +136,8 @@ function Fields({ row, keys }: { row: Row; keys: string[] }) {
       {keys
         .filter((key) => row[key] != null && row[key] !== '')
         .map((key) => (
-          <div key={key} className="rounded-lg bg-[var(--mn-surface-muted)] p-2">
-            <dt className="text-[var(--mn-primary)]">{labels[key] ? publicT(labels[key]) : key}</dt>
+          <div key={key} className="rounded-lg bg-[var(--ab-surface-muted)] p-2">
+            <dt className="text-[var(--ab-primary)]">{labels[key] ? publicT(labels[key]) : key}</dt>
             <dd>
               <Value value={row[key]} />
             </dd>
@@ -163,11 +163,11 @@ export function PublishedUniversityDetails({
   const section = (id: string, title: string, icon: typeof BookOpen, children: React.ReactNode) => (
     <section
       key={id}
-      className="mn-detail-full-bleed relative bg-[var(--mn-surface)] border-y border-[var(--mn-border-brand)]/30 shadow-md mn-panel"
+      className="ab-detail-full-bleed relative bg-[var(--ab-surface)] border-y border-[var(--ab-border-brand)]/30 shadow-md ab-panel"
     >
-      <div className="absolute inset-x-0 top-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
       <DetailSectionHeader id={id} title={title} icon={icon} />
-      <div className="space-y-3 p-4 text-[11px] sm:text-xs font-bold leading-7 text-[var(--mn-text)]">
+      <div className="space-y-3 p-4 text-[11px] sm:text-xs font-bold leading-7 text-[var(--ab-text)]">
         {children}
       </div>
     </section>
@@ -176,10 +176,10 @@ export function PublishedUniversityDetails({
     rows.map((row, index) => (
       <article
         key={text(row.id) || index}
-        className="rounded-xl border border-[var(--mn-border)] p-3"
+        className="rounded-xl border border-[var(--ab-border)] p-3"
       >
         {row[heading] != null && (
-          <h3 className="mb-2 text-[var(--mn-heading)]">{text(row[heading])}</h3>
+          <h3 className="mb-2 text-[var(--ab-heading)]">{text(row[heading])}</h3>
         )}
         <Fields row={row} keys={keys} />
       </article>
@@ -215,14 +215,14 @@ export function PublishedUniversityDetails({
             return (
               <article
                 key={text(program.id) || index}
-                className="rounded-xl border border-[var(--mn-border)] p-3"
+                className="rounded-xl border border-[var(--ab-border)] p-3"
               >
-                <h3 className="text-[var(--mn-heading)]">{text(program.sourceProgramName)}</h3>
+                <h3 className="text-[var(--ab-heading)]">{text(program.sourceProgramName)}</h3>
                 <p>{text(degree.nameAr) || text(degree.nameEn) || text(degree.canonicalCode)}</p>
                 {program.majorMappingState === 'CANONICALLY_MAPPED' && !!program.majorId && (
                   <button
                     onClick={() => onOpenMajor?.(text(program.majorId))}
-                    className="text-[var(--mn-primary)] underline"
+                    className="text-[var(--ab-primary)] underline"
                   >{publicT('public_major_details')}</button>
                 )}
                 {Array.isArray(program.admissionRequirements) &&
@@ -232,7 +232,7 @@ export function PublishedUniversityDetails({
                     return (
                       <div
                         key={text(requirement.id) || index}
-                        className="mt-2 rounded-lg bg-[var(--mn-surface-muted)] p-2"
+                        className="mt-2 rounded-lg bg-[var(--ab-surface-muted)] p-2"
                       >
                         <p>
                           {text(test.displayName) ||
@@ -250,7 +250,7 @@ export function PublishedUniversityDetails({
                         />
                         {test.status === 'PUBLISHED' && (
                           <button
-                            className="text-[var(--mn-primary)] underline"
+                            className="text-[var(--ab-primary)] underline"
                             onClick={() => onOpenExam?.(text(test.slug))}
                           >{publicT('public_exam_details')}</button>
                         )}
@@ -261,7 +261,7 @@ export function PublishedUniversityDetails({
             );
           })}
           {!programs.length && (
-            <p className="text-[var(--mn-text-muted)]">{publicT('public_no_academic_programs_have_been_published_for_this')}</p>
+            <p className="text-[var(--ab-text-muted)]">{publicT('public_no_academic_programs_have_been_published_for_this')}</p>
           )}
         </>,
       )}

@@ -8,7 +8,7 @@ import { ReferenceDataSeedStatus } from '../packages/domain/src/reference-data/s
 import { ReferenceAliasInput } from '../packages/domain/src/reference-data/governance/ReferenceGovernance';
 
 const sourcePath = path.resolve(
-  process.argv[2] ?? 'workspace/reference-data/languages/MANARATAK_Languages_CLEAN_IMPORT_READY.csv',
+  process.argv[2] ?? 'workspace/reference-data/languages/ABSHEER_Languages_CLEAN_IMPORT_READY.csv',
 );
 
 if (!fs.existsSync(sourcePath)) {

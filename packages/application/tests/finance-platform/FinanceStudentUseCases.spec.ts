@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FinanceInvoiceDto, IFinanceRepository, InvoiceStatus } from '@manaratak/domain';
+import { FinanceInvoiceDto, IFinanceRepository, InvoiceStatus } from '@absheer/domain';
 import { FinanceStudentUseCases } from '../../src/finance-platform/use-cases/FinanceStudentUseCases';
 
 describe('FinanceStudentUseCases', () => {

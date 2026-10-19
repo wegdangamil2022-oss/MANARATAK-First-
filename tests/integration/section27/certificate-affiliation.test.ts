@@ -117,7 +117,7 @@ test('certificate affiliation: absent owner and legacy snapshots never invent an
     (await service().resolve('issuer', 'UNIVERSITY', undefined)).state,
     'LEGACY_UNVERIFIED',
   );
-  assert.equal((await service().resolve('issuer', 'MANARATAK', undefined)).state, 'NOT_APPLICABLE');
+  assert.equal((await service().resolve('issuer', 'ABSHEER', undefined)).state, 'NOT_APPLICABLE');
 });
 test('certificate affiliation: invalid signature never triggers current affiliation lookup', async () => {
   let called = false;

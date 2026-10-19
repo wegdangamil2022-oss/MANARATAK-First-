@@ -29,7 +29,7 @@ vm.runInNewContext(`(function(require,module,exports){${transpiled}\n})`, {
   setTimeout,
   clearTimeout,
 }, { filename: sourcePath })(
-  (specifier) => specifier === '@manaratak/core' ? {} : hostRequire(specifier),
+  (specifier) => specifier === '@absheer/core' ? {} : hostRequire(specifier),
   module,
   module.exports,
 );
@@ -59,15 +59,15 @@ class SharedRedisFake {
 test('two Student Tools limiter instances share one Redis quota window and N+1 is rejected', async () => {
   let now = 1_000_000;
   const sharedRedis = new SharedRedisFake(() => now);
-  const a = new RedisRateLimiter(sharedRedis, 'manaratak:student-tools:quota:', () => now);
-  const b = new RedisRateLimiter(sharedRedis, 'manaratak:student-tools:quota:', () => now);
+  const a = new RedisRateLimiter(sharedRedis, 'absheer:student-tools:quota:', () => now);
+  const b = new RedisRateLimiter(sharedRedis, 'absheer:student-tools:quota:', () => now);
 
   assert.equal((await a.consume('tool:gpa:user:42', 3, 60_000)).allowed, true);
   assert.equal((await b.consume('tool:gpa:user:42', 3, 60_000)).allowed, true);
   assert.equal((await a.consume('tool:gpa:user:42', 3, 60_000)).allowed, true);
   assert.equal((await b.consume('tool:gpa:user:42', 3, 60_000)).allowed, false);
 
-  const restartedProcessLimiter = new RedisRateLimiter(sharedRedis, 'manaratak:student-tools:quota:', () => now);
+  const restartedProcessLimiter = new RedisRateLimiter(sharedRedis, 'absheer:student-tools:quota:', () => now);
   assert.equal((await restartedProcessLimiter.consume('tool:gpa:user:42', 3, 60_000)).allowed, false);
 
   now += 60_001;
@@ -80,6 +80,6 @@ test('Redis failures propagate so Student Tools can fail closed instead of grant
       throw new Error('REDIS_DOWN');
     },
   };
-  const limiter = new RedisRateLimiter(failingRedis, 'manaratak:student-tools:quota:');
+  const limiter = new RedisRateLimiter(failingRedis, 'absheer:student-tools:quota:');
   await assert.rejects(() => limiter.consume('tool:ai:user:42', 2, 60_000), /REDIS_DOWN/);
 });

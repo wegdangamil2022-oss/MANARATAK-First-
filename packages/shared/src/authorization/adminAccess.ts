@@ -59,7 +59,7 @@ export function canAccessAdminPath(path: string, permissions: readonly string[] 
   if (!isAdministrativePath(path)) return false;
   const rawPathname = path.split(/[?#]/, 1)[0];
   try {
-    if (new URL(path, 'https://manaratak.invalid').pathname !== rawPathname) return false;
+    if (new URL(path, 'https://absheer.invalid').pathname !== rawPathname) return false;
   } catch {
     return false;
   }

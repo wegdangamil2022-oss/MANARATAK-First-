@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
-import { IStudentToolResultProtector } from '@manaratak/domain';
+import { IStudentToolResultProtector } from '@absheer/domain';
 
 /** Encrypts short-lived Phase 18 results; key material remains runtime-only. */
 export class EnvironmentStudentToolResultProtector implements IStudentToolResultProtector {

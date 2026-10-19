@@ -3,8 +3,8 @@ import type {
   AssetRights,
   AssetRecord,
   IAssetStorageGateway,
-} from '@manaratak/domain';
-import { assertAssetPublicRights, validateAssetRights } from '@manaratak/domain';
+} from '@absheer/domain';
+import { assertAssetPublicRights, validateAssetRights } from '@absheer/domain';
 import type {
   AtomicDomainMutationCoordinator,
   AtomicMutationRequestContext,

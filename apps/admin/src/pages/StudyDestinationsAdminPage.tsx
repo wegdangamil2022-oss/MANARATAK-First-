@@ -10,7 +10,7 @@ import {
   Search,
   ShieldCheck,
 } from 'lucide-react';
-import { STUDY_DESTINATION_READINESS_KEYS } from '@manaratak/domain';
+import { STUDY_DESTINATION_READINESS_KEYS } from '@absheer/domain';
 import { studyDestinationCheckLabels } from './StudyDestinationUiLabels';
 import { adminApiClient } from '../api/client';
 import { useTranslation } from '../i18n/I18nProvider';
@@ -187,7 +187,7 @@ export function StudyDestinationsAdminPage() {
           <div>
             <div className="mb-2 flex items-center gap-2 text-[#F8D58A]">
               <Globe2 className="h-5 w-5" />
-              <span className="text-sm font-bold">MANARATAK · Study Destinations</span>
+              <span className="text-sm font-bold">ABSHEER · Study Destinations</span>
             </div>
             <h1 className="text-3xl font-black">{isAr ? 'دول الدراسة' : 'Study Destinations'}</h1>
             <p className="mt-2 max-w-3xl text-sm text-white/80">

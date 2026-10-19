@@ -3,7 +3,7 @@ import {
   CertificateStatus,
   CourseCompletedEventPayload,
   LearningPathCompletedEventPayload,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CertificateUseCases } from './CertificateUseCases';
 import { CertificateArtifactRenderUseCase } from './CertificateArtifactRenderUseCase';
 

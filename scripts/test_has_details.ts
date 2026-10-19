@@ -29,13 +29,13 @@ async function run() {
     if (metadataCount > 0) {
       //
     }
-    if (md?.sourceClassificationSystem === 'MANARATAK_PHASE_10_DETAIL_DOSSIER') {
+    if (md?.sourceClassificationSystem === 'ABSHEER_PHASE_10_DETAIL_DOSSIER') {
       sourceTypeDossier++;
     }
     
     // mimic frontend check:
     const sectionCount = typeof md?.metadata?.contentBlockCount === 'number' ? md.metadata.contentBlockCount : undefined;
-    const st = md?.metadata?.sourceImportMode || (md?.sourceClassificationSystem === 'MANARATAK_PHASE_10_DETAIL_DOSSIER' ? 'DETAIL_DOSSIER' : undefined);
+    const st = md?.metadata?.sourceImportMode || (md?.sourceClassificationSystem === 'ABSHEER_PHASE_10_DETAIL_DOSSIER' ? 'DETAIL_DOSSIER' : undefined);
     if ((sectionCount ?? 0) > 0 || st === 'DETAIL_DOSSIER') {
       detailHas++;
     }

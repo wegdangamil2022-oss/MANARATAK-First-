@@ -6,7 +6,7 @@ import {
   validateDutyException,
   type DutyPolicy,
   type DutyException,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export const DUTY_POLICY_ID = 'authorization-governance:sod';
 export const DUTY_LOCK = 'authorization-duty-governance';

@@ -2,7 +2,7 @@ import {
   IOutboxDeliveryGateway,
   OutboxDeliveryContext,
   TransactionalOutboxEntry,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { CertificateArtifactRenderUseCase } from './CertificateArtifactRenderUseCase';
 
 /** Private durable render command; never accepts completion facts or issues certificates. */

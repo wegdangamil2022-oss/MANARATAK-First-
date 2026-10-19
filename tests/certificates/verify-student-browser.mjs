@@ -32,7 +32,7 @@ const server = await createServer({
   publicDir: join(root, 'apps/admin/public'),
   plugins: [react()],
   server: { host: '127.0.0.1', port: 0 },
-  resolve: { alias: { '@manaratak/shared': join(root, 'packages/shared/src/index.ts') } },
+  resolve: { alias: { '@absheer/shared': join(root, 'packages/shared/src/index.ts') } },
 });
 let browser;
 try {
@@ -107,21 +107,21 @@ try {
   const exported = resolve(process.argv[3] || join(root, 'docs/templates/certificates'));
   await page.route('**/fixture-preview.svg', (route) =>
     route.fulfill({
-      path: join(exported, 'manaratak-approved-editable.svg'),
+      path: join(exported, 'absheer-approved-editable.svg'),
       contentType: 'image/svg+xml',
     }),
   );
   await page.route('**/fixture.pdf', (route) =>
     route.fulfill({
-      path: join(exported, 'manaratak-approved-preview.pdf'),
+      path: join(exported, 'absheer-approved-preview.pdf'),
       contentType: 'application/pdf',
     }),
   );
   await page.goto(`${origin}/${html.slice(root.length + 1)}`);
-  await expect(page.getByText('تظهر شهادة منارتك للدورات المؤهلة', { exact: false })).toBeVisible();
-  await expect(page.getByAltText('معاينة قالب منارتك المعتمد')).toBeVisible();
+  await expect(page.getByText('تظهر شهادة أبشر للدورات المؤهلة', { exact: false })).toBeVisible();
+  await expect(page.getByAltText('معاينة قالب أبشر المعتمد')).toBeVisible();
   await page.waitForFunction(() => {
-    const img = document.querySelector('img[alt="معاينة قالب منارتك المعتمد"]');
+    const img = document.querySelector('img[alt="معاينة قالب أبشر المعتمد"]');
     return img?.complete && img.naturalWidth > 0;
   });
   phase = 'issued';
@@ -143,7 +143,7 @@ try {
   expect(errors).toEqual([]);
   await page.screenshot({ path: join(output, 'student-certificates.png'), fullPage: true });
   await page
-    .getByAltText('معاينة قالب منارتك المعتمد')
+    .getByAltText('معاينة قالب أبشر المعتمد')
     .screenshot({ path: join(output, 'admin-template.png') });
   await writeFile(
     join(output, 'verification.json'),

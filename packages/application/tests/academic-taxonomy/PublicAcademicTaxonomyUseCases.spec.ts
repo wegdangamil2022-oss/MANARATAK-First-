@@ -6,7 +6,7 @@ import {
   AcademicTaxonomyNodeType,
   AcademicTaxonomyStatus,
   AcademicStandardType,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 describe('PublicAcademicTaxonomyUseCases', () => {
   const mockNode: AcademicTaxonomyNodeDto = {

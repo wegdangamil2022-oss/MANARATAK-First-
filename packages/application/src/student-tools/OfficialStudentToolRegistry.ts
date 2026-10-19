@@ -6,7 +6,7 @@ import {
   StudentToolImplementationStatus,
   StudentToolLifecycleStatus,
   StudentToolVisibilityStatus,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const NAMES = [
   'Personal Statement Generator',

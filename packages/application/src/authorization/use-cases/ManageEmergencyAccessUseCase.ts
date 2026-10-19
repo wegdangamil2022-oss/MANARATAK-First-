@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { EmergencyAccessGrantRecord, IEmergencyAccessRepository } from '@manaratak/domain';
+import type { EmergencyAccessGrantRecord, IEmergencyAccessRepository } from '@absheer/domain';
 import {
   AtomicDomainMutationCoordinator,
   AtomicMutationRequestContext,

@@ -124,7 +124,7 @@ export function securityAudit(repoRoot) {
   ));
 
   checks.push(gate(
-    'exact-master-column-contract',
+    'exact-master-coluab-contract',
     /COURSE_MASTER_COLUMN_CONTRACT_MISMATCH/.test(text.parser),
     'course master parser fails closed when the approved 11-column order changes',
   ));

@@ -1,4 +1,4 @@
-import {publicMajorProjection} from '@manaratak/domain';
+import {publicMajorProjection} from '@absheer/domain';
 import { projectPublicUniversity } from '../universities/use-cases/UniversityPublicProjection';
 import {
   AdministrativeRegionDto,
@@ -16,7 +16,7 @@ import {
   UniversityDto,
   UniversityLocalizedTextDto,
   UniversityLocalizedTextTargetType,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   DEFAULT_LOCALE,
   isSupportedLocale,
@@ -25,7 +25,7 @@ import {
   assessLocalizedPage,
   type LocalizedLocaleResolution,
   type SupportedLocale,
-} from '@manaratak/shared';
+} from '@absheer/shared';
 
 export interface LocalizedValueProjection<T> {
   value: T | undefined;

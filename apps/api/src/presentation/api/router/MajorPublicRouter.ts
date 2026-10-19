@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { LocalizedPublicMajorUseCases } from '@manaratak/application';
-import { IMajorRepository } from '@manaratak/domain';
+import { LocalizedPublicMajorUseCases } from '@absheer/application';
+import { IMajorRepository } from '@absheer/domain';
 import { localeQuerySchema, parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
 
 export class MajorPublicRouter {

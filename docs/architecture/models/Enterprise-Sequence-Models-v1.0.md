@@ -1,7 +1,7 @@
 # Enterprise Sequence Models v1.0
 
 ## 1. Overview
-Details complex event flows across the MANARATAK 2.0 Enterprise Platform.
+Details complex event flows across the ABSHEER 2.0 Enterprise Platform.
 
 ## 2. Universal Import Sequence
 1. External System pushes data payload.

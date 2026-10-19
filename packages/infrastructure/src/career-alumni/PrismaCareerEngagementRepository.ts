@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { ALLOWED_APPLICATION_TRANSITIONS, careerJobOpen, publishedCareerJob } from '@manaratak/application';
+import { ALLOWED_APPLICATION_TRANSITIONS, careerJobOpen, publishedCareerJob } from '@absheer/application';
 import {
   AlumniProfileVisibility,
   CareerAlumniProfileDto,
@@ -8,7 +8,7 @@ import {
   CareerApplicationStatus,
   CareerProfileDto,
   ICareerEngagementRepository,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const obj = (value: unknown): Record<string, unknown> | null => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
 const paging = (page = 1, pageSize = 20) => {

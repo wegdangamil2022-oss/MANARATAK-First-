@@ -1,4 +1,4 @@
-import { ICmsDeliveryCache, PublicCmsContentDto } from '@manaratak/domain';
+import { ICmsDeliveryCache, PublicCmsContentDto } from '@absheer/domain';
 
 interface RedisCmsClient {
   isReady: boolean;

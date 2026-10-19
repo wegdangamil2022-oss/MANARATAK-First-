@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { JsonImportStreamParser } from '../../src/import-foundation/parsers/JsonImportStreamParser';
-import type { ParsedImportRow } from '@manaratak/domain';
+import type { ParsedImportRow } from '@absheer/domain';
 async function parse(bytes: Uint8Array, size = 7) {
   async function* chunks() { for (let at = 0; at < bytes.length; at += size) yield bytes.subarray(at, at + size); }
   const rows: ParsedImportRow[] = [];
@@ -9,7 +9,7 @@ async function parse(bytes: Uint8Array, size = 7) {
 }
 describe('bounded JSON artifact parser', () => {
   it('preserves Unicode, escaped delimiters, nested values and byte offsets across split bytes', async () => {
-    const first = JSON.stringify({ name: 'منارتك', nested: { values: [1, 2] }, text: '"}\\' });
+    const first = JSON.stringify({ name: 'أبشر', nested: { values: [1, 2] }, text: '"}\\' });
     const document = `[${first}, {"id":2}]`;
     const rows = await parse(Buffer.from(document), 1);
     expect(rows.map(row => row.raw)).toEqual([JSON.parse(first), { id: 2 }]);

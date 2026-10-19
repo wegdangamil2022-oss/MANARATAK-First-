@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { createRequire } from 'node:module';
 
 const root = process.cwd();
-const work = mkdtempSync(join(tmpdir(), 'manaratak-foundation-'));
+const work = mkdtempSync(join(tmpdir(), 'absheer-foundation-'));
 const outDir = join(work, 'build');
 const tsconfig = join(work, 'tsconfig.json');
 writeFileSync(tsconfig, JSON.stringify({

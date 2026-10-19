@@ -77,7 +77,7 @@ function createStore({ corruptRead = false } = {}) {
   return { store, calls };
 }
 
-test('MNT-AUD-0012 immutable provider snapshot is content-hashed, provenance-scoped and retention-bound', async () => {
+test('ABSH-AUD-0012 immutable provider snapshot is content-hashed, provenance-scoped and retention-bound', async () => {
   const { store, calls } = createStore();
   const snapshot = await store.store(acquisition);
   assert.match(snapshot.artifactId, /^raw_[a-f0-9]{64}$/);
@@ -91,7 +91,7 @@ test('MNT-AUD-0012 immutable provider snapshot is content-hashed, provenance-sco
   assert.equal(call.body.retentionClass, 'IMPORT_RAW_PROVENANCE');
 });
 
-test('MNT-AUD-0012 same bytes from a different provenance produce a distinct immutable snapshot identity', async () => {
+test('ABSH-AUD-0012 same bytes from a different provenance produce a distinct immutable snapshot identity', async () => {
   const { store } = createStore();
   const first = await store.store(acquisition);
   const second = await store.store({ ...acquisition, sourceId: 'source-b' });
@@ -99,7 +99,7 @@ test('MNT-AUD-0012 same bytes from a different provenance produce a distinct imm
   assert.notEqual(first.artifactId, second.artifactId);
 });
 
-test('MNT-AUD-0012 retrieval verifies bytes against provider content hash and rejects corruption', async () => {
+test('ABSH-AUD-0012 retrieval verifies bytes against provider content hash and rejects corruption', async () => {
   const { store } = createStore({ corruptRead: true });
   const snapshot = await store.store(acquisition);
   await assert.rejects(() => store.read(snapshot.artifactId), /IMPORT_RAW_PROVIDER_READ_HASH_MISMATCH/);

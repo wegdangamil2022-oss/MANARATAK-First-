@@ -28,7 +28,7 @@ describe('Single-Role Credential Rotation Runner', () => {
 
   const validEnv = {
     NODE_ENV: 'development',
-    DATABASE_URL: 'postgresql://manaratak_probe:probepass@localhost:5432/cloud_sql_development_database',
+    DATABASE_URL: 'postgresql://absheer_probe:probepass@localhost:5432/cloud_sql_development_database',
     ORIGINAL_ADMIN_DIRECT_URL: 'postgresql://admin:adminpass@localhost:5432/cloud_sql_development_database',
     DATABASE_PROVISIONING_GATE: 'APPROVED',
     ALLOW_DATABASE_MUTATIONS: 'YES',
@@ -69,13 +69,13 @@ describe('Single-Role Credential Rotation Runner', () => {
     );
   });
 
-  it('rejects rotation for non-application roles (manaratak_migration, manaratak_probe, postgres)', () => {
+  it('rejects rotation for non-application roles (absheer_migration, absheer_probe, postgres)', () => {
     const badRoleEnv = {
       ...validEnv,
-      DB_APPLICATION_ROLE: 'manaratak_migration',
+      DB_APPLICATION_ROLE: 'absheer_migration',
     };
     expect(() => validateRotateApplicationRoleRequest(badRoleEnv)).toThrow(
-      /Role manaratak_migration is not permitted/
+      /Role absheer_migration is not permitted/
     );
   });
 
@@ -129,8 +129,8 @@ describe('Single-Role Credential Rotation Runner', () => {
 
   it('builds application database URL without corrupting host/db/query', () => {
     const base = 'postgresql://probe:oldpass@127.0.0.1:5432/cloud_sql_development_database?sslmode=disable';
-    const updated = buildApplicationDatabaseUrl(base, 'manaratak_application', 'new_secret_pwd');
-    expect(updated).toBe('postgresql://manaratak_application:new_secret_pwd@127.0.0.1:5432/cloud_sql_development_database?sslmode=disable');
+    const updated = buildApplicationDatabaseUrl(base, 'absheer_application', 'new_secret_pwd');
+    expect(updated).toBe('postgresql://absheer_application:new_secret_pwd@127.0.0.1:5432/cloud_sql_development_database?sslmode=disable');
   });
 
   it('updates env content preserving other variables and comments', () => {
@@ -151,7 +151,7 @@ SOME_KEY=some_val`;
 
   it('redacts secret credentials and URLs from error messages', () => {
     const secret = 'super-secret-password-xyz';
-    const rawMsg = `FATAL: password authentication failed for user manaratak_application with password super-secret-password-xyz at postgresql://user:mysecretpass@localhost:5432/db`;
+    const rawMsg = `FATAL: password authentication failed for user absheer_application with password super-secret-password-xyz at postgresql://user:mysecretpass@localhost:5432/db`;
     const redacted = redactSecret(rawMsg, secret);
     expect(redacted).not.toContain(secret);
     expect(redacted).not.toContain('mysecretpass');
@@ -190,7 +190,7 @@ SOME_KEY=some_val`;
     expect(() =>
       executeAlterRolePassword({
         adminUrl: 'postgresql://admin:pass@localhost:5432/db',
-        roleName: 'manaratak_application',
+        roleName: 'absheer_application',
         newPassword: 'secret-pass-123',
         execSync: fakeExecSync,
       })
@@ -200,7 +200,7 @@ SOME_KEY=some_val`;
       'psql',
       ['--no-psqlrc', '--set', 'ON_ERROR_STOP=1', '--quiet'],
       expect.objectContaining({
-        input: expect.stringContaining('ALTER ROLE "manaratak_application" WITH PASSWORD \'secret-pass-123\';'),
+        input: expect.stringContaining('ALTER ROLE "absheer_application" WITH PASSWORD \'secret-pass-123\';'),
       })
     );
   });
@@ -328,7 +328,7 @@ SOME_KEY=some_val`;
 
   it('completes successful rotation workflow atomically', async () => {
     const envFile = path.join(tmpDir, '.env');
-    fs.writeFileSync(envFile, 'DATABASE_URL=postgresql://manaratak_probe:pass@localhost:5432/cloud_sql_development_database\n');
+    fs.writeFileSync(envFile, 'DATABASE_URL=postgresql://absheer_probe:pass@localhost:5432/cloud_sql_development_database\n');
 
     const fakeExecSync = vi.fn().mockReturnValue({ status: 0, stdout: '' });
     const fixedPassword = 'generated-safe-token-for-test-32chars';
@@ -347,7 +347,7 @@ SOME_KEY=some_val`;
     const updatedContent = fs.readFileSync(envFile, 'utf8');
     expect(updatedContent).toContain(`DB_APPLICATION_PASSWORD=${fixedPassword}`);
     expect(updatedContent).toContain(
-      `DATABASE_URL=postgresql://manaratak_application:${fixedPassword}@localhost:5432/cloud_sql_development_database`
+      `DATABASE_URL=postgresql://absheer_application:${fixedPassword}@localhost:5432/cloud_sql_development_database`
     );
 
     // Intermediate artifacts removed
@@ -365,20 +365,20 @@ SOME_KEY=some_val`;
     await expect(
       executeAlterRoleWithNodeDriver({
         adminUrl: 'postgresql://admin:pass@localhost:5432/db',
-        roleName: 'manaratak_application',
+        roleName: 'absheer_application',
         newPassword: 'secret-node-pass-456',
         driver: fakeDriver,
       })
     ).rejects.toThrow(/ALTER_ROLE_FAILED: connection timeout: \[REDACTED_SECRET\]/);
 
     expect(fakeDriver.execute).toHaveBeenCalledWith(
-      expect.stringContaining('ALTER ROLE "manaratak_application" WITH PASSWORD \'secret-node-pass-456\';')
+      expect.stringContaining('ALTER ROLE "absheer_application" WITH PASSWORD \'secret-node-pass-456\';')
     );
   });
 
   it('completes successful rotation workflow using Node database driver', async () => {
     const envFile = path.join(tmpDir, '.env');
-    fs.writeFileSync(envFile, 'DATABASE_URL=postgresql://manaratak_probe:pass@localhost:5432/cloud_sql_development_database\n');
+    fs.writeFileSync(envFile, 'DATABASE_URL=postgresql://absheer_probe:pass@localhost:5432/cloud_sql_development_database\n');
 
     const fakeDriver = {
       execute: vi.fn().mockResolvedValue(true),
@@ -399,7 +399,7 @@ SOME_KEY=some_val`;
     const updatedContent = fs.readFileSync(envFile, 'utf8');
     expect(updatedContent).toContain(`DB_APPLICATION_PASSWORD=${fixedPassword}`);
     expect(updatedContent).toContain(
-      `DATABASE_URL=postgresql://manaratak_application:${fixedPassword}@localhost:5432/cloud_sql_development_database`
+      `DATABASE_URL=postgresql://absheer_application:${fixedPassword}@localhost:5432/cloud_sql_development_database`
     );
   });
 
@@ -436,7 +436,7 @@ SOME_KEY=some_val`;
 
     // Dispatched the supplied secret directly
     expect(fakeDriver.execute).toHaveBeenCalledWith(
-      expect.stringContaining(`ALTER ROLE "manaratak_application" WITH PASSWORD '${suppliedSecret}';`)
+      expect.stringContaining(`ALTER ROLE "absheer_application" WITH PASSWORD '${suppliedSecret}';`)
     );
 
     // Did NOT write ephemeral .env or recovery artifacts
@@ -477,7 +477,7 @@ SOME_KEY=some_val`;
     const journal = JSON.parse(fs.readFileSync(journalPath, 'utf8'));
     expect(journal.stage).toBe('UNCERTAIN_MUTATION_STATE');
     expect(journal.secretSource).toBe('DB_APPLICATION_PASSWORD');
-    expect(journal.role).toBe('manaratak_application');
+    expect(journal.role).toBe('absheer_application');
   });
 
   it('rejects secret handoff if DB_APPLICATION_PASSWORD is empty', async () => {

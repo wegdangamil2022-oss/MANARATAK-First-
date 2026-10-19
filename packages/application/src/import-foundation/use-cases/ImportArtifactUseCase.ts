@@ -3,7 +3,7 @@ import type { IVerifiedImportArtifactGateway } from '../contracts/IVerifiedImpor
 import { AssetReferencePolicy } from '../../asset-platform/AssetReferencePolicy';
 import { ImportAdminUseCases } from './ImportAdminUseCases';
 import { ImportParserRegistry } from '../parsers/ImportParserRegistry';
-import { ImportParseError, ParsedImportRow } from '@manaratak/domain';
+import { ImportParseError, ParsedImportRow } from '@absheer/domain';
 
 export interface ImportArtifactInput {
   assetId: string; ownerDomain: string; expectedSha256: string; format: 'csv' | 'ndjson' | 'json'; mappingProfileId?: string; referenceEntityType?: 'COUNTRY'|'CURRENCY'|'LANGUAGE'|'CITY';

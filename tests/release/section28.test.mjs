@@ -54,7 +54,7 @@ const sign = (data, pair = keys) => {
     signature: crypto.sign(null, Buffer.from(payload), pair.privateKey).toString('base64'),
   };
 };
-const fixture = () => fs.mkdtempSync(path.join(os.tmpdir(), 'manaratak-section28-'));
+const fixture = () => fs.mkdtempSync(path.join(os.tmpdir(), 'absheer-section28-'));
 const roots = [];
 const temp = () => {
   const root = fixture();
@@ -76,7 +76,7 @@ function artifacts() {
   fs.writeFileSync(path.join(root, sbom.file), '{}');
   const manifest = {
     version: 2,
-    kind: 'MANARATAK_IMMUTABLE_RELEASE',
+    kind: 'ABSHEER_IMMUTABLE_RELEASE',
     sourceSha: sha,
     provenance: { repository: REPOSITORY },
     artifacts: units,
@@ -169,7 +169,7 @@ function healthyFetch(overrides = {}) {
           status: overrides.status ?? 200,
           headers: {
             'content-type': overrides.contentType ?? 'application/json',
-            'x-manaratak-source-sha': overrides.revision ?? sha,
+            'x-absheer-source-sha': overrides.revision ?? sha,
           },
         },
       );
@@ -181,7 +181,7 @@ function healthyFetch(overrides = {}) {
       );
     return new Response(
       overrides.html ??
-        `<html><head><meta name="manaratak-build-sha" content="${sha}"></head><body><div id="root"></div><script src="/assets/app.js"></script></body></html>`,
+        `<html><head><meta name="absheer-build-sha" content="${sha}"></head><body><div id="root"></div><script src="/assets/app.js"></script></body></html>`,
       { headers: { 'content-type': 'text/html' } },
     );
   };
@@ -212,7 +212,7 @@ test('FSA008 smoke rejects placeholder/unbuilt html', async () =>
     () =>
       runSmoke(
         smoke,
-        healthyFetch({ html: 'MANARATAK Platform is initializing. Please build web assets.' }),
+        healthyFetch({ html: 'ABSHEER Platform is initializing. Please build web assets.' }),
       ),
     /BUILT_HTML/,
   ));
@@ -229,10 +229,10 @@ test('FSA008 stamp matches exact static unit and source', () => {
   const root = temp();
   fs.writeFileSync(
     path.join(root, 'index.html'),
-    `<meta name="manaratak-build-sha" content="${sha}">`,
+    `<meta name="absheer-build-sha" content="${sha}">`,
   );
   fs.writeFileSync(
-    path.join(root, 'manaratak-build.json'),
+    path.join(root, 'absheer-build.json'),
     JSON.stringify({ version: 1, unit: 'web', sourceSha: sha }),
   );
   assert.equal(inspectStaticBuild(root, 'web', sha).status, 'BUILT');
@@ -482,7 +482,7 @@ test('FSA006 full attributable matrix assertions accepted without any live execu
   );
 });
 const db =
-  'postgresql://manaratak_restore_runner:fixture@isolated.example/manaratak_restore_' +
+  'postgresql://absheer_restore_runner:fixture@isolated.example/absheer_restore_' +
   '1'.repeat(32);
 function recoveryFixture(overrides = {}) {
   const root = temp(),
@@ -499,7 +499,7 @@ function recoveryFixture(overrides = {}) {
   };
   fs.writeFileSync(assetManifest, JSON.stringify(manifest));
   const data = {
-    kind: 'MANARATAK_DISPOSABLE_RESTORE_AUTHORIZATION',
+    kind: 'ABSHEER_DISPOSABLE_RESTORE_AUTHORIZATION',
     environment: 'DISPOSABLE',
     productionHosts: ['production.example'], targetServerIdentity: '111111111111', productionServerIdentity: '222222222222',
     targetFingerprint: databaseIdentity(db).fingerprint,
@@ -545,13 +545,13 @@ test('FSA014 independently signed literal isolated target accepted', () => {
   const input = recoveryFixture();
   assert.equal(
     recoveryTarget(db, input.assertion, publicKey, sha, now).target.role,
-    'manaratak_restore_runner',
+    'absheer_restore_runner',
   );
 });
 for (const url of [
-  'postgresql://manaratak_restore_runner:x@localhost/production',
-  'postgresql://manaratak_restore_runner:x@remote/test-production',
-  'postgresql://postgres:x@isolated.example/manaratak_restore_' + '1'.repeat(32),
+  'postgresql://absheer_restore_runner:x@localhost/production',
+  'postgresql://absheer_restore_runner:x@remote/test-production',
+  'postgresql://postgres:x@isolated.example/absheer_restore_' + '1'.repeat(32),
 ])
   test(`FSA014 reject ${new URL(url).pathname} before mutating`, () => {
     const input = recoveryFixture({
@@ -836,10 +836,10 @@ test('FSA001 source evidence writer preserves skipped gate and never declares ru
 test('FSA002/013 corrected repository while deployment/recovery remain explicit opt-in', () => {
   const release = fs.readFileSync('.github/workflows/release-promotion.yml', 'utf8'),
     recovery = fs.readFileSync('.github/workflows/recovery-restore-audit.yml', 'utf8');
-  assert.equal(release.includes('MANARATAK_FINAL'), false);
-  assert.equal(recovery.includes('MANARATAK_FINAL'), false);
-  assert.ok(release.includes("vars.MANARATAK_RELEASE_ENABLED == 'true'"));
-  assert.ok(recovery.includes("vars.MANARATAK_RECOVERY_AUDIT_ENABLED == 'true'"));
+  assert.equal(release.includes('ABSHEER_FINAL'), false);
+  assert.equal(recovery.includes('ABSHEER_FINAL'), false);
+  assert.ok(release.includes("vars.ABSHEER_RELEASE_ENABLED == 'true'"));
+  assert.ok(recovery.includes("vars.ABSHEER_RECOVERY_AUDIT_ENABLED == 'true'"));
   assert.ok(release.includes('environment: production'));
   assert.ok(recovery.includes('environment: recovery-audit'));
   assert.ok(release.includes('verify-release-evidence.mjs'));

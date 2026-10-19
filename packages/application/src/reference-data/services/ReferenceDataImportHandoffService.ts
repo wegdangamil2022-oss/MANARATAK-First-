@@ -6,7 +6,7 @@ import {
   UpsertReferenceCurrencyDto,
   UpsertReferenceLanguageDto,
   UpsertReferenceCityDto
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 export interface ReferenceDataImportHandoffCommand {
   seedBatchId: string;

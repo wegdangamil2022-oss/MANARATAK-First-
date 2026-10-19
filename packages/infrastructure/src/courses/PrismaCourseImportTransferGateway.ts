@@ -1,7 +1,7 @@
 import { lockImportOwnerCommand } from '../import-foundation/ImportReviewLeaseGuard';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { PrismaImportPromotionLinkWriter } from '../import-foundation/PrismaImportPromotionLinkWriter';
-import type { AtomicPersistenceContext } from '@manaratak/domain';
+import type { AtomicPersistenceContext } from '@absheer/domain';
 import type {
   CourseFieldProvenanceWrite,
   CourseImportTransferAnalysis,
@@ -9,7 +9,7 @@ import type {
   CourseImportTransferGateway,
   CourseImportTransferSourceIdentity,
   CourseImportTransferStoredRecord,
-} from '@manaratak/application';
+} from '@absheer/application';
 
 interface CourseTransferTransactionContext extends AtomicPersistenceContext {
   readonly transactionClient: Prisma.TransactionClient;

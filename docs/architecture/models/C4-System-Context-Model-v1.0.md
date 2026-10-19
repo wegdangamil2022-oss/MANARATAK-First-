@@ -2,11 +2,11 @@
 
 ## 1. Overview
 
-This document defines the Level 1 (System Context) architectural diagram for the MANARATAK 2.0 Enterprise Platform. It outlines the platform's relationship with external actors, systems, and enterprise boundaries.
+This document defines the Level 1 (System Context) architectural diagram for the ABSHEER 2.0 Enterprise Platform. It outlines the platform's relationship with external actors, systems, and enterprise boundaries.
 
 ## 2. Diagram Description
 
-- **Enterprise Platform (MANARATAK 2.0)**: The core system providing 24 distinct bounded contexts serving students, educators, and institutions.
+- **Enterprise Platform (ABSHEER 2.0)**: The core system providing 24 distinct bounded contexts serving students, educators, and institutions.
 - **Actors**:
   - Students
   - University Administrators

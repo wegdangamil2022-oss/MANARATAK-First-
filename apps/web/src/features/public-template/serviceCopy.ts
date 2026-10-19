@@ -164,7 +164,7 @@ const english: Record<string, string> = {
   'مسح البحث': 'Clear search',
   'نوع الخدمة': 'Service category',
   'الخدمات المتاحة': 'Available services',
-  'الخدمات المنشورة والمتاحة من كتالوج منارتك': 'Published services available from Manaratak',
+  'الخدمات المنشورة والمتاحة من كتالوج أبشر': 'Published services available from Absheer',
   خدمة: 'Service',
   'لا توجد خدمات مطابقة': 'No matching services',
   'غيّر البحث أو نوع الخدمة.': 'Change the search or service category.',
@@ -178,7 +178,7 @@ const english: Record<string, string> = {
   الباقات: 'Packages',
   'خيارات الخدمة المنشورة عند توفرها': 'Published service options, when available',
   'ما الذي نحتاجه منك؟': 'What do we need from you?',
-  'استكشف في منارتك': 'Explore Manaratak',
+  'استكشف في أبشر': 'Explore Absheer',
   'ظهور سياقي فقط — لا يعني أن الخدمة مرتبطة أو معتمدة من هذه الكيانات':
     'These discovery links do not establish a service relationship or endorsement.',
   'فصل الترابط:': 'Discovery links:',

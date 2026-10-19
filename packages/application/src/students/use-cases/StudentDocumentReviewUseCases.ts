@@ -3,7 +3,7 @@ import {
   type IStudentApplicationTrackerRepository,
   type IStudentApplicationScholarshipGateway,
   type StudentDocumentAttestation,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   assertAssetReferenceUsable,
   type AssetReferencePolicy,

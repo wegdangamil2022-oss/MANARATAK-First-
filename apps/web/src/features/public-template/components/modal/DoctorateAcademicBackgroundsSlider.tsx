@@ -79,35 +79,35 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
 
   return (
     <div
-      className="relative w-full bg-[var(--mn-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--mn-border-brand)]/40 shadow-md shadow-[var(--mn-shadow-ink)]/60 overflow-hidden mn-panel "
+      className="relative w-full bg-[var(--ab-surface)] rounded-none p-3.5 sm:p-4 border-y border-[var(--ab-border-brand)]/40 shadow-md shadow-[var(--ab-shadow-ink)]/60 overflow-hidden ab-panel "
       dir={publicDir}
     >
       {/* Top Emerald Accent Line */}
-      <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--mn-section-line)] to-transparent" />
+      <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-transparent via-[var(--ab-section-line)] to-transparent" />
 
       {/* Section Header */}
       <div className="flex flex-col items-center justify-center mb-3.5 pt-0.5">
         <div className="flex items-center justify-center gap-2 mb-1.5">
-          <div className="w-6.5 h-6.5 rounded-full bg-[var(--mn-primary)]/5 border border-[var(--mn-accent)]/60 ring-2 ring-[var(--mn-focus)]/20 flex items-center justify-center shrink-0 shadow-2xs">
-            <Layers className="w-3.5 h-3.5 text-[var(--mn-heading)]" />
+          <div className="w-6.5 h-6.5 rounded-full bg-[var(--ab-primary)]/5 border border-[var(--ab-accent)]/60 ring-2 ring-[var(--ab-focus)]/20 flex items-center justify-center shrink-0 shadow-2xs">
+            <Layers className="w-3.5 h-3.5 text-[var(--ab-heading)]" />
           </div>
-          <h2 className="text-xs sm:text-[13px] font-bold text-[var(--mn-heading)] leading-tight">{publicT('public_4_suitable_academic_backgrounds_and_entry_paths')}</h2>
+          <h2 className="text-xs sm:text-[13px] font-bold text-[var(--ab-heading)] leading-tight">{publicT('public_4_suitable_academic_backgrounds_and_entry_paths')}</h2>
         </div>
         {/* Glowing Gold Underline */}
-        <div className="w-[140px] h-[1.5px] bg-gradient-to-r from-transparent via-[var(--mn-accent-soft)] to-transparent shadow-[0_0_8px_rgba(214,164,59,0.7)]" />
+        <div className="w-[140px] h-[1.5px] bg-gradient-to-r from-transparent via-[var(--ab-accent-soft)] to-transparent shadow-[0_0_8px_rgba(214,164,59,0.7)]" />
       </div>
 
       {/* 4 Clean Segmented Tab Buttons (التنقل السريع) with Animated Glowing Line */}
-      <div className="relative mb-3 rounded-2xl overflow-hidden p-[2px] shadow-[0_0_12px_rgba(214,164,59,0.2)] bg-[var(--mn-surface-muted)]/50">
+      <div className="relative mb-3 rounded-2xl overflow-hidden p-[2px] shadow-[0_0_12px_rgba(214,164,59,0.2)] bg-[var(--ab-surface-muted)]/50">
         {/* Animated Moving Glowing Border Line (Slanted Shine) */}
         <motion.div
-          className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-[var(--mn-accent-soft)] to-transparent opacity-100 -rotate-12 scale-150 origin-center"
+          className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-[var(--ab-accent-soft)] to-transparent opacity-100 -rotate-12 scale-150 origin-center"
           initial={{ x: '-100%' }}
           animate={{ x: '100%' }}
           transition={{ duration: 3, ease: 'linear', repeat: Infinity }}
         />
 
-        <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 bg-[var(--mn-page)]/95 backdrop-blur-sm rounded-[14px] mn-panel ">
+        <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 bg-[var(--ab-page)]/95 backdrop-blur-sm rounded-[14px] ab-panel ">
           {tabs.map((tab, idx) => {
             const Icon = tab.icon;
             const isActive = activeTab === idx;
@@ -118,12 +118,12 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
                 onClick={() => handleSelectTab(idx)}
                 className={`py-2 px-2 rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer select-none text-center ${
                   isActive
-                    ? 'bg-[var(--mn-surface)] text-[var(--mn-heading)] shadow-xs border border-[var(--mn-accent)]/60 ring-1 ring-[var(--mn-focus)]/20 font-bold mn-panel '
-                    : 'text-[var(--mn-text-muted)] hover:text-[var(--mn-heading)] hover:bg-[var(--mn-surface-muted)] border border-transparent font-bold'
+                    ? 'bg-[var(--ab-surface)] text-[var(--ab-heading)] shadow-xs border border-[var(--ab-accent)]/60 ring-1 ring-[var(--ab-focus)]/20 font-bold ab-panel '
+                    : 'text-[var(--ab-text-muted)] hover:text-[var(--ab-heading)] hover:bg-[var(--ab-surface-muted)] border border-transparent font-bold'
                 }`}
               >
                 <Icon
-                  className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[var(--mn-heading)]' : 'text-[var(--mn-text-muted)]'}`}
+                  className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[var(--ab-heading)]' : 'text-[var(--ab-text-muted)]'}`}
                 />
                 <span className="text-[11px] sm:text-[11.5px] leading-tight truncate">
                   {tab.tabLabel}
@@ -135,7 +135,7 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
       </div>
 
       {/* Swipeable Slide Content Container */}
-      <div className="relative min-h-[160px] overflow-hidden rounded-2xl bg-[var(--mn-page)]/60 border border-[var(--mn-border-gold)] p-3 sm:p-4">
+      <div className="relative min-h-[160px] overflow-hidden rounded-2xl bg-[var(--ab-page)]/60 border border-[var(--ab-border-gold)] p-3 sm:p-4">
         <AnimatePresence mode="wait" initial={false} custom={direction}>
           <motion.div
             key={activeTab}
@@ -151,15 +151,15 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
             className="w-full space-y-3 text-start cursor-grab active:cursor-grabbing"
           >
             {/* Slide Header */}
-            <div className="flex items-center gap-2.5 pb-2.5 border-b border-[var(--mn-border-gold)]">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[var(--mn-primary)] to-[var(--mn-primary)] text-[var(--mn-accent-text)] flex items-center justify-center shadow-2xs shrink-0 mn-inverse ">
-                {React.createElement(currentTab.icon, { className: 'w-4.5 h-4.5 text-[var(--mn-accent-soft)]' })}
+            <div className="flex items-center gap-2.5 pb-2.5 border-b border-[var(--ab-border-gold)]">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[var(--ab-primary)] to-[var(--ab-primary)] text-[var(--ab-accent-text)] flex items-center justify-center shadow-2xs shrink-0 ab-inverse ">
+                {React.createElement(currentTab.icon, { className: 'w-4.5 h-4.5 text-[var(--ab-accent-soft)]' })}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-[12px] sm:text-[13px] font-bold text-[var(--mn-heading)] leading-tight">
+                <h3 className="text-[12px] sm:text-[13px] font-bold text-[var(--ab-heading)] leading-tight">
                   {currentTab.title}
                 </h3>
-                <p className="text-[10.5px] text-[var(--mn-text-muted)] font-bold mt-0.5 leading-snug">
+                <p className="text-[10.5px] text-[var(--ab-text-muted)] font-bold mt-0.5 leading-snug">
                   {currentTab.description}
                 </p>
               </div>
@@ -170,12 +170,12 @@ export const DoctorateAcademicBackgroundsSlider: React.FC<
               {currentTab.items.map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border-gold)] hover:border-[var(--mn-accent)] hover:shadow-2xs transition-all duration-200 text-start mn-panel "
+                  className="flex items-start gap-2.5 p-2.5 sm:p-3 rounded-xl bg-[var(--ab-surface)] border border-[var(--ab-border-gold)] hover:border-[var(--ab-accent)] hover:shadow-2xs transition-all duration-200 text-start ab-panel "
                 >
-                  <div className="w-5 h-5 rounded-lg bg-[var(--mn-primary)]/10 text-[var(--mn-heading)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[11px]">
+                  <div className="w-5 h-5 rounded-lg bg-[var(--ab-primary)]/10 text-[var(--ab-heading)] flex items-center justify-center shrink-0 mt-0.5 font-bold text-[11px]">
                     <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                   </div>
-                  <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--mn-heading)] leading-relaxed flex-1">
+                  <span className="text-[11px] sm:text-[11.5px] font-bold text-[var(--ab-heading)] leading-relaxed flex-1">
                     {item}
                   </span>
                 </div>

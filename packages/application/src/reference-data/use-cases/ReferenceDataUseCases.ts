@@ -35,7 +35,7 @@ import {
   ReferenceHistoryPage,
   referenceCityScopeKey,
   referenceStandardsReadiness
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import { AtomicAuditedOutboxMutationExecutor } from '../../event-foundation/use-cases/AtomicAuditedOutboxMutationExecutor';
 import { CountryImportPreviewService, CountrySourceRecord } from '../services/CountryImportPreviewService';
 import { CountryDerivedReferencePreviewService } from '../services/CountryDerivedReferencePreviewService';
@@ -314,7 +314,7 @@ export class ReferenceDataUseCases {
     const repo = this.repository as IReferenceDataRepository & {
       repairCityCountryLinkInTransaction?: (
         command: ReferenceCityCountryLinkRepairCommand,
-        tx: import('@manaratak/domain').AtomicPersistenceContext,
+        tx: import('@absheer/domain').AtomicPersistenceContext,
         correlationId?: string,
       ) => Promise<void>
     };
@@ -364,7 +364,7 @@ export class ReferenceDataUseCases {
     const repository = this.repository as IReferenceDataRepository & {
       reassignProviderMappingInTransaction?: (
         command: ReferenceProviderMappingReassignmentCommand,
-        context: import('@manaratak/domain').AtomicPersistenceContext,
+        context: import('@absheer/domain').AtomicPersistenceContext,
       ) => Promise<void>;
     };
     if (!repository.reassignProviderMappingInTransaction) throw new Error('REFERENCE_DATA_TRANSACTIONAL_PERSISTENCE_REQUIRED');
@@ -469,7 +469,7 @@ export class ReferenceDataUseCases {
     entityType: string,
     entityId: string,
     requestContext: ReferenceDataMutationContext | undefined,
-    mutation: (transaction: { repository: ITransactionalReferenceDataRepository; context: import('@manaratak/domain').AtomicPersistenceContext }) => Promise<T>,
+    mutation: (transaction: { repository: ITransactionalReferenceDataRepository; context: import('@absheer/domain').AtomicPersistenceContext }) => Promise<T>,
     legacyMutation: () => Promise<T>,
   ): Promise<T> {
     if (!this.atomicMutationExecutor) {

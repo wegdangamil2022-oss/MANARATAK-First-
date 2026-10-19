@@ -1,4 +1,4 @@
-import { assertTranslationContentAuthoringEnabled } from '@manaratak/shared';
+import { assertTranslationContentAuthoringEnabled } from '@absheer/shared';
 import {
   Localization,
   LocalizationId,
@@ -21,7 +21,7 @@ import {
   LocalizationVersionPublishedEvent,
   LocalizationDeprecatedEvent,
   LocalizationArchivedEvent
-} from '@manaratak/domain';
+} from '@absheer/domain';
 import {
   CreateLocalizationDto,
   UpdateLocalizationDto,

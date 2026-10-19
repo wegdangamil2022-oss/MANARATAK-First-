@@ -1,8 +1,8 @@
 import { publishedCatalogImage, type PublishedCatalogImageServices } from '../../media/PublishedCatalogImage.js';
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { CourseAccessType, CourseOriginType } from '@manaratak/domain';
-import { CourseRelationshipQueryService, PublicCourseUseCases } from '@manaratak/application';
+import { CourseAccessType, CourseOriginType } from '@absheer/domain';
+import { CourseRelationshipQueryService, PublicCourseUseCases } from '@absheer/application';
 import { parseRequestLocale, toApiValidationErrorPayload } from '../locale/LocaleQueryContract.js';
 
 export class CoursePublicRouter {

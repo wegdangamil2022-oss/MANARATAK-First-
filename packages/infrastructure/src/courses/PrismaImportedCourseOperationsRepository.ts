@@ -1,4 +1,4 @@
-import type {AtomicPersistenceContext} from '@manaratak/domain';
+import type {AtomicPersistenceContext} from '@absheer/domain';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CourseImportOperationsOverview,
@@ -15,7 +15,7 @@ import {
   ImportedCourseOverview,
   ImportedCoursePage,
   ImportedCourseVerificationContext,
-} from '@manaratak/domain';
+} from '@absheer/domain';
 
 const IMPORTED_ORIGIN = 'EXTERNAL_LINKED_COURSE';
 

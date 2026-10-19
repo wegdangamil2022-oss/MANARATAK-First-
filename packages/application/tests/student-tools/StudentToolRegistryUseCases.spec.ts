@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { IStudentToolRegistryRepository, StudentToolLifecycleStatus } from '@manaratak/domain';
+import { IStudentToolRegistryRepository, StudentToolLifecycleStatus } from '@absheer/domain';
 import { OFFICIAL_STUDENT_TOOLS } from '../../src/student-tools/OfficialStudentToolRegistry';
 import { StudentToolRegistryUseCases } from '../../src/student-tools/use-cases/StudentToolRegistryUseCases';
 
