@@ -1,0 +1,38 @@
+[
+  {
+    "name": "CD019 actual link result serialization and freshness > rejects conflicting equal-time results from independent writers",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-course-link-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD019 actual link result serialization and freshness > treats an exact equal-time replay as a read-only result",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-course-link-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD019 actual link result serialization and freshness > accepts a genuinely newer verdict after denying an equal-time conflict",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-course-link-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD019 actual link result serialization and freshness > refuses an older result without replacing a newer broken-link verdict",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-course-link-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD019 actual link result serialization and freshness > locks the canonical Course while its verification context is read and written",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-course-link-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD019 actual link result serialization and freshness > keeps the newest result under two independent concurrent writers",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-course-link-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD019 actual link result serialization and freshness > rejects a result for the previous URL after a canonical URL change",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-course-link-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD019 actual link result serialization and freshness > rolls history and identity back with a real PostgreSQL error at the final write",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-course-link-concurrency.database.spec.mjs"
+  },
+  {
+    "name": "CD019 actual link result serialization and freshness > uses an existing owner transaction and rolls back when its caller fails",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-course-link-concurrency.database.spec.mjs"
+  }
+]
