@@ -1,0 +1,61 @@
+{
+  "reviewedSourceSha": "6f9cae73dfad7a2886bb0f4225ca49cb256e6d05",
+  "queryExclusionsAdded": false,
+  "receipts": [
+    {
+      "number": 157,
+      "rule": "js/insufficient-password-hash",
+      "path": "packages/application/src/auth/InMemorySessionManager.ts",
+      "state": "dismissed",
+      "reason": "false positive",
+      "comment": "Codex review: SHA-256 indexes 256-bit random refresh tokens from randomBytes(32), not passwords. Credentials use scrypt. Keep compatible lookup format. Evidence: docs/remediation/POST28_R07_CODEQL_REVIEW_2026-10-19.md",
+      "at": "2026-10-19T19:57:07Z",
+      "recordedBy": "wegdangamil2022-oss",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/security/code-scanning/157"
+    },
+    {
+      "number": 158,
+      "rule": "js/insufficient-password-hash",
+      "path": "packages/infrastructure/src/auth/PrismaSessionManager.ts",
+      "state": "dismissed",
+      "reason": "false positive",
+      "comment": "Codex review: SHA-256 indexes 256-bit random refresh tokens, not human passwords. Credentials use scrypt separately; changing this digest invalidates existing sessions. Evidence: docs/remediation/POST28_R07_CODEQL_REVIEW_2026-10-19.md",
+      "at": "2026-10-19T19:57:10Z",
+      "recordedBy": "wegdangamil2022-oss",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/security/code-scanning/158"
+    },
+    {
+      "number": 159,
+      "rule": "js/insufficient-password-hash",
+      "path": "scripts/release/post28-r08-redis-lab.mjs",
+      "state": "dismissed",
+      "reason": "false positive",
+      "comment": "Codex review: Redis ACL #hash requires SHA-256; input is a fresh 256-bit random machine secret for one disposable lab, not a human password. Evidence: docs/remediation/POST28_R07_CODEQL_REVIEW_2026-10-19.md",
+      "at": "2026-10-19T19:57:12Z",
+      "recordedBy": "wegdangamil2022-oss",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/security/code-scanning/159"
+    },
+    {
+      "number": 155,
+      "rule": "js/missing-rate-limiting",
+      "path": "tests/database/fixtures/post28-r08-session-server.mjs",
+      "state": "dismissed",
+      "reason": "used in tests",
+      "comment": "Codex review: IPC/DB-T guarded test server binds only 127.0.0.1 ephemeral port. AuthRouter uses real local limiter; private endpoint is synthetic. Evidence: docs/remediation/POST28_R07_CODEQL_REVIEW_2026-10-19.md",
+      "at": "2026-10-19T19:57:15Z",
+      "recordedBy": "wegdangamil2022-oss",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/security/code-scanning/155"
+    },
+    {
+      "number": 156,
+      "rule": "js/missing-rate-limiting",
+      "path": "tests/database/post28-learning-path-http.database.spec.mjs",
+      "state": "dismissed",
+      "reason": "used in tests",
+      "comment": "Codex review: DB-T guarded synthetic Supertest app with no external listener. Tests persisted permissions/idempotency, not production bootstrap. Evidence: docs/remediation/POST28_R07_CODEQL_REVIEW_2026-10-19.md",
+      "at": "2026-10-19T19:57:18Z",
+      "recordedBy": "wegdangamil2022-oss",
+      "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/security/code-scanning/156"
+    }
+  ]
+}

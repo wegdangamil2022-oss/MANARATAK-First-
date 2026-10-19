@@ -1,0 +1,23 @@
+[
+  {
+    "verifiedZipDigest": true,
+    "name": "p12-full-source-ci-closure",
+    "id": 12218880669,
+    "bytes": 1061,
+    "digest": "sha256:e8d289397899b98f95f76c20f19644e12681a6cc57251f422db936a62690d23f"
+  },
+  {
+    "verifiedZipDigest": true,
+    "name": "linux-runtime-review-1349371f29902857be7444cf89457e90a1d4b25d",
+    "id": 12217803555,
+    "bytes": 152933,
+    "digest": "sha256:5f831585d503abda22cf71aa9f3fa2d952345d47f40381bd11ea8a07de5cb2a2"
+  },
+  {
+    "verifiedZipDigest": true,
+    "name": "artifact-retrieval-1349371f29902857be7444cf89457e90a1d4b25d",
+    "id": 12218436201,
+    "bytes": 653,
+    "digest": "sha256:a5d5d58f6e1edd2f8cec23b4abfa722464d33db8120c4fb0de105dd51e3cb235"
+  }
+]

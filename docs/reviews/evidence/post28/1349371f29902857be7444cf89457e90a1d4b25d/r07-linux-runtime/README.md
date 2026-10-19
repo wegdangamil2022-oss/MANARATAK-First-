@@ -1,0 +1,9 @@
+# Actual post-security-fix Linux runtime
+
+Source `1349371f29902857be7444cf89457e90a1d4b25d`; all six jobs in run 39315368366 succeeded. Three proof ZIPs were authenticated through Actions and checked against the API digests before extracting only allowlisted entries; `archive-receipts.json` retains the exact IDs, names, sizes and digests. Log bytes are unchanged; names were changed from `.log` to `.txt`. Git line-ending conversion is disabled in this directory.
+
+The native/image receipt proves UID 1000 and actual module loading with no network. Its API/DB flags are false because that receipt precedes boot. `result.json` then proves actual boot of the same exact image with new isolated PostgreSQL 16, restricted runtime role, HTTPS browser login/dashboard/denial/logout and cleanup. Source CI and artifact retrieval receipts likewise retain runtime-unverified status at their earlier stage. Those original receipts were not rewritten to imply later execution.
+
+All 111 migration checksums matched and schema diff was empty. There were eight observations, 59 same-origin responses, zero page errors/HTTP 5xx and 31 retained console errors from denial probes and deliberately blocked external images. API drain was 160 ms with exit zero. Owned API/PG/network resources were removed without touching existing databases. The screenshot uses a synthetic verified student and workspace; self-registration/email delivery or sensitive admin writes are not proved.
+
+`initialize.txt` preserves the old initializer authorization label for R05 scoped setup, not the current R05 closure state. Migrator credentials were used only for fresh reviewed schema/synthetic setup; application traffic used `post28_app`. No environment file, private key or lab credential was retained. Production acceptance, formal R07 acceptance and promotion authorization remain false in the runtime receipt.

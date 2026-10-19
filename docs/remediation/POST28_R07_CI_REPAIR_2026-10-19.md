@@ -1,5 +1,7 @@
 # R07 CI repair and Linux review continuation
 
+Current outcome: source `1349371f29902857be7444cf89457e90a1d4b25d` passed all six push jobs, all eight PR workflows and 23 check runs, including the separate CodeQL result. Actual fresh Linux PG16/HTTPS browser proof is retained in the [current Linux report](POST28_R07_LINUX_REVIEW_PROOF_2026-10-19.md). The sections below retain earlier failures and repairs at their original sources.
+
 Implementation candidate: `950261cf7c5d515367ba502e531d8dcc3a24ec1c` on `feat/post28-r07-artifact-preparation`. Draft review: https://github.com/wegdangamil2022-oss/MANARATAK-First-/pull/34 . No merge or production deployment is authorized by this report.
 
 ## Concrete changes
@@ -46,3 +48,9 @@ The owner confirmed the emails are GitHub failure notifications. Latest inspecte
 Targeted verification: 10 CI regression tests and 6 directly affected workflow-boundary tests passed; environment inventory is current at 320 variable names; targeted ESLint and whitespace checks passed. No full local build or unrelated suites were repeated. The prior R08 concurrent-refresh changes remain excluded.
 
 At the time of these repairs, push run `39309948873` was still executing. Its eventual result must be read independently; a correction for PR metadata/history is not evidence that artifact/Linux runtime gates passed.
+
+## Verified follow-up and retired preview configuration
+
+The completed `6dfae89` push run `39309948873` passed all six jobs, including actual immutable-artifact retrieval and the Linux PG16/HTTPS/browser runtime. The [retained Linux proof](POST28_R07_LINUX_REVIEW_PROOF_2026-10-19.md) records its exact source and limits. At corrected source `5879c610bc0527db89a4d29ccb46934aa251864d`, all eight PR workflows succeeded, including Enterprise `39311717939` and Imported Courses `39311718192`; the latter now passes the unchanged historical-predecessor/checksum test. This confirms the two reported PR failure causes were repaired.
+
+The owner confirmed the inaccessible Vercel project `manaratak-2-preview-2026` is old and unused. Commit `6f9cae73dfad7a2886bb0f4225ca49cb256e6d05` disables automatic Git deployment for this remediation branch using the supported root `vercel.json` configuration, without changing other branches or notification preferences. GitHub CI and deployment-configuration validation remain enabled. The organization verifier explicitly registers the new configuration filename; all seven affected organization tests and the repository organization check pass. No production deployment, project deletion or fabricated green status occurred. Subsequent CI/status observations must remain bound to this new SHA.

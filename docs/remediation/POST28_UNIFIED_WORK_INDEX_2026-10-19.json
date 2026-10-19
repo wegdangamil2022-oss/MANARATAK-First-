@@ -94,23 +94,36 @@
     },
     {
       "id": "R07",
-      "state": "CORE_LOCAL_DIAGNOSTIC_COMPLETE_POST111",
+      "state": "CORE_LINUX_DIAGNOSTIC_COMPLETE_POST111",
       "formalAcceptance": "OPEN_RELEASE_GATES",
-      "releaseGateProgressReport": "docs/remediation/POST28_R07_RELEASE_GATES_2026-10-19.md",
-      "releaseGateEvidenceSourceSha": "8be720a65678d61eb8076f08177c5dc911c54c6d",
-      "releaseGateRunId": "39278772529",
-      "releaseGateRunObservedState": "FAILED_VERCEL_TYPECHECK_MOCK_SIGNATURE_FIXED_AND_VERIFIED_LOCALLY_NEW_CI_REQUIRED",
-      "latestCandidateCiSourceSha": "810b3a9440fa64ad13258a17bcf86ffe0b7bb2e2",
-      "latestCandidateCiRun": "39296347297",
-      "latestCandidateCiObservedState": "IN_PROGRESS_GENERIC_ENVIRONMENT_MAPPING_CORRECTED_STUDIO_JOB_REMOVED_PRIOR_UNIT_FAILURES_OPEN",
+      "releaseGateProgressReport": "docs/remediation/POST28_R07_LINUX_REVIEW_PROOF_2026-10-19.md",
+      "releaseGateEvidenceSourceSha": "1349371f29902857be7444cf89457e90a1d4b25d",
+      "releaseGateRunId": "39315368366",
+      "releaseGateRunObservedState": "PASS_ALL_SIX_JOBS_ACTUAL_LINUX_PG16_HTTPS_BROWSER_VERIFIED",
+      "latestCandidateCiSourceSha": "1349371f29902857be7444cf89457e90a1d4b25d",
+      "latestCandidateCiRun": "39315368366",
+      "latestCandidateCiObservedState": "PASS_SIX_PUSH_JOBS_EIGHT_PR_WORKFLOWS_23_CHECK_RUNS_NO_PENDING_OR_FAILURE",
+      "previousCorrectedCandidateSha": "5879c610bc0527db89a4d29ccb46934aa251864d",
+      "previousCorrectedCandidateState": "PASS_SIX_PUSH_JOBS_AND_EIGHT_PR_WORKFLOWS",
+      "prCiRun": "39315381906",
+      "importedCourseCiRun": "39315381892",
+      "externalVercelStatus": "NO_FAILURE_STATUS_AFTER_OWNER_CONFIRMED_RETIRED_PREVIEW_BRANCH_DEPLOYMENT_DISABLED",
+      "retiredVercelProject": "manaratak-2-preview-2026",
+      "codeQlReview": "docs/remediation/POST28_R07_CODEQL_REVIEW_2026-10-19.md",
+      "codeQlOriginalNewAlerts": 8,
+      "codeQlSpecificDispositions": "157_158_159_FALSE_POSITIVE_155_156_USED_IN_TESTS_CONFIRMED_BY_API",
+      "codeQlCodeRepair": "135_136_80_REDOS_REPAIRED_ACTUAL_RESULT_118281934697_PASS_NO_NEW_ALERTS",
+      "codeQlPriorRepositoryFindings": "NOT_COLLECTIVELY_REVIEWED_OR_DISMISSED",
       "googleAiStudioRuntime": "CANCELLED_BY_OWNER_2026_10_19",
       "linuxReviewTarget": "linux-x64/node22/postgresql16",
       "fourSymlinkCases": "PASS_ON_LINUX_AT_5b9c4e4502d2ea9168e223a4f2a465ef799b6662",
       "reference": "docs/remediation/POST28_R07_POST111_DIAGNOSTIC_2026-10-19.md",
       "evidenceSourceSha": "4c7b01cbac1d49688a0f32273316fc370109bcb0",
       "newArtifactOrRuntimeProofAtConsolidationSha": false,
-      "newArtifactOrRuntimeProofOnLatestUnifiedSource": true,
-      "latestEvidence": "docs/reviews/evidence/post28/4c7b01cbac1d49688a0f32273316fc370109bcb0/r07-post111-diagnostic/status.json",
+      "newArtifactOrRuntimeProofOnLatestUnifiedSource": false,
+      "lastVerifiedRuntimeSourceSha": "1349371f29902857be7444cf89457e90a1d4b25d",
+      "latestCandidateArtifactRuntimeProof": true,
+      "latestEvidence": "docs/reviews/evidence/post28/1349371f29902857be7444cf89457e90a1d4b25d/r07-linux-runtime/result.json",
       "productionAcceptance": false
     },
     {
@@ -124,7 +137,8 @@
       "latestEvidenceSourceSha": "6e42d922c79053b67107cd8722390bff1f273986",
       "latestEvidence": "docs/reviews/evidence/post28/6e42d922c79053b67107cd8722390bff1f273986/r08-shared-sessions/status.json",
       "standardRuntimeSourceSha": "be5407e6c9a63f9633019c22a79b6990ca0d3a1d",
-      "latestCandidateCiRun": "39296347297",
+      "latestCandidateCiRun": "39315368366",
+      "latestScopedRedisAndLinuxDrainState": "PASS_ON_1349371_NOT_FULL_R08_ACCEPTANCE",
       "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md",
       "laterEvidence": "docs/remediation/POST28_R06_WORKER_CRASH_2026-10-18.md",
       "canonicalAutomaticWorkerEnabledByThisBatch": false
@@ -163,8 +177,9 @@
     "browserRepeated": false
   },
   "resumeOrder": [
-    "R07_RELEASE_ENVIRONMENT_CI_AND_ARTIFACT_RECOVERY_GATES",
-    "R08_R09_ENABLED_FEATURE_PROOFS"
+    "R08_FINISH_PENDING_CONCURRENT_REFRESH_FIXTURE_AND_EFFECT_PROOFS",
+    "R07_FORMAL_RELEASE_CONFIGURATION_AND_REVIEW_GATES",
+    "R09_ENABLED_FEATURE_PROOFS"
   ],
   "mainPlan": "Prepare one reviewed pull request after consolidation stability and release configuration review; do not merge or deploy automatically."
 }

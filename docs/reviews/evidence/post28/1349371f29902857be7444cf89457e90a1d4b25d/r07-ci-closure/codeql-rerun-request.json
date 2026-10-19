@@ -1,0 +1,11 @@
+{
+  "sourceSha": "1349371f29902857be7444cf89457e90a1d4b25d",
+  "runId": 39315381870,
+  "originalJobId": 118275379884,
+  "action": "RERUN_ONLY_FAILED_CODEQL_JOB_ONCE",
+  "reason": "Complete queries exported SARIF, then the analyze step stopped during result upload without a reported query/source error. Original full logs inspected; no broad CI rerun.",
+  "requestedAt": "2026-10-19T20:06:26.648Z",
+  "httpStatus": 201,
+  "assertionsChanged": false,
+  "successfulJobsRepeated": false
+}

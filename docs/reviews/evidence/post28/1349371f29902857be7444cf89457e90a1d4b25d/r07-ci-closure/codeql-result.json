@@ -1,0 +1,20 @@
+{
+  "sourceSha": "1349371f29902857be7444cf89457e90a1d4b25d",
+  "checks": [
+    {
+      "id": 118281934697,
+      "name": "CodeQL",
+      "head_sha": "1349371f29902857be7444cf89457e90a1d4b25d",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/runs/118281934697",
+      "output": {
+        "title": "No new alerts in code changed by this pull request",
+        "summary": "[View all branch alerts](/wegdangamil2022-oss/MANARATAK-First-/security/code-scanning?query=pr%3A34+tool%3ACodeQL+is%3Aopen).",
+        "text": null,
+        "annotations_count": 0
+      }
+    }
+  ],
+  "annotations": []
+}

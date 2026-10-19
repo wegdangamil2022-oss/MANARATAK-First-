@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "kind": "POST28_R07_CI_REVIEW_EVIDENCE",
+  "sourceSha": "6f9cae73dfad7a2886bb0f4225ca49cb256e6d05",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1147,
+      "sha256": "e0cd51dec516d8b53331d2b9db313dd0548b7003584eade7a28a625150c2ecbb"
+    },
+    {
+      "path": "disposition-receipts.json",
+      "bytes": 3247,
+      "sha256": "6057adb2400c70bc3e281d5790552e46550898f71c35a3257ed3db3a53119513"
+    },
+    {
+      "path": "new-alert-check.json",
+      "bytes": 5466,
+      "sha256": "1dd6bed23ff316ead3a309f47bef4f6d32a9c0ef0347c212e28d0756f6beb7ba"
+    }
+  ]
+}

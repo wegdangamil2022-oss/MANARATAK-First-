@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "kind": "POST28_R07_ACTUAL_LINUX_DIAGNOSTIC_EVIDENCE",
+  "sourceSha": "6dfae89cf3278678a0c50a49fd9c9f4bf37e2e8a",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2200,
+      "sha256": "2d6727a46dfb06697cf0ccac3cbecf16ca3497c4eaedbc71aabc15e4919d7541"
+    },
+    {
+      "path": "SOURCE_CI_CLOSURE.json",
+      "bytes": 2559,
+      "sha256": "1a4ca9ad29b06bdaaf50e018d4d74627ddc5c806010cd89df031ab896c83163b"
+    },
+    {
+      "path": "api.txt",
+      "bytes": 15571,
+      "sha256": "191db945b7dc36aa25313943548b4e2b33516a59e34e4fa8106d34f513c69f29"
+    },
+    {
+      "path": "artifact-retrieval.txt",
+      "bytes": 1041,
+      "sha256": "684ff3ed1de8cd3fcb6884e722b2df23dd278930f46d67f566259e08c86b72b8"
+    },
+    {
+      "path": "create.txt",
+      "bytes": 872,
+      "sha256": "bf51aff7d3946b7f2b17dfa868d4609c3d59cb043007cd4507975eeecd0cda60"
+    },
+    {
+      "path": "dependency-audit.json",
+      "bytes": 366,
+      "sha256": "988ed6038f6062decdb7f76ba9894d755a1dcd3789593c63c7f9b117c6a43799"
+    },
+    {
+      "path": "gateway.txt",
+      "bytes": 136,
+      "sha256": "1889f69908f3b81846a7b3b66d801767618f9bf92fdf3714884143055b5df5af"
+    },
+    {
+      "path": "github-run.json",
+      "bytes": 13316,
+      "sha256": "3e38303fc0795849a38199cd937e0c38b0b12342ee0642f77e93f8c3a14d335f"
+    },
+    {
+      "path": "initialize.txt",
+      "bytes": 3960,
+      "sha256": "492b821d7e5ee608a000c916b1b3224f4d7261adc6fb1eb477f35caacf22e97b"
+    },
+    {
+      "path": "linux-image-probe.json",
+      "bytes": 1284,
+      "sha256": "92ad9a029705f52dd14cd6da345b76262f93ac5845698d5c535223801fea0cc4"
+    },
+    {
+      "path": "result.json",
+      "bytes": 12168,
+      "sha256": "71b73bcc21ecb11a001920fd8a3e5bb489b53aad345c56dbea74146405b6b938"
+    },
+    {
+      "path": "runtime-install.txt",
+      "bytes": 611,
+      "sha256": "25cfa367655418d91afaec0797b246619220425ff77edaa8c1f35eb2518f0d6e"
+    },
+    {
+      "path": "runtime-layer.json",
+      "bytes": 1910,
+      "sha256": "f0ea29b524b84c755626769e9e6c0d76ab3e61ebc73cafd4002378969cb65fff"
+    },
+    {
+      "path": "student-dashboard.png",
+      "bytes": 151241,
+      "sha256": "6f8bc89de284de8234d2f5b5f4b282e0e2441fe3834cb7c6aee847bb552b8d82"
+    }
+  ]
+}
