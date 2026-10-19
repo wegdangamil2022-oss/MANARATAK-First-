@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "kind": "POST28_R08_SHARED_SESSION_AND_STUDIO_RETIREMENT_EVIDENCE",
+  "sourceSha": "6e42d922c79053b67107cd8722390bff1f273986",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "checks.json",
+      "bytes": 1678,
+      "sha256": "b6801dc8bd20a0235e126f7774f5f70424c945f1d73fd5d31d04136f69804258"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 160,
+      "sha256": "35b2dce5c6d60cb1e8987515b5a3ed0710b5efee847fa094d50d00cfd52f0374"
+    },
+    {
+      "path": "discovery.json",
+      "bytes": 1332,
+      "sha256": "def1dc401d955e10fed2aca9a672dc1070acec7efaf3844cb4cd88226161e9e4"
+    },
+    {
+      "path": "identity.json",
+      "bytes": 258,
+      "sha256": "3da8b5d606c3eabf6d4025e6a1bbda5c2dfc593f4ce76d32db560b2d1c6ce348"
+    },
+    {
+      "path": "selection.json",
+      "bytes": 106,
+      "sha256": "fe3f92ec7f436d720a08e61934e2b6e94365fae5152a8b18482d63be57d6fe19"
+    },
+    {
+      "path": "setup.json",
+      "bytes": 4932,
+      "sha256": "1a02a853aea646871869f3afa0927f6346c7159723fa48089a544b2dc4d36fbd"
+    },
+    {
+      "path": "status.json",
+      "bytes": 1816,
+      "sha256": "5d6310f44b3ff75be6055dbec6347abd0eb2cad7d8c61d67b05ae1e9ef21671c"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 1227,
+      "sha256": "fe8a729061b019958dd4bf9df73160c11e4387ccc32eb9871d9746c49970a9c2"
+    },
+    {
+      "path": "vitest.json",
+      "bytes": 2447,
+      "sha256": "ed0269628f2ab0b8f2ca35af5450e629fbb7f4ab246db55c7dc899e5f761ac70"
+    },
+    {
+      "path": "web-admin-http-smoke.json",
+      "bytes": 545,
+      "sha256": "0437042383b5f8ba08f18520509a04c00710e0a37ffe2a1cd739947f42990265"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "publishedSourceSha": "be5407e6c9a63f9633019c22a79b6990ca0d3a1d",
+  "sessionAndRetirementSourceSha": "6e42d922c79053b67107cd8722390bff1f273986",
+  "browserAfterRecordedHeadSha": "6e42d922c79053b67107cd8722390bff1f273986",
+  "browserAfterWorkingTreeDirty": true,
+  "explanation": "Browser after-run used nonce/HMR source before its commit; those exact runtime files were committed in 761e345 and remain unchanged in this source. be5407 only fixes test typing. The original browser JSON retains its base HEAD instead of being relabeled.",
+  "runtimeFiles": [
+    {
+      "path": "apps/frontend-security/ViteFrontendSecurityHeaders.ts",
+      "gitBlobSha256": "9e69c16edfa96f7e8ae6fc7113fbb9b541d53b4259549d7d9268f0a1f1a5fd88"
+    },
+    {
+      "path": "apps/web/vite.config.ts",
+      "gitBlobSha256": "d14b66928619e8eb4fd6b989bf2d74dc355fce6a7a5a94a50cce677f1623138a"
+    },
+    {
+      "path": "apps/admin/vite.config.ts",
+      "gitBlobSha256": "16655a96c7bb4c9479255ba75b0e94c3a01352859cf48bdc1353f86ae94aa071"
+    }
+  ]
+}

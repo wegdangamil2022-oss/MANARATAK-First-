@@ -1,0 +1,49 @@
+{
+  "sourceSha": "6e42d922c79053b67107cd8722390bff1f273986",
+  "state": "FOUR_REAL_HTTP_SHARED_SESSION_CASES_VERIFIED_LOCAL_ONLY",
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "realHttpProcesses": 2,
+  "network": "loopback HTTP, not TLS or a browser",
+  "components": [
+    "AuthRouter",
+    "AuthService",
+    "PrismaCredentialVerifier",
+    "PasswordHasher",
+    "JwtTokenProvider",
+    "PrismaSessionManager",
+    "PrismaIdentityRepository",
+    "IdentityPrincipalAccessValidator",
+    "AuthMiddleware",
+    "SecurityMiddlewareFactory"
+  ],
+  "cases": [
+    "Login A -> protected route B -> refresh B -> old access rejected A -> new access allowed A -> logout A -> access rejected B",
+    "Parent refresh replay on another process revokes rotated descendant family",
+    "Identity suspension observed across processes and stale CSRF bootstrap denied",
+    "Missing CSRF and foreign origin rejected without session mutation"
+  ],
+  "newDatabaseCases": 4,
+  "passed": 4,
+  "failed": 0,
+  "skipped": 0,
+  "credentials": {
+    "fixtureOnlyAdditionalTable": "CredentialRecord",
+    "appRole": "post28_app",
+    "DDLGranted": false,
+    "ledgerGranted": false,
+    "keys": "Synthetic ephemeral material passed through IPC only, not files/argv/artifacts",
+    "refreshStorage": "Hash only, asserted 64-character hex"
+  },
+  "notClaimed": [
+    "Whole built API/Web/Admin deployed together",
+    "Redis-backed limiter combined with these API processes",
+    "TLS/browser cookie behavior",
+    "Concurrent refresh race exhaustive coverage",
+    "Provider reconciliation and full financial invariants"
+  ],
+  "earlierRedisLinuxEvidence": "26fe899a033ab93eb3a44b39df1c10d9600bcd87",
+  "R05": "UNCHANGED",
+  "R06": "UNCHANGED",
+  "R07": "OPEN_11_PREVIOUS_UNIT_FAILURES_NOT_REMOVED_BY_STUDIO_RETIREMENT"
+}

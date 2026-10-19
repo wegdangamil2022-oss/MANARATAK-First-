@@ -1,0 +1,18 @@
+[
+  {
+    "name": "R08 two real HTTP auth processes with persistent shared sessions > logs in on A, rotates on B and revokes the shared session on logout from A",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-r08-session-processes.database.spec.mjs"
+  },
+  {
+    "name": "R08 two real HTTP auth processes with persistent shared sessions > replayed parent on another process revokes its already rotated descendant",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-r08-session-processes.database.spec.mjs"
+  },
+  {
+    "name": "R08 two real HTTP auth processes with persistent shared sessions > suspension is observed across processes and stale CSRF bootstrap cannot restore access",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-r08-session-processes.database.spec.mjs"
+  },
+  {
+    "name": "R08 two real HTTP auth processes with persistent shared sessions > rejects missing CSRF and foreign origin without rotating or revoking a valid session",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-r08-session-processes.database.spec.mjs"
+  }
+]

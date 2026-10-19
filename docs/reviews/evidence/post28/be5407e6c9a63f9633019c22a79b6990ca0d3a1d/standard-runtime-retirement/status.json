@@ -1,0 +1,21 @@
+{
+  "sourceSha": "be5407e6c9a63f9633019c22a79b6990ca0d3a1d",
+  "state": "STUDIO_RUNTIME_REMOVED_STANDARD_DEV_BOOT_AND_STYLES_VERIFIED",
+  "productionAcceptance": false,
+  "fullR07Acceptance": false,
+  "fullR08Acceptance": false,
+  "retirement": [
+    "No Studio CI job or npm script",
+    "No Studio environment profile or launcher",
+    "No iframe CSP/cookie bypass",
+    "Generic environment inventory retained",
+    "Local development nonce for Vite resources only"
+  ],
+  "sharedSessionEvidence": "docs/reviews/evidence/post28/6e42d922c79053b67107cd8722390bff1f273986/r08-shared-sessions",
+  "remaining": [
+    "Built API/Web/Admin combined with Redis/TLS on target host",
+    "Concurrent refresh/unknown outcome coverage",
+    "Provider signed webhook/reconciliation chains",
+    "Eleven earlier R07 unit failures independent of Studio and current full CI result"
+  ]
+}

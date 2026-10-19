@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "kind": "POST28_STANDARD_RUNTIME_BROWSER_EVIDENCE",
+  "sourceSha": "be5407e6c9a63f9633019c22a79b6990ca0d3a1d",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "browser-after.json",
+      "bytes": 1845,
+      "sha256": "9df394f40328068f6a78c8e8e3dab529766750be06fda8a9ef21ca888d5094da"
+    },
+    {
+      "path": "browser-before.json",
+      "bytes": 2190,
+      "sha256": "a3b33f71e32e1f5e7de6950b74162fbc1023211db519685044373dd50093231f"
+    },
+    {
+      "path": "checks.json",
+      "bytes": 1839,
+      "sha256": "08a46d3483ca392f902c9492c6eacaef1cf4cd1fcb6281c7ed63534f32babe81"
+    },
+    {
+      "path": "ci-inventory-followup.json",
+      "bytes": 589,
+      "sha256": "b1c35512d21fb5968cc6ebc7668db9230db9f94e85561cc3cb13e0a3055f9087"
+    },
+    {
+      "path": "execution-binding.json",
+      "bytes": 1030,
+      "sha256": "4f8fcd9c203392b5b7f47fd97942017dce94b96872402d5c029f92b6b4ca578a"
+    },
+    {
+      "path": "status.json",
+      "bytes": 875,
+      "sha256": "66fd59bf564b0381f43a90d7fd361469869450bfda150a2f6876ad8534525920"
+    }
+  ]
+}

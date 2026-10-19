@@ -1,0 +1,36 @@
+{
+  "sourceSha": "6e42d922c79053b67107cd8722390bff1f273986",
+  "observeOnly": false,
+  "browser": "Edge headless isolated context",
+  "backendRequestsIntercepted": true,
+  "externalRequestsBlocked": true,
+  "results": [
+    {
+      "app": "web",
+      "rootRendered": true,
+      "violations": [],
+      "noncePresent": true,
+      "inlineModuleCount": 0,
+      "pageErrors": [],
+      "csp": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'nonce-c/AlE2DqQUivexvJN3f4qLz5py5nc0JI'; script-src-attr 'none'; style-src 'self' 'nonce-c/AlE2DqQUivexvJN3f4qLz5py5nc0JI'; style-src-elem 'self' 'nonce-c/AlE2DqQUivexvJN3f4qLz5py5nc0JI'; style-src-attr 'none'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https: wss: ws:; media-src 'self' blob: https:; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'",
+      "htmlScriptCount": 2
+    },
+    {
+      "app": "admin",
+      "rootRendered": true,
+      "violations": [
+        {
+          "directive": "script-src",
+          "blocked": "eval",
+          "source": "http://127.0.0.1:55243/admin/node_modules/.vite/deps/zod.js",
+          "line": 816
+        }
+      ],
+      "noncePresent": true,
+      "inlineModuleCount": 0,
+      "pageErrors": [],
+      "csp": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'nonce-2kY9UUswc1wysGAm/KjSo/tuVfxG96wk'; script-src-attr 'none'; style-src 'self' 'nonce-2kY9UUswc1wysGAm/KjSo/tuVfxG96wk'; style-src-elem 'self' 'nonce-2kY9UUswc1wysGAm/KjSo/tuVfxG96wk'; style-src-attr 'none'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https: wss: ws:; media-src 'self' blob: https:; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'",
+      "htmlScriptCount": 2
+    }
+  ]
+}
