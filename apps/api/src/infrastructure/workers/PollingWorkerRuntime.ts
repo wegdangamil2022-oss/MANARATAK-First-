@@ -8,7 +8,7 @@ export interface PollingWorkerHandle {
 
 let activeWorkerHandle: PollingWorkerHandle | null = null;
 
-async function requireSuccessfulDelivery(result: Promise<unknown>): Promise<unknown> {
+async function requireSuccessfulDelivery<T>(result: Promise<T>): Promise<T> {
   const value = await result;
   if (value && typeof value === 'object') {
     if ('exhausted' in value && typeof value.exhausted === 'number' && value.exhausted > 0) throw new Error('OUTBOX_DELIVERY_EXHAUSTED');
