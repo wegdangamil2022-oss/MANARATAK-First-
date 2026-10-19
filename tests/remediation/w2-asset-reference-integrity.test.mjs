@@ -112,6 +112,7 @@ test('MNT-AUD-0050 purge rejects in-use asset before storage deletion', async ()
     'packages/application/src/asset-platform/use-cases/ProcessAssetLifecycleUseCase.ts',
     {
       '@manaratak/domain': { ...domainMock() },
+      'node:crypto': require('node:crypto'),
       '../mappers/AssetRecordMapper': { AssetRecordMapper: { toDto: (v) => v } },
       '../dtos/AssetDtos': {},
     },
