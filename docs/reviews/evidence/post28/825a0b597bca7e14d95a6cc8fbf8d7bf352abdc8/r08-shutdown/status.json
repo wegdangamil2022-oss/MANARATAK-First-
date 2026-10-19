@@ -1,0 +1,23 @@
+{
+  "sourceSha": "825a0b597bca7e14d95a6cc8fbf8d7bf352abdc8",
+  "state": "POLLING_STOP_AND_ABSOLUTE_SHUTDOWN_BUDGET_FIXED_LOCAL_PROOFS",
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "scope": [
+    "No later polling step starts after stop",
+    "Queued initial task observes stop before invoking worker",
+    "Existing in-flight task drains and registry becomes STOPPED",
+    "Hung flush cannot exceed the absolute process shutdown budget"
+  ],
+  "remaining": [
+    "Actual Linux SIGTERM results",
+    "Full built API resource/DB/Redis drain and overrun outcomes",
+    "Redis namespace, outage, distributed sessions/rate limit and health freshness",
+    "Provider stubs, reorder and canonical owner chains"
+  ],
+  "safety": "At deadline exit code is 1 and in-flight business outcomes remain uncertain; no success receipt is fabricated. Previously proved durable receipts remain recovery prerequisites.",
+  "earlierOutboxEvidenceSourceSha": "770d787c172d1ce826c7bb15ddeecb90ecc957d5",
+  "R05": "UNCHANGED",
+  "R06": "UNCHANGED",
+  "R07": "FORMAL_GATES_OPEN"
+}

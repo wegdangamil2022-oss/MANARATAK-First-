@@ -1,0 +1,40 @@
+{
+  "sourceSha": "825a0b597bca7e14d95a6cc8fbf8d7bf352abdc8",
+  "files": [
+    {
+      "path": "apps/api/src/server.ts",
+      "workingCopySha256": "db7a90f5cf26eb1c74f4a1da7f580dff8b1e09c98f7fdae6b808f717ef11b2e1",
+      "gitBlobSha256": "db7a90f5cf26eb1c74f4a1da7f580dff8b1e09c98f7fdae6b808f717ef11b2e1"
+    },
+    {
+      "path": "apps/api/src/infrastructure/workers/PollingWorkerRuntime.ts",
+      "workingCopySha256": "b4566bcf608c9f65ad7755f045354840b95fbdacc06e6b797b57d14058330b84",
+      "gitBlobSha256": "b4566bcf608c9f65ad7755f045354840b95fbdacc06e6b797b57d14058330b84"
+    },
+    {
+      "path": "apps/api/tests/infrastructure/workers/PollingWorkerRuntime.spec.ts",
+      "workingCopySha256": "08e7058caa9466f0939c8f960e32f5b6ae6aa41c03f59b86ed93f9c4218f4293",
+      "gitBlobSha256": "08e7058caa9466f0939c8f960e32f5b6ae6aa41c03f59b86ed93f9c4218f4293"
+    },
+    {
+      "path": "tests/runtime/runtime-shutdown-drain-runtime.test.mjs",
+      "workingCopySha256": "411820bb51fdecf3888ce111399a03b63a1ad544cc2a4a4ce40b65e8864b8dd2",
+      "gitBlobSha256": "411820bb51fdecf3888ce111399a03b63a1ad544cc2a4a4ce40b65e8864b8dd2"
+    },
+    {
+      "path": "tests/runtime/post28-r08-process-drain.test.mjs",
+      "workingCopySha256": "6b00477d4af9d782d8a1dc8c3c29e3a3003d4ee3e9718665d91cdce17be86515",
+      "gitBlobSha256": "6b00477d4af9d782d8a1dc8c3c29e3a3003d4ee3e9718665d91cdce17be86515"
+    },
+    {
+      "path": "tests/runtime/fixtures/post28-r08-drain-child.mjs",
+      "workingCopySha256": "3844c8169cff1a51d97abb26ebd0c90eb0ff3b7ffca82a6b3ccf4c7a2b1e29f8",
+      "gitBlobSha256": "3844c8169cff1a51d97abb26ebd0c90eb0ff3b7ffca82a6b3ccf4c7a2b1e29f8"
+    },
+    {
+      "path": "tests/runtime/fixtures/post28-r08-deadline-child.mjs",
+      "workingCopySha256": "96e6cc327d249721ef9fd5f55b5570d588f21740712dd78884fdfaba3140c87d",
+      "gitBlobSha256": "96e6cc327d249721ef9fd5f55b5570d588f21740712dd78884fdfaba3140c87d"
+    }
+  ]
+}

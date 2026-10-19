@@ -111,11 +111,13 @@
     },
     {
       "id": "R08",
-      "state": "SCOPED_OUTBOX_PROCESS_CHAIN_VERIFIED_FULL_SCOPE_OPEN",
+      "state": "SCOPED_OUTBOX_CHAIN_AND_SHUTDOWN_FIXES_VERIFIED_FULL_SCOPE_OPEN",
       "formalAcceptance": "OPEN_FULL_WORKER_SECURITY_PROVIDER_SCOPE",
-      "latestRuntimeReport": "docs/remediation/POST28_R08_OUTBOX_PROCESS_CHAIN_2026-10-19.md",
-      "latestEvidenceSourceSha": "770d787c172d1ce826c7bb15ddeecb90ecc957d5",
-      "latestEvidence": "docs/reviews/evidence/post28/770d787c172d1ce826c7bb15ddeecb90ecc957d5/r08-outbox-chain/status.json",
+      "outboxChainReport": "docs/remediation/POST28_R08_OUTBOX_PROCESS_CHAIN_2026-10-19.md",
+      "latestRuntimeReport": "docs/remediation/POST28_R08_SHUTDOWN_2026-10-19.md",
+      "latestEvidenceSourceSha": "825a0b597bca7e14d95a6cc8fbf8d7bf352abdc8",
+      "latestEvidence": "docs/reviews/evidence/post28/825a0b597bca7e14d95a6cc8fbf8d7bf352abdc8/r08-shutdown/status.json",
+      "latestCandidateCiRun": "39285187356",
       "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md",
       "laterEvidence": "docs/remediation/POST28_R06_WORKER_CRASH_2026-10-18.md",
       "canonicalAutomaticWorkerEnabledByThisBatch": false
