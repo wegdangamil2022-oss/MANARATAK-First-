@@ -7,6 +7,11 @@ import {PrismaAssetRecordRepository} from '../../packages/infrastructure/src/ass
 
 const packet={source:{createdAt:new Date(Date.now()-86400000).toISOString()}};
 const decision=fixedKnownSourceDecision(packet);
+test('snapshot digest survives JSONB object-key reordering without hiding changed array order or values',()=>{
+ assert.equal(snapshotDigest({b:{z:1,a:2},a:[{d:4,c:3}]}),snapshotDigest({a:[{c:3,d:4}],b:{a:2,z:1}}));
+ assert.notEqual(snapshotDigest({a:[1,2]}),snapshotDigest({a:[2,1]}));
+ assert.notEqual(snapshotDigest({a:1}),snapshotDigest({a:'1'}));
+});
 function asset(){return new AssetRecord({id:new AssetId(randomUUID()),reference:new AssetReference('SYNTHETIC-R05'),locator:new AssetStorageLocator('QUARANTINE','synthetic','uploads/example.pdf'),owner:new AssetOwnerReference('synthetic-student','STUDENT'),metadata:new AssetMetadata('new.pdf','application/pdf','pdf',636),retention:new AssetRetentionMetadata('TEMPORARY',new Date(decision.expiresAt)),classification:'CONFIDENTIAL',state:'INITIATED'});}
 test('expiry is anchored to source creation, bounded by an earlier document deadline, and unchanged on retry',()=>{
  assert.equal(Date.parse(decision.expiresAt)-Date.parse(packet.source.createdAt),180*86400000);

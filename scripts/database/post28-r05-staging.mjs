@@ -12,7 +12,9 @@ import {
 import {AuditSecretSanitizer} from '../../packages/infrastructure/src/audit/AuditSecretSanitizer.ts';
 
 const clone=value=>JSON.parse(JSON.stringify(value));
-export const snapshotDigest=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+// PostgreSQL JSONB reorders object keys. Hash semantic JSON, never insertion order.
+const ordered=value=>Array.isArray(value)?value.map(ordered):value!==null&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,ordered(value[key])])):value;
+export const snapshotDigest=value=>createHash('sha256').update(JSON.stringify(ordered(clone(value)))).digest('hex');
 const fail=code=>{throw Error('POST28_R05_'+code);};
 function locator(value){
  const match=/^(quarantine|clean):\/\/([^/]+)\/(.+)$/.exec(value??'');
