@@ -45,13 +45,17 @@ try{
     const scope={environment:'test',apiOrigin:'https://api.example.invalid',revision:config.sourceSha,namespace:config.namespace+'a:'};
     const a=new WorkerHealthObservation(client,scope),b=new WorkerHealthObservation(client,{...scope,namespace:config.namespace+'b:'}),otherRevision=new WorkerHealthObservation(client,{...scope,revision:'different'});
     await a.publish('background-jobs',{state:'IDLE',lastPollAt:new Date().toISOString()});assert.equal((await a.read('background-jobs')).state,'IDLE');assert.equal((await b.read('background-jobs')).state,'NOT_STARTED');assert.equal((await otherRevision.read('background-jobs')).state,'NOT_STARTED');
+    const healthKey=scope.namespace+'health:workers:v2:'+createHash('sha256').update(JSON.stringify({environment:scope.environment,apiOrigin:scope.apiOrigin,revision:scope.revision})).digest('hex')+':background-jobs';
+    const healthTtl=await client.pTTL(healthKey);assert(healthTtl>0&&healthTtl<=3600000);
+    await a.publish('background-jobs',{state:'DEGRADED',lastFailureAt:new Date().toISOString()});assert.equal((await a.read('background-jobs')).state,'DEGRADED');assert.equal(freshWorkerEvidence(await a.read('background-jobs'),15000),false);
+    await a.publish('background-jobs',{state:'STOPPED',lastStoppedAt:new Date().toISOString()});assert.equal((await a.read('background-jobs')).state,'STOPPED');assert.equal(freshWorkerEvidence(await a.read('background-jobs'),15000),false);
     const now=Date.now();await a.publish('stale',{state:'RUNNING',lastSuccessAt:new Date(now-16000).toISOString()});assert.equal(freshWorkerEvidence(await a.read('stale'),15000,now),false);
     const stopped=once(process,'message');process.send({point:'STOP_REDIS'});const [message]=await stopped;assert.equal(message,'REDIS_STOPPED');
     const outage=Promise.race([a.read('background-jobs'),new Promise((_,reject)=>{timeout=setTimeout(()=>reject(Error('R08_OUTAGE_DID_NOT_SETTLE')),8000);})]);
     await assert.rejects(outage,error=>error.message!=='R08_OUTAGE_DID_NOT_SETTLE');
     clearTimeout(timeout);
     await assert.rejects(verifier.verify({...sign(),rawBody:Buffer.from(rawBody)}));
-    process.send({point:'RESULT',result:{sourceSha:config.sourceSha,independentCounterProcesses:2,requests:24,allowed:10,namespaceIsolation:true,revisionIsolation:true,staleRejected:true,restrictedAcl:true,redisOutageRejected:true,signedWebhook:{independentProcesses:2,accepted:1,replayed:1,tamperedRejected:true,invalidDoesNotConsumeNonce:true,staleRejected:true,outageRejected:true,financialMutationClaimed:false},fullApiSessionsVerified:false}});
+    process.send({point:'RESULT',result:{sourceSha:config.sourceSha,independentCounterProcesses:2,requests:24,allowed:10,namespaceIsolation:true,revisionIsolation:true,staleRejected:true,failedWorkerObserved:true,stoppedWorkerObserved:true,healthTtlBounded:true,restrictedAcl:true,redisOutageRejected:true,signedWebhook:{independentProcesses:2,accepted:1,replayed:1,tamperedRejected:true,invalidDoesNotConsumeNonce:true,staleRejected:true,outageRejected:true,financialMutationClaimed:false},fullApiSessionsVerified:false}});
   }
 }catch(error){
   const message=String(error?.message??'R08_REDIS_PROBE_FAILED').replaceAll(url.password,'[REDACTED]').replace(/rediss?:\/\/[^\s'"<>]+/g,'[REDACTED_REDIS_URL]').slice(0,1600);
