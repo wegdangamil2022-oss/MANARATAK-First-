@@ -99,7 +99,7 @@
       "releaseGateProgressReport": "docs/remediation/POST28_R07_RELEASE_GATES_2026-10-19.md",
       "releaseGateEvidenceSourceSha": "8be720a65678d61eb8076f08177c5dc911c54c6d",
       "releaseGateRunId": "39278772529",
-      "releaseGateRunObservedState": "QUEUED_NO_RUNNER_ASSIGNED",
+      "releaseGateRunObservedState": "FAILED_VERCEL_TYPECHECK_MOCK_SIGNATURE_FIXED_AND_VERIFIED_LOCALLY_NEW_CI_REQUIRED",
       "linuxReviewTarget": "linux-x64/node22/postgresql16",
       "fourSymlinkCases": "PASS_ON_LINUX_AT_5b9c4e4502d2ea9168e223a4f2a465ef799b6662",
       "reference": "docs/remediation/POST28_R07_POST111_DIAGNOSTIC_2026-10-19.md",
