@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import {
   IAssetRecordRepository,
   IAssetStorageGateway,
@@ -144,6 +145,8 @@ export class IngestAssetUseCase {
         source: 'Phase14',
         kind: input.kind,
         renderFingerprint: input.renderFingerprint,
+        sourceSha256: createHash('sha256').update(input.bytes).digest('hex'),
+        sourceByteSize: input.bytes.byteLength,
       },
       ...(input.kind === 'QR'
         ? {
@@ -183,6 +186,12 @@ export class IngestAssetUseCase {
       record.classification !== input.classification
     )
       throw new Error('CERTIFICATE_UPLOAD_RESUME_INVALID');
+    const provenance = record.metadata.extraMetadata?.certificateGenerated as Record<string, unknown> | undefined;
+    if (provenance?.source !== 'Phase14' || provenance.kind !== input.kind ||
+        provenance.renderFingerprint !== input.renderFingerprint ||
+        provenance.sourceByteSize !== input.bytes.byteLength ||
+        provenance.sourceSha256 !== createHash('sha256').update(input.bytes).digest('hex'))
+      throw new Error('CERTIFICATE_ARTIFACT_SOURCE_MISMATCH');
     if (!this.storageGateway.refreshUploadGrant)
       throw new Error('EAP_GENERATED_ARTIFACT_UPLOAD_REFRESH_REQUIRED');
     const grant = await this.storageGateway.refreshUploadGrant(record.locator, {
