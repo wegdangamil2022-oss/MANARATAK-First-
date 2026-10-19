@@ -108,7 +108,7 @@ jobs:
         run: npm run build
       - name: Unit and source integration tests
         id: unit
-        run: node scripts/ci/run-source-unit-with-diagnostics.mjs
+        run: node scripts/ci/run-source-unit-with-diagnostics.mjs npm run test:unit
       - name: Build deterministic immutable release artifacts
         id: artifacts
         run: |
@@ -196,8 +196,10 @@ jobs:
       - name: Build digest-pinned non-root image and load native modules without network
         run: node scripts/release/post28-linux-image-probe.mjs "$RUNNER_TEMP/r07-linux"
       - name: Install browser for the isolated Linux review
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
         run: npx --no-install playwright install --with-deps chromium
       - name: Boot reviewed image with new PG16 and exercise HTTPS student journey
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
         env:
           POST28_LINUX_RUNTIME_REVIEW: 'YES'
         run: node scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r07-linux"

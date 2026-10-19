@@ -3,7 +3,9 @@
 import {spawn} from 'node:child_process';
 import {stripVTControlCharacters} from 'node:util';
 import {npmInvocation} from '../release/lib/DiagnosticProcess.mjs';
-const command=npmInvocation(['run','test:unit']);
+const args=process.argv.slice(2);
+if(JSON.stringify(args)!==JSON.stringify(['npm','run','test:unit']))throw Error('CANONICAL_SOURCE_UNIT_COMMAND_REQUIRED');
+const command=npmInvocation(args.slice(1));
 const child=spawn(command.command,command.args,{stdio:['ignore','pipe','pipe'],env:process.env,windowsHide:true});
 let log='';
 for(const [stream,output]of [[child.stdout,process.stdout],[child.stderr,process.stderr]])stream.on('data',chunk=>{output.write(chunk);log+=chunk.toString();if(log.length>2_000_000)log=log.slice(-2_000_000);});

@@ -10,7 +10,9 @@ if (process.platform !== 'linux' || process.arch !== 'x64') throw new Error('LIN
 const manifest = verifyReleaseManifest(path.join(run, 'artifacts'), process.env.GITHUB_SHA);
 const context = path.join(run, 'image-context');
 fs.mkdirSync(context);
-fs.cpSync(path.join(run, 'api-runtime'), path.join(context, 'api-runtime'), { recursive: true });
+// The tar round-trip already dereferenced only validated in-layer links.
+// Copy that fresh unpack so workspace symlinks cannot retain host-absolute paths.
+fs.cpSync(path.join(run, 'api-boot-root'), path.join(context, 'api-runtime'), { recursive: true });
 if (fs.existsSync(path.join(context, 'api-runtime/storage')) || fs.existsSync(path.join(context, 'api-runtime/.env')))
   throw new Error('LINUX_IMAGE_MUTABLE_STATE_REJECTED');
 fs.mkdirSync(path.join(context, 'release-tools'));
