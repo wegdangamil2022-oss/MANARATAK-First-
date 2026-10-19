@@ -10,7 +10,7 @@ async function fixture(){
   await db.roleRecord.upsert({where:{id:'student'},update:{},create:{id:'student',name:'Synthetic student',description:'Isolated fixture',permissions:[],policyIds:[]}});
   await db.roleAssignmentRecord.create({data:{id:assignment,identityId:identity,roleId:'student'}});
   await db.transactionalOutboxRecord.create({data:{id:event,eventType:'RoleAssignmentCreated',domain:'AUTHORIZATION',aggregateType:'ROLE_ASSIGNMENT',aggregateId:assignment,payload:{assignmentId:assignment,identityId:identity,roleId:'student'},metadata:{schemaVersion:'1.0.0'},availableAt:new Date(Date.now()-1000)}});
-  return {identity,event};
+  return {identity,event,assignment};
 }
 function worker(c,mode='NORMAL'){
   const child=spawn(process.execPath,['--import','tsx','tests/database/fixtures/post28-r08-outbox-worker.mjs',c.event,mode],{env:{...process.env},windowsHide:true,stdio:['ignore','pipe','pipe','ipc']});
@@ -37,5 +37,23 @@ describe('R08 actual outbox processes to student inbox',()=>{
   });
   it('retries a failed delivery then parks exhausted work without projecting an effect',async()=>{
     const c=await fixture();expect(await worker(c,'FAIL').finish()).toMatchObject({failed:1,exhausted:0});let row=(await facts(c)).outbox;expect(row.attempts).toBe(1);await new Promise(resolve=>setTimeout(resolve,Math.max(0,row.availableAt.getTime()-Date.now()+25)));expect(await worker(c,'FAIL').finish()).toMatchObject({failed:1,exhausted:1});const f=await facts(c);expect(f.outbox.attempts).toBe(2);expect(f.outbox.availableAt.getUTCFullYear()).toBe(9999);expect(f.inbox).toHaveLength(0);expect(f.workspace).toBeNull();expect((await worker(c).finish()).claimed).toBe(0);
+  });
+  it('a delayed role-created event projects current suspension instead of reviving the student',async()=>{
+    const c=await fixture();
+    await db.identityRecord.update({where:{id:c.identity},data:{status:'SUSPENDED'}});
+    expect((await worker(c).finish()).processed).toBe(1);
+    const f=await facts(c);expect(f.outbox.state).toBe('PROCESSED');expect(f.workspace.status).toBe('SUSPENDED');
+    expect(f.inbox.length).toBeGreaterThan(0);expect(f.audits.length).toBeGreaterThan(0);
+  });
+  it('late activation cannot undo the current role revocation projected by another worker',async()=>{
+    const c=await fixture();expect((await worker(c).finish()).processed).toBe(1);
+    await db.roleAssignmentRecord.delete({where:{id:c.assignment}});
+    const revoked={...c,event:fresh()},late={...c,event:fresh()};
+    await db.transactionalOutboxRecord.create({data:{id:revoked.event,domain:'AUTHORIZATION',eventType:'RoleAssignmentRevoked',aggregateType:'ROLE_ASSIGNMENT',aggregateId:c.assignment,payload:{identityId:c.identity,assignmentId:c.assignment,roleId:'student'},metadata:{schemaVersion:'1.0.0'}}});
+    expect((await worker(revoked).finish()).processed).toBe(1);
+    const before=await facts(revoked);expect(before.workspace.status).toBe('SUSPENDED');
+    await db.transactionalOutboxRecord.create({data:{id:late.event,domain:'IDENTITY',eventType:'IdentityStatusChanged.v1',aggregateType:'IDENTITY',aggregateId:c.identity,payload:{identityId:c.identity,newStatus:'ACTIVE'},metadata:{schemaVersion:'1.0.0'}}});
+    expect((await worker(late).finish()).processed).toBe(1);
+    const after=await facts(late);expect(after.workspace).toEqual(before.workspace);expect(after.inbox).toEqual(before.inbox);expect(after.audits).toEqual(before.audits);
   });
 });

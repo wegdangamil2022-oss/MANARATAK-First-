@@ -16,6 +16,9 @@ try{
   const role=(await db.$queryRaw`SELECT current_user AS role`)[0].role;
   if(role!=='post28_app')throw Error('POST28_APP_ROLE_REQUIRED');
   const store=new PrismaTransactionalOutboxStore(db);
+  const source=await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:eventId}});
+  if(!((source.domain==='AUTHORIZATION'&&['RoleAssignmentCreated','RoleAssignmentRevoked'].includes(source.eventType))||
+       (source.domain==='IDENTITY'&&source.eventType==='IdentityStatusChanged.v1')))throw Error('POST28_WORKER_EVENT_NOT_ALLOWED');
   const gateway=new StudentWorkspaceOutboxDeliveryGateway(new StudentWorkspaceUseCases(new PrismaStudentWorkspaceRepository(db)),new PrismaRoleAssignmentRepository(db),new PrismaIdentityRepository(db));
   const delivery={deliver:async(entry,context)=>{
     if(entry.id!==eventId)throw Error('POST28_UNEXPECTED_SYNTHETIC_EVENT');
@@ -24,6 +27,6 @@ try{
     await gateway.deliver(entry,context);
     if(mode==='AFTER_EFFECT')await pause('AFTER_EFFECT');
   }};
-  const result=await new TransactionalOutboxDispatcher(store,delivery).dispatchBatch({workerId:'post28-r08-'+process.pid,batchSize:1,claimDurationMs:3000,maxAttempts:2,baseBackoffMs:100,maxBackoffMs:100,domain:'AUTHORIZATION',eventTypes:['RoleAssignmentCreated']});
+  const result=await new TransactionalOutboxDispatcher(store,delivery).dispatchBatch({workerId:'post28-r08-'+process.pid,batchSize:1,claimDurationMs:3000,maxAttempts:2,baseBackoffMs:100,maxBackoffMs:100,domain:source.domain,eventTypes:[source.eventType]});
   process.send?.({point:'RESULT',result});
 }finally{await db.$disconnect();process.disconnect?.();}
