@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'service-public-facets': {files:['tests/database/post28-service-public-facets.database.spec.mjs'],minimumCases:1},
   'course-link-concurrency': {files:['tests/database/post28-course-link-concurrency.database.spec.mjs'],minimumCases:9},
   'learning-path-http': {files:['tests/database/post28-learning-path-http.database.spec.mjs'],minimumCases:5},
   'learning-path-completion': {files:['tests/database/post28-learning-path-completion.database.spec.mjs'],minimumCases:6},
