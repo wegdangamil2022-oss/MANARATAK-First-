@@ -23,10 +23,10 @@ try{
   const port=Number(bindings[0].HostPort);assert.ok(port>0&&port<65536);receipt.redisImageDigest=digest;
   const child=spawn(process.execPath,['--import','tsx','tests/runtime/fixtures/post28-r08-redis-probe.mjs'],{stdio:['pipe','pipe','pipe','ipc']});child.stdout.resume();child.stderr.resume();
   let result,timer;const done=new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',code=>resolve(code));});
-  child.on('message',message=>{if(message.point==='STOP_REDIS'){try{owned();docker(['stop','-t','2',containerId]);child.send('REDIS_STOPPED');}catch{child.kill('SIGKILL');}}if(message.point==='RESULT')result=message.result;});
+  child.on('message',message=>{if(message.point==='STOP_REDIS'){try{owned();docker(['stop','-t','2',containerId]);child.send('REDIS_STOPPED');}catch{child.kill('SIGKILL');}}if(message.point==='RESULT')result=message.result;if(message.point==='ERROR')receipt.probeError=message.message;});
   child.stdin.end(JSON.stringify({url:`redis://post28:${password}@127.0.0.1:${port}`,namespace,sourceSha}));
   try{const code=await Promise.race([done,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('R08_REDIS_PROBE_TIMEOUT')),45000);})]);assert.equal(code,0);assert.ok(result);receipt={...receipt,result,passed:true};}finally{clearTimeout(timer);if(child.exitCode===null)child.kill('SIGKILL');await done;}
-}catch{receipt.passed=false;process.exitCode=1;console.error('R08_REDIS_LAB_FAILED');}
+}catch(error){receipt.passed=false;process.exitCode=1;receipt.failure=String(error?.message??'R08_REDIS_LAB_FAILED').replaceAll(password,'[REDACTED]').replaceAll(passwordHash,'[REDACTED]').replace(/rediss?:\/\/[^\s'"<>]+/g,'[REDACTED_REDIS_URL]').slice(0,1600);console.error(receipt.failure);}
 finally{
   if(containerId){try{owned();docker(['rm','-f',containerId]);receipt.ownedContainerRemoved=true;}catch{receipt.ownedContainerRemoved=false;process.exitCode=1;}}
   assert.ok(fs.realpathSync(directory).startsWith(fs.realpathSync(os.tmpdir())+path.sep));assert.ok(!directory.startsWith(root+path.sep));

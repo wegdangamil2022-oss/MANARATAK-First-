@@ -37,5 +37,8 @@ try{
     clearTimeout(timeout);
     process.send({point:'RESULT',result:{sourceSha:config.sourceSha,independentCounterProcesses:2,requests:24,allowed:10,namespaceIsolation:true,revisionIsolation:true,staleRejected:true,restrictedAcl:true,redisOutageRejected:true,fullApiSessionsVerified:false}});
   }
-}catch{console.error('R08_REDIS_PROBE_FAILED');process.exitCode=1;}
+}catch(error){
+  const message=String(error?.message??'R08_REDIS_PROBE_FAILED').replaceAll(url.password,'[REDACTED]').replace(/rediss?:\/\/[^\s'"<>]+/g,'[REDACTED_REDIS_URL]').slice(0,1600);
+  process.send?.({point:'ERROR',message});console.error(message);process.exitCode=1;
+}
 finally{clearTimeout(timeout);if(client.isOpen)client.destroy();process.disconnect?.();}
