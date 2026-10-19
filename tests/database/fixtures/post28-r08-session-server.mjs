@@ -16,9 +16,31 @@ if(!process.send||process.env.POST28_DATABASE_SUITE!=='r08-session-processes'||p
 const configuration=once(process,'message');process.send({point:'WAITING_CONFIG'});
 const [config]=await configuration;
 const db=new PrismaClient({log:[],errorFormat:'minimal'});let server;
+let pauseNextRotation=false,releaseRotation;
+const sessionClient=new Proxy(db,{get(target,key){
+  if(key==='$transaction')return async(work,options)=>{
+    try{return await target.$transaction(tx=>work(new Proxy(tx,{get(client,property){
+      if(property==='sessionRecord')return new Proxy(client.sessionRecord,{get(model,operation){
+        const value=Reflect.get(model,operation);
+        if(operation==='findUnique')return async args=>{
+          const row=await value.call(model,args);
+          if(pauseNextRotation&&args.where?.refreshTokenHash&&row){
+            pauseNextRotation=false;
+            let timer;try{const barrier=new Promise((resolve,reject)=>{releaseRotation=resolve;timer=setTimeout(()=>reject(Error('R08_ROTATION_BARRIER_TIMEOUT')),2500);});process.send({point:'ROTATION_READ'});await barrier;}finally{clearTimeout(timer);releaseRotation=undefined;}
+          }
+          return row;
+        };
+        return typeof value==='function'?value.bind(model):value;
+      }});
+      const value=Reflect.get(client,property);return typeof value==='function'?value.bind(client):value;
+    }})),options);}catch(error){process.send?.({point:'TRANSACTION_FAILURE',code:error.code??'UNKNOWN'});throw error;}
+  };
+  const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;
+}});
+process.on('message',message=>{if(message==='ARM_ROTATION_BARRIER'){pauseNextRotation=true;process.send({point:'ARMED'});}if(message==='RELEASE_ROTATION')releaseRotation?.();});
 try{
   if((await db.$queryRaw`SELECT current_user AS role`)[0].role!=='post28_app')throw Error('POST28_APP_REQUIRED');
-  const identities=new PrismaIdentityRepository(db),sessions=new PrismaSessionManager(db),tokens=new JwtTokenProvider(config.keys),principal=new IdentityPrincipalAccessValidator(identities),credentials=new PrismaCredentialVerifier(db);
+  const identities=new PrismaIdentityRepository(db),sessions=new PrismaSessionManager(sessionClient),tokens=new JwtTokenProvider(config.keys),principal=new IdentityPrincipalAccessValidator(identities),credentials=new PrismaCredentialVerifier(db);
   // Real local fixed-window limiter only; distributed Redis has separate Linux evidence.
   const security=new SecurityService(undefined,{signingSecret:config.csrf});
   const auth=new AuthService(tokens,sessions,principal,credentials),app=express();app.use(express.json());

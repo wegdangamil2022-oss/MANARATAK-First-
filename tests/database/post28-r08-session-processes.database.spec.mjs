@@ -9,8 +9,11 @@ async function start(config){
   const child=spawn(process.execPath,['--import','tsx','tests/database/fixtures/post28-r08-session-server.mjs'],{env:{...process.env,NODE_ENV:'test',CORS_ORIGIN:'https://web.example.invalid'},windowsHide:true,stdio:['ignore','pipe','pipe','ipc']});child.stdout.resume();child.stderr.resume();
   let exited=false;const done=new Promise(resolve=>{child.once('exit',(code,signal)=>{exited=true;resolve({code,signal});});child.once('error',error=>resolve({error:error.code}));});
   const handle={child,done,async stop(){if(!exited){child.send('STOP');let timer;try{await Promise.race([done,new Promise(resolve=>{timer=setTimeout(()=>{child.kill('SIGKILL');resolve();},5000);})]);}finally{clearTimeout(timer);}}await done;}};servers.push(handle);
+  const events=new Map(),failures=[];
+  child.on('message',m=>{if(m.point==='TRANSACTION_FAILURE')failures.push(m.code);events.get(m.point)?.();});
+  const next=point=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('R08_SESSION_EVENT_TIMEOUT:'+point)),5000);events.set(point,()=>{clearTimeout(timer);events.delete(point);resolve();});});
   const readyMessage=new Promise(resolve=>child.on('message',m=>{if(m.point==='WAITING_CONFIG')child.send(config);if(m.point==='READY')resolve(m);}));
-  let timer;try{const ready=await Promise.race([readyMessage,done.then(()=>{throw Error('R08_SESSION_CHILD_EXIT');}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('R08_SESSION_CHILD_TIMEOUT')),15000);})]);return {...handle,url:'http://127.0.0.1:'+ready.port};}finally{clearTimeout(timer);}
+  let timer;try{const ready=await Promise.race([readyMessage,done.then(()=>{throw Error('R08_SESSION_CHILD_EXIT');}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('R08_SESSION_CHILD_TIMEOUT')),15000);})]);return {...handle,url:'http://127.0.0.1:'+ready.port,next,failures};}finally{clearTimeout(timer);}
 }
 async function call(server,path,jar={},method='GET',body,csrf,origin='https://web.example.invalid'){
   const headers={Origin:origin,Cookie:Object.entries(jar).map(([k,v])=>k+'='+v).join(';')};if(body)headers['Content-Type']='application/json';if(csrf)headers['X-CSRF-Token']=csrf;
@@ -31,4 +34,13 @@ describe('R08 two real HTTP auth processes with persistent shared sessions',()=>
   it('replayed parent on another process revokes its already rotated descendant',async()=>{const c=await login(),token=await csrf(a,c.jar),r=await call(a,'/auth/refresh',c.jar,'POST',undefined,token);expect(r.status).toBe(200);expect((await call(b,'/auth/refresh',c.jar,'POST',undefined,token)).status).toBe(401);expect((await call(a,'/private',r.jar)).status).toBe(401);expect(await active(c.id)).toBe(0);});
   it('suspension is observed across processes and stale CSRF bootstrap cannot restore access',async()=>{const c=await login();await db.identityRecord.update({where:{id:c.id},data:{status:'SUSPENDED'}});expect((await call(b,'/private',c.jar)).status).toBe(401);expect((await call(a,'/auth/csrf-token',c.jar)).status).toBe(401);expect(await active(c.id)).toBe(0);});
   it('rejects missing CSRF and foreign origin without rotating or revoking a valid session',async()=>{const c=await login(),before=await db.sessionRecord.findMany({where:{identityId:c.id}});expect((await call(b,'/auth/refresh',c.jar,'POST')).status).toBe(403);expect((await call(b,'/auth/refresh',c.jar,'POST',undefined,await csrf(a,c.jar),'https://foreign.example.invalid')).status).toBe(403);expect(await db.sessionRecord.findMany({where:{identityId:c.id}})).toEqual(before);expect((await call(a,'/private',c.jar)).status).toBe(200);});
+  it('revokes the committed descendant after a deterministically concurrent refresh serialization conflict',async()=>{
+    const c=await login(),token=await csrf(a,c.jar);
+    const armedA=a.next('ARMED'),armedB=b.next('ARMED');a.child.send('ARM_ROTATION_BARRIER');b.child.send('ARM_ROTATION_BARRIER');await Promise.all([armedA,armedB]);
+    const readA=a.next('ROTATION_READ'),readB=b.next('ROTATION_READ');
+    const pendingA=call(a,'/auth/refresh',c.jar,'POST',undefined,token),pendingB=call(b,'/auth/refresh',c.jar,'POST',undefined,token);
+    await Promise.all([readA,readB]);a.child.send('RELEASE_ROTATION');const first=await pendingA;expect(first.status).toBe(200);
+    b.child.send('RELEASE_ROTATION');const second=await pendingB;expect(second.status).toBe(401);expect(b.failures).toContain('P2034');
+    expect(await active(c.id)).toBe(0);expect((await call(a,'/private',first.jar)).status).toBe(401);
+  });
 });
