@@ -1,0 +1,101 @@
+{
+  "kind": "POST28_R05_KNOWN_SOURCE_REMEDIATION",
+  "sourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+  "runId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+  "identity": {
+    "role": "post28_app",
+    "database": "manaratak_post28_upgrade_test",
+    "server": "7698371865707923580",
+    "oid": "16387",
+    "marker": "POST28_DISPOSABLE:186b4fc2-d77a-45ab-8e97-0c3aabef0a20:DB-U:ae5139990510dcea08ff79b586ac8388b30c16f4e4adc550d86a21632c7ad31e",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false
+  },
+  "privileges": {
+    "ddl": false,
+    "ledger": false,
+    "binding_write": false,
+    "audit_update": false,
+    "asset_update": false
+  },
+  "operationId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+  "manifestSha256": "212a86a22662783c29c939ff55228c46f4b455ab260e0f1889e47f253a106864",
+  "decision": {
+    "classification": "CONFIDENTIAL",
+    "retentionCategory": "TEMPORARY",
+    "sourceCreatedAt": "2026-10-19T13:35:11.970Z",
+    "expiresAt": "2027-04-17T13:35:11.970Z",
+    "legalHoldUntil": null
+  },
+  "trust": {
+    "trustChecksPassed": true,
+    "ownerAuthorizationVerified": false,
+    "upgradeAuthorized": false,
+    "sourceSha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+    "sanitizedSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+    "historicalSnapshotSha256": "c06dd7da417cdf4ff9c87e1de28a446aa950f9716644d63334b406ba05b4b4c3"
+  },
+  "providerProof": {
+    "kind": "MUPDF_RASTER_SANITIZATION",
+    "sourceSha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+    "sanitizedSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+    "sourceBytes": 636,
+    "sanitizedBytes": 10234,
+    "originalObjectsCopied": 0,
+    "pixelsMatched": true,
+    "sourceLocator": "quarantine://synthetic-pdf-lab/uploads/1d111402-4eca-4745-8c03-b6f2f9274e54",
+    "sanitizedLocator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+    "searchableTextAndInteractiveFeaturesDiscarded": true,
+    "preScan": {
+      "kind": "DEFENDER_SCAN",
+      "locator": "quarantine://synthetic-pdf-lab/uploads/1d111402-4eca-4745-8c03-b6f2f9274e54",
+      "sha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+      "digestUnchanged": true,
+      "exitCode": 0,
+      "output": "Scan starting...\r\nScan finished.\r\nScanning C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-J6WAup\\real-pdf-storage\\synthetic-pdf-lab\\uploads\\1d111402-4eca-4745-8c03-b6f2f9274e54 found no threats.\r\n",
+      "clean": true
+    },
+    "postScan": {
+      "kind": "DEFENDER_SCAN",
+      "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf",
+      "sha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+      "digestUnchanged": true,
+      "exitCode": 0,
+      "output": "Scan starting...\r\nScan finished.\r\nScanning C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-J6WAup\\real-pdf-storage\\synthetic-pdf-lab\\uploads\\sanitized-e3f52b48-97de-4113-9b1d-b11dff126416.pdf found no threats.\r\n",
+      "clean": true
+    },
+    "storageReadbackSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5"
+  },
+  "completion": {
+    "replayed": false,
+    "snapshotSha256": "8203c0d85178057c22c2f660a5a84372112a8bd22534cf427b8ee2ec7fded96f"
+  },
+  "replay": {
+    "replayed": true,
+    "snapshotSha256": "8203c0d85178057c22c2f660a5a84372112a8bd22534cf427b8ee2ec7fded96f"
+  },
+  "rollbackProof": {
+    "assetAbsent": true,
+    "completionAuditAbsent": true,
+    "durableActiveStagePreserved": true
+  },
+  "auditRecords": 7,
+  "auditActions": [
+    "R05_PROCESSING_STAGE",
+    "R05_PROCESSING_STAGE",
+    "R05_PROCESSING_STAGE",
+    "R05_PROCESSING_STAGE",
+    "R05_PROCESSING_STAGE",
+    "R05_PROCESSING_STAGE",
+    "R05_REMEDIATION_COMPLETED"
+  ],
+  "historicalRowsUnchanged": true,
+  "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+  "originalNegativeEvidencePreserved": true,
+  "independentTechnicalReview": "PENDING",
+  "upgradeExecuted": false,
+  "R05Accepted": false
+}

@@ -1,0 +1,47 @@
+{
+  "firstAttempt": {
+    "sourceSha": "19029346a50dc8a63b5110760f3a7229da82d149",
+    "runId": "666506e4-bb62-4a9f-807f-f71e1c228e84",
+    "failure": "POST28_R05_STAGE_IDENTITY_MISMATCH",
+    "cause": "JSONB object-key ordering changed insertion-order digest; failed closed before target Asset creation",
+    "correctiveCommit": "6dc778605d1344b99011b3074ee2b2648d182550",
+    "stop": {
+      "sourceSha": "19029346a50dc8a63b5110760f3a7229da82d149",
+      "runId": "666506e4-bb62-4a9f-807f-f71e1c228e84",
+      "postmasterPid": 8280,
+      "port": 50119,
+      "exitCode": 0,
+      "pidFileRemoved": true
+    }
+  },
+  "secondAttempt": {
+    "sourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+    "runId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+    "unexpectedPostmasterExit": true,
+    "initialPid": 1820,
+    "restartedVerifiedPid": 6020,
+    "automaticWalRecovery": true,
+    "restoreVerificationAfterRecovery": "PASS",
+    "initialVerifyWrapper": {
+      "failure": "POST28_IDENTITY_READ_FAILED",
+      "logSha256": "81b13195eeac437ce3e24d6ccbfdeac54223a294adad4f94488d639bb7451930"
+    },
+    "retryWrapper": {
+      "failure": "EEXIST for stage-verify.log after successful actual restore",
+      "actualVerificationResult": "R05-backup/verification-result.json",
+      "restoreRepeatedAfterSuccess": false
+    },
+    "restartWrapper": {
+      "issue": "PowerShell Start-Process -Wait waited for child process tree; resumed after deliberate stop; stale PID metadata preserved privately and corrected from verified pre-stop identity",
+      "databaseRetouched": false
+    },
+    "finalStop": {
+      "sourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+      "runId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+      "postmasterPid": 6020,
+      "port": 50222,
+      "exitCode": 0,
+      "pidFileRemoved": true
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "kind": "POST28_R05_DELEGATED_REMEDIATION_HANDOFF",
+  "sourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+  "runId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+  "technicalDecision": "RESOLVED_UNDER_EXPLICIT_USER_DELEGATION",
+  "knownSourceRemediation": "PROVEN_ON_ISOLATED_POSTGRES16",
+  "negativeBeforeRepair": "PRESERVED",
+  "allNineAuditsAfterRepairZero": true,
+  "assetAndAuditAtomicRollback": true,
+  "idempotentReplay": true,
+  "existingDataPreserved": true,
+  "backupAfterRepairStructurallyVerified": true,
+  "previousClient": "BEFORE_UPGRADE_ONLY",
+  "independentImplementationReview": "PENDING",
+  "upgrade109to110": "NOT_EXECUTED",
+  "R05Accepted": false,
+  "productionAuthorized": false,
+  "NeonTouched": false,
+  "mainMerged": false,
+  "labStopped": true
+}

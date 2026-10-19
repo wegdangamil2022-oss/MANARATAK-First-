@@ -1,0 +1,21 @@
+{
+    "kind":  "POST28_NATIVE_LOCAL_LAB",
+    "runtime":  "NATIVE_WINDOWS",
+    "scope":  "DISPOSABLE",
+    "profile":  "upgrade",
+    "sourceSha":  "6dc778605d1344b99011b3074ee2b2648d182550",
+    "runId":  "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+    "postgresMajor":  16,
+    "postgresVersion":  "postgres (PostgreSQL) 16.15",
+    "pgBin":  "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\pg16-binaries\\pgsql\\bin",
+    "dataDirectory":  "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-J6WAup\\data",
+    "directory":  "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-J6WAup",
+    "port":  50222,
+    "status":  "EMPTY_TARGETS_VERIFIED",
+    "createdAt":  "2026-10-19T13:34:41.802Z",
+    "postgresBinarySha256":  "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+    "postmasterPid":  6020,
+    "serverIdentity":  "7698371865707923580",
+    "contractFile":  "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-J6WAup\\targets.json",
+    "envFile":  "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-J6WAup\\lab.env"
+}

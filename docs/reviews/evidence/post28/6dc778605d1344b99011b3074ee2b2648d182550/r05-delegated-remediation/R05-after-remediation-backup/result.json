@@ -1,0 +1,17 @@
+{
+  "kind": "POST28_R05_AFTER_REMEDIATION_BACKUP",
+  "sourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+  "runId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+  "archiveSha256": "1fdd6c7fd8d7675cb1c93b0044dd63f9dbb501c786157c7710283bc44c3f2f5d",
+  "bytes": 1049327,
+  "restoredTables": 282,
+  "allRowContentMatched": true,
+  "allCatalogDefinitionsMatched": true,
+  "sourceUnchanged": true,
+  "tableContentSha256": "f644d5792b89885efa77d52e287863562ea86b565cc9d59c53b38eef35cef571",
+  "catalogSha256": "2aa2f4305b7f39d3353a0e052e856148e77aedb92569a060146f0d4fc2a13f1f",
+  "newEmptyRestoreTarget": "manaratak_post28_known_source_verify_test",
+  "originalBackupAndRestoreTargetUnchanged": true,
+  "upgradeExecuted": false,
+  "R05Accepted": false
+}

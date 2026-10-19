@@ -10,7 +10,15 @@
     "acceptance": false,
     "evidenceSourceSha": "40f93b655c4835f669c6686d7301817f48f0e5c2",
     "evidence": "docs/reviews/evidence/post28/40f93b655c4835f669c6686d7301817f48f0e5c2/r05-historical/status.json",
-    "remaining": ["Traceable synthetic orphan remediation", "Upgrade109_to110_preservation", "Previous_client_after_upgrade", "Upgrade_interruption_resume_and_lock_budgets"]
+    "remaining": ["Final_remediation_implementation_review_and_promotion_recovery", "Final_sequence_fence_PostgreSQL_proof", "Upgrade109_to110_preservation", "Previous_client_after_upgrade", "Upgrade_interruption_resume_and_lock_budgets"],
+    "latestRemediation": {
+      "technicalDecision": "RESOLVED_UNDER_EXPLICIT_USER_DELEGATION",
+      "runtimeStatus": "KNOWN_SOURCE_REMEDIATION_PROVEN_UPGRADE_PENDING",
+      "acceptance": false,
+      "evidenceSourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+      "evidence": "docs/reviews/evidence/post28/6dc778605d1344b99011b3074ee2b2648d182550/r05-delegated-remediation/status.json",
+      "handoff": "docs/remediation/POST28_R05_DELEGATED_REMEDIATION_HANDOFF_2026-10-19.md"
+    }
   },
   "productionAcceptance": false,
   "cloudMutationAuthorized": false,

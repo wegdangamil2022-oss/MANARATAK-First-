@@ -1,0 +1,193 @@
+{
+  "sourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+  "runId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+  "operationId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+  "manifestSha256": "212a86a22662783c29c939ff55228c46f4b455ab260e0f1889e47f253a106864",
+  "packetSha256": "812d5456f97382b3923ee55469948ae67abddd1c7be565328f271de75e001a72",
+  "decision": {
+    "classification": "CONFIDENTIAL",
+    "retentionCategory": "TEMPORARY",
+    "sourceCreatedAt": "2026-10-19T13:35:11.970Z",
+    "expiresAt": "2027-04-17T13:35:11.970Z",
+    "legalHoldUntil": null
+  },
+  "historical": {
+    "bindings": [
+      {
+        "reviewConsentGrantedAt": null,
+        "reviewConsentUntil": null,
+        "attestation": {
+          "consent": "REVOKED",
+          "synthetic": true
+        },
+        "id": "22f8f004-4c7c-4a7d-84ca-8ad7d5f2ab55",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "0d06f731-9e72-46d8-84d8-1d7755c4d356",
+        "assetId": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "scenario": "revoked-consent",
+          "synthetic": true,
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "updatedAt": "2026-10-19T13:35:28.334Z"
+      },
+      {
+        "reviewConsentGrantedAt": null,
+        "reviewConsentUntil": null,
+        "attestation": {
+          "consent": "MISSING",
+          "synthetic": true
+        },
+        "id": "2a4960c9-b4be-405a-8b21-7c3b34a5034f",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "413c5da3-86f1-4b99-87fc-78e898b34dfb",
+        "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "scenario": "orphan-document",
+          "synthetic": true,
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "updatedAt": "2026-10-19T13:35:28.337Z"
+      },
+      {
+        "reviewConsentGrantedAt": "2030-01-01T00:00:00.000Z",
+        "reviewConsentUntil": "2035-01-01T00:00:00.000Z",
+        "attestation": {
+          "consent": "GRANTED",
+          "synthetic": true
+        },
+        "id": "2dd35cf9-2d8c-4729-838b-cac0ecff51dc",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "58c32dde-234d-4a3d-8226-fcb0ae8646ef",
+        "assetId": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "scenario": "future-consent",
+          "synthetic": true,
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "updatedAt": "2026-10-19T13:35:28.335Z"
+      },
+      {
+        "reviewConsentGrantedAt": null,
+        "reviewConsentUntil": null,
+        "attestation": {
+          "consent": "   ",
+          "synthetic": true
+        },
+        "id": "9d82a071-e1ad-4d8d-8843-da5d2ac9e644",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "a56ee09a-8170-4fb4-883d-a613c5480a7b",
+        "assetId": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "scenario": "whitespace-consent",
+          "synthetic": true,
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "updatedAt": "2026-10-19T13:35:28.333Z"
+      },
+      {
+        "reviewConsentGrantedAt": null,
+        "reviewConsentUntil": null,
+        "attestation": {
+          "consent": "MISSING",
+          "synthetic": true
+        },
+        "id": "a8fec8ab-43bd-4556-8c5a-740bfb041421",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "c0cc2dd1-9ea5-4009-866b-f90e56c27b5c",
+        "assetId": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "scenario": "missing-consent",
+          "synthetic": true,
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "updatedAt": "2026-10-19T13:35:28.329Z"
+      },
+      {
+        "reviewConsentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "reviewConsentUntil": "2035-01-01T00:00:00.000Z",
+        "attestation": {
+          "consent": "GRANTED",
+          "synthetic": true
+        },
+        "id": "c5fee355-9d12-4c68-861c-11bcaae0c3d4",
+        "trackerId": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "requirementId": "f5c41351-2028-4189-877b-78a30ba10d4c",
+        "assetId": "7b3d94d5-ac23-4182-8dc9-9f68738926da",
+        "ownerVersionId": "ee3e3d0e-8c86-41eb-84d2-42ebe2ea0568",
+        "requirementSnapshot": {
+          "scenario": "valid-consent",
+          "synthetic": true,
+          "legacySource": "post28-r05"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2035-01-01T00:00:00.000Z",
+        "updatedAt": "2026-10-19T13:35:28.336Z"
+      }
+    ],
+    "trackers": [
+      {
+        "cycleReferenceId": "LEGACY",
+        "ownerSnapshot": {
+          "source": "post28-r05",
+          "version": 1
+        },
+        "id": "1315efb8-b2dd-40da-86d0-618c702e9052",
+        "studentReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "scholarshipId": "a7e64a34-ed01-462b-840a-864bd40ffd66",
+        "scholarshipSlug": null,
+        "stage": "PREPARING_DOCUMENTS",
+        "notes": null,
+        "deadlineAt": null,
+        "status": "ACTIVE",
+        "version": 1,
+        "archivedAt": null,
+        "createdAt": "2026-10-19T13:35:28.316Z",
+        "updatedAt": "2026-10-19T13:35:28.316Z"
+      }
+    ],
+    "consent": [
+      {
+        "id": "947e7d8c-96ee-4853-8034-b86ab7f75cc0",
+        "studentReferenceId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "workspaceVersion": 1,
+        "actorId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+        "actorType": "STUDENT",
+        "purpose": "DOCUMENT_REVIEW",
+        "source": "POST28_SYNTHETIC",
+        "beforePreferences": {
+          "documentReview": true
+        },
+        "afterPreferences": {
+          "documentReview": false
+        },
+        "changedFields": [
+          "documentReview"
+        ],
+        "correlationId": null,
+        "decidedAt": "2025-01-01T00:00:00.000Z"
+      }
+    ]
+  }
+}
