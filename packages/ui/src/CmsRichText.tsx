@@ -1,4 +1,5 @@
 import { createElement, type ReactNode } from 'react';
+import DOMPurify from 'dompurify';
 
 const allowed = new Set([
   'p',
@@ -56,8 +57,13 @@ export function CmsRichText({ body, className }: { body: string; className?: str
     return createElement(tag, props, ...(tag === 'br' ? [] : children));
   };
   const nodes =
-    typeof DOMParser !== 'undefined' && /<\/?[a-z][^>]*>/i.test(body)
-      ? Array.from(new DOMParser().parseFromString(body, 'text/html').body.childNodes).map(
+    typeof DOMParser !== 'undefined' && body.includes('<') && body.includes('>')
+      ? Array.from(DOMPurify.sanitize(body, {
+          ALLOWED_TAGS: [...allowed],
+          ALLOWED_ATTR: ['href'],
+          FORBID_TAGS: [...blocked],
+          RETURN_DOM_FRAGMENT: true,
+        }).childNodes).map(
           (node, index) => render(node, String(index)),
         )
       : body;

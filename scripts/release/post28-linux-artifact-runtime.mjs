@@ -54,7 +54,7 @@ try{
   assert.equal(state.sourceSha,sha);assert.equal(state.storage,'tmpfs');
   env=Object.fromEntries(fs.readFileSync(state.envFile,'utf8').trim().split(/\r?\n/).map(line=>{const i=line.indexOf('=');return[line.slice(0,i),line.slice(i+1)];}));
   secrets.push(env.DATABASE_URL,env.POST28_TRANSACTION_SETUP_URL,...[env.DATABASE_URL,env.POST28_TRANSACTION_SETUP_URL].map(value=>decodeURIComponent(new URL(value).password)));
-  execute(['scripts/database/initialize-post28-transactions.mjs'],env,'initialize.log');
+  execute(['scripts/database/initialize-post28-transactions.mjs',...(r09Learner?['--r09-learner-fixtures']:[])],env,'initialize.log');
   const contract=JSON.parse(fs.readFileSync(state.contractFile,'utf8'));
   report.databaseIdentity=await preflightTargets(contract,[{label:'DB-T',url:env.DATABASE_URL}],env,sha,readDatabaseIdentity,{requireValidatedCatalog:true});
   const setup=new PrismaClient({datasources:{db:{url:env.POST28_TRANSACTION_SETUP_URL}},log:[],errorFormat:'minimal'});
@@ -72,6 +72,10 @@ try{
   assert.equal(roles[0].role,'post28_app');for(const key of ['rolsuper','rolcreatedb','rolcreaterole','rolreplication','rolbypassrls'])assert.equal(roles[0][key],false);
   const privileges=await db.$queryRaw`SELECT has_schema_privilege(current_user,'public','CREATE') AS ddl, has_table_privilege(current_user,'public._prisma_migrations','UPDATE') AS ledger`;
   assert.equal(privileges[0].ddl,false);assert.equal(privileges[0].ledger,false);report.applicationRole={...roles[0],...privileges[0]};
+  if(r09Learner){
+    const [rights]=await db.$queryRaw`SELECT has_table_privilege(current_user,'public."CourseLessonProgress"','INSERT') AS insert, has_table_privilege(current_user,'public."CourseLessonProgress"','UPDATE') AS update, has_table_privilege(current_user,'public."CourseLessonProgress"','DELETE') AS delete`;
+    assert.equal(rights.insert,true);assert.equal(rights.update,true);assert.equal(rights.delete,false);report.learnerProgressPrivileges=rights;
+  }
   const gatewayPort=await freePort(),origin='https://127.0.0.1:'+gatewayPort;
   const url=new URL(env.DATABASE_URL);url.hostname=state.containerName;url.port='5432';
   const apiEnv={NODE_ENV:'test',PORT:'3000',DATABASE_URL:url.href,DIRECT_URL:url.href,DATABASE_REQUIRED:'true',RELEASE_SOURCE_SHA:sha,HEALTH_DEPLOYMENT_REVISION:sha,CORS_ORIGIN:origin,PUBLIC_WEB_URL:origin,ADMIN_WEB_URL:origin+'/admin',TRUST_PROXY_HOPS:'1',SECURE_COOKIE:'true',BACKGROUND_WORKER_ENABLED:'false',STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED:'false',OWNER_DOMAIN_OUTBOX_WORKER_ENABLED:'false',CERTIFICATE_COMPLETION_WORKER_ENABLED:'false'};
