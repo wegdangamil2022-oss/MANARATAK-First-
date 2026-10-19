@@ -51,6 +51,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # GitHub Actions GITHUB_TOKEN cannot modify workflows without extra workflow permission.
+          # Preserve workflow YAML in bot push; rebrand it with authorized GitHub connector later.
+          git restore --staged --worktree -- .github/workflows
           git add -A
           if git diff --cached --quiet; then
             echo "NO_CHANGES=YES"
