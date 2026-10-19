@@ -1,0 +1,18 @@
+{
+  "sourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+  "ciRun": "39334529021",
+  "status": "PRACTICAL_SCOPE_CLOSED_FOR_R09_LOCAL_ONLY",
+  "formalR08Acceptance": false,
+  "productionAcceptance": false,
+  "promotionAuthorized": false,
+  "ownerScope": "Continue independent isolated R09 after critical R08 work; comprehensive original-plan acceptance is not required now.",
+  "combinedEvidence": "docs/reviews/evidence/post28/cbb99ac63bb4497df9c07cf3e16611d27bcd3396/r08-combined-closure/evidence-index.json",
+  "financialEvidence": "docs/reviews/evidence/post28/cbb99ac63bb4497df9c07cf3e16611d27bcd3396/r08-provider-closure/evidence-index.json",
+  "redisEvidence": "docs/reviews/evidence/post28/cbb99ac63bb4497df9c07cf3e16611d27bcd3396/r08-redis-closure/evidence-index.json",
+  "deferred": [
+    "full provider and asset failure matrix",
+    "SMTP, AI, bank and FX provider acceptance",
+    "hosting and production alert destination acceptance",
+    "formal whole-plan release acceptance"
+  ]
+}

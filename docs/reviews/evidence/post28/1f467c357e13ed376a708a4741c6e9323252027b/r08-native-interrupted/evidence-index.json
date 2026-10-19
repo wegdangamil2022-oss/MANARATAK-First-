@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "kind": "POST28_R08_NATIVE_INTERRUPTED_ATTEMPT",
+  "sourceSha": "1f467c357e13ed376a708a4741c6e9323252027b",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "README.md",
+      "bytes": 536,
+      "sha256": "71bc08305c198206b3ce3f71543060721b1689b007ed07a98b81244829f9f44f"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 161,
+      "sha256": "e91d81feba9cc5e51096fa01dc40bb26b3b43dce84920f0519242b516f0c6e23"
+    },
+    {
+      "path": "termination-inspection.json",
+      "bytes": 342,
+      "sha256": "b4bbf1da99d8ea0c7a3afe671d1085adc3a4b42666ba8ee573481d8dd263317c"
+    }
+  ]
+}

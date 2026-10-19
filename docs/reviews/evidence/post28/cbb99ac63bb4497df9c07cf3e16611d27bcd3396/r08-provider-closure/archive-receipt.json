@@ -1,0 +1,24 @@
+{
+    "archiveBytes":  11942,
+    "artifactId":  "12226342115",
+    "runId":  "39334529021",
+    "verifiedAgainstGitHubArtifactDigest":  true,
+    "entries":  [
+                    "result.json",
+                    "setup.json",
+                    "case-0.log",
+                    "case-1.log",
+                    "create.log",
+                    "initialize.log",
+                    "suite-0-discovery.json",
+                    "suite-0-selection.json",
+                    "suite-0-summary.json",
+                    "suite-0-vitest.json",
+                    "suite-1-discovery.json",
+                    "suite-1-selection.json",
+                    "suite-1-summary.json",
+                    "suite-1-vitest.json"
+                ],
+    "sourceSha":  "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+    "archiveSha256":  "0ad69d95ac54cdc4f671c75c9b1a39a4a1b8680e2ab81283128d160853052f3f"
+}

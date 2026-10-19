@@ -1,0 +1,14 @@
+{
+  "reviewedSourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+  "number": 160,
+  "rule": "js/insufficient-password-hash",
+  "path": "scripts/release/lib/R08CombinedRuntime.mjs",
+  "state": "dismissed",
+  "reason": "false positive",
+  "comment": "Codex review: Redis ACL #hash requires SHA-256. Input is randomBytes(32), a fresh 256-bit machine secret for one isolated lab, never a human password. Evidence: docs/remediation/POST28_R08_PRACTICAL_CLOSE_2026-10-20.md",
+  "at": "2026-10-19T22:36:17Z",
+  "recordedBy": "wegdangamil2022-oss",
+  "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/security/code-scanning/160",
+  "queryExclusionsAdded": false,
+  "otherAlertsChanged": false
+}

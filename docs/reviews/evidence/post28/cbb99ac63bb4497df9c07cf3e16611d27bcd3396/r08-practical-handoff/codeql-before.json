@@ -1,0 +1,13 @@
+{
+  "sourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+  "id": 118342645674,
+  "name": "CodeQL",
+  "result": "failure",
+  "output": {
+    "title": "1 new alert including 1 high severity security vulnerability",
+    "summary": "### New alerts in code changed by this pull request\n\nSecurity Alerts:\n * 1 high\n\n\n_Alerts not introduced by this pull request might have been detected because the code changes were too large._\n\nSee annotations below for details.\n\n[View all branch alerts](/wegdangamil2022-oss/MANARATAK-First-/security/code-scanning?query=pr%3A34+tool%3ACodeQL+is%3Aopen).",
+    "text": null,
+    "annotations_count": 1,
+    "annotations_url": "https://api.github.com/repos/wegdangamil2022-oss/MANARATAK-First-/check-runs/118342645674/annotations"
+  }
+}
