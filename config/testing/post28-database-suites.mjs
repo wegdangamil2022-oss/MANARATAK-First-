@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'r08-provider-outcomes': {files:['tests/database/post28-r08-provider-outcomes.database.spec.mjs'],minimumCases:2},
   'r08-session-processes': {files:['tests/database/post28-r08-session-processes.database.spec.mjs'],minimumCases:5},
   'r08-outbox-chain': {files:['tests/database/post28-r08-outbox-chain.database.spec.mjs'],minimumCases:6},
   'service-public-facets': {files:['tests/database/post28-service-public-facets.database.spec.mjs'],minimumCases:1},
