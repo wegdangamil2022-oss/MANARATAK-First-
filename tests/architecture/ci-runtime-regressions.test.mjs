@@ -52,11 +52,21 @@ test('branch policy accepts scoped Dependabot updates but rejects arbitrary bran
 
 test('source-only Prisma job uses the isolated validation gate, never deployment credentials', () => {
   const workflow = read('.github/workflows/imported-courses-runtime-closure.yml');
+  assert.match(workflow,/actions\/checkout@[^\n]+\n\s+with:\n\s+fetch-depth: 0/);
   assert.match(workflow, /run: npm run db:source:verify/);
   assert.doesNotMatch(workflow, /npx prisma validate/);
   const gate = read('scripts/ci/prisma-source-gate.mjs');
   assert.match(gate, /DATABASE_URL: sourceDatabaseUrl, DIRECT_URL: sourceDatabaseUrl/);
   assert.match(gate, /\['validate', 'generate'\]/);
+});
+
+test('commit policy validates published merge/config categories and rejects malformed messages',()=>{
+  for(const [message,status]of [
+    ['merge(r07): integrate tested R06 fixes while retaining artifact tooling',0],
+    ['config(post28): pin R03 isolated Neon G/S targets and explicit blockers',0],
+    ['fix(api): preserve privacy boundary',0],['config(post28): x',1],
+    ['merge(r07) missing delimiter',1],['arbitrary(api): allow everything',1],['',2],
+  ])assert.equal(spawnSync(process.execPath,['scripts/git/validate-commit-message.mjs',message]).status,status,message);
 });
 
 test('translation builds runtime artifacts before behavioral tests', () => {

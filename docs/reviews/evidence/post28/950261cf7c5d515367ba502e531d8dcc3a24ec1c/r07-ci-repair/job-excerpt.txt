@@ -1,0 +1,6 @@
+2026-10-19T19:09:47.1091195Z # pass 1025
+2026-10-19T19:09:47.1091630Z # fail 0
+2026-10-19T19:09:47.1422393Z ##[group]Run npm run release:artifacts && npm run release:verify
+2026-10-19T19:09:47.1423217Z npm run release:artifacts && npm run release:verify
+2026-10-19T19:09:47.3680972Z if(fs.existsSync(out))throw new Error('RELEASE_FRESH_OUTPUT_REQUIRED');
+2026-10-19T19:09:47.3682851Z Error: RELEASE_FRESH_OUTPUT_REQUIRED
