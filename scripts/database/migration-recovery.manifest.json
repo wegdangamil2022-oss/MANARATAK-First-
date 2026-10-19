@@ -552,6 +552,11 @@
       "recoveryClass": "BACKUP_RESTORE_REQUIRED",
       "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
       "decision": "Reprovision a fresh disposable target; shared environments require pre-mutation backup and separate authorization. No reverse validation or row repair asserted."
+    },
+    "20261019000100_admission_null_identity": {
+      "recoveryClass": "BACKUP_RESTORE_REQUIRED",
+      "artifact": "docs/operations/DATABASE_MIGRATION_RECOVERY_POLICY.md",
+      "decision": "Preserve the four-column NULLS NOT DISTINCT admission identity and all existing rows. A failed apply rolls back its index replacement atomically; do not drop the stronger index or delete conflicting rows as recovery. Applied shared targets require a verified compatible pre-mutation backup, reconciliation of subsequent writes and separate restore or forward-fix authorization. Local promotion review and measured backup/restore evidence: docs/remediation/POST28_R06_NULL_IDENTITY_ROLLOUT_REVIEW_2026-10-19.md and docs/remediation/POST28_R06_CORE_CLOSURE_2026-10-19.md. Those proofs authorize only fresh isolated synthetic labs, not shared-target recovery. No destructive down SQL is authorized."
     }
   }
 }
