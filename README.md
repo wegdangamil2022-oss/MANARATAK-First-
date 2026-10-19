@@ -13,11 +13,13 @@ MANARATAK is an npm-workspaces monorepo containing the public web application, A
 
 ## Current Status
 
+For the current POST28 work branch, R00–R09 implementation/evidence map, pending gates and resume order, read the [unified work index](docs/remediation/POST28_UNIFIED_WORK_INDEX_2026-10-19.md). Historical phase notes below do not supersede its source-specific local evidence.
+
 - Source remediation through WP10 is prepared.
 - Phase 10 source freeze is prepared; final freeze is pending Google Studio.
 - Phase 11 University contracts are prepared; University bulk import is blocked.
 - University Stage 1 source Dry Run covers 10,723 rows; imported records remain 0.
-- Clean PostgreSQL provisioning/migration, build, tests, and runtime validation remain pending runtime execution; no database mutation is implied by source readiness.
+- Isolated local PostgreSQL migration/seed and a packaged API/Web/Admin browser diagnostic have source-specific evidence in the unified index; cloud/production acceptance and the remaining formal gates are still open.
 - This repository is not declared Production Ready.
 
 Database operations are governed by `docs/operations/GREENFIELD_DATABASE_PROVISIONING.md`; remediation state is tracked separately from runtime/database evidence.

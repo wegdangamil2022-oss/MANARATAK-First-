@@ -1,0 +1,60 @@
+{
+  "kind": "POST28_SOURCE_PRESERVATION_AUDIT",
+  "baseline": "c7f6585dddc6d350291d81726b936eb2daa0e2c9",
+  "sourceSha": "2940c2ac20cebb4c45941ed0d48093976b059198",
+  "r05Head": "61878b5b37b2109e37f55e554e163b38cc0f8311",
+  "reviewHead": "0970edd3181ac5b1184ae0165f2eb240fb8bac09",
+  "baselineFiles": 7448,
+  "deletedBaselineFiles": [],
+  "modifiedBaselineFiles": [
+    ".env.aistudio.example",
+    "docs/operations/GOOGLE_AI_STUDIO_ENVIRONMENT.md",
+    "scripts/database/initialize-post28-upgrade.mjs",
+    "scripts/database/post28-r05-known-source.mjs",
+    "scripts/database/verify-post28-upgrade-backup.mjs",
+    "tests/database/post28-isolation.test.mjs",
+    "tests/database/post28-r05-known-source.test.mjs"
+  ],
+  "priorEvidenceFilesUnchanged": 2418,
+  "importedEvidenceFilesByteIdentical": 84,
+  "importedEvidenceIndexes": [
+    {
+      "path": "docs/reviews/evidence/post28/1494b36591f057047dfac2b222c767925be1b386/R05-trust-guard-20261018/evidence-index.json",
+      "files": 3,
+      "sourceSha": "1494b36591f057047dfac2b222c767925be1b386",
+      "gitRef": "2940c2ac20cebb4c45941ed0d48093976b059198",
+      "readOnly": true
+    },
+    {
+      "path": "docs/reviews/evidence/post28/15b993e19c770563281f0a29db00b1ae881103c0/R05-native-lab-20261017/evidence-index.json",
+      "files": 36,
+      "sourceSha": "15b993e19c770563281f0a29db00b1ae881103c0",
+      "gitRef": "2940c2ac20cebb4c45941ed0d48093976b059198",
+      "readOnly": true
+    },
+    {
+      "path": "docs/reviews/evidence/post28/e787410178b26e42fca4096d1337c46011737aa8/R05-native-repeat-20261018/evidence-index.json",
+      "files": 42,
+      "sourceSha": "e787410178b26e42fca4096d1337c46011737aa8",
+      "gitRef": "2940c2ac20cebb4c45941ed0d48093976b059198",
+      "readOnly": true
+    }
+  ],
+  "r05TrustGuardAndFixtureByteIdentical": true,
+  "reviewStagedByteIdentical": true,
+  "upstreamReviewFormatting": {
+    "markdownHardBreakLines": [
+      3,
+      4,
+      5,
+      6
+    ],
+    "preservedVerbatim": true,
+    "generalWhitespaceRulesChanged": false
+  },
+  "nativeCreatorOid": "439ee8cf90a6ee13a001a814c6c94293d81d1859",
+  "nativeCreatorUnchanged": true,
+  "appsPackagesConfigWorkflowsUnchanged": true,
+  "pendingReviewMergeNotYetAncestorOfSource": true,
+  "newRuntimeAcceptance": false
+}

@@ -1,0 +1,562 @@
+TAP version 13
+# Subtest: only preprovisioned public schema and pg_trgm are excluded
+ok 1 - only preprovisioned public schema and pg_trgm are excluded
+  ---
+  duration_ms: 4.6965
+  type: 'test'
+  ...
+# Subtest: invalid
+ok 2 - invalid
+  ---
+  duration_ms: 0.5322
+  type: 'test'
+  ...
+# Subtest: unknown schema
+ok 3 - unknown schema
+  ---
+  duration_ms: 0.212
+  type: 'test'
+  ...
+# Subtest: unknown extension
+ok 4 - unknown extension
+  ---
+  duration_ms: 0.1472
+  type: 'test'
+  ...
+# Subtest: missing schema
+ok 5 - missing schema
+  ---
+  duration_ms: 0.1429
+  type: 'test'
+  ...
+# Subtest: missing extension
+ok 6 - missing extension
+  ---
+  duration_ms: 0.1326
+  type: 'test'
+  ...
+# Subtest: DB-V restore mutation gate requires its own explicit target
+ok 7 - DB-V restore mutation gate requires its own explicit target
+  ---
+  duration_ms: 16.0139
+  type: 'test'
+  ...
+# Subtest: rejects remote target before client/query creation
+ok 8 - rejects remote target before client/query creation
+  ---
+  duration_ms: 3.1825
+  type: 'test'
+  ...
+# Subtest: rejects restore target before client/query creation
+ok 9 - rejects restore target before client/query creation
+  ---
+  duration_ms: 0.3922
+  type: 'test'
+  ...
+# Subtest: rejects production target before client/query creation
+ok 10 - rejects production target before client/query creation
+  ---
+  duration_ms: 0.2693
+  type: 'test'
+  ...
+# Subtest: rejects schema target before client/query creation
+ok 11 - rejects schema target before client/query creation
+  ---
+  duration_ms: 0.1849
+  type: 'test'
+  ...
+# Subtest: rejects port target before client/query creation
+ok 12 - rejects port target before client/query creation
+  ---
+  duration_ms: 0.3908
+  type: 'test'
+  ...
+# Subtest: rejects role target before client/query creation
+ok 13 - rejects role target before client/query creation
+  ---
+  duration_ms: 0.2308
+  type: 'test'
+  ...
+# Subtest: missing isolation flags, stale SHA and forbidden restore label fail before any read
+ok 14 - missing isolation flags, stale SHA and forbidden restore label fail before any read
+  ---
+  duration_ms: 0.6736
+  type: 'test'
+  ...
+# Subtest: different credentials/loopback spelling cannot disguise a shared target/shadow
+ok 15 - different credentials/loopback spelling cannot disguise a shared target/shadow
+  ---
+  duration_ms: 0.6931
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag superuser
+ok 16 - rejects live elevated role flag superuser
+  ---
+  duration_ms: 0.6141
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag createRole
+ok 17 - rejects live elevated role flag createRole
+  ---
+  duration_ms: 0.4479
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag createDatabase
+ok 18 - rejects live elevated role flag createDatabase
+  ---
+  duration_ms: 0.1886
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag replication
+ok 19 - rejects live elevated role flag replication
+  ---
+  duration_ms: 0.1008
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag bypassRls
+ok 20 - rejects live elevated role flag bypassRls
+  ---
+  duration_ms: 0.1002
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag privilegedMembership
+ok 21 - rejects live elevated role flag privilegedMembership
+  ---
+  duration_ms: 0.0759
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag globalWrite
+ok 22 - rejects live elevated role flag globalWrite
+  ---
+  duration_ms: 0.11
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag databaseOwner
+ok 23 - rejects live elevated role flag databaseOwner
+  ---
+  duration_ms: 0.2123
+  type: 'test'
+  ...
+# Subtest: rejects live elevated role flag databaseCreate
+ok 24 - rejects live elevated role flag databaseCreate
+  ---
+  duration_ms: 0.3004
+  type: 'test'
+  ...
+# Subtest: rejects changed live database
+ok 25 - rejects changed live database
+  ---
+  duration_ms: 0.2695
+  type: 'test'
+  ...
+# Subtest: rejects changed live role
+ok 26 - rejects changed live role
+  ---
+  duration_ms: 0.1102
+  type: 'test'
+  ...
+# Subtest: rejects changed live sessionRole
+ok 27 - rejects changed live sessionRole
+  ---
+  duration_ms: 0.0998
+  type: 'test'
+  ...
+# Subtest: rejects changed live databaseOid
+ok 28 - rejects changed live databaseOid
+  ---
+  duration_ms: 0.0991
+  type: 'test'
+  ...
+# Subtest: rejects changed live serverIdentity
+ok 29 - rejects changed live serverIdentity
+  ---
+  duration_ms: 0.176
+  type: 'test'
+  ...
+# Subtest: rejects changed live marker
+ok 30 - rejects changed live marker
+  ---
+  duration_ms: 0.106
+  type: 'test'
+  ...
+# Subtest: rejects changed live postgresMajor
+ok 31 - rejects changed live postgresMajor
+  ---
+  duration_ms: 0.0986
+  type: 'test'
+  ...
+# Subtest: rejects changed live timezone
+ok 32 - rejects changed live timezone
+  ---
+  duration_ms: 0.0928
+  type: 'test'
+  ...
+# Subtest: application cannot inherit migration DDL privileges; nonempty greenfield is rejected
+ok 33 - application cannot inherit migration DDL privileges; nonempty greenfield is rejected
+  ---
+  duration_ms: 4.5204
+  type: 'test'
+  ...
+# Subtest: valid distinct target/shadow declarations and live identities reach two read-only probes
+ok 34 - valid distinct target/shadow declarations and live identities reach two read-only probes
+  ---
+  duration_ms: 0.8948
+  type: 'test'
+  ...
+# Subtest: suite catalogue includes both actual asset DB suites and rejects an unknown profile
+ok 35 - suite catalogue includes both actual asset DB suites and rejects an unknown profile
+  ---
+  duration_ms: 0.1823
+  type: 'test'
+  ...
+# Subtest: suite result policy rejects missing cases, skipped tests, wrong files and mismatched identities
+ok 36 - suite result policy rejects missing cases, skipped tests, wrong files and mismatched identities
+  ---
+  duration_ms: 6.5447
+  type: 'test'
+  ...
+# Subtest: Prisma connection URLs are passed through private JS argv, absent from OS arguments
+ok 37 - Prisma connection URLs are passed through private JS argv, absent from OS arguments
+  ---
+  duration_ms: 630.9437
+  type: 'test'
+  ...
+# Subtest: destructive database suites reject restore references and protected aliases before test imports
+ok 38 - destructive database suites reject restore references and protected aliases before test imports
+  ---
+  duration_ms: 24.7281
+  type: 'test'
+  ...
+# Subtest: runtime suite preflight rejects NOT VALID constraints and invalid indexes
+ok 39 - runtime suite preflight rejects NOT VALID constraints and invalid indexes
+  ---
+  duration_ms: 0.3777
+  type: 'test'
+  ...
+# Subtest: Vitest refuses a protected restore target before importing test modules
+ok 40 - Vitest refuses a protected restore target before importing test modules
+  ---
+  duration_ms: 4193.8072
+  type: 'test'
+  ...
+# Subtest: identity probe must itself run in a read-only transaction
+ok 41 - identity probe must itself run in a read-only transaction
+  ---
+  duration_ms: 0.2596
+  type: 'test'
+  ...
+# Subtest: lab provisioning rejects missing authorization and production mode before creating resources
+ok 42 - lab provisioning rejects missing authorization and production mode before creating resources
+  ---
+  duration_ms: 154.5926
+  type: 'test'
+  ...
+# Subtest: source unit gate explicitly excludes DB profiles and rejects empty discovery
+ok 43 - source unit gate explicitly excludes DB profiles and rejects empty discovery
+  ---
+  duration_ms: 0.8358
+  type: 'test'
+  ...
+# Subtest: actual Vitest discovery and JSON report identities agree with the case-count policy (inert fixture)
+ok 44 - actual Vitest discovery and JSON report identities agree with the case-count policy (inert fixture)
+  ---
+  duration_ms: 2414.3381
+  type: 'test'
+  ...
+# Subtest: DB-U requires the limited migration role kind before any live probe
+ok 45 - DB-U requires the limited migration role kind before any live probe
+  ---
+  duration_ms: 0.6332
+  type: 'test'
+  ...
+# Subtest: DB-V requires the limited migration role kind before any live probe
+ok 46 - DB-V requires the limited migration role kind before any live probe
+  ---
+  duration_ms: 0.4881
+  type: 'test'
+  ...
+# Subtest: memory-backed labs reject non-transaction profiles and unknown storage before creating resources
+ok 47 - memory-backed labs reject non-transaction profiles and unknown storage before creating resources
+  ---
+  duration_ms: 197.7002
+  type: 'test'
+  ...
+# Subtest: parent-host creation refuses non-memory scope and a fabricated parent before Docker or target mutation
+ok 48 - parent-host creation refuses non-memory scope and a fabricated parent before Docker or target mutation
+  ---
+  duration_ms: 400.5443
+  type: 'test'
+  ...
+# Subtest: default lab remains exactly G migration and S shadow
+ok 49 - default lab remains exactly G migration and S shadow
+  ---
+  duration_ms: 3.8645
+  type: 'test'
+  ...
+# Subtest: upgrade and backup verification have their own labels databases and limited roles
+ok 50 - upgrade and backup verification have their own labels databases and limited roles
+  ---
+  duration_ms: 0.3653
+  type: 'test'
+  ...
+# Subtest: unknown lab profile rejected restore
+ok 51 - unknown lab profile rejected restore
+  ---
+  duration_ms: 1.5675
+  type: 'test'
+  ...
+# Subtest: unknown lab profile rejected production
+ok 52 - unknown lab profile rejected production
+  ---
+  duration_ms: 0.4749
+  type: 'test'
+  ...
+# Subtest: unknown lab profile rejected neon
+ok 53 - unknown lab profile rejected neon
+  ---
+  duration_ms: 0.2279
+  type: 'test'
+  ...
+# Subtest: unknown lab profile rejected 
+ok 54 - unknown lab profile rejected 
+  ---
+  duration_ms: 0.1312
+  type: 'test'
+  ...
+# Subtest: unknown lab profile rejected null
+ok 55 - unknown lab profile rejected null
+  ---
+  duration_ms: 0.218
+  type: 'test'
+  ...
+# Subtest: upgrade pair cannot fall back to greenfield URLs
+ok 56 - upgrade pair cannot fall back to greenfield URLs
+  ---
+  duration_ms: 0.4577
+  type: 'test'
+  ...
+# Subtest: synthetic PDF has a consistent xref and exact stream length
+ok 57 - synthetic PDF has a consistent xref and exact stream length
+  ---
+  duration_ms: 3.7053
+  type: 'test'
+  ...
+# Subtest: packet records actual source bytes owner identities and pending reviews without creating an asset
+ok 58 - packet records actual source bytes owner identities and pending reviews without creating an asset
+  ---
+  duration_ms: 1112.5325
+  type: 'test'
+  ...
+# Subtest: new manifest keeps every historical row and all old rejection evidence unchanged
+ok 59 - new manifest keeps every historical row and all old rejection evidence unchanged
+  ---
+  duration_ms: 101.495
+  type: 'test'
+  ...
+# Subtest: packet cannot overwrite an existing source bundle
+ok 60 - packet cannot overwrite an existing source bundle
+  ---
+  duration_ms: 236.837
+  type: 'test'
+  ...
+# Subtest: packet rejects an owner belonging to another student
+ok 61 - packet rejects an owner belonging to another student
+  ---
+  duration_ms: 84.7866
+  type: 'test'
+  ...
+# Subtest: packet rejects a different binding or asset without mutating the manifest
+ok 62 - packet rejects a different binding or asset without mutating the manifest
+  ---
+  duration_ms: 376.2534
+  type: 'test'
+  ...
+# Subtest: packet rejects a path inside the checkout before creating files
+ok 63 - packet rejects a path inside the checkout before creating files
+  ---
+  duration_ms: 6.5406
+  type: 'test'
+  ...
+# Subtest: packet rejects missing SHA run or owner contract
+ok 64 - packet rejects missing SHA run or owner contract
+  ---
+  duration_ms: 2.3022
+  type: 'test'
+  ...
+# Subtest: replays actual PG16 ACTIVE row without rewriting quarantine scan locators to clean
+ok 65 - replays actual PG16 ACTIVE row without rewriting quarantine scan locators to clean
+  ---
+  duration_ms: 23.926
+  type: 'test'
+  ...
+# Subtest: rejects a completed activation whose expected digest differs from actual bytes
+ok 66 - rejects a completed activation whose expected digest differs from actual bytes
+  ---
+  duration_ms: 1.4113
+  type: 'test'
+  ...
+# Subtest: trust check accepts distinct raw and sanitized digests without claiming owner approval
+ok 67 - trust check accepts distinct raw and sanitized digests without claiming owner approval
+  ---
+  duration_ms: 1.264
+  type: 'test'
+  ...
+# Subtest: rejects FK existence with INITIATED row
+ok 68 - rejects FK existence with INITIATED row
+  ---
+  duration_ms: 0.3106
+  type: 'test'
+  ...
+# Subtest: rejects foreign owner
+ok 69 - rejects foreign owner
+  ---
+  duration_ms: 0.2709
+  type: 'test'
+  ...
+# Subtest: rejects original-file recovery claim
+ok 70 - rejects original-file recovery claim
+  ---
+  duration_ms: 0.162
+  type: 'test'
+  ...
+# Subtest: rejects permanent retention shortcut
+ok 71 - rejects permanent retention shortcut
+  ---
+  duration_ms: 0.2766
+  type: 'test'
+  ...
+# Subtest: rejects retry extends fixed deadline
+ok 72 - rejects retry extends fixed deadline
+  ---
+  duration_ms: 0.2079
+  type: 'test'
+  ...
+# Subtest: rejects expired asset
+ok 73 - rejects expired asset
+  ---
+  duration_ms: 0.4941
+  type: 'test'
+  ...
+# Subtest: rejects fabricated legal hold
+ok 74 - rejects fabricated legal hold
+  ---
+  duration_ms: 0.7132
+  type: 'test'
+  ...
+# Subtest: rejects raw checksum substituted
+ok 75 - rejects raw checksum substituted
+  ---
+  duration_ms: 0.3709
+  type: 'test'
+  ...
+# Subtest: rejects scan without byte binding
+ok 76 - rejects scan without byte binding
+  ---
+  duration_ms: 0.2423
+  type: 'test'
+  ...
+# Subtest: rejects missing sanitizer evidence
+ok 77 - rejects missing sanitizer evidence
+  ---
+  duration_ms: 0.218
+  type: 'test'
+  ...
+# Subtest: rejects pending activation
+ok 78 - rejects pending activation
+  ---
+  duration_ms: 0.1338
+  type: 'test'
+  ...
+# Subtest: rejects unscanned sanitized output
+ok 79 - rejects unscanned sanitized output
+  ---
+  duration_ms: 0.1289
+  type: 'test'
+  ...
+# Subtest: rejects changed consent
+ok 80 - rejects changed consent
+  ---
+  duration_ms: 0.1756
+  type: 'test'
+  ...
+# Subtest: rejects changed financial history
+ok 81 - rejects changed financial history
+  ---
+  duration_ms: 0.3253
+  type: 'test'
+  ...
+# Subtest: selected 109-migration predecessor is a checksummed prefix of the 110-migration source
+ok 82 - selected 109-migration predecessor is a checksummed prefix of the 110-migration source
+  ---
+  duration_ms: 12122.7816
+  type: 'test'
+  ...
+# Subtest: candidate refuses non-commit input HEAD
+ok 83 - candidate refuses non-commit input HEAD
+  ---
+  duration_ms: 0.5979
+  type: 'test'
+  ...
+# Subtest: candidate refuses non-commit input --help
+ok 84 - candidate refuses non-commit input --help
+  ---
+  duration_ms: 0.1208
+  type: 'test'
+  ...
+# Subtest: candidate refuses non-commit input main;anything
+ok 85 - candidate refuses non-commit input main;anything
+  ---
+  duration_ms: 0.1137
+  type: 'test'
+  ...
+# Subtest: candidate refuses non-commit input ../other
+ok 86 - candidate refuses non-commit input ../other
+  ---
+  duration_ms: 0.1372
+  type: 'test'
+  ...
+# Subtest: candidate refuses non-commit input 
+ok 87 - candidate refuses non-commit input 
+  ---
+  duration_ms: 0.1033
+  type: 'test'
+  ...
+# Subtest: candidate refuses non-commit input null
+ok 88 - candidate refuses non-commit input null
+  ---
+  duration_ms: 0.1843
+  type: 'test'
+  ...
+# Subtest: a commit cannot be its own predecessor
+ok 89 - a commit cannot be its own predecessor
+  ---
+  duration_ms: 114.0974
+  type: 'test'
+  ...
+# Subtest: native identity accepts only the recorded cluster and binary
+ok 90 - native identity accepts only the recorded cluster and binary
+  ---
+  duration_ms: 55.6943
+  type: 'test'
+  ...
+# Subtest: native identity rejects a contract pointing outside the recorded local server
+ok 91 - native identity rejects a contract pointing outside the recorded local server
+  ---
+  duration_ms: 21.526
+  type: 'test'
+  ...
+# Subtest: native tools reject privileged roles and non-lab or remote targets
+ok 92 - native tools reject privileged roles and non-lab or remote targets
+  ---
+  duration_ms: 0.8915
+  type: 'test'
+  ...
+1..92
+# tests 92
+# suites 0
+# pass 92
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 12581.7027
