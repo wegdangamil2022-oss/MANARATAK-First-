@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const verifier = fileURLToPath(
@@ -103,6 +104,28 @@ test('source import checks ignore fixture strings and resolve declarations and f
   });
   assert.equal(result.status, 0);
   assert.deepEqual(result.report.brokenRelativeImports, []);
+});
+
+test('archived harness imports require exact source identity, size and digest; active imports still fail', () => {
+  const sha = 'a'.repeat(40), directory = `docs/reviews/evidence/post28/${sha}/lab`;
+  const harness = "import './original-external-checkout/tool.mjs';";
+  const index = { sourceSha: sha, files: [{ path: 'probe.mjs', bytes: Buffer.byteLength(harness), sha256: createHash('sha256').update(harness).digest('hex') }] };
+  const files = { [`${directory}/probe.mjs`]: harness, [`${directory}/evidence-index.json`]: JSON.stringify(index) };
+  const valid = inspect(files);
+  assert.equal(valid.status, 0);
+  assert.deepEqual(valid.report.archivedHarnesses, [`${directory}/probe.mjs`]);
+  for (const changed of [
+    { ...files, [`${directory}/probe.mjs`]: harness + ' // changed' },
+    { ...files, [`${directory}/evidence-index.json`]: JSON.stringify({ ...index, sourceSha: 'b'.repeat(40) }) },
+    { [`${directory}/probe.mjs`]: harness },
+  ]) {
+    const rejected = inspect(changed);
+    assert.equal(rejected.status, 1);
+    assert.equal(rejected.report.evidenceIntegrityIssues.length, 1);
+  }
+  const active = inspect({ ...files, 'scripts/active.mjs': harness });
+  assert.equal(active.status, 1);
+  assert.deepEqual(active.report.brokenRelativeImports, ['scripts/active.mjs: ./original-external-checkout/tool.mjs']);
 });
 
 test('reviewed acceptance suite configs are allowed while unregistered hidden configs are rejected', () => {

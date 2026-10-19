@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
+import { createHash } from 'node:crypto';
 
 const root = process.cwd();
 const allowedRootDirectories = new Set(['.devcontainer', '.git', '.github', '.husky', 'apps', 'config', 'docs', 'packages', 'scripts', 'storage', 'tests', 'vendor', 'workspace']);
@@ -84,7 +85,30 @@ const temporaryArtifacts = allFiles.map((file) => path.relative(root, file).repl
     // Reviewed validation logs are project evidence, not disposable runtime output.
     && !/^docs\/(?:remediation|reviews)\/evidence\/.*\.log$/i.test(file));
 
-const sourceFiles = allFiles.filter((file) => /\.(?:ts|tsx|js|jsx|mjs|cjs)$/.test(file) && !path.relative(root, file).startsWith(`workspace${path.sep}`));
+// Archived lab harnesses retain their original external working-directory imports.
+// Treat only indexed, byte-verified copies as evidence, never as runnable source.
+const archivedHarnesses = [], evidenceIntegrityIssues = [];
+function isVerifiedArchivedHarness(file) {
+  const relative = path.relative(root, file).replaceAll('\\', '/');
+  const match = relative.match(/^docs\/reviews\/evidence\/post28\/([a-f0-9]{40})\/([^/]+)\/(.+)$/);
+  if (!match) return false;
+  const directory = path.join(root, 'docs/reviews/evidence/post28', match[1], match[2]);
+  try {
+    const indexFile = path.join(directory, 'evidence-index.json');
+    if (fs.lstatSync(indexFile).isSymbolicLink() || fs.lstatSync(file).isSymbolicLink()) throw new Error('SYMLINK');
+    const index = JSON.parse(fs.readFileSync(indexFile, 'utf8'));
+    const rows = index.files?.filter(row => row.path === match[3]);
+    const bytes = fs.readFileSync(file);
+    if (index.sourceSha !== match[1] || rows?.length !== 1 || rows[0].bytes !== bytes.length ||
+        rows[0].sha256 !== createHash('sha256').update(bytes).digest('hex')) throw new Error('DIGEST');
+    archivedHarnesses.push(relative);
+    return true;
+  } catch {
+    evidenceIntegrityIssues.push(relative);
+    return false;
+  }
+}
+const sourceFiles = allFiles.filter((file) => /\.(?:ts|tsx|js|jsx|mjs|cjs)$/.test(file) && !path.relative(root, file).startsWith(`workspace${path.sep}`) && !isVerifiedArchivedHarness(file));
 const brokenRelativeImports = [];
 for (const file of sourceFiles) {
   const source = fs.readFileSync(file, 'utf8');
@@ -119,6 +143,8 @@ const report = {
   unexpectedRootFiles,
   temporaryArtifacts,
   brokenRelativeImports,
+  archivedHarnesses,
+  evidenceIntegrityIssues,
   brokenImportantLinks,
   packageManager: 'npm',
   activeLockfiles: ['package-lock.json'].filter((file) => fs.existsSync(path.join(root, file))),
@@ -132,6 +158,6 @@ const report = {
 console.log(JSON.stringify(report, null, 2));
 if (
   unexpectedRootDirectories.length || unexpectedRootFiles.length || temporaryArtifacts.length ||
-  brokenRelativeImports.length || brokenImportantLinks.length || report.competingRootLockfiles.length || report.activeLockfiles.length !== 1 ||
+  brokenRelativeImports.length || evidenceIntegrityIssues.length || brokenImportantLinks.length || report.competingRootLockfiles.length || report.activeLockfiles.length !== 1 ||
   !report.internationalTestSourcePresent || !report.majorCatalogSourcePresent || report.universityImportFilesInRoot.length
 ) process.exitCode = 1;

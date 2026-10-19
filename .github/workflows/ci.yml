@@ -153,6 +153,46 @@ jobs:
           path: artifact-retrieval.txt
           if-no-files-found: error
 
+  linux-runtime-review:
+    name: Linux x64 review image and native runtime
+    needs: [source-quality, artifact-retrieval]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Retrieve exact reviewed units outside the checkout
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_MANIFEST_SHA256: ${{ needs.source-quality.outputs.manifest-sha256 }}
+        run: |
+          mkdir "$RUNNER_TEMP/r07-linux"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" -n "manaratak-release-artifacts-$GITHUB_SHA" -D "$RUNNER_TEMP/r07-linux/artifacts"
+          printf '%s  %s\n' "$EXPECTED_MANIFEST_SHA256" "$RUNNER_TEMP/r07-linux/artifacts/release-manifest.json" | sha256sum --check
+          node scripts/release/verify-release-artifacts.mjs "$RUNNER_TEMP/r07-linux/artifacts"
+          mkdir "$RUNNER_TEMP/r07-linux/unpacked-api"
+          tar -xf "$RUNNER_TEMP/r07-linux/artifacts/manaratak-api-$GITHUB_SHA.tar" -C "$RUNNER_TEMP/r07-linux/unpacked-api"
+      - name: Install and verify a fresh locked Linux runtime layer
+        run: node scripts/release/post28-prepare-runtime-layer.mjs "$RUNNER_TEMP/r07-linux"
+      - name: Build digest-pinned non-root image and load native modules without network
+        run: node scripts/release/post28-linux-image-probe.mjs "$RUNNER_TEMP/r07-linux"
+      - name: Retain review proof without publishing the image
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: linux-runtime-review-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/r07-linux/linux-image-probe.json
+            ${{ runner.temp }}/r07-linux/runtime-layer.json
+            ${{ runner.temp }}/r07-linux/runtime-install.log
+          if-no-files-found: error
+
   translation-quality:
     name: Translation quality gates
     runs-on: ubuntu-latest
