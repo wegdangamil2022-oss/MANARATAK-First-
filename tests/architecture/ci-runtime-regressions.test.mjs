@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, mkdtempSync, rmSync, rmdirSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
@@ -85,7 +87,9 @@ test('source CI catches inventory drift and negative guard contracts before the 
   assert.match(runner, /if \(result.status !== 0\) process.exit/);
 });
 
-test('release build and retrieval stop on command failure instead of certifying stale artifacts', () => {
+test('release build and retrieval stop on command failure instead of certifying stale artifacts', (t) => {
+  const cwd=mkdtempSync(path.join(os.tmpdir(),'r07-ci-failure-'));
+  t.after(()=>{rmSync(path.join(cwd,'artifact-retrieval.txt'),{force:true});rmdirSync(cwd);});
   const workflow=read('.github/workflows/ci.yml');
   const bash=process.platform==='win32'?'C:/Program Files/Git/bin/bash.exe':'bash';
   const block=name=>{
@@ -97,9 +101,9 @@ test('release build and retrieval stop on command failure instead of certifying 
   const build=block('Build deterministic immutable release artifacts');
   assert.match(build,/RELEASE_ARTIFACT_OUTPUT_DIR/);
   assert.match(workflow,/path: \$\{\{ runner.temp \}\}\/r07-built-release/);
-  const buildFailure=spawnSync(bash,['-c',"npm(){ return 73; }; export -f npm;\n"+build+'\necho UNSAFE_CONTINUATION'],{encoding:'utf8',env:{...process.env,RELEASE_ARTIFACT_OUTPUT_DIR:'/unused',GITHUB_OUTPUT:'/unused'}});
+  const buildFailure=spawnSync(bash,['-c',"npm(){ return 73; }; export -f npm;\n"+build+'\necho UNSAFE_CONTINUATION'],{cwd,encoding:'utf8',env:{...process.env,RELEASE_ARTIFACT_OUTPUT_DIR:'/unused',GITHUB_OUTPUT:'/unused'}});
   assert.equal(buildFailure.status,73,buildFailure.stderr);assert.doesNotMatch(buildFailure.stdout,/UNSAFE_CONTINUATION/);
   const retrieval=block('Verify independently retained manifest digest and every unit');
-  const retrievalFailure=spawnSync(bash,['-c',"sha256sum(){ cat >/dev/null; return 0; }; node(){ return 74; }; export -f sha256sum node;\n"+retrieval+'\necho UNSAFE_CONTINUATION'],{encoding:'utf8',env:{...process.env,EXPECTED_MANIFEST_SHA256:'a'.repeat(64),RUNNER_TEMP:'/unused'}});
+  const retrievalFailure=spawnSync(bash,['-c',"sha256sum(){ cat >/dev/null; return 0; }; node(){ return 74; }; export -f sha256sum node;\n"+retrieval+'\necho UNSAFE_CONTINUATION'],{cwd,encoding:'utf8',env:{...process.env,EXPECTED_MANIFEST_SHA256:'a'.repeat(64),RUNNER_TEMP:'/unused'}});
   assert.equal(retrievalFailure.status,74,retrievalFailure.stderr);assert.doesNotMatch(retrievalFailure.stdout,/UNSAFE_CONTINUATION/);
 });
