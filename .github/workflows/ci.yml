@@ -108,7 +108,7 @@ jobs:
         run: npm run build
       - name: Unit and source integration tests
         id: unit
-        run: npm run test:unit
+        run: node scripts/ci/run-source-unit-with-diagnostics.mjs
       - name: Build deterministic immutable release artifacts
         id: artifacts
         run: |

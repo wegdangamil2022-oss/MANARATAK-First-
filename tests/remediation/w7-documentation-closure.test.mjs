@@ -1,10 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
   extractDeclaredComposeServices,
   findProductionReadyStatusClaims,
   hasRebaselineOpenStatusRows,
   parseComposeServiceNames,
+  sourceCiBrowserBoundaryDeclared,
 } from '../../scripts/lib/w7-documentation-contracts.mjs';
 
 test('readiness guard rejects Production Ready only when used as an active status claim', () => {
@@ -14,6 +16,18 @@ test('readiness guard rejects Production Ready only when used as an active statu
   ]);
   assert.equal(findings.length, 1);
   assert.equal(findings[0].file, 'bad.md');
+});
+
+test('source CI permits only the explicitly authorized dependency-gated Linux browser lab',()=>{
+  const ci=fs.readFileSync(new URL('../../.github/workflows/ci.yml',import.meta.url),'utf8');
+  assert.equal(sourceCiBrowserBoundaryDeclared(ci),true);
+  for(const altered of [
+    ci.replace('needs: [source-quality, artifact-retrieval]','needs: source-quality'),
+    ci.replace("POST28_LINUX_RUNTIME_REVIEW: 'YES'","POST28_LINUX_RUNTIME_REVIEW: 'NO'"),
+    ci.replace('playwright install --with-deps chromium','playwright test'),
+    ci.replace('run: npm run quality:source','run: npx playwright test'),
+    ci.replace('  linux-runtime-review:','  unrestricted-browser:'),
+  ])assert.equal(sourceCiBrowserBoundaryDeclared(altered),false);
 });
 
 test('readiness guard accepts SOURCE_COMPLETE with runtime pending', () => {

@@ -3,7 +3,7 @@
 # Containerization, CI and Release Operations Manual
 
 **Status:** SOURCE_COMPLETE — RUNTIME_EVIDENCE_PENDING  
-**Updated:** 2026-09-07
+**Updated:** 2026-10-19
 
 This manual describes the executable repository today. It does not claim application Docker images, deployed environments, browser E2E, provider runtime, or production readiness unless those artifacts actually exist and are verified.
 
@@ -16,7 +16,7 @@ This manual describes the executable repository today. It does not claim applica
 - `redis`
 - `mailpit`
 
-There are no `api`, `web`, or `admin` Compose services and no application Dockerfiles are claimed by this manual. Application processes run through their normal npm workspace commands outside Compose.
+There are no `api`, `web`, or `admin` Compose services. Application processes run through their normal npm workspace commands outside Compose. A separate Linux review image is built by the isolated CI diagnostic described below; this does not turn the development Compose file into a deployment topology.
 
 Generate guarded local credentials:
 
@@ -49,7 +49,7 @@ A source-only PASS is not runtime certification.
 
 ## 3. Canonical CI workflow
 
-`.github/workflows/ci.yml` contains four jobs:
+`.github/workflows/ci.yml` contains six jobs:
 
 1. **Full source closure gates**
    - checkout and Node 22.16.0 setup;
@@ -64,13 +64,20 @@ A source-only PASS is not runtime certification.
 2. **Translation quality gates**
    - dependency install;
    - source translation and semantic Arabic-copy verification.
-3. **Isolated Google AI Studio Web preview**
-   - verifies, tests and builds the isolated Web preview and checks its generated environment inventory;
-   - does not contact Google AI Studio or a database.
-4. **Deployment configuration**
+3. **R08 isolated Redis and Linux worker shutdown**
+   - provisions a new restricted Redis lab and exercises real Linux shutdown signals;
+   - does not contact an existing Redis or database.
+4. **Retrieve and verify immutable artifacts from Actions storage**
+   - retrieves this run's exact-SHA API/Web/Admin units and verifies the independently retained manifest digest, unit hashes and SBOM.
+5. **Linux x64 review image and native runtime**
+   - depends on source closure and artifact retrieval;
+   - prepares a fresh locked Linux runtime and non-root image, then checks native dependencies;
+   - the explicitly authorized diagnostic provisions a new synthetic PostgreSQL16 lab and exercises the image and HTTPS student browser journey; workers and external providers remain disabled;
+   - source presence is preparation only: acceptance requires the actual run receipt, cleanup and matching source SHA.
+6. **Deployment configuration**
    - `docker compose config` only; it validates the dependency Compose file and does not build application containers.
 
-The canonical CI does **not** claim a Playwright browser-E2E job. Browser E2E remains runtime evidence unless a dedicated executable workflow is added and verified.
+General source jobs do not execute browser E2E. Playwright is restricted to the dependency-gated Linux review lab with its explicit authorization flag. That limited journey does not establish full browser acceptance or production readiness. Google AI Studio execution and its preview job have been retired.
 
 ## 4. Immutable release and environment promotion
 
@@ -108,4 +115,4 @@ The following are not converted into source PASS results:
 
 ## 7. Source-checked operational paths
 
-W7 verifies that every script/workflow/file path named as executable in this manual exists and that Compose service claims equal the actual `docker-compose.yml` service keys. A documentation change that reintroduces nonexistent deployment wrappers, application Compose services, or browser-E2E claims inside the canonical CI workflow must fail source verification.
+W7 verifies that every script/workflow/file path named as executable in this manual exists and that Compose service claims equal the actual `docker-compose.yml` service keys. Nonexistent deployment wrappers, application Compose service claims, and browser execution outside the explicitly authorized Linux review boundary fail source verification.

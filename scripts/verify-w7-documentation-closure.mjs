@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { extractDeclaredComposeServices, extractOperationalPaths, findProductionReadyStatusClaims, hasRebaselineOpenStatusRows, parseComposeServiceNames } from './lib/w7-documentation-contracts.mjs';
+import { extractDeclaredComposeServices, extractOperationalPaths, findProductionReadyStatusClaims, hasRebaselineOpenStatusRows, parseComposeServiceNames, sourceCiBrowserBoundaryDeclared } from './lib/w7-documentation-contracts.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
@@ -52,7 +52,7 @@ const actualServices = parseComposeServiceNames(compose);
 const claimedServices = extractDeclaredComposeServices(manual);
 const missingPaths = extractOperationalPaths(manual).filter((rel) => !exists(rel));
 const ci = read('.github/workflows/ci.yml');
-check('MNT-AUD-0052', JSON.stringify(actualServices) === JSON.stringify(claimedServices) && missingPaths.length === 0 && !manual.includes('local-compose-up.sh') && !manual.includes('local-compose-down.sh') && !/playwright/i.test(ci) && exists('.github/workflows/release-promotion.yml'), `services=${actualServices.join(',')} missingPaths=${missingPaths.join(',')}`);
+check('MNT-AUD-0052', JSON.stringify(actualServices) === JSON.stringify(claimedServices) && missingPaths.length === 0 && !manual.includes('local-compose-up.sh') && !manual.includes('local-compose-down.sh') && sourceCiBrowserBoundaryDeclared(ci) && exists('.github/workflows/release-promotion.yml'), `services=${actualServices.join(',')} missingPaths=${missingPaths.join(',')}`);
 
 // 109: root layout matches actual packages.
 const rootReadme = read('README.md');
