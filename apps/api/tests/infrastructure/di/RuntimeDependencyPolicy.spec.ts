@@ -121,6 +121,24 @@ describe('RuntimeDependencyPolicy', () => {
     expect(() => createRateLimiterForRuntime({ NODE_ENV: 'production' })).toThrow(/REDIS_URL/);
   });
 
+  it('honors an explicitly configured Redis limiter in an isolated test runtime', async () => {
+    const evaluate = vi.fn().mockResolvedValue([1, 60000]);
+    const client = { eval: evaluate, buildKey: (feature: string, key: string) => `isolated:${feature}:${key}` };
+    const factory = vi.fn(() => client as any);
+    const limiter = createRateLimiterForRuntime({ NODE_ENV: 'test', REDIS_URL: 'redis://127.0.0.1:16379', REDIS_NAMESPACE: 'isolated:' }, undefined, factory as any);
+    expect(limiter.kind).toBe('real');
+    expect(factory).toHaveBeenCalledTimes(1);
+    expect((await limiter.consume('synthetic-client', 8, 60000)).allowed).toBe(true);
+    expect(evaluate.mock.calls[0][1].keys[0]).toMatch(/^isolated:rate-limit:/);
+  });
+
+  it('does not silently replace a configured Redis outage with local counters', async () => {
+    const error = new Error('Synthetic isolated Redis unavailable');
+    const client = { eval: vi.fn().mockRejectedValue(error) };
+    const limiter = createRateLimiterForRuntime({ NODE_ENV: 'development', REDIS_URL: 'redis://127.0.0.1:16379' }, undefined, vi.fn(() => client as any) as any);
+    await expect(limiter.consume('synthetic-client', 8, 60000)).rejects.toBe(error);
+  });
+
   it('builds a production-capable Redis limiter from the composition boundary', () => {
     const evalMock = vi.fn().mockResolvedValue([1, 60_000]);
     const fakeClient = {
