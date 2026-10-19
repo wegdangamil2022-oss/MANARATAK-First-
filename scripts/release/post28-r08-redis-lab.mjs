@@ -10,6 +10,8 @@ const run=randomUUID(),namespace=`post28:r08:${run}:`,name='post28-r08-'+run,roo
 const sourceSha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert.equal(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim(),'');
 const directory=fs.mkdtempSync(path.join(os.tmpdir(),'post28-r08-'));fs.chmodSync(directory,0o700);
+// Redis ACL #<hash> requires SHA-256. This is a fresh 256-bit machine secret
+// for one disposable container, never a stored human password.
 const password=randomBytes(32).toString('hex'),passwordHash=createHash('sha256').update(password).digest('hex');
 const configFile=path.join(directory,'redis.conf');
 fs.writeFileSync(configFile,`bind 0.0.0.0\nport 6379\nprotected-mode yes\nsave ""\nappendonly no\nuser default off\nuser post28 on #${passwordHash} ~${namespace}* +ping +get +set +eval +incr +pexpire +pttl +quit +hello +client|setinfo +client|setname\n`,{mode:0o444,flag:'wx'});

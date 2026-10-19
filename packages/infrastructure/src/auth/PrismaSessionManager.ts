@@ -9,6 +9,8 @@ export class PrismaSessionManager implements ISessionManager {
   ) {}
 
   private hashToken(token: string): string {
+    // Stable lookup digest of a 256-bit random opaque refresh token, not a
+    // password KDF. Changing this format would invalidate existing sessions.
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 

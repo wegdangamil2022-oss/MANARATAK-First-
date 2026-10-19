@@ -62,11 +62,35 @@ export class AssetValidator {
     const text = new TextDecoder('utf-8', { fatal: true }).decode(input.bytes);
     if (
       !/^\s*<svg[\s>]/i.test(text) ||
-      /<!DOCTYPE|<!ENTITY|<\?|<\s*\/?(?:script|foreignObject|iframe|object|embed)\b|<[^>]*\s+on[a-z]+\s*=/i.test(
-        text,
-      )
+      /<!DOCTYPE|<!ENTITY|<\?/i.test(text)
     )
       throw new Error('CERTIFICATE_GENERATED_SVG_UNSAFE');
+    // Consume each tag once. The former overlapping whitespace expressions
+    // could backtrack quadratically on a large generated upload.
+    for (let start = 0; start < text.length; start++) {
+      if (text[start] !== '<') continue;
+      let quote: string | undefined;
+      let end = start + 1;
+      for (; end < text.length; end++) {
+        const character = text[end];
+        if (quote) {
+          if (character === quote) quote = undefined;
+        } else if (character === '"' || character === "'") {
+          quote = character;
+        } else if (character === '<') {
+          throw new Error('CERTIFICATE_GENERATED_SVG_UNSAFE');
+        } else if (character === '>') break;
+      }
+      if (end === text.length)
+        throw new Error('CERTIFICATE_GENERATED_SVG_UNSAFE');
+      const tag = text.slice(start + 1, end);
+      if (
+        /^\s*\/?(?:script|foreignObject|iframe|object|embed)\b/i.test(tag) ||
+        /(?:^|\s)on[a-z]+\s*=/i.test(tag)
+      )
+        throw new Error('CERTIFICATE_GENERATED_SVG_UNSAFE');
+      start = end;
+    }
     for (const match of text.matchAll(
       /(?:href|xlink:href)\s*=\s*["']([^"']*)["']/gi,
     ))
@@ -76,13 +100,25 @@ export class AssetValidator {
         )
       )
         throw new Error('CERTIFICATE_GENERATED_SVG_EXTERNAL_REFERENCE');
-    for (const match of text.matchAll(/url\(\s*["']?([^"')\s]+)["']?\s*\)/gi))
+    const lower = text.toLowerCase();
+    for (let start = lower.indexOf('url('); start !== -1; ) {
+      const end = text.indexOf(')', start + 4);
+      if (end === -1)
+        throw new Error('CERTIFICATE_GENERATED_SVG_EXTERNAL_REFERENCE');
+      let target = text.slice(start + 4, end).trim();
+      if (target[0] === '"' || target[0] === "'") {
+        if (target.at(-1) !== target[0])
+          throw new Error('CERTIFICATE_GENERATED_SVG_EXTERNAL_REFERENCE');
+        target = target.slice(1, -1);
+      }
       if (
         !/^(?:#[A-Za-z0-9_-]+|data:(?:font\/(?:ttf|otf|woff2?)|image\/(?:png|jpeg));base64,[A-Za-z0-9+/=]+)$/.test(
-          match[1],
+          target,
         )
       )
         throw new Error('CERTIFICATE_GENERATED_SVG_EXTERNAL_REFERENCE');
+      start = lower.indexOf('url(', end + 1);
+    }
     if (input.kind === 'QR' && /<\s*(?:text|tspan|image|style)\b/i.test(text))
       throw new Error('CERTIFICATE_GENERATED_QR_PERSONAL_CONTENT_FORBIDDEN');
   }
