@@ -1,8 +1,5 @@
 name: ABSHEER complete source rebranding
 on:
-  push:
-    branches:
-      - 'handoff/absheer-clean-base-2026-10-19'
   workflow_dispatch:
 permissions:
   contents: write

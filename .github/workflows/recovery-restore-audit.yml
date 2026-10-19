@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   restore-audit:
-    if: github.repository == 'wegdangamil2022-oss/MANARATAK-First-' && vars.MANARATAK_RECOVERY_AUDIT_ENABLED == 'true'
+    if: github.repository == 'wegdangamil2022-oss/ABSHEER-First-' && vars.ABSHEER_RECOVERY_AUDIT_ENABLED == 'true'
     runs-on: ubuntu-latest
     environment: recovery-audit
     env:
@@ -39,7 +39,7 @@ jobs:
           RECOVERY_DATABASE_BACKUP_FILE: ${{ secrets.RECOVERY_DATABASE_BACKUP_FILE }}
           RECOVERY_ASSET_RESTORE_DIR: ${{ secrets.RECOVERY_ASSET_RESTORE_DIR }}
           RECOVERY_ASSET_MANIFEST: ${{ secrets.RECOVERY_ASSET_MANIFEST }}
-          MANARATAK_DATABASE_INTEGRATION_ENABLED: 'true'
+          ABSHEER_DATABASE_INTEGRATION_ENABLED: 'true'
         run: npm run recovery:restore:drill
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
         if: always()

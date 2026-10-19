@@ -20,16 +20,16 @@ jobs:
         env:
           POSTGRES_USER: certificate_fixture
           POSTGRES_PASSWORD: ${{ secrets.ABSHEER_CI_POSTGRES_PASSWORD }}
-          POSTGRES_DB: manaratak_certificate_verification
+          POSTGRES_DB: absheer_certificate_verification
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U certificate_fixture -d manaratak_certificate_verification"
+          --health-cmd "pg_isready -U certificate_fixture -d absheer_certificate_verification"
           --health-interval 10s --health-timeout 5s --health-retries 5
     env:
       NODE_ENV: test
       CERTIFICATE_RUNTIME_ISOLATED: '1'
-      DATABASE_URL: postgresql://certificate_fixture:certificate_fixture_only@127.0.0.1:5432/manaratak_certificate_verification
-      DIRECT_URL: postgresql://certificate_fixture:certificate_fixture_only@127.0.0.1:5432/manaratak_certificate_verification
+      DATABASE_URL: postgresql://certificate_fixture:certificate_fixture_only@127.0.0.1:5432/absheer_certificate_verification
+      DIRECT_URL: postgresql://certificate_fixture:certificate_fixture_only@127.0.0.1:5432/absheer_certificate_verification
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020

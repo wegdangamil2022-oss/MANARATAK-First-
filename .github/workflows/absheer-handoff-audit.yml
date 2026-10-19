@@ -32,5 +32,5 @@ jobs:
       - run: npm ci
       - run: npm run db:generate
       - run: npm run typecheck
-      - run: npm run build -w @manaratak/web
-      - run: npm run build -w @manaratak/admin
+      - run: npm run build -w @absheer/web
+      - run: npm run build -w @absheer/admin

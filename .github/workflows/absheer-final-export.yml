@@ -1,0 +1,42 @@
+name: ABSHEER final ZIP and branch cleanup
+on:
+  push:
+    branches: ['handoff/absheer-clean-base-2026-10-19']
+permissions:
+  contents: write
+jobs:
+  finish-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the isolated handoff snapshot
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Audit the final snapshot before export
+        run: |
+          node scripts/rebrand-absheer.mjs --check
+          node scripts/security/verify-absheer-handoff.mjs
+          node --test tests/handoff/rebrand-absheer.test.mjs tests/handoff/absheer-handoff.test.mjs
+      - name: Package entire ABSHEER project without Git history
+        run: |
+          git archive --format=zip --output=ABSHEER-FULL-PROJECT.zip HEAD
+          test -s ABSHEER-FULL-PROJECT.zip
+          unzip -t ABSHEER-FULL-PROJECT.zip | tail -2
+          sha256sum ABSHEER-FULL-PROJECT.zip
+      - name: Publish downloadable ABSHEER project ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: ABSHEER-FULL-PROJECT
+          path: ABSHEER-FULL-PROJECT.zip
+          retention-days: 90
+          if-no-files-found: error
+          compression-level: 0
+      - name: Delete handoff branch from original MANARATAK repository
+        run: |
+          git push origin --delete 'handoff/absheer-clean-base-2026-10-19'

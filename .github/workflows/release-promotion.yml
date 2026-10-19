@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   validation:
-    if: github.repository == 'wegdangamil2022-oss/MANARATAK-First-' && vars.MANARATAK_RELEASE_ENABLED == 'true' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == 'wegdangamil2022-oss/MANARATAK-First-'))
+    if: github.repository == 'wegdangamil2022-oss/ABSHEER-First-' && vars.ABSHEER_RELEASE_ENABLED == 'true' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == 'wegdangamil2022-oss/ABSHEER-First-'))
     runs-on: ubuntu-latest
     environment: validation
     env:
@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           if [ -n "$SOURCE_RUN_ID" ]; then
-            gh run download "$SOURCE_RUN_ID" -n "manaratak-release-artifacts-$SOURCE_SHA" -D release-artifacts
+            gh run download "$SOURCE_RUN_ID" -n "absheer-release-artifacts-$SOURCE_SHA" -D release-artifacts
           else
             npm run build
             GITHUB_SHA="$SOURCE_SHA" npm run release:artifacts
@@ -58,14 +58,14 @@ jobs:
           RELEASE_EVIDENCE_PUBLIC_KEY: ${{ secrets.RELEASE_EVIDENCE_PUBLIC_KEY }}
           RELEASE_SOURCE_EVIDENCE_PUBLIC_KEY: ${{ secrets.RELEASE_SOURCE_EVIDENCE_PUBLIC_KEY }}
           RELEASE_RUNTIME_EVIDENCE_PUBLIC_KEY: ${{ secrets.RELEASE_RUNTIME_EVIDENCE_PUBLIC_KEY }}
-          MANARATAK_DEPLOYMENT_CONTROL_PLANE_URL: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_URL }}
-          MANARATAK_DEPLOYMENT_CONTROL_PLANE_TOKEN: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_TOKEN }}
+          ABSHEER_DEPLOYMENT_CONTROL_PLANE_URL: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_URL }}
+          ABSHEER_DEPLOYMENT_CONTROL_PLANE_TOKEN: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_TOKEN }}
         run: npm run release:promote -- validation
       - name: Validation smoke
         env:
-          MANARATAK_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
-          MANARATAK_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
-          MANARATAK_SMOKE_ADMIN_URL: ${{ vars.SMOKE_ADMIN_URL }}
+          ABSHEER_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
+          ABSHEER_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
+          ABSHEER_SMOKE_ADMIN_URL: ${{ vars.SMOKE_ADMIN_URL }}
         run: npm run release:smoke -- validation
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
         with:
@@ -103,13 +103,13 @@ jobs:
           RELEASE_EVIDENCE_PUBLIC_KEY: ${{ secrets.RELEASE_EVIDENCE_PUBLIC_KEY }}
           RELEASE_SOURCE_EVIDENCE_PUBLIC_KEY: ${{ secrets.RELEASE_SOURCE_EVIDENCE_PUBLIC_KEY }}
           RELEASE_RUNTIME_EVIDENCE_PUBLIC_KEY: ${{ secrets.RELEASE_RUNTIME_EVIDENCE_PUBLIC_KEY }}
-          MANARATAK_DEPLOYMENT_CONTROL_PLANE_URL: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_URL }}
-          MANARATAK_DEPLOYMENT_CONTROL_PLANE_TOKEN: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_TOKEN }}
+          ABSHEER_DEPLOYMENT_CONTROL_PLANE_URL: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_URL }}
+          ABSHEER_DEPLOYMENT_CONTROL_PLANE_TOKEN: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_TOKEN }}
         run: npm run release:promote -- staging
       - env:
-          MANARATAK_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
-          MANARATAK_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
-          MANARATAK_SMOKE_ADMIN_URL: ${{ vars.SMOKE_ADMIN_URL }}
+          ABSHEER_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
+          ABSHEER_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
+          ABSHEER_SMOKE_ADMIN_URL: ${{ vars.SMOKE_ADMIN_URL }}
         run: npm run release:smoke -- staging
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
         with:
@@ -152,13 +152,13 @@ jobs:
           RELEASE_EVIDENCE_PUBLIC_KEY: ${{ secrets.RELEASE_EVIDENCE_PUBLIC_KEY }}
           RELEASE_SOURCE_EVIDENCE_PUBLIC_KEY: ${{ secrets.RELEASE_SOURCE_EVIDENCE_PUBLIC_KEY }}
           RELEASE_RUNTIME_EVIDENCE_PUBLIC_KEY: ${{ secrets.RELEASE_RUNTIME_EVIDENCE_PUBLIC_KEY }}
-          MANARATAK_DEPLOYMENT_CONTROL_PLANE_URL: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_URL }}
-          MANARATAK_DEPLOYMENT_CONTROL_PLANE_TOKEN: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_TOKEN }}
+          ABSHEER_DEPLOYMENT_CONTROL_PLANE_URL: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_URL }}
+          ABSHEER_DEPLOYMENT_CONTROL_PLANE_TOKEN: ${{ secrets.DEPLOYMENT_CONTROL_PLANE_TOKEN }}
         run: npm run release:promote -- production
       - env:
-          MANARATAK_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
-          MANARATAK_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
-          MANARATAK_SMOKE_ADMIN_URL: ${{ vars.SMOKE_ADMIN_URL }}
+          ABSHEER_SMOKE_API_URL: ${{ vars.SMOKE_API_URL }}
+          ABSHEER_SMOKE_WEB_URL: ${{ vars.SMOKE_WEB_URL }}
+          ABSHEER_SMOKE_ADMIN_URL: ${{ vars.SMOKE_ADMIN_URL }}
         run: npm run release:smoke -- production
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
         with:
