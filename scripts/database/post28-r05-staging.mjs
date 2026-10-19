@@ -98,7 +98,7 @@ export class R05AuditStagingRepository {
   if(id.value!==this.assetId)fail('STAGE_SCOPE_MISMATCH');
   const current=await this.latest();if(!current)return null;
   this.validate(current.snapshot);const asset=restoreAsset(current.snapshot);
-  this.observed.set(asset,current.snapshotSha256);return asset;
+  this.observed.set(asset,current.sequence);return asset;
  }
  async findByReference(reference){
   const current=await this.latest();
@@ -109,7 +109,7 @@ export class R05AuditStagingRepository {
   await this.client.$transaction(async tx=>{
    await this.lock(tx);const previous=await this.latest(tx);
    if(previous?.action==='R05_REMEDIATION_COMPLETED')fail('STAGE_ALREADY_COMPLETED');
-   if((previous?.snapshotSha256??null)!==(this.observed.get(asset)??null))fail('STAGE_CONCURRENT_MODIFICATION');
+   if((previous?.sequence??null)!==(this.observed.get(asset)??null))fail('STAGE_CONCURRENT_MODIFICATION');
    const context={boundaryId:this.operationId,transactionClient:tx};
    await this.audit.saveInTransaction(this.record(snapshot,previous,'R05_PROCESSING_STAGE'),context);
   });

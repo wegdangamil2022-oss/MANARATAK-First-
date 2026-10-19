@@ -60,6 +60,12 @@ test('durable staging refuses changed owner or expiry and a different manifest o
  const other=stageFixture();other.repo.decision.expiresAt=new Date(Date.now()+86400000).toISOString();
  await assert.rejects(other.repo.save(other.value),/RETENTION_MISMATCH/);
 });
+test('audit sequence fences a stale writer even when the preceding save preserved identical snapshot bytes',async()=>{
+ const {repo,value}=stageFixture();await repo.save(value);
+ const first=await repo.findById(value.id),stale=await repo.findById(value.id);
+ await repo.save(first);
+ await assert.rejects(repo.save(stale),/CONCURRENT_MODIFICATION/);
+});
 test('completion rejects an intermediate state before calling Asset persistence or a verifier',async()=>{
  const {repo,value}=stageFixture();await repo.save(value);
  await assert.rejects(repo.complete({assetRepository:{saveInTransaction(){throw Error('MUST_NOT_WRITE');}},verifyWithinTransaction(){throw Error('MUST_NOT_VERIFY_INACTIVE');}}),/STAGE_NOT_ACTIVE/);
