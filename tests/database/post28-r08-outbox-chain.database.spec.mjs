@@ -20,7 +20,7 @@ function worker(c,mode='NORMAL'){
   const done=new Promise(resolve=>{child.once('exit',(code,signal)=>resolve({code,signal}));child.once('error',error=>resolve({error}));});
   return {child,done,async wait(point){if(points.has(point))return;let timer;try{await Promise.race([new Promise(resolve=>waiters.set(point,resolve)),done.then(()=>{throw Error('WORKER_EXIT_BEFORE_'+point+':'+output.slice(-1000));}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('WORKER_BARRIER_TIMEOUT:'+point)),15000);})]);}finally{clearTimeout(timer);waiters.delete(point);}},async finish(){const exit=await Promise.race([done,new Promise(resolve=>{const t=setTimeout(()=>{child.kill('SIGKILL');resolve({timeout:true});},20000);t.unref();})]);expect(exit).toEqual({code:0,signal:null});return result;},async kill(){child.kill('SIGKILL');await done;}};
 }
-async function facts(c){return {outbox:await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:c.event}}),inbox:await db.studentWorkspaceEventInbox.findMany({where:{studentReferenceId:c.identity},orderBy:{eventId:'asc'}}),workspace:await db.studentWorkspace.findUnique({where:{studentReferenceId:c.identity}}),audits:await db.auditRecord.findMany({where:{targetId:c.identity},orderBy:{id:'asc'}})};}
+async function facts(c){const workspace=await db.studentWorkspace.findUnique({where:{studentReferenceId:c.identity}});return {outbox:await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:c.event}}),inbox:await db.studentWorkspaceEventInbox.findMany({where:{studentReferenceId:c.identity},orderBy:{eventId:'asc'}}),workspace,audits:workspace?await db.auditRecord.findMany({where:{targetId:workspace.id},orderBy:{id:'asc'}}):[]};}
 async function waitExpiry(c){const row=await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:c.event}});const ms=Math.max(0,row.claimUntil.getTime()-Date.now()+75);expect(ms).toBeLessThan(5000);await new Promise(resolve=>setTimeout(resolve,ms));}
 describe('R08 actual outbox processes to student inbox',()=>{
   beforeAll(async()=>{if(process.env.POST28_DATABASE_SUITE!=='r08-outbox-chain'||process.env.POST28_TARGET_LABEL!=='DB-T'||process.env.POST28_TRANSACTION_SETUP_URL)throw Error('POST28_DB_T_RUNNER_REQUIRED');db=new PrismaClient({log:[],errorFormat:'minimal'});await db.$connect();expect((await db.$queryRaw`SELECT current_user AS role`)[0].role).toBe('post28_app');});
@@ -32,7 +32,7 @@ describe('R08 actual outbox processes to student inbox',()=>{
     const c=await fixture(),a=worker(c,mode);try{await a.wait(mode);}finally{await a.kill();}
     const before=await facts(c);expect(before.outbox.state).toBe('PROCESSING');expect(before.inbox).toHaveLength(mode==='AFTER_EFFECT'?2:0);
     await waitExpiry(c);expect((await worker(c).finish()).processed).toBe(1);const after=await facts(c);expect(after.inbox).toHaveLength(2);expect(after.workspace.status).toBe('ACTIVE');expect(after.outbox.claimToken).toBeNull();
-    if(mode==='AFTER_EFFECT'){expect(after.inbox).toEqual(before.inbox);expect(after.workspace).toEqual(before.workspace);expect(after.audits).toEqual(before.audits);}
+    if(mode==='AFTER_EFFECT'){expect(before.audits.length).toBeGreaterThan(0);expect(after.inbox).toEqual(before.inbox);expect(after.workspace).toEqual(before.workspace);expect(after.audits).toEqual(before.audits);}
     expect((await worker(c).finish()).claimed).toBe(0);
   });
   it('retries a failed delivery then parks exhausted work without projecting an effect',async()=>{
