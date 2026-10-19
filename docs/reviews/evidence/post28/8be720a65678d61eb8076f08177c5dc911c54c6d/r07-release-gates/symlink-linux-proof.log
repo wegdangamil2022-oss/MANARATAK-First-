@@ -1,0 +1,8 @@
+2026-10-19T15:22:38.1179037Z # Subtest: static build refuses symlink-file
+2026-10-19T15:22:38.1179537Z ok 12 - static build refuses symlink-file
+2026-10-19T15:22:38.1181413Z # Subtest: static build refuses symlink-parent
+2026-10-19T15:22:38.1181891Z ok 13 - static build refuses symlink-parent
+2026-10-19T15:22:38.1190175Z # Subtest: static build refuses metadata-symlink
+2026-10-19T15:22:38.1190790Z ok 16 - static build refuses metadata-symlink
+2026-10-19T15:22:38.1218408Z # Subtest: artifact input inspection rejects symlinks before tar packaging
+2026-10-19T15:22:38.1219428Z ok 24 - artifact input inspection rejects symlinks before tar packaging
