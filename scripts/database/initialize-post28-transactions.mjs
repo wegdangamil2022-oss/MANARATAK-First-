@@ -8,6 +8,7 @@ import {readDatabaseIdentity} from './post28-preflight.mjs';
 import {preflightTargets} from './post28-isolation.mjs';
 import {preflightTransactionProvisioning,TRANSACTION_APPLICATION_TABLES,CERTIFICATE_FIXTURE_APPLICATION_TABLES,COURSE_FIXTURE_APPLICATION_TABLES,LEARNING_PATH_FIXTURE_APPLICATION_TABLES} from './post28-transaction-provisioning.mjs';
 import {requireScopedR06Authorization} from './post28-r06-authorization.mjs';
+import {assertAdmissionNullIdentity} from './post28-admission-null-identity.mjs';
 import {requireDatabaseMutationGate} from '../lib/database-mutation-gate.mjs';
 import {digest,migrationInventory,verifyMigrationLedger} from './post28-migration-inventory.mjs';
 const fail=code=>{throw new Error(code);};
@@ -20,7 +21,7 @@ try{
  const root=fs.realpathSync(process.cwd()),sourceSha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
  if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())fail('POST28_CLEAN_SOURCE_REQUIRED');
  const authorization=requireScopedR06Authorization(root);
- if(execFileSync('git',['branch','--show-current'],{encoding:'utf8'}).trim()!=='fix/post28-ci-environment-inventory-20261016')fail('POST28_R06_BRANCH_REQUIRED');
+ if(!['fix/post28-ci-environment-inventory-20261016','feat/post28-r07-artifact-preparation'].includes(execFileSync('git',['branch','--show-current'],{encoding:'utf8'}).trim()))fail('POST28_R06_BRANCH_REQUIRED');
  const contractFile=fs.realpathSync(process.env.POST28_TARGET_CONTRACT_FILE),lab=path.dirname(contractFile);
  if(lab===root||lab.startsWith(root+path.sep))fail('POST28_LAB_SECRETS_OUTSIDE_CHECKOUT_REQUIRED');
  const contract=JSON.parse(fs.readFileSync(contractFile,'utf8'));requirePost28LocalExecution(contract);
@@ -44,6 +45,7 @@ try{
  try{
   const rows=await setup.$transaction(async tx=>{await tx.$executeRawUnsafe('SET TRANSACTION READ ONLY');return tx.$queryRawUnsafe('SELECT id,migration_name,checksum,started_at::text,finished_at::text,rolled_back_at::text,applied_steps_count FROM public._prisma_migrations ORDER BY started_at,id');});
   ledger=verifyMigrationLedger(migrationInventory(root),rows);
+  await assertAdmissionNullIdentity(setup);
   const models=[...fs.readFileSync(schema,'utf8').matchAll(/^model\s+(\w+)\s*\{/gm)].map(m=>m[1]);
   if(models.length!==281||[...TRANSACTION_APPLICATION_TABLES,...CERTIFICATE_FIXTURE_APPLICATION_TABLES,...COURSE_FIXTURE_APPLICATION_TABLES,...LEARNING_PATH_FIXTURE_APPLICATION_TABLES].some(t=>!models.includes(t)))fail('POST28_TRANSACTION_GRANT_TABLE_SET_INVALID');
   const quoted=names=>names.map(n=>'public."'+n+'"').join(',');
