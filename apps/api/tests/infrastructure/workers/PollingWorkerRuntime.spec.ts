@@ -43,7 +43,9 @@ describe('server-composed owner domain polling runtime, isolated adapters', () =
     expect(f.worker.runSettingsOnce).toHaveBeenCalledOnce(); expect(f.worker.runCareerOnce).not.toHaveBeenCalled();
     let stopped = false; const stop = handle.stop().then(() => { stopped = true; });
     await Promise.resolve(); expect(stopped).toBe(false);
-    release(); await stop; expect(f.worker.runServicesOnce).toHaveBeenCalledOnce();
+    release(); await stop;
+    expect(f.worker.runCareerOnce).not.toHaveBeenCalled();
+    expect(f.worker.runServicesOnce).not.toHaveBeenCalled();
     await vi.advanceTimersByTimeAsync(1000); expect(f.worker.runSettingsOnce).toHaveBeenCalledOnce();
   });
 
@@ -87,11 +89,21 @@ describe('server-composed P15 polling routes', () => {
     expect(f.student.runCertificatesOnce).not.toHaveBeenCalled();
     let drained=false;const stop=handle.stop().then(()=>{drained=true;});
     await Promise.resolve();expect(drained).toBe(false);
-    release();await stop;expect(f.student.runCertificatesOnce).toHaveBeenCalledOnce();
+    release();await stop;
+    for(const name of f.names.slice(3))expect(f.student[name]).not.toHaveBeenCalled();
   });
 });
 
 describe('B09 atomic startup and shutdown ownership', () => {
+  it('does not start a queued first iteration after shutdown begins in the same turn', async () => {
+    const f = fixture();
+    const starting = startPollingWorkers(f.container, f.config);
+    const stopping = stopPollingWorkers();
+    await Promise.all([starting, stopping]);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(f.registry.started).not.toHaveBeenCalled();
+    expect(f.worker.runSettingsOnce).not.toHaveBeenCalled();
+  });
   it('rejects an invalid later route before starting any earlier worker', async () => {
     const f = fixture();
     const certificate = { runOnce: vi.fn().mockResolvedValue(undefined) };

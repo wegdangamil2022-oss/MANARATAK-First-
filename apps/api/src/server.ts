@@ -56,8 +56,16 @@ async function bootstrap() {
 
       let timeoutHandle: NodeJS.Timeout | null = null;
       const hardTimeout = new Promise<'timeout'>((resolve) => {
-        timeoutHandle = setTimeout(() => resolve('timeout'), SHUTDOWN_TIMEOUT_MS);
-        timeoutHandle.unref?.();
+        timeoutHandle = setTimeout(() => {
+          process.exitCode = 1;
+          console.error('[Bootstrap] Shutdown deadline reached; terminating with in-flight outcomes requiring recovery.');
+          server.closeAllConnections?.();
+          // Cleanup is best effort at the absolute deadline. A hung adapter or
+          // monitoring flush must not keep the process alive beyond its budget.
+          try { void runtimeResources?.closeAll().catch(() => undefined); } catch { /* terminal cleanup */ }
+          resolve('timeout');
+          process.exit(1);
+        }, SHUTDOWN_TIMEOUT_MS);
       });
 
       try {

@@ -61,12 +61,19 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     const workerId = `student-workspace-${runtimeId}`;
     register('student-workspace-outbox', intervalMs, async () => {
       await worker.runIdentityOnce(`${workerId}-identity`);
+      if (stopping) return;
       await worker.runRoleOnce(`${workerId}-role`);
+      if (stopping) return;
       await worker.runCatchupOnce(`${workerId}-catchup`);
+      if (stopping) return;
       await worker.runLearningOnce(`${workerId}-learning`);
+      if (stopping) return;
       await worker.runCertificatesOnce(`${workerId}-certificates`);
+      if (stopping) return;
       await worker.runReplayOnce(`${workerId}-replay`);
+      if (stopping) return;
       await worker.runRemindersOnce(`${workerId}-reminders`);
+      if (stopping) return;
       await worker.runTrackerOwnersOnce(`${workerId}-tracker-owners`);
     });
   }
@@ -76,7 +83,9 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     const workerId = `owner-domain-${runtimeId}`;
     register('owner-domain-outbox', intervalMs, async () => {
       await worker.runSettingsOnce(`${workerId}-settings`);
+      if (stopping) return;
       await worker.runCareerOnce(`${workerId}-career`);
+      if (stopping) return;
       await worker.runServicesOnce(`${workerId}-services`);
     });
   }
@@ -111,6 +120,7 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
       if (stopping || task) return;
       // Defer execution until task ownership is recorded, including synchronous failures.
       task = Promise.resolve().then(async () => {
+        if (stopping) return;
         try {
           pollingWorkerRuntimeRegistry.started(name);
           await observeWorkerIteration(name, action);
