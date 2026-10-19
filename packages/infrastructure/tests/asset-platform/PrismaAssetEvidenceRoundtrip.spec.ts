@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { Prisma } from '@prisma/client';
 import {
   AssetRecord, AssetId, AssetReference, AssetOwnerReference, AssetStorageLocator,
   AssetMetadata, AssetRetentionMetadata, AssetRetentionCategory,
@@ -10,7 +11,8 @@ describe('EAP persisted upload and malware evidence', () => {
   it('round-trips observed upload evidence and scanner result through existing Prisma JSON column', async () => {
     let stored: any = null;
     const create = vi.fn(async (args: any) => {
-      stored = { ...args.data, updatedAt: new Date('2026-10-09T00:00:00.000Z') };
+      // Prisma writes SQL NULL with DbNull and returns JavaScript null on reads.
+      stored = { ...args.data, versionChain: args.data.versionChain === Prisma.DbNull ? null : args.data.versionChain, updatedAt: new Date('2026-10-09T00:00:00.000Z') };
       return stored;
     });
     const findUnique = vi.fn(async () => stored);
@@ -42,11 +44,13 @@ describe('EAP persisted upload and malware evidence', () => {
     record.passSanitizedMalwareScan();
     record.prepareActivation(globalThis.crypto.randomUUID());
     await repository.save(record);
+    expect(create.mock.calls[0][0].data.versionChain).toBe(Prisma.DbNull);
     expect(stored.malwareScanStatus).toMatchObject({
       status: 'PASSED', uploadVerification: { checksumSha256: 'b'.repeat(64), byteSize: 42 },
     });
 
     const restored = await repository.findById(new AssetId('asset-evidence-1'));
+    expect(restored?.versionChain).toBeUndefined();
     expect(restored?.activationOperation).toEqual(record.activationOperation);
     expect(() => restored?.softDelete()).toThrow('ASSET_ACTIVATION_RECOVERY_PENDING');
     expect(restored?.uploadVerification?.verifiedMimeType).toBe('application/pdf');

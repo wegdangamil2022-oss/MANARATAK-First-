@@ -37,9 +37,10 @@ describe('B11 native owner description pairs',()=>{
   });
  }
  it('routes course edits through its owner port, rejects draft public reads and stale publication',async()=>{
-  let row:any=owner();const repo:any={findById:async()=>row,findBySlug:async()=>row,update:vi.fn(async(_id,patch)=>row={...row,...patch,version:row.version+1})};
+  let row:any=owner();const repo:any={findById:async()=>row,findPublishedBySlug:vi.fn(async()=>row.status==='PUBLISHED'?row:null),update:vi.fn(async(_id,patch)=>row={...row,...patch,version:row.version+1})};
   await new AdminCourseUseCases(repo).saveLocalizedDescription('owner',input);
   const publicUC=new PublicCourseUseCases(repo);await expect(publicUC.getCourse('slug','en')).rejects.toThrow('not found');
+  expect(repo.findPublishedBySlug).toHaveBeenCalledWith('slug');
   await new CoursePublicationService(repo).assertPublicationReady(row);row.status='PUBLISHED';
   expect(await publicUC.getCourse('slug','en')).toMatchObject({displayName:input.displayName,description:input.description});
   expect(JSON.stringify(await publicUC.getCourse('slug','en'))).not.toContain('sourceDigest');
