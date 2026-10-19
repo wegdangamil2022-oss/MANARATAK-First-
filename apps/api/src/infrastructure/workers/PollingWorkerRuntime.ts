@@ -8,6 +8,16 @@ export interface PollingWorkerHandle {
 
 let activeWorkerHandle: PollingWorkerHandle | null = null;
 
+async function requireSuccessfulDelivery(result: Promise<unknown>): Promise<unknown> {
+  const value = await result;
+  if (value && typeof value === 'object') {
+    if ('exhausted' in value && typeof value.exhausted === 'number' && value.exhausted > 0) throw new Error('OUTBOX_DELIVERY_EXHAUSTED');
+    if ('failed' in value && typeof value.failed === 'number' && value.failed > 0) throw new Error('OUTBOX_DELIVERY_FAILED');
+    if ('leaseLost' in value && typeof value.leaseLost === 'number' && value.leaseLost > 0) throw new Error('OUTBOX_LEASE_LOST');
+  }
+  return value;
+}
+
 export async function startPollingWorkers(container: AwilixContainer, config: IConfigurationService): Promise<PollingWorkerHandle> {
   if (activeWorkerHandle) {
     return activeWorkerHandle;
@@ -53,28 +63,28 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     const intervalMs = config.getOptional<number>('CERTIFICATE_COMPLETION_WORKER_INTERVAL_MS') ?? 5_000;
     const worker = container.resolve<any>('certificateCompletionOutboxWorker');
     const workerId = `certificate-completion-${runtimeId}`;
-    register('certificate-completion', intervalMs, () => worker.runOnce(workerId));
+    register('certificate-completion', intervalMs, () => requireSuccessfulDelivery(worker.runOnce(workerId)));
   }
   if (config.getOptional<boolean>('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED') === true) {
     const intervalMs = config.getOptional<number>('STUDENT_WORKSPACE_OUTBOX_WORKER_INTERVAL_MS') ?? 2_000;
     const worker = container.resolve<any>('studentWorkspaceOutboxWorker');
     const workerId = `student-workspace-${runtimeId}`;
     register('student-workspace-outbox', intervalMs, async () => {
-      await worker.runIdentityOnce(`${workerId}-identity`);
+      await requireSuccessfulDelivery(worker.runIdentityOnce(`${workerId}-identity`));
       if (stopping) return;
-      await worker.runRoleOnce(`${workerId}-role`);
+      await requireSuccessfulDelivery(worker.runRoleOnce(`${workerId}-role`));
       if (stopping) return;
-      await worker.runCatchupOnce(`${workerId}-catchup`);
+      await requireSuccessfulDelivery(worker.runCatchupOnce(`${workerId}-catchup`));
       if (stopping) return;
-      await worker.runLearningOnce(`${workerId}-learning`);
+      await requireSuccessfulDelivery(worker.runLearningOnce(`${workerId}-learning`));
       if (stopping) return;
-      await worker.runCertificatesOnce(`${workerId}-certificates`);
+      await requireSuccessfulDelivery(worker.runCertificatesOnce(`${workerId}-certificates`));
       if (stopping) return;
-      await worker.runReplayOnce(`${workerId}-replay`);
+      await requireSuccessfulDelivery(worker.runReplayOnce(`${workerId}-replay`));
       if (stopping) return;
-      await worker.runRemindersOnce(`${workerId}-reminders`);
+      await requireSuccessfulDelivery(worker.runRemindersOnce(`${workerId}-reminders`));
       if (stopping) return;
-      await worker.runTrackerOwnersOnce(`${workerId}-tracker-owners`);
+      await requireSuccessfulDelivery(worker.runTrackerOwnersOnce(`${workerId}-tracker-owners`));
     });
   }
   if (config.getOptional<boolean>('OWNER_DOMAIN_OUTBOX_WORKER_ENABLED') === true) {
@@ -82,11 +92,11 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     const worker = container.resolve<any>('ownerDomainOutboxWorker');
     const workerId = `owner-domain-${runtimeId}`;
     register('owner-domain-outbox', intervalMs, async () => {
-      await worker.runSettingsOnce(`${workerId}-settings`);
+      await requireSuccessfulDelivery(worker.runSettingsOnce(`${workerId}-settings`));
       if (stopping) return;
-      await worker.runCareerOnce(`${workerId}-career`);
+      await requireSuccessfulDelivery(worker.runCareerOnce(`${workerId}-career`));
       if (stopping) return;
-      await worker.runServicesOnce(`${workerId}-services`);
+      await requireSuccessfulDelivery(worker.runServicesOnce(`${workerId}-services`));
     });
   }
   if (config.getOptional<boolean>('BACKGROUND_WORKER_ENABLED') === true) {
