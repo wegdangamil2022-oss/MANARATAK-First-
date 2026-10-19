@@ -54,7 +54,7 @@ export function sourceCiBrowserBoundaryDeclared(text) {
     && browserLines[0].trim()==='run: npx --no-install playwright install --with-deps chromium'
     && /^    needs: \[source-quality, artifact-retrieval\]\s*$/m.test(review)
     && /^          POST28_LINUX_RUNTIME_REVIEW: 'YES'\s*$/m.test(review)
-    && /^        run: node scripts\/release\/post28-linux-artifact-runtime\.mjs "\$RUNNER_TEMP\/r07-linux"\s*$/m.test(review);
+    && /^        run: node scripts\/release\/post28-linux-artifact-runtime\.mjs "\$RUNNER_TEMP\/r07-linux"(?: --r08-combined)?\s*$/m.test(review);
 }
 
 export function hasRebaselineOpenStatusRows(text) {

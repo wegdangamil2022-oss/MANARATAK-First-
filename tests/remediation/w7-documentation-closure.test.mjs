@@ -21,12 +21,15 @@ test('readiness guard rejects Production Ready only when used as an active statu
 test('source CI permits only the explicitly authorized dependency-gated Linux browser lab',()=>{
   const ci=fs.readFileSync(new URL('../../.github/workflows/ci.yml',import.meta.url),'utf8');
   assert.equal(sourceCiBrowserBoundaryDeclared(ci),true);
+  assert.equal(sourceCiBrowserBoundaryDeclared(ci.replace(' --r08-combined','')),true);
   for(const altered of [
     ci.replace('needs: [source-quality, artifact-retrieval]','needs: source-quality'),
     ci.replace("POST28_LINUX_RUNTIME_REVIEW: 'YES'","POST28_LINUX_RUNTIME_REVIEW: 'NO'"),
     ci.replace('playwright install --with-deps chromium','playwright test'),
     ci.replace('run: npm run quality:source','run: npx playwright test'),
     ci.replace('  linux-runtime-review:','  unrestricted-browser:'),
+    ci.replace(' --r08-combined',' --arbitrary-command'),
+    ci.replace(' --r08-combined',' --r08-combined --arbitrary-command'),
   ])assert.equal(sourceCiBrowserBoundaryDeclared(altered),false);
 });
 
