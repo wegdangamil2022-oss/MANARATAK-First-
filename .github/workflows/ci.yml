@@ -195,6 +195,12 @@ jobs:
         run: node scripts/release/post28-prepare-runtime-layer.mjs "$RUNNER_TEMP/r07-linux"
       - name: Build digest-pinned non-root image and load native modules without network
         run: node scripts/release/post28-linux-image-probe.mjs "$RUNNER_TEMP/r07-linux"
+      - name: Install browser for the isolated Linux review
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Boot reviewed image with new PG16 and exercise HTTPS student journey
+        env:
+          POST28_LINUX_RUNTIME_REVIEW: 'YES'
+        run: node scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r07-linux"
       - name: Retain review proof without publishing the image
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -204,6 +210,7 @@ jobs:
             ${{ runner.temp }}/r07-linux/linux-image-probe.json
             ${{ runner.temp }}/r07-linux/runtime-layer.json
             ${{ runner.temp }}/r07-linux/runtime-install.log
+            ${{ runner.temp }}/r07-linux/linux-runtime-proof
           if-no-files-found: error
 
   translation-quality:

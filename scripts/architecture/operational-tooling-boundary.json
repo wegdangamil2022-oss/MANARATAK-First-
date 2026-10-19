@@ -10,6 +10,7 @@
     "directPrisma": "deny-unless-explicitly-classified"
   },
   "classifiedDirectPrismaScripts": [
+    "scripts/release/post28-linux-artifact-runtime.mjs",
     "scripts/check_outbox.ts",
     "scripts/find-failures.ts",
     "scripts/inspect_audit_logs.ts",
@@ -135,6 +136,14 @@
         "CERTIFICATE_DATABASE_MUST_BE_EMPTY_NO_EXISTING_DATABASE_CHANGES"
       ],
       "review": "B04 2026-10-15; no execution authorized by classification"
+    },
+    "scripts/release/post28-linux-artifact-runtime.mjs": {
+      "purpose": "Exercise reviewed non-root Linux image and HTTPS browser against a newly created synthetic PostgreSQL16 lab",
+      "access": "isolated-read-write",
+      "environment": ["Linux x64 / Node22", "POST28_LINUX_RUNTIME_REVIEW=YES", "New labelled internal-network tmpfs PG16 only", "Exact clean artifact/source SHA"],
+      "gate": "Existing target preflight and reviewed migration initializer before synthetic fixtures; application role has no elevated flags, DDL or ledger writes; external egress disabled; cleanup verifies exact resource labels",
+      "requiredSourceMarkers": ["POST28_LINUX_RUNTIME_REVIEW_NOT_AUTHORIZED", "POST28_CLEAN_SOURCE_REQUIRED", "preflightTargets", "requireValidatedCatalog:true", "initialize-post28-transactions.mjs", "assert.equal(roles[0].role,'post28_app')", "assert.equal(identity.Config.Labels['codex.post28.run'],state.runId)"],
+      "review": "R07 isolated Linux review authorized by project owner; diagnostic execution only, no production or promotion"
     },
     "scripts/release/build-immutable-artifacts.mjs": {
       "purpose": "Record external runtime module names in release artifact metadata",
