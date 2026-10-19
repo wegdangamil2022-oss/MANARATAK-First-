@@ -1,0 +1,5 @@
+{"kind":"HTTP_UPLOAD","bytes":10387,"sha256":"a342a0bf2fbf88704b06ad742db1c418e53f8626efd55c4389ca5bde38648d8b"}
+{"kind":"DEFENDER_SCAN","sha256":"a342a0bf2fbf88704b06ad742db1c418e53f8626efd55c4389ca5bde38648d8b","clean":true,"exitCode":0}
+{"kind":"MUPDF_RASTER_RECONSTRUCTION","mime":"application/pdf","sourceSha256":"a342a0bf2fbf88704b06ad742db1c418e53f8626efd55c4389ca5bde38648d8b","cleanSha256":"7aeea3ad49c1edb1b71d23e8cdc7fc835cae99949308e3ff8e89956d7e908806","pixelsMatched":true,"originalObjectsCopied":0}
+{"kind":"DEFENDER_SCAN","sha256":"7aeea3ad49c1edb1b71d23e8cdc7fc835cae99949308e3ff8e89956d7e908806","clean":true,"exitCode":0}
+{"kind":"HTTP_UPLOAD","bytes":391133,"sha256":"ed4ca47b9b09bb0f7a96fa838254e10667ad83f196bd1a5376cbeaffd381691f"}

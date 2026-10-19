@@ -1,0 +1,29 @@
+{
+  "sourceSha": "c42f8dd3a881ee559c6a4e0665204ea4b814c875",
+  "identity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698163941403182988",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "syntheticOnly": true,
+  "certificateIssuedOrAttached": false,
+  "providerScope": "LAB_ONLY_NOT_PRODUCTION_APPROVAL",
+  "toolDigests": {
+    "mupdfModule": "5d237eadcb9640584e0050f6f958e547887b7a54d80a04043e12be9420931076",
+    "defender": "c0c9670d63a8a7de9c0ef5ba58231826b0abee03c2b3ba6f858114d96ea12315"
+  },
+  "results": [],
+  "operations": 2,
+  "failure": "cannot find document handler for file type: 'image/svg+xml'",
+  "passed": false,
+  "R06Accepted": false,
+  "R07Accepted": false
+}

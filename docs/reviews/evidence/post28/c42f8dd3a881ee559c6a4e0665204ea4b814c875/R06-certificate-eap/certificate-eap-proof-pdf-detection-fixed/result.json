@@ -1,0 +1,42 @@
+{
+  "sourceSha": "c42f8dd3a881ee559c6a4e0665204ea4b814c875",
+  "identity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698163941403182988",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "syntheticOnly": true,
+  "certificateIssuedOrAttached": false,
+  "providerScope": "LAB_ONLY_NOT_PRODUCTION_APPROVAL",
+  "toolDigests": {
+    "mupdfModule": "5d237eadcb9640584e0050f6f958e547887b7a54d80a04043e12be9420931076",
+    "defender": "c0c9670d63a8a7de9c0ef5ba58231826b0abee03c2b3ba6f858114d96ea12315"
+  },
+  "results": [
+    {
+      "kind": "PDF",
+      "id": "bc30fc3a-3c9b-4a7b-8626-7ea0a0d78b08",
+      "classification": "INTERNAL",
+      "sourceSha256": "a342a0bf2fbf88704b06ad742db1c418e53f8626efd55c4389ca5bde38648d8b",
+      "cleanSha256": "7aeea3ad49c1edb1b71d23e8cdc7fc835cae99949308e3ff8e89956d7e908806",
+      "sourceBytes": 10387,
+      "cleanBytes": 28993,
+      "activeReplayWithoutProviderWork": true,
+      "changedBytesDenied": true,
+      "deliveryHashVerified": true
+    }
+  ],
+  "operations": 5,
+  "failure": "cannot find document handler for file type: 'image/svg+xml'",
+  "passed": false,
+  "R06Accepted": false,
+  "R07Accepted": false
+}

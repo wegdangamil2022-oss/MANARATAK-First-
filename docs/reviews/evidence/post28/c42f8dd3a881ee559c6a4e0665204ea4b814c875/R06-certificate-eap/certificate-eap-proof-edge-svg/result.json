@@ -1,0 +1,66 @@
+{
+  "sourceSha": "c42f8dd3a881ee559c6a4e0665204ea4b814c875",
+  "identity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698163941403182988",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "syntheticOnly": true,
+  "certificateIssuedOrAttached": false,
+  "providerScope": "LAB_ONLY_NOT_PRODUCTION_APPROVAL",
+  "toolDigests": {
+    "mupdfModule": "5d237eadcb9640584e0050f6f958e547887b7a54d80a04043e12be9420931076",
+    "defender": "c0c9670d63a8a7de9c0ef5ba58231826b0abee03c2b3ba6f858114d96ea12315"
+  },
+  "results": [
+    {
+      "kind": "PDF",
+      "id": "d8a73c78-897d-41b4-8e5d-1f4818a99fb5",
+      "classification": "INTERNAL",
+      "sourceSha256": "a342a0bf2fbf88704b06ad742db1c418e53f8626efd55c4389ca5bde38648d8b",
+      "cleanSha256": "4b45336a7508ce20e6df465777f0b1faae1727b719a700635ec7844c5523ade1",
+      "sourceBytes": 10387,
+      "cleanBytes": 28993,
+      "activeReplayWithoutProviderWork": true,
+      "changedBytesDenied": true,
+      "deliveryHashVerified": true
+    },
+    {
+      "kind": "PREVIEW",
+      "id": "d17beed8-f3d0-4657-843b-410b2b5b886a",
+      "classification": "INTERNAL",
+      "sourceSha256": "37fb81b8bc06aaa1a9f5051d10fb5742e4705ee0602c7756294dc32223bda909",
+      "cleanSha256": "fab5aef6be566e5c94fb1aae5ad3e69407ca2553bf937da79ed77fe9b7ee58e9",
+      "sourceBytes": 391133,
+      "cleanBytes": 44162,
+      "activeReplayWithoutProviderWork": true,
+      "changedBytesDenied": true,
+      "deliveryHashVerified": true
+    },
+    {
+      "kind": "QR",
+      "id": "6ce1d3a4-dd7c-4557-8994-4c335de3cc38",
+      "classification": "PUBLIC",
+      "sourceSha256": "bbc9f35a46529508fef1a738970f3b4b80687ab8bea6069d57934f2bb7090276",
+      "cleanSha256": "8aa756ba6beea3c0ac7df2929d45db5ce5b80fa1cc47cc0ad0d98da10dfbda12",
+      "sourceBytes": 24936,
+      "cleanBytes": 2026,
+      "activeReplayWithoutProviderWork": true,
+      "changedBytesDenied": true,
+      "deliveryHashVerified": true
+    }
+  ],
+  "operations": 12,
+  "failure": null,
+  "passed": true,
+  "R06Accepted": false,
+  "R07Accepted": false
+}
