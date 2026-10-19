@@ -1,0 +1,65 @@
+{
+  "sourceSha": "7efa51061a9c9c1a739928d7c8799a6a74108393",
+  "mode": "duplicates",
+  "identities": {
+    "runtime": {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698175180333069092",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    },
+    "setup": {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_tx_migrator",
+      "serverIdentity": "7698175180333069092",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  },
+  "candidateSha256": "ae74cf355a8d6869a7e1368d98dfa7a262dc12c2e741dc0bf61ecbc81514cb9d",
+  "checks": [
+    {
+      "name": "independent ordinary application connections",
+      "passed": true,
+      "roles": [
+        "post28_app",
+        "post28_app"
+      ]
+    },
+    {
+      "name": "reproduces pre-fix direct SQL identity gap",
+      "passed": true
+    },
+    {
+      "name": "duplicate audit blocks candidate without deleting rows or changing index",
+      "passed": true,
+      "rowsPreserved": 2
+    },
+    {
+      "name": "application role has no superuser DDL or ledger access",
+      "passed": true,
+      "role": "post28_app",
+      "rolsuper": false,
+      "ddl": false,
+      "ledger": false
+    }
+  ],
+  "compatibility": null,
+  "failure": null,
+  "passed": true,
+  "activeMigrationTreeChanged": false,
+  "migrationLedgerCandidateRecorded": false,
+  "syntheticOnly": true,
+  "productionApproved": false,
+  "R04Accepted": false,
+  "R05Accepted": false
+}

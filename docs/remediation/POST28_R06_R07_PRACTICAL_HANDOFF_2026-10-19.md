@@ -75,3 +75,7 @@ These are accumulated implementation/evidence statements across named sources, n
 Do not rebuild or rerun successful packs for these evidence-only files. The diagnostic flow is complete. Next necessary release decision is E01: reviewed NULL-key uniqueness design and its actual migration gates. Until those are satisfied, keep affected unrestricted writes unaccepted and continue only independently authorized feature work. E02-E07 remain explicitly deferred/gated; no stress run, broad role matrix or automatic canonical-worker rollout is required to repeat this local basic diagnostic. A future changed executable source needs a new identified candidate only when selected for delivery.
 
 Evidence: docs/reviews/evidence/post28/a8210404f63e2408fc911be74ff91bf8bc47aa8e/R07-owner-priority-browser/evidence-index.json. Skill used for browser-to-API-to-data verification: vercel:verification (local workflow only).
+
+## Subsequent DEC06 repair
+
+Source 7efa51061a9c9c1a739928d7c8799a6a74108393 now implements and experimentally verifies the database repair; see POST28_R06_NULL_IDENTITY_REPAIR_2026-10-19.md. E01 above describes the pre-repair diagnosis. The updated JSON state distinguishes LAB_VERIFIED from controlled migration application: the latter and R04/R05 gates remain open, and unchanged databases still have the gap. Prior R07 evidence and its SHA are unchanged.
