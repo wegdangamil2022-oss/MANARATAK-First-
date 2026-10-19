@@ -96,4 +96,40 @@ describe('PrismaSessionManager', () => {
     // Since updateMany handles no-ops cleanly if no rows match, it is deterministic.
   });
 
+  it('retries a rolled-back serialization conflict and revokes the committed family on a fresh read', async () => {
+    const tx = { sessionRecord: {
+      findUnique: vi.fn().mockResolvedValue({
+        id: 'parent', identityId: 'user1', familyId: 'family',
+        revokedAt: new Date(), rotatedAt: new Date(), expiresAt: new Date(Date.now() + 60_000),
+      }),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      create: vi.fn(),
+    } };
+    mockPrisma.$transaction = vi.fn()
+      .mockRejectedValueOnce(Object.assign(new Error('Synthetic serialization conflict'), { code: 'P2034' }))
+      .mockImplementationOnce(work => work(tx));
+
+    await expect(sessionManager.consumeAndRotateRefreshSession('parent-token', 'next-token', 'child')).resolves.toBeNull();
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(2);
+    for (const [, options] of mockPrisma.$transaction.mock.calls) expect(options).toEqual({ isolationLevel: 'Serializable' });
+    expect(tx.sessionRecord.updateMany).toHaveBeenCalledWith({
+      where: { familyId: 'family', revokedAt: null }, data: { revokedAt: expect.any(Date) },
+    });
+    expect(tx.sessionRecord.create).not.toHaveBeenCalled();
+  });
+
+  it('bounds serialization retries and preserves the failure when conflicts persist', async () => {
+    const conflict = Object.assign(new Error('Synthetic serialization conflict'), { code: 'P2034' });
+    mockPrisma.$transaction = vi.fn().mockRejectedValue(conflict);
+    await expect(sessionManager.consumeAndRotateRefreshSession('parent-token', 'next-token', 'child')).rejects.toBe(conflict);
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not retry an unknown commit outcome or other database failure', async () => {
+    const unknown = Object.assign(new Error('Synthetic response lost'), { code: 'P1001' });
+    mockPrisma.$transaction = vi.fn().mockRejectedValue(unknown);
+    await expect(sessionManager.consumeAndRotateRefreshSession('parent-token', 'next-token', 'child')).rejects.toBe(unknown);
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
+  });
+
 });
