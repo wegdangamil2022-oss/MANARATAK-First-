@@ -11,6 +11,7 @@ const files = {
   admin: read('packages/application/src/courses/use-cases/AdminCourseUseCases.ts'),
   native: read('packages/application/src/courses/use-cases/NativeCourseUseCases.ts'),
   publication: read('packages/application/src/courses/services/CoursePublicationService.ts'),
+  publicEligibility: read('packages/infrastructure/src/courses/CoursePublicEligibility.ts'),
   publicUseCases: read('packages/application/src/courses/use-cases/PublicCourseUseCases.ts'),
   checker: read('packages/infrastructure/src/courses/SafeImportedCourseLinkChecker.ts'),
   provider: read('packages/domain/src/courses/provider-registry.ts'),
@@ -29,11 +30,15 @@ const checks = [
   ['P13-LINK-003', files.checker.includes('isDirectCoursePage') && files.checker.includes('NOT_DIRECT_COURSE_PAGE') && files.provider.includes('directCoursePathPatterns')],
   ['P13-URL-004', files.admin.includes('IMPORT_LINEAGE_FIELDS') && files.admin.includes('CHANGE_REQUIRES_CONTROLLED_IMPORT') && files.admin.includes("'directCourseUrl'")],
   ['P13-ELIG-005', (
-    files.publication.includes('IMPORTED_COURSE_FREE_STUDY_AND_CERTIFICATE_REQUIRED')
+    // DEC-03: free study is mandatory; certificate price is independent/nullable.
+    files.publication.includes('IMPORTED_COURSE_FREE_STUDY_REQUIRED')
+    && files.publication.includes('CourseAccessType.FREE_STUDY, CourseAccessType.FREE_STUDY_AND_CERTIFICATE')
     && files.publication.includes('CourseAccessType.FREE_STUDY_AND_CERTIFICATE')
     && files.publication.includes('course.isStudyFree !== true')
-    && files.publication.includes('course.isFreeCertificate !== true')
-  ) && files.courseRepo.includes('CourseAccessType.PAID') && files.courseRepo.includes('isStudyFree: true') && files.publicUseCases.includes('publicEligible')],
+    && !files.publication.includes('course.isFreeCertificate !== true')
+  ) && files.courseRepo.includes('CourseAccessType.PAID') && files.courseRepo.includes('return currentPublicCourseEligibility(this.prisma, scope)')
+    && files.publicEligibility.includes("accessType: { in: ['FREE_STUDY', 'FREE_STUDY_AND_CERTIFICATE'] }")
+    && files.publicEligibility.includes('isStudyFree: true') && files.publicUseCases.includes('publicEligible')],
   ['P13-PUB-002', files.admin.includes('publicationService.assertPublicationReady') && files.admin.includes('publicationService.publish') && files.native.includes('publicationService.publish')],
   ['P13-CURR-006', files.curriculum.includes('ensureCurriculumMember') && files.curriculum.includes('assertQuizReferences') && files.curriculum.includes('assertQuestionReferences') && files.curriculum.includes('COURSE_CURRICULUM_SCOPE_MISMATCH')],
   ['P13-PROG-007', files.progress.includes('COURSE_LESSON_SCOPE_MISMATCH') && files.progress.includes('COURSE_QUIZ_ATTEMPT_SCOPE_MISMATCH') && files.progress.includes('attempt.courseId !== data.courseId')],
