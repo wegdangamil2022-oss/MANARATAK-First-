@@ -31,3 +31,9 @@
 R07: استُخدم سجل job السابق بدل حالة REST المتأخرة؛ تشغيل `39285187356` فشل في inventory رغم ظهور queued. أُصلح الجرد، والتشغيل الحالي اجتاز preflight/closure/Prisma/typecheck/Vercel ثم lint والبناء، ودخل اختبارات unit عند آخر قراءة. unit/artifacts والاسترجاع وصورة الإصدار ليست PASS بعد. حالة R05/R06 محفوظة. لا إنتاج أو Neon أو main أو مزود مؤثر.
 
 نقطة الاستئناف: نتيجة R07 الحالية من job logs/steps، ثم جلسات API الموزعة وبقية سلاسل R08. حفظ التوثيق فقط بـskip ci يمنع تشغيل نسخة مكررة؛ أدلة التنفيذ تبقى مرتبطة بالمصدر أعلاه.
+
+### نتيجة R07 اللاحقة
+
+اكتمل job المصدر `118178128350` بالفشل في unit على المصدر نفسه؛ اجتازت source-quality/preflight/regressions/closure وPrisma وtypecheck/Vercel وlint/build. نتيجة Vitest: 5134 passed، و11 failed، و7 skipped؛ خمس ملفات فاشلة و687 ناجحة وثلاثة متخطاة. لا يُحوَّل هذا إلى نسبة قبول أو PASS. لم تُبنَ artifacts، وبقي استرجاع وحدات الإصدار وصورتها محجوبين. نطاق R08 المستقل الناجح لا يتأثر بهذا التصنيف.
+
+الملفات الفاشلة: `tests/remediation/B05ProgramOwner.spec.ts` (7 حالات عقد مالك البرنامج)، و`packages/application/tests/localization/B11OwnerDescriptions.spec.ts` (قراءة published)، و`packages/infrastructure/tests/asset-platform/PrismaAssetEvidenceRoundtrip.spec.ts` (`ASSET_VERSION_HISTORY_INVALID`)، و`packages/infrastructure/tests/cms/CmsRelatedPublishedSelection.spec.ts` (delegate course.findMany ناقص)، و`packages/infrastructure/tests/scholarships/PrismaScholarshipCanonicalLookupGateway.spec.ts` (عقد lookup). يلزم فحص كل fixture مقابل عقد الكود الحالي قبل إصلاحه؛ لا تضعيف assertion أو guard ولا إعادة مجموعة عامة دون تغيير يبررها. السجل الرسمي: [job المصدر](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39287364100/job/118178128350). توجيه المالك الحالي عند عدم اكتمال R07 هو مواصلة R08؛ التالي جلسات API الموزعة وسلاسل المزودين، مع إبقاء إخفاق CI ظاهرًا.

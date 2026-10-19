@@ -102,7 +102,7 @@
       "releaseGateRunObservedState": "FAILED_VERCEL_TYPECHECK_MOCK_SIGNATURE_FIXED_AND_VERIFIED_LOCALLY_NEW_CI_REQUIRED",
       "latestCandidateCiSourceSha": "26fe899a033ab93eb3a44b39df1c10d9600bcd87",
       "latestCandidateCiRun": "39287364100",
-      "latestCandidateCiObservedState": "SOURCE_LINT_BUILD_PASSED_UNIT_IN_PROGRESS_RELEASE_GATES_OPEN",
+      "latestCandidateCiObservedState": "SOURCE_LINT_BUILD_PASSED_UNIT_FAILED_11_CASES_5_FILES_ARTIFACTS_NOT_BUILT",
       "linuxReviewTarget": "linux-x64/node22/postgresql16",
       "fourSymlinkCases": "PASS_ON_LINUX_AT_5b9c4e4502d2ea9168e223a4f2a465ef799b6662",
       "reference": "docs/remediation/POST28_R07_POST111_DIAGNOSTIC_2026-10-19.md",
