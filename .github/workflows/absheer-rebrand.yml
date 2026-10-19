@@ -1,0 +1,60 @@
+name: ABSHEER complete source rebranding
+on:
+  push:
+    branches:
+      - 'handoff/absheer-clean-base-2026-10-19'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: absheer-rebranding
+  cancel-in-progress: false
+jobs:
+  migrate-and-verify:
+    # GITHUB_TOKEN commits won't fire another push workflow; this job verifies before pushing.
+    if: "!contains(github.event.head_commit.message, '[ABSHEER-BRAND-APPLIED]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - name: Red tests for the migration transformation
+        run: node --test tests/handoff/rebrand-absheer.test.mjs
+      - name: Rewrite tracked project sources, documents, and paths
+        run: node scripts/rebrand-absheer.mjs --apply
+      - name: Reconcile root/workspace package lockfile after namespace migration
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Install against synchronized lockfile
+        run: npm ci
+      - name: Assert no old identifiers remain in tracked content or paths
+        run: |
+          git add -A
+          node scripts/rebrand-absheer.mjs --check
+          node --test tests/handoff/rebrand-absheer.test.mjs
+      - name: Validate core source modules, all Typescript projects and apps
+        run: |
+          npm run db:generate
+          npm run typecheck
+          npm run build -w @absheer/web
+          npm run build -w @absheer/admin
+      - name: Verify handoff security after rebranding
+        run: |
+          node scripts/security/verify-absheer-handoff.mjs
+          node --test tests/handoff/absheer-handoff.test.mjs
+      - name: Commit rebranded contents to isolated handoff branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "NO_CHANGES=YES"
+            exit 0
+          fi
+          git commit -m "refactor(brand): migrate all project files to ABSHEER [ABSHEER-BRAND-APPLIED]"
+          git push origin "HEAD:refs/heads/handoff/absheer-clean-base-2026-10-19"
