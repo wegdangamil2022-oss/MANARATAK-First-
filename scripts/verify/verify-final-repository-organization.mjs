@@ -47,7 +47,7 @@ const allowedRootFiles = new Set([
   '.sections08-09-completion-vitest.config.ts',
   '.certificates-vitest.config.ts', '.section08-vitest.config.ts', '.section09-vitest.config.ts',
   '.section15-vitest.config.ts', '.section16-vitest.config.ts', 'vitest.database.config.ts', 'vitest.health.config.ts',
-  'docker-compose.yml', 'eslint.config.js', 'LICENSE', 'package-lock.json', 'package.json',
+  'docker-compose.yml', 'eslint.config.js', 'LICENSE', 'package-lock.json', 'package.json', 'vercel.json',
   'README.md', 'metadata.json', 'server.js', 'tsconfig.base.json', 'tsconfig.json', 'turbo.json', 'vitest.config.ts', 'vitest.workspace.ts',
 ]);
 const excludedDirectories = new Set(['node_modules', '.git', 'dist', 'build', 'coverage', '.cache', '.turbo', '.vite', 'playwright-report', 'test-results', 'release-artifacts', 'archive']);
