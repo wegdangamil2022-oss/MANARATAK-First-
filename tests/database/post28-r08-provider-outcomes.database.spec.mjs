@@ -14,10 +14,10 @@ const secret=randomBytes(32).toString('hex'),apiKey=randomBytes(32).toString('he
 const merchant='post28-synthetic-merchant',records=new Map(),requests=[];
 let db,finance,server,port;
 const digest=value=>createHash('sha256').update(value).digest('hex');
-function captured(record){
+function captured(record,status='CAPTURED'){
   const proof={operationReference:record.reference,merchantReference:record.invalid?merchant+'-wrong':merchant,captureReference:'capture:'+record.reference,amount:record.amount,timestamp:new Date().toISOString()};
-  const canonical=[record.gatewayReference,'CAPTURED',proof.operationReference,proof.merchantReference,proof.captureReference,proof.amount.currencyCode,String(proof.amount.scale),proof.amount.amountMinorUnits,proof.timestamp].join('\n');
-  return {status:'CAPTURED',gatewayReference:record.gatewayReference,attestation:{...proof,signature:createHmac('sha256',secret).update(canonical).digest('hex')}};
+  const canonical=[record.gatewayReference,status,proof.operationReference,proof.merchantReference,proof.captureReference,proof.amount.currencyCode,String(proof.amount.scale),proof.amount.amountMinorUnits,proof.timestamp].join('\n');
+  return {status,gatewayReference:record.gatewayReference,attestation:{...proof,signature:createHmac('sha256',secret).update(canonical).digest('hex')}};
 }
 async function stub(req,res){
   try{
@@ -25,22 +25,28 @@ async function stub(req,res){
     const timestamp=req.headers['x-manaratak-timestamp'],nonce=req.headers['x-manaratak-nonce'],bodyHash=digest(raw);
     const canonical=['POST',req.url,timestamp,nonce,bodyHash].join('\n');
     if(req.method!=='POST'||req.headers['x-manaratak-provider-key']!==apiKey||req.headers['x-manaratak-content-sha256']!==bodyHash||req.headers['x-manaratak-signature']!==createHmac('sha256',secret).update(canonical).digest('hex'))throw Error('UNAUTHENTICATED');
-    const body=JSON.parse(raw),reference=body.paymentReference;
-    if(!/^fin_pay_[a-f0-9]{32}$/.test(reference))throw Error('REFERENCE');
+    const body=JSON.parse(raw),reference=body.paymentReference??body.refundReference;
+    if(!/^fin_pay_[a-f0-9]{32}$/.test(reference)&&!/^fin_ref_[a-f0-9-]{36}$/.test(reference))throw Error('REFERENCE');
     const operation=req.url.split('/').at(-1),key=req.headers['idempotency-key'];
     requests.push({reference,operation,key,signed:true});
     let record=records.get(reference),response;
     if(operation==='authorize'){
-      if(!record){record={reference,gatewayReference:'synthetic:'+reference,amount:body.amount,invalid:body.paymentMethodToken==='synthetic-invalid-proof',captures:0};records.set(reference,record);}
+      if(!record){record={reference,gatewayReference:'synthetic:'+reference,amount:body.amount,invalid:body.paymentMethodToken==='synthetic-invalid-proof',loseCaptureReply:body.paymentMethodToken==='synthetic-lost-response',captures:0};records.set(reference,record);}
+      if(body.paymentMethodToken==='synthetic-timeout')return; // Real transport deadline, no synthetic clock.
       response={status:'AUTHORIZED',gatewayReference:record.gatewayReference};
     }else if(operation==='capture'){
       if(!record||body.gatewayReference!==record.gatewayReference)throw Error('UNKNOWN_AUTHORIZATION');
       record.captures+=1;record.status='CAPTURED';
-      if(!record.invalid){req.socket.destroy();return;} // Provider committed; response is deliberately lost.
+      if(record.loseCaptureReply){req.socket.destroy();return;} // Provider committed; response is deliberately lost.
       response=captured(record);
     }else if(operation==='status'){
       if(!record||record.status!=='CAPTURED')throw Error('UNKNOWN_CAPTURE');
       response=captured(record);
+    }else if(operation==='refund'){
+      if(!record){record={reference,gatewayReference:'synthetic:'+reference,amount:body.amount,status:'COMPLETED',submissions:0};records.set(reference,record);}
+      record.submissions+=1;req.socket.destroy();return;
+    }else if(operation==='refund-status'){
+      if(!record||record.status!=='COMPLETED')throw Error('UNKNOWN_REFUND');response=captured(record,'COMPLETED');
     }else throw Error('UNKNOWN_OPERATION');
     res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify(response));
   }catch{res.writeHead(400,{'Content-Type':'application/json'});res.end('{"error":"SYNTHETIC_STUB_REJECTED"}');}
@@ -83,5 +89,31 @@ describe('R08 signed loopback provider with persisted financial outcomes',()=>{
     const i=await invoice(),c=context(),input={invoiceId:i.id,amount:money(),paymentMethodToken:'synthetic-invalid-proof',gatewayProvider:'POST28_STUB'};
     await expect(finance.capturePayment(input,c)).rejects.toThrow('FINANCE_PROVIDER_PROTOCOL_ERROR:payment.capture');
     const f=await facts(i.id);expect(f.invoice.status).toBe('ISSUED');expect(f.invoice.dueMinorUnits).toBe('100');expect(f.payment.status).toBe('AUTHORIZED');expect(f.transactions).toHaveLength(0);expect(f.receipts).toHaveLength(0);
+  });
+  it('recovers a lost refund response with one consumed approval and one balanced refund posting',async()=>{
+    const i=await invoice(),payment=await finance.capturePayment({invoiceId:i.id,amount:money(),paymentMethodToken:'synthetic-refund-source',gatewayProvider:'POST28_STUB'},context());
+    const refund=await finance.createRefund({paymentId:payment.id,amount:{...money(),amountMinorUnits:'50'},reason:'Synthetic refund recovery'},context());
+    let approval=await finance.createApproval({actionType:'REFUND_EXECUTE',targetReferenceId:refund.id,requiredApprovals:2},context());
+    for(const actorId of ['post28-r08-checker-a','post28-r08-checker-b'])approval=await finance.decideApproval(approval.id,'APPROVE',actorId,undefined,{...context(),actorId,expectedVersion:approval.version});
+    const c={...context(),expectedVersion:refund.version};
+    await expect(finance.processRefund(refund.id,approval.id,c)).rejects.toThrow('FINANCE_PROVIDER_UNAVAILABLE:payment.refund');
+    const pending=await db.financeRefundRecord.findUniqueOrThrow({where:{id:refund.id}}),reserved=await db.financeApprovalRecord.findUniqueOrThrow({where:{id:approval.id}});
+    expect(pending.status).toBe('UNKNOWN_OUTCOME');expect(reserved.consumedAt).not.toBeNull();
+    await expect(finance.processRefund(refund.id,approval.id,c)).rejects.toThrow('not pending approval');
+    expect(records.get(refund.publicId).submissions).toBe(1);
+    const wait=Math.max(0,pending.nextCheckAt.getTime()-Date.now()+50);expect(wait).toBeLessThanOrEqual(60050);await new Promise(resolve=>setTimeout(resolve,wait));
+    const result=await finance.reconcileProviderStates({...context(),limit:10});expect(result.updatedRefunds).toBe(1);expect(result.providerFailures).toBe(0);
+    const settled=await db.financeRefundRecord.findUniqueOrThrow({where:{id:refund.id}}),ledger=await db.financialTransactionRecord.findMany({where:{businessReferenceType:'REFUND',businessReferenceId:refund.id},include:{entries:true}});
+    expect(settled.status).toBe('COMPLETED');expect(ledger).toHaveLength(1);expect(ledger[0].entries).toHaveLength(2);expect(ledger[0].entries.every(e=>e.amountMinorUnits==='50')).toBe(true);expect(new Set(ledger[0].entries.map(e=>e.direction))).toEqual(new Set(['DEBIT','CREDIT']));
+    expect((await db.financeInvoiceRecord.findUniqueOrThrow({where:{id:i.id}})).dueMinorUnits).toBe('50');
+    const replay=await finance.processRefund(refund.id,approval.id,c);expect(replay.status).toBe('COMPLETED');expect(await db.financialTransactionRecord.findMany({where:{businessReferenceType:'REFUND',businessReferenceId:refund.id},include:{entries:true}})).toEqual(ledger);
+    expect(await db.financeApprovalRecord.findUniqueOrThrow({where:{id:approval.id}})).toEqual(reserved);expect(records.get(refund.publicId).submissions).toBe(1);
+  },100000);
+  it('keeps a real authorization timeout pending without redispatch or a paid invoice',async()=>{
+    const i=await invoice(),c=context(),input={invoiceId:i.id,amount:money(),paymentMethodToken:'synthetic-timeout',gatewayProvider:'POST28_STUB'};
+    await expect(finance.capturePayment(input,c)).rejects.toThrow('FINANCE_PROVIDER_TIMEOUT:payment.authorize');
+    const before=await facts(i.id);expect(before.payment.status).toBe('PENDING');expect(before.invoice.status).toBe('ISSUED');expect(before.transactions).toHaveLength(0);expect(before.receipts).toHaveLength(0);
+    await expect(finance.capturePayment(input,c)).rejects.toThrow('FINANCE_PAYMENT_OUTCOME_PENDING_RECONCILIATION');expect(await facts(i.id)).toEqual(before);
+    expect(requests.filter(r=>r.reference===before.payment.publicId).map(r=>r.operation)).toEqual(['authorize']);
   });
 });
