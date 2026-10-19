@@ -1,0 +1,16 @@
+{
+  "sourceSha": "2141eb207c5c837457e5b9de5bfe5757f03d05a1",
+  "stage": "R09",
+  "slice": "SAFE_POST_LOGIN_RETURN",
+  "actualSelectedPassed": 3,
+  "unselectedExistingCases": 2,
+  "newCases": 2,
+  "existingDirectlyAffectedCases": 1,
+  "regressionObservedBeforeFix": true,
+  "priorFailureReceipt": "Observed terminal: browser-normalized /TAB/attacker.example/account was returned rather than null; the valid localized deep link already passed.",
+  "eslint": "PASS",
+  "builtBrowserVerified": false,
+  "formalR09Acceptance": false,
+  "productionAcceptance": false,
+  "next": "Built-browser localized learner deep-link round trip and student/admin authorization boundaries, with synthetic owners in an isolated lab."
+}

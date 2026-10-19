@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "kind": "POST28_R09_FIRST_SLICE",
+  "sourceSha": "2141eb207c5c837457e5b9de5bfe5757f03d05a1",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "scope.json",
+      "bytes": 715,
+      "sha256": "62863921cb2bcffeeefd5eb3bb2f36ef285a52ee2bb62ea9b6b90cf8b2c869e1"
+    },
+    {
+      "path": "vitest.json",
+      "bytes": 2540,
+      "sha256": "523e5df53e2538912143731b98b1b2e2e419adf2cd89ef36f70eac335c106e08"
+    }
+  ]
+}
