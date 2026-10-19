@@ -1,0 +1,25 @@
+{
+  "sourceSha": "672c631c49e8fe337a1c8c02a8c9db80d9d06896",
+  "runs": [
+    {
+      "directory": "course-import-receipt-qEpWTw",
+      "success": true,
+      "passed": 1,
+      "failed": 0,
+      "unselectedOrHookSkipped": 5,
+      "selection": {
+        "caseExact": "Post28 actual canonical course import receipts > R08 recovers a killed owner process after canonical commit without a second mutation or event",
+        "fullDiscoveryCases": 6,
+        "selectedCases": 1,
+        "fullProfileAcceptance": false
+      }
+    }
+  ],
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "appRole": "post28_app",
+  "secretsRetained": false,
+  "cleanupVerified": true,
+  "setupAuthority": "Separate migrator for the new empty lab only; application tests used no elevated role",
+  "note": "Actual runtime assertions passed on this source; scoped selection excludes other cases explicitly."
+}

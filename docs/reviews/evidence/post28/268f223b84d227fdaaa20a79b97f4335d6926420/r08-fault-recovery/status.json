@@ -1,0 +1,38 @@
+{
+  "sourceSha": "268f223b84d227fdaaa20a79b97f4335d6926420",
+  "runs": [
+    {
+      "directory": "r08-outbox-chain-2whHiA",
+      "success": false,
+      "passed": 0,
+      "failed": 1,
+      "unselectedOrHookSkipped": 5,
+      "selection": {
+        "caseExact": "R08 actual outbox processes to student inbox > late activation cannot undo the current role revocation projected by another worker",
+        "fullDiscoveryCases": 6,
+        "selectedCases": 1,
+        "fullProfileAcceptance": false
+      }
+    },
+    {
+      "directory": "r08-outbox-chain-IiZ0zu",
+      "success": true,
+      "passed": 1,
+      "failed": 0,
+      "unselectedOrHookSkipped": 5,
+      "selection": {
+        "caseExact": "R08 actual outbox processes to student inbox > a delayed role-created event projects current suspension instead of reviving the student",
+        "fullDiscoveryCases": 6,
+        "selectedCases": 1,
+        "fullProfileAcceptance": false
+      }
+    }
+  ],
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "appRole": "post28_app",
+  "secretsRetained": false,
+  "cleanupVerified": true,
+  "setupAuthority": "Separate migrator for the new empty lab only; application tests used no elevated role",
+  "note": "Delayed suspension passed; late activation failed because the synthetic identity envelope violated the real owner contract. The corrected envelope was verified separately."
+}

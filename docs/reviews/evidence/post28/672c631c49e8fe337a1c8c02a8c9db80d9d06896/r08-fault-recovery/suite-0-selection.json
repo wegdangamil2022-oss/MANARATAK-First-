@@ -1,0 +1,6 @@
+{
+  "caseExact": "Post28 actual canonical course import receipts > R08 recovers a killed owner process after canonical commit without a second mutation or event",
+  "fullDiscoveryCases": 6,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

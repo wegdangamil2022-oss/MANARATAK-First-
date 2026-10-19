@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "kind": "POST28_R08_FAULT_RECOVERY_EVIDENCE",
+  "sourceSha": "a3c0dde6d9f323ccc703bbae9610b828d0ed1f41",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "README.md",
+      "bytes": 556,
+      "sha256": "04d09d77190f30d5978b3d58a06a2d541761edd17b3250157b9ef4b48826593e"
+    },
+    {
+      "path": "archive-receipt.json",
+      "bytes": 343,
+      "sha256": "ad42ea172287d6a4e67ee60f8f6659834af954d944b1e6524ba4c1a8b4f61456"
+    },
+    {
+      "path": "first-ci-failure-excerpt.txt",
+      "bytes": 391,
+      "sha256": "ffa2a8b719707091cdef79cb7c22766edf6cf3cace0313d2a11a9fd87733c11d"
+    },
+    {
+      "path": "first-ci-run.json",
+      "bytes": 9114,
+      "sha256": "00291a76c941fcbc89781cc79132b4fbbf1464a5aca50672cf694dcdafcf7746"
+    },
+    {
+      "path": "redis-execution-receipt.json",
+      "bytes": 982,
+      "sha256": "1cd0755607acf33acde7196590313b55d5b849e16a07ee70900594f97ffb189e"
+    }
+  ]
+}

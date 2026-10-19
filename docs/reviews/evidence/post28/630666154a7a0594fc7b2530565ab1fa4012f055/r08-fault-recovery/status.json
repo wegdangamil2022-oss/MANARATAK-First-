@@ -1,0 +1,25 @@
+{
+  "sourceSha": "630666154a7a0594fc7b2530565ab1fa4012f055",
+  "runs": [
+    {
+      "directory": "r08-session-processes-ehWz1D",
+      "success": false,
+      "passed": 0,
+      "failed": 1,
+      "unselectedOrHookSkipped": 4,
+      "selection": {
+        "caseExact": "R08 two real HTTP auth processes with persistent shared sessions > revokes the committed descendant after a deterministically concurrent refresh serialization conflict",
+        "fullDiscoveryCases": 5,
+        "selectedCases": 1,
+        "fullProfileAcceptance": false
+      }
+    }
+  ],
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "appRole": "post28_app",
+  "secretsRetained": false,
+  "cleanupVerified": true,
+  "setupAuthority": "Separate migrator for the new empty lab only; application tests used no elevated role",
+  "note": "Confirmed concurrent refresh defect before the production fix: one descendant remained active."
+}

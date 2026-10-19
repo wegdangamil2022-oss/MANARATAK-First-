@@ -1,0 +1,84 @@
+{
+  "kind": "canonical-course",
+  "sourceSha": "672c631c49e8fe337a1c8c02a8c9db80d9d06896",
+  "runId": "0688fb6e-70ab-400e-9a05-99af637e0fde",
+  "readOnlyInspection": true,
+  "syntheticOnly": true,
+  "effects": {
+    "records": [
+      {
+        "id": "19c46e90-45dd-4a15-ab2e-c3ff52502141",
+        "promotedEntityId": "1a5a89e0-be99-490a-9652-37ee9cf57bb9",
+        "processingNotes": "[COURSE_IMPORT_TRANSFER_RECEIPT]{\"version\":1,\"recordId\":\"19c46e90-45dd-4a15-ab2e-c3ff52502141\",\"courseId\":\"1a5a89e0-be99-490a-9652-37ee9cf57bb9\",\"publicId\":\"course-16269aff\",\"actorId\":\"POST28_SYNTHETIC_COURSE_REVIEWER\",\"correlationId\":null,\"transferredAt\":\"2026-10-19T20:44:34.040Z\",\"state\":\"TRANSFERRED_CREATED\",\"analysisId\":\"58678b4c-9d2b-4289-bb0e-30cd5ba06543\",\"analysisChangeState\":\"NEW\",\"approvedFields\":[],\"urlVerified\":false}"
+      }
+    ],
+    "courses": [
+      {
+        "id": "1a5a89e0-be99-490a-9652-37ee9cf57bb9",
+        "status": "IMPORTED"
+      }
+    ],
+    "provenance": [
+      {
+        "fieldKey": "courseName",
+        "reviewedBy": "POST28_SYNTHETIC_COURSE_REVIEWER",
+        "reviewStatus": "APPROVED"
+      },
+      {
+        "fieldKey": "directCourseUrl",
+        "reviewedBy": "POST28_SYNTHETIC_COURSE_REVIEWER",
+        "reviewStatus": "APPROVED"
+      },
+      {
+        "fieldKey": "studyFreeRaw",
+        "reviewedBy": "POST28_SYNTHETIC_COURSE_REVIEWER",
+        "reviewStatus": "APPROVED"
+      },
+      {
+        "fieldKey": "freeCertificateRaw",
+        "reviewedBy": "POST28_SYNTHETIC_COURSE_REVIEWER",
+        "reviewStatus": "APPROVED"
+      },
+      {
+        "fieldKey": "certificateTypeRaw",
+        "reviewedBy": "POST28_SYNTHETIC_COURSE_REVIEWER",
+        "reviewStatus": "APPROVED"
+      },
+      {
+        "fieldKey": "languageRaw",
+        "reviewedBy": "POST28_SYNTHETIC_COURSE_REVIEWER",
+        "reviewStatus": "APPROVED"
+      },
+      {
+        "fieldKey": "studyLevelRaw",
+        "reviewedBy": "POST28_SYNTHETIC_COURSE_REVIEWER",
+        "reviewStatus": "APPROVED"
+      },
+      {
+        "fieldKey": "courseDurationRaw",
+        "reviewedBy": "POST28_SYNTHETIC_COURSE_REVIEWER",
+        "reviewStatus": "APPROVED"
+      },
+      {
+        "fieldKey": "shortCourseTopicsRaw",
+        "reviewedBy": "POST28_SYNTHETIC_COURSE_REVIEWER",
+        "reviewStatus": "APPROVED"
+      }
+    ],
+    "audits": [
+      {
+        "id": "146f0da8-df1d-4062-ba64-9735acf62504",
+        "action": "COURSE_IMPORT_TRANSFERRED",
+        "targetId": "19c46e90-45dd-4a15-ab2e-c3ff52502141"
+      }
+    ],
+    "outbox": [
+      {
+        "id": "99521653-d033-4f42-9b51-cd49aa246599",
+        "eventType": "COURSE_IMPORT_TRANSFERRED",
+        "aggregateId": "19c46e90-45dd-4a15-ab2e-c3ff52502141",
+        "state": "PENDING"
+      }
+    ]
+  }
+}

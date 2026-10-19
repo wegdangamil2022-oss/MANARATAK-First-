@@ -1,0 +1,10 @@
+[
+  {
+    "name": "R08 signed loopback provider with persisted financial outcomes > reconciles a lost capture response after the natural deadline without a second charge or receipt",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-r08-provider-outcomes.database.spec.mjs"
+  },
+  {
+    "name": "R08 signed loopback provider with persisted financial outcomes > refuses signed evidence for another merchant without marking the invoice paid",
+    "file": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/tests/database/post28-r08-provider-outcomes.database.spec.mjs"
+  }
+]

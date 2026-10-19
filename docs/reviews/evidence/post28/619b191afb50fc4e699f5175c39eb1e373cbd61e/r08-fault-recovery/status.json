@@ -1,0 +1,25 @@
+{
+  "sourceSha": "619b191afb50fc4e699f5175c39eb1e373cbd61e",
+  "runs": [
+    {
+      "directory": "r08-session-processes-BWpLM0",
+      "success": false,
+      "passed": 0,
+      "failed": 0,
+      "unselectedOrHookSkipped": 5,
+      "selection": {
+        "caseExact": "R08 two real HTTP auth processes with persistent shared sessions > revokes the committed descendant after a deterministically concurrent refresh serialization conflict",
+        "fullDiscoveryCases": 5,
+        "selectedCases": 1,
+        "fullProfileAcceptance": false
+      }
+    }
+  ],
+  "fullR08Acceptance": false,
+  "productionAcceptance": false,
+  "appRole": "post28_app",
+  "secretsRetained": false,
+  "cleanupVerified": true,
+  "setupAuthority": "Separate migrator for the new empty lab only; application tests used no elevated role",
+  "note": "Initial hook failure: all cases skipped; no defect or passing case inferred. A subsequent change enabled the default reporter to expose failure diagnostics."
+}

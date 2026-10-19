@@ -1,0 +1,8 @@
+{
+  "sourceSha": "672c631c49e8fe337a1c8c02a8c9db80d9d06896",
+  "runId": "0688fb6e-70ab-400e-9a05-99af637e0fde",
+  "postgresVersion": "postgres (PostgreSQL) 16.15",
+  "serverIdentity": "7698482533045491972",
+  "profile": "transactions",
+  "localOnly": true
+}

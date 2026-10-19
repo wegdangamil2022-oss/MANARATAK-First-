@@ -1,0 +1,3 @@
+2026-10-19T20:43:24.6436718Z       throw new Error('Environment inventory stale: run node scripts/config/environment-inventory.mjs --write');
+2026-10-19T20:43:24.6437623Z Error: Environment inventory stale: run node scripts/config/environment-inventory.mjs --write
+2026-10-19T20:43:24.8763928Z SOURCE_EXECUTION_REPORT=SOURCE_STEPS_FAILED_OR_SKIPPED RUNTIME_VERIFIED=FALSE PRODUCTION=BLOCKED

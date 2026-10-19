@@ -128,20 +128,28 @@
     },
     {
       "id": "R08",
-      "state": "SCOPED_OUTBOX_LINUX_REDIS_SHARED_HTTP_SESSIONS_VERIFIED_FULL_SCOPE_OPEN",
-      "formalAcceptance": "OPEN_FULL_WORKER_SECURITY_PROVIDER_SCOPE",
+      "state": "LOCAL_FAULT_RECOVERY_VERIFIED_FULL_ACCEPTANCE_OPEN",
+      "formalAcceptance": "OPEN_COMBINED_API_TOPOLOGY_PROVIDER_MATRIX_AND_OPERATIONAL_ALERTS",
       "outboxChainReport": "docs/remediation/POST28_R08_OUTBOX_PROCESS_CHAIN_2026-10-19.md",
       "shutdownReport": "docs/remediation/POST28_R08_SHUTDOWN_2026-10-19.md",
       "linuxRedisReport": "docs/remediation/POST28_R08_LINUX_REDIS_2026-10-19.md",
-      "latestRuntimeReport": "docs/remediation/POST28_R08_SESSIONS_AND_STANDARD_RUNTIME_2026-10-19.md",
-      "latestEvidenceSourceSha": "6e42d922c79053b67107cd8722390bff1f273986",
-      "latestEvidence": "docs/reviews/evidence/post28/6e42d922c79053b67107cd8722390bff1f273986/r08-shared-sessions/status.json",
+      "latestRuntimeReport": "docs/remediation/POST28_R08_FAULT_RECOVERY_2026-10-20.md",
+      "latestEvidenceSourceSha": "4f9573332afe83ed2aa804f36494b520c574fe6d",
+      "latestEvidence": "docs/reviews/evidence/post28/4f9573332afe83ed2aa804f36494b520c574fe6d/r08-current-ci/evidence-index.json",
       "standardRuntimeSourceSha": "be5407e6c9a63f9633019c22a79b6990ca0d3a1d",
-      "latestCandidateCiRun": "39315368366",
-      "latestScopedRedisAndLinuxDrainState": "PASS_ON_1349371_NOT_FULL_R08_ACCEPTANCE",
+      "latestCandidateCiRun": "39326541345",
+      "latestScopedRedisAndLinuxDrainState": "PASS_ON_4f95733_NOT_FULL_R08_ACCEPTANCE",
       "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md",
       "laterEvidence": "docs/remediation/POST28_R06_WORKER_CRASH_2026-10-18.md",
-      "canonicalAutomaticWorkerEnabledByThisBatch": false
+      "canonicalAutomaticWorkerEnabledByThisBatch": false,
+      "sessionConflictFixSourceSha": "5c5152ff2c575414b0e04f7b450330b61cef2070",
+      "canonicalOwnerRecoverySourceSha": "672c631c49e8fe337a1c8c02a8c9db80d9d06896",
+      "signedWebhookRedisSourceSha": "a3c0dde6d9f323ccc703bbae9610b828d0ed1f41",
+      "latestCandidateSourceSha": "4f9573332afe83ed2aa804f36494b520c574fe6d",
+      "latestCandidateCiState": "PASS_ALL_23_CHECKS_AND_LINUX_DIAGNOSTIC_NOT_FULL_R08_ACCEPTANCE",
+      "pendingConcurrentFixtureChangesCommitted": true,
+      "combinedBuiltApiTlsRedisSessionsVerified": false,
+      "financialRecoverySourceSha": "9c4d4b16b8efa5c4d38c18db4b36f56c04f252a7"
     },
     {
       "id": "R09",
@@ -177,9 +185,30 @@
     "browserRepeated": false
   },
   "resumeOrder": [
-    "R08_FINISH_PENDING_CONCURRENT_REFRESH_FIXTURE_AND_EFFECT_PROOFS",
+    "R08_COMBINED_API_TLS_REDIS_PROVIDER_MATRIX_AND_OPERATIONAL_ALERTS",
     "R07_FORMAL_RELEASE_CONFIGURATION_AND_REVIEW_GATES",
     "R09_ENABLED_FEATURE_PROOFS"
   ],
-  "mainPlan": "Prepare one reviewed pull request after consolidation stability and release configuration review; do not merge or deploy automatically."
+  "mainPlan": "Prepare one reviewed pull request after consolidation stability and release configuration review; do not merge or deploy automatically.",
+  "r08BatchVerification": {
+    "reportDate": "2026-10-20",
+    "sourceSha": "4f9573332afe83ed2aa804f36494b520c574fe6d",
+    "ciRun": "39326541345",
+    "checkRuns": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    },
+    "scopedDatabasePassingExecutions": 10,
+    "newAndCompletedRuntimeCases": 6,
+    "targetedUnitPassed": 19,
+    "syntheticNewPg16Clusters": 7,
+    "allOwnedClustersStopped": true,
+    "activeMigrationsChanged": false,
+    "schemaChanged": false,
+    "fullLocalBuildRepeated": false,
+    "combinedBuiltApiTlsRedisSessionsVerified": false,
+    "fullR08Acceptance": false,
+    "productionAcceptance": false
+  }
 }

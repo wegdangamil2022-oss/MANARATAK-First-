@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "kind": "POST28_R08_FAULT_RECOVERY_EVIDENCE",
+  "sourceSha": "268f223b84d227fdaaa20a79b97f4335d6926420",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 160,
+      "sha256": "a5bc80bdb15452764d7c01f8cbc85e461404293e12d92c93e2d74742ee5b87d0"
+    },
+    {
+      "path": "identity.json",
+      "bytes": 258,
+      "sha256": "ceb60ad9d2b898c103ef46a90d0be4aa4a060d9392d78770390be4f357ac8449"
+    },
+    {
+      "path": "inspection-cleanup.json",
+      "bytes": 153,
+      "sha256": "9e1fbbe9ec1ee25a088c67319e78a6df48248871a56b9abccb3038f793af224a"
+    },
+    {
+      "path": "setup.json",
+      "bytes": 4942,
+      "sha256": "45fa1b3e52b4946b53c46d40bbdce6cc0628d665eed5cfb94f9285cdd46365ba"
+    },
+    {
+      "path": "status.json",
+      "bytes": 1403,
+      "sha256": "9fa24f96cec2a9bcc9a6c10787dabd83109fd3e25c6ed82386837bfc48370065"
+    },
+    {
+      "path": "suite-0-discovery.json",
+      "bytes": 1831,
+      "sha256": "27e83ec0c75e8c3b1eb07998030cab4eaa125ec6ac5ef6f4ab4f437a05cd1a4d"
+    },
+    {
+      "path": "suite-0-selection.json",
+      "bytes": 235,
+      "sha256": "201c71df5757b9c1af27e0e5dd16cd4dd017db0de0c8411ac1d303b975fdd75b"
+    },
+    {
+      "path": "suite-0-vitest.json",
+      "bytes": 3330,
+      "sha256": "e06d2d3ae76e8671d5fb646420b7ed5530e538416f0a9ce05e3488bb9adc97f0"
+    },
+    {
+      "path": "suite-1-discovery.json",
+      "bytes": 1831,
+      "sha256": "27e83ec0c75e8c3b1eb07998030cab4eaa125ec6ac5ef6f4ab4f437a05cd1a4d"
+    },
+    {
+      "path": "suite-1-selection.json",
+      "bytes": 240,
+      "sha256": "8d3f778c94f9c7acea0257908d0bae58df110ddd4cae78c1170c00e3100ecacf"
+    },
+    {
+      "path": "suite-1-summary.json",
+      "bytes": 1356,
+      "sha256": "cb7c1a0318f765e3ddec1c016dd6173b945bd148e269247bf44a44981e4b05ce"
+    },
+    {
+      "path": "suite-1-vitest.json",
+      "bytes": 2869,
+      "sha256": "15561ccc15b8b1b8c7013921c7c9420effbf92a94776b590e07a23c6bffc6555"
+    }
+  ]
+}
