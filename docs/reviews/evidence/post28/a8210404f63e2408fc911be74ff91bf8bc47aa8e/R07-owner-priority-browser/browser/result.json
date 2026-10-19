@@ -1,0 +1,631 @@
+{
+  "sourceSha": "a8210404f63e2408fc911be74ff91bf8bc47aa8e",
+  "identity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698173008653821920",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "browserVersion": "154.0.4258.53",
+  "observations": [
+    {
+      "step": "REVISION_READINESS",
+      "route": "/health/build",
+      "status": 200,
+      "sourceSha": "a8210404f63e2408fc911be74ff91bf8bc47aa8e"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/admin/health/build",
+      "status": 200,
+      "sourceSha": "a8210404f63e2408fc911be74ff91bf8bc47aa8e"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "sourceSha": "a8210404f63e2408fc911be74ff91bf8bc47aa8e"
+    },
+    {
+      "step": "ADMIN_BUNDLE_RENDERS_LOGIN",
+      "passed": true
+    },
+    {
+      "step": "FORM_LOGIN_TO_PERSISTED_STUDENT_DASHBOARD",
+      "passed": true
+    },
+    {
+      "step": "STUDENT_ADMIN_API_DENIED",
+      "status": 403
+    },
+    {
+      "step": "FOREIGN_STUDENT_DASHBOARD_DENIED",
+      "status": 403
+    },
+    {
+      "step": "UI_LOGOUT_REVOKES_PERSISTED_SESSION",
+      "status": 401
+    }
+  ],
+  "network": [
+    {
+      "method": "GET",
+      "path": "/admin/login",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/assets/index-Dh8Vxlpe.js",
+      "status": 200,
+      "resource": "script"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/login",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-Chp4nGOr.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-ChOjP5kU.js",
+      "status": 200,
+      "resource": "script"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "other"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "other"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-2.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/scholarships.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-0.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/universities.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/majors",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/scholarships",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/universities",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/tools.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/international-tests",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/student-tools",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/services",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "other"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "other"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/5cfb7d45-0d23-4262-a8bc-298b39edea72/finance/invoices",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/application-trackers",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/services/requests",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/snapshots",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/dashboard",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/courses",
+      "status": 403,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/00000000-0000-4000-8000-000000000000/dashboard",
+      "status": 403,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-Chp4nGOr.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-ChOjP5kU.js",
+      "status": 200,
+      "resource": "script"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "other"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "other"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-2.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-0.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/scholarships.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/universities.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/tools.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/scholarships",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/universities",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/majors",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/student-tools",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "other"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/services",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/international-tests",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs",
+      "status": 200,
+      "resource": "fetch"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "blockedExternal": [
+    "https://images.unsplash.com"
+  ],
+  "failure": null,
+  "sessionFacts": {
+    "synthetic": true,
+    "fixtureId": "5cfb7d45-0d23-4262-a8bc-298b39edea72",
+    "workspaceMatched": true,
+    "activeSessionsAfterLogout": 0,
+    "runtimeRole": "post28_app"
+  },
+  "passed": true,
+  "artifactsFreshlyUnpacked": true,
+  "tlsCertificatePinned": true,
+  "productionAccepted": false,
+  "R07Accepted": false
+}

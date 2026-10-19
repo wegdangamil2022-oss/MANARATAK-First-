@@ -1,0 +1,79 @@
+{
+  "sourceSha": "a8210404f63e2408fc911be74ff91bf8bc47aa8e",
+  "checks": [
+    {
+      "name": "prisma-generate",
+      "command": [
+        "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+        "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "db:generate"
+      ],
+      "startedAt": "2026-10-19T00:42:56.266Z",
+      "finishedAt": "2026-10-19T00:43:02.299Z",
+      "exitCode": 0,
+      "spawnError": null,
+      "logSha256": "9d81d95cbab6f6884a5e97a183c07f6d84e1d25156a6104feb35b05c40c836d1"
+    },
+    {
+      "name": "api-build",
+      "command": [
+        "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+        "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "build",
+        "--workspace",
+        "@manaratak/api"
+      ],
+      "startedAt": "2026-10-19T00:43:02.308Z",
+      "finishedAt": "2026-10-19T00:43:14.813Z",
+      "exitCode": 0,
+      "spawnError": null,
+      "logSha256": "7f3cf6c4e50c274842ebb05bed6ea2e7f0df12ef0502a3bbada88ca6e37f04dc"
+    },
+    {
+      "name": "web-build",
+      "command": [
+        "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+        "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "build",
+        "--workspace",
+        "@manaratak/web"
+      ],
+      "startedAt": "2026-10-19T00:43:14.822Z",
+      "finishedAt": "2026-10-19T00:43:25.418Z",
+      "exitCode": 0,
+      "spawnError": null,
+      "logSha256": "308a8d6892d169a74df350a724adbb879ee76f9e32ea2c94f2de797fd62e433d"
+    },
+    {
+      "name": "admin-build",
+      "command": [
+        "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+        "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "build",
+        "--workspace",
+        "@manaratak/admin"
+      ],
+      "startedAt": "2026-10-19T00:43:25.426Z",
+      "finishedAt": "2026-10-19T00:43:38.667Z",
+      "exitCode": 0,
+      "spawnError": null,
+      "logSha256": "bc31b54ee65e715ce788f35ab2f8afaaafab2c4c82a4177c45628962d4292ecd"
+    },
+    {
+      "name": "package",
+      "command": [
+        "C:\\Users\\HP\\Documents\\Codex\\2026-09-03\\github-migration-github-17-6-11\\tooling\\node-v22.16.0-win-x64\\node.exe",
+        "scripts/release/build-immutable-artifacts.mjs"
+      ],
+      "startedAt": "2026-10-19T00:43:38.806Z",
+      "finishedAt": "2026-10-19T00:43:41.317Z",
+      "exitCode": 0,
+      "spawnError": null,
+      "logSha256": "7a3640caafc6c5a45da3304135501c1779bf8471ff40c3a5450bf7486d422180"
+    }
+  ]
+}

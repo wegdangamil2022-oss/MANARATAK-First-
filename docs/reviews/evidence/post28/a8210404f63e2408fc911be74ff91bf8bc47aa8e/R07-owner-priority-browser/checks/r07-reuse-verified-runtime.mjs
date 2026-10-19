@@ -1,0 +1,16 @@
+import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {createHash} from 'node:crypto';import {execFileSync} from 'node:child_process';
+import {verifyReleaseManifest} from './r07-filtered/scripts/release/lib/ReleaseContracts.mjs';import {verifyRuntimeLayer} from './r07-filtered/scripts/release/lib/RuntimeLayerPolicy.mjs';
+const prior=path.resolve(process.argv[2]),next=path.resolve(process.argv[3]),root=path.resolve('work/r07-filtered');
+const old=JSON.parse(fs.readFileSync(path.join(prior,'artifacts/release-manifest.json'))),current=JSON.parse(fs.readFileSync(path.join(next,'artifacts/release-manifest.json')));
+for(const [run,manifest]of[[prior,old],[next,current]])verifyReleaseManifest(path.join(run,'artifacts'),manifest.sourceSha);
+assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),current.sourceSha);assert.equal(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim(),'');
+assert.equal(execFileSync('git',['diff','--name-only',old.sourceSha,current.sourceSha,'--','package-lock.json','package.json','apps/*/package.json','packages/*/package.json','packages/infrastructure/prisma/schema.prisma'],{cwd:root,encoding:'utf8'}).trim(),'','Runtime dependency/schema inputs changed');
+assert.equal(old.runtimeRequirements.lockSha256,current.runtimeRequirements.lockSha256);
+const identity=JSON.parse(fs.readFileSync(path.join(prior,'api-boot-root/runtime-layer.json')));verifyRuntimeLayer(path.join(prior,'api-boot-root'),old,identity);
+const list=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?list(path.join(dir,e.name)).map(s=>e.name+'/'+s):[e.name]).sort();
+assert.deepEqual(list(path.join(prior,'unpacked-api')),list(path.join(next,'unpacked-api')),'Artifact file set changed; clean assembly required');
+const target=path.join(next,'api-boot-root');assert(!fs.existsSync(target));fs.cpSync(path.join(prior,'api-boot-root'),target,{recursive:true});fs.cpSync(path.join(next,'unpacked-api'),target,{recursive:true});
+const digest=f=>createHash('sha256').update(fs.readFileSync(f)).digest('hex');for(const file of list(path.join(next,'unpacked-api')))assert.equal(digest(path.join(target,file)),digest(path.join(next,'unpacked-api',file)));
+const updated={...identity,sourceSha:current.sourceSha};fs.writeFileSync(path.join(target,'runtime-layer.json'),JSON.stringify(updated,null,2));const verification=verifyRuntimeLayer(target,current,updated);
+const report={sourceSha:current.sourceSha,reusedDependencyLayerFrom:old.sourceSha,reason:'Only service SQL changed; all package manifests, lock and schema unchanged. No second install.',dependencyInputsUnchanged:true,apiFilesMatchFreshUnpack:true,apiArtifactSha256:current.artifacts.find(r=>r.unit==='api').sha256,generatedClientSchemaSha256:identity.generatedSchemaSha256,engineSha256:identity.engineSha256,verification,newRuntimeArchiveCreated:false,productionAccepted:false};
+fs.writeFileSync(path.join(next,'runtime-layer.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));
