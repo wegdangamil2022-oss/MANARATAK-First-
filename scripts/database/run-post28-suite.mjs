@@ -45,7 +45,7 @@ try {
   fs.writeFileSync(path.join(out,'selection.json'),JSON.stringify({caseExact:caseExact??null,fullDiscoveryCases:rows.length,selectedCases:selected.length,fullProfileAcceptance:caseExact===undefined},null,2)+'\n');
   fs.writeFileSync(path.join(out,'discovery.json'),JSON.stringify(rows,null,2)+'\n');
   const resultFile=path.join(out,'vitest.json');
-  const result=spawnSync(process.execPath,[...base,'run','--config','config/testing/post28-database-vitest.config.ts','--reporter=json','--outputFile',resultFile,...selectionArgs],{env,stdio:'inherit'});
+  const result=spawnSync(process.execPath,[...base,'run','--config','config/testing/post28-database-vitest.config.ts','--reporter=default','--reporter=json','--outputFile',resultFile,...selectionArgs],{env,stdio:'inherit'});
   if(result.status!==0)throw new Error('POST28_DATABASE_SUITE_EXECUTION_FAILED');
   const counts=verifySuiteResults(name,rows,JSON.parse(fs.readFileSync(resultFile,'utf8')),process.cwd(),caseExact);
   const summary={kind:'POST28_DATABASE_SUITE_EXECUTION',sourceSha:sha,suite:name,caseExact:caseExact??null,fullDiscoveryCases:rows.length,fullProfileAcceptance:caseExact===undefined,authorization,targets,...counts};
