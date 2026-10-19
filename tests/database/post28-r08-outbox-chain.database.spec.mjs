@@ -52,7 +52,7 @@ describe('R08 actual outbox processes to student inbox',()=>{
     await db.transactionalOutboxRecord.create({data:{id:revoked.event,domain:'AUTHORIZATION',eventType:'RoleAssignmentRevoked',aggregateType:'ROLE_ASSIGNMENT',aggregateId:c.assignment,payload:{identityId:c.identity,assignmentId:c.assignment,roleId:'student'},metadata:{schemaVersion:'1.0.0'}}});
     expect((await worker(revoked).finish()).processed).toBe(1);
     const before=await facts(revoked);expect(before.workspace.status).toBe('SUSPENDED');
-    await db.transactionalOutboxRecord.create({data:{id:late.event,domain:'IDENTITY',eventType:'IdentityStatusChanged.v1',aggregateType:'IDENTITY',aggregateId:c.identity,payload:{identityId:c.identity,newStatus:'ACTIVE'},metadata:{schemaVersion:'1.0.0'}}});
+    await db.transactionalOutboxRecord.create({data:{id:late.event,domain:'IDENTITY',eventType:'IdentityStatusChanged.v1',aggregateType:'Identity',aggregateId:c.identity,payload:{identityId:c.identity,identityType:'Human',oldStatus:'SUSPENDED',newStatus:'ACTIVE'},metadata:{ownerDomain:'IDENTITY',schemaVersion:1}}});
     expect((await worker(late).finish()).processed).toBe(1);
     const after=await facts(late);expect(after.workspace).toEqual(before.workspace);expect(after.inbox).toEqual(before.inbox);expect(after.audits).toEqual(before.audits);
   });
