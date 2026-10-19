@@ -1,0 +1,24 @@
+{
+  "status": "PREPARED_FOR_REVIEW_NOT_EXECUTED",
+  "userDecision": "Prepare Linux x64 / Node22 / PostgreSQL16 for review",
+  "nodeVersion": "22.16.0",
+  "os": "linux",
+  "architecture": "x64",
+  "postgresMajor": 16,
+  "dockerfile": {
+    "path": "config/release/linux-x64/Dockerfile",
+    "sha256": "90e242ea42d244e59b697d2a082ba507b01f33ffb462d4f731348d38ce336900"
+  },
+  "probe": {
+    "path": "scripts/release/post28-linux-image-probe.mjs",
+    "sha256": "b85eb5fed895fff16b7541f73bfd26c41557703047cd3bb68f4b1b5e0d99f057"
+  },
+  "nativeImageBuildExecuted": false,
+  "apiBootedOnLinux": false,
+  "postgresServerStartedOnLinux": false,
+  "gracefulDrainProvenOnLinux": false,
+  "imagePublished": false,
+  "deploymentApproved": false,
+  "existingComposeUnchanged": true,
+  "existingPg15VolumeUntouched": true
+}

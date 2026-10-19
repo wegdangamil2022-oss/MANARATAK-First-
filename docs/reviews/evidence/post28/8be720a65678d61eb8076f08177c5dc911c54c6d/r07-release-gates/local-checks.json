@@ -1,0 +1,42 @@
+{
+  "kind": "TRANSCRIPT_OBSERVED_RESULTS_NOT_RAW_EXECUTION_LOGS",
+  "checks": [
+    {
+      "command": "node --test tests/architecture/ci-runtime-regressions.test.mjs",
+      "passed": 9,
+      "reason": "CI trigger and retrieval workflow changed"
+    },
+    {
+      "command": "node --test tests/remediation/w2-migration-recovery-source.test.mjs tests/remediation/m10-recovery-gate-exit.test.mjs",
+      "passed": 4,
+      "reason": "Recovery manifest111 classification added"
+    },
+    {
+      "command": "node --test tests/architecture/repository-organization.test.mjs",
+      "passed": 7,
+      "reason": "Indexed archived harness classification and tamper rejection changed"
+    },
+    {
+      "command": "vitest run packages/application/tests/courses/CourseSourcePublicationGate.spec.ts",
+      "passed": 9,
+      "reason": "Confirm DEC03 behavior while reconciling source checks"
+    },
+    {
+      "command": "node scripts/verify-courses-source-closure.mjs",
+      "passed": 24,
+      "reason": "Correct stale DEC03 source policy checks"
+    },
+    {
+      "command": "node --import tsx --test --test-name-pattern=\"a hidden test is excluded|optional CMS failure also isolated|owner SQL requires exact\" tests/integration/section27/academic-program-explorer.test.ts tests/integration/section27/section27.test.ts",
+      "passed": 3,
+      "reason": "Re-run only failed fixtures; preserve assertions and assert RepeatableRead"
+    }
+  ],
+  "notes": [
+    "No product runtime code changed in this batch.",
+    "No full local build, database matrix or browser replay.",
+    "An attempted yaml parser was unavailable; installed js-yaml parsed the workflow successfully.",
+    "Local W16 aggregate could not invoke bash on Windows; W1 already passed in Linux CI. No Windows failure was relabeled PASS.",
+    "Unregistered legacy P5 verifier has stale path-eligibility/bounded-read expectations; investigative edit was reverted, no active gate removed."
+  ]
+}

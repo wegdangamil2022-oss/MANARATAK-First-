@@ -1,0 +1,85 @@
+[
+  {
+    "sourceSha": "f436ebba06843b3df90fdd541bffc4ebde8e02a5",
+    "runId": 39273831209,
+    "jobId": 118132840101,
+    "jobUrl": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39273831209/job/118132840101",
+    "failure": "Environment inventory stale",
+    "originalLogSha256": "f9b76595b6395dcfbc696d2e5147a5fb256331013b08c0514004aad27568f936",
+    "excerpt": [
+      "2026-10-19T14:59:20.2313064Z       throw new Error('Environment inventory stale: run node scripts/aistudio/environment.mjs --write');",
+      "2026-10-19T14:59:20.2314440Z Error: Environment inventory stale: run node scripts/aistudio/environment.mjs --write",
+      "2026-10-19T14:59:20.3643253Z SOURCE_EXECUTION_REPORT=SOURCE_STEPS_FAILED_OR_SKIPPED RUNTIME_VERIFIED=FALSE PRODUCTION=BLOCKED"
+    ]
+  },
+  {
+    "sourceSha": "bce857c897eee722c020b305facc6d8aabd7d753",
+    "runId": 39274206243,
+    "jobId": 118134118648,
+    "jobUrl": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39274206243/job/118134118648",
+    "failure": "Migration111 missing from recovery manifest",
+    "originalLogSha256": "f8fd18e3a463b5e92e67ed0f191f57c4cac2ae8704ce92c525512285b7cdec27",
+    "excerpt": [
+      "2026-10-19T15:01:40.2882389Z not ok 11 - MNT-AUD-0079 every migration has explicit recovery classification and existing artifact",
+      "2026-10-19T15:01:40.2965838Z not ok 12 - MNT-AUD-0079 rollback companions match their recovery classification and environment boundary",
+      "2026-10-19T15:01:40.5919903Z SOURCE_EXECUTION_REPORT=SOURCE_STEPS_FAILED_OR_SKIPPED RUNTIME_VERIFIED=FALSE PRODUCTION=BLOCKED"
+    ]
+  },
+  {
+    "sourceSha": "c6e4bd478e777be5d7e9b81c601dbb4de5f01003",
+    "runId": 39274550557,
+    "jobId": 118135329564,
+    "jobUrl": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39274550557/job/118135329564",
+    "failure": "Archived external harness imports classified as runnable source",
+    "originalLogSha256": "b37bf220d9debda9bd5b52ca6dd23854c49a1fb6eb501f29ed17d0422bf1653e",
+    "excerpt": [
+      "2026-10-19T15:05:02.2284429Z Error: Command failed: node scripts/verify/verify-final-repository-organization.mjs",
+      "2026-10-19T15:05:02.3956654Z SOURCE_EXECUTION_REPORT=SOURCE_STEPS_FAILED_OR_SKIPPED RUNTIME_VERIFIED=FALSE PRODUCTION=BLOCKED"
+    ]
+  },
+  {
+    "sourceSha": "1380a662e3da54a842f95cd699fed8fe673551e2",
+    "runId": 39275569496,
+    "jobId": 118138880092,
+    "jobUrl": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39275569496/job/118138880092",
+    "failure": "W9 eligibility check predates approved DEC03",
+    "originalLogSha256": "e77d6d4ff85158891372ce3c75ebf70cc2f1af44c8b78f6692497b966b029701",
+    "excerpt": [
+      "2026-10-19T15:11:58.3192899Z FAIL P13-ELIG-005",
+      "2026-10-19T15:11:58.3198263Z W9_SOURCE_VERIFIER=FAIL 12/13",
+      "2026-10-19T15:11:58.3225844Z REMEDIATION_VERIFIER_FAILED=verify-w9-source.mjs EXIT_CODE=1",
+      "2026-10-19T15:11:58.3321504Z Error: Command failed: npm run remediation:verify",
+      "2026-10-19T15:11:58.4736320Z SOURCE_EXECUTION_REPORT=SOURCE_STEPS_FAILED_OR_SKIPPED RUNTIME_VERIFIED=FALSE PRODUCTION=BLOCKED"
+    ]
+  },
+  {
+    "sourceSha": "1af4bd5c38405490ff4db2f282be883dee095231",
+    "runId": 39276769509,
+    "jobId": 118142985379,
+    "jobUrl": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39276769509/job/118142985379",
+    "failure": "Course closure checks predate DEC03 and owner predicate extraction",
+    "originalLogSha256": "c183a52e62216599a0e507554cefb7547d516aba0f5517dc26e6ff5af87d3a81",
+    "excerpt": [
+      "2026-10-19T15:20:24.2919992Z FAIL Imported publication requires free study and certificate",
+      "2026-10-19T15:20:24.2920556Z FAIL Public imported eligibility matches publication policy",
+      "2026-10-19T15:20:24.2921156Z FAIL Repositories apply matching public eligibility",
+      "2026-10-19T15:20:24.3008897Z Error: Command failed: npm run courses:source:closure",
+      "2026-10-19T15:20:24.4604137Z SOURCE_EXECUTION_REPORT=SOURCE_STEPS_FAILED_OR_SKIPPED RUNTIME_VERIFIED=FALSE PRODUCTION=BLOCKED"
+    ]
+  },
+  {
+    "sourceSha": "5b9c4e4502d2ea9168e223a4f2a465ef799b6662",
+    "runId": 39277252905,
+    "jobId": 118144736774,
+    "jobUrl": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39277252905/job/118144736774",
+    "failure": "Three section27 fixtures predate owner identity/public repository/snapshot contracts",
+    "originalLogSha256": "e2ac9e4163cd2c28b9c1124e0bfe92dc6b1235471ac384e5e752fcd2a3c657c6",
+    "excerpt": [
+      "2026-10-19T15:25:07.0252468Z not ok 9 - academic explorer: a hidden test is excluded even when its published version and score are valid",
+      "2026-10-19T15:25:08.8237041Z not ok 68 - graph: optional CMS failure also isolated for university",
+      "2026-10-19T15:25:08.8259811Z not ok 72 - program repository: owner SQL requires exact degree/published profile before counts and cursor",
+      "2026-10-19T15:25:08.8830202Z Error: Command failed: node scripts/verify-cross-module-source-closure.mjs",
+      "2026-10-19T15:25:09.0252167Z SOURCE_EXECUTION_REPORT=SOURCE_STEPS_FAILED_OR_SKIPPED RUNTIME_VERIFIED=FALSE PRODUCTION=BLOCKED"
+    ]
+  }
+]

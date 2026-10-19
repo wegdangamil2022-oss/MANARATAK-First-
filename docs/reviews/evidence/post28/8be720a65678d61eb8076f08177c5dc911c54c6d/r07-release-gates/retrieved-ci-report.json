@@ -1,0 +1,10 @@
+{
+  "artifactId": 12199870452,
+  "runId": 39277252905,
+  "sourceSha": "5b9c4e4502d2ea9168e223a4f2a465ef799b6662",
+  "name": "p12-full-source-ci-closure",
+  "zipSha256": "7baada86fc0268df99a23bd8e10e5f2d27cfa7b26e109b5965e55e4b4af5e231",
+  "downloadedAndRead": true,
+  "containsReleaseUnitArchives": false,
+  "doesNotSatisfyReleaseArtifactRetrievalGate": true
+}
