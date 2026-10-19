@@ -51,7 +51,7 @@ try{
  fs.writeFileSync(path.join(directory,'source.schema.prisma'),schemaBytes,{mode:0o600});
  if(digest(schemaBytes)!==plan.before.schemaSha256)fail('POST28_UPGRADE_SCHEMA_HASH_MISMATCH');
  // Resolve the installed, version-checked dependency tree without network auto-install.
- fs.symlinkSync(path.join(root,'node_modules'),path.join(directory,'node_modules'),'dir');
+ fs.symlinkSync(path.join(root,'node_modules'),path.join(directory,'node_modules'),process.platform==='win32'?'junction':'dir');
  const clientDirectory=path.join(directory,'previous-client');
  const schema=schemaBytes.toString('utf8').replace(/generator client\s*\{/,match=>match+'\n  output = '+JSON.stringify(clientDirectory));
  if(schema===schemaBytes.toString('utf8'))fail('POST28_UPGRADE_CLIENT_GENERATOR_REQUIRED');

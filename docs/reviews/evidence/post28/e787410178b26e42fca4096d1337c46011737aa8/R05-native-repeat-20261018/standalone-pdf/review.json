@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-18",
+  "tool": "mupdf@1.28.1",
+  "packageIntegrity": "sha512-Gi11Ow2G1SlrXKJNZBL1eAIGFVih5+4ZKqjptamTVaj/5hnlrcVrVbyb7lHE2lfFKdxZPyv9ZtfOOq7XgjzEig==",
+  "visualReview": "Rendered PNG inspected: single synthetic-case label, no clipping; exact pixel comparison passed.",
+  "postScan": {
+    "initialForwardSlashPathAttempt": "FAILED 0x80508023; retained, not counted as clean",
+    "nativeWindowsPathAttempt": "exit 0 and explicit found no threats",
+    "digestUnchanged": true
+  },
+  "productionProviderApproved": false,
+  "R05Accepted": false
+}

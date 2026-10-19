@@ -1,0 +1,224 @@
+{
+  "kind": "POST28_NATIVE_LOCAL_LAB",
+  "runtime": "NATIVE_WINDOWS",
+  "sourceSha": "e787410178b26e42fca4096d1337c46011737aa8",
+  "runId": "edc26378-2c3a-4339-9809-ebffbea31a83",
+  "postgresVersion": "postgres (PostgreSQL) 16.15",
+  "postgresMajor": 16,
+  "serverIdentity": "7697999034768925256",
+  "postmasterPid": 1928,
+  "port": 61271,
+  "postgresBinarySha256": "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+  "baseline": {
+    "kind": "POST28_R05_PREDECESSOR_BASELINE",
+    "sourceSha": "e787410178b26e42fca4096d1337c46011737aa8",
+    "predecessorSha": "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+    "runId": "edc26378-2c3a-4339-9809-ebffbea31a83",
+    "identities": [
+      {
+        "label": "DB-U",
+        "database": "manaratak_post28_upgrade_test",
+        "role": "post28_upgrader",
+        "serverIdentity": "7697999034768925256",
+        "databaseOid": "16387",
+        "postgresMajor": 16,
+        "timezone": "UTC",
+        "publicTables": 282,
+        "probeReadOnly": true
+      },
+      {
+        "label": "DB-V",
+        "database": "manaratak_post28_upgrade_verify_test",
+        "role": "post28_verifier",
+        "serverIdentity": "7697999034768925256",
+        "databaseOid": "16469",
+        "postgresMajor": 16,
+        "timezone": "UTC",
+        "publicTables": 0,
+        "probeReadOnly": true
+      }
+    ],
+    "ledger": {
+      "expected": 109,
+      "applied": 109,
+      "checksumsMatched": 109,
+      "partial": 0,
+      "rolledBack": 0
+    },
+    "publicTables": 282,
+    "previousClientGenerated": true,
+    "previousClientReadProbes": {
+      "providerCount": 18,
+      "countryCount": 0
+    },
+    "previousClientVersion": "5.22.0",
+    "sourceSchemaSha256": "56966e566cbcd7ea60966d3954a4368630753f35a265e24b8ece354387450d45",
+    "generationSchemaSha256": "298ea79f50f79ba50859d3a1d0511941cfb73550bd9d65940c4accfa702da6b5",
+    "generatedSchemaSha256": "10d1cf83b41078f815158f6e6548b51ab234406db24e935f5da803694cd50f68",
+    "applicationRows": 109,
+    "catalog": {
+      "unvalidated": 9,
+      "invalid_indexes": 0
+    },
+    "representativeFixturesProvisioned": true,
+    "fixtureProof": {
+      "rowsCreated": 46,
+      "modelsPopulated": 36,
+      "historicalStageMigrations": 108,
+      "orphanCount": 1,
+      "triggersBypassed": false,
+      "manifestSha256": "33bf42ee61462d5cdf1f5384b0961c4df5587a54d426e8463ff4b5150fd2e4cf"
+    },
+    "historicalStageSourceSha": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+    "ownerRemediationApproved": false,
+    "upgradeExecuted": false,
+    "R05Accepted": false
+  },
+  "backup": {
+    "sourceSha": "e787410178b26e42fca4096d1337c46011737aa8",
+    "runId": "edc26378-2c3a-4339-9809-ebffbea31a83",
+    "kind": "POST28_R05_STRUCTURAL_BACKUP_VERIFICATION",
+    "archiveSha256": "3653127748ee99bc96ac8f13e69abc9e019306fe6181cef8da04597c99ecf255",
+    "identities": [
+      {
+        "label": "DB-U",
+        "database": "manaratak_post28_upgrade_test",
+        "role": "post28_upgrader",
+        "serverIdentity": "7697999034768925256",
+        "databaseOid": "16387",
+        "postgresMajor": 16,
+        "timezone": "UTC",
+        "publicTables": 282,
+        "probeReadOnly": true
+      },
+      {
+        "label": "DB-V",
+        "database": "manaratak_post28_upgrade_verify_test",
+        "role": "post28_verifier",
+        "serverIdentity": "7697999034768925256",
+        "databaseOid": "16469",
+        "postgresMajor": 16,
+        "timezone": "UTC",
+        "publicTables": 282,
+        "probeReadOnly": true
+      }
+    ],
+    "restoredTables": 282,
+    "allRowContentMatched": true,
+    "allCatalogDefinitionsMatched": true,
+    "sourceUnchanged": true,
+    "tableContentSha256": "d09d8974b3202b30dd787a06f29e353e7d0031cabe5457bdbe796d0bd3f97415",
+    "catalogSha256": "2aa2f4305b7f39d3353a0e052e856148e77aedb92569a060146f0d4fc2a13f1f",
+    "excludedPreprovisionedObjects": [
+      "6; 2615 2200 SCHEMA - public post28_upgrader\r",
+      "2; 3079 16388 EXTENSION - pg_trgm \r",
+      "8851; 0 0 COMMENT - EXTENSION pg_trgm \r"
+    ],
+    "R05Accepted": false,
+    "representativeFixturesPresent": true,
+    "fixtureManifestSha256": "33bf42ee61462d5cdf1f5384b0961c4df5587a54d426e8463ff4b5150fd2e4cf"
+  },
+  "audit": {
+    "kind": "POST28_R05_PREUPGRADE_AUDIT",
+    "sourceSha": "e787410178b26e42fca4096d1337c46011737aa8",
+    "predecessorSha": "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+    "runId": "edc26378-2c3a-4339-9809-ebffbea31a83",
+    "identities": [
+      {
+        "label": "DB-U",
+        "database": "manaratak_post28_upgrade_test",
+        "role": "post28_upgrader",
+        "serverIdentity": "7697999034768925256",
+        "databaseOid": "16387",
+        "postgresMajor": 16,
+        "timezone": "UTC",
+        "publicTables": 282,
+        "probeReadOnly": true
+      },
+      {
+        "label": "DB-V",
+        "database": "manaratak_post28_upgrade_verify_test",
+        "role": "post28_verifier",
+        "serverIdentity": "7697999034768925256",
+        "databaseOid": "16469",
+        "postgresMajor": 16,
+        "timezone": "UTC",
+        "publicTables": 282,
+        "probeReadOnly": true
+      }
+    ],
+    "gate": "BLOCKED",
+    "reason": "POST28_UPGRADE_OWNER_REMEDIATION_REQUIRED",
+    "audits": [
+      {
+        "constraint": "FinancePayment_positive_units",
+        "violations": "0"
+      },
+      {
+        "constraint": "FinanceRefund_positive_units",
+        "violations": "0"
+      },
+      {
+        "constraint": "FinanceTransfer_positive_units",
+        "violations": "0"
+      },
+      {
+        "constraint": "FinanceWalletHold_positive_units",
+        "violations": "0"
+      },
+      {
+        "constraint": "FinanceLedger_positive_units",
+        "violations": "0"
+      },
+      {
+        "constraint": "ServiceCatalogRecord_fulfillment_policy",
+        "violations": "0"
+      },
+      {
+        "constraint": "ServicePricingRecord_bounded_money",
+        "violations": "0"
+      },
+      {
+        "constraint": "SettingAssignmentRecord_id_currentVersionId_fkey",
+        "violations": "0"
+      },
+      {
+        "constraint": "StudentApplicationDocumentBinding_assetId_fkey",
+        "violations": "1"
+      }
+    ],
+    "modelsMeasured": 281,
+    "invariantsMeasured": 8,
+    "financialGroups": 2,
+    "financialTotals": [
+      {
+        "accountId": "8dc9e95e-9850-49cf-84ba-35ce74da1569",
+        "currency": "USD",
+        "scale": 2,
+        "balanceUnits": "-900719925474099312345"
+      },
+      {
+        "accountId": "c755e42b-f43c-4663-88ec-9a095867b589",
+        "currency": "USD",
+        "scale": 2,
+        "balanceUnits": "900719925474099312345"
+      }
+    ],
+    "legacyUnattributedSearchRows": 1,
+    "fixtureReadProbes": {
+      "rows": 46,
+      "allDeclaredFieldsMatched": true,
+      "readOnly": true
+    },
+    "sourceUnchanged": true,
+    "tableContentSha256": "d09d8974b3202b30dd787a06f29e353e7d0031cabe5457bdbe796d0bd3f97415",
+    "catalogSha256": "2aa2f4305b7f39d3353a0e052e856148e77aedb92569a060146f0d4fc2a13f1f",
+    "readOnly": true,
+    "mutationCommandsExecuted": 0,
+    "upgradeExecuted": false,
+    "R05Accepted": false
+  },
+  "privateCredentialsIncluded": false,
+  "rawDatabaseArchiveIncluded": false,
+  "originalRejectedEvidenceModified": false
+}

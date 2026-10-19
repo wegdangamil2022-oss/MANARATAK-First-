@@ -1,0 +1,30 @@
+// Standalone synthetic-only CDR experiment. Never creates an Asset or updates a DB.
+import fs from 'node:fs';
+import {deflateSync} from 'node:zlib';
+import {createHash} from 'node:crypto';
+import * as mupdf from 'mupdf';
+const digest=b=>createHash('sha256').update(b).digest('hex');
+const source=fs.readFileSync(new URL('./synthetic-source.pdf',import.meta.url));
+if(digest(source)!=='7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7')throw new Error('ONLY_CANONICAL_SYNTHETIC_PDF_ALLOWED');
+const doc=mupdf.Document.openDocument(source,'application/pdf');
+if(doc.countPages()!==1)throw new Error('SYNTHETIC_SINGLE_PAGE_REQUIRED');
+const page=doc.loadPage(0),bounds=page.getBounds();
+if(JSON.stringify(bounds)!=='[0,0,600,200]')throw new Error('CANONICAL_BOUNDS_REQUIRED');
+const pix=page.toPixmap(mupdf.Matrix.scale(2,2),mupdf.ColorSpace.DeviceRGB,false,true);
+const pixels=Buffer.from(pix.getPixels()),w=pix.getWidth(),h=pix.getHeight();
+if(w!==1200||h!==400||pix.getNumberOfComponents()!==3||pixels.length!==w*h*3)throw new Error('RASTER_LAYOUT_UNEXPECTED');
+fs.writeFileSync(new URL('./source-render.png',import.meta.url),pix.asPNG(),{flag:'wx'});
+const stream=(dictionary,bytes)=>Buffer.concat([Buffer.from(`<< ${dictionary} /Length ${bytes.length} >>\nstream\n`),bytes,Buffer.from('\nendstream')]);
+const objects=[Buffer.from('<< /Type /Catalog /Pages 2 0 R >>'),Buffer.from('<< /Type /Pages /Kids [3 0 R] /Count 1 >>'),Buffer.from('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 600 200] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>'),stream(`/Type /XObject /Subtype /Image /Width ${w} /Height ${h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode`,deflateSync(pixels)),stream('',Buffer.from('q 600 0 0 200 0 0 cm /Im0 Do Q\n'))];
+let chunks=[Buffer.from('%PDF-1.4\n')],offsets=[],length=chunks[0].length;
+for(const [i,object] of objects.entries()){offsets.push(length);const bytes=Buffer.concat([Buffer.from(`${i+1} 0 obj\n`),object,Buffer.from('\nendobj\n')]);chunks.push(bytes);length+=bytes.length;}
+chunks.push(Buffer.from('xref\n0 6\n0000000000 65535 f \n'+offsets.map(n=>String(n).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${length}\n%%EOF\n`));
+const sanitized=Buffer.concat(chunks);fs.writeFileSync(new URL('./sanitized.pdf',import.meta.url),sanitized,{flag:'wx'});
+const cleanDoc=mupdf.Document.openDocument(sanitized,'application/pdf');if(cleanDoc.countPages()!==1)throw new Error('OUTPUT_PAGE_COUNT');
+const cleanPage=cleanDoc.loadPage(0),cleanPix=cleanPage.toPixmap(mupdf.Matrix.scale(2,2),mupdf.ColorSpace.DeviceRGB,false,true);
+fs.writeFileSync(new URL('./sanitized-render.png',import.meta.url),cleanPix.asPNG(),{flag:'wx'});
+const samePixels=digest(Buffer.from(cleanPix.getPixels()))===digest(pixels);
+const proof={kind:'POST28_SYNTHETIC_ONLY_RASTER_CDR_EXPERIMENT',sourceSha256:digest(source),sanitizedSha256:digest(sanitized),sourceBytes:source.length,sanitizedBytes:sanitized.length,rasterDpi:144,pages:1,imageOnlyReconstruction:true,originalPdfObjectsCopied:0,outputObjects:5,visualPixelsMatched:samePixels,searchableTextAndInteractiveFeaturesDiscarded:true,productionProviderApproved:false,assetCreated:false,databaseMutations:0,lifecycleActivated:false,R05Accepted:false};
+fs.writeFileSync(new URL('./raster-result.json',import.meta.url),JSON.stringify(proof,null,2)+'\n');
+cleanPix.destroy();cleanPage.destroy();cleanDoc.destroy();pix.destroy();page.destroy();doc.destroy();
+console.log(JSON.stringify(proof));if(!samePixels)process.exitCode=2;

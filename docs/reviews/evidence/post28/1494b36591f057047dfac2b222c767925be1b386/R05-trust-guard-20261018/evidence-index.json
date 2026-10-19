@@ -1,0 +1,20 @@
+{
+  "sourceSha": "1494b36591f057047dfac2b222c767925be1b386",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 47,
+      "sha256": "920781736b28385b1c3625f2a8a187763ea8facb06daa3f6bb319bee46182807"
+    },
+    {
+      "path": "result.json",
+      "bytes": 537,
+      "sha256": "8f1a329f45e26fdfbc034aa72e278a5ff12a66edf061020cdf676e5b83fccb47"
+    },
+    {
+      "path": "trust-tests.log",
+      "bytes": 2659,
+      "sha256": "906418855b60ec5efd698ca882327b3d1f71144ff76630728abbc5431584a6cd"
+    }
+  ]
+}

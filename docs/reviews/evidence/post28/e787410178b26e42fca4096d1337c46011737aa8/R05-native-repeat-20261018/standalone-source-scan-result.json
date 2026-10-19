@@ -1,0 +1,21 @@
+﻿{
+    "kind":  "POST28_R05_STANDALONE_SOURCE_SCAN",
+    "syntheticOnly":  true,
+    "sourceSha256":  "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+    "sourceBytes":  636,
+    "scanner":  "Microsoft Defender",
+    "productVersion":  "4.18.26090.9",
+    "signatureVersion":  "1.461.60.0",
+    "signatureUpdatedUtc":  "2026-10-16T15:07:13.0000000Z",
+    "antivirusEnabled":  true,
+    "customScan":  true,
+    "disableRemediation":  true,
+    "exitCode":  0,
+    "explicitNoThreatOutput":  true,
+    "sourceUnchanged":  true,
+    "sanitizationExecuted":  false,
+    "assetCreated":  false,
+    "lifecycleActivated":  false,
+    "R05Accepted":  false,
+    "documentation":  "https://learn.microsoft.com/en-us/defender-endpoint/command-line-arguments-microsoft-defender-antivirus"
+}

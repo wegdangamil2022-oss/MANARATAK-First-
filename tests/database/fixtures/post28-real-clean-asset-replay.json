@@ -1,0 +1,331 @@
+{
+  "provenance": {
+    "sourceSha": "6e5e9691c6f5d51fb3b12a0ec7c311d1e45cff37",
+    "kind": "RECORDED_REAL_PG16_SYNTHETIC_ROW_REPLAY_NOT_NEW_DATABASE_RUN"
+  },
+  "at": "2026-10-18T14:20:30.207Z",
+  "asset": {
+    "id": "2b09ff16-ac2e-42ee-bb45-7da10baacf98",
+    "reference": "STUDENT-DOCUMENT-LAB-2b09ff16-ac2e-42ee-bb45-7da10baacf98",
+    "ownerId": "synthetic-independent-student",
+    "ownerType": "STUDENT",
+    "lifecycleState": "ACTIVE",
+    "securityClassification": "CONFIDENTIAL",
+    "retentionCategory": "TEMPORARY",
+    "retentionExpiresAt": "2027-04-16T14:20:29.485Z",
+    "quarantineStorageLocator": null,
+    "cleanStorageLocator": "clean://synthetic-pdf-lab/clean/sanitized-43191ab2-8b04-4d0e-94ea-bb0a71d08c1d.pdf",
+    "checksumAlgorithm": "sha256",
+    "checksumHash": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+    "metadata": {
+      "byteSize": 10234,
+      "mimeType": "application/pdf",
+      "fileExtension": "pdf",
+      "originalFilename": "new-synthetic.pdf"
+    },
+    "versionChain": null,
+    "sanitizationMetadata": {
+      "sanitizedAt": "2026-10-18T14:20:30.134Z",
+      "exifStripped": true,
+      "sanitizerNotes": "Synthetic-only MuPDF 1.28.1 raster reconstruction; image-only, text/forms/signatures discarded"
+    },
+    "malwareScanStatus": {
+      "status": "PASSED",
+      "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-43191ab2-8b04-4d0e-94ea-bb0a71d08c1d.pdf",
+      "scannedAt": "2026-10-18T14:20:30.188Z",
+      "archiveOperation": null,
+      "restoreOperation": null,
+      "uploadVerification": {
+        "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-43191ab2-8b04-4d0e-94ea-bb0a71d08c1d.pdf",
+        "byteSize": 10234,
+        "verifiedAt": "2026-10-18T14:20:30.135Z",
+        "checksumSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+        "verifiedMimeType": "application/pdf",
+        "signatureVerified": true
+      },
+      "activationOperation": {
+        "phase": "COMPLETED",
+        "version": 1,
+        "preparedAt": "2026-10-18T14:20:30.198Z",
+        "completedAt": "2026-10-18T14:20:30.207Z",
+        "operationId": "0f55cb1a-93e5-476f-8d6d-4dd5ea3ba56e",
+        "sourceLocator": "quarantine://synthetic-pdf-lab/uploads/sanitized-43191ab2-8b04-4d0e-94ea-bb0a71d08c1d.pdf",
+        "expectedSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5"
+      }
+    },
+    "legalHoldUntil": null,
+    "retentionProcessedAt": null,
+    "retentionClaimUntil": null,
+    "retentionClaimToken": null,
+    "createdAt": "2026-10-18T14:20:30.013Z",
+    "updatedAt": "2026-10-18T14:20:30.207Z",
+    "archivedAt": null,
+    "deletedAt": null,
+    "purgedAt": null
+  },
+  "packet": {
+    "kind": "POST28_NEW_SYNTHETIC_KNOWN_SOURCE_CASE",
+    "assetId": "2b09ff16-ac2e-42ee-bb45-7da10baacf98",
+    "owner": {
+      "ownerId": "synthetic-independent-student"
+    },
+    "source": {
+      "createdForThisNewCase": true,
+      "sha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+      "byteSize": 636
+    },
+    "claims": {
+      "originalMissingFileRecovered": false
+    }
+  },
+  "decision": {
+    "classification": "CONFIDENTIAL",
+    "retentionCategory": "TEMPORARY",
+    "sourceCreatedAt": "2026-10-18T14:20:29.485Z",
+    "expiresAt": "2027-04-16T14:20:29.485Z",
+    "legalHoldUntil": null
+  },
+  "providerProof": {
+    "kind": "MUPDF_RASTER_SANITIZATION",
+    "sourceSha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+    "sanitizedSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+    "sourceBytes": 636,
+    "sanitizedBytes": 10234,
+    "originalObjectsCopied": 0,
+    "pixelsMatched": true,
+    "sourceLocator": "quarantine://synthetic-pdf-lab/uploads/331fd3e1-6290-45a7-8a2a-c012a614f977",
+    "sanitizedLocator": "quarantine://synthetic-pdf-lab/uploads/sanitized-43191ab2-8b04-4d0e-94ea-bb0a71d08c1d.pdf",
+    "searchableTextAndInteractiveFeaturesDiscarded": true,
+    "preScan": {
+      "kind": "DEFENDER_SCAN",
+      "locator": "quarantine://synthetic-pdf-lab/uploads/331fd3e1-6290-45a7-8a2a-c012a614f977",
+      "sha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+      "digestUnchanged": true,
+      "exitCode": 0,
+      "output": "Scan starting...\r\nScan finished.\r\nScanning C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-KMF02l\\real-pdf-storage\\synthetic-pdf-lab\\uploads\\331fd3e1-6290-45a7-8a2a-c012a614f977 found no threats.\r\n",
+      "clean": true
+    },
+    "postScan": {
+      "kind": "DEFENDER_SCAN",
+      "locator": "quarantine://synthetic-pdf-lab/uploads/sanitized-43191ab2-8b04-4d0e-94ea-bb0a71d08c1d.pdf",
+      "sha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+      "digestUnchanged": true,
+      "exitCode": 0,
+      "output": "Scan starting...\r\nScan finished.\r\nScanning C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-KMF02l\\real-pdf-storage\\synthetic-pdf-lab\\uploads\\sanitized-43191ab2-8b04-4d0e-94ea-bb0a71d08c1d.pdf found no threats.\r\n",
+      "clean": true
+    },
+    "storageReadbackSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5"
+  },
+  "historicalBefore": {
+    "bindings": [
+      {
+        "reviewConsentGrantedAt": "2026-10-18T12:20:30.703Z",
+        "reviewConsentUntil": "2026-10-18T14:20:29.695Z",
+        "attestation": null,
+        "id": "18979743-7427-4453-aa6e-dfffd5ab8dc7",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "94fc59bd-efc0-491c-b298-6b1c068cdce9",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2026-10-18T16:20:30.703Z",
+        "updatedAt": "2026-10-18T14:20:30.709Z"
+      },
+      {
+        "reviewConsentGrantedAt": "2026-10-18T12:20:30.695Z",
+        "reviewConsentUntil": "2026-10-18T13:20:30.695Z",
+        "attestation": null,
+        "id": "39bdff61-7859-4b50-8142-9cb179ea4841",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "ef9f911c-5d48-4536-99a4-237b3360e8b0",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2026-10-18T14:20:29.695Z",
+        "updatedAt": "2026-10-18T14:20:30.710Z"
+      },
+      {
+        "reviewConsentGrantedAt": "2026-10-18T12:20:30.701Z",
+        "reviewConsentUntil": null,
+        "attestation": null,
+        "id": "5c560310-b3ed-4f33-8ef9-604e41284321",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "5246f122-8406-432e-92d1-9db5c4269ba5",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2026-10-18T16:20:30.701Z",
+        "updatedAt": "2026-10-18T14:20:30.708Z"
+      },
+      {
+        "reviewConsentGrantedAt": null,
+        "reviewConsentUntil": null,
+        "attestation": null,
+        "id": "9efa665e-85c0-4562-92a5-5dd3a13c86af",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "4a6d263b-c188-475a-8e2e-79d62292ca01",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2026-10-18T16:20:30.695Z",
+        "updatedAt": "2026-10-18T14:20:30.702Z"
+      },
+      {
+        "reviewConsentGrantedAt": "2026-10-18T12:20:30.705Z",
+        "reviewConsentUntil": "2026-10-18T15:20:30.705Z",
+        "attestation": null,
+        "id": "a087c4c5-2907-4c2f-b9a0-71e974d46874",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "4612b7fd-688b-422d-8016-c8b667373d22",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": "2026-10-18T14:20:29.695Z",
+        "retentionUntil": "2026-10-18T16:20:30.705Z",
+        "updatedAt": "2026-10-18T14:20:30.711Z"
+      },
+      {
+        "reviewConsentGrantedAt": "2026-10-19T14:20:30.695Z",
+        "reviewConsentUntil": "2026-10-19T15:20:30.695Z",
+        "attestation": null,
+        "id": "c33ea9d7-1a90-4e97-a4c2-3abe0f9e9b41",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "0f65fabe-1085-4e15-876c-84d5cf624d5a",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2026-10-19T16:20:30.695Z",
+        "updatedAt": "2026-10-18T14:20:30.706Z"
+      }
+    ]
+  },
+  "historicalAfter": {
+    "bindings": [
+      {
+        "reviewConsentGrantedAt": "2026-10-18T12:20:30.703Z",
+        "reviewConsentUntil": "2026-10-18T14:20:29.695Z",
+        "attestation": null,
+        "id": "18979743-7427-4453-aa6e-dfffd5ab8dc7",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "94fc59bd-efc0-491c-b298-6b1c068cdce9",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2026-10-18T16:20:30.703Z",
+        "updatedAt": "2026-10-18T14:20:30.709Z"
+      },
+      {
+        "reviewConsentGrantedAt": "2026-10-18T12:20:30.695Z",
+        "reviewConsentUntil": "2026-10-18T13:20:30.695Z",
+        "attestation": null,
+        "id": "39bdff61-7859-4b50-8142-9cb179ea4841",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "ef9f911c-5d48-4536-99a4-237b3360e8b0",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2026-10-18T14:20:29.695Z",
+        "updatedAt": "2026-10-18T14:20:30.710Z"
+      },
+      {
+        "reviewConsentGrantedAt": "2026-10-18T12:20:30.701Z",
+        "reviewConsentUntil": null,
+        "attestation": null,
+        "id": "5c560310-b3ed-4f33-8ef9-604e41284321",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "5246f122-8406-432e-92d1-9db5c4269ba5",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2026-10-18T16:20:30.701Z",
+        "updatedAt": "2026-10-18T14:20:30.708Z"
+      },
+      {
+        "reviewConsentGrantedAt": null,
+        "reviewConsentUntil": null,
+        "attestation": null,
+        "id": "9efa665e-85c0-4562-92a5-5dd3a13c86af",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "4a6d263b-c188-475a-8e2e-79d62292ca01",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2026-10-18T16:20:30.695Z",
+        "updatedAt": "2026-10-18T14:20:30.702Z"
+      },
+      {
+        "reviewConsentGrantedAt": "2026-10-18T12:20:30.705Z",
+        "reviewConsentUntil": "2026-10-18T15:20:30.705Z",
+        "attestation": null,
+        "id": "a087c4c5-2907-4c2f-b9a0-71e974d46874",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "4612b7fd-688b-422d-8016-c8b667373d22",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": "2026-10-18T14:20:29.695Z",
+        "retentionUntil": "2026-10-18T16:20:30.705Z",
+        "updatedAt": "2026-10-18T14:20:30.711Z"
+      },
+      {
+        "reviewConsentGrantedAt": "2026-10-19T14:20:30.695Z",
+        "reviewConsentUntil": "2026-10-19T15:20:30.695Z",
+        "attestation": null,
+        "id": "c33ea9d7-1a90-4e97-a4c2-3abe0f9e9b41",
+        "trackerId": "ce13402a-a5ef-4bf7-865d-9f7110506577",
+        "requirementId": "0f65fabe-1085-4e15-876c-84d5cf624d5a",
+        "assetId": "d36f0158-c8e1-4f7d-891d-707f46ce1985",
+        "ownerVersionId": "1a2a5c52-8199-45a8-99ca-3065c59a7f91",
+        "requirementSnapshot": {
+          "displayName": "Synthetic PDF"
+        },
+        "consentGrantedAt": "2025-01-01T00:00:00.000Z",
+        "expiresAt": null,
+        "retentionUntil": "2026-10-19T16:20:30.695Z",
+        "updatedAt": "2026-10-18T14:20:30.706Z"
+      }
+    ]
+  }
+}

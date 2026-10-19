@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "kind": "POST28_NEW_SYNTHETIC_KNOWN_SOURCE_CASE",
+  "sourceSha": "15b993e19c770563281f0a29db00b1ae881103c0",
+  "runId": "d5030244-7c77-4d3e-abff-f0d3cffcd6d9",
+  "source": {
+    "filename": "new-synthetic-historical-document.pdf",
+    "mimeType": "application/pdf",
+    "byteSize": 636,
+    "sha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+    "createdForThisNewCase": true
+  },
+  "bindingId": "2a4960c9-b4be-405a-8b21-7c3b34a5034f",
+  "assetId": "aafb690a-1f6c-463d-8b24-3d88e9a9b5d8",
+  "owner": {
+    "ownerId": "000f4d39-0c78-45b5-8429-8223ffdb205c",
+    "ownerType": "STUDENT"
+  },
+  "requiredReviews": {
+    "assetOwner": "assets",
+    "documentOwner": "student",
+    "status": "AWAITING_TECHNICAL_OWNER_REVIEW",
+    "approvals": []
+  },
+  "remediationContract": {
+    "ingest": "IngestAssetUseCase",
+    "lifecycle": "ProcessAssetLifecycleUseCase",
+    "directAssetInsertForbidden": true,
+    "consentOrBindingReassignmentForbidden": true,
+    "realMalwareAndSanitizationEvidenceRequired": true,
+    "retentionDecision": "PENDING_TECHNICAL_OWNER_REVIEW"
+  },
+  "claims": {
+    "originalMissingFileRecovered": false,
+    "priorRejectedEvidenceModified": false,
+    "assetCreated": false,
+    "activeCleanEvidence": false,
+    "ownerApproval": false,
+    "R05Accepted": false
+  }
+}

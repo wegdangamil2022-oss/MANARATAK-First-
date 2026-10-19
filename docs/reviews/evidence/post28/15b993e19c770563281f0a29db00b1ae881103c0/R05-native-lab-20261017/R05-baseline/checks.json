@@ -1,0 +1,55 @@
+[
+  {
+    "args": [
+      "validate"
+    ],
+    "startedAt": "2026-10-16T23:20:11.350Z",
+    "finishedAt": "2026-10-16T23:20:12.016Z",
+    "exitCode": 0,
+    "privateLog": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-fK4Cfy\\R05-baseline\\0-validate.log",
+    "logSha256": "5a461742d63d3a6a668de1502cf571b3b046310b57c0952aa369be9a9c1042ee"
+  },
+  {
+    "args": [
+      "generate"
+    ],
+    "startedAt": "2026-10-16T23:20:12.024Z",
+    "finishedAt": "2026-10-16T23:20:16.767Z",
+    "exitCode": 0,
+    "privateLog": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-fK4Cfy\\R05-baseline\\1-generate.log",
+    "logSha256": "0de2759e78837074fc3bff0185b77417e5280ead96dcdbc5321498512f519250"
+  },
+  {
+    "args": [
+      "migrate",
+      "deploy"
+    ],
+    "startedAt": "2026-10-16T23:20:16.776Z",
+    "finishedAt": "2026-10-16T23:20:22.796Z",
+    "exitCode": 0,
+    "privateLog": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-fK4Cfy\\R05-baseline\\2-migrate-deploy.log",
+    "logSha256": "fa7729bb8f035411e1f5ce845d2360d5a5597e137d998126a8feb2e16192a7f4"
+  },
+  {
+    "args": [
+      "migrate",
+      "deploy"
+    ],
+    "startedAt": "2026-10-16T23:20:23.535Z",
+    "finishedAt": "2026-10-16T23:20:24.304Z",
+    "exitCode": 0,
+    "privateLog": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-fK4Cfy\\R05-baseline\\3-migrate-deploy.log",
+    "logSha256": "abdbb25131f6dfd434ceb91e022d8ff61785dbea0800c9ad7204c9564997db07"
+  },
+  {
+    "args": [
+      "migrate",
+      "status"
+    ],
+    "startedAt": "2026-10-16T23:20:24.312Z",
+    "finishedAt": "2026-10-16T23:20:25.167Z",
+    "exitCode": 0,
+    "privateLog": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-fK4Cfy\\R05-baseline\\4-migrate-status.log",
+    "logSha256": "57bf92264caf798e3a4034b1bf3904e7808051e72b5833e2dc387d9b650840c4"
+  }
+]
