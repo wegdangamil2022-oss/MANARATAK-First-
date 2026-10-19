@@ -1,0 +1,37 @@
+{
+  "sourceSha": "4c7b01cbac1d49688a0f32273316fc370109bcb0",
+  "runId": "7ace2285-df63-4ed8-b293-6f8a4988dd92",
+  "artifactSourceSha": "4c7b01cbac1d49688a0f32273316fc370109bcb0",
+  "postgresVersion": "16.15",
+  "serverIdentity": "7698386776037789708",
+  "dependencyLayerInheritedFrom": "a8210404f63e2408fc911be74ff91bf8bc47aa8e",
+  "dependencyInputsUnchanged": true,
+  "apiPayloadNewlyBuiltAndUnpacked": true,
+  "dependencyLayerWasNotInstalledAgain": true,
+  "previousRuntimeNotRelabelledAsNewInstall": true,
+  "buildsExecuted": [
+    "Prisma generate",
+    "API typecheck/esbuild",
+    "Web Vite build",
+    "Admin TypeScript/Vite build",
+    "Immutable package/SBOM/manifest"
+  ],
+  "notRepeated": [
+    "R05 PDF providers",
+    "R05/R06 database matrices",
+    "General unit suites",
+    "Prior session replay and gateway policy suites"
+  ],
+  "priorEvidence": {
+    "gateway": "docs/reviews/evidence/post28/c9264f40eef75ca5ab5142707f30f4203d381d60/R07-integrated-artifact-gateway/evidence-index.json",
+    "sessionReplay": "docs/reviews/evidence/post28/642556ca18aefcd7af567915b3a1422394c0627f/R07-authenticated-session-replay/evidence-index.json"
+  },
+  "tlsPinning": true,
+  "tlsValidationDisabled": false,
+  "externalOriginsBlocked": [
+    "https://images.unsplash.com"
+  ],
+  "consoleErrorsRetained": 43,
+  "signatureAndProviderApprovalNotClaimed": true,
+  "windowsTerminationNotGracefulDrainProof": true
+}

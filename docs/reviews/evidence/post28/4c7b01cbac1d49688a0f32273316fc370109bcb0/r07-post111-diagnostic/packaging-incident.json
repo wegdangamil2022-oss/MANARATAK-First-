@@ -1,0 +1,14 @@
+{
+  "sourceSha": "4c7b01cbac1d49688a0f32273316fc370109bcb0",
+  "runId": "7ace2285-df63-4ed8-b293-6f8a4988dd92",
+  "kind": "INHERITED_MUTABLE_DEV_KEY_REJECTED",
+  "detectedBeforeBoot": true,
+  "originalPriorRuntimeUnchanged": true,
+  "keyValuePrinted": false,
+  "keyPublished": false,
+  "interruptedArchiveNeverBootedOrPublished": true,
+  "interruptedArchivePrivateQuarantine": true,
+  "correction": "Exclude inherited storage; assert top-level assembly allowlist, absence of .env/lab.env/dev-jwt-keys.json; verify every current API payload byte; create and fresh-unpack a new clean archive; verify native engine and external modules.",
+  "archiveImplementation": "Release units use GNU tar; new clean runtime uses Windows libarchive tar, verified after extraction.",
+  "scope": "Outside-checkout diagnostic packaging helper; existing clean-install product tooling unchanged."
+}

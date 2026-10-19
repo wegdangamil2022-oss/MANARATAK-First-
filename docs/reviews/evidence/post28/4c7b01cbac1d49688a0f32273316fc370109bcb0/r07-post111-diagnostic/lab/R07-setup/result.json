@@ -1,0 +1,38 @@
+{
+  "sourceSha": "4c7b01cbac1d49688a0f32273316fc370109bcb0",
+  "identities": {
+    "runtime": {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698386776037789708",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    },
+    "setup": {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_tx_migrator",
+      "serverIdentity": "7698386776037789708",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 0,
+      "probeReadOnly": true
+    }
+  },
+  "ledger": {
+    "expected": 111,
+    "applied": 111,
+    "checksumsMatched": 111,
+    "partial": 0,
+    "rolledBack": 0
+  },
+  "readOnlyApplicationTables": 281,
+  "applicationDdlGranted": false,
+  "applicationLedgerGranted": false,
+  "R07Accepted": false
+}

@@ -94,11 +94,14 @@
     },
     {
       "id": "R07",
-      "state": "BASIC_BROWSER_FLOW_PROVEN_ON_PRIOR_SOURCE",
-      "formalAcceptance": "OPEN",
-      "reference": "docs/remediation/POST28_R06_R07_PRACTICAL_HANDOFF_2026-10-19.md",
-      "evidenceSourceSha": "a8210404f63e2408fc911be74ff91bf8bc47aa8e",
-      "newArtifactOrRuntimeProofAtConsolidationSha": false
+      "state": "CORE_LOCAL_DIAGNOSTIC_COMPLETE_POST111",
+      "formalAcceptance": "OPEN_RELEASE_GATES",
+      "reference": "docs/remediation/POST28_R07_POST111_DIAGNOSTIC_2026-10-19.md",
+      "evidenceSourceSha": "4c7b01cbac1d49688a0f32273316fc370109bcb0",
+      "newArtifactOrRuntimeProofAtConsolidationSha": false,
+      "newArtifactOrRuntimeProofOnLatestUnifiedSource": true,
+      "latestEvidence": "docs/reviews/evidence/post28/4c7b01cbac1d49688a0f32273316fc370109bcb0/r07-post111-diagnostic/status.json",
+      "productionAcceptance": false
     },
     {
       "id": "R08",
@@ -141,7 +144,7 @@
     "browserRepeated": false
   },
   "resumeOrder": [
-    "R07_SELECTED_DELIVERY_CANDIDATE_AND_TARGETED_OPERATION",
+    "R07_RELEASE_ENVIRONMENT_CI_AND_ARTIFACT_RECOVERY_GATES",
     "R08_R09_ENABLED_FEATURE_PROOFS"
   ],
   "mainPlan": "Prepare one reviewed pull request after consolidation stability and release configuration review; do not merge or deploy automatically."
