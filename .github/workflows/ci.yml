@@ -16,6 +16,34 @@ env:
   ADMIN_AUTH_MODE: strict
 
 jobs:
+  r08-runtime-diagnostics:
+    name: R08 isolated Redis and Linux worker shutdown
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.16.0
+          cache: npm
+      - run: npm ci
+      - name: Exercise actual Linux process signals and absolute deadline
+        run: node --test tests/runtime/post28-r08-process-drain.test.mjs
+      - name: Provision new restricted Redis and exercise counter and health isolation
+        shell: bash
+        run: |
+          unset DATABASE_URL DIRECT_URL REDIS_URL
+          node scripts/release/post28-r08-redis-lab.mjs
+      - name: Retain scoped Redis diagnostic receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r08-redis-diagnostic-${{ github.sha }}
+          path: /tmp/post28-r08-redis-result.json
+          if-no-files-found: warn
+
   ai-studio-compatibility:
     name: Isolated Google AI Studio Web preview
     runs-on: ubuntu-latest

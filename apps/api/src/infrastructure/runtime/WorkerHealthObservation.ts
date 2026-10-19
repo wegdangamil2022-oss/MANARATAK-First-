@@ -5,10 +5,12 @@ export class WorkerHealthObservation {
   private pending = new Set<string>();
   constructor(
     private redis: any,
-    config: { environment?: string; apiOrigin?: string; revision?: string },
+    config: { environment?: string; apiOrigin?: string; revision?: string; namespace?: string },
   ) {
     if (config.revision && config.environment && config.apiOrigin) {
-      this.prefix = `health:workers:v1:${createHash('sha256').update(JSON.stringify(config)).digest('hex')}`;
+      const namespace = config.namespace?.trim() || 'manaratak:';
+      const scope = { environment: config.environment, apiOrigin: config.apiOrigin, revision: config.revision };
+      this.prefix = `${namespace.endsWith(':') ? namespace : namespace + ':'}health:workers:v2:${createHash('sha256').update(JSON.stringify(scope)).digest('hex')}`;
     }
   }
   async publish(name: string, snapshot: Record<string, unknown>): Promise<void> {

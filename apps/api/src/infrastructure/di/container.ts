@@ -871,6 +871,7 @@ export function registerDependencies(
     workerHealthObservation: asFunction(({ redisClient }) => new WorkerHealthObservation(redisClient, {
       environment: readConfig<string>('NODE_ENV'), apiOrigin: readConfig<string>('API_BASE_URL'),
       revision: readConfig<string>('HEALTH_DEPLOYMENT_REVISION'),
+      namespace: readConfig<string>('REDIS_NAMESPACE'),
     })).singleton(),
     backgroundWorkerRuntimeState: asFunction(({ workerHealthObservation }) => new BackgroundWorkerRuntimeState((snapshot) => workerHealthObservation.publish('background-jobs', snapshot),
     )).singleton(),
