@@ -113,6 +113,14 @@
     "scripts/generate-localized-public-sitemap.ts"
   ],
   "reviewedPrismaScriptContracts": {
+    "scripts/database/remediate-post28-known-source.mjs": {
+      "purpose": "Repair one new synthetic known-source R05 incident through real providers and canonical Asset plus append-only Audit persistence",
+      "access": "isolated-read-write",
+      "environment": ["Node22; clean SHA/run-bound new native PostgreSQL16 U/V lab; ordinary post28_app with INSERT only on Asset and Audit"],
+      "gate": "Local U/V preflight, native lab marker, verified backup and preserved negative audit; fixed expiry, historical owner and consent preservation; no migration or production authorization",
+      "requiredSourceMarkers": ["preflightTargets", "requirePost28LocalExecution", "requireDatabaseMutationGate", "LIMITED_APPLICATION_IDENTITY_REQUIRED", "APPLICATION_PRIVILEGES_EXCESSIVE", "requireKnownSourceTrust", "INJECTED_COMPLETION_FAILURE", "upgradeExecuted:false", "R05Accepted:false"],
+      "review": "Delegated technical decision 2026-10-19; independent implementation review remains required before upgrade"
+    },
     "scripts/certificates/verify-isolated-runtime.mjs": {
       "purpose": "Manual certificate migration/rehearsal on an empty disposable local database only",
       "access": "isolated-read-write",
