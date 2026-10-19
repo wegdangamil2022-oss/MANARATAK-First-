@@ -18,6 +18,26 @@ afterEach(() => {
 });
 
 describe('student account switch after logout', () => {
+  it('rejects return URLs that browser normalization turns into an external destination', () => {
+    const session = storage(); vi.stubGlobal('sessionStorage', session);
+    const unsafe = '/\t/attacker.example/account';
+    expect(new URL(unsafe, 'https://manaratak.invalid').origin).toBe('https://attacker.example');
+    preservePostLoginReturn(unsafe);
+    expect(consumePostLoginReturn('student-a')).toBeNull();
+    session.setItem('manaratak_post_login_return', JSON.stringify({ path: unsafe }));
+    expect(consumePostLoginReturn('student-a')).toBeNull();
+    expect(session.getItem('manaratak_post_login_return')).toBeNull();
+  });
+
+  it('preserves a localized learner deep link with its query and fragment exactly once', () => {
+    const session = storage(); vi.stubGlobal('sessionStorage', session);
+    rememberAuthenticatedIdentity('student-a');
+    const destination = '/en/student/courses/synthetic-course?lesson=intro#progress';
+    preservePostLoginReturn(destination);
+    expect(consumePostLoginReturn('student-a')).toBe(destination);
+    expect(consumePostLoginReturn('student-a')).toBeNull();
+  });
+
   it('clears the previous account cache and pending action when accounts switch without logout', () => {
     const local = storage(); const session = storage();
     vi.stubGlobal('localStorage', local); vi.stubGlobal('sessionStorage', session);
