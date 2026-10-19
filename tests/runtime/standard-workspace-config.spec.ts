@@ -16,7 +16,7 @@ describe('standard workspace runtime after retiring the hosted preview',()=>{
     vi.stubEnv('NODE_ENV','production');
     const loaded=await loadConfigFromFile({command:'build',mode:'production'},resolve(`apps/${app}/vite.config.ts`));
     expect(loaded).not.toBeNull();
-    const plugins=(loaded!.config.plugins??[]).flat(Infinity).filter(Boolean) as {name:string}[];
+    const plugins=((loaded!.config.plugins??[]) as unknown[]).flat(Infinity).filter(Boolean) as {name:string}[];
     expect(plugins.some(plugin=>/studio/i.test(plugin.name))).toBe(false);
     expect(plugins.some(plugin=>plugin.name.includes('security'))).toBe(true);
     if(app==='web')expect(loaded!.config.define?.__MANARATAK_PROTOTYPE_DATA_ENABLED__).toBe('false');
@@ -25,7 +25,7 @@ describe('standard workspace runtime after retiring the hosted preview',()=>{
   it('uses a local Vite nonce while production retains canonical script and style restrictions',async()=>{
     vi.stubEnv('NODE_ENV','development');
     const development=await resolveConfig({configFile:resolve('apps/web/vite.config.ts'),mode:'development'},'serve');
-    expect(development.html.cspNonce).toMatch(/^[A-Za-z0-9+/]{32}$/);
+    expect(development.html?.cspNonce).toMatch(/^[A-Za-z0-9+/]{32}$/);
     vi.stubEnv('NODE_ENV','production');
     const production=await resolveConfig({configFile:resolve('apps/web/vite.config.ts'),mode:'production'},'build');
     expect(production.html?.cspNonce).toBeUndefined();
