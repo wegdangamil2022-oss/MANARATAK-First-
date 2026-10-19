@@ -48,7 +48,7 @@ export function CourseLearnerPage() {
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
 
   const loginPath = `/${locale}/login`;
-  const returnPath = `${location.pathname}${location.search}`;
+  const returnPath = `${location.pathname}${location.search}${location.hash}`;
 
   const load = useCallback(async () => {
     const request = ++workspaceRequest.current;

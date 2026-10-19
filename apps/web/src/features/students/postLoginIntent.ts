@@ -20,6 +20,10 @@ export function preservePostLoginReturn(path: string): void {
   try { sessionStorage.setItem(KEY, JSON.stringify({ path: safe, accountId: sessionStorage.getItem(ACCOUNT_KEY) })); } catch { /* storage can be unavailable */ }
 }
 
+export function isStudentPostLoginDestination(path: string): boolean {
+  return safeInternalPath(path) !== null && /^\/(?:ar\/|en\/)?(?:student(?:[/?#]|$)|tools\/[A-Za-z0-9._-]+(?:[?#]|$))/.test(path);
+}
+
 export function consumePostLoginReturn(identityId: string): string | null {
   try {
     const raw = sessionStorage.getItem(KEY);

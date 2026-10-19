@@ -13,10 +13,12 @@ import {createLoopbackForwarder} from '../database/post28-local-forwarder.mjs';
 import {preflightTargets} from '../database/post28-isolation.mjs';
 import {readDatabaseIdentity} from '../database/post28-preflight.mjs';
 import {R08CombinedRuntime} from './lib/R08CombinedRuntime.mjs';
+import {seedR09LearnerFixture,exerciseR09Learner} from './lib/R09LearnerRuntime.mjs';
 
 const repo=fs.realpathSync(process.cwd()), run=fs.realpathSync(process.argv[2]);
 const r08Combined=process.argv[3]==='--r08-combined';
-if(process.argv.length>4||(process.argv[3]&&!r08Combined))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
+const r09Learner=process.argv[3]==='--r09-learner';
+if(process.argv.length>4||(process.argv[3]&&!r08Combined&&!r09Learner))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
 if(process.platform!=='linux'||process.arch!=='x64'||Number(process.versions.node.split('.')[0])!==22||process.env.POST28_LINUX_RUNTIME_REVIEW!=='YES')throw Error('POST28_LINUX_RUNTIME_REVIEW_NOT_AUTHORIZED');
 const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())throw Error('POST28_CLEAN_SOURCE_REQUIRED');
@@ -58,10 +60,12 @@ try{
   const setup=new PrismaClient({datasources:{db:{url:env.POST28_TRANSACTION_SETUP_URL}},log:[],errorFormat:'minimal'});
   const fixtureId=randomUUID(),email=fixtureId+'@example.invalid',password=randomBytes(24).toString('base64url'),salt=randomBytes(16),passwordHash=scryptSync(password,salt,64);
   secrets.push(password);
+  let r09Fixture;
   try{
     await setup.roleRecord.create({data:{id:'student',name:'Student',description:'Synthetic Linux review student',permissions:[],policyIds:[]}});
     await setup.identityRecord.create({data:{id:fixtureId,type:'Human',status:'ACTIVE',createdBy:'R07_LINUX_SYNTHETIC_FIXTURE',user:{create:{displayName:'R07 Linux learner',primaryEmail:email,isEmailVerified:true}},account:{create:{accessState:'Active'}},credentials:{create:{type:'password',passwordHash:'scrypt:16384:8:1:'+salt.toString('hex')+':'+passwordHash.toString('hex')}},roleAssignments:{create:{id:randomUUID(),roleId:'student'}}}});
     await setup.studentWorkspace.create({data:{studentReferenceId:fixtureId,status:'ACTIVE',displayName:'R07 Linux learner'}});
+    if(r09Learner)r09Fixture=await seedR09LearnerFixture(setup,'scrypt:16384:8:1:'+salt.toString('hex')+':'+passwordHash.toString('hex'));
   }finally{await setup.$disconnect();}
   db=new PrismaClient({datasources:{db:{url:env.DATABASE_URL}},log:[],errorFormat:'minimal'});
   const roles=await db.$queryRaw`SELECT current_user AS role, rolsuper, rolcreatedb, rolcreaterole, rolreplication, rolbypassrls FROM pg_roles WHERE rolname=current_user`;
@@ -98,6 +102,11 @@ try{
     report.combinedAuth=await combined.exercise({page,origin,email,password,db,fixtureId});
     observations.push({step:'TWO_BUILT_APIS_SHARED_PG_REDIS_TLS_AUTH',passed:true});report.redisConfigured=true;
     assert(network.filter(row=>row.status>=500).every(row=>row.path==='/api/v1/auth/login'&&row.status===500));
+  }else if(r09Learner){
+    report.kind='POST28_R09_LEARNER_ARTIFACT_RUNTIME';report.formalR09Acceptance=false;
+    report.learnerJourney=await exerciseR09Learner({page,origin,email,password,db,fixtureId,fixture:r09Fixture,proof,pageErrors});
+    observations.push({step:'R09_LOCALIZED_LEARNER_PROGRESS_AND_ADMIN_BOUNDARIES',passed:true});report.redisConfigured=false;
+    assert.equal(network.filter(row=>row.status>=500).length,0);
   }else{
   await page.goto(origin+'/admin/login');await page.getByRole('heading',{name:'دخول الإدارة',exact:true}).waitFor();observations.push({step:'ADMIN_BUNDLE_LOGIN_RENDERED',passed:true});
   await page.goto(origin+'/login');await page.locator('#account-email').fill(email);await page.locator('#account-password').fill(password);
