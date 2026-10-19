@@ -1,0 +1,6 @@
+{
+  "caseExact": "R08 actual outbox processes to student inbox > recovers an actual killed AFTER_EFFECT worker after natural lease expiry",
+  "fullDiscoveryCases": 4,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}
