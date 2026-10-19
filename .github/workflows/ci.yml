@@ -213,7 +213,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
         env:
           POST28_LINUX_RUNTIME_REVIEW: 'YES'
-        run: node scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r07-linux"
+        run: node scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r07-linux" --r08-combined
       - name: Retain review proof without publishing the image
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

@@ -12,8 +12,11 @@ import {verifyReleaseManifest} from './lib/ReleaseContracts.mjs';
 import {createLoopbackForwarder} from '../database/post28-local-forwarder.mjs';
 import {preflightTargets} from '../database/post28-isolation.mjs';
 import {readDatabaseIdentity} from '../database/post28-preflight.mjs';
+import {R08CombinedRuntime} from './lib/R08CombinedRuntime.mjs';
 
 const repo=fs.realpathSync(process.cwd()), run=fs.realpathSync(process.argv[2]);
+const r08Combined=process.argv[3]==='--r08-combined';
+if(process.argv.length>4||(process.argv[3]&&!r08Combined))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
 if(process.platform!=='linux'||process.arch!=='x64'||Number(process.versions.node.split('.')[0])!==22||process.env.POST28_LINUX_RUNTIME_REVIEW!=='YES')throw Error('POST28_LINUX_RUNTIME_REVIEW_NOT_AUTHORIZED');
 const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())throw Error('POST28_CLEAN_SOURCE_REQUIRED');
@@ -30,7 +33,7 @@ const hash=value=>createHash('sha256').update(value).digest('hex');
 const dockerEnv={...process.env};for(const key of ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'])delete dockerEnv[key];
 const docker=args=>execFileSync('docker',['--host=unix:///var/run/docker.sock',...args],{env:dockerEnv,encoding:'utf8',timeout:45000,maxBuffer:4*1024*1024}).trim();
 const baseEnv={PATH:process.env.PATH,HOME:process.env.HOME,NODE_ENV:'test',POST28_LOCAL_LAB_CREATE:'YES',POST28_LOCAL_LAB_PROFILE:'transactions',POST28_LOCAL_LAB_STORAGE:'tmpfs',POST28_LAB_ROOT:path.join(run,'private-labs')};
-let state,env={},db,apiId,browser,gateway,forwarder,failure=null;
+let state,env={},db,apiId,browser,gateway,forwarder,combined,failure=null;
 const secrets=[],observations=[],network=[],pageErrors=[],consoleErrors=[],children=[];
 const redact=value=>secrets.reduce((text,secret)=>text.replaceAll(secret,'[REDACTED]'),String(value)).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]');
 const report={kind:'POST28_R07_LINUX_ARTIFACT_RUNTIME',sourceSha:sha,imageId:image.imageId,node:process.version,environment:'DISPOSABLE',providerMode:'NO_EXTERNAL_EGRESS',observations,network,pageErrors,consoleErrors,productionAcceptance:false,formalR07Acceptance:false,promotionAuthorized:false};
@@ -68,12 +71,15 @@ try{
   const gatewayPort=await freePort(),origin='https://127.0.0.1:'+gatewayPort;
   const url=new URL(env.DATABASE_URL);url.hostname=state.containerName;url.port='5432';
   const apiEnv={NODE_ENV:'test',PORT:'3000',DATABASE_URL:url.href,DIRECT_URL:url.href,DATABASE_REQUIRED:'true',RELEASE_SOURCE_SHA:sha,HEALTH_DEPLOYMENT_REVISION:sha,CORS_ORIGIN:origin,PUBLIC_WEB_URL:origin,ADMIN_WEB_URL:origin+'/admin',TRUST_PROXY_HOPS:'1',SECURE_COOKIE:'true',BACKGROUND_WORKER_ENABLED:'false',STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED:'false',OWNER_DOMAIN_OUTBOX_WORKER_ENABLED:'false',CERTIFICATE_COMPLETION_WORKER_ENABLED:'false'};
+  if(r08Combined){combined=new R08CombinedRuntime({docker,state,imageId:image.imageId,secrets});Object.assign(apiEnv,combined.prepare());report.kind='POST28_R08_COMBINED_ARTIFACT_RUNTIME';}
   secrets.push(url.href);const apiEnvFile=path.join(state.directory,'api.env');fs.writeFileSync(apiEnvFile,Object.entries(apiEnv).map(([key,value])=>key+'='+value).join('\n')+'\n',{mode:0o600,flag:'wx'});
   apiId=docker(['run','-d','--label','codex.post28.run='+state.runId,'--network',state.network,'--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','--memory=768m','--pids-limit=128','--tmpfs','/opt/manaratak/storage:rw,uid=1000,gid=1000,mode=0700,size=67108864','--tmpfs','/tmp:rw,nosuid,noexec,size=16777216','--env-file',apiEnvFile,image.imageId]);
   assert.match(apiId,/^[a-f0-9]{64}$/);
   const apiIdentity=JSON.parse(docker(['inspect',apiId]))[0];assert.equal(apiIdentity.Config.Labels['codex.post28.run'],state.runId);assert.equal(apiIdentity.Image,image.imageId);assert.equal(apiIdentity.HostConfig.ReadonlyRootfs,true);assert.equal(apiIdentity.Config.User,'node');
   const address=apiIdentity.NetworkSettings.Networks[state.network].IPAddress;assert.equal(net.isIP(address),4);
-  const apiPort=await freePort();forwarder=createLoopbackForwarder({host:address,port:3000},apiPort);await forwarder.listen();
+  let apiPort;
+  if(combined)apiPort=await combined.route(address,apiEnvFile);
+  else{apiPort=await freePort();forwarder=createLoopbackForwarder({host:address,port:3000},apiPort);await forwarder.listen();}
   const apiOrigin='http://127.0.0.1:'+apiPort;
   await bounded(async()=>{try{return(await fetch(apiOrigin+'/api/v1/monitoring/health/readiness',{signal:AbortSignal.timeout(1000)})).status===200;}catch{return false;}},'POST28_LINUX_API_NOT_READY');
   const cert=path.join(state.directory,'tls.crt'),key=path.join(state.directory,'tls.key');
@@ -88,6 +94,11 @@ try{
   const context=await browser.newContext({ignoreHTTPSErrors:false,viewport:{width:1440,height:1000}});
   const blocked=new Set();await context.route('**/*',route=>{const target=new URL(route.request().url());if(target.origin===origin||['data:','blob:'].includes(target.protocol))return route.continue();blocked.add(target.origin);return route.abort();});
   const page=await context.newPage();page.on('pageerror',error=>pageErrors.push(redact(error.message)));page.on('console',message=>{if(message.type()==='error')consoleErrors.push(redact(message.text()).slice(0,400));});page.on('response',response=>{const target=new URL(response.url());if(target.origin===origin)network.push({method:response.request().method(),path:target.pathname,status:response.status(),resource:response.request().resourceType()});});
+  if(combined){
+    report.combinedAuth=await combined.exercise({page,origin,email,password,db,fixtureId});
+    observations.push({step:'TWO_BUILT_APIS_SHARED_PG_REDIS_TLS_AUTH',passed:true});report.redisConfigured=true;
+    assert(network.filter(row=>row.status>=500).every(row=>row.path==='/api/v1/auth/login'&&row.status===500));
+  }else{
   await page.goto(origin+'/admin/login');await page.getByRole('heading',{name:'دخول الإدارة',exact:true}).waitFor();observations.push({step:'ADMIN_BUNDLE_LOGIN_RENDERED',passed:true});
   await page.goto(origin+'/login');await page.locator('#account-email').fill(email);await page.locator('#account-password').fill(password);
   const login=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/auth/login'&&response.request().method()==='POST');await page.locator('form button[type=submit]').click();assert.equal((await login).status(),200);
@@ -99,7 +110,9 @@ try{
   const foreign=await page.evaluate(async()=>{const response=await fetch('/api/v1/student/00000000-0000-4000-8000-000000000000/dashboard',{credentials:'include'});return response.status;});assert([403,404].includes(foreign));observations.push({step:'FOREIGN_STUDENT_DENIED',status:foreign});
   const logout=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/auth/logout'&&response.request().method()==='POST');await page.locator('button[title="تسجيل الخروج من الحساب"]').first().click();assert.equal((await logout).status(),200);await page.waitForURL(origin+'/');
   assert.equal(await db.sessionRecord.count({where:{identityId:fixtureId,revokedAt:null}}),0);assert.equal(await page.evaluate(async()=>{const response=await fetch('/api/v1/auth/me',{credentials:'include'});return response.status;}),401);observations.push({step:'UI_LOGOUT_PERSISTENT_SESSION_REVOKED',status:401});
-  assert.equal(pageErrors.length,0);assert.equal(network.filter(row=>row.status>=500).length,0);report.blockedExternalOrigins=[...blocked];report.tls={certificateSha256:hash(ca),hostnameVerified:true,exactCertificateSpkiPinned:true,ignoreHTTPSErrors:false};report.freshUnpackedThreeUnits=true;report.apiBootedInImage=true;report.databaseConnected=true;report.workersEnabled=false;report.redisConfigured=false;
+  assert.equal(network.filter(row=>row.status>=500).length,0);report.redisConfigured=false;
+  }
+  assert.equal(pageErrors.length,0);report.blockedExternalOrigins=[...blocked];report.tls={certificateSha256:hash(ca),hostnameVerified:true,exactCertificateSpkiPinned:true,ignoreHTTPSErrors:false};report.freshUnpackedThreeUnits=true;report.apiBootedInImage=true;report.databaseConnected=true;report.workersEnabled=false;
 }catch(error){failure=redact(error.message);process.exitCode=1;}
 finally{
   await browser?.close().catch(()=>{});await db?.$disconnect().catch(()=>{});
@@ -114,6 +127,7 @@ finally{
     fs.writeFileSync(path.join(proof,'api.log'),redact(docker(['logs',apiId])),{flag:'wx'});docker(['rm',apiId]);cleanup.ownedContainerRemoved=true;
     if(report.apiBootedInImage)assert.equal(cleanup.apiExitCode,0);
   });
+  if(combined)cleanup.combined=combined.cleanup(clean,proof,redact);
   if(state){
     if(state.forwarderPid)clean(()=>{const command=fs.readFileSync('/proc/'+state.forwarderPid+'/cmdline','utf8');assert(command.includes('post28-local-forwarder.mjs')&&command.includes(path.join(state.directory,'forwarder.json')));process.kill(state.forwarderPid,'SIGTERM');});
     clean(()=>{const identity=JSON.parse(docker(['inspect',state.containerId]))[0];assert.equal(identity.Config.Labels['codex.post28.run'],state.runId);assert.equal(identity.Config.Labels['codex.post28.scope'],'DISPOSABLE');docker(['stop','--time','10',state.containerId]);cleanup.postgresStopped=true;docker(['rm',state.containerId]);cleanup.postgresRemoved=true;});
