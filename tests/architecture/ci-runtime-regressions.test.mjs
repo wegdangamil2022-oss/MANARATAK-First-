@@ -84,3 +84,22 @@ test('source CI catches inventory drift and negative guard contracts before the 
   for (const contract of ['verify-source-architecture-guards.mjs', 'verify-di-reachability.mjs', 'verify-admin-audit-coverage.mjs', 'environment-inventory.mjs', '--check', 'w2-migration-recovery-source.test.mjs', 'admin-audit-coverage.test.mjs', 'dictionary-source.test.mjs']) assert.ok(runner.includes(contract), contract);
   assert.match(runner, /if \(result.status !== 0\) process.exit/);
 });
+
+test('release build and retrieval stop on command failure instead of certifying stale artifacts', () => {
+  const workflow=read('.github/workflows/ci.yml');
+  const bash=process.platform==='win32'?'C:/Program Files/Git/bin/bash.exe':'bash';
+  const block=name=>{
+    const step=workflow.split('      - name: '+name+'\n')[1]?.split('\n      - ')[0];
+    assert.ok(step,name);
+    assert.match(step,/shell: bash/);
+    return step.split('        run: |\n')[1].split('\n').map(line=>line.replace(/^          /,'')).join('\n');
+  };
+  const build=block('Build deterministic immutable release artifacts');
+  assert.match(build,/RELEASE_ARTIFACT_OUTPUT_DIR/);
+  assert.match(workflow,/path: \$\{\{ runner.temp \}\}\/r07-built-release/);
+  const buildFailure=spawnSync(bash,['-c',"npm(){ return 73; }; export -f npm;\n"+build+'\necho UNSAFE_CONTINUATION'],{encoding:'utf8',env:{...process.env,RELEASE_ARTIFACT_OUTPUT_DIR:'/unused',GITHUB_OUTPUT:'/unused'}});
+  assert.equal(buildFailure.status,73,buildFailure.stderr);assert.doesNotMatch(buildFailure.stdout,/UNSAFE_CONTINUATION/);
+  const retrieval=block('Verify independently retained manifest digest and every unit');
+  const retrievalFailure=spawnSync(bash,['-c',"sha256sum(){ cat >/dev/null; return 0; }; node(){ return 74; }; export -f sha256sum node;\n"+retrieval+'\necho UNSAFE_CONTINUATION'],{encoding:'utf8',env:{...process.env,EXPECTED_MANIFEST_SHA256:'a'.repeat(64),RUNNER_TEMP:'/unused'}});
+  assert.equal(retrievalFailure.status,74,retrievalFailure.stderr);assert.doesNotMatch(retrievalFailure.stdout,/UNSAFE_CONTINUATION/);
+});

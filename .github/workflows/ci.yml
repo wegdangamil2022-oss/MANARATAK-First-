@@ -111,14 +111,19 @@ jobs:
         run: node scripts/ci/run-source-unit-with-diagnostics.mjs npm run test:unit
       - name: Build deterministic immutable release artifacts
         id: artifacts
+        shell: bash
+        env:
+          RELEASE_ARTIFACT_OUTPUT_DIR: ${{ runner.temp }}/r07-built-release
         run: |
-          npm run release:artifacts && npm run release:verify
-          echo "manifest-sha256=$(sha256sum release-artifacts/release-manifest.json | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          npm run release:artifacts
+          npm run release:verify -- "$RELEASE_ARTIFACT_OUTPUT_DIR"
+          echo "manifest-sha256=$(sha256sum "$RELEASE_ARTIFACT_OUTPUT_DIR/release-manifest.json" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
       - name: Upload immutable release artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 immutable snapshot
         with:
           name: manaratak-release-artifacts-${{ github.sha }}
-          path: release-artifacts
+          path: ${{ runner.temp }}/r07-built-release
           if-no-files-found: error
       - name: Write P12 source CI evidence
         if: always()
@@ -153,9 +158,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" -n "manaratak-release-artifacts-$GITHUB_SHA" -D "$RUNNER_TEMP/recovered-release"
       - name: Verify independently retained manifest digest and every unit
+        shell: bash
         env:
           EXPECTED_MANIFEST_SHA256: ${{ needs.source-quality.outputs.manifest-sha256 }}
         run: |
+          set -euo pipefail
           test "${#EXPECTED_MANIFEST_SHA256}" -eq 64
           printf '%s  %s\n' "$EXPECTED_MANIFEST_SHA256" "$RUNNER_TEMP/recovered-release/release-manifest.json" | sha256sum --check
           node scripts/release/verify-release-artifacts.mjs "$RUNNER_TEMP/recovered-release" | tee artifact-retrieval.txt
