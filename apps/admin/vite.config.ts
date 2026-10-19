@@ -51,7 +51,7 @@ export default defineConfig(({ mode }) => {
   plugins: [frontendSecurityHeadersPlugin(), react(), tailwindcss(),
     localAdminReadOnlyGuardPlugin(), disableHmrPlugin()],
   server: {
-    hmr: disableHmr ? false : { clientPort: 443 },
+    hmr: disableHmr ? false : undefined,
     host: '0.0.0.0',
     port: 3001,
   },

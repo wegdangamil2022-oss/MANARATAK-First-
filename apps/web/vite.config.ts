@@ -180,7 +180,7 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
-      hmr: disableHmr ? false : { clientPort: 443 },
+      hmr: disableHmr ? false : undefined,
       port: 3000,
       host: '0.0.0.0',
       watch: {

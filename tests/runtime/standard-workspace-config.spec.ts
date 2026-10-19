@@ -1,6 +1,6 @@
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
-import {loadConfigFromFile} from 'vite';
+import {loadConfigFromFile,resolveConfig} from 'vite';
 import {afterEach,describe,it,expect,vi} from 'vitest';
 afterEach(()=>vi.unstubAllEnvs());
 describe('standard workspace runtime after retiring the hosted preview',()=>{
@@ -21,5 +21,13 @@ describe('standard workspace runtime after retiring the hosted preview',()=>{
     expect(plugins.some(plugin=>plugin.name.includes('security'))).toBe(true);
     if(app==='web')expect(loaded!.config.define?.__MANARATAK_PROTOTYPE_DATA_ENABLED__).toBe('false');
     expect(loaded!.config.envDir).toBe(resolve(`apps/${app}`));
+  });
+  it('uses a local Vite nonce while production retains canonical script and style restrictions',async()=>{
+    vi.stubEnv('NODE_ENV','development');
+    const development=await resolveConfig({configFile:resolve('apps/web/vite.config.ts'),mode:'development'},'serve');
+    expect(development.html.cspNonce).toMatch(/^[A-Za-z0-9+/]{32}$/);
+    vi.stubEnv('NODE_ENV','production');
+    const production=await resolveConfig({configFile:resolve('apps/web/vite.config.ts'),mode:'production'},'build');
+    expect(production.html?.cspNonce).toBeUndefined();
   });
 });

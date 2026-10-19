@@ -1,4 +1,5 @@
 import type { Plugin, ViteDevServer, PreviewServer } from 'vite';
+import { randomBytes } from 'node:crypto';
 
 /**
  * Canonical browser-document security policy for MANARATAK Web/Admin.
@@ -46,9 +47,18 @@ export const FRONTEND_SECURITY_HEADERS_FILE = `/*\n${Object.entries(FRONTEND_SEC
   .map(([name, value]) => `  ${name}: ${value}`)
   .join('\n')}\n`;
 
-function installHeaders(server: ViteDevServer | PreviewServer) {
+function installHeaders(server: ViteDevServer | PreviewServer, nonce?: string) {
+  const headers = nonce ? {
+    ...FRONTEND_SECURITY_HEADERS,
+    'Content-Security-Policy': FRONTEND_CSP_DIRECTIVES
+      .filter(directive => directive !== 'upgrade-insecure-requests')
+      .map(directive => /^(script-src|style-src|style-src-elem) /.test(directive)
+        ? `${directive} 'nonce-${nonce}'`
+        : directive === "connect-src 'self' https: wss:" ? directive + ' ws:' : directive)
+      .join('; '),
+  } : FRONTEND_SECURITY_HEADERS;
   server.middlewares.use((_req, res, next) => {
-    for (const [name, value] of Object.entries(FRONTEND_SECURITY_HEADERS)) {
+    for (const [name, value] of Object.entries(headers)) {
       res.setHeader(name, value);
     }
     next();
@@ -62,11 +72,22 @@ function installHeaders(server: ViteDevServer | PreviewServer) {
  *   equivalent source-controlled mapping and verify delivered headers.
  */
 export function frontendSecurityHeadersPlugin(): Plugin {
+  let developmentNonce: string | undefined;
   return {
     name: 'manaratak-frontend-security-headers',
     enforce: 'pre',
+    config(_config, environment) {
+      if (environment.command === 'serve' && !environment.isPreview &&
+          !['production', 'staging'].includes(environment.mode) &&
+          !['production', 'staging'].includes(process.env.NODE_ENV ?? '')) {
+        // Vite adds this nonce to its own script/style tags and CSS runtime.
+        // The lifetime is one local development server; static builds stay canonical.
+        developmentNonce = randomBytes(24).toString('base64');
+        return { html: { cspNonce: developmentNonce } };
+      }
+    },
     configureServer(server) {
-      installHeaders(server);
+      installHeaders(server, developmentNonce);
     },
     configurePreviewServer(server) {
       installHeaders(server);
