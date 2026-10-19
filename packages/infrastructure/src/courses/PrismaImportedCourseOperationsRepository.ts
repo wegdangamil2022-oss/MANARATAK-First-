@@ -309,6 +309,15 @@ export class PrismaImportedCourseOperationsRepository implements IImportedCourse
     if (existing?.checkedAt && existing.checkedAt.getTime() > result.checkedAt.getTime()) {
       throw new Error('IMPORTED_COURSE_LINK_CHECK_STALE_RESULT');
     }
+    if (existing?.checkedAt && existing.checkedAt.getTime() === result.checkedAt.getTime()) {
+      // Millisecond timestamps do not order two different observations. Preserve
+      // the committed verdict; only an exact current replay is a harmless no-op.
+      if (existing.isCurrent && existing.url === context.directCourseUrl &&
+          existing.verificationState === persistedVerificationState(result.state) &&
+          existing.responseCode === (result.responseCode ?? null) &&
+          existing.redirectTarget === (result.redirectTarget ?? null)) return;
+      throw new Error('IMPORTED_COURSE_LINK_CHECK_CONFLICTING_RESULT');
+    }
 
     await this.batch([
       this.prisma.courseSourceUrlHistory.updateMany({
