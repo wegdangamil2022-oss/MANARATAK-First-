@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "kind": "POST28_R08_REDIS_BOUNDARY_AND_ACTUAL_LINUX_EVIDENCE",
+  "sourceSha": "26fe899a033ab93eb3a44b39df1c10d9600bcd87",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 8,
+      "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+    },
+    {
+      "path": "artifact-retrieval.json",
+      "bytes": 467,
+      "sha256": "3b92e671e3932da2618477623d6e29ff4d0d4ce05fe0f92d36c87a41e700c091"
+    },
+    {
+      "path": "checks.json",
+      "bytes": 1248,
+      "sha256": "c451ca243f30592d452e1129e6778dbec0e1883e4e1c9e0d691f596789ac9561"
+    },
+    {
+      "path": "linux-process-proof.log",
+      "bytes": 910,
+      "sha256": "eecff96d6df055669a61e5f8e55ff9f4996f2c0df5cfef91aec6c8b5ab7e2b9f"
+    },
+    {
+      "path": "preparation-status.json",
+      "bytes": 1662,
+      "sha256": "b4101c96fd4e193f0ba824251586d1a48e6641eadf70311c51389e7268f5ad2c"
+    },
+    {
+      "path": "r07-latest-step-observation.json",
+      "bytes": 534,
+      "sha256": "7676a1a1155cb5729c4add5a2ec00626898f3a0fd1834cf831d9b8d88222d26c"
+    },
+    {
+      "path": "r07-observation.json",
+      "bytes": 1024,
+      "sha256": "fc735c2ad8a13a2f4a38c2ab67a8cf4dc457488c05311c88fdce45acb3420745"
+    },
+    {
+      "path": "redis-execution-receipt.json",
+      "bytes": 704,
+      "sha256": "bf44835a454483f4489282c8dadff79d2c7aeb430bef3fababc6199a8359abac"
+    },
+    {
+      "path": "source-files.json",
+      "bytes": 1260,
+      "sha256": "e6759001d33c69045dd0f994479799e7efe9471d97cb49edfc7b84c5991c7b4f"
+    },
+    {
+      "path": "status.json",
+      "bytes": 1506,
+      "sha256": "8092484d2394d322991f511611429688a97230aa27eef063d3249bd5c20ad473"
+    }
+  ]
+}

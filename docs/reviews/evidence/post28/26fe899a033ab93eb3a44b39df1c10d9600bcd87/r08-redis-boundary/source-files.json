@@ -1,0 +1,33 @@
+{
+  "sourceSha": "26fe899a033ab93eb3a44b39df1c10d9600bcd87",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "gitBlobSha256": "77806572212d8da4d82ea10f4f48c1dc2c904915c7bc01dbd548aa78bec68be2"
+    },
+    {
+      "path": "apps/api/src/infrastructure/runtime/WorkerHealthObservation.ts",
+      "gitBlobSha256": "2ef9cccc977e246ea45c9cda5ac15602a68c16546d00ba20f513e96ab776f60c"
+    },
+    {
+      "path": "apps/api/src/infrastructure/di/container.ts",
+      "gitBlobSha256": "48c4c29e5dc60ac3b5d6beba6ce555fa63a2d2471b69e6f59ba3c60f4206711a"
+    },
+    {
+      "path": "apps/api/tests/infrastructure/workers/WorkerHealthObservation.spec.ts",
+      "gitBlobSha256": "e5c3a93fd520b7aaed7a46cc454bf9b283e91bda93017c97b1ead03ef6193099"
+    },
+    {
+      "path": "scripts/release/post28-r08-redis-lab.mjs",
+      "gitBlobSha256": "eace9f768e159dc0ea68e12f694208d7c5c522d6f49920d37f27d3137f1f7b95"
+    },
+    {
+      "path": "tests/runtime/fixtures/post28-r08-redis-probe.mjs",
+      "gitBlobSha256": "f7645ae38fbd9d90b1364b5fdbc61221cc143bc22a4fb7b1fb83df3a6b937d49"
+    },
+    {
+      "path": "docs/operations/GOOGLE_AI_STUDIO_ENVIRONMENT.md",
+      "gitBlobSha256": "1f877a6aed2010f80dcab8a4e8f5b39d006bccb7835dad968be54168d00f78d4"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "kind": "TRANSCRIPT_OBSERVED_RESULTS_NOT_RAW_LOGS",
+  "sourceSha": "26fe899a033ab93eb3a44b39df1c10d9600bcd87",
+  "testsRunBeforeCommitWithSameProductFiles": true,
+  "namespaceRegression": {
+    "initialResult": "FAIL",
+    "initialKey": "health:workers:v1:...:background-jobs",
+    "expectedPrefix": "r08:a:health:workers:",
+    "reason": "Worker health did not use REDIS_NAMESPACE in production composition"
+  },
+  "focusedVitest": {
+    "files": [
+      "apps/api/tests/infrastructure/workers/WorkerHealthObservation.spec.ts",
+      "apps/api/tests/infrastructure/workers/B09RecurringJobs.spec.ts"
+    ],
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "newCases": 3
+  },
+  "apiTypescript": {
+    "command": "node node_modules/typescript/bin/tsc -p apps/api/tsconfig.json --noEmit --pretty false",
+    "exitCode": 0
+  },
+  "workflowYaml": "PASS",
+  "launcherAndProbeSyntax": "PASS",
+  "targetedEslint": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "actionPins": {
+    "status": "PASS",
+    "refs": 65
+  },
+  "environmentInventory": {
+    "status": "PASS",
+    "names": 321,
+    "secretValuesRead": false
+  },
+  "secretScan": "PASS",
+  "fullBuildRepeated": false,
+  "databaseTestsRepeated": false,
+  "realRedisExecutedLocally": false
+}
