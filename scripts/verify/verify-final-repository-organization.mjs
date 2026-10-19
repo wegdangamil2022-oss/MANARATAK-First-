@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
 const root = process.cwd();
 const allowedRootDirectories = new Set(['.devcontainer', '.git', '.github', '.husky', 'apps', 'config', 'docs', 'packages', 'scripts', 'storage', 'tests', 'vendor', 'workspace']);
 const allowedRootFiles = new Set([
-  '.git', '.dockerignore', '.editorconfig', '.env.example', '.env.aistudio.example', '.env.compose.example',
+  '.git', '.dockerignore', '.editorconfig', '.env.example', '.env.runtime.example', '.env.compose.example',
   '.gitattributes', '.gitignore', '.npmrc', '.nvmrc', '.prettierrc',
   // Reviewed source-suite entry points used by the section and B-package validation plans.
   // Keep explicit names: an arbitrary hidden config must still fail this gate.

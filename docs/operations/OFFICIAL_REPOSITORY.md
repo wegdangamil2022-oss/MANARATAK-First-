@@ -16,14 +16,14 @@ Predecessor repositories `wegdangamil2022-oss/MANARATAK_FINAL` and `wegdangamil2
 
 ## Development and deployment boundaries
 
-`npm ci` then `npm run dev` starts Google AI Studio-compatible Public Web on port 3000.
+`npm ci` then `npm run dev` starts the Public Web workspace on port 3000.
 `npm run dev:admin` starts the separate Admin application on port 3001.
-Configure `VITE_API_URL` only when a real HTTP API is available. The default frontend preview does not start API, workers or database connections and never installs a fake API adapter.
+Configure backend services and origins explicitly for an isolated runtime. See [local development](LOCAL_DEVELOPMENT.md). The Web development gateway may load the API for API requests; provisioning guards still apply.
 
 Repository adoption is not database provisioning or production readiness. Existing Vercel project links, secrets and Supabase data are not copied by Git. No migration, seed, SQL or secret change is part of this operation.
 Automatic release-promotion and recovery-restore workflows retain their old repository guards and therefore remain disabled here until separately authorized and configured. Source CI remains enabled.
 
-Preserve the full monorepo when exporting Google AI Studio changes. Do not replace the repository with a frontend-only export. The compatibility tests assert the presence of runtime workspaces, configuration and regression guards.
+Preserve the full monorepo when importing UI changes. Do not replace it with a frontend-only export. Google AI Studio launchers and compatibility CI were retired by the owner on2026-10-19.
 
 ## Verification scope
 

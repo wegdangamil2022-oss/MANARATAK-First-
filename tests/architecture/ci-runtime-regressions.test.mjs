@@ -5,7 +5,7 @@ import test from 'node:test';
 
 const read = (file) => readFileSync(new URL(`../../${file}`, import.meta.url), 'utf8');
 
-test('Studio exports retain real configuration, runtime contracts and source datasets', () => {
+test('The repository retains real configuration, runtime contracts and source datasets', () => {
   for (const file of [
     'packages/config/src/AppConfig.ts',
     'packages/config/src/ProductionReadinessValidator.ts',
@@ -20,14 +20,6 @@ test('Studio exports retain real configuration, runtime contracts and source dat
   ]) assert.ok(existsSync(new URL(`../../${file}`, import.meta.url)), file);
   assert.match(read('packages/config/src/index.ts'), /export \* from '\.\/ProductionReadinessValidator'/);
   assert.match(read('packages/core/src/index.ts'), /export \* from '\.\/domain\/IdentifierGenerator'/);
-});
-
-test('Studio verification performs requests and assertions rather than printing unconditional success', () => {
-  const verifier = read('scripts/aistudio/verify.mjs');
-  assert.match(verifier, /scripts\/aistudio\/isolation\.mjs/);
-  assert.match(verifier, /await fetch\(origin/);
-  assert.match(verifier, /assert\.equal\(response\.status, 503\)/);
-  assert.match(verifier, /child\.kill\(\)/);
 });
 
 test('npm workspace manifests keep API runtime guards and full build orchestration', () => {
@@ -89,6 +81,6 @@ test('source CI catches inventory drift and negative guard contracts before the 
   const workflow = read('.github/workflows/ci.yml');
   assert.ok(workflow.indexOf('npm run ci:preflight') < workflow.indexOf('npm run ci:closure:manifest'));
   const runner = read('scripts/ci/source-preflight.mjs');
-  for (const contract of ['verify-source-architecture-guards.mjs', 'verify-di-reachability.mjs', 'verify-admin-audit-coverage.mjs', 'environment.mjs', '--check', 'w2-migration-recovery-source.test.mjs', 'admin-audit-coverage.test.mjs', 'dictionary-source.test.mjs']) assert.ok(runner.includes(contract), contract);
+  for (const contract of ['verify-source-architecture-guards.mjs', 'verify-di-reachability.mjs', 'verify-admin-audit-coverage.mjs', 'environment-inventory.mjs', '--check', 'w2-migration-recovery-source.test.mjs', 'admin-audit-coverage.test.mjs', 'dictionary-source.test.mjs']) assert.ok(runner.includes(contract), contract);
   assert.match(runner, /if \(result.status !== 0\) process.exit/);
 });

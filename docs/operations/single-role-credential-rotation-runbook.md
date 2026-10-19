@@ -17,8 +17,8 @@ This runbook defines the controlled procedure for rotating the password of the s
 
 ## 2. Gate Configuration & Prerequisites
 
-### Mode A: Solo Project Owner Policy (Google AI Studio Secret Handoff)
-Set the persistent secret `DB_APPLICATION_PASSWORD` via Google AI Studio's Secrets panel. Then export gate variables:
+### Mode A: Solo Project Owner Policy (Approved Secret Handoff)
+Persist `DB_APPLICATION_PASSWORD` in the approved secret manager. Then export gate variables:
 ```bash
 export DATABASE_PROVISIONING_GATE=APPROVED
 export ALLOW_DATABASE_MUTATIONS=YES
@@ -80,7 +80,7 @@ node scripts/rotate-application-role.mjs
 ## 5. Operator Recovery from Uncertain Outcome (`UNCERTAIN_MUTATION_STATE`)
 
 When an unexpected timeout or network partition occurs during rotation:
-- In **Secret Handoff Mode**, `.rotation.journal.json` records `stage: "UNCERTAIN_MUTATION_STATE"` with `secretSource: "DB_APPLICATION_PASSWORD"`. The candidate credential is the value persisted in Google AI Studio's Secrets panel.
+- In **Secret Handoff Mode**, `.rotation.journal.json` records `stage: "UNCERTAIN_MUTATION_STATE"` with `secretSource: "DB_APPLICATION_PASSWORD"`. The candidate credential is the value persisted in the approved secret manager.
 - In **File Staging Mode**, `.env.unconfirmed.rotation` holds the candidate credential while `.env` remains untouched.
 
 **Do NOT display or print the secret.** Test whether PostgreSQL applied the change using the candidate credential:

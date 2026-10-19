@@ -1360,7 +1360,7 @@ export function registerDependencies(
         if (nodeEnv === 'production' || nodeEnv === 'staging') {
           throw new Error('JWT_PRIVATE_KEY_PEM and JWT_PUBLIC_KEY_PEM are required in production/staging.');
         }
-        // In local development or AI Studio preview, persist the generated JWT keys to a file
+        // In local development, persist the generated JWT keys to a file
         // so that restarts/rebuilds of the API server do not log out active sessions.
         const keysDir = path.resolve(process.cwd(), 'storage');
         const keysFile = path.join(keysDir, 'dev-jwt-keys.json');

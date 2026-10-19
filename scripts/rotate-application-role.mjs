@@ -406,7 +406,7 @@ export async function runRotationWorkflow(options = {}) {
     );
 
     if (isSecretHandoff) {
-      // In secret handoff mode, secret is already persisted in Google AI Studio Secrets panel.
+      // In secret handoff mode, secret is already persisted in the approved secret manager.
       // Clean up pre-mutation journal and do not write to an ephemeral .env or touch /app/.dev.env.json.
       if (fs.existsSync(journalPath)) {
         fs.unlinkSync(journalPath);

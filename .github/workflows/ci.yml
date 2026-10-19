@@ -44,21 +44,6 @@ jobs:
           path: /tmp/post28-r08-redis-result.json
           if-no-files-found: warn
 
-  ai-studio-compatibility:
-    name: Isolated Google AI Studio Web preview
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 immutable snapshot
-        with:
-          node-version: 22.16.0
-          cache: npm
-      - run: npm ci
-      - run: npm run verify:aistudio
-      - run: npx --no-install vitest run tests/aistudio/compatibility.spec.ts
-      - run: npm run build:aistudio
-      - run: node scripts/aistudio/environment.mjs --check
-
   source-quality:
     name: Full source closure gates
     runs-on: ubuntu-latest

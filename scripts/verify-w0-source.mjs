@@ -40,16 +40,11 @@ check('quality_gate_script_exists', fs.existsSync(path.join(root, 'scripts/quali
 check('quality_baseline_exists', fs.existsSync(path.join(root, 'scripts/quality/source-quality-baseline.json')));
 
 const pkg = JSON.parse(read('package.json'));
-const aiStudioPortableInstall = pkg.scripts?.['verify:aistudio'] === 'node scripts/aistudio/verify.mjs'
-  && fs.existsSync(path.join(root, 'docs/operations/GOOGLE_AI_STUDIO.md'))
-  && fs.existsSync(path.join(root, '.env.aistudio.example'));
 check('package_node_engine_strict_range', pkg.engines?.node === '>=22.16.0 <23');
-check('package_npm_engine_range', pkg.engines?.npm === '>=10.9.0 <11'
-  || (aiStudioPortableInstall && pkg.engines?.npm === '>=10'));
+check('package_npm_engine_range', pkg.engines?.npm === '>=10.9.0 <11');
 check('package_quality_script', pkg.scripts?.['quality:source'] === 'node scripts/quality/verify-source-quality.mjs');
 check('package_w0_verify_script', pkg.scripts?.['w0:verify'] === 'node scripts/verify-w0-source.mjs');
-check('npm_engine_strict', /engine-strict\s*=\s*true/.test(read('.npmrc'))
-  || (aiStudioPortableInstall && /engine-strict\s*=\s*false/.test(read('.npmrc'))));
+check('npm_engine_strict', /engine-strict\s*=\s*true/.test(read('.npmrc')));
 check('nvmrc_pinned', read('.nvmrc').trim() === '22.16.0');
 const turbo = JSON.parse(read('turbo.json'));
 check('turbo_v2_tasks_config', Boolean(turbo.tasks) && !('pipeline' in turbo));

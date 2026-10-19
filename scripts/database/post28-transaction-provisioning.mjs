@@ -17,6 +17,7 @@ export const CERTIFICATE_FIXTURE_APPLICATION_TABLES=Object.freeze(['CertificateI
 export const COURSE_FIXTURE_APPLICATION_TABLES=Object.freeze(['CourseImportAnalysis','CourseFieldProvenance']);
 export const LEARNING_PATH_FIXTURE_APPLICATION_TABLES=Object.freeze(['LearningPath','LearningPathVersion','LearningPathCourse','LearningPathEnrollment']);
 export const R08_OUTBOX_FIXTURE_APPLICATION_TABLES=Object.freeze(['StudentWorkspaceEventInbox']);
+export const R08_SESSION_FIXTURE_APPLICATION_TABLES=Object.freeze(['CredentialRecord']);
 export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
  'ImportRateBudget', // Synthetic distributed source acquisition reservation tests.
  'CertificateVerificationLog', // Actual verification analytics transaction test.

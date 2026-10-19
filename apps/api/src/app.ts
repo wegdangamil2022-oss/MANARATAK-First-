@@ -59,10 +59,6 @@ let isBootstrapping = false;
 let bootstrapPromise: Promise<Express> | null = null;
 
 export async function createApiApp(options?: CreateApiAppOptions): Promise<Express> {
-  const profile = options?.env ?? process.env;
-  if ((profile.MANARATAK_RUNTIME_PROFILE === 'google-ai-studio' || profile.MANARATAK_GOOGLE_AI_STUDIO === 'true') && !profile.DATABASE_URL) {
-    throw new Error('AI_STUDIO_WEB_ONLY_BACKEND_DISABLED');
-  }
   if (options?.resetCache || options?.env) {
     appInstance = null;
     bootstrapPromise = null;
@@ -181,8 +177,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
       // Bootstrap API
       const apiRouter = new ApiRouter();
       const app = express();
-      const isAiStudio = process.env.MANARATAK_GOOGLE_AI_STUDIO === 'true';
-    const trustProxyHops = Number(config.getOptional<string>('TRUST_PROXY_HOPS') || currentEnv.TRUST_PROXY_HOPS || (isAiStudio ? 1 : 0));
+    const trustProxyHops = Number(config.getOptional<string>('TRUST_PROXY_HOPS') || currentEnv.TRUST_PROXY_HOPS || 0);
     if (Number.isInteger(trustProxyHops) && trustProxyHops > 0) {
       app.set('trust proxy', trustProxyHops);
     }

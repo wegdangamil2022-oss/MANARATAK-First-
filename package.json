@@ -5,12 +5,9 @@
   "type": "module",
   "scripts": {
     "bootstrap": "npm install && npm run build",
-    "dev": "node scripts/aistudio/run.mjs web dev",
-    "dev:aistudio": "node scripts/aistudio/run.mjs web dev",
-    "dev:admin": "node scripts/aistudio/run.mjs admin dev",
+    "dev": "npm run dev -w @manaratak/web",
+    "dev:admin": "npm run dev -w @manaratak/admin",
     "dev:full": "npm run dev -w @manaratak/web",
-    "build:aistudio": "node scripts/aistudio/run.mjs web build",
-    "verify:aistudio": "node scripts/aistudio/verify.mjs",
     "build": "npm run build --workspaces --if-present",
     "build:cached": "turbo run build",
     "start": "node server.js",
@@ -231,6 +228,6 @@
   },
   "engines": {
     "node": ">=22.16.0 <23",
-    "npm": ">=10"
+    "npm": ">=10.9.0 <11"
   }
 }

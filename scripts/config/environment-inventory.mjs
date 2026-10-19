@@ -17,7 +17,7 @@ function add(name, source) {
 const files = execFileSync('git', ['ls-files', '-z', '--cached'], { cwd: root, encoding: 'utf8' }).split('\0');
 for (const file of new Set(files)) {
   if (!file || file.startsWith('docs/') || file.startsWith('workspace/') ||
-      file.startsWith('scripts/aistudio/') || file === '.env.aistudio.example') continue;
+      file === 'scripts/config/environment-inventory.mjs' || file === '.env.runtime.example') continue;
   if (!/\.(?:ts|tsx|js|mjs|cjs|yml|yaml|sh|prisma)$/.test(file) && !/\.env.*example$/.test(file)) continue;
   const text = fs.readFileSync(path.join(root, file), 'utf8');
   for (const match of text.matchAll(/\b(?:process\.env|import\.meta\.env|env|config|values|currentEnv)\??\.(?:\s*)([A-Z][A-Z0-9_]*)/g)) add(match[1], file);
@@ -42,19 +42,18 @@ for (const file of new Set(files)) {
   }
 }
 for (const name of required) add(name, 'packages/config/src/AppConfig.ts');
-for (const name of ['MANARATAK_GOOGLE_AI_STUDIO', 'MANARATAK_RUNTIME_PROFILE', 'VITE_API_URL',
+for (const name of ['VITE_API_URL',
   'VITE_API_BASE_URL', 'VITE_PUBLIC_WEB_URL', 'VITE_ADMIN_URL', 'DIRECT_URL', 'DISABLE_HMR']) {
-  add(name, 'docs/operations/GOOGLE_AI_STUDIO.md');
+  add(name, 'docs/operations/LOCAL_DEVELOPMENT.md');
 }
 const defaults = {
-  MANARATAK_GOOGLE_AI_STUDIO: 'true', MANARATAK_RUNTIME_PROFILE: 'google-ai-studio',
   VITE_API_URL: '', VITE_API_BASE_URL: '', VITE_PUBLIC_WEB_URL: '', VITE_ADMIN_URL: '',
   VITE_PUBLIC_TEMPLATE_DATA_MODE: 'api', VITE_LOCAL_ADMIN_READ_ONLY: 'false',
   DISABLE_HMR: 'false',
 };
 function category(name, sources) {
   if (name.startsWith('VITE_')) return 'Browser / public (never secret)';
-  if (name in defaults) return 'Web preview configuration';
+  if (name in defaults) return 'Application configuration';
   if (/DATABASE|SQL_|REDIS|JWT|CSRF|SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|SIGNING/.test(name)) return 'Server / restricted';
   if (sources.some((s) => /^(apps\/api|packages\/)/.test(s))) return 'Server configuration';
   return 'Tooling / CI / optional capability';
@@ -62,36 +61,36 @@ function category(name, sources) {
 const rows = [...variables].sort(([a], [b]) => a.localeCompare(b)).map(([name, locations]) => {
   const sources = [...locations].sort();
   return { name, sources, category: category(name, sources), requirement:
-    required.has(name) ? 'Required for staging/production Full API; not Web preview' :
-    name === 'DIRECT_URL' ? 'Required for experimental direct connection; not Web preview' :
-    name === 'VITE_API_URL' ? 'Optional for preview; required to fetch external application data' :
-    name in defaults ? 'Defaulted by preview launcher/example' :
+    required.has(name) ? 'Required for staging/production API' :
+    name === 'DIRECT_URL' ? 'Direct database connection; only for explicitly authorized operations' :
+    name === 'VITE_API_URL' ? 'Public API origin when using a separate backend' :
+    name in defaults ? 'Documented example; configure for the selected application' :
     'Optional/conditional; consult source contract for the enabled capability' };
 });
 const table = [
-  '# Google AI Studio environment inventory', '',
+  '# Runtime environment inventory', '',
   'Generated from tracked source/configuration only. No environment values are read or exported.',
   'Original definitions, defaults and validators remain in the linked source files. This inventory does not relax them.',
-  'All server variables are unnecessary for Web-only preview. Entries used only by tests/CI are not app secrets.',
+  'Configure only the capabilities used by the selected runtime. Entries used only by tests/CI are not app secrets.',
   'For optional/conditional settings, the source contract is authoritative. No secret values have been transferred.',
   '', '| Variable | Scope / classification | Requirement | Definition/source |',
   '|---|---|---|---|',
   ...rows.map((r) => `| \`${r.name}\` | ${r.category} | ${r.requirement} | ${r.sources.map((s) => `[${s}](../../${s})`).join('<br>')} |`), '',
 ].join('\n');
 const example = [
-  '# Google AI Studio: copy to .env.aistudio.local (gitignored), or use the environment UI.',
-  '# No secret is needed for Web preview. VITE_* values are exposed to the browser.',
-  '# Use only an independent experimental API/database. Never copy original service credentials.',
+  '# Runtime configuration reference; copy only required values into the selected app environment.',
+  '# VITE_* values are exposed to the browser. Never put server secrets in them.',
+  '# Use isolated local infrastructure for tests. Do not copy production service credentials.',
   ...Object.entries(defaults).map(([key, value]) => `${key}=${value}`),
   '', '# Backend/tooling inventory: placeholders only, intentionally commented out.',
   '# Do not uncomment all entries. Configure only a separately approved Full Runtime capability.',
-  '# Required status and definition links: docs/operations/GOOGLE_AI_STUDIO_ENVIRONMENT.md',
+  '# Required status and definition links: docs/operations/ENVIRONMENT_INVENTORY.md',
   ...rows.filter((r) => !(r.name in defaults)).flatMap((r) => [
     `# ${r.category}; ${r.requirement}`, `# ${r.name}=`,
   ]), '',
 ].join('\n');
 export const environmentArtifacts = new Map([
-  ['docs/operations/GOOGLE_AI_STUDIO_ENVIRONMENT.md', table], ['.env.aistudio.example', example],
+  ['docs/operations/ENVIRONMENT_INVENTORY.md', table], ['.env.runtime.example', example],
 ]);
 if (process.argv.includes('--write')) {
   for (const [file, content] of environmentArtifacts) fs.writeFileSync(path.join(root, file), content);
@@ -100,7 +99,7 @@ if (process.argv.includes('--write')) {
 if (process.argv.includes('--check')) {
   for (const [file, content] of environmentArtifacts) {
     if (fs.readFileSync(path.join(root, file), 'utf8').replaceAll('\r\n', '\n') !== content) {
-      throw new Error('Environment inventory stale: run node scripts/aistudio/environment.mjs --write');
+      throw new Error('Environment inventory stale: run node scripts/config/environment-inventory.mjs --write');
     }
   }
   console.log('Environment inventory current: ' + rows.length + ' variable names.');
