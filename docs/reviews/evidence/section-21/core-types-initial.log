@@ -1,1 +1,0 @@
-packages/application/src/finance-platform/use-cases/FinancePlatformUseCases.ts(330,61): error TS2339: Property 'VOID' does not exist on type 'typeof InvoiceStatus'.

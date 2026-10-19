@@ -1,8 +1,0 @@
-
- RUN  v4.1.11 /workspace/manaratak-home-cards
-
-
- Test Files  11 passed (11)
-      Tests  64 passed (64)
-   Start at  22:38:55
-   Duration  17.22s (transform 7.88s, setup 0ms, import 12.24s, tests 2.64s, environment 1ms)

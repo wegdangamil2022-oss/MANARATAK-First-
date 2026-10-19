@@ -1,4 +1,0 @@
-{"conclusion":"success","failed_steps":[],"id":113020982675,"name":"Translation quality gates"}
-{"conclusion":"failure","failed_steps":["Authoritative registered source-closure manifest"],"id":113020983014,"name":"Full source closure gates"}
-{"conclusion":"failure","failed_steps":["Run node scripts/aistudio/environment.mjs --check"],"id":113020983130,"name":"Isolated Google AI Studio Web preview"}
-{"conclusion":"success","failed_steps":[],"id":113020984041,"name":"Deployment configuration"}

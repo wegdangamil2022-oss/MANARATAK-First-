@@ -1,1 +1,0 @@
-DI_REACHABILITY_VERIFY=PASS registrations=424 reachable=424 unreachable=0

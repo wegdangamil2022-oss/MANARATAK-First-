@@ -1,6 +1,0 @@
-PASS persistence model ownership complete (281/281)
-PASS direct cross-context ORM mutations = 0
-PASS approved cross-context read-model paths = 18
-PASS historical migration baseline = 47; new migrations require ADR-028 ownership metadata
-PASS immutable historical metadata sidecars = 26
-PERSISTENCE_BOUNDARY_VERIFIER = PASS

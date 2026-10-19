@@ -1,8 +1,0 @@
-
- RUN  v4.1.11 /workspace/manaratak
-
-
- Test Files  26 passed (26)
-      Tests  187 passed (187)
-   Start at  15:48:39
-   Duration  56.45s (transform 44.66s, setup 0ms, import 93.03s, tests 2.91s, environment 26ms)

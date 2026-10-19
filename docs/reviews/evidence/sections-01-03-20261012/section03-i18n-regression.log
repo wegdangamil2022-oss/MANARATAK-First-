@@ -1,8 +1,0 @@
-
- RUN  v4.1.11 /workspace/MANARATAK-First-
-
-
- Test Files  1 passed (1)
-      Tests  3 passed (3)
-   Start at  14:22:57
-   Duration  2.51s (transform 1.25s, setup 0ms, import 2.27s, tests 49ms, environment 0ms)

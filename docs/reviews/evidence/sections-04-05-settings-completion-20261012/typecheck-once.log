@@ -1,2 +1,0 @@
-packages/infrastructure/src/settings/PrismaSettingsGovernanceGateway.ts(3,71): error TS6133: 'SettingsChange' is declared but its value is never read.
-packages/infrastructure/src/settings/PrismaSettingsGovernanceGateway.ts(4,46): error TS6133: 'SettingsDependencyPolicy' is declared but its value is never read.

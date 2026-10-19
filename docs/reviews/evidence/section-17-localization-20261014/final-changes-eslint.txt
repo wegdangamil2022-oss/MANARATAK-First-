@@ -1,8 +1,0 @@
-
-/workspace/manaratak/apps/web/src/router/index.tsx
-  264:10  warning  'CanonicalAdminUnavailable' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/workspace/manaratak/tests/translation/root-locale-rendering.spec.tsx
-  52:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-✖ 2 problems (0 errors, 2 warnings)

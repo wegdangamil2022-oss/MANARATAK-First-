@@ -1,8 +1,0 @@
-apps/admin/src/components/UniversityProgramWorkspace.tsx 177ms
-apps/admin/src/components/UniversityLocationFilters.tsx 16ms
-apps/admin/src/components/ScholarshipCanonicalFilters.tsx 36ms
-apps/api/src/presentation/api/router/UniversityProgramWorkspaceRouter.ts 22ms
-apps/web/src/features/public-template/components/UniversityProgramDiscovery.tsx 18ms
-packages/domain/src/universities/UniversityProgramWorkspace.ts 8ms
-packages/application/src/universities/use-cases/UniversityProgramWorkspaceUseCases.ts 8ms
-packages/infrastructure/src/universities/PrismaUniversityProgramWorkspaceGateway.ts 24ms
