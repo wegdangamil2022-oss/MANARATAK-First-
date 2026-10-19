@@ -1,25 +1,10 @@
 import React from 'react';
-import { useTranslation } from '../../../i18n/I18nProvider';
-
-interface ManaratakLogoProps {
-  className?: string;
-  size?: number;
-}
-
-/**
- * Official MANARATAK logo asset.
- * Do not redraw, recolor, crop, stretch, or replace with an inline SVG.
- */
-export const ManaratakLogo: React.FC<ManaratakLogoProps> = ({ className = '', size = 48 }) => {
-  const { t } = useTranslation();
-  return (
-    <img
-      src="/brand/manaratak-logo.png"
-      width={size}
-      height={size}
-      alt={t('public_brand_logo')}
-      draggable={false}
-      className={`block shrink-0 select-none rounded-full object-contain ${className}`}
-    />
-  );
-};
+interface ManaratakLogoProps { className?: string; size?: number; }
+/** Compatibility export: neutral stand-in, until ABSHEER supplies approved brand assets. */
+export const ManaratakLogo: React.FC<ManaratakLogoProps> = ({ className = '', size = 48 }) => (
+  <span aria-label="رمز مؤقت" role="img"
+    style={{ width: size, height: size, lineHeight: '1' }}
+    className={`inline-flex shrink-0 select-none items-center justify-center rounded-full bg-slate-200 font-black text-slate-700 ${className}`}>
+    A
+  </span>
+);

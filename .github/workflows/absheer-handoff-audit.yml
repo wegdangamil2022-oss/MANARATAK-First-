@@ -1,0 +1,36 @@
+name: ABSHEER clean handoff audit
+on:
+  push:
+    branches: ['handoff/absheer-clean-base-*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.16.0'
+      - name: Scan all source files for secrets and legacy catalog payloads
+        run: node scripts/security/verify-absheer-handoff.mjs
+      - name: Test homepage isolation and preserved modules
+        run: node --test tests/handoff/absheer-handoff.test.mjs
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288ca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate
+      - run: npm run typecheck
+      - run: npm run build -w @manaratak/web
+      - run: npm run build -w @manaratak/admin

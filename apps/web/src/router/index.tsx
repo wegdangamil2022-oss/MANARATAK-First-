@@ -13,6 +13,7 @@ import { isSupportedLocale } from '@manaratak/shared';
 import { useTranslation } from '../i18n/I18nProvider';
 import { localizeLocation, resolveLegacyPublicLocale } from '../i18n/localeRouting';
 import PublicTemplateApp from '../features/public-template/PublicTemplateApp';
+import { EmptyStudentHomepage } from '../features/handoff/EmptyStudentHomepage';
 import { StudentAuthPage } from '../features/students/StudentAuthPage';
 import { canonicalAdminTarget } from './adminRedirect';
 
@@ -87,7 +88,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <PublicTemplateApp />,
+        element: <EmptyStudentHomepage />,
       },
       {
         path: 'login',

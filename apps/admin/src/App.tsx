@@ -198,22 +198,7 @@ function AdminLayout() {
           <header className="sticky top-0 z-40 flex min-h-[73px] items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3 shadow-xs backdrop-blur sm:px-6">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#142B5F] text-white shadow-sm overflow-hidden p-1 border border-[#21A7B4]/20 shrink-0">
-                <img
-                  src="/brand/manaratak-logo.png"
-                  alt="MANARATAK"
-                  className="h-full w-full object-contain rounded-xl"
-                  onError={(e) => {
-                    // Fallback to stylized 'M' if image not found
-                    (e.currentTarget as HTMLElement).style.display = 'none';
-                    const parent = e.currentTarget.parentElement;
-                    if (parent && !parent.querySelector('.fallback-m')) {
-                      const span = document.createElement('span');
-                      span.className = 'fallback-m text-sm font-black text-white';
-                      span.textContent = 'M';
-                      parent.appendChild(span);
-                    }
-                  }}
-                />
+                <span className="text-lg font-black text-white" aria-label="رمز مؤقت للهوية">A</span>
               </div>
               <div>
                 <h1 className="text-base font-black tracking-tight text-[#142B5F] sm:text-lg">

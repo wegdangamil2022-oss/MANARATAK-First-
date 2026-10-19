@@ -27,7 +27,11 @@ async function main() {
   }
 
   const bootstrapId = process.env.ADMIN_BOOTSTRAP_ID || 'admin-root';
-  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || 'admin@manaratak.org';
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
+  if (!bootstrapEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bootstrapEmail)) {
+    console.error('[BOOTSTRAP ERROR] ADMIN_BOOTSTRAP_EMAIL must be set to the new owner email.');
+    process.exit(1);
+  }
   const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
 
   if (!bootstrapPassword) {
