@@ -1,0 +1,13 @@
+{
+  "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+  "runId": "6788aa7c-ecd9-4735-b262-05b4d7995891",
+  "operationId": "7805687b-5eaa-4d68-84c1-7c870c149292",
+  "assetId": "b379a93a-4961-41a9-8d7c-deebc39f6c7f",
+  "actualPostgreSQL": true,
+  "identicalSnapshotInterveningSave": true,
+  "staleWriterRejected": true,
+  "auditDelta": 2,
+  "assetDelta": 0,
+  "applicationRole": "post28_app",
+  "latestSequence": 2
+}

@@ -1,0 +1,33 @@
+{
+  "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+  "runId": "6788aa7c-ecd9-4735-b262-05b4d7995891",
+  "migrationSha256": "17a15b0e5314f6c8023ad44b979a6e913eef6acb32264ea6688f23d96c1c7bfc",
+  "preApplyCancellationNoProcessNoEffects": true,
+  "rehearsalTarget": "DB-V",
+  "actualApplyTargetUntouched": "DB-U",
+  "outcomes": [
+    {
+      "mode": "LOCK_TIMEOUT",
+      "sqlstate": "55P03",
+      "elapsedMs": 3088,
+      "actualBlockerObserved": true,
+      "blockerPids": [
+        14592
+      ],
+      "exitCode": 3
+    },
+    {
+      "mode": "CANCEL_WHILE_BLOCKED",
+      "sqlstate": "57014",
+      "elapsedMs": 121,
+      "actualBlockerObserved": true,
+      "blockerPids": [
+        14592
+      ],
+      "exitCode": 3
+    }
+  ],
+  "allCatalogRowsAnd109LedgerUnchangedAfterEach": true,
+  "migrationSQLUnmodified": true,
+  "failedMigrationLedgerEntriesCreated": 0
+}

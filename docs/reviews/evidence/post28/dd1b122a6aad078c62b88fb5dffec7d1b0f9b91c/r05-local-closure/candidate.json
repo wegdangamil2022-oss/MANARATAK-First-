@@ -1,0 +1,1803 @@
+{
+  "version": 1,
+  "kind": "POST28_R05_UPGRADE_CANDIDATE",
+  "runtimeExecuted": false,
+  "runtimeAcceptance": false,
+  "cleanSource": true,
+  "before": {
+    "sourceSha": "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+    "schemaSha256": "56966e566cbcd7ea60966d3954a4368630753f35a265e24b8ece354387450d45",
+    "migrationChainSha256": "937036de62620f4474fbe9071ef0e1eaddac971b64025a1b94c8ab1e62d67da7",
+    "lockSha256": "75269332ee9c7c5b5b66b753a5ac5e94427668cd27b1db20b26291499306b4ee",
+    "migrations": [
+      {
+        "name": "20260806172001_init_schema",
+        "checksum": "359675914fb1519511a39172bd32b1969090da6daa0b80638602d97d01714cce"
+      },
+      {
+        "name": "20260809161800_add_administrative_region",
+        "checksum": "4c2d7fa7b215eacfcbfc145c546ad6fbc887183e134ba78ae4b07f3fb884d2cd"
+      },
+      {
+        "name": "20260810000000_add_degree_level",
+        "checksum": "6137305140333ef20a15c00b14d6105110e3250c9e40c052d043c30b51eacc05"
+      },
+      {
+        "name": "20260811191618_init_session_model",
+        "checksum": "e50e2ad5e18efb7061d0f1a6fa69d87fd4473896e8d4d65d7be61da6102435bf"
+      },
+      {
+        "name": "20260811210000_add_credential_model",
+        "checksum": "5d683bfaa6d09a878f9a83a7eff27a07a459ca959776f39b8fd695f911d16a01"
+      },
+      {
+        "name": "20260813000000_add_transactional_outbox",
+        "checksum": "044b3a9afe7d962a9230a21bb29be83abdbe43092fea39ed93e42c3c2c324fa8"
+      },
+      {
+        "name": "20260814000100_import_worker_leases",
+        "checksum": "1d45621151d743b22f32e6b15addd465515e876e78688a35c71039fa10dc9d5f"
+      },
+      {
+        "name": "20260814000200_add_normalized_university_platform",
+        "checksum": "0a479f769d78382e47db6301dd5ac59e9213fc527833096763f31def7222c634"
+      },
+      {
+        "name": "20260817010000_translation_phase7_11_extensions",
+        "checksum": "d0b35e972666c1c12d39cfb3ab2dbf287573fc7ae486c2168fd2d5958d53473a"
+      },
+      {
+        "name": "20260820231500_normalize_scholarship_model",
+        "checksum": "12c83988b1ecad9f25bfb7f5c73bedb8f0e1f5d175e2c5ab4eda4acee1eaf178"
+      },
+      {
+        "name": "20260821233000_add_course_persistence",
+        "checksum": "c0cd70d75292c7c84cc3fec2ebdb4b0bad590a4ab5fe2bf654e0fcbb89f9966e"
+      },
+      {
+        "name": "20260822010000_external_course_provider_registry",
+        "checksum": "6e994eeb41e5cd2d91b46fd6cff74f4f708ee50f6e3f11444fff901815c065a4"
+      },
+      {
+        "name": "20260822011000_seed_external_course_providers",
+        "checksum": "f5f98fea42402eaa643a873c888ee3d75ff37208b82de3532ac9bb1704324018"
+      },
+      {
+        "name": "20260822040000_course_relationships",
+        "checksum": "daf25651e01803922629c1f814e2012a276998a3f212c61bd36b14ec14a97217"
+      },
+      {
+        "name": "20260822050000_remove_shared_freecodecamp_youtube_domain",
+        "checksum": "8d3edf86d84b0f7582945c74ce2c460770ba5a702a017555731b596d039762d2"
+      },
+      {
+        "name": "20260823010000_course_language_review_snapshot",
+        "checksum": "28107e4cdb441765657c40e5e8a6a3abe70a12a0791f44f21514f85a800ea4d3"
+      },
+      {
+        "name": "20260823020000_scholarship_lifecycle_language_document_refs",
+        "checksum": "c8d7b96ae33c85b4d0e6adce9e42d4a811f01cf11ae46e84139f48d15b12e797"
+      },
+      {
+        "name": "20260823030000_import_source_registry",
+        "checksum": "1a560331a041c53b72b39d5b881ec56ede7dd4a28ba2c5245defb1a3a30e8096"
+      },
+      {
+        "name": "20260824010000_scholarship_import_decision_record_fks",
+        "checksum": "46cd7d57bc163eb7dc1c9dab0188bbe707008e883caf05ed77fcc29b90c82503"
+      },
+      {
+        "name": "20260824030000_international_test_fee_currency_reference",
+        "checksum": "611f3c4cf230c7539a7ff0e06d9d67fd8ced6e53f3f6dd1e8c813197ffa03ac8"
+      },
+      {
+        "name": "20260824120000_phase13_native_learning_persistence",
+        "checksum": "d51cfe3f3902d0e41a1739e3762d7fea23ffc8ecc66664ea74fa54841ea7d7f8"
+      },
+      {
+        "name": "20260824170000_phase17_enterprise_ai_platform",
+        "checksum": "4b1e3bf2fe0ab78e2907b71db36982dca7169b71c3122bcc6810b106669d392d"
+      },
+      {
+        "name": "20260824180000_phase18_enterprise_student_tools",
+        "checksum": "bb9ca106c7d4048eab73fb1ce3e0f3720ea2c0e8684830d60dfe5551c11df0ad"
+      },
+      {
+        "name": "20260824190000_phase19_enterprise_finance_payments",
+        "checksum": "5298b28fdcbc3b6a4b521be16cdd2a136ad68f60b7817a76cda8985365ba2fbf"
+      },
+      {
+        "name": "20260824200000_phase14_enterprise_certificates",
+        "checksum": "ac3abb91006c4ac46630822551386ffdf8bda7abfb79c5f3d22cc5dff86ce981"
+      },
+      {
+        "name": "20260824200000_phase15_enterprise_student_workspace",
+        "checksum": "e48dc9525f10db44044b02ce0227fd6abe2c6ab873bc3b0639dc7e67c9854467"
+      },
+      {
+        "name": "20260824213000_phase16_enterprise_cms",
+        "checksum": "5aa309d64ef65711800567e4e84e64082bf0253625ec3574a28e1be52e5b12b4"
+      },
+      {
+        "name": "20260825010000_phase15_phase16_mandatory_closure",
+        "checksum": "54bb06d94750d51072fb1b7880ff85bf7cb8d51dac59d35f1753eefa14a1a0f9"
+      },
+      {
+        "name": "20260825180000_w2_enterprise_event_durability",
+        "checksum": "fd8ef8dcee44d2ff8b79a53e087686e3cdcdb84b3e7b99d07da4ce2f221727ad"
+      },
+      {
+        "name": "20260825190000_w3_reference_city_identity",
+        "checksum": "06ca2ba77f45183503bd9a1e27ca8528aa4752d07097d72f1a3fd4e6f62545d6"
+      },
+      {
+        "name": "20260825210000_w4_finance_safety_core",
+        "checksum": "2474807e8e7ef57b98ec54d5750b71df54cbb0d04ee50315e134fe64c8b50568"
+      },
+      {
+        "name": "20260825220000_w5_international_test_canonical_integrity",
+        "checksum": "bb39bc7cbdb37f75b9a0074fb899ce47852e46acfa2b232aa6ad47411804fe80"
+      },
+      {
+        "name": "20260825234500_w7_university_source_identity",
+        "checksum": "46038d40df024c80c8ba0f373582880e0d2f1ca519f88236486c94c5fec112de"
+      },
+      {
+        "name": "20260826001500_w8_scholarship_architecture",
+        "checksum": "13b40e975a1f4387de487f3d59307f28dc8d79e5feda3196afc6d6192a2f7217"
+      },
+      {
+        "name": "20260826013000_w9_course_lifecycle",
+        "checksum": "a64ff79af37d2dd2d1d0bad4e289e591fd212037565e00a412389446274e5469"
+      },
+      {
+        "name": "20260826024500_w10_certificate_trust_model",
+        "checksum": "12c05a10ac7bb85a7ec7fe545439c32740a0037a3ca4ca58dcaae3d66178f241"
+      },
+      {
+        "name": "20260826034000_w11_student_lifecycle_consent_stats",
+        "checksum": "ff13a69926e085c11d48ccbf1da21876b108ddb59008e9b2954d648eafdf9ba8"
+      },
+      {
+        "name": "20260826045000_w12_ai_governance_execution_safety",
+        "checksum": "171ba6b5cfaf00567bb16910eb5dd66234b8eb478b426e749e7f54292efb4bc3"
+      },
+      {
+        "name": "20260826183000_w13_student_tools_integrity",
+        "checksum": "771e656bad703506dd73980b2a8d6a6c5bf8fc7055717ebc9cdf8bc8b3461557"
+      },
+      {
+        "name": "20260826194500_w14_cms_integrity",
+        "checksum": "9f4daa62ad688074fdda50a7b6bd3cc63cd72ec097cef350c2b7e08eab1cbd6c"
+      },
+      {
+        "name": "20260903190000_p7_canonical_geography_country_links",
+        "checksum": "6636fdfad608d9403873570246084ebd910fa590f8d1b3a2b7129557559fa965"
+      },
+      {
+        "name": "20260903210000_p8_late_domain_integrations",
+        "checksum": "f9f8e270e4348bc016a89cd573d01781e7c6ebf26ce60303cb60f69dfbbcb01f"
+      },
+      {
+        "name": "20260905014500_cms_domain_links_source_only",
+        "checksum": "2e565978068033e13d64708a62f53f70b79d03cb449eb3261a015ecccbfd3296"
+      },
+      {
+        "name": "20260905033000_course_international_test_relationship",
+        "checksum": "3f61e4a2f162b0992a03a2f92bea024cc2c0770e0db4870a520b8d007e7e72d6"
+      },
+      {
+        "name": "20260905043000_study_destination_profiles_source_only",
+        "checksum": "6ac9bd282db11e5d8d5a949d20cf25dbc221151b2104496cfaf4c152b0c5aa39"
+      },
+      {
+        "name": "20260905050000_certificate_brand_defaults",
+        "checksum": "a57e11827b29d52f16850682b342e6a29c7a6af6bbce8b5e6f7ab8ff5a75b57f"
+      },
+      {
+        "name": "20260906194500_session_refresh_rotation_lineage",
+        "checksum": "e3819156196027aff62603b1ac549368efd3841fe950db05a67f4b0f7adb1846"
+      },
+      {
+        "name": "20260906204000_reference_governance_lifecycle",
+        "checksum": "9afc17a52aecd327cefaba299781db4721c39ae18de890109813d3e350d07afb"
+      },
+      {
+        "name": "20260906223000_foundation_control_plane_persistence",
+        "checksum": "607331eb2178e27d51ec0726bc4a43d37eb520ad4e336540bdb46c55b42c29f4"
+      },
+      {
+        "name": "20260906231000_phase20_service_operations_owner_scope",
+        "checksum": "94ddcd40af34f8c39424733988f11336572951a73eff6cc4b779a16cba6101c7"
+      },
+      {
+        "name": "20260906234000_phase21_career_engagement_owner_scope",
+        "checksum": "a700b3d49087ec65e5e890acf73a3186bf57bea333d7b82358a0dae6625679e8"
+      },
+      {
+        "name": "20260906235500_phase20_phase21_optimistic_concurrency",
+        "checksum": "2fb0172fa5515669ac72e4052dc5c724019575bf236cd60f806b799ad5555d88"
+      },
+      {
+        "name": "20260907001500_retention_policy_enforcement",
+        "checksum": "333d19301026703148d9aa05cb72a299e2700670db99c13498368fd08f32e146"
+      },
+      {
+        "name": "20260907010000_w3_durable_background_jobs",
+        "checksum": "0a3654b6393948bf8fb0ada77fb252206f53e4b9174ba4c33a36be37fb7d2f12"
+      },
+      {
+        "name": "20260907011000_w3_outbox_lease_fencing",
+        "checksum": "9cbc18aba6d8517e22035e288757f2079555c802f262c48f5ce0119332902b71"
+      },
+      {
+        "name": "20260907013000_w3_notification_delivery",
+        "checksum": "2a922adb81d46177ad61dfd3545ab2e65a0f448eb9513fedcc1e819649baf7cb"
+      },
+      {
+        "name": "20260907013000_w4_api_idempotency",
+        "checksum": "47a7418d68b6b13ddfd5771d81f7b395c3e09dc4baafbce20903ffa68b1ac2aa"
+      },
+      {
+        "name": "20260907014000_w4_search_runtime",
+        "checksum": "56956ba531ca457889026d108d926333e286bcce5a1b0e43b713c6e4ec4f20c5"
+      },
+      {
+        "name": "20260907014500_w4_iam_breakglass",
+        "checksum": "58cb51169dbbad28fda4ace391e7aa0c945425f5f045b2d94c1b3256bea766c3"
+      },
+      {
+        "name": "20260907023000_w5_student_application_tracker",
+        "checksum": "5e745af568b68cdb84acfbda08602c0956eb6bbd991c1acb2f55705e4dcbfd7a"
+      },
+      {
+        "name": "20260907030000_m7_batch_a2_structural_reconciliation",
+        "checksum": "92b07dbc1401a1925e9de3fc8bdc34ddd1105521237ea599c0cd34f829abc224"
+      },
+      {
+        "name": "20260907033000_m7_batch_b_index_reconciliation",
+        "checksum": "ab6fdac31b613ed3c1682a96d2d0c0da8b0ef0acb91899d7c2787ea102fd4624"
+      },
+      {
+        "name": "20260907040000_m7_batch_c_fk_reconciliation",
+        "checksum": "34e948f8dee7c8403bd395a18b5387fc50cf9e4d9c1d0253f640c0f0af00b920"
+      },
+      {
+        "name": "20261001010000_m10_region_governance",
+        "checksum": "755cc942972a0132bd2160549fe8e8bc7f7a95bce74c280b5bdcbb352d08ca0e"
+      },
+      {
+        "name": "20261009010000_eap_asset_reference_serialization",
+        "checksum": "4c66980afa46fcbdae28dddcbe7953484ca9f16ba06e2247d80e18ed7e9ac27b"
+      },
+      {
+        "name": "20261009020000_eap_restore_operation_barrier",
+        "checksum": "fb08ee3012aabe2ec3ffaffb77da1378dd274dc4071fd198d7b6da7718935416"
+      },
+      {
+        "name": "20261009030000_eap_archive_operation_barrier",
+        "checksum": "2c722df56aeb6303860ce59bcc62748998199a780c14c26a809037e92f946c91"
+      },
+      {
+        "name": "20261009040000_settings_override_history",
+        "checksum": "be93cf547a461a5053289c7778653cc737f101542e1a0964bd40391e4f8d51f8"
+      },
+      {
+        "name": "20261009050000_settings_current_version_ownership",
+        "checksum": "c95388b1ff5bd28df5086ee5302b5b8fbde0cef57cdc400cd86812564e16d187"
+      },
+      {
+        "name": "20261009060000_settings_definition_validation_rules",
+        "checksum": "f67821c21f341926c469026cc8d22faa9917559cc80ff8bb3ccf3b04fe6702c8"
+      },
+      {
+        "name": "20261009070000_import_governance_receipts",
+        "checksum": "35b53855b98f6a694ab6ff304ab1b369fc86505afa33a290641ad017ef399d0c"
+      },
+      {
+        "name": "20261010000000_course_assessment_type",
+        "checksum": "dcdbc4880d0f9970075b43d42537988ff308b62074ecea06d55ed30205b3c8bc"
+      },
+      {
+        "name": "20261010010000_taxonomy_owner_import_review",
+        "checksum": "362d81165c7c1593134af6787ec3c2777ed86fbc9842e69cfd011133db490ddd"
+      },
+      {
+        "name": "20261010020000_reference_owner_review",
+        "checksum": "811b9e467b908efc6d900b5582ed5d2dfb745b146ce1aaeb17b99a16b7f6a2ce"
+      },
+      {
+        "name": "20261010100000_tests_publication_governance",
+        "checksum": "906faa6d6425fb4d251dc7df86e22ddb1ad98649661cd7f79c2f60272fb2392e"
+      },
+      {
+        "name": "20261010120000_major_review_governance",
+        "checksum": "6ad95200b6ff5b735c454e478b7f588ea47704e1b1509df8881340064e12a47b"
+      },
+      {
+        "name": "20261010170000_p11_unit_source_identity",
+        "checksum": "bf4878a9827d27fb269db582e298535acf831c6e4b8e311eb9ce1a259f6ce14d"
+      },
+      {
+        "name": "20261010180000_certificate_issuer_pending_default",
+        "checksum": "51fae13c113a0177bb39eefda84463c68b36f75efd7f6fba8ff95b3bf501ee81"
+      },
+      {
+        "name": "20261010183000_p12_scholarship_revision",
+        "checksum": "5ba9abfb4eed7bc26a3dbc8a292cc04ac4af7fe6942e6a290ee24e1b6ed4d208"
+      },
+      {
+        "name": "20261011051500_cms_review_snapshot_hash",
+        "checksum": "f266448d4685411165bbd37c38c7f11399e141448e6c84980a627a775e3d319e"
+      },
+      {
+        "name": "20261011052500_cms_public_site_snapshots",
+        "checksum": "36c2b03f059c10bfd72ca7cb39ab3aab45ad9764a7025fb21f2defa1e339a9a3"
+      },
+      {
+        "name": "20261011053500_cms_redirect_version",
+        "checksum": "e8d9603efa8bc50190d33ffa6270f96255d2386462f263aad39bbd45b4e3f085"
+      },
+      {
+        "name": "20261011065000_cms_block_schema_approval",
+        "checksum": "60034f9ff46fb3aabaeb8c5fabd1aeab58c4499a2e89deeb6b02e3c8096172c9"
+      },
+      {
+        "name": "20261011075500_cms_root_last_editor",
+        "checksum": "f7615bb02541ae1755363c4feeb363c4718f2a305f379e2c430ac22483ee5229"
+      },
+      {
+        "name": "20261011114500_cms_bounded_search_indexes",
+        "checksum": "2d982cd4b562573ff6bd273166e5fbc83472c61ed3c1142c856f46877da349f9"
+      },
+      {
+        "name": "20261011150000_ai_workflow_execution_plan",
+        "checksum": "2d5d02eb21d851f2f67b0f45e448c0d1e3f11fab89edbfd67349e2c39bab3e2f"
+      },
+      {
+        "name": "20261011180000_p15_private_tool_results",
+        "checksum": "2fa45d9fb12a523c07a46c9847af286a3cdaed2efcbdd414aadca2d0c15f3ec7"
+      },
+      {
+        "name": "20261011180100_p18_release_governance",
+        "checksum": "742616a9be71e3cfbc05023c553481705501f18d90e69a93fa90cc6cb6a895da"
+      },
+      {
+        "name": "20261011221500_section20_financial_safety",
+        "checksum": "23152b38f7503673e4369af61be2b11cd9b60d23ecbe5958a83f14d074f35f0b"
+      },
+      {
+        "name": "20261012000000_section21_service_safety",
+        "checksum": "ce941a90ba55c0093705aa7adff05b76ca5c7454d6fc63babc377e1927682956"
+      },
+      {
+        "name": "20261012010000_audit_workspace",
+        "checksum": "1ee8c6f12b2fa6b1595f24d57a2dae20adf4e300ca280373057263a2c2cbfe7f"
+      },
+      {
+        "name": "20261012010000_section21_close_source",
+        "checksum": "9ff52bfba3a1374398dc88c916529e8e54d8bc478ef653cbc05b70b67139abf7"
+      },
+      {
+        "name": "20261012010000_section23_channel_delivery",
+        "checksum": "1622cfcf6cc215e88260109f4dce6db41e6bfe6cce8a97439273c332559d82d9"
+      },
+      {
+        "name": "20261012020000_asset_rendition_inventory",
+        "checksum": "876466277b435a252d91ccb17fd5b0084aa081f3a3c1815f52206644cfec41af"
+      },
+      {
+        "name": "20261012030000_asset_authoritative_reconciliation",
+        "checksum": "1964f6a60941f355ac8cc13a1aed21b4bd60aea15f194c1162b81115442b8f52"
+      },
+      {
+        "name": "20261012040000_settings_governance",
+        "checksum": "58157b939cfb2bafb4ef0420d8a9e9e358f0ac40e06e719d698f0ff82ca466f6"
+      },
+      {
+        "name": "20261013010000_major_import_owner_review",
+        "checksum": "36231c8b17d667edc9def7c7012c9e5635952eb7b7ba471e5898c0880504d38d"
+      },
+      {
+        "name": "20261013020000_university_program_workspace",
+        "checksum": "0d5d0161325251e58e9552aceb8e3e58f872309f9659e14b113a55c001b7f76b"
+      },
+      {
+        "name": "20261013200000_certificate_authority_delegations",
+        "checksum": "04d6348f1ba5b00a50e4025c0542f8f9c5c678f67202204957e1cb9c78dab83e"
+      },
+      {
+        "name": "20261013210000_student_support_owner_read_health",
+        "checksum": "f74dc1fea09ea3b66d55287991240deb3fdc08963a605c5502280fc736126873"
+      },
+      {
+        "name": "20261014010000_owner_translation_receipt",
+        "checksum": "7dcaa828caa804328973f3a6dd61936d94dd365383ed4c63c08c02af973ed1c7"
+      },
+      {
+        "name": "20261014090000_study_destination_governance_source_only",
+        "checksum": "7cea01fcf6bd970b9eb5a7ace00a49d02c902740e35c593a5fa10e3c0416effb"
+      },
+      {
+        "name": "20261014193000_section27_tracker_cycles",
+        "checksum": "855b062b356d559c8421dab61e42bd49400ecdf521ac44074890620928080dcf"
+      },
+      {
+        "name": "20261015020000_search_request_actor_boundary",
+        "checksum": "a85d4c2a7c34e0247de114f2a9f0a93a4b04837b296029f81ec9b10334020278"
+      },
+      {
+        "name": "20261015020000_student_tool_test_discovery",
+        "checksum": "74a4ae837bbaf9ddf76547d960e27ebd590e21574362df09b77b5b2cdc1a8b1e"
+      },
+      {
+        "name": "20261015020100_service_test_discovery",
+        "checksum": "9374748547c74c2d84ea3a40ea4fa07355d8857ffc56d047656ad798fdf4143b"
+      },
+      {
+        "name": "20261015030000_student_document_review",
+        "checksum": "1b5b242d44fa9e44118bec55456f584f0c7e1b89df9c1bfa756b2a0ce92e4c44"
+      },
+      {
+        "name": "20261015031000_scholarship_reference_lifecycle",
+        "checksum": "c1ec9f4c960ea285968f7b6f656d95858c9e5e4131a98ad23d3b0bbccfc5a5a3"
+      },
+      {
+        "name": "20261015100000_student_document_asset_boundary",
+        "checksum": "68a558cf20df4fb049863d4dac84bd5743732a88499827346dd696a793c3c43b"
+      }
+    ],
+    "models": [
+      "AIAsyncJobRecord",
+      "AICapabilityPromptBindingRecord",
+      "AIEmbeddingRecord",
+      "AIEvaluationRunRecord",
+      "AIExecutionRecord",
+      "AIExecutionSpanRecord",
+      "AIIncidentEventRecord",
+      "AIIndexingRunRecord",
+      "AIKnowledgeSourceRecord",
+      "AIPromptDeploymentRecord",
+      "AIPromptVersionRecord",
+      "AIProviderCircuitRecord",
+      "AIQuotaReservationRecord",
+      "AIRegistryRecord",
+      "AIUsageRecord",
+      "AIWorkflowRunRecord",
+      "AIWorkflowStepRunRecord",
+      "AIWorkflowVersionRecord",
+      "AcademicStandardMapping",
+      "AcademicTaxonomyAlias",
+      "AcademicTaxonomyEdge",
+      "AcademicTaxonomyImportReview",
+      "AcademicTaxonomyNode",
+      "AccountRecord",
+      "AdminEmergencyAccessRecord",
+      "AdministrativeRegion",
+      "ApiIdempotencyRecord",
+      "ApiSearchRequestRecord",
+      "ApiServiceControlRecord",
+      "ApiServiceExposureProjection",
+      "AssetRecord",
+      "AssetRenditionRecord",
+      "AuditAlertOccurrenceRecord",
+      "AuditRecord",
+      "AuditWorkspaceRecord",
+      "BackgroundJobDeadLetterRecord",
+      "BackgroundJobExecutionRecord",
+      "BackgroundJobRecord",
+      "CareerAlumniProfileRecord",
+      "CareerApplicationRecord",
+      "CareerEmployerRecord",
+      "CareerJobPostingRecord",
+      "CareerProfileRecord",
+      "Certificate",
+      "CertificateAuthorityDelegation",
+      "CertificateIssuanceInbox",
+      "CertificateIssuer",
+      "CertificateLedgerEntry",
+      "CertificateTemplate",
+      "CertificateTemplateVersion",
+      "CertificateVerificationLog",
+      "CmsAnnouncement",
+      "CmsBlockSchema",
+      "CmsCategory",
+      "CmsContentAttachment",
+      "CmsContentBlock",
+      "CmsContentDomainLink",
+      "CmsContentNode",
+      "CmsContentRevision",
+      "CmsContentTag",
+      "CmsEditorialLedger",
+      "CmsLocalizedContent",
+      "CmsNavigationMenu",
+      "CmsNavigationNode",
+      "CmsPublishedContent",
+      "CmsRedirect",
+      "CmsScheduledJob",
+      "CmsSitePublishedSnapshot",
+      "CmsTag",
+      "CmsWorkflowReview",
+      "Course",
+      "CourseAcademicTaxonomyLink",
+      "CourseCompletion",
+      "CourseEnrollment",
+      "CourseEnrollmentPolicy",
+      "CourseFieldProvenance",
+      "CourseImportAnalysis",
+      "CourseInternationalTestRelationship",
+      "CourseLesson",
+      "CourseLessonAsset",
+      "CourseLessonProgress",
+      "CourseMajorProjection",
+      "CourseModule",
+      "CourseQuestion",
+      "CourseQuestionBank",
+      "CourseQuestionVersion",
+      "CourseQuiz",
+      "CourseQuizAttempt",
+      "CourseSourceIdentity",
+      "CourseSourceUrlHistory",
+      "CourseTaxonomyResolution",
+      "CourseVersion",
+      "CredentialRecord",
+      "DegreeLevel",
+      "EmailVerificationTokenRecord",
+      "EnterpriseEventRecord",
+      "ExternalCourseProvider",
+      "ExternalCourseProviderAlias",
+      "ExternalCourseProviderDomain",
+      "FellowshipDefinition",
+      "FinanceAdjustmentCaseRecord",
+      "FinanceApprovalDecisionRecord",
+      "FinanceApprovalRecord",
+      "FinanceCommandRecord",
+      "FinanceCommissionRecord",
+      "FinanceDocumentRecord",
+      "FinanceEstimateRecord",
+      "FinanceExchangeRateRecord",
+      "FinanceInstallmentPlanRecord",
+      "FinanceInvoiceRecord",
+      "FinancePaymentAttemptRecord",
+      "FinancePaymentRecord",
+      "FinanceReconciliationIssueRecord",
+      "FinanceReconciliationSnapshot",
+      "FinanceRefundRecord",
+      "FinanceTransferRecord",
+      "FinanceWalletHoldRecord",
+      "FinanceWalletRecord",
+      "FinancialAccountRecord",
+      "FinancialLedgerEntryRecord",
+      "FinancialTransactionRecord",
+      "IdentityRecord",
+      "ImportBatch",
+      "ImportMappingProfile",
+      "ImportRateBudget",
+      "ImportRecord",
+      "ImportReviewAssignment",
+      "ImportScreeningReceipt",
+      "ImportSourceObservation",
+      "ImportSourceRegistryEntry",
+      "InternationalTest",
+      "InternationalTestAcademicTaxonomyRelationship",
+      "InternationalTestAvailability",
+      "InternationalTestCenter",
+      "InternationalTestContentBlock",
+      "InternationalTestCountryRelationship",
+      "InternationalTestDegreeRelationship",
+      "InternationalTestDeliveryModeProfile",
+      "InternationalTestEquivalencyMapping",
+      "InternationalTestEvidence",
+      "InternationalTestEvidenceHistory",
+      "InternationalTestFamily",
+      "InternationalTestFeeMetadata",
+      "InternationalTestGovernance",
+      "InternationalTestLanguageRelationship",
+      "InternationalTestOfficialLink",
+      "InternationalTestPolicy",
+      "InternationalTestPreparationMaterial",
+      "InternationalTestProvider",
+      "InternationalTestPublicationSnapshot",
+      "InternationalTestRequirement",
+      "InternationalTestScoreScale",
+      "InternationalTestSection",
+      "InternationalTestSession",
+      "InternationalTestVariant",
+      "InternationalTestVersion",
+      "InternationalTestVersionScoreScale",
+      "LearningPath",
+      "LearningPathCourse",
+      "LearningPathEnrollment",
+      "LearningPathVersion",
+      "Major",
+      "MajorAlias",
+      "MajorClassificationMapping",
+      "MajorContentSection",
+      "MajorImportOwnerReview",
+      "MajorLevelProfile",
+      "MajorPublicationSnapshot",
+      "MajorRelationship",
+      "MajorSource",
+      "MajorVersion",
+      "NewMajorCandidateDecision",
+      "NotificationChannelDelivery",
+      "NotificationDeliveryReceipt",
+      "NotificationIntentRecord",
+      "NotificationRateReservation",
+      "NotificationTemplateRecord",
+      "OwnerTranslationTransferReceipt",
+      "PasswordResetTokenRecord",
+      "PolicyRecord",
+      "ReferenceAliasRecord",
+      "ReferenceCity",
+      "ReferenceCountry",
+      "ReferenceCurrency",
+      "ReferenceLanguage",
+      "ReferenceOwnerImportReview",
+      "ReferenceProviderMappingRecord",
+      "ReferenceRelationshipRecord",
+      "ReferenceStandardSnapshot",
+      "ReferenceVersionRecord",
+      "RetentionDecisionRecord",
+      "RoleAssignmentRecord",
+      "RoleRecord",
+      "Scholarship",
+      "ScholarshipApplicationCycle",
+      "ScholarshipAwardPackageVersion",
+      "ScholarshipBenefit",
+      "ScholarshipDegreeTarget",
+      "ScholarshipEligibilityItem",
+      "ScholarshipEligibilityRuleVersion",
+      "ScholarshipImportCanonicalResolutionDecision",
+      "ScholarshipImportVerificationDecision",
+      "ScholarshipMajorTarget",
+      "ScholarshipReferenceTransition",
+      "ScholarshipRequiredDocument",
+      "ScholarshipSourceEvidence",
+      "ScholarshipSponsorContext",
+      "ScholarshipUniversityLink",
+      "ScholarshipVersion",
+      "ServiceAvailabilitySlotRecord",
+      "ServiceBookingItemRecord",
+      "ServiceBookingRecord",
+      "ServiceCatalogCountryRecord",
+      "ServiceCatalogLanguageRecord",
+      "ServiceCatalogRecord",
+      "ServiceDeliveryArtifactRecord",
+      "ServiceDiscountRecord",
+      "ServicePackageItemRecord",
+      "ServicePackageRecord",
+      "ServicePricingRecord",
+      "ServicePromotionRecord",
+      "ServiceProviderRecord",
+      "ServiceProviderServiceRecord",
+      "ServiceRequestRecord",
+      "ServiceTestDiscoveryLink",
+      "ServiceWorkflowDefinitionRecord",
+      "ServiceWorkflowExecutionRecord",
+      "SessionRecord",
+      "SettingAssignmentRecord",
+      "SettingDefinitionRecord",
+      "SettingVersionRecord",
+      "Settings",
+      "SettingsGovernanceRecord",
+      "SharedComponentControlRecord",
+      "SharedComponentRenderingProjection",
+      "StudentApplicationChecklistItem",
+      "StudentApplicationDocumentBinding",
+      "StudentApplicationTracker",
+      "StudentCertificateReadProjection",
+      "StudentLearningProjection",
+      "StudentNotificationProjection",
+      "StudentPersonalStatistics",
+      "StudentPrivacyConsentDecision",
+      "StudentRecentActivity",
+      "StudentRecentlyViewed",
+      "StudentSavedCollection",
+      "StudentSavedItem",
+      "StudentSearchHistory",
+      "StudentSupportOwnerReadObservation",
+      "StudentTimelineEntry",
+      "StudentToolDefinitionRecord",
+      "StudentToolDependencyRecord",
+      "StudentToolExecutionRecord",
+      "StudentToolTestDiscoveryLink",
+      "StudentToolVersionRecord",
+      "StudentWorkspace",
+      "StudentWorkspaceEventInbox",
+      "StudentWorkspaceSnapshot",
+      "StudyDestinationProfile",
+      "StudyDestinationStudyLanguage",
+      "TransactionalOutboxRecord",
+      "University",
+      "UniversityAcademicProgram",
+      "UniversityAccommodationProfile",
+      "UniversityCampus",
+      "UniversityImportChange",
+      "UniversityImportChangeSet",
+      "UniversityLocalizedText",
+      "UniversityOrganizationUnit",
+      "UniversityProgramAdmissionRequirement",
+      "UniversityProgramCampus",
+      "UniversityProgramIntake",
+      "UniversityProgramStudyLanguage",
+      "UniversityProgramStudyProfile",
+      "UniversityRanking",
+      "UniversitySourceRecord",
+      "UniversityTranslation",
+      "UniversityTuitionProfile",
+      "UserRecord",
+      "WorkflowControlRecord",
+      "WorkflowExecutionProjection"
+    ],
+    "clientGeneration": {
+      "prismaCliVersion": "5.22.0",
+      "prismaClientVersion": "5.22.0",
+      "generated": false,
+      "runtimeCompatibilityExecuted": false,
+      "sourceSchemaSha256": "56966e566cbcd7ea60966d3954a4368630753f35a265e24b8ece354387450d45"
+    }
+  },
+  "after": {
+    "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+    "schemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+    "migrationChainSha256": "542a3b4a6f90a50dda5e10bdb062bb2b4eae16e211e79c110417cd3dea8c2ab7",
+    "lockSha256": "2b468457bb4c706293a6b9f8eaed1b0abde34cef38225a70364a10ff4ac0e151",
+    "migrations": [
+      {
+        "name": "20260806172001_init_schema",
+        "checksum": "359675914fb1519511a39172bd32b1969090da6daa0b80638602d97d01714cce"
+      },
+      {
+        "name": "20260809161800_add_administrative_region",
+        "checksum": "4c2d7fa7b215eacfcbfc145c546ad6fbc887183e134ba78ae4b07f3fb884d2cd"
+      },
+      {
+        "name": "20260810000000_add_degree_level",
+        "checksum": "6137305140333ef20a15c00b14d6105110e3250c9e40c052d043c30b51eacc05"
+      },
+      {
+        "name": "20260811191618_init_session_model",
+        "checksum": "e50e2ad5e18efb7061d0f1a6fa69d87fd4473896e8d4d65d7be61da6102435bf"
+      },
+      {
+        "name": "20260811210000_add_credential_model",
+        "checksum": "5d683bfaa6d09a878f9a83a7eff27a07a459ca959776f39b8fd695f911d16a01"
+      },
+      {
+        "name": "20260813000000_add_transactional_outbox",
+        "checksum": "044b3a9afe7d962a9230a21bb29be83abdbe43092fea39ed93e42c3c2c324fa8"
+      },
+      {
+        "name": "20260814000100_import_worker_leases",
+        "checksum": "1d45621151d743b22f32e6b15addd465515e876e78688a35c71039fa10dc9d5f"
+      },
+      {
+        "name": "20260814000200_add_normalized_university_platform",
+        "checksum": "0a479f769d78382e47db6301dd5ac59e9213fc527833096763f31def7222c634"
+      },
+      {
+        "name": "20260817010000_translation_phase7_11_extensions",
+        "checksum": "d0b35e972666c1c12d39cfb3ab2dbf287573fc7ae486c2168fd2d5958d53473a"
+      },
+      {
+        "name": "20260820231500_normalize_scholarship_model",
+        "checksum": "12c83988b1ecad9f25bfb7f5c73bedb8f0e1f5d175e2c5ab4eda4acee1eaf178"
+      },
+      {
+        "name": "20260821233000_add_course_persistence",
+        "checksum": "c0cd70d75292c7c84cc3fec2ebdb4b0bad590a4ab5fe2bf654e0fcbb89f9966e"
+      },
+      {
+        "name": "20260822010000_external_course_provider_registry",
+        "checksum": "6e994eeb41e5cd2d91b46fd6cff74f4f708ee50f6e3f11444fff901815c065a4"
+      },
+      {
+        "name": "20260822011000_seed_external_course_providers",
+        "checksum": "f5f98fea42402eaa643a873c888ee3d75ff37208b82de3532ac9bb1704324018"
+      },
+      {
+        "name": "20260822040000_course_relationships",
+        "checksum": "daf25651e01803922629c1f814e2012a276998a3f212c61bd36b14ec14a97217"
+      },
+      {
+        "name": "20260822050000_remove_shared_freecodecamp_youtube_domain",
+        "checksum": "8d3edf86d84b0f7582945c74ce2c460770ba5a702a017555731b596d039762d2"
+      },
+      {
+        "name": "20260823010000_course_language_review_snapshot",
+        "checksum": "28107e4cdb441765657c40e5e8a6a3abe70a12a0791f44f21514f85a800ea4d3"
+      },
+      {
+        "name": "20260823020000_scholarship_lifecycle_language_document_refs",
+        "checksum": "c8d7b96ae33c85b4d0e6adce9e42d4a811f01cf11ae46e84139f48d15b12e797"
+      },
+      {
+        "name": "20260823030000_import_source_registry",
+        "checksum": "1a560331a041c53b72b39d5b881ec56ede7dd4a28ba2c5245defb1a3a30e8096"
+      },
+      {
+        "name": "20260824010000_scholarship_import_decision_record_fks",
+        "checksum": "46cd7d57bc163eb7dc1c9dab0188bbe707008e883caf05ed77fcc29b90c82503"
+      },
+      {
+        "name": "20260824030000_international_test_fee_currency_reference",
+        "checksum": "611f3c4cf230c7539a7ff0e06d9d67fd8ced6e53f3f6dd1e8c813197ffa03ac8"
+      },
+      {
+        "name": "20260824120000_phase13_native_learning_persistence",
+        "checksum": "d51cfe3f3902d0e41a1739e3762d7fea23ffc8ecc66664ea74fa54841ea7d7f8"
+      },
+      {
+        "name": "20260824170000_phase17_enterprise_ai_platform",
+        "checksum": "4b1e3bf2fe0ab78e2907b71db36982dca7169b71c3122bcc6810b106669d392d"
+      },
+      {
+        "name": "20260824180000_phase18_enterprise_student_tools",
+        "checksum": "bb9ca106c7d4048eab73fb1ce3e0f3720ea2c0e8684830d60dfe5551c11df0ad"
+      },
+      {
+        "name": "20260824190000_phase19_enterprise_finance_payments",
+        "checksum": "5298b28fdcbc3b6a4b521be16cdd2a136ad68f60b7817a76cda8985365ba2fbf"
+      },
+      {
+        "name": "20260824200000_phase14_enterprise_certificates",
+        "checksum": "ac3abb91006c4ac46630822551386ffdf8bda7abfb79c5f3d22cc5dff86ce981"
+      },
+      {
+        "name": "20260824200000_phase15_enterprise_student_workspace",
+        "checksum": "e48dc9525f10db44044b02ce0227fd6abe2c6ab873bc3b0639dc7e67c9854467"
+      },
+      {
+        "name": "20260824213000_phase16_enterprise_cms",
+        "checksum": "5aa309d64ef65711800567e4e84e64082bf0253625ec3574a28e1be52e5b12b4"
+      },
+      {
+        "name": "20260825010000_phase15_phase16_mandatory_closure",
+        "checksum": "54bb06d94750d51072fb1b7880ff85bf7cb8d51dac59d35f1753eefa14a1a0f9"
+      },
+      {
+        "name": "20260825180000_w2_enterprise_event_durability",
+        "checksum": "fd8ef8dcee44d2ff8b79a53e087686e3cdcdb84b3e7b99d07da4ce2f221727ad"
+      },
+      {
+        "name": "20260825190000_w3_reference_city_identity",
+        "checksum": "06ca2ba77f45183503bd9a1e27ca8528aa4752d07097d72f1a3fd4e6f62545d6"
+      },
+      {
+        "name": "20260825210000_w4_finance_safety_core",
+        "checksum": "2474807e8e7ef57b98ec54d5750b71df54cbb0d04ee50315e134fe64c8b50568"
+      },
+      {
+        "name": "20260825220000_w5_international_test_canonical_integrity",
+        "checksum": "bb39bc7cbdb37f75b9a0074fb899ce47852e46acfa2b232aa6ad47411804fe80"
+      },
+      {
+        "name": "20260825234500_w7_university_source_identity",
+        "checksum": "46038d40df024c80c8ba0f373582880e0d2f1ca519f88236486c94c5fec112de"
+      },
+      {
+        "name": "20260826001500_w8_scholarship_architecture",
+        "checksum": "13b40e975a1f4387de487f3d59307f28dc8d79e5feda3196afc6d6192a2f7217"
+      },
+      {
+        "name": "20260826013000_w9_course_lifecycle",
+        "checksum": "a64ff79af37d2dd2d1d0bad4e289e591fd212037565e00a412389446274e5469"
+      },
+      {
+        "name": "20260826024500_w10_certificate_trust_model",
+        "checksum": "12c05a10ac7bb85a7ec7fe545439c32740a0037a3ca4ca58dcaae3d66178f241"
+      },
+      {
+        "name": "20260826034000_w11_student_lifecycle_consent_stats",
+        "checksum": "ff13a69926e085c11d48ccbf1da21876b108ddb59008e9b2954d648eafdf9ba8"
+      },
+      {
+        "name": "20260826045000_w12_ai_governance_execution_safety",
+        "checksum": "171ba6b5cfaf00567bb16910eb5dd66234b8eb478b426e749e7f54292efb4bc3"
+      },
+      {
+        "name": "20260826183000_w13_student_tools_integrity",
+        "checksum": "771e656bad703506dd73980b2a8d6a6c5bf8fc7055717ebc9cdf8bc8b3461557"
+      },
+      {
+        "name": "20260826194500_w14_cms_integrity",
+        "checksum": "9f4daa62ad688074fdda50a7b6bd3cc63cd72ec097cef350c2b7e08eab1cbd6c"
+      },
+      {
+        "name": "20260903190000_p7_canonical_geography_country_links",
+        "checksum": "6636fdfad608d9403873570246084ebd910fa590f8d1b3a2b7129557559fa965"
+      },
+      {
+        "name": "20260903210000_p8_late_domain_integrations",
+        "checksum": "f9f8e270e4348bc016a89cd573d01781e7c6ebf26ce60303cb60f69dfbbcb01f"
+      },
+      {
+        "name": "20260905014500_cms_domain_links_source_only",
+        "checksum": "2e565978068033e13d64708a62f53f70b79d03cb449eb3261a015ecccbfd3296"
+      },
+      {
+        "name": "20260905033000_course_international_test_relationship",
+        "checksum": "3f61e4a2f162b0992a03a2f92bea024cc2c0770e0db4870a520b8d007e7e72d6"
+      },
+      {
+        "name": "20260905043000_study_destination_profiles_source_only",
+        "checksum": "6ac9bd282db11e5d8d5a949d20cf25dbc221151b2104496cfaf4c152b0c5aa39"
+      },
+      {
+        "name": "20260905050000_certificate_brand_defaults",
+        "checksum": "a57e11827b29d52f16850682b342e6a29c7a6af6bbce8b5e6f7ab8ff5a75b57f"
+      },
+      {
+        "name": "20260906194500_session_refresh_rotation_lineage",
+        "checksum": "e3819156196027aff62603b1ac549368efd3841fe950db05a67f4b0f7adb1846"
+      },
+      {
+        "name": "20260906204000_reference_governance_lifecycle",
+        "checksum": "9afc17a52aecd327cefaba299781db4721c39ae18de890109813d3e350d07afb"
+      },
+      {
+        "name": "20260906223000_foundation_control_plane_persistence",
+        "checksum": "607331eb2178e27d51ec0726bc4a43d37eb520ad4e336540bdb46c55b42c29f4"
+      },
+      {
+        "name": "20260906231000_phase20_service_operations_owner_scope",
+        "checksum": "94ddcd40af34f8c39424733988f11336572951a73eff6cc4b779a16cba6101c7"
+      },
+      {
+        "name": "20260906234000_phase21_career_engagement_owner_scope",
+        "checksum": "a700b3d49087ec65e5e890acf73a3186bf57bea333d7b82358a0dae6625679e8"
+      },
+      {
+        "name": "20260906235500_phase20_phase21_optimistic_concurrency",
+        "checksum": "2fb0172fa5515669ac72e4052dc5c724019575bf236cd60f806b799ad5555d88"
+      },
+      {
+        "name": "20260907001500_retention_policy_enforcement",
+        "checksum": "333d19301026703148d9aa05cb72a299e2700670db99c13498368fd08f32e146"
+      },
+      {
+        "name": "20260907010000_w3_durable_background_jobs",
+        "checksum": "0a3654b6393948bf8fb0ada77fb252206f53e4b9174ba4c33a36be37fb7d2f12"
+      },
+      {
+        "name": "20260907011000_w3_outbox_lease_fencing",
+        "checksum": "9cbc18aba6d8517e22035e288757f2079555c802f262c48f5ce0119332902b71"
+      },
+      {
+        "name": "20260907013000_w3_notification_delivery",
+        "checksum": "2a922adb81d46177ad61dfd3545ab2e65a0f448eb9513fedcc1e819649baf7cb"
+      },
+      {
+        "name": "20260907013000_w4_api_idempotency",
+        "checksum": "47a7418d68b6b13ddfd5771d81f7b395c3e09dc4baafbce20903ffa68b1ac2aa"
+      },
+      {
+        "name": "20260907014000_w4_search_runtime",
+        "checksum": "56956ba531ca457889026d108d926333e286bcce5a1b0e43b713c6e4ec4f20c5"
+      },
+      {
+        "name": "20260907014500_w4_iam_breakglass",
+        "checksum": "58cb51169dbbad28fda4ace391e7aa0c945425f5f045b2d94c1b3256bea766c3"
+      },
+      {
+        "name": "20260907023000_w5_student_application_tracker",
+        "checksum": "5e745af568b68cdb84acfbda08602c0956eb6bbd991c1acb2f55705e4dcbfd7a"
+      },
+      {
+        "name": "20260907030000_m7_batch_a2_structural_reconciliation",
+        "checksum": "92b07dbc1401a1925e9de3fc8bdc34ddd1105521237ea599c0cd34f829abc224"
+      },
+      {
+        "name": "20260907033000_m7_batch_b_index_reconciliation",
+        "checksum": "ab6fdac31b613ed3c1682a96d2d0c0da8b0ef0acb91899d7c2787ea102fd4624"
+      },
+      {
+        "name": "20260907040000_m7_batch_c_fk_reconciliation",
+        "checksum": "34e948f8dee7c8403bd395a18b5387fc50cf9e4d9c1d0253f640c0f0af00b920"
+      },
+      {
+        "name": "20261001010000_m10_region_governance",
+        "checksum": "755cc942972a0132bd2160549fe8e8bc7f7a95bce74c280b5bdcbb352d08ca0e"
+      },
+      {
+        "name": "20261009010000_eap_asset_reference_serialization",
+        "checksum": "4c66980afa46fcbdae28dddcbe7953484ca9f16ba06e2247d80e18ed7e9ac27b"
+      },
+      {
+        "name": "20261009020000_eap_restore_operation_barrier",
+        "checksum": "fb08ee3012aabe2ec3ffaffb77da1378dd274dc4071fd198d7b6da7718935416"
+      },
+      {
+        "name": "20261009030000_eap_archive_operation_barrier",
+        "checksum": "2c722df56aeb6303860ce59bcc62748998199a780c14c26a809037e92f946c91"
+      },
+      {
+        "name": "20261009040000_settings_override_history",
+        "checksum": "be93cf547a461a5053289c7778653cc737f101542e1a0964bd40391e4f8d51f8"
+      },
+      {
+        "name": "20261009050000_settings_current_version_ownership",
+        "checksum": "c95388b1ff5bd28df5086ee5302b5b8fbde0cef57cdc400cd86812564e16d187"
+      },
+      {
+        "name": "20261009060000_settings_definition_validation_rules",
+        "checksum": "f67821c21f341926c469026cc8d22faa9917559cc80ff8bb3ccf3b04fe6702c8"
+      },
+      {
+        "name": "20261009070000_import_governance_receipts",
+        "checksum": "35b53855b98f6a694ab6ff304ab1b369fc86505afa33a290641ad017ef399d0c"
+      },
+      {
+        "name": "20261010000000_course_assessment_type",
+        "checksum": "dcdbc4880d0f9970075b43d42537988ff308b62074ecea06d55ed30205b3c8bc"
+      },
+      {
+        "name": "20261010010000_taxonomy_owner_import_review",
+        "checksum": "362d81165c7c1593134af6787ec3c2777ed86fbc9842e69cfd011133db490ddd"
+      },
+      {
+        "name": "20261010020000_reference_owner_review",
+        "checksum": "811b9e467b908efc6d900b5582ed5d2dfb745b146ce1aaeb17b99a16b7f6a2ce"
+      },
+      {
+        "name": "20261010100000_tests_publication_governance",
+        "checksum": "906faa6d6425fb4d251dc7df86e22ddb1ad98649661cd7f79c2f60272fb2392e"
+      },
+      {
+        "name": "20261010120000_major_review_governance",
+        "checksum": "6ad95200b6ff5b735c454e478b7f588ea47704e1b1509df8881340064e12a47b"
+      },
+      {
+        "name": "20261010170000_p11_unit_source_identity",
+        "checksum": "bf4878a9827d27fb269db582e298535acf831c6e4b8e311eb9ce1a259f6ce14d"
+      },
+      {
+        "name": "20261010180000_certificate_issuer_pending_default",
+        "checksum": "51fae13c113a0177bb39eefda84463c68b36f75efd7f6fba8ff95b3bf501ee81"
+      },
+      {
+        "name": "20261010183000_p12_scholarship_revision",
+        "checksum": "5ba9abfb4eed7bc26a3dbc8a292cc04ac4af7fe6942e6a290ee24e1b6ed4d208"
+      },
+      {
+        "name": "20261011051500_cms_review_snapshot_hash",
+        "checksum": "f266448d4685411165bbd37c38c7f11399e141448e6c84980a627a775e3d319e"
+      },
+      {
+        "name": "20261011052500_cms_public_site_snapshots",
+        "checksum": "36c2b03f059c10bfd72ca7cb39ab3aab45ad9764a7025fb21f2defa1e339a9a3"
+      },
+      {
+        "name": "20261011053500_cms_redirect_version",
+        "checksum": "e8d9603efa8bc50190d33ffa6270f96255d2386462f263aad39bbd45b4e3f085"
+      },
+      {
+        "name": "20261011065000_cms_block_schema_approval",
+        "checksum": "60034f9ff46fb3aabaeb8c5fabd1aeab58c4499a2e89deeb6b02e3c8096172c9"
+      },
+      {
+        "name": "20261011075500_cms_root_last_editor",
+        "checksum": "f7615bb02541ae1755363c4feeb363c4718f2a305f379e2c430ac22483ee5229"
+      },
+      {
+        "name": "20261011114500_cms_bounded_search_indexes",
+        "checksum": "2d982cd4b562573ff6bd273166e5fbc83472c61ed3c1142c856f46877da349f9"
+      },
+      {
+        "name": "20261011150000_ai_workflow_execution_plan",
+        "checksum": "2d5d02eb21d851f2f67b0f45e448c0d1e3f11fab89edbfd67349e2c39bab3e2f"
+      },
+      {
+        "name": "20261011180000_p15_private_tool_results",
+        "checksum": "2fa45d9fb12a523c07a46c9847af286a3cdaed2efcbdd414aadca2d0c15f3ec7"
+      },
+      {
+        "name": "20261011180100_p18_release_governance",
+        "checksum": "742616a9be71e3cfbc05023c553481705501f18d90e69a93fa90cc6cb6a895da"
+      },
+      {
+        "name": "20261011221500_section20_financial_safety",
+        "checksum": "23152b38f7503673e4369af61be2b11cd9b60d23ecbe5958a83f14d074f35f0b"
+      },
+      {
+        "name": "20261012000000_section21_service_safety",
+        "checksum": "ce941a90ba55c0093705aa7adff05b76ca5c7454d6fc63babc377e1927682956"
+      },
+      {
+        "name": "20261012010000_audit_workspace",
+        "checksum": "1ee8c6f12b2fa6b1595f24d57a2dae20adf4e300ca280373057263a2c2cbfe7f"
+      },
+      {
+        "name": "20261012010000_section21_close_source",
+        "checksum": "9ff52bfba3a1374398dc88c916529e8e54d8bc478ef653cbc05b70b67139abf7"
+      },
+      {
+        "name": "20261012010000_section23_channel_delivery",
+        "checksum": "1622cfcf6cc215e88260109f4dce6db41e6bfe6cce8a97439273c332559d82d9"
+      },
+      {
+        "name": "20261012020000_asset_rendition_inventory",
+        "checksum": "876466277b435a252d91ccb17fd5b0084aa081f3a3c1815f52206644cfec41af"
+      },
+      {
+        "name": "20261012030000_asset_authoritative_reconciliation",
+        "checksum": "1964f6a60941f355ac8cc13a1aed21b4bd60aea15f194c1162b81115442b8f52"
+      },
+      {
+        "name": "20261012040000_settings_governance",
+        "checksum": "58157b939cfb2bafb4ef0420d8a9e9e358f0ac40e06e719d698f0ff82ca466f6"
+      },
+      {
+        "name": "20261013010000_major_import_owner_review",
+        "checksum": "36231c8b17d667edc9def7c7012c9e5635952eb7b7ba471e5898c0880504d38d"
+      },
+      {
+        "name": "20261013020000_university_program_workspace",
+        "checksum": "0d5d0161325251e58e9552aceb8e3e58f872309f9659e14b113a55c001b7f76b"
+      },
+      {
+        "name": "20261013200000_certificate_authority_delegations",
+        "checksum": "04d6348f1ba5b00a50e4025c0542f8f9c5c678f67202204957e1cb9c78dab83e"
+      },
+      {
+        "name": "20261013210000_student_support_owner_read_health",
+        "checksum": "f74dc1fea09ea3b66d55287991240deb3fdc08963a605c5502280fc736126873"
+      },
+      {
+        "name": "20261014010000_owner_translation_receipt",
+        "checksum": "7dcaa828caa804328973f3a6dd61936d94dd365383ed4c63c08c02af973ed1c7"
+      },
+      {
+        "name": "20261014090000_study_destination_governance_source_only",
+        "checksum": "7cea01fcf6bd970b9eb5a7ace00a49d02c902740e35c593a5fa10e3c0416effb"
+      },
+      {
+        "name": "20261014193000_section27_tracker_cycles",
+        "checksum": "855b062b356d559c8421dab61e42bd49400ecdf521ac44074890620928080dcf"
+      },
+      {
+        "name": "20261015020000_search_request_actor_boundary",
+        "checksum": "a85d4c2a7c34e0247de114f2a9f0a93a4b04837b296029f81ec9b10334020278"
+      },
+      {
+        "name": "20261015020000_student_tool_test_discovery",
+        "checksum": "74a4ae837bbaf9ddf76547d960e27ebd590e21574362df09b77b5b2cdc1a8b1e"
+      },
+      {
+        "name": "20261015020100_service_test_discovery",
+        "checksum": "9374748547c74c2d84ea3a40ea4fa07355d8857ffc56d047656ad798fdf4143b"
+      },
+      {
+        "name": "20261015030000_student_document_review",
+        "checksum": "1b5b242d44fa9e44118bec55456f584f0c7e1b89df9c1bfa756b2a0ce92e4c44"
+      },
+      {
+        "name": "20261015031000_scholarship_reference_lifecycle",
+        "checksum": "c1ec9f4c960ea285968f7b6f656d95858c9e5e4131a98ad23d3b0bbccfc5a5a3"
+      },
+      {
+        "name": "20261015100000_student_document_asset_boundary",
+        "checksum": "68a558cf20df4fb049863d4dac84bd5743732a88499827346dd696a793c3c43b"
+      },
+      {
+        "name": "20261016150000_post28_schema_reconciliation",
+        "checksum": "17a15b0e5314f6c8023ad44b979a6e913eef6acb32264ea6688f23d96c1c7bfc"
+      }
+    ],
+    "models": [
+      "AIAsyncJobRecord",
+      "AICapabilityPromptBindingRecord",
+      "AIEmbeddingRecord",
+      "AIEvaluationRunRecord",
+      "AIExecutionRecord",
+      "AIExecutionSpanRecord",
+      "AIIncidentEventRecord",
+      "AIIndexingRunRecord",
+      "AIKnowledgeSourceRecord",
+      "AIPromptDeploymentRecord",
+      "AIPromptVersionRecord",
+      "AIProviderCircuitRecord",
+      "AIQuotaReservationRecord",
+      "AIRegistryRecord",
+      "AIUsageRecord",
+      "AIWorkflowRunRecord",
+      "AIWorkflowStepRunRecord",
+      "AIWorkflowVersionRecord",
+      "AcademicStandardMapping",
+      "AcademicTaxonomyAlias",
+      "AcademicTaxonomyEdge",
+      "AcademicTaxonomyImportReview",
+      "AcademicTaxonomyNode",
+      "AccountRecord",
+      "AdminEmergencyAccessRecord",
+      "AdministrativeRegion",
+      "ApiIdempotencyRecord",
+      "ApiSearchRequestRecord",
+      "ApiServiceControlRecord",
+      "ApiServiceExposureProjection",
+      "AssetRecord",
+      "AssetRenditionRecord",
+      "AuditAlertOccurrenceRecord",
+      "AuditRecord",
+      "AuditWorkspaceRecord",
+      "BackgroundJobDeadLetterRecord",
+      "BackgroundJobExecutionRecord",
+      "BackgroundJobRecord",
+      "CareerAlumniProfileRecord",
+      "CareerApplicationRecord",
+      "CareerEmployerRecord",
+      "CareerJobPostingRecord",
+      "CareerProfileRecord",
+      "Certificate",
+      "CertificateAuthorityDelegation",
+      "CertificateIssuanceInbox",
+      "CertificateIssuer",
+      "CertificateLedgerEntry",
+      "CertificateTemplate",
+      "CertificateTemplateVersion",
+      "CertificateVerificationLog",
+      "CmsAnnouncement",
+      "CmsBlockSchema",
+      "CmsCategory",
+      "CmsContentAttachment",
+      "CmsContentBlock",
+      "CmsContentDomainLink",
+      "CmsContentNode",
+      "CmsContentRevision",
+      "CmsContentTag",
+      "CmsEditorialLedger",
+      "CmsLocalizedContent",
+      "CmsNavigationMenu",
+      "CmsNavigationNode",
+      "CmsPublishedContent",
+      "CmsRedirect",
+      "CmsScheduledJob",
+      "CmsSitePublishedSnapshot",
+      "CmsTag",
+      "CmsWorkflowReview",
+      "Course",
+      "CourseAcademicTaxonomyLink",
+      "CourseCompletion",
+      "CourseEnrollment",
+      "CourseEnrollmentPolicy",
+      "CourseFieldProvenance",
+      "CourseImportAnalysis",
+      "CourseInternationalTestRelationship",
+      "CourseLesson",
+      "CourseLessonAsset",
+      "CourseLessonProgress",
+      "CourseMajorProjection",
+      "CourseModule",
+      "CourseQuestion",
+      "CourseQuestionBank",
+      "CourseQuestionVersion",
+      "CourseQuiz",
+      "CourseQuizAttempt",
+      "CourseSourceIdentity",
+      "CourseSourceUrlHistory",
+      "CourseTaxonomyResolution",
+      "CourseVersion",
+      "CredentialRecord",
+      "DegreeLevel",
+      "EmailVerificationTokenRecord",
+      "EnterpriseEventRecord",
+      "ExternalCourseProvider",
+      "ExternalCourseProviderAlias",
+      "ExternalCourseProviderDomain",
+      "FellowshipDefinition",
+      "FinanceAdjustmentCaseRecord",
+      "FinanceApprovalDecisionRecord",
+      "FinanceApprovalRecord",
+      "FinanceCommandRecord",
+      "FinanceCommissionRecord",
+      "FinanceDocumentRecord",
+      "FinanceEstimateRecord",
+      "FinanceExchangeRateRecord",
+      "FinanceInstallmentPlanRecord",
+      "FinanceInvoiceRecord",
+      "FinancePaymentAttemptRecord",
+      "FinancePaymentRecord",
+      "FinanceReconciliationIssueRecord",
+      "FinanceReconciliationSnapshot",
+      "FinanceRefundRecord",
+      "FinanceTransferRecord",
+      "FinanceWalletHoldRecord",
+      "FinanceWalletRecord",
+      "FinancialAccountRecord",
+      "FinancialLedgerEntryRecord",
+      "FinancialTransactionRecord",
+      "IdentityRecord",
+      "ImportBatch",
+      "ImportMappingProfile",
+      "ImportRateBudget",
+      "ImportRecord",
+      "ImportReviewAssignment",
+      "ImportScreeningReceipt",
+      "ImportSourceObservation",
+      "ImportSourceRegistryEntry",
+      "InternationalTest",
+      "InternationalTestAcademicTaxonomyRelationship",
+      "InternationalTestAvailability",
+      "InternationalTestCenter",
+      "InternationalTestContentBlock",
+      "InternationalTestCountryRelationship",
+      "InternationalTestDegreeRelationship",
+      "InternationalTestDeliveryModeProfile",
+      "InternationalTestEquivalencyMapping",
+      "InternationalTestEvidence",
+      "InternationalTestEvidenceHistory",
+      "InternationalTestFamily",
+      "InternationalTestFeeMetadata",
+      "InternationalTestGovernance",
+      "InternationalTestLanguageRelationship",
+      "InternationalTestOfficialLink",
+      "InternationalTestPolicy",
+      "InternationalTestPreparationMaterial",
+      "InternationalTestProvider",
+      "InternationalTestPublicationSnapshot",
+      "InternationalTestRequirement",
+      "InternationalTestScoreScale",
+      "InternationalTestSection",
+      "InternationalTestSession",
+      "InternationalTestVariant",
+      "InternationalTestVersion",
+      "InternationalTestVersionScoreScale",
+      "LearningPath",
+      "LearningPathCourse",
+      "LearningPathEnrollment",
+      "LearningPathVersion",
+      "Major",
+      "MajorAlias",
+      "MajorClassificationMapping",
+      "MajorContentSection",
+      "MajorImportOwnerReview",
+      "MajorLevelProfile",
+      "MajorPublicationSnapshot",
+      "MajorRelationship",
+      "MajorSource",
+      "MajorVersion",
+      "NewMajorCandidateDecision",
+      "NotificationChannelDelivery",
+      "NotificationDeliveryReceipt",
+      "NotificationIntentRecord",
+      "NotificationRateReservation",
+      "NotificationTemplateRecord",
+      "OwnerTranslationTransferReceipt",
+      "PasswordResetTokenRecord",
+      "PolicyRecord",
+      "ReferenceAliasRecord",
+      "ReferenceCity",
+      "ReferenceCountry",
+      "ReferenceCurrency",
+      "ReferenceLanguage",
+      "ReferenceOwnerImportReview",
+      "ReferenceProviderMappingRecord",
+      "ReferenceRelationshipRecord",
+      "ReferenceStandardSnapshot",
+      "ReferenceVersionRecord",
+      "RetentionDecisionRecord",
+      "RoleAssignmentRecord",
+      "RoleRecord",
+      "Scholarship",
+      "ScholarshipApplicationCycle",
+      "ScholarshipAwardPackageVersion",
+      "ScholarshipBenefit",
+      "ScholarshipDegreeTarget",
+      "ScholarshipEligibilityItem",
+      "ScholarshipEligibilityRuleVersion",
+      "ScholarshipImportCanonicalResolutionDecision",
+      "ScholarshipImportVerificationDecision",
+      "ScholarshipMajorTarget",
+      "ScholarshipReferenceTransition",
+      "ScholarshipRequiredDocument",
+      "ScholarshipSourceEvidence",
+      "ScholarshipSponsorContext",
+      "ScholarshipUniversityLink",
+      "ScholarshipVersion",
+      "ServiceAvailabilitySlotRecord",
+      "ServiceBookingItemRecord",
+      "ServiceBookingRecord",
+      "ServiceCatalogCountryRecord",
+      "ServiceCatalogLanguageRecord",
+      "ServiceCatalogRecord",
+      "ServiceDeliveryArtifactRecord",
+      "ServiceDiscountRecord",
+      "ServicePackageItemRecord",
+      "ServicePackageRecord",
+      "ServicePricingRecord",
+      "ServicePromotionRecord",
+      "ServiceProviderRecord",
+      "ServiceProviderServiceRecord",
+      "ServiceRequestRecord",
+      "ServiceTestDiscoveryLink",
+      "ServiceWorkflowDefinitionRecord",
+      "ServiceWorkflowExecutionRecord",
+      "SessionRecord",
+      "SettingAssignmentRecord",
+      "SettingDefinitionRecord",
+      "SettingVersionRecord",
+      "Settings",
+      "SettingsGovernanceRecord",
+      "SharedComponentControlRecord",
+      "SharedComponentRenderingProjection",
+      "StudentApplicationChecklistItem",
+      "StudentApplicationDocumentBinding",
+      "StudentApplicationTracker",
+      "StudentCertificateReadProjection",
+      "StudentLearningProjection",
+      "StudentNotificationProjection",
+      "StudentPersonalStatistics",
+      "StudentPrivacyConsentDecision",
+      "StudentRecentActivity",
+      "StudentRecentlyViewed",
+      "StudentSavedCollection",
+      "StudentSavedItem",
+      "StudentSearchHistory",
+      "StudentSupportOwnerReadObservation",
+      "StudentTimelineEntry",
+      "StudentToolDefinitionRecord",
+      "StudentToolDependencyRecord",
+      "StudentToolExecutionRecord",
+      "StudentToolTestDiscoveryLink",
+      "StudentToolVersionRecord",
+      "StudentWorkspace",
+      "StudentWorkspaceEventInbox",
+      "StudentWorkspaceSnapshot",
+      "StudyDestinationProfile",
+      "StudyDestinationStudyLanguage",
+      "TransactionalOutboxRecord",
+      "University",
+      "UniversityAcademicProgram",
+      "UniversityAccommodationProfile",
+      "UniversityCampus",
+      "UniversityImportChange",
+      "UniversityImportChangeSet",
+      "UniversityLocalizedText",
+      "UniversityOrganizationUnit",
+      "UniversityProgramAdmissionRequirement",
+      "UniversityProgramCampus",
+      "UniversityProgramIntake",
+      "UniversityProgramStudyLanguage",
+      "UniversityProgramStudyProfile",
+      "UniversityRanking",
+      "UniversitySourceRecord",
+      "UniversityTranslation",
+      "UniversityTuitionProfile",
+      "UserRecord",
+      "WorkflowControlRecord",
+      "WorkflowExecutionProjection"
+    ],
+    "clientGeneration": {
+      "prismaCliVersion": "5.22.0",
+      "prismaClientVersion": "5.22.0",
+      "generated": false,
+      "runtimeCompatibilityExecuted": false,
+      "sourceSchemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59"
+    }
+  },
+  "prefixChecksumsMatched": 109,
+  "pendingMigrations": [
+    {
+      "name": "20261016150000_post28_schema_reconciliation",
+      "checksum": "17a15b0e5314f6c8023ad44b979a6e913eef6acb32264ea6688f23d96c1c7bfc"
+    }
+  ],
+  "comparisonPlan": {
+    "version": 2,
+    "runId": null,
+    "beforeSourceSha": "23897bdaa66d966eef15c85f44288589ecbcdf2b",
+    "afterSourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+    "beforeSchemaSha256": "56966e566cbcd7ea60966d3954a4368630753f35a265e24b8ece354387450d45",
+    "afterSchemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+    "beforeMigrationChainSha256": "937036de62620f4474fbe9071ef0e1eaddac971b64025a1b94c8ab1e62d67da7",
+    "afterMigrationChainSha256": "542a3b4a6f90a50dda5e10bdb062bb2b4eae16e211e79c110417cd3dea8c2ab7",
+    "expectedTarget": null,
+    "requiredModels": [
+      "AIAsyncJobRecord",
+      "AICapabilityPromptBindingRecord",
+      "AIEmbeddingRecord",
+      "AIEvaluationRunRecord",
+      "AIExecutionRecord",
+      "AIExecutionSpanRecord",
+      "AIIncidentEventRecord",
+      "AIIndexingRunRecord",
+      "AIKnowledgeSourceRecord",
+      "AIPromptDeploymentRecord",
+      "AIPromptVersionRecord",
+      "AIProviderCircuitRecord",
+      "AIQuotaReservationRecord",
+      "AIRegistryRecord",
+      "AIUsageRecord",
+      "AIWorkflowRunRecord",
+      "AIWorkflowStepRunRecord",
+      "AIWorkflowVersionRecord",
+      "AcademicStandardMapping",
+      "AcademicTaxonomyAlias",
+      "AcademicTaxonomyEdge",
+      "AcademicTaxonomyImportReview",
+      "AcademicTaxonomyNode",
+      "AccountRecord",
+      "AdminEmergencyAccessRecord",
+      "AdministrativeRegion",
+      "ApiIdempotencyRecord",
+      "ApiSearchRequestRecord",
+      "ApiServiceControlRecord",
+      "ApiServiceExposureProjection",
+      "AssetRecord",
+      "AssetRenditionRecord",
+      "AuditAlertOccurrenceRecord",
+      "AuditRecord",
+      "AuditWorkspaceRecord",
+      "BackgroundJobDeadLetterRecord",
+      "BackgroundJobExecutionRecord",
+      "BackgroundJobRecord",
+      "CareerAlumniProfileRecord",
+      "CareerApplicationRecord",
+      "CareerEmployerRecord",
+      "CareerJobPostingRecord",
+      "CareerProfileRecord",
+      "Certificate",
+      "CertificateAuthorityDelegation",
+      "CertificateIssuanceInbox",
+      "CertificateIssuer",
+      "CertificateLedgerEntry",
+      "CertificateTemplate",
+      "CertificateTemplateVersion",
+      "CertificateVerificationLog",
+      "CmsAnnouncement",
+      "CmsBlockSchema",
+      "CmsCategory",
+      "CmsContentAttachment",
+      "CmsContentBlock",
+      "CmsContentDomainLink",
+      "CmsContentNode",
+      "CmsContentRevision",
+      "CmsContentTag",
+      "CmsEditorialLedger",
+      "CmsLocalizedContent",
+      "CmsNavigationMenu",
+      "CmsNavigationNode",
+      "CmsPublishedContent",
+      "CmsRedirect",
+      "CmsScheduledJob",
+      "CmsSitePublishedSnapshot",
+      "CmsTag",
+      "CmsWorkflowReview",
+      "Course",
+      "CourseAcademicTaxonomyLink",
+      "CourseCompletion",
+      "CourseEnrollment",
+      "CourseEnrollmentPolicy",
+      "CourseFieldProvenance",
+      "CourseImportAnalysis",
+      "CourseInternationalTestRelationship",
+      "CourseLesson",
+      "CourseLessonAsset",
+      "CourseLessonProgress",
+      "CourseMajorProjection",
+      "CourseModule",
+      "CourseQuestion",
+      "CourseQuestionBank",
+      "CourseQuestionVersion",
+      "CourseQuiz",
+      "CourseQuizAttempt",
+      "CourseSourceIdentity",
+      "CourseSourceUrlHistory",
+      "CourseTaxonomyResolution",
+      "CourseVersion",
+      "CredentialRecord",
+      "DegreeLevel",
+      "EmailVerificationTokenRecord",
+      "EnterpriseEventRecord",
+      "ExternalCourseProvider",
+      "ExternalCourseProviderAlias",
+      "ExternalCourseProviderDomain",
+      "FellowshipDefinition",
+      "FinanceAdjustmentCaseRecord",
+      "FinanceApprovalDecisionRecord",
+      "FinanceApprovalRecord",
+      "FinanceCommandRecord",
+      "FinanceCommissionRecord",
+      "FinanceDocumentRecord",
+      "FinanceEstimateRecord",
+      "FinanceExchangeRateRecord",
+      "FinanceInstallmentPlanRecord",
+      "FinanceInvoiceRecord",
+      "FinancePaymentAttemptRecord",
+      "FinancePaymentRecord",
+      "FinanceReconciliationIssueRecord",
+      "FinanceReconciliationSnapshot",
+      "FinanceRefundRecord",
+      "FinanceTransferRecord",
+      "FinanceWalletHoldRecord",
+      "FinanceWalletRecord",
+      "FinancialAccountRecord",
+      "FinancialLedgerEntryRecord",
+      "FinancialTransactionRecord",
+      "IdentityRecord",
+      "ImportBatch",
+      "ImportMappingProfile",
+      "ImportRateBudget",
+      "ImportRecord",
+      "ImportReviewAssignment",
+      "ImportScreeningReceipt",
+      "ImportSourceObservation",
+      "ImportSourceRegistryEntry",
+      "InternationalTest",
+      "InternationalTestAcademicTaxonomyRelationship",
+      "InternationalTestAvailability",
+      "InternationalTestCenter",
+      "InternationalTestContentBlock",
+      "InternationalTestCountryRelationship",
+      "InternationalTestDegreeRelationship",
+      "InternationalTestDeliveryModeProfile",
+      "InternationalTestEquivalencyMapping",
+      "InternationalTestEvidence",
+      "InternationalTestEvidenceHistory",
+      "InternationalTestFamily",
+      "InternationalTestFeeMetadata",
+      "InternationalTestGovernance",
+      "InternationalTestLanguageRelationship",
+      "InternationalTestOfficialLink",
+      "InternationalTestPolicy",
+      "InternationalTestPreparationMaterial",
+      "InternationalTestProvider",
+      "InternationalTestPublicationSnapshot",
+      "InternationalTestRequirement",
+      "InternationalTestScoreScale",
+      "InternationalTestSection",
+      "InternationalTestSession",
+      "InternationalTestVariant",
+      "InternationalTestVersion",
+      "InternationalTestVersionScoreScale",
+      "LearningPath",
+      "LearningPathCourse",
+      "LearningPathEnrollment",
+      "LearningPathVersion",
+      "Major",
+      "MajorAlias",
+      "MajorClassificationMapping",
+      "MajorContentSection",
+      "MajorImportOwnerReview",
+      "MajorLevelProfile",
+      "MajorPublicationSnapshot",
+      "MajorRelationship",
+      "MajorSource",
+      "MajorVersion",
+      "NewMajorCandidateDecision",
+      "NotificationChannelDelivery",
+      "NotificationDeliveryReceipt",
+      "NotificationIntentRecord",
+      "NotificationRateReservation",
+      "NotificationTemplateRecord",
+      "OwnerTranslationTransferReceipt",
+      "PasswordResetTokenRecord",
+      "PolicyRecord",
+      "ReferenceAliasRecord",
+      "ReferenceCity",
+      "ReferenceCountry",
+      "ReferenceCurrency",
+      "ReferenceLanguage",
+      "ReferenceOwnerImportReview",
+      "ReferenceProviderMappingRecord",
+      "ReferenceRelationshipRecord",
+      "ReferenceStandardSnapshot",
+      "ReferenceVersionRecord",
+      "RetentionDecisionRecord",
+      "RoleAssignmentRecord",
+      "RoleRecord",
+      "Scholarship",
+      "ScholarshipApplicationCycle",
+      "ScholarshipAwardPackageVersion",
+      "ScholarshipBenefit",
+      "ScholarshipDegreeTarget",
+      "ScholarshipEligibilityItem",
+      "ScholarshipEligibilityRuleVersion",
+      "ScholarshipImportCanonicalResolutionDecision",
+      "ScholarshipImportVerificationDecision",
+      "ScholarshipMajorTarget",
+      "ScholarshipReferenceTransition",
+      "ScholarshipRequiredDocument",
+      "ScholarshipSourceEvidence",
+      "ScholarshipSponsorContext",
+      "ScholarshipUniversityLink",
+      "ScholarshipVersion",
+      "ServiceAvailabilitySlotRecord",
+      "ServiceBookingItemRecord",
+      "ServiceBookingRecord",
+      "ServiceCatalogCountryRecord",
+      "ServiceCatalogLanguageRecord",
+      "ServiceCatalogRecord",
+      "ServiceDeliveryArtifactRecord",
+      "ServiceDiscountRecord",
+      "ServicePackageItemRecord",
+      "ServicePackageRecord",
+      "ServicePricingRecord",
+      "ServicePromotionRecord",
+      "ServiceProviderRecord",
+      "ServiceProviderServiceRecord",
+      "ServiceRequestRecord",
+      "ServiceTestDiscoveryLink",
+      "ServiceWorkflowDefinitionRecord",
+      "ServiceWorkflowExecutionRecord",
+      "SessionRecord",
+      "SettingAssignmentRecord",
+      "SettingDefinitionRecord",
+      "SettingVersionRecord",
+      "Settings",
+      "SettingsGovernanceRecord",
+      "SharedComponentControlRecord",
+      "SharedComponentRenderingProjection",
+      "StudentApplicationChecklistItem",
+      "StudentApplicationDocumentBinding",
+      "StudentApplicationTracker",
+      "StudentCertificateReadProjection",
+      "StudentLearningProjection",
+      "StudentNotificationProjection",
+      "StudentPersonalStatistics",
+      "StudentPrivacyConsentDecision",
+      "StudentRecentActivity",
+      "StudentRecentlyViewed",
+      "StudentSavedCollection",
+      "StudentSavedItem",
+      "StudentSearchHistory",
+      "StudentSupportOwnerReadObservation",
+      "StudentTimelineEntry",
+      "StudentToolDefinitionRecord",
+      "StudentToolDependencyRecord",
+      "StudentToolExecutionRecord",
+      "StudentToolTestDiscoveryLink",
+      "StudentToolVersionRecord",
+      "StudentWorkspace",
+      "StudentWorkspaceEventInbox",
+      "StudentWorkspaceSnapshot",
+      "StudyDestinationProfile",
+      "StudyDestinationStudyLanguage",
+      "TransactionalOutboxRecord",
+      "University",
+      "UniversityAcademicProgram",
+      "UniversityAccommodationProfile",
+      "UniversityCampus",
+      "UniversityImportChange",
+      "UniversityImportChangeSet",
+      "UniversityLocalizedText",
+      "UniversityOrganizationUnit",
+      "UniversityProgramAdmissionRequirement",
+      "UniversityProgramCampus",
+      "UniversityProgramIntake",
+      "UniversityProgramStudyLanguage",
+      "UniversityProgramStudyProfile",
+      "UniversityRanking",
+      "UniversitySourceRecord",
+      "UniversityTranslation",
+      "UniversityTuitionProfile",
+      "UserRecord",
+      "WorkflowControlRecord",
+      "WorkflowExecutionProjection"
+    ],
+    "requiredInvariants": [
+      "immutableReceipts",
+      "financialLedger",
+      "studentConsent",
+      "assetBindings",
+      "universityPrograms",
+      "scholarshipTargets",
+      "courseProjections",
+      "publishedVersions"
+    ]
+  },
+  "gates": {
+    "R04Evidence": "docs/remediation/POST28_R04_LOCAL_CLOSURE_2026-10-16.md",
+    "separateUpgradeAndRestoreVerificationTargets": "REQUIRED_NOT_PROVISIONED",
+    "fixtureContract": "REQUIRES_OWNER_REVIEW_AND_REPRESENTABILITY_PROOF",
+    "backupAndStructuralRestore": "NOT_EXECUTED",
+    "priorClientRuntime": "NOT_EXECUTED",
+    "safeInterruptionAndRetry": "NOT_EXECUTED"
+  },
+  "fixturePolicy": {
+    "newOrphanOn109Prefix": "Forbidden by already installed NOT VALID FK; NOT VALID still enforces new writes.",
+    "historicalOrphan": "Requires a known pre-FK source stage and documented historical migration path; never DISABLE TRIGGER or session_replication_role=replica.",
+    "consentAndFinancialLegacy": "Use declared owner fixtures, exact integer money, immutable receipts and source-bound IDs; no invented DEC or deletion."
+  }
+}

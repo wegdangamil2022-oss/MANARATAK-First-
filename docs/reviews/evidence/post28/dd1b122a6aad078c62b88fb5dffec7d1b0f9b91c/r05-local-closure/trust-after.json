@@ -1,0 +1,33 @@
+{
+  "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+  "runId": "6788aa7c-ecd9-4735-b262-05b4d7995891",
+  "phase": "trust-after",
+  "parentProviderSourceSha": "6dc778605d1344b99011b3074ee2b2648d182550",
+  "parentProviderRunId": "186b4fc2-d77a-45ab-8e97-0c3aabef0a20",
+  "trust": {
+    "trustChecksPassed": true,
+    "ownerAuthorizationVerified": false,
+    "upgradeAuthorized": false,
+    "sourceSha256": "7815592e17eeb3bb1b720b4d8df1f6a697954b99328843dff6fb6f1555c08da7",
+    "sanitizedSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+    "historicalSnapshotSha256": "c06dd7da417cdf4ff9c87e1de28a446aa950f9716644d63334b406ba05b4b4c3"
+  },
+  "actualReadbackSha256": "05a6ad73757ecae51b2c1b47876d988f12dcc37af58db680b28fdf0f476950f5",
+  "deliveryBytes": 10234,
+  "previousClientVersion": "5.22.0",
+  "historicalFixtureProbes": 46,
+  "allHistoricalFieldsMatched": true,
+  "consentBindingTrackersUnchanged": true,
+  "crossStudentDenied": true,
+  "publicConfidentialDenied": true,
+  "legacyReviewStillDenied": true,
+  "role": "post28_app",
+  "privileges": {
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false
+  },
+  "scansRepeated": false
+}

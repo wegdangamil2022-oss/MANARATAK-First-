@@ -1,0 +1,11 @@
+{
+  "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+  "runId": "6788aa7c-ecd9-4735-b262-05b4d7995891",
+  "archiveSha256": "b91a5115dce9557794c60fd1f5253e59a7c5ba277aadc90c06bcbb0dc1404118",
+  "freshDatabase": "manaratak_post28_final_verify_test",
+  "restoreRole": "post28_verifier",
+  "all282TableContentsMatched": true,
+  "allCatalogDefinitionsMatched": true,
+  "sourceUnchanged": true,
+  "bootstrapUsedOnlyForEmptyDatabaseProvisioning": true
+}

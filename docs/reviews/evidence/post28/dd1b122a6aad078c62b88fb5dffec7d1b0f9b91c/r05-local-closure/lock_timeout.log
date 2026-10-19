@@ -1,0 +1,5 @@
+BEGIN
+SET
+SET
+ERROR:  55P03: canceling statement due to lock timeout
+LOCATION:  ProcessInterrupts, postgres.c:3389

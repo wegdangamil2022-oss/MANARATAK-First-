@@ -1,0 +1,12 @@
+{
+  "sourceSha": "dd1b122a6aad078c62b88fb5dffec7d1b0f9b91c",
+  "runId": "6788aa7c-ecd9-4735-b262-05b4d7995891",
+  "operationId": "3a8eb6dd-9821-45af-ad58-f8359a649404",
+  "assetId": "e074d0ca-0dbc-453f-aa8f-d06796ff7515",
+  "error": "INJECTED_PROVIDER_RESPONSE_LOSS",
+  "providerCompletedMove": true,
+  "durablePhase": "PREPARED",
+  "assetNotWritten": true,
+  "completionNotWritten": true,
+  "originalProviderEvidenceReused": true
+}
