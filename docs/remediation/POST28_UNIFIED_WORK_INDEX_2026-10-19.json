@@ -83,11 +83,14 @@
     },
     {
       "id": "R06",
-      "state": "DATABASE_FIX_LAB_VERIFIED_PENDING_MIGRATION_REVIEW_AND_CONTROLLED_APPLICATION",
-      "formalAcceptance": "OPEN",
-      "reference": "docs/remediation/POST28_R06_R07_PRACTICAL_HANDOFF_2026-10-19.json",
+      "state": "CORE_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+      "formalAcceptance": "OPEN_COMPREHENSIVE_SCOPE",
+      "reference": "docs/remediation/POST28_R06_CORE_CLOSURE_2026-10-19.md",
       "nullRepair": "docs/remediation/POST28_R06_NULL_IDENTITY_REPAIR_2026-10-19.md",
-      "coreScopeDeclaredComplete": false
+      "coreScopeDeclaredComplete": true,
+      "runtimeEvidenceSourceSha": "d1770592c2ec171b14b6e755b3e138dfa2beed4a",
+      "latestEvidence": "docs/reviews/evidence/post28/d1770592c2ec171b14b6e755b3e138dfa2beed4a/r06-core-closure/closure.json",
+      "migration111": "APPLIED_ONLY_IN_FRESH_SYNTHETIC_LOCAL_LAB"
     },
     {
       "id": "R07",
@@ -138,7 +141,6 @@
     "browserRepeated": false
   },
   "resumeOrder": [
-    "R06_REVIEWED_NULL_MIGRATION_ROLLOUT_AND_PRIORITY_EXCEPTIONS",
     "R07_SELECTED_DELIVERY_CANDIDATE_AND_TARGETED_OPERATION",
     "R08_R09_ENABLED_FEATURE_PROOFS"
   ],

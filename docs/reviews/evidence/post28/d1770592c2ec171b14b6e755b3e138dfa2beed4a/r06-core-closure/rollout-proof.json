@@ -1,0 +1,36 @@
+{
+  "sourceSha": "d1770592c2ec171b14b6e755b3e138dfa2beed4a",
+  "runId": "ba99d4f2-2e14-40de-bb68-b5f726089e7e",
+  "elapsedMs": 938,
+  "ledger": 111,
+  "index": {
+    "unique": true,
+    "valid": true,
+    "ready": true,
+    "nullsNotDistinct": true,
+    "unrestricted": true,
+    "plainColumns": true,
+    "keyCount": 4,
+    "columnCount": 4,
+    "columns": [
+      "academicProgramId",
+      "internationalTestId",
+      "testVariantId",
+      "testVersionId"
+    ]
+  },
+  "preservation": {
+    "kind": "POST28_UPGRADE_PRESERVATION_COMPARISON",
+    "models": 281,
+    "invariants": 8,
+    "financialGroups": 2,
+    "runtimeAcceptance": false,
+    "note": "Comparison only; measured producer provenance, ledger, catalog, backup and compatibility execution remain mandatory."
+  },
+  "all281ApplicationTableHashesUnchanged": true,
+  "financialTotalsExact": true,
+  "schemaParity": true,
+  "redeployNoEffect": true,
+  "backupVerified": true,
+  "localOnly": true
+}

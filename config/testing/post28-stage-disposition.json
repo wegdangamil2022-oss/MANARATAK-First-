@@ -31,5 +31,12 @@
   "productionAcceptance": false,
   "cloudMutationAuthorized": false,
   "deploymentAuthorized": false,
-  "recordPurpose": "HISTORICAL_SCOPED_R06_AUTHORIZATION_SNAPSHOT"
+  "recordPurpose": "HISTORICAL_SCOPED_R06_AUTHORIZATION_SNAPSHOT",
+  "R06LatestClosure": {
+    "runtimeStatus": "CORE_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+    "evidence": "docs/reviews/evidence/post28/d1770592c2ec171b14b6e755b3e138dfa2beed4a/r06-core-closure/closure.json",
+    "sourceSha": "d1770592c2ec171b14b6e755b3e138dfa2beed4a",
+    "formalComprehensiveAcceptance": false,
+    "productionAcceptance": false
+  }
 }
