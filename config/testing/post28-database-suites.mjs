@@ -10,7 +10,7 @@ export const DATABASE_SUITES = Object.freeze({
   'course-read-concurrency': {files:['tests/database/post28-course-read-concurrency.database.spec.mjs'],minimumCases:4},
   'university-read-concurrency': {files:['tests/database/post28-university-read-concurrency.database.spec.mjs'],minimumCases:4},
   'real-course-source': {files: ['tests/database/post28-real-course-source.database.spec.mjs'],minimumCases:7},
-  'course-import-receipt': {files: ['tests/database/post28-course-import-receipt.database.spec.mjs'],minimumCases:5},
+  'course-import-receipt': {files: ['tests/database/post28-course-import-receipt.database.spec.mjs'],minimumCases:6},
   'owner-advisory-locks': {files: ['tests/database/post28-owner-advisory-locks.database.spec.mjs'],minimumCases:10},
   'certificate-runtime': {files: ['tests/database/post28-certificate-runtime.database.spec.mjs'],minimumCases:14},
   'import-worker-crash': {files: ['tests/database/post28-import-worker-crash.database.spec.mjs'],minimumCases:5},

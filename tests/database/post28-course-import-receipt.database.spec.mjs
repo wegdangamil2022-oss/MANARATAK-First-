@@ -1,4 +1,5 @@
 import {randomUUID as fresh} from 'node:crypto';
+import {spawn} from 'node:child_process';
 import {beforeAll,afterAll,describe,it,expect} from 'vitest';
 import {PrismaClient} from '@prisma/client';
 import {CourseImportCoordinator} from '../../packages/application/src/courses/use-cases/CourseImportCoordinator.ts';
@@ -30,6 +31,12 @@ async function fixture(){
 }
 const command=c=>({recordId:c.record.id,actorId:actor,approval:{expectedAnalysisId:c.analysis.id,approvedFields:[],reason:'Explicit synthetic staged course review'}});
 async function facts(c){return {record:await db.importRecord.findUnique({where:{id:c.record.id}}),analysis:await db.courseImportAnalysis.findUnique({where:{id:c.analysis.id}}),identity:await db.courseSourceIdentity.findUnique({where:{id:c.identity.id}}),courses:await db.course.findMany({where:{externalProviderId:c.provider.id}}),fields:await db.courseFieldProvenance.findMany({where:{importRecordId:c.record.id},orderBy:{fieldKey:'asc'}}),audits:await db.auditRecord.count({where:{targetId:c.record.id,action:'COURSE_IMPORT_TRANSFERRED'}}),events:await db.transactionalOutboxRecord.count({where:{aggregateId:c.record.id,eventType:'COURSE_IMPORT_TRANSFERRED'}})};}
+function ownerProcess(command,mode){
+ const child=spawn(process.execPath,['--import','tsx','tests/database/fixtures/post28-r08-course-owner.mjs',mode],{env:{...process.env},windowsHide:true,stdio:['ignore','pipe','pipe','ipc']});child.stdout.resume();child.stderr.resume();
+ const messages=new Map(),waiters=new Map(),done=new Promise(resolve=>{child.once('exit',(code,signal)=>resolve({code,signal}));child.once('error',error=>resolve({error:error.code}));});
+ child.on('message',message=>{if(message.point==='WAITING_CONFIG')child.send(command);messages.set(message.point,message);waiters.get(message.point)?.(message);});
+ return {done,async wait(point){if(messages.has(point))return messages.get(point);let timer;try{return await Promise.race([new Promise(resolve=>waiters.set(point,resolve)),done.then(()=>{throw Error('POST28_OWNER_EXIT_BEFORE_'+point);}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('POST28_OWNER_TIMEOUT')),20000);})]);}finally{clearTimeout(timer);waiters.delete(point);}},async kill(){if(child.exitCode===null&&child.signalCode===null)child.kill('SIGKILL');await done;}};
+}
 describe('Post28 actual canonical course import receipts',()=>{
  beforeAll(async()=>{if(process.env.POST28_TARGET_LABEL!=='DB-T'||process.env.POST28_DATABASE_SUITE!=='course-import-receipt'||process.env.RUN_DATABASE_INTEGRATION_TESTS!=='true'||process.env.POST28_TRANSACTION_SETUP_URL)throw Error('POST28_DB_T_RUNNER_REQUIRED');db=new PrismaClient({log:[],errorFormat:'minimal'});other=new PrismaClient({log:[],errorFormat:'minimal'});await Promise.all([db.$connect(),other.$connect()]);expect((await db.$queryRaw`SELECT current_user AS role`)[0].role).toBe('post28_app');expect((await db.$queryRaw`SELECT pg_backend_pid() AS pid`)[0].pid).not.toBe((await other.$queryRaw`SELECT pg_backend_pid() AS pid`)[0].pid);});
  afterAll(async()=>{await Promise.all([db?.$disconnect(),other?.$disconnect()]);});
@@ -38,4 +45,12 @@ describe('Post28 actual canonical course import receipts',()=>{
  it('serializes concurrent transfers from independent connections to one canonical mutation and one event',async()=>{const c=await fixture(),results=await Promise.all([facade(db).transfer(command(c)),facade(other).transfer(command(c))]);expect(new Set(results.map(x=>x.courseId)).size).toBe(1);expect(results.map(x=>x.state).sort()).toEqual(['TRANSFERRED_CREATED','TRANSFERRED_UNCHANGED']);const f=await facts(c);expect(f.courses).toHaveLength(1);expect(f.audits).toBe(1);expect(f.events).toBe(1);expect(f.record.processingNotes.match(/COURSE_IMPORT_TRANSFER_RECEIPT/g)).toHaveLength(1);});
  it('records a first unchanged-analysis handoff and suppresses only subsequent receipt replays',async()=>{const c=await fixture(),initial=await facade(db).transfer(command(c)),record=await db.importRecord.create({data:{batchId:c.batch.id,status:'COMPLETE',rawPayload:{synthetic:true},sourceRowNumber:3}}),{id,createdAt,updatedAt,analyzedAt,...data}=c.analysis;const analysis=await db.courseImportAnalysis.create({data:{...data,importRecordId:record.id,changeState:'UNCHANGED',matchState:'EXACT_EXISTING',matchedCourseId:initial.courseId}});const next={...c,record,analysis};const r=await facade(db).transfer(command(next));expect(r.state).toBe('TRANSFERRED_UNCHANGED');const before=await facts(next);expect(before.audits).toBe(1);expect(before.events).toBe(1);expect(before.fields).toHaveLength(9);await facade(other).transfer(command(next));expect(await facts(next)).toEqual(before);});
  it('rolls back canonical owner identity analysis provenance receipt audit and event on actual PostgreSQL outbox failure',async()=>{const c=await fixture(),before=await facts(c);await expect(facade(db,true).transfer(command(c))).rejects.toMatchObject({code:'P2010',meta:{code:'22012'}});expect(await facts(c)).toEqual(before);});
+ it('R08 recovers a killed owner process after canonical commit without a second mutation or event',async()=>{
+  const c=await fixture(),first=ownerProcess(command(c),'AFTER_COMMIT');let committed;
+  try{committed=(await first.wait('COMMITTED')).result;}finally{await first.kill();}
+  const before=await facts(c);expect(before.courses).toHaveLength(1);expect(before.fields).toHaveLength(9);expect(before.audits).toBe(1);expect(before.events).toBe(1);expect(committed.state).toBe('TRANSFERRED_CREATED');
+  const restarted=ownerProcess(command(c),'NORMAL');
+  try{const replay=(await restarted.wait('RESULT')).result;expect(replay).toEqual({...committed,state:'TRANSFERRED_UNCHANGED'});expect(await restarted.done).toEqual({code:0,signal:null});}finally{await restarted.kill();}
+  expect(await facts(c)).toEqual(before);expect(before.courses[0].status).toBe('IMPORTED');
+ });
 });
