@@ -32,7 +32,7 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     const span = operationalMonitoring.startSpan?.('worker.iteration', { worker });
     operationalMetrics.incrementCounter('worker.iterations', 1, { worker });
     try {
-      const result = await action();
+      const result = await requireSuccessfulDelivery(action());
       operationalMetrics.incrementCounter('worker.iterations.completed', 1, { worker });
       span?.end('OK');
       return result;
@@ -63,7 +63,7 @@ export async function startPollingWorkers(container: AwilixContainer, config: IC
     const intervalMs = config.getOptional<number>('CERTIFICATE_COMPLETION_WORKER_INTERVAL_MS') ?? 5_000;
     const worker = container.resolve<any>('certificateCompletionOutboxWorker');
     const workerId = `certificate-completion-${runtimeId}`;
-    register('certificate-completion', intervalMs, () => requireSuccessfulDelivery(worker.runOnce(workerId)));
+    register('certificate-completion', intervalMs, () => worker.runOnce(workerId));
   }
   if (config.getOptional<boolean>('STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED') === true) {
     const intervalMs = config.getOptional<number>('STUDENT_WORKSPACE_OUTBOX_WORKER_INTERVAL_MS') ?? 2_000;
