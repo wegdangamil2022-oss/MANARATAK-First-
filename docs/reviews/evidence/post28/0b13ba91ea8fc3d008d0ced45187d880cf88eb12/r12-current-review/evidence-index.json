@@ -1,0 +1,26 @@
+{
+  "kind": "R12_CURRENT_REVIEW_EVIDENCE",
+  "sourceSha": "0b13ba91ea8fc3d008d0ced45187d880cf88eb12",
+  "files": [
+    {
+      "path": "artifact-pair-check.json",
+      "bytes": 1747,
+      "sha256": "b26b0e18f2d067afd3256daf359586ef59378dfe0eef3bf9d02366b6919acdb4"
+    },
+    {
+      "path": "operator.mjs.txt",
+      "bytes": 6259,
+      "sha256": "83dfd0ad2a6a4f633b24fe933a88b9196a19ee9bcd71fb9a6698658ff5a1a234"
+    },
+    {
+      "path": "r11-fix-ci-observed.json",
+      "bytes": 670,
+      "sha256": "60ed4c8ba321547ee3fceb71b6ccecc9a50dbc81b2c693f477fb388280f27f6e"
+    },
+    {
+      "path": "review-summary.json",
+      "bytes": 2156,
+      "sha256": "f01b5641f2aef0185407768815627231fc9565aa6f0778a4b8b6a9cd7e086de1"
+    }
+  ]
+}

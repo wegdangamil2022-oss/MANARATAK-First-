@@ -291,6 +291,11 @@
     {
       "id": "R12",
       "state": "LOCAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_RELEASE_BLOCKERS",
+      "latestPracticalReview":"docs/remediation/POST28_R12_CURRENT_REVIEW_2026-10-21.md",
+      "latestReviewSourceSha":"0b13ba91ea8fc3d008d0ced45187d880cf88eb12",
+      "latestReviewEvidence":"docs/reviews/evidence/post28/0b13ba91ea8fc3d008d0ced45187d880cf88eb12/r12-current-review/evidence-index.json",
+      "latestReviewHistoricalFilesMatched":48,
+      "latestReviewHistoricalArtifactUnitsVerified":6,
       "latestReport": "docs/remediation/POST28_R12_PRACTICAL_CLOSEOUT_2026-10-20.md",
       "configuration": "config/testing/r12-local-rollback-preparation.json",
       "evidenceIndex": "docs/reviews/evidence/post28/70230e082e03f73761eee6437858c074839fb8d2/r12-worker-assets/evidence-index.json",

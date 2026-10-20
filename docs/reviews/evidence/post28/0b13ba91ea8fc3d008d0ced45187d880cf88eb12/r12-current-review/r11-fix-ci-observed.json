@@ -1,0 +1,29 @@
+{
+  "sourceSha": "2934821ae7de16fd65531c5df41684eb104a8e5c",
+  "runId": 39514942840,
+  "status": "in_progress",
+  "result": null,
+  "observedAt": "2026-10-20T23:26:59.9743231Z",
+  "jobs": [
+    {
+      "name": "R08 isolated Redis and Linux worker shutdown",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Translation quality gates",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Full source closure gates",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "name": "Deployment configuration",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "reviewHead": "0b13ba91ea8fc3d008d0ced45187d880cf88eb12",
+  "candidates": [
+    {
+      "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+      "artifacts": [
+        {
+          "unit": "api",
+          "sha256": "86ea6fb08569187a94f2a9d4d774c544e989fa329f2f72552dcd3a2ffba09459",
+          "size": 31078400
+        },
+        {
+          "unit": "web",
+          "sha256": "dd9d78ed94e8b4b7168f1439726ce2a92f96e61b9f2311d9ecdcbab1e497dbf1",
+          "size": 11653120
+        },
+        {
+          "unit": "admin",
+          "sha256": "ccaa2e9335bdfd74e60c8a4497df91e0960e6bc6e4635d3719e9bda70ab3cde8",
+          "size": 8355840
+        }
+      ],
+      "lockSha256": "ffa6cc00dbb15ef8e637246c690cfaa73f287aa1e8a6c7e9e94f8eed5daa3735",
+      "prismaSchemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59"
+    },
+    {
+      "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "artifacts": [
+        {
+          "unit": "api",
+          "sha256": "77019e10245a3cbe0530810de6d383529f25f23e00f0a9b5cb31eb07865f71d0",
+          "size": 31078400
+        },
+        {
+          "unit": "web",
+          "sha256": "7a8f46a5f61eaba626513a1064406768e8c9710b11f8db2654e60d6fa2f616e9",
+          "size": 8263680
+        },
+        {
+          "unit": "admin",
+          "sha256": "8e1308b4257cecb49c31446ff052ed59cbb44710dc68930fe15a0f77c1b2ad1e",
+          "size": 6348800
+        }
+      ],
+      "lockSha256": "ffa6cc00dbb15ef8e637246c690cfaa73f287aa1e8a6c7e9e94f8eed5daa3735",
+      "prismaSchemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59"
+    }
+  ],
+  "allSixUnitsAndBothSbomsDigestVerified": true,
+  "candidateSourcesRelabeled": false,
+  "newRuntimeRehearsal": false
+}
