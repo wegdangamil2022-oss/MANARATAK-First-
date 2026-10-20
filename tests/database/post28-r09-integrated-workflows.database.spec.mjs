@@ -1,3 +1,11 @@
+import {CrossDomainGraphReadService} from '../../packages/application/src/read-models/CrossDomainGraphReadService.ts';
+import {CrossDomainReadModelRouter} from '../../apps/api/src/presentation/api/router/CrossDomainReadModelRouter.ts';
+import {PrismaMajorRepository} from '../../packages/infrastructure/src/majors/PrismaMajorRepository.ts';
+import {PrismaUniversityRepository} from '../../packages/infrastructure/src/universities/PrismaUniversityRepository.ts';
+import {PrismaInternationalTestRepository} from '../../packages/infrastructure/src/international-tests/PrismaInternationalTestRepository.ts';
+import {PrismaCourseRelationshipRepository} from '../../packages/infrastructure/src/courses/PrismaCourseRelationshipRepository.ts';
+import {PrismaReferenceDataRepository} from '../../packages/infrastructure/src/reference-data/PrismaReferenceDataRepository.ts';
+import {syntheticUniversityCountry} from './fixtures/synthetic-university-country.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {randomUUID as fresh,randomBytes,createHash} from 'node:crypto';
@@ -113,6 +121,7 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     // Real session-bound authentication and DB-backed capabilities. MFA and deployment
     // acceptance are deliberately not represented by this internal workflow boundary.
     app.use('/admin/cms',SecurityMiddlewareFactory.createAdminGuard({mode:'strict',tokenProvider:tokens,sessionManager:sessions,principalAccessValidator}),CmsAdminRouter.create({adminCmsUseCases:new AdminCmsUseCases(cms),authEvaluatorService:evaluator}));
+    app.use('/graph',CrossDomainReadModelRouter.create({crossDomainGraphReadService:new CrossDomainGraphReadService(new PrismaMajorRepository(db),new PrismaUniversityRepository(db),new PrismaScholarshipRepository(db),new PrismaInternationalTestRepository(db),new PrismaCourseRelationshipRepository(db),new PrismaReferenceDataRepository(db),cms)}));
     app.use('/cms',CmsPublicRouter.create({publicCmsUseCases:new PublicCmsUseCases(cms)}));
     app.use('/certificates',CertificatePublicRouter.create({certificateReadModelService:readModel}));
     app.use('/student',StudentWorkspaceRouter.create({certificateReadModelService:readModel,studentApplicationTrackerUseCases:new StudentApplicationTrackerUseCases(new PrismaStudentApplicationTrackerRepository(db),new ScholarshipStudentApplicationTrackerGateway(new PrismaScholarshipRepository(db)),new AssetReferencePolicy(assets)),financeStudentUseCases:new FinanceStudentUseCases(new PrismaFinanceRepository(db)),financePlatformUseCases:finance,assetRecordRepository:assets,tokenProvider:tokens,sessionManager:sessions,principalAccessValidator,roleAssignmentRepository:assignments,apiIdempotencyStore:new PrismaApiIdempotencyStore(db)}));
@@ -202,6 +211,54 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     for(const command of ['wallet-payment','payment-attempts']){const denied=await call(a,'post','/student/'+a.id+'/finance/invoices/'+foreignInvoice.id+'/'+command,{});expect(denied.status,denied.text).toBe(404);}
     expect(await financialFacts(foreignInvoice.id)).toEqual(facts);
     proof.observations.push({case:'PRIVATE_DOCUMENT_AND_FINANCE_OWNERSHIP',bindingId:binding.id,originalConsentAndBindingPreserved:true,foreignReadWriteAndAssetDenied:true,financialFactsUnchanged:true});
+  });
+
+  it('traverses canonical owner relations beyond page one and distinguishes withdrawal zero and unavailable reads',async()=>{
+    const owner=id=>({id,publicId:id,slug:id,canonicalName:id,canonicalDedupKey:id,displayName:'Same synthetic display name',status:'PUBLISHED',completenessStatus:'COMPLETE'});
+    const country=await syntheticUniversityCountry(db),degree=fresh();
+    await db.degreeLevel.create({data:{id:degree,canonicalCode:degree,nameEn:'Synthetic degree',nameAr:'Synthetic degree'}});
+    async function publishedMajor(){
+      const id=fresh(),profile=fresh(),version=fresh();await db.major.create({data:owner(id)});
+      await db.majorLevelProfile.create({data:{id:profile,majorId:id,degreeLevelId:degree,level:'BACHELOR',code:profile,status:'PUBLISHED',completenessStatus:'COMPLETE'}});
+      await db.majorVersion.create({data:{id:version,majorId:id,profileId:profile,versionNumber:1,status:'PUBLISHED'}});
+      await db.majorLevelProfile.update({where:{id:profile},data:{currentPublishedVersionId:version}});
+      // Materialized historical read fixture; this does not attest a real editorial approval.
+      await db.majorPublicationSnapshot.create({data:{versionId:version,majorId:id,profileId:profile,reviewerId:'R09_SYNTHETIC_HISTORICAL',payload:{...owner(id),profiles:[],contentSections:[]}}});
+      return{id,profile,version};
+    }
+    const major=await publishedMajor(),lookalike=await publishedMajor(),universities=[];
+    for(let n=0;n<3;n++){
+      const id=fresh(),program=fresh();universities.push(id);
+      await db.university.create({data:{...owner(id),countryReferenceId:country,optionalFields:{privateSentinel:students[1].id}}});
+      await db.universityAcademicProgram.create({data:{id:program,universityId:id,majorId:major.id,degreeLevelId:degree,status:'ACTIVE',majorMappingState:'CANONICALLY_MAPPED',sourceProgramName:'Synthetic canonical program',normalizedName:program}});
+    }
+    const fetchGraph=(id,query={})=>request(app).get('/graph/majors/'+id).query({pageSize:1,...query});
+    const pages=[],seen=[];let cursor;
+    do{
+      const response=await fetchGraph(major.id,cursor?{universityCursor:cursor}:{});expect(response.status,response.text).toBe(200);expect(response.headers['cache-control']).toBe('no-store');
+      const edge=response.body.relationships.universities;expect(edge.total).toBe(3);expect(response.body.readScope.collections.universities.state).toBe('AVAILABLE');
+      expect(response.text).not.toContain(students[1].id);expect(response.text).not.toContain('privateSentinel');
+      seen.push(...edge.data.map(row=>row.ownerId));pages.push(edge);cursor=edge.nextCursor;
+      expect(pages.length).toBeLessThanOrEqual(3);
+    }while(cursor);
+    expect(seen).toEqual([...universities].sort());expect(new Set(seen).size).toBe(3);expect(pages).toHaveLength(3);
+    const zero=await fetchGraph(lookalike.id);expect(zero.status).toBe(200);expect(zero.body.relationships.universities.total).toBe(0);expect(zero.body.readScope.collections.universities).toMatchObject({state:'AVAILABLE',total:0});
+    const inverse=await request(app).get('/graph/universities/'+universities[0]);expect(inverse.status,inverse.text).toBe(200);expect(inverse.body.relationships.majors.map(row=>row.ownerId)).toEqual([major.id]);
+    const page=await browser.newPage();try{
+      await page.goto(origin+'/r09-origin');const viewed=await page.evaluate(async slug=>{const r=await fetch('/graph/majors/'+slug+'?pageSize=1');return{status:r.status,body:await r.json()};},major.id);
+      expect(viewed.status).toBe(200);expect(viewed.body.subject.ownerId).toBe(major.id);expect(viewed.body.relationships.universities.total).toBe(3);
+    }finally{await page.close();}
+    const withdrawn=[...universities].sort()[1];await db.university.update({where:{id:withdrawn},data:{status:'ARCHIVED'}});
+    const after=await fetchGraph(major.id,{universityCursor:pages[0].nextCursor});expect(after.status,after.text).toBe(200);expect(after.body.relationships.universities.total).toBe(2);expect(after.body.relationships.universities.data.map(row=>row.ownerId)).not.toContain(withdrawn);
+    expect((await request(app).get('/graph/universities/'+withdrawn)).status).toBe(404);
+    let unlock,locked;const acquired=new Promise(resolve=>{locked=resolve;}),released=new Promise(resolve=>{unlock=resolve;});
+    const lock=other.$transaction(async tx=>{await tx.$executeRawUnsafe('LOCK TABLE "University" IN ACCESS EXCLUSIVE MODE');locked();await released;},{timeout:15000});
+    // A real temporary owner read outage, restricted to this disposable database.
+    lock.catch(()=>locked());await acquired;
+    try{const unavailable=await fetchGraph(major.id);expect(unavailable.status,unavailable.text).toBe(200);expect(unavailable.body.readScope.collections.universities).toMatchObject({state:'UNAVAILABLE',errorCode:'OWNER_READ_UNAVAILABLE',total:null});}
+    finally{unlock();await lock;}
+    const recovered=await fetchGraph(major.id);expect(recovered.status).toBe(200);expect(recovered.body.readScope.collections.universities).toMatchObject({state:'AVAILABLE',total:2});
+    proof.observations.push({case:'CANONICAL_GRAPH_RELATIONSHIPS',majorId:major.id,lookalikeId:lookalike.id,universityIds:universities,pages:3,uniqueOwnerIds:true,inverseOwnerIds:true,withdrawnId:withdrawn,afterWithdrawalTotal:2,realOwnerReadOutage:'UNAVAILABLE_TOTAL_NULL',recovered:true,browserTransport:true,builtGraphUi:false,historicalPublicationFixture:true});
   });
 
   it('pays a real synthetic invoice once across concurrent HTTP replays with one balanced ledger effect',async()=>{

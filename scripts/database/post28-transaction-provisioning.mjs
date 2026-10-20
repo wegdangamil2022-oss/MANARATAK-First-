@@ -25,7 +25,7 @@ export const R09_LEARNER_APPLICATION_TABLES=Object.freeze(['CourseLessonProgress
 export const R09_WORKFLOW_APPLICATION_TABLES=Object.freeze([
  'CmsCategory','CmsLocalizedContent','CmsContentTag','CmsContentAttachment',
  'CmsWorkflowReview','CmsContentRevision','CmsEditorialLedger','CmsRedirect','CmsScheduledJob',
- 'CourseModule','CourseLesson','CourseLessonProgress',
+ 'CourseModule','CourseLesson','CourseLessonProgress','MajorPublicationSnapshot',
  ...CERTIFICATE_FIXTURE_APPLICATION_TABLES,
 ]);
 export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
