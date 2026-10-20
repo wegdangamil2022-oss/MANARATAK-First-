@@ -15,6 +15,7 @@ export async function runBoundedScenario(plan, { step, sampleResources }) {
   const deadline = started + plan.durationSeconds * 1000;
   let abortReason = null;
   while (observations.length < plan.maximumOperations && performance.now() < deadline) {
+    const cycleStarted = performance.now();
     let resource;
     try { resource = await sampleResources(); } catch { abortReason = 'RESOURCE_OBSERVER_UNAVAILABLE'; break; }
     if (!resource || !Number.isFinite(resource.cpuPercent) || resource.cpuPercent < 0 || resource.cpuPercent > 100 ||
@@ -33,7 +34,7 @@ export async function runBoundedScenario(plan, { step, sampleResources }) {
       if (observation?.verified !== true) { abortReason = 'INVARIANT_UNVERIFIED'; break; }
       observations.push({ latencyMs: performance.now() - at, ...observation });
     } catch { abortReason = signal.aborted ? 'OPERATION_TIMEOUT' : 'SCENARIO_STEP_FAILED'; break; }
-    const wait = Math.min(deadline - performance.now(), Math.max(0, 1000 / plan.operationsPerSecond - (performance.now() - at)));
+    const wait = Math.min(deadline - performance.now(), Math.max(0, 1000 / plan.operationsPerSecond - (performance.now() - cycleStarted)));
     if (wait > 0) await new Promise(resolve => setTimeout(resolve, wait));
   }
   const elapsedSeconds = (performance.now() - started) / 1000;
