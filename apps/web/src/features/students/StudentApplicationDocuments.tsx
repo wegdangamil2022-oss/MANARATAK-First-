@@ -1,8 +1,10 @@
+import { PreviewStudentApiClient } from './studentWorkspacePreviewApi';
+const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
 import {StudentDocumentUpload} from './StudentDocumentUpload';
 import { applicationCycleLabel } from './ApplicationCycleLabel';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import {
-  ApiClient,
+  ApiClient as LiveApiClient,
   type StudentApplicationTrackerDto,
   type StudentOwnedAssetDto,
 } from '../../api/client';
