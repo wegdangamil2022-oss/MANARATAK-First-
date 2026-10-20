@@ -294,6 +294,23 @@
         "requireValidatedCatalog:true"
       ],
       "review": "POST28 R06 local runtime 2026-10-16; user authorized continuing with recorded R05 blockers, no R05 PASS or deployment authority"
+    },
+    "scripts/recovery/run-whole-platform-restore-drill.mjs": {
+      "purpose": "Restore only into an independently authorized disposable target, then verify full scoped row and asset parity with read-only Prisma",
+      "access": "isolated-read-write",
+      "environment": [
+        "Node22 PostgreSQL16; signed target/source SHA and snapshot; local synthetic or authorized disposable only"
+      ],
+      "gate": "Input hashes and pinned TLS before SQL; independently owned role sentinel before/after restore; read-only snapshot verifier; no destructive fixture suite",
+      "requiredSourceMarkers": [
+        "recoveryInputs",
+        "RECOVERY_DRILL_NOT_AUTHORIZED",
+        "databaseSentinel",
+        "verifyDatabaseSnapshot",
+        "recoveryPrismaUrl",
+        "requireTlsRoot: true"
+      ],
+      "review": "POST28 R10 independent source and local execution review 2026-10-20"
     }
   }
 }

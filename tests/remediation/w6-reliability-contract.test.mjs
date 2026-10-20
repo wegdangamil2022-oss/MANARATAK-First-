@@ -34,7 +34,11 @@ test('DR contract includes PITR, immutable backups, provider readiness and weekl
   assert.ok(contract.objectives.regionalLossRtoMinutes<=60);
   assert.match(contract.postgresql.immutableCopy,/WORM/);
   assert.ok(read('.github/workflows/recovery-restore-audit.yml').includes('recovery:runtime:readiness'));
-  assert.ok(read('scripts/recovery/run-whole-platform-restore-drill.mjs').includes('test:database'));
+  const drill=read('scripts/recovery/run-whole-platform-restore-drill.mjs');
+  assert.ok(drill.includes('await verifyDatabaseSnapshot(client,manifest.databaseSnapshot,manifest.files)'));
+  assert.ok(drill.includes('databaseSentinel(guard?.value,target,proof)'));
+  assert.ok(!drill.includes('test:database'), 'restored data must never be verified by a destructive fixture suite');
+  assert.ok(read('scripts/recovery/DatabaseSnapshot.mjs').includes('SET TRANSACTION READ ONLY'));
 });
 
 test('release promotion consumes one immutable artifact set across validation staging and production',()=>{
