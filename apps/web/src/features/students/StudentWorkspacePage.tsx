@@ -876,6 +876,19 @@ function SummaryView({
 }) {
   const [showAllActivities, setShowAllActivities] = useState(false);
 
+  // Combine the timeline and recent activity for the full log, removing duplicates.
+  // Keep the compact summary to three events until the user opens "كل السجلات".
+  const activityLog = useMemo(() => {
+    const seen = new Set<string>();
+    return [...dashboard.timeline, ...dashboard.recentActivity]
+      .filter((event) => {
+        if (seen.has(event.id)) return false;
+        seen.add(event.id);
+        return true;
+      })
+      .sort((first, second) => (Date.parse(second.occurredAt) || 0) - (Date.parse(first.occurredAt) || 0));
+  }, [dashboard.timeline, dashboard.recentActivity]);
+
   const activeMilestones = useMemo(
     () => applicationTrackers.filter((item) => item.status === 'ACTIVE'),
     [applicationTrackers],
@@ -928,7 +941,7 @@ function SummaryView({
         <div className="relative z-10 px-3 py-3.5 sm:px-5 sm:py-4">
           <div className="flex items-center gap-2.5 font-bold text-[#142B5F] dark:text-[#F4F9FC]">
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/60 bg-[#142B5F]"><Bell className="h-4 w-4 text-[#EAC775]" /></span>
-            <h2 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F4F9FC]">يحتاج انتباهك</h2>
+            <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F4F9FC]">يحتاج انتباهك</h2>
           </div>
           <div className="mt-3 space-y-2">
             {urgentAlerts.criticalDeadlines.slice(0, 2).map((tracker) => (
@@ -1040,7 +1053,7 @@ function SummaryView({
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#E5B54F]" />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="text-sm sm:text-base font-bold text-[var(--mn-heading)]">مرحبًا بك في مساحتك في منارتك</h2>
+              <h2 className="mn-student-summary-heading text-sm sm:text-base font-bold text-[var(--mn-heading)]">مرحبًا بك في مساحتك في منارتك</h2>
               <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] mt-1 leading-relaxed">
                 مساحتك جاهزة لتتبع طلبات المنح، التسجيل في الدورات، واستكشاف الجامعات والتخصصات وحفظ ما يهمك.
               </p>
@@ -1095,7 +1108,7 @@ function SummaryView({
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
                 <BookOpen className="h-4 w-4 text-[#E5B54F]" />
               </span>
-              <h2 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">متابعة التعلم</h2>
+              <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">متابعة التعلم</h2>
             </div>
             <button
               type="button"
@@ -1147,7 +1160,7 @@ function SummaryView({
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
                 <Route className="h-4 w-4 text-[#E5B54F]" />
               </span>
-              <h2 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
+              <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
             </div>
             <button type="button" onClick={() => setTab('OPPORTUNITIES')}
               className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-bold leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
@@ -1200,29 +1213,29 @@ function SummaryView({
       )}
 
       {/* 6. Recent activities: compact timeline, expanded history only on demand. */}
-      {dashboard.timeline.length > 0 && (
+      {activityLog.length > 0 && (
         <section aria-label="آخر الأنشطة والخطوات" className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]">
           <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
                 <HistoryIcon className="h-4 w-4 text-[#E5B54F]" />
               </span>
-              <h2 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">آخر الأنشطة والخطوات</h2>
+              <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">آخر الأنشطة والخطوات</h2>
             </div>
-            {dashboard.timeline.length > 3 && (
-              <button type="button" onClick={() => setShowAllActivities((previous) => !previous)}
-                aria-expanded={showAllActivities} aria-controls="student-summary-activity-timeline"
-                className="inline-flex shrink-0 items-center gap-1 text-[11px] leading-5 font-medium text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]">
-                <span>{showAllActivities ? 'إخفاء' : 'السجل'}</span>
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowAllActivities((previous) => !previous)}
+              aria-expanded={showAllActivities}
+              aria-controls="student-summary-activity-timeline"
+              className="inline-flex min-h-8 shrink-0 items-center gap-1 rounded-lg border border-[#142B5F]/30 bg-[var(--mn-surface)] px-2 py-1 text-[11px] font-bold leading-5 text-[#142B5F] dark:border-[#D6A43B]/50 dark:bg-[#10264A] dark:text-[#E5B54F] hover:bg-[#F5F8FB] dark:hover:bg-[#1B365A] cursor-pointer font-['Cairo',sans-serif]"
+            >
+              <span>{showAllActivities ? 'إخفاء السجلات' : 'كل السجلات'}</span>
+              <ChevronLeft className={`h-3.5 w-3.5 transition-transform ${showAllActivities ? '-rotate-90' : ''}`} />
+            </button>
           </div>
 
           <ol id="student-summary-activity-timeline" className="mr-2.5 space-y-3 border-r-2 border-[#0E7C86]/35 pr-4 dark:border-[#5BC6C0]/45">
-            {[...dashboard.timeline]
-              .sort((first, second) => (Date.parse(second.occurredAt) || 0) - (Date.parse(first.occurredAt) || 0))
-              .slice(0, showAllActivities ? undefined : 3)
+            {activityLog.slice(0, showAllActivities ? undefined : 3)
               .map((item) => (
                 <li key={item.id} className="relative min-w-0">
                   <span aria-hidden="true" className="absolute -right-[22px] top-1 h-2.5 w-2.5 rounded-full border-2 border-[var(--mn-surface)] bg-[#0E7C86] dark:bg-[#5BC6C0]" />
@@ -1244,7 +1257,7 @@ function SummaryView({
               <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
               </div>
-              <h2 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">استكشف الفرص في منارتك</h2>
+              <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">استكشف الفرص في منارتك</h2>
             </div>
             <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
             <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">
