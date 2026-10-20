@@ -1,5 +1,7 @@
+import { PreviewStudentApiClient } from './studentWorkspacePreviewApi';
+const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { ApiClient, type StudentOwnedAssetDto } from '../../api/client';
+import { ApiClient as LiveApiClient, type StudentOwnedAssetDto } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 type Profile = { headline?: string; summary?: string; skills: string[]; resumeAssetId?: string; version?: number; };
 type Alumni = { displayName: string; graduationYear?: number; employerName?: string; visibility: 'PRIVATE'|'ALUMNI_ONLY'|'PUBLIC'; consentRevokedAt?: string; version?: number; };
