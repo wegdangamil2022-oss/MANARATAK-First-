@@ -431,6 +431,18 @@
         "lastObservedStatus": "in_progress",
         "result": null
       }
+    },
+    {
+      "id": "R14",
+      "state": "NO_GO_PREPARATION_MEMO_ONLY",
+      "latestReport": "docs/remediation/POST28_R14_NO_GO_PREPARATION_2026-10-21.md",
+      "reviewSha": "83e210e0eb9505c875129948bd52171986f458b3",
+      "candidateSourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+      "formalR14Accepted": false,
+      "productionAuthorized": false,
+      "promotionInvoked": false,
+      "releaseDecision": "NO_GO",
+      "nextFunctionalStep": "FULL_ADMIN_CMS_MFA_JOURNEY_IN_NEW_SYNTHETIC_LAB_AFTER_CURRENT_CI"
     }
   ],
   "validation": {
