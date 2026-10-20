@@ -4,7 +4,7 @@ import path from 'node:path';
 import net from 'node:net';
 import {randomBytes,randomUUID,createHash} from 'node:crypto';
 import {execFileSync,spawnSync} from 'node:child_process';
-import {localLabProfile} from './post28-lab-profile.mjs';
+import {localLabProfile,nativeLabBindings} from './post28-lab-profile.mjs';
 
 let directory;
 try {
@@ -16,7 +16,6 @@ try {
   const base=fs.realpathSync(process.env.POST28_LAB_ROOT);
   if(base===root||base.startsWith(root+path.sep))throw new Error('POST28_NATIVE_LAB_OUTSIDE_CHECKOUT_REQUIRED');
   const profile=localLabProfile(process.env.POST28_LOCAL_LAB_PROFILE??'upgrade');
-  if(!['upgrade','transactions'].includes(profile.name))throw new Error('POST28_NATIVE_PROFILE_NOT_SUPPORTED');
   directory=fs.mkdtempSync(path.join(base,'native-pg16-'));
   const account=execFileSync('whoami',[],{encoding:'utf8',windowsHide:true}).trim();
   execFileSync('icacls',[directory,'/inheritance:r','/grant:r',account+':(OI)(CI)F'],{stdio:'pipe',windowsHide:true});
@@ -55,12 +54,14 @@ try {
   const contractFile=path.join(directory,'targets.json');fs.writeFileSync(contractFile,JSON.stringify(contract,null,2)+'\n');
   const connection=label=>{const target=targets[label],url=new URL(`postgresql://${target.role}@127.0.0.1:${port}/${target.database}`);url.password=passwords[target.role.replace('post28_','')];url.searchParams.set('schema','public');return url.href;};
   const primary=connection(profile.primary);
+  const bindings=nativeLabBindings(profile.name,connection);
   const setup=new URL(primary);setup.username='post28_tx_migrator';setup.password=passwords.tx_migrator??'';
   const labEnv={NODE_ENV:'test',POST28_ISOLATED_EXECUTION:'YES',DATABASE_TARGET_CLASS:'DISPOSABLE',POST28_TARGET_CONTRACT_FILE:contractFile,POST28_TARGET_LABEL:profile.primary,DATABASE_URL:primary,DIRECT_URL:primary,
-    ...(profile.name==='transactions'?{POST28_TRANSACTION_SETUP_URL:setup.href}:{UPGRADE_DATABASE_URL:primary,UPGRADE_VERIFY_DATABASE_URL:connection('DB-V'),POST28_UPGRADE_VERIFY_MUTATION_TARGET:`127.0.0.1:${port}/${targets['DB-V'].database}`}),
+    ...bindings.environment,
+    ...(profile.name==='transactions'?{POST28_TRANSACTION_SETUP_URL:setup.href}:profile.name==='upgrade'?{POST28_UPGRADE_VERIFY_MUTATION_TARGET:`127.0.0.1:${port}/${targets['DB-V'].database}`} : {}),
     POST28_APP_PASSWORD:passwords.app,DATABASE_PROVISIONING_GATE:'APPROVED',ALLOW_DATABASE_MUTATIONS:'YES',DATABASE_MUTATION_ENVIRONMENT:'test',DATABASE_MUTATION_PURPOSE:'migrate',DATABASE_MUTATION_TARGET:`127.0.0.1:${port}/${targets[profile.primary].database}`,ALLOW_PRODUCTION_DATABASE_MUTATIONS:'NO'};
   const envFile=path.join(directory,'lab.env');fs.writeFileSync(envFile,Object.entries(labEnv).map(([key,value])=>`${key}=${value}`).join('\n')+'\n');
-  const result=spawnSync(process.execPath,['scripts/database/post28-preflight.mjs',...(profile.name==='upgrade'?['--upgrade-pair']:[]),'--require-empty'],{env:{...process.env,...labEnv},encoding:'utf8',windowsHide:true});
+  const result=spawnSync(process.execPath,['scripts/database/post28-preflight.mjs',...bindings.preflightArgs,'--require-empty'],{env:{...process.env,...labEnv},encoding:'utf8',windowsHide:true});
   fs.writeFileSync(path.join(directory,'target-preflight.log'),redact(result.stdout??'')+redact(result.stderr??''));
   if(result.status!==0)throw new Error('POST28_NATIVE_EMPTY_PREFLIGHT_FAILED');
   state.status='EMPTY_TARGETS_VERIFIED';state.contractFile=contractFile;state.envFile=envFile;fs.writeFileSync(path.join(directory,'lab-state.json'),JSON.stringify(state,null,2)+'\n');

@@ -14,3 +14,11 @@ export function preflightDeclarations(argv,env){
  if(argv.includes('--pair'))return [{label:'DB-G',url:env.GREENFIELD_DATABASE_URL},{label:'DB-S',url:env.GREENFIELD_SHADOW_DATABASE_URL}];
  return [{label:env.POST28_TARGET_LABEL,url:env.DATABASE_URL}];
 }
+
+// Native and container labs use the same labels; never fall back to another pair.
+export function nativeLabBindings(name,connection){
+ localLabProfile(name);
+ if(name==='greenfield')return {environment:{GREENFIELD_DATABASE_URL:connection('DB-G'),GREENFIELD_SHADOW_DATABASE_URL:connection('DB-S')},preflightArgs:['--pair']};
+ if(name==='upgrade')return {environment:{UPGRADE_DATABASE_URL:connection('DB-U'),UPGRADE_VERIFY_DATABASE_URL:connection('DB-V')},preflightArgs:['--upgrade-pair']};
+ return {environment:{},preflightArgs:[]};
+}
