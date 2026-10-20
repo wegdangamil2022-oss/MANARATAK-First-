@@ -1,24 +1,50 @@
 {
-  "kind":"POST28_R11_CURRENT_PRACTICAL_REVIEW",
-  "localDate":"2026-10-21",
-  "sourceSha":"2934821ae7de16fd65531c5df41684eb104a8e5c",
-  "status":"PRACTICAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
-  "fixes":["Prevent mutation after delayed resource observer exhausts duration","Keep measured latency authoritative over scenario output"],
-  "targetedTests":{"newBeforeFixFailed":2,"afterFixPassed":5,"afterFixFailed":0,"afterFixSkipped":0,"existingRepeatedBecauseDirectlyAffected":3,"targetedEslintPassed":true},
-  "historicalEvidenceFilesMatched":30,
-  "historicalMeasurementsRerun":false,
-  "r10Ci":{"sourceSha":"d83ee3e9513af2fd61dc2e7681cb99e3c6dff466","runId":39513312392,"result":"success","passedJobs":6},
-  "currentFixCi":{"runId":39514942840,"lastObservedStatus":"in_progress","result":null},
-  "practicalScopeComplete":true,
-  "formalR11Acceptance":false,
-  "formalLoadSloAcceptance":false,
-  "productionAcceptance":false,
-  "representativeLaunchDatasetPrepared":false,
-  "poolWaitMeasured":false,
-  "fullAdminCmsMfaJourneyCompleted":false,
-  "openExceptions":["E1","E2","E3","E4","E5"],
-  "databaseConnected":false,
-  "externalProviderEnabled":false,
-  "evidence":"docs/reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/evidence-index.json",
-  "next":"CURRENT_FIX_CI_THEN_R12_REVIEW"
+  "kind": "POST28_R11_CURRENT_PRACTICAL_REVIEW",
+  "localDate": "2026-10-21",
+  "sourceSha": "2934821ae7de16fd65531c5df41684eb104a8e5c",
+  "status": "PRACTICAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+  "fixes": [
+    "Prevent mutation after delayed resource observer exhausts duration",
+    "Keep measured latency authoritative over scenario output"
+  ],
+  "targetedTests": {
+    "newBeforeFixFailed": 2,
+    "afterFixPassed": 5,
+    "afterFixFailed": 0,
+    "afterFixSkipped": 0,
+    "existingRepeatedBecauseDirectlyAffected": 3,
+    "targetedEslintPassed": true
+  },
+  "historicalEvidenceFilesMatched": 30,
+  "historicalMeasurementsRerun": false,
+  "r10Ci": {
+    "sourceSha": "d83ee3e9513af2fd61dc2e7681cb99e3c6dff466",
+    "runId": 39513312392,
+    "result": "success",
+    "passedJobs": 6
+  },
+  "currentFixCi": {
+    "runId": 39514942840,
+    "lastObservedStatus": "completed",
+    "result": "success",
+    "passedJobs": 6
+  },
+  "practicalScopeComplete": true,
+  "formalR11Acceptance": false,
+  "formalLoadSloAcceptance": false,
+  "productionAcceptance": false,
+  "representativeLaunchDatasetPrepared": false,
+  "poolWaitMeasured": false,
+  "fullAdminCmsMfaJourneyCompleted": false,
+  "openExceptions": [
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5"
+  ],
+  "databaseConnected": false,
+  "externalProviderEnabled": false,
+  "evidence": "docs/reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/evidence-index.json",
+  "next": "CURRENT_FIX_CI_THEN_R12_REVIEW"
 }

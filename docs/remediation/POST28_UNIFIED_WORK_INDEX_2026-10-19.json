@@ -54,8 +54,18 @@
       "practicalClosure": "docs/remediation/POST28_R00_R03_PRACTICAL_CLOSEOUT_2026-10-21.md",
       "evidenceSourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
       "targetedB13Passed": 63,
-      "verifiedCurrentToolingCi": {"sourceSha":"46c9416c340fbe21d92fd1581b75e3ce84a09520","runId":39501061767,"result":"success","passedJobs":6},
-      "verifiedPreviousDeliveryCi": {"sourceSha":"d1c379df7b3013aff17c60109ebf15f56e6aa8b7","runId":39496759696,"result":"success","passedJobs":6},
+      "verifiedCurrentToolingCi": {
+        "sourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+        "runId": 39501061767,
+        "result": "success",
+        "passedJobs": 6
+      },
+      "verifiedPreviousDeliveryCi": {
+        "sourceSha": "d1c379df7b3013aff17c60109ebf15f56e6aa8b7",
+        "runId": 39496759696,
+        "result": "success",
+        "passedJobs": 6
+      },
       "formalComprehensiveAcceptance": false,
       "reference": "docs/remediation/POST28_R01_REVALIDATION_2026-10-16.md"
     },
@@ -113,7 +123,12 @@
       "latestCurrentSchemaSuite": "admission-null-identity",
       "latestDatabaseEvidenceSourceSha": "1cade7f70033430a1fd79655007026b4c69fa75f",
       "latestDatabaseCasesPassed": 5,
-      "finalDeliveryCi": {"sourceSha":"0ee961a7aa5a79d5bdf22406cfb88a18970ec03e","runId":39506916987,"result":"success","passedJobs":6},
+      "finalDeliveryCi": {
+        "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+        "runId": 39506916987,
+        "result": "success",
+        "passedJobs": 6
+      },
       "formalAcceptance": "OPEN_COMPREHENSIVE_SCOPE",
       "reference": "docs/remediation/POST28_R06_CORE_CLOSURE_2026-10-19.md",
       "nullRepair": "docs/remediation/POST28_R06_NULL_IDENTITY_REPAIR_2026-10-19.md",
@@ -169,7 +184,13 @@
       "latestPracticalReview": "docs/remediation/POST28_R08_CURRENT_REVIEW_2026-10-21.md",
       "latestReviewSourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
       "latestReviewEvidence": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r08-current-review/evidence-index.json",
-      "latestReviewCi": {"runId":39506916987,"result":"success","passedJobs":6,"currentSelectedFinancialCasesPassed":2,"fullProviderProfileAccepted":false},
+      "latestReviewCi": {
+        "runId": 39506916987,
+        "result": "success",
+        "passedJobs": 6,
+        "currentSelectedFinancialCasesPassed": 2,
+        "fullProviderProfileAccepted": false
+      },
       "latestRuntimeReport": "docs/remediation/POST28_R08_PRACTICAL_CLOSE_2026-10-20.md",
       "latestEvidenceSourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
       "latestEvidence": "docs/reviews/evidence/post28/cbb99ac63bb4497df9c07cf3e16611d27bcd3396/r08-practical-handoff/evidence-index.json",
@@ -201,9 +222,9 @@
       "formalAcceptance": "OPEN_COMPREHENSIVE_SCOPE_PRODUCTION_NOT_AUTHORIZED",
       "latestCandidateCiSourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
       "latestCandidateCiState": "PASS_SIX_PUSH_JOBS_AND_FIVE_SHARED_WORKFLOW_CASES",
-      "latestCandidateCiRun":39506916987,
-      "fullBuiltAdminCmsMfaJourneyAccepted":false,
-      "certificateProviderDeliveryGrantAccepted":false,
+      "latestCandidateCiRun": 39506916987,
+      "fullBuiltAdminCmsMfaJourneyAccepted": false,
+      "certificateProviderDeliveryGrantAccepted": false,
       "ownerPriorityDecision": "OWNER_ACCEPTS_PRACTICAL_CLOSURE_WITHOUT_FULL_MATRIX_ACCEPTANCE"
     },
     {
@@ -212,8 +233,13 @@
       "latestPracticalReview": "docs/remediation/POST28_R10_CURRENT_REVIEW_2026-10-21.md",
       "latestReviewSourceSha": "d83ee3e9513af2fd61dc2e7681cb99e3c6dff466",
       "latestReviewEvidence": "docs/reviews/evidence/post28/d83ee3e9513af2fd61dc2e7681cb99e3c6dff466/r10-current-offline-review/evidence-index.json",
-      "numericRecoveryObjectiveGateHardened":true,
-      "latestFixCi":{"runId":39513312392,"lastObservedStatus":"completed","result":"success","passedJobs":6},
+      "numericRecoveryObjectiveGateHardened": true,
+      "latestFixCi": {
+        "runId": 39513312392,
+        "lastObservedStatus": "completed",
+        "result": "success",
+        "passedJobs": 6
+      },
       "latestReport": "docs/remediation/POST28_R10_OPERATIONAL_RECOVERY_2026-10-20.md",
       "latestEvidence": "docs/reviews/evidence/post28/978a0db95d89c5e65aceb012dd082b9111fa3327/r10-operational/evidence-index.json",
       "latestEvidenceSourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
@@ -239,11 +265,16 @@
     {
       "id": "R11",
       "state": "PRACTICAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
-      "latestPracticalReview":"docs/remediation/POST28_R11_CURRENT_REVIEW_2026-10-21.md",
-      "latestReviewSourceSha":"2934821ae7de16fd65531c5df41684eb104a8e5c",
-      "latestReviewEvidence":"docs/reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/evidence-index.json",
-      "diagnosticDeadlineAndLatencyHardened":true,
-      "latestFixCi":{"runId":39514942840,"lastObservedStatus":"in_progress","result":null},
+      "latestPracticalReview": "docs/remediation/POST28_R11_CURRENT_REVIEW_2026-10-21.md",
+      "latestReviewSourceSha": "2934821ae7de16fd65531c5df41684eb104a8e5c",
+      "latestReviewEvidence": "docs/reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/evidence-index.json",
+      "diagnosticDeadlineAndLatencyHardened": true,
+      "latestFixCi": {
+        "runId": 39514942840,
+        "lastObservedStatus": "completed",
+        "result": "success",
+        "passedJobs": 6
+      },
       "latestReport": "docs/remediation/POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.md",
       "configuration": "config/testing/r11-load-preparation.json",
       "baselineSourceSha": "79055e7634ad33fe221872d58770d48c2ed09e58",
@@ -291,11 +322,11 @@
     {
       "id": "R12",
       "state": "LOCAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_RELEASE_BLOCKERS",
-      "latestPracticalReview":"docs/remediation/POST28_R12_CURRENT_REVIEW_2026-10-21.md",
-      "latestReviewSourceSha":"0b13ba91ea8fc3d008d0ced45187d880cf88eb12",
-      "latestReviewEvidence":"docs/reviews/evidence/post28/0b13ba91ea8fc3d008d0ced45187d880cf88eb12/r12-current-review/evidence-index.json",
-      "latestReviewHistoricalFilesMatched":48,
-      "latestReviewHistoricalArtifactUnitsVerified":6,
+      "latestPracticalReview": "docs/remediation/POST28_R12_CURRENT_REVIEW_2026-10-21.md",
+      "latestReviewSourceSha": "0b13ba91ea8fc3d008d0ced45187d880cf88eb12",
+      "latestReviewEvidence": "docs/reviews/evidence/post28/0b13ba91ea8fc3d008d0ced45187d880cf88eb12/r12-current-review/evidence-index.json",
+      "latestReviewHistoricalFilesMatched": 48,
+      "latestReviewHistoricalArtifactUnitsVerified": 6,
       "latestReport": "docs/remediation/POST28_R12_PRACTICAL_CLOSEOUT_2026-10-20.md",
       "configuration": "config/testing/r12-local-rollback-preparation.json",
       "evidenceIndex": "docs/reviews/evidence/post28/70230e082e03f73761eee6437858c074839fb8d2/r12-worker-assets/evidence-index.json",
@@ -390,7 +421,16 @@
         "R13-E03",
         "R13-E04",
         "R13-E05"
-      ]
+      ],
+      "latestPracticalReview": "docs/remediation/POST28_R13_CURRENT_REVIEW_2026-10-21.md",
+      "latestReviewSourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+      "latestReviewEvidence": "docs/reviews/evidence/post28/cbe2ff2d0e3ba881361fcbe42133af500cd4c331/r13-current-review/evidence-index.json",
+      "runtimeRecoveryNumericGuardHardened": true,
+      "latestFixCi": {
+        "runId": 39516645007,
+        "lastObservedStatus": "in_progress",
+        "result": null
+      }
     }
   ],
   "validation": {

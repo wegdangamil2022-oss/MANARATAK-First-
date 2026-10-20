@@ -1,0 +1,100 @@
+{
+  "kind": "R13_CURRENT_PRACTICAL_REVIEW",
+  "reviewSourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+  "verifiedAt": "2026-10-20T23:42:35.133Z",
+  "retainedEvidence": [
+    {
+      "index": "docs/reviews/evidence/post28/92eb66e5ab572ab51f19c5db14ed3fa2329a3072/r13-practical-closeout/evidence-index.json",
+      "files": 15,
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/1cade7f70033430a1fd79655007026b4c69fa75f/r06-current-admission/evidence-index.json",
+      "files": 11,
+      "sourceSha": "1cade7f70033430a1fd79655007026b4c69fa75f",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r07-current-closure/evidence-index.json",
+      "files": 8,
+      "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r08-current-review/evidence-index.json",
+      "files": 10,
+      "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r09-current-review/evidence-index.json",
+      "files": 7,
+      "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/d83ee3e9513af2fd61dc2e7681cb99e3c6dff466/r10-current-offline-review/evidence-index.json",
+      "files": 4,
+      "sourceSha": "d83ee3e9513af2fd61dc2e7681cb99e3c6dff466",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/evidence-index.json",
+      "files": 4,
+      "sourceSha": "2934821ae7de16fd65531c5df41684eb104a8e5c",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/0b13ba91ea8fc3d008d0ced45187d880cf88eb12/r12-current-review/evidence-index.json",
+      "files": 4,
+      "sourceSha": "0b13ba91ea8fc3d008d0ced45187d880cf88eb12",
+      "gitRef": "HEAD",
+      "readOnly": true
+    }
+  ],
+  "section27TasksMatched": 38,
+  "implementationSourceHashesMatched": 60,
+  "sourceSection27Closed": false,
+  "applicationSourceChanged": false,
+  "releaseRuntimeGuardChanged": true,
+  "fix": "Strict finite numeric RPO/RTO in signed runtime evidence acceptance",
+  "targetedTests": {
+    "beforeFix": {
+      "passed": 1,
+      "failed": 2
+    },
+    "afterFix": {
+      "passed": 3,
+      "failed": 0
+    },
+    "invalidRuntimeValuesChecked": 20,
+    "relatedR12TestsPassed": 2,
+    "repeatReason": "Same acceptanceDetails function modified",
+    "targetedEslintPassed": true
+  },
+  "sourceSignoffCreated": false,
+  "independentReviewClaimed": false,
+  "newRuntimeOrBuildOrDatabaseDrill": false,
+  "historicalEvidenceRebound": false,
+  "validationExecuted": false,
+  "stagingExecuted": false,
+  "formalR13Acceptance": false,
+  "productionAcceptance": false,
+  "eligibleForProductionReview": false,
+  "releaseDecision": "BLOCKED",
+  "remainingReleaseBlockers": [
+    "R13-E01",
+    "R13-E02",
+    "R13-E03",
+    "R13-E04",
+    "R13-E05"
+  ],
+  "executionIssue": "Sandbox shell and patch calls unresponsive; reviewed local commands outside sandbox succeeded; no safety guard bypassed"
+}

@@ -1,0 +1,43 @@
+{
+  "kind": "POST28_R13_CURRENT_PRACTICAL_REVIEW",
+  "localDate": "2026-10-21",
+  "sourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+  "status": "PRACTICAL_REVIEW_COMPLETE_WITH_RELEASE_BLOCKERS",
+  "fix": "Strict finite numeric RPO/RTO in runtime release acceptance",
+  "targetedTestsPassed": 5,
+  "newTestsPassed": 3,
+  "relatedR12TestsPassed": 2,
+  "invalidRuntimeValuesChecked": 20,
+  "retainedEvidenceFilesMatched": 63,
+  "section27TaskIdsMatched": 38,
+  "implementationHashesMatched": 60,
+  "applicationSourceChanged": false,
+  "r11Ci": {
+    "sourceSha": "2934821ae7de16fd65531c5df41684eb104a8e5c",
+    "runId": 39514942840,
+    "result": "success",
+    "passedJobs": 6
+  },
+  "currentFixCi": {
+    "runId": 39516645007,
+    "lastObservedStatus": "in_progress",
+    "result": null
+  },
+  "sourceSection27Closed": false,
+  "formalR13Acceptance": false,
+  "eligibleForProductionReview": false,
+  "productionAcceptance": false,
+  "releaseDecision": "BLOCKED",
+  "validationExecuted": false,
+  "stagingExecuted": false,
+  "databaseConnected": false,
+  "releaseBlockers": [
+    "R13-E01",
+    "R13-E02",
+    "R13-E03",
+    "R13-E04",
+    "R13-E05"
+  ],
+  "evidence": "docs/reviews/evidence/post28/cbe2ff2d0e3ba881361fcbe42133af500cd4c331/r13-current-review/evidence-index.json",
+  "next": "CURRENT_FIX_CI_THEN_RELEASE_BLOCKER_REMEDIATION_NO_AUTOMATIC_R14_GO"
+}
