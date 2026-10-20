@@ -26,13 +26,14 @@ export async function runBoundedScenario(plan, { step, sampleResources }) {
     resources.push(resource);
     if (resource.cpuPercent > plan.maximumCpuPercent || resource.residentMemoryBytes > plan.maximumResidentMemoryBytes ||
         resource.activeConnections > plan.maximumConnections) { abortReason = 'RESOURCE_BUDGET_EXCEEDED'; break; }
+    if (performance.now() >= deadline) { abortReason = 'DURATION_BUDGET_EXHAUSTED'; break; }
     const at = performance.now(), signal = AbortSignal.timeout(plan.operationTimeoutMs);
     try {
       // Await settlement: a timed-out mutation must not continue in the background while a new one starts.
       const observation = await step({ index: observations.length, signal });
       if (signal.aborted) { abortReason = 'OPERATION_TIMEOUT'; break; }
       if (observation?.verified !== true) { abortReason = 'INVARIANT_UNVERIFIED'; break; }
-      observations.push({ latencyMs: performance.now() - at, ...observation });
+      observations.push({ ...observation, latencyMs: performance.now() - at });
     } catch { abortReason = signal.aborted ? 'OPERATION_TIMEOUT' : 'SCENARIO_STEP_FAILED'; break; }
     const wait = Math.min(deadline - performance.now(), Math.max(0, 1000 / plan.operationsPerSecond - (performance.now() - cycleStarted)));
     if (wait > 0) await new Promise(resolve => setTimeout(resolve, wait));

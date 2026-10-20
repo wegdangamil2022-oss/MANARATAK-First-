@@ -23,3 +23,27 @@ test('R11 timed-out mutation settles before returning; no second operation is st
     step: async () => { calls++; await new Promise(resolve => setTimeout(resolve, 30)); settled = true; return { verified: true }; } });
   assert.equal(settled, true); assert.equal(calls, 1); assert.equal(result.abortReason, 'OPERATION_TIMEOUT');
 });
+
+test('R11 does not start a mutation after a delayed resource sample exhausts the duration', async () => {
+  let calls = 0;
+  const result = await runBoundedScenario({ ...plan, durationSeconds: 0.01 }, {
+    sampleResources: async () => {
+      await new Promise(resolve => setTimeout(resolve, 30));
+      return healthy();
+    },
+    step: async () => { calls++; return { verified: true }; },
+  });
+  assert.equal(calls, 0);
+  assert.equal(result.sampleCount, 0);
+  assert.equal(result.abortReason, 'DURATION_BUDGET_EXHAUSTED');
+});
+
+test('R11 measured latency cannot be overwritten by a scenario observation', async () => {
+  const result = await runBoundedScenario(plan, {
+    sampleResources: healthy,
+    step: async () => ({ verified: true, latencyMs: -123 }),
+  });
+  assert.equal(result.sampleCount, 1);
+  assert(result.observations[0].latencyMs >= 0);
+  assert(result.p99Ms >= 0);
+});
