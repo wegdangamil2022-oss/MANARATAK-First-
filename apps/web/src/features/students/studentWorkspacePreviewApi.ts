@@ -83,7 +83,7 @@ const initialDashboard: StudentDashboardSummaryDto = {
   ],
   certificates:[
     {id:'preview-cert-1',publicId:'DEMO-CERT-1',serialNumber:'DEMO-2026-001',
-     verificationCode:'DEMO-ONLY',status:'ISSUED',courseDisplayName:'مهارات الكتابة الأكاديمية',issuedAt:'2026-10-10T10:00:00Z'},
+     verificationCode:'DEMO-ONLY',status:'ISSUED',courseDisplayName:'مهارات الكتابة الأكاديمية',issuedAt:'2026-10-10T10:00:00Z',previewImageAssetId:'preview-certificate-image',certificatePdfAssetId:'preview-certificate-pdf'},
   ],
   notifications:[
     {id:'preview-notification-1',category:'COURSES',title:'تابع تقدمك في الدورة',
@@ -146,7 +146,22 @@ async function callPreviewApi(method: string, ...args: unknown[]): Promise<unkno
       const selected=requests.filter(r=>!filters?.status||r.status===filters.status);
       return {data:copy(selected),page:1,total:selected.length,totalPages:1};
     }
-    case 'getMyStudentServiceRequest':return copy(requests.find(r=>r.id===a[0]||r.publicId===a[0])||requests[0]);
+    case 'getMyStudentServiceRequest':{
+      const request=requests.find(r=>r.id===a[0]||r.publicId===a[0]);
+      if(!request)throw new Error('طلب الخدمة غير موجود في بيانات المعاينة');
+      return copy(request);
+    }
+    case 'createMyStudentApplicationTracker':{
+      const input=a[0]||{};
+      const prior=trackers.find(item=>item.scholarshipId===input.scholarshipId);
+      if(!prior)throw new Error('منحة غير موجودة في بيانات المعاينة.');
+      const index=trackers.length+1;
+      const t:StudentApplicationTrackerDto={...copy(prior),id:'preview-tracker-'+index,
+        cycleReferenceId:String(input.cycleId||prior.cycleReferenceId||''),
+        status:'ACTIVE',version:1,createdAt:timestamp,updatedAt:timestamp,
+        checklist:prior.checklist.map((entry,i)=>({...entry,id:'preview-new-task-'+index+'-'+i,trackerId:'preview-tracker-'+index,completed:false}))};
+      trackers=[...trackers,t];return copy(t);
+    }
     case 'updateMyStudentApplicationTracker':{
       trackers=trackers.map(t=>t.id===a[0]?{...t,...a[1],version:t.version+1,updatedAt:timestamp}:t);
       return copy(trackers.find(t=>t.id===a[0]));
