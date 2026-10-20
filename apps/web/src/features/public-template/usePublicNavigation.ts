@@ -5,6 +5,8 @@ import type { TabType } from './components/BottomNavBar';
 export const initialNavigation = {
   activeTab: 'home' as TabType,
   isComparePage: false,
+  compareType: 'universities',
+  compareItems: '',
   selectedCategory: 'all' as CategoryType,
   selectedCourseTrack: null as 'imported' | 'native' | 'paid' | null,
   selectedServiceTrack: null as ServiceAudience | null,
@@ -87,8 +89,12 @@ export function publicUrlForState(state: NavigationState): string {
     if (token) params.set('token', token);
   }
   if (path === '/compare') {
+    // Restore deep-link inputs from state even if the public router replaced
+    // an earlier history entry before the comparison page was mounted.
     const existing = new URLSearchParams(window.location.search);
-    for (const name of ['type', 'items']) { const v = existing.get(name); if (v) params.set(name, v); }
+    params.set('type', existing.get('type') || state.compareType);
+    const items = existing.get('items') || state.compareItems;
+    if (items) params.set('items', items);
   }
   if (path === '/search' && state.globalSearchQuery.trim()) params.set('q', state.globalSearchQuery.trim());
   if (path === '/tools' && state.activeTab === 'ai-tools' && state.nestedDetailId) params.set('detail', state.nestedDetailId);
@@ -99,7 +105,7 @@ export function publicUrlForState(state: NavigationState): string {
 }
 
 export function routeKey(state: NavigationState) {
-  return JSON.stringify([state.isComparePage, state.activeTab, state.selectedCategory, state.selectedCourseTrack,
+  return JSON.stringify([state.isComparePage, state.compareType, state.compareItems, state.activeTab, state.selectedCategory, state.selectedCourseTrack,
     state.selectedServiceTrack, state.isSmartSearchOpen, state.auxiliaryPage,
     state.nestedDetailId, state.countryNavigationName, state.detailSearchAnchor, state.detailSearchTerm,
     ...detailKeys.map(key => state[key]?.id || null)]);
