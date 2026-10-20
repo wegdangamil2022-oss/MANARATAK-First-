@@ -234,6 +234,7 @@ export default function App() {
     else if (section === 'login' || section === 'signup' || section === 'register' || section === 'verify-email' || section === 'forgot-password' || section === 'reset-password') patch = { activeTab: 'auth' };
     else if (section === 'student') patch = { activeTab: 'account' };
     else if (section === 'search') patch = { activeTab: 'search', selectedCategory: 'all', globalSearchQuery: params.get('q') || '' };
+    else if (section === 'compare') patch = { activeTab: 'search', selectedCategory: 'all', isComparePage: true };
     else if (section === 'scholarships') {
       const selected = key ? scholarships.find(matchesKey) || null : null;
       if (key && publicDataMode === 'api') {
@@ -1026,7 +1027,7 @@ export default function App() {
     return counts;
   }, {});
 
-  const isCompareRoute = /^\/(?:ar|en)\/compare(?:\/|$)/.test(window.location.pathname);
+  const isCompareRoute = navigation.state.isComparePage;
 
   return (
     <div className="manaratak-public flex flex-col min-h-screen w-full bg-[var(--mn-page)] text-[var(--mn-text)] selection:bg-[var(--mn-accent)]/30 selection:text-[var(--mn-heading)] font-['Cairo',sans-serif] pb-24 sm:pb-28 transition-colors mn-panel ">
