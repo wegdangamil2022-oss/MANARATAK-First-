@@ -175,11 +175,21 @@
       "formalAcceptance": "OPEN_PROVIDER_AND_PRODUCTION_SCOPE",
       "productionAcceptance": false,
       "restoreExecuted": true,
-      "independentReview": "docs/reviews/POST28_R10_INDEPENDENT_REVIEW_2026-10-20.md",
+      "independentReview": "docs/reviews/POST28_R10_OPERATIONAL_INDEPENDENT_REVIEW_2026-10-20.md",
       "integratedServiceRtoSeconds": 17,
       "observedProbeRpoSeconds": 3.443,
       "eventMeasurementScope": "TWO_SYNTHETIC_COMMITTED_OUTBOX_PROBES",
-      "providerControlsVerified": false
+      "providerControlsVerified": false,
+      "latestCi": {
+        "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+        "passed": 23,
+        "failed": 0,
+        "pending": 0,
+        "pushRun": "39451932873",
+        "pullRequestRun": "39451943225"
+      },
+      "browserFollowupEvidence": "docs/reviews/evidence/post28/c8afe5f253d132f671ecd035a0330de7794b6ee8/r10-operational/evidence-index.json",
+      "majorsWarningResolved": true
     }
   ],
   "validation": {
@@ -210,7 +220,7 @@
   },
   "resumeOrder": [
     "R11_PREPARATION_ONLY_WITH_APPROVED_BUDGET_AND_SCOPE",
-    "R10_DEFERRED_OPERATIONAL_RECOVERY_AND_PROVIDER_CONTROLS",
+    "R10_PROVIDER_CONTROLS_REQUIRE_REAL_HOSTING_ACCOUNT",
     "R09_MANDATORY_CHAINS_AND_DOMAIN_MATRIX",
     "DEFERRED_R08_FULL_PROVIDER_MATRIX_AND_HOSTING",
     "R07_FORMAL_RELEASE_CONFIGURATION_AND_REVIEW_GATES"

@@ -113,3 +113,5 @@
 R10: نجحت الاستعادة البنيوية المحلية ومطابقة 282 جدولًا و6 ملفات بعد مراجعة مستقلة فعلية، وبقيت أهداف التعافي التشغيلي وضوابط مزود النسخ مؤجلة. [التسليم والأدلة والاستثناءات](POST28_R10_LOCAL_RESTORE_2026-10-20.md).
 
 R10 operational continuation: actual API/Web/Admin recovery on restored DB verified at 978a0db; local RTO17s and two-probe RPO3.443s with one actual lost post-backup event. AWS design selected, not provisioned; production/provider gates remain open. See POST28_R10_OPERATIONAL_RECOVERY_2026-10-20.md.
+
+R10 delivery update: all 23 check runs passed at c8afe5f (push 39451932873, PR 39451943225), including artifact retrieval and actual Linux runtime. The majors warning was independently verified fixed in the browser; original RTO/RPO were not repeated. Evidence-only followup retains exact source attribution. Actual provider controls remain unprovisioned.

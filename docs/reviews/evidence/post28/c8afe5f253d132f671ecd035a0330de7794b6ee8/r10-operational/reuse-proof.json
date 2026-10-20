@@ -1,0 +1,25 @@
+{
+  "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "unchangedApiAdminAndDependenciesFrom": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+  "webRebuilt": true,
+  "apiRebuilt": false,
+  "adminRebuilt": false,
+  "cleanDependencyLayerReused": true,
+  "mutableRuntimeFilesExcluded": true,
+  "verification": {
+    "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+    "nativeLoaded": true,
+    "modules": [
+      "@node-rs/xxhash",
+      "@prisma/client",
+      "cors",
+      "express",
+      "fontkit",
+      "helmet",
+      "pdfkit",
+      "svg-to-pdfkit",
+      "uuid"
+    ],
+    "stageAccepted": false
+  }
+}

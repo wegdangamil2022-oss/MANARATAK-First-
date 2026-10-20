@@ -1,0 +1,93 @@
+{
+  "kind": "POST28_R10_MAJOR_WARNING_FOLLOWUP",
+  "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "originalRecoverySourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+  "restoreRepeated": false,
+  "operationalRtoRpoRemeasured": false,
+  "majorsUnavailableBannerAbsent": true,
+  "files": [
+    {
+      "path": "major-fix-browser-result.json",
+      "bytes": 1031,
+      "sha256": "746b446dcd4387eaafc3e6531be5e2dd27a410bfa4550e67648b882474eabc42"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 40,
+      "sha256": "f65844d65442780fc14000bd85edd9a3a7ab7d97a6478b14f6e320c11741d21f"
+    },
+    {
+      "path": "browser/result.json",
+      "bytes": 922,
+      "sha256": "1eb0b2126eaf6a133fc6b4a3d8487bbff780ad532ffce5560f479a8afe3c989e"
+    },
+    {
+      "path": "browser/api.log",
+      "bytes": 13712,
+      "sha256": "80c371bafac84c957b2e8cc0fb324c32c97fb0f9470b495c9bae37e56823a05e"
+    },
+    {
+      "path": "browser/web-admin-gateway.log",
+      "bytes": 136,
+      "sha256": "06f043ca6f47b926265b740782aac813e8960902878b63294391dbf8b7384f4d"
+    },
+    {
+      "path": "browser/admin-login.png",
+      "bytes": 22971,
+      "sha256": "e7cbd52f57e5efc9d2e103821cb9473c4c5f6f341b8633bae4209eaf8e556219"
+    },
+    {
+      "path": "browser/recovered-student-dashboard.png",
+      "bytes": 135215,
+      "sha256": "1a3a18a52a0707268cba0f840321636f6375e46ef653f518483024f3b434d305"
+    },
+    {
+      "path": "reuse-proof.json",
+      "bytes": 622,
+      "sha256": "fe37354e7e02005f84ebff1066b80fa92bf734b41ee175e46d2b4ad0a28c0e48"
+    },
+    {
+      "path": "web-build.log",
+      "bytes": 1582,
+      "sha256": "fe73aa5ddeac6ae3fba3607cfcf98da6114e10c0c9b7a2fc2f2fdd574210c81d"
+    },
+    {
+      "path": "artifacts/release-manifest.json",
+      "bytes": 1923,
+      "sha256": "05fd45629215ff59e107e8491904ba5a6f63c48537469bd721c289e215cc93c3"
+    },
+    {
+      "path": "artifacts/release-sbom.cdx.json",
+      "bytes": 113674,
+      "sha256": "15702abdd87d7589fc42844f1a32bba983a8e84710006ddaf432501f1d7837ad"
+    },
+    {
+      "path": "artifacts/SHA256SUMS",
+      "bytes": 465,
+      "sha256": "426baafba0a91fe0c1f3114e2caf8c9660177a8635d43406231fbbdbbe2c6c14"
+    },
+    {
+      "path": "ci-checks.json",
+      "bytes": 5930,
+      "sha256": "849238f128b2e9695dca37740306081a3d49d2e93b470b2c1c020ab9c67d6b4a"
+    },
+    {
+      "path": "ci-run-39451943225.json",
+      "bytes": 14342,
+      "sha256": "82f12566068296860a725158ec07aa22820c5c5484091914d2dc1632669c3fac"
+    },
+    {
+      "path": "ci-run-39451932873.json",
+      "bytes": 14845,
+      "sha256": "d4bdf88edb1dfdcce0a938ad350d1b4620fe933f3551b11f2dcdef882ef75c97"
+    }
+  ],
+  "ci": {
+    "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+    "passedCheckRuns": 23,
+    "failedCheckRuns": 0,
+    "pendingCheckRuns": 0,
+    "legacyCombinedStatus": "pending with zero legacy status contexts; individual check runs all completed successfully",
+    "documentationOnlyFollowupNotIndependentlyRun": true
+  }
+}
