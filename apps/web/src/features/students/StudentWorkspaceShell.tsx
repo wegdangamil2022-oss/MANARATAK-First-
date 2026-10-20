@@ -30,12 +30,13 @@ type Props = {
   stats: { activeCourses: number; certificates: number; averageCourseProgress: number };
   onLogout: () => void;
   logoutDisabled?: boolean;
+  logoutLabel?: string;
   accessibility?: { textScale?: unknown; reduceMotion?: unknown; highContrast?: unknown };
 };
 
 export function StudentWorkspaceShell({
   children, activeTab: tab, onTabChange, displayName, email, statusLabel, stats,
-  onLogout, logoutDisabled = false, accessibility = {},
+  onLogout, logoutDisabled = false, logoutLabel = 'خروج', accessibility = {},
 }: Props) {
   return (
     <main dir="rtl"
@@ -106,7 +107,7 @@ export function StudentWorkspaceShell({
                 className="rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white/90 hover:bg-white/20 hover:text-white disabled:opacity-60 transition-colors shrink-0 cursor-pointer"
                 title="تسجيل الخروج من الحساب"
               >
-                خروج
+                {logoutLabel}
               </button>
             </div>
           </div>
