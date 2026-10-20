@@ -1,0 +1,20 @@
+[
+  {
+    "artifactId": 12304121530,
+    "name": "r08-redis-diagnostic-0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+    "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+    "runId": 39506916987,
+    "bytes": 669,
+    "digest": "sha256:fba59f463046573f9890d81e0aaa8598576f88a8059936af8d57762f96e6d1c2",
+    "verified": true
+  },
+  {
+    "artifactId": 12303317883,
+    "name": "r08-provider-faults-0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+    "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+    "runId": 39506916987,
+    "bytes": 11958,
+    "digest": "sha256:2df1899e075a6653c040b681832d63869a52d6ef74d0dbf1a6c487447b61571f",
+    "verified": true
+  }
+]

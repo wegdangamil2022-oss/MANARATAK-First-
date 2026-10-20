@@ -1,0 +1,56 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+import {verifyEvidenceIndex} from './r07-filtered/scripts/lib/verify-evidence-index.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),sha='0ee961a7aa5a79d5bdf22406cfb88a18970ec03e';
+const dest=path.join(repo,'docs/reviews/evidence/post28',sha,'r08-current-review');
+const hash=b=>createHash('sha256').update(b).digest('hex');
+const ci=JSON.parse(fs.readFileSync(path.join(work,'r07-review-ci-observed.json'),'utf8').replace(/^\uFEFF/,''));
+assert.equal(ci.sourceSha,sha);assert.equal(ci.runId,39506916987);assert.equal(ci.result,'success');assert.equal(ci.jobs.length,6);assert(ci.jobs.every(j=>j.conclusion==='success'));
+const receipts=[];
+function archive(id){
+ const meta=ci.artifacts.find(a=>a.id===id),file=path.join(work,`r07-current-artifact-${id}.zip`);
+ assert(meta);assert.equal(meta.expired,false);assert.equal(meta.workflow_run.head_sha,sha);assert.equal(meta.workflow_run.id,ci.runId);
+ const bytes=fs.readFileSync(file);assert.equal('sha256:'+hash(bytes),meta.digest);assert.equal(bytes.length,meta.size_in_bytes);
+ receipts.push({artifactId:id,name:meta.name,sourceSha:sha,runId:ci.runId,bytes:bytes.length,digest:meta.digest,verified:true});
+ const names=execFileSync('C:/Windows/System32/tar.exe',['-tf',file],{encoding:'utf8'}).trim().split(/\r?\n/);
+ assert.equal(names.length,new Set(names).size);assert(names.every(n=>/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(n)));
+ return name=>{assert(names.includes(name));return JSON.parse(execFileSync('C:/Windows/System32/tar.exe',['-xOf',file,name],{maxBuffer:8*1024*1024}).toString());};
+}
+const redis=archive(12304121530)('post28-r08-redis-result.json'),providerFile=archive(12303317883),provider=providerFile('result.json');
+assert.equal(redis.sourceSha,sha);assert.equal(redis.passed,true);assert.equal(redis.ownedContainerRemoved,true);
+assert.equal(redis.result.sourceSha,sha);assert.equal(redis.result.independentCounterProcesses,2);assert.equal(redis.result.requests,24);assert.equal(redis.result.allowed,10);
+for(const key of ['namespaceIsolation','revisionIsolation','staleRejected','failedWorkerObserved','stoppedWorkerObserved','healthTtlBounded','restrictedAcl','redisOutageRejected'])assert.equal(redis.result[key],true);
+assert.equal(redis.result.signedWebhook.accepted,1);assert.equal(redis.result.signedWebhook.replayed,1);
+for(const key of ['tamperedRejected','invalidDoesNotConsumeNonce','staleRejected','outageRejected'])assert.equal(redis.result.signedWebhook[key],true);
+assert.equal(provider.sourceSha,sha);assert.equal(provider.passed,true);assert.equal(provider.syntheticOnly,true);assert.equal(provider.selectedCases.length,2);
+assert.equal(provider.cleanup.existingDatabasesTouched,false);assert.equal(provider.cleanup.databaseRemoved,true);assert.equal(provider.cleanup.networkRemoved,true);assert(!provider.cleanup.errors);
+const summaries=[],raw=[];
+for(let i=0;i<2;i++){
+ const summary=providerFile(`suite-${i}-summary.json`),vitest=providerFile(`suite-${i}-vitest.json`);
+ assert.equal(summary.sourceSha,sha);assert.equal(summary.suite,'r08-provider-outcomes');
+ assert.equal(summary.fullDiscoveryCases,4);assert.equal(summary.fullProfileAcceptance,false);
+ for(const [key,value] of Object.entries({expected:1,executed:1,passed:1,failed:0,skipped:0}))assert.equal(summary[key],value);
+ assert.equal(summary.targets.length,1);assert.equal(summary.targets[0].postgresMajor,16);assert.equal(summary.targets[0].role,'post28_app');
+ assert.equal(vitest.success,true);assert.equal(vitest.numPassedTests,1);assert.equal(vitest.numPendingTests,3);
+ const selected=vitest.testResults.flatMap(r=>r.assertionResults).filter(r=>r.status==='passed');assert.equal(selected.length,1);
+ assert.equal(summary.caseExact,selected[0].ancestorTitles.join(' > ')+' > '+selected[0].title);
+ assert(provider.selectedCases.includes(selected[0].title));summaries.push(summary);raw.push(vitest);
+}
+const retained=[];
+for(const suffix of ['r08-practical-handoff','r08-combined-closure','r08-provider-closure','r08-redis-closure']){
+ const file=path.join(repo,'docs/reviews/evidence/post28/cbb99ac63bb4497df9c07cf3e16611d27bcd3396',suffix,'evidence-index.json');
+ retained.push({index:path.relative(repo,file).replaceAll('\\','/'),...verifyEvidenceIndex(file,{root:repo,gitRef:'HEAD'})});
+}
+const unchangedPaths=['apps/api/src/infrastructure/runtime','apps/api/src/presentation/auth','packages/infrastructure/src/security','packages/infrastructure/src/redis','packages/infrastructure/src/finance-platform','scripts/release/lib/R08CombinedRuntime.mjs','scripts/release/post28-r08-provider-faults.mjs','scripts/release/post28-r08-redis-lab.mjs','tests/database/post28-r08-provider-outcomes.database.spec.mjs','tests/runtime/fixtures/post28-r08-redis-probe.mjs'];
+assert.equal(execFileSync('git',['diff','--name-only','cbb99ac63bb4497df9c07cf3e16611d27bcd3396',sha,'--',...unchangedPaths],{cwd:repo,encoding:'utf8'}).trim(),'');
+fs.mkdirSync(dest,{recursive:true});
+const write=(name,data)=>fs.writeFileSync(path.join(dest,name),JSON.stringify(data,null,2)+'\n');
+write('redis-result.json',redis);write('provider-result.json',provider);write('archive-receipts.json',receipts);write('ci-completed.json',ci);
+summaries.forEach((data,i)=>{write(`suite-${i}-summary.json`,data);write(`suite-${i}-vitest.json`,raw[i]);});
+const verification={kind:'R08_CURRENT_REVIEW',sourceSha:sha,runId:ci.runId,verifiedAt:new Date().toISOString(),artifactDigestsMatched:2,ciPassedJobs:6,currentFinancialSelectedCasesPassed:2,fullProviderProfileCases:4,fullProviderProfileAccepted:false,unselectedPerInvocation:3,retainedHistoricalEvidence:retained,unchangedPaths,manualTestsOrBuildOrCiRerun:false,currentCombinedTwoApiSessionsRerun:false,existingDatabasesTouched:false,productionAcceptance:false,formalR08Acceptance:false,legacyAuthorizationLabelNote:'R05 BLOCKED_USER_AUTHORIZED_SCOPED_R06 in suite summaries is a legacy scoped authorization label, not a reassessment of the separately closed R05.'};
+write('verification.json',verification);fs.copyFileSync(path.join(work,'collect-r08-current-proof.mjs'),path.join(dest,'operator.mjs.txt'));
+write('evidence-index.json',{kind:'R08_CURRENT_REVIEW_EVIDENCE',sourceSha:sha,files:fs.readdirSync(dest).filter(n=>n!=='evidence-index.json').sort().map(name=>{const b=fs.readFileSync(path.join(dest,name));return {path:name,bytes:b.length,sha256:hash(b)};})});
+console.log(JSON.stringify({destination:dest,selectedPassed:2,retainedFiles:retained.reduce((n,r)=>n+r.files,0),digestsMatched:receipts.length}));

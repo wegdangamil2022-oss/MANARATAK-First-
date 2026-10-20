@@ -1,0 +1,60 @@
+{
+  "kind": "R08_CURRENT_REVIEW",
+  "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+  "runId": 39506916987,
+  "verifiedAt": "2026-10-20T22:49:56.713Z",
+  "artifactDigestsMatched": 2,
+  "ciPassedJobs": 6,
+  "currentFinancialSelectedCasesPassed": 2,
+  "fullProviderProfileCases": 4,
+  "fullProviderProfileAccepted": false,
+  "unselectedPerInvocation": 3,
+  "retainedHistoricalEvidence": [
+    {
+      "index": "docs/reviews/evidence/post28/cbb99ac63bb4497df9c07cf3e16611d27bcd3396/r08-practical-handoff/evidence-index.json",
+      "files": 7,
+      "sourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/cbb99ac63bb4497df9c07cf3e16611d27bcd3396/r08-combined-closure/evidence-index.json",
+      "files": 10,
+      "sourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/cbb99ac63bb4497df9c07cf3e16611d27bcd3396/r08-provider-closure/evidence-index.json",
+      "files": 16,
+      "sourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/cbb99ac63bb4497df9c07cf3e16611d27bcd3396/r08-redis-closure/evidence-index.json",
+      "files": 3,
+      "sourceSha": "cbb99ac63bb4497df9c07cf3e16611d27bcd3396",
+      "gitRef": "HEAD",
+      "readOnly": true
+    }
+  ],
+  "unchangedPaths": [
+    "apps/api/src/infrastructure/runtime",
+    "apps/api/src/presentation/auth",
+    "packages/infrastructure/src/security",
+    "packages/infrastructure/src/redis",
+    "packages/infrastructure/src/finance-platform",
+    "scripts/release/lib/R08CombinedRuntime.mjs",
+    "scripts/release/post28-r08-provider-faults.mjs",
+    "scripts/release/post28-r08-redis-lab.mjs",
+    "tests/database/post28-r08-provider-outcomes.database.spec.mjs",
+    "tests/runtime/fixtures/post28-r08-redis-probe.mjs"
+  ],
+  "manualTestsOrBuildOrCiRerun": false,
+  "currentCombinedTwoApiSessionsRerun": false,
+  "existingDatabasesTouched": false,
+  "productionAcceptance": false,
+  "formalR08Acceptance": false,
+  "legacyAuthorizationLabelNote": "R05 BLOCKED_USER_AUTHORIZED_SCOPED_R06 in suite summaries is a legacy scoped authorization label, not a reassessment of the separately closed R05."
+}
