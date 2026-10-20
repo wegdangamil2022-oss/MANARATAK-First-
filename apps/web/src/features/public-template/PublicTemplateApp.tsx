@@ -236,7 +236,11 @@ export default function App() {
     else if (section === 'favorites') patch = { activeTab: 'favorites' };
     else if (section === 'tracker') patch = { activeTab: 'tracker' };
     else if (section === 'search') patch = { activeTab: 'search', selectedCategory: 'all', globalSearchQuery: params.get('q') || '' };
-    else if (section === 'compare') patch = { activeTab: 'search', selectedCategory: 'all', isComparePage: true };
+    else if (section === 'compare') patch = {
+      activeTab: 'search', selectedCategory: 'all', isComparePage: true,
+      compareType: params.get('type') || 'universities',
+      compareItems: params.get('items') || '',
+    };
     else if (section === 'scholarships') {
       const selected = key ? scholarships.find(matchesKey) || null : null;
       if (key && publicDataMode === 'api') {
