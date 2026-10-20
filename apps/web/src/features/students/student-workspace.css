@@ -137,6 +137,9 @@
    following the intrinsic text width rather than spanning the card. */
 .mn-student-workspace .mn-student-summary-heading,
 .mn-student-workspace .mn-student-summary-invoices .mn-card h2 {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700;
   display: inline-block;
   width: max-content;
   max-width: 100%;
