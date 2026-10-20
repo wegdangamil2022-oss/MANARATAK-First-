@@ -3858,8 +3858,8 @@ function ProfileView({
         </div>
       </div>
 
-      {/* Prominent Floating/Bottom Save Bar */}
-      <div className="sticky bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:bottom-4 z-40 rounded-2xl bg-[#142B5F] text-white p-4 shadow-xl border-2 border-[#B38018]/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* End-of-form save section: scrolls naturally, never floats above profile settings. */}
+      <div className="relative mt-5 mb-6 rounded-2xl bg-[#142B5F] text-white p-4 shadow-xl border-2 border-[#B38018]/60 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 text-center sm:text-right">
           <ShieldCheck className="w-5 h-5 text-[#E5B54F] shrink-0 hidden sm:block" />
           <div>
