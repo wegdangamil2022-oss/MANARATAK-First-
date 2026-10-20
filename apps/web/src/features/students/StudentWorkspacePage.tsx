@@ -1083,14 +1083,14 @@ function SummaryView({
 
       {/* 4. Active In-Progress Course (If any exists) */}
       {activeCourse && (
-        <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
+        <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-y border-x-0 border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-none mn-panel">
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                <BookOpen className="w-3.5 h-3.5 text-[#E5B54F]" />
+              <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
+                <BookOpen className="w-4 h-4 text-[#E5B54F]" />
               </div>
               <div>
-                <h2 className="text-xs sm:text-sm font-bold text-[var(--mn-heading)]">متابعة التعلم</h2>
+                <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">متابعة التعلم</h2>
                 <p className="text-[10px] text-[var(--mn-text-muted)]">آخر دورة تدريبية جارية</p>
               </div>
             </div>
@@ -1136,14 +1136,14 @@ function SummaryView({
 
       {/* 5. Active Application Trackers (If any exist) */}
       {activeMilestones.length > 0 && (
-        <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
+        <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-y border-x-0 border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-none mn-panel">
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                <Route className="w-3.5 h-3.5 text-[#E5B54F]" />
+              <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
+                <Route className="w-4 h-4 text-[#E5B54F]" />
               </div>
               <div>
-                <h2 className="text-xs sm:text-sm font-bold text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
+                <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
                 <p className="text-[10px] text-[var(--mn-text-muted)]">متابعة مراحل التقديم والمواعيد</p>
               </div>
             </div>
@@ -1201,14 +1201,14 @@ function SummaryView({
 
       {/* 6. Recent Activity Timeline (If items exist) */}
       {dashboard.timeline.length > 0 && (
-        <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
+        <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-y border-x-0 border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-none mn-panel">
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                <HistoryIcon className="w-3.5 h-3.5 text-[#E5B54F]" />
+              <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
+                <HistoryIcon className="w-4 h-4 text-[#E5B54F]" />
               </div>
               <div>
-                <h2 className="text-xs sm:text-sm font-bold text-[var(--mn-heading)]">آخر الأنشطة والخطوات</h2>
+                <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">آخر الأنشطة والخطوات</h2>
                 <p className="text-[10px] text-[var(--mn-text-muted)]">سجل زمني لتقدمك وتحديثاتك</p>
               </div>
             </div>
