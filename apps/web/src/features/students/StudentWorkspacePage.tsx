@@ -879,8 +879,12 @@ function SummaryView({
     [applicationTrackers],
   );
 
+  // Surface only the most recently accessed unfinished course in the summary.
+  // Completed courses (including those at 100%) remain in the full Learning tab.
   const activeCourse = useMemo(
-    () => dashboard.courseEnrollments.find((item) => ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(item.status)) || dashboard.courseEnrollments[0] || null,
+    () => dashboard.courseEnrollments
+      .filter((item) => ['ACTIVE', 'ENROLLED', 'IN_PROGRESS'].includes(item.status) && item.progressPercentage < 100)
+      .sort((first, second) => (Date.parse(second.lastAccessedAt ?? '') || 0) - (Date.parse(first.lastAccessedAt ?? '') || 0))[0] ?? null,
     [dashboard.courseEnrollments],
   );
 
@@ -1081,57 +1085,55 @@ function SummaryView({
         </div>
       )}
 
-      {/* 4. Active In-Progress Course (If any exists) */}
+      {/* 4. Continue learning: one recent unfinished course, optimized for mobile. */}
       {activeCourse && (
-        <div className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                <BookOpen className="w-4 h-4 text-[#E5B54F]" />
-              </div>
-              <div>
-                <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">متابعة التعلم</h2>
-                <p className="text-[10px] text-[var(--mn-text-muted)]">آخر دورة تدريبية جارية</p>
-              </div>
+        <section aria-label="متابعة التعلم" className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel">
+          <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+                <BookOpen className="h-4 w-4 text-[#E5B54F]" />
+              </span>
+              <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">متابعة التعلم</h2>
             </div>
             <button
               type="button"
               onClick={() => setTab('LEARNING')}
-              className="text-[11px] font-semibold text-[#142B5F] dark:text-[#E5B54F] hover:underline flex items-center gap-1 cursor-pointer"
+              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
             >
               <span>جميع الدورات</span>
-              <ChevronLeft className="w-3 h-3" />
+              <ChevronLeft className="h-3.5 w-3.5" />
             </button>
           </div>
 
           <div className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <span className="text-[10px] font-semibold text-[var(--mn-secondary)]">
-                  {activeCourse.status === 'COMPLETED' ? 'مكتملة' : 'قيد التقدم'}
-                </span>
-                <h3 className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] mt-0.5 truncate">{activeCourse.courseName}</h3>
+            <div className="flex min-w-0 items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] sm:text-[11px] font-medium text-[var(--mn-text-muted)]">آخر دورة تتابعها</span>
+                <h3 className="mt-0.5 text-xs sm:text-sm font-bold leading-5 text-[var(--mn-heading)] break-words">{activeCourse.courseName}</h3>
               </div>
-              <span className="text-xs font-bold text-[var(--mn-heading)] shrink-0">{activeCourse.progressPercentage}%</span>
+              <span className="shrink-0 text-sm font-bold tabular-nums text-[#0E7C86] dark:text-[#72DED1]" dir="ltr">
+                {Math.min(100, Math.max(0, activeCourse.progressPercentage))}%
+              </span>
             </div>
+
             <progress
-              className="mn-native-progress mn-native-progress-secondary mt-2.5 h-2 w-full"
+              className="mn-native-progress mn-native-progress-secondary mt-2.5 h-1.5 w-full"
               value={Math.min(100, Math.max(0, activeCourse.progressPercentage))}
               max={100}
-              aria-label="نسبة تقدم الدورة"
+              aria-label={`نسبة إنجاز الدورة: ${activeCourse.progressPercentage}%`}
             />
-            <div className="mt-3 flex items-center justify-between text-[10.5px] text-[var(--mn-text-muted)]">
-              <span>{activeCourse.lastAccessedAt ? `آخر وصول: ${formatDate(activeCourse.lastAccessedAt)}` : 'دورة نشطة'}</span>
+
+            <div className="mt-2.5 flex justify-end">
               <Link
                 to={`../student/courses/${encodeURIComponent(activeCourse.courseId)}`}
-                className="inline-flex items-center gap-1 font-bold text-[var(--mn-primary)] dark:text-[#E5B54F] hover:underline"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] sm:text-xs font-semibold text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]"
               >
-                <span>متابعة الدرس</span>
-                <ArrowLeft className="w-3 h-3" />
+                <span>متابعة التعلم</span>
+                <ArrowLeft className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* 5. Active Application Trackers (If any exist) */}
