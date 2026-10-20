@@ -1089,7 +1089,7 @@ function SummaryView({
 
       {/* 4. Continue learning: one recent unfinished course, optimized for mobile. */}
       {activeCourse && (
-        <section aria-label="متابعة التعلم" className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel">
+        <section aria-label="متابعة التعلم" className="relative mx-2 sm:mx-3 rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel">
           <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
@@ -1100,9 +1100,10 @@ function SummaryView({
             <button
               type="button"
               onClick={() => setTab('LEARNING')}
-              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-5 text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
+              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
+              style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}
             >
-              <span>جميع الدورات</span>
+              <span style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>جميع الدورات</span>
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -1140,7 +1141,7 @@ function SummaryView({
 
       {/* 5. Active application trackers: last two updates, with complete details in Opportunities. */}
       {activeMilestones.length > 0 && (
-        <section aria-label="ملفات التقديم النشطة" className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]">
+        <section aria-label="ملفات التقديم النشطة" className="relative mx-2 sm:mx-3 rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]">
           <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
@@ -1149,8 +1150,9 @@ function SummaryView({
               <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
             </div>
             <button type="button" onClick={() => setTab('OPPORTUNITIES')}
-              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-5 text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]">
-              <span>عرض الكل</span>
+              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
+              style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>
+              <span style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>عرض الكل</span>
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -1172,21 +1174,21 @@ function SummaryView({
                         {progress}%
                       </span>
                     </div>
-                    <p className="mt-0.5 truncate text-[11px] leading-5 text-[var(--mn-text-muted)]" title={item.stage}>
+                    <p className="mt-0.5 truncate text-[10px] font-semibold leading-[18px] text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]" style={{ fontSize: '10px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }} title={item.stage}>
                       {item.stage}
                     </p>
                     <div className="mt-1.5 flex min-w-0 items-center justify-between gap-2">
                       {item.deadlineAt ? (
-                        <span className="inline-flex min-w-0 items-center gap-1 text-[10px] text-[var(--mn-text-muted)]">
+                        <span className="inline-flex min-w-0 items-center gap-1 text-[10px] font-semibold leading-[18px] text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]" style={{ fontSize: '10px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>
                           <CalendarClock className="h-3 w-3 shrink-0" />
-                          <span className="truncate">{formatDate(item.deadlineAt)}</span>
+                          <span className="truncate" style={{ fontSize: '10px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>{formatDate(item.deadlineAt)}</span>
                         </span>
                       ) : (
-                        <span className="text-[10px] text-[var(--mn-text-muted)]">لا يوجد موعد محدد</span>
+                        <span className="text-[10px] font-semibold text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]" style={{ fontSize: '10px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>لا يوجد موعد محدد</span>
                       )}
                       <button type="button" onClick={() => setTab('OPPORTUNITIES')}
-                        className="inline-flex shrink-0 items-center gap-1 text-[11px] leading-5 font-medium text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]">
-                        <span>متابعة الملف</span>
+                        className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] sm:text-xs font-semibold text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]">
+                        <span className="font-['Cairo',sans-serif]">متابعة الملف</span>
                         <ArrowLeft className="h-3 w-3" />
                       </button>
                     </div>
