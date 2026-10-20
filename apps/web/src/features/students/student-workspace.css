@@ -26,3 +26,35 @@
   --mn-heading: #ffffff;
   --mn-border: #cbd5e1;
 }
+
+/*
+ * The public preview and P15 student workspace share the same identity layout.
+ * These scoped rules follow the site's manual .dark toggle regardless of which
+ * Tailwind CSS entrypoint generates utility variants. Light mode is unchanged.
+ */
+.dark .mn-student-attention {
+  background-color: var(--mn-page, #09152f);
+  color: #f4f9fc;
+}
+.dark .mn-student-attention h2 {
+  color: #f4f9fc;
+}
+.dark .mn-student-attention .mn-student-attention-card {
+  background-color: var(--mn-surface, #10264a);
+  border-color: #55b5b4;
+  border-right-color: #55cbc5;
+}
+.dark .mn-student-attention .mn-student-attention-card h3 {
+  color: #f2f7fa;
+}
+.dark .mn-student-attention .mn-student-attention-card p {
+  color: #ccdfe4;
+}
+.dark .mn-student-attention .mn-student-attention-action {
+  background-color: var(--mn-surface-elevated, #153258);
+  color: #f2fafa;
+  border-color: #55b5b4;
+}
+.dark .mn-student-attention .mn-student-attention-action:hover {
+  background-color: #28617a;
+}
