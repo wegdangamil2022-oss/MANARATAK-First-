@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { required, promotionState } from './lib/ReleaseContracts.mjs';
 import { readBounded } from './lib/SmokeContracts.mjs';
 import { verifyPromotionInputs } from './verify-release-evidence.mjs';
@@ -58,7 +60,10 @@ export async function reconcilePromotion(
     result = await read(`${base}/promotions/${encodeURIComponent(deploymentId)}`);
   }
 }
-if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
+export function isPromotionCliEntry(entry) {
+  return typeof entry === 'string' && pathToFileURL(path.resolve(entry)).href === import.meta.url;
+}
+if (isPromotionCliEntry(process.argv[1])) {
   const environment = process.argv[2];
   if (!['validation', 'staging', 'production'].includes(environment))
     throw new Error('PROMOTION_ENVIRONMENT_INVALID');
