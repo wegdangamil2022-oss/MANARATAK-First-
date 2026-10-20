@@ -38,7 +38,15 @@ try {
   delete env.POST28_TRANSACTION_SETUP_URL;delete env.POST28_APP_PASSWORD;
   const base=['node_modules/vitest/vitest.mjs'];
   const collected=spawnSync(process.execPath,[...base,'list','--config','config/testing/post28-database-vitest.config.ts','--json'],{encoding:'utf8',maxBuffer:16*1024*1024,env});
-  if(collected.status!==0)throw new Error('POST28_RUNTIME_DISCOVERY_FAILED');
+  if(collected.status!==0){
+    const secrets=['DATABASE_URL','DIRECT_URL','POST28_APP_PASSWORD'].flatMap(key=>{
+      const value=env[key];if(!value)return[];
+      try{return[value,decodeURIComponent(new URL(value).password)].filter(Boolean);}catch{return[value];}
+    });
+    const redact=value=>secrets.reduce((text,secret)=>text.replaceAll(secret,'[REDACTED]'),String(value??'')).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]');
+    fs.writeFileSync(path.join(out,'discovery-failure.json'),JSON.stringify({sourceSha:sha,suite:name,exit:collected.status,signal:collected.signal,error:collected.error?.code,stdout:redact(collected.stdout),stderr:redact(collected.stderr)},null,2)+'\n');
+    throw new Error('POST28_RUNTIME_DISCOVERY_FAILED');
+  }
   const rows=JSON.parse(collected.stdout);verifyDiscovery(name,rows);
   const selected = selectedDiscovery(name,rows,caseExact);
   const selectionArgs = caseExact === undefined ? [] : ['--testNamePattern', '^' + caseExact.split(' > ').join(' ').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'];

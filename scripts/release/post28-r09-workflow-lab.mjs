@@ -31,7 +31,7 @@ finally{
  }
  if(state?.directory){
   const setup=path.join(state.directory,'R06-setup/result.json');if(fs.existsSync(setup))fs.copyFileSync(setup,path.join(proof,'setup.json'));
-  const suites=path.join(state.directory,'R06-suites');if(fs.existsSync(suites))for(const [index,directory]of fs.readdirSync(suites).sort().entries())for(const name of ['discovery.json','selection.json','vitest.json','summary.json']){const file=path.join(suites,directory,name);if(fs.existsSync(file))fs.copyFileSync(file,path.join(proof,'suite-'+index+'-'+name));}
+  const suites=path.join(state.directory,'R06-suites');if(fs.existsSync(suites))for(const [index,directory]of fs.readdirSync(suites).sort().entries())for(const name of ['discovery-failure.json','discovery.json','selection.json','vitest.json','summary.json']){const file=path.join(suites,directory,name);if(fs.existsSync(file))fs.copyFileSync(file,path.join(proof,'suite-'+index+'-'+name));}
   for(const name of fs.readdirSync(state.directory).filter(name=>/^r09-workflow-observations.*[.]json$/.test(name)))fs.copyFileSync(path.join(state.directory,name),path.join(proof,name));
  }
  fs.writeFileSync(path.join(proof,'result.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
