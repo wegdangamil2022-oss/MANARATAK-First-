@@ -37,6 +37,10 @@ export async function exerciseR09Public({page,origin,db,fixture,proof}) {
   await page.screenshot({path:path.join(proof,'r09-public-course.png'),fullPage:true});
   const hidden=fixture.hidden[0];const denied=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/public/courses/'+hidden.slug);await page.goto(origin+'/ar/courses/'+hidden.slug);assert.equal((await denied).status(),404);
   await page.getByRole('heading',{name:'الدورات',exact:true}).waitFor();assert.equal(await page.getByRole('heading',{name:hidden.displayName,exact:true}).count(),0);assert.equal((await page.locator('body').innerText()).includes(fixture.privateMarker),false);
+  await page.getByRole('status').filter({hasText:'الإجمالي: 3'}).waitFor();
+  for(const row of fixture.published)await page.getByRole('heading',{name:row.displayName,exact:true}).waitFor();
+  for(const row of fixture.hidden)assert.equal(await page.getByRole('heading',{name:row.displayName,exact:true}).count(),0);
+  assert.equal((await page.locator('body').innerText()).includes(fixture.privateMarker),false);
   await page.screenshot({path:path.join(proof,'r09-public-hidden.png'),fullPage:true});
-  return {anonymousRead:true,ownerIdsMatched:true,paginationPages:pages,duplicateOwnerIds:false,hiddenStates:fixture.hidden.map(row=>({status:row.status,completenessStatus:row.completenessStatus,unresolvedLanguage:Boolean(row.learningLanguageRaw),httpStatus:404})),privateLessonContentAbsent:true,privateMetadataAbsent:true,emptyIsSuccessfulZero:true,publishedUiRendered:true,learnerLinkUsesOwnerId:true,hiddenUiFallsBackToCatalog:true,fullPublicationLifecycleExercised:false,fullR09Acceptance:false};
+  return {anonymousRead:true,ownerIdsMatched:true,paginationPages:pages,duplicateOwnerIds:false,hiddenStates:fixture.hidden.map(row=>({status:row.status,completenessStatus:row.completenessStatus,unresolvedLanguage:Boolean(row.learningLanguageRaw),httpStatus:404})),privateLessonContentAbsent:true,privateMetadataAbsent:true,emptyIsSuccessfulZero:true,publishedUiRendered:true,learnerLinkUsesOwnerId:true,hiddenUiFallsBackToCatalog:true,loadedCatalogMatchesOwners:true,allHiddenTitlesAbsentAfterCatalogLoad:true,fullPublicationLifecycleExercised:false,fullR09Acceptance:false};
 }
