@@ -1,0 +1,88 @@
+{
+  "kind": "POST28_R09_PRACTICAL_HANDOFF",
+  "date": "2026-10-20",
+  "sourceSha": "819216eba0d09afb3048235e310e2854ef54779d",
+  "ciRun": "39348319130",
+  "status": "PRACTICAL_RECORDED_JOURNEYS_COMPLETE_FORMAL_R09_OPEN",
+  "basis": "Owner priority: tangible local operation, targeted checks and documented exceptions; this handoff does not waive mandatory plan gates",
+  "checks": {
+    "passed": 23,
+    "failed": 0,
+    "pending": 0
+  },
+  "evidence": {
+    "public": "docs/reviews/evidence/post28/819216eba0d09afb3048235e310e2854ef54779d/r09-public-runtime/evidence-index.json",
+    "publicHandoff": "docs/reviews/evidence/post28/819216eba0d09afb3048235e310e2854ef54779d/r09-public-handoff/evidence-index.json",
+    "filters": "docs/reviews/evidence/post28/819216eba0d09afb3048235e310e2854ef54779d/r09-public-source/evidence-index.json",
+    "learner": "docs/reviews/evidence/post28/ce0690c36759fc73ac202a679f905054b7a4607b/r09-handoff/evidence-index.json",
+    "r08": "docs/remediation/POST28_R08_PRACTICAL_CLOSE_2026-10-20.md",
+    "outbox": "docs/remediation/POST28_R08_OUTBOX_PROCESS_CHAIN_2026-10-19.md",
+    "r06": "docs/remediation/POST28_R06_CORE_CLOSURE_2026-10-19.md"
+  },
+  "exceptions": [
+    {
+      "id": "R09-E01",
+      "remaining": "All five mandatory end-to-end chains on one canonical dataset and the 26-domain / section 27 matrix",
+      "localImpact": "Does not invalidate the recorded learner/public-course laboratory journeys; other workflows are not accepted by this handoff",
+      "blocksLocalRecordedJourneys": false,
+      "blocksFullR09Acceptance": true,
+      "blocksProductionAcceptance": true,
+      "resolution": "Run missing mandatory producers/fixtures and owner-curated assertions with per-case artifact/source provenance; retain partial results"
+    },
+    {
+      "id": "R09-E02",
+      "remaining": "Real author/reviewer/publisher separation, publish/unpublish/archive and withdrawal during browser history restoration; AR/EN, SEO, accessibility and responsive combinations",
+      "localImpact": "Seeded publication states and Arabic rendering are proven; the full publication lifecycle and other locale behavior are unproven",
+      "blocksLocalRecordedJourneys": false,
+      "blocksFullR09Acceptance": true,
+      "blocksProductionAcceptance": true,
+      "resolution": "Exercise approved administrative roles and real lifecycle transitions; measure history/race/error behavior and localized metadata"
+    },
+    {
+      "id": "R09-E03",
+      "remaining": "Completion through workers to one certificate with verification/revocation and assets; services through authorized payment/refund provider",
+      "localImpact": "The recorded course journey stops at persisted lesson progress; no payment or certificate-delivery activation is approved",
+      "blocksLocalRecordedJourneys": false,
+      "blocksFullR09Acceptance": true,
+      "blocksProductionAcceptance": true,
+      "resolution": "Use an approved synthetic provider and the actual completion/issuance/service commands; prove receipts, transactions, ownership and repeated delivery without duplicate effects"
+    },
+    {
+      "id": "R09-E04",
+      "remaining": "Cross-domain inverse relations, required markets and canonical language coverage, unavailable-versus-zero under real service failure, composite facets and changing owner pagination",
+      "localImpact": "Three native-course cursor pages, seven visibility states and a genuine zero are proven; no general market or inverse-graph acceptance",
+      "blocksLocalRecordedJourneys": false,
+      "blocksFullR09Acceptance": true,
+      "blocksProductionAcceptance": true,
+      "resolution": "Complete R02 coverage dependencies and owner-backed cross-domain fixtures; distinguish incomplete/unavailable/unsupported from successful zero"
+    },
+    {
+      "id": "R09-E05",
+      "remaining": "Full cross-student privacy matrix for documents, trackers, certificates and finance; owner-to-consumer notification/DLQ/replay in the integrated browser dataset",
+      "localImpact": "Two-student course progress isolation and course-admin denial are proven; earlier independent R06/R08 proofs keep their original sources and do not replace the integrated chain",
+      "blocksLocalRecordedJourneys": false,
+      "blocksFullR09Acceptance": true,
+      "blocksProductionAcceptance": true,
+      "resolution": "Run the missing resource-specific denial and lifecycle cases against actual app roles and durable consumers"
+    },
+    {
+      "id": "R09-E06",
+      "remaining": "External hosting/release acceptance and full provider/performance matrix",
+      "localImpact": "Disposable Linux x64/Node 22/PG16 operation only; no hosting or production approval",
+      "blocksLocalRecordedJourneys": false,
+      "blocksFullR09Acceptance": false,
+      "blocksProductionAcceptance": true,
+      "resolution": "Keep R07/R08 release/provider gates and execute their environment-specific acceptance before deployment"
+    }
+  ],
+  "completeMandatoryCaseIds": [],
+  "formalR09Acceptance": false,
+  "productionAcceptance": false,
+  "promotionAuthorized": false,
+  "mainMergeAuthorized": false,
+  "existingDatabasesTouched": false,
+  "previousStageStatesChanged": false,
+  "earlierEvidenceRebound": false,
+  "sourceWorktreeChanges": false,
+  "resumeAt": "R09-E01 through R09-E05 before full R09 acceptance; R10 preparation may proceed independently only within its own authorization and safety gates"
+}

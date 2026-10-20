@@ -155,13 +155,13 @@
     },
     {
       "id": "R09",
-      "state": "IN_PROGRESS_LEARNER_AND_CMS_BROWSER_VERIFIED",
+      "state": "PRACTICAL_RECORDED_JOURNEYS_COMPLETE_FORMAL_R09_OPEN",
       "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md",
       "laterEvidence": "docs/remediation/POST28_R06_R07_PRACTICAL_HANDOFF_2026-10-19.md",
-      "latestReport": "docs/remediation/POST28_R09_LEARNER_JOURNEY_2026-10-20.md",
-      "latestEvidence": "docs/reviews/evidence/post28/ce0690c36759fc73ac202a679f905054b7a4607b/r09-handoff/evidence-index.json",
-      "latestEvidenceSourceSha": "ce0690c36759fc73ac202a679f905054b7a4607b",
-      "formalAcceptance": "OPEN_REMAINING_ENABLED_FEATURE_MATRIX"
+      "latestReport": "docs/remediation/POST28_R09_PRACTICAL_HANDOFF_2026-10-20.md",
+      "latestEvidence": "docs/reviews/evidence/post28/819216eba0d09afb3048235e310e2854ef54779d/r09-practical-handoff/evidence-index.json",
+      "latestEvidenceSourceSha": "819216eba0d09afb3048235e310e2854ef54779d",
+      "formalAcceptance": "OPEN_MANDATORY_CHAINS_AND_DOMAIN_MATRIX"
     }
   ],
   "validation": {
@@ -191,7 +191,8 @@
     "browserRepeated": false
   },
   "resumeOrder": [
-    "R09_ENABLED_FEATURE_PROOFS",
+    "R09_MANDATORY_CHAINS_AND_DOMAIN_MATRIX",
+    "R10_PREPARATION_ONLY_IF_INDEPENDENT_AND_AUTHORIZED",
     "DEFERRED_R08_FULL_PROVIDER_MATRIX_AND_HOSTING",
     "R07_FORMAL_RELEASE_CONFIGURATION_AND_REVIEW_GATES"
   ],
@@ -247,6 +248,41 @@
     "secondStudentProgress": 0,
     "cmsSecurityBrowserCases": 4,
     "fullR09Acceptance": false,
+    "productionAcceptance": false
+  },
+  "r09PublicSlice": {
+    "sourceSha": "819216eba0d09afb3048235e310e2854ef54779d",
+    "ciRun": "39348319130",
+    "status": "IN_PROGRESS_PUBLIC_OWNER_CANARY_VERIFIED",
+    "checks": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    },
+    "publishedCourses": 3,
+    "hiddenCourses": 4,
+    "cursorPages": 3,
+    "fullR09Acceptance": false,
+    "productionAcceptance": false
+  },
+  "r09PracticalHandoff": {
+    "sourceSha": "819216eba0d09afb3048235e310e2854ef54779d",
+    "ciRun": "39348319130",
+    "status": "PRACTICAL_RECORDED_JOURNEYS_COMPLETE_FORMAL_R09_OPEN",
+    "checks": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    },
+    "exceptions": [
+      "R09-E01",
+      "R09-E02",
+      "R09-E03",
+      "R09-E04",
+      "R09-E05",
+      "R09-E06"
+    ],
+    "formalR09Acceptance": false,
     "productionAcceptance": false
   }
 }

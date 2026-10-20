@@ -1,0 +1,10 @@
+{
+  "runId": "39347958875",
+  "oldSha": "4244b9449119bae00b732c5257303d5203487dfd",
+  "supersededBy": "819216eba0d09afb3048235e310e2854ef54779d",
+  "cancelAccepted": true,
+  "priorDatabaseLabCompleted": true,
+  "activeArtifactLab": false,
+  "reason": "Avoid repeating source checks for a superseded harness; latest source retains mandatory gates.",
+  "observedAt": "2026-10-20T00:33:38.595Z"
+}
