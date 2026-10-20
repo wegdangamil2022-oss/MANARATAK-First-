@@ -922,13 +922,13 @@ function SummaryView({
   const attentionPanel = urgentAlerts.hasUrgent ? (
       <section
         aria-label="أمور تحتاج انتباه الطالب"
-        className="mn-student-attention relative w-full overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-white dark:bg-[#09152F] text-[#142B5F] dark:text-[#F4F9FC] text-right font-['Cairo',sans-serif]"
+        className="mn-student-attention relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-white dark:bg-[#09152F] text-[#142B5F] dark:text-[#F4F9FC] text-right font-['Cairo',sans-serif]"
       >
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
         <div className="relative z-10 px-3 py-3.5 sm:px-5 sm:py-4">
           <div className="flex items-center gap-2.5 font-bold text-[#142B5F] dark:text-[#F4F9FC]">
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/60 bg-[#142B5F]"><Bell className="h-4 w-4 text-[#EAC775]" /></span>
-            <h2 className="text-[14.5px] sm:text-base font-bold text-[#142B5F] dark:text-[#F4F9FC]">يحتاج انتباهك</h2>
+            <h2 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F4F9FC]">يحتاج انتباهك</h2>
           </div>
           <div className="mt-3 space-y-2">
             {urgentAlerts.criticalDeadlines.slice(0, 2).map((tracker) => (
@@ -1089,13 +1089,13 @@ function SummaryView({
 
       {/* 4. Continue learning: one recent unfinished course, optimized for mobile. */}
       {activeCourse && (
-        <section aria-label="متابعة التعلم" className="relative mx-2 sm:mx-3 rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel">
+        <section aria-label="متابعة التعلم" className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel">
           <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
                 <BookOpen className="h-4 w-4 text-[#E5B54F]" />
               </span>
-              <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">متابعة التعلم</h2>
+              <h2 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">متابعة التعلم</h2>
             </div>
             <button
               type="button"
@@ -1141,13 +1141,13 @@ function SummaryView({
 
       {/* 5. Active application trackers: last two updates, with complete details in Opportunities. */}
       {activeMilestones.length > 0 && (
-        <section aria-label="ملفات التقديم النشطة" className="relative mx-2 sm:mx-3 rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]">
+        <section aria-label="ملفات التقديم النشطة" className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]">
           <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
                 <Route className="h-4 w-4 text-[#E5B54F]" />
               </span>
-              <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
+              <h2 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
             </div>
             <button type="button" onClick={() => setTab('OPPORTUNITIES')}
               className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-bold leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
@@ -1201,13 +1201,13 @@ function SummaryView({
 
       {/* 6. Recent activities: compact timeline, expanded history only on demand. */}
       {dashboard.timeline.length > 0 && (
-        <section aria-label="آخر الأنشطة والخطوات" className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]">
+        <section aria-label="آخر الأنشطة والخطوات" className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]">
           <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
                 <HistoryIcon className="h-4 w-4 text-[#E5B54F]" />
               </span>
-              <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">آخر الأنشطة والخطوات</h2>
+              <h2 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">آخر الأنشطة والخطوات</h2>
             </div>
             {dashboard.timeline.length > 3 && (
               <button type="button" onClick={() => setShowAllActivities((previous) => !previous)}
@@ -1238,13 +1238,13 @@ function SummaryView({
 
       {/* 7. Explore Platform Directory (Scholarships, Courses, Majors, Universities) - only for active students to avoid duplicate CTA for new students */}
       {!isNewStudent && (
-        <div className="rounded-2xl border border-[#D6A43B]/30 bg-gradient-to-r from-[#D6A43B]/10 via-[#F3CE74]/5 to-transparent p-4">
+        <div className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[#D6A43B]/30 bg-gradient-to-r from-[#D6A43B]/10 via-[#F3CE74]/5 to-transparent p-4">
           <div className="text-center max-w-xl mx-auto">
             <div className="inline-flex items-center justify-center gap-2">
               <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
               </div>
-              <h2 className="text-[13.5px] sm:text-sm font-bold text-[var(--mn-heading)]">استكشف الفرص في منارتك</h2>
+              <h2 className="text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">استكشف الفرص في منارتك</h2>
             </div>
             <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
             <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">
