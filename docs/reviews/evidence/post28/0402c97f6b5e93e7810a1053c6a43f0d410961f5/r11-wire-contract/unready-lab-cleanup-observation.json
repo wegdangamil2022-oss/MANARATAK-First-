@@ -1,0 +1,13 @@
+{
+  "sourceSha": "0402c97f6b5e93e7810a1053c6a43f0d410961f5",
+  "lab": "native-pg16-GJNlOH",
+  "postgresPid": 11868,
+  "postgresPort": 55218,
+  "apiReadinessFailed": true,
+  "browserWorkerExecuted": false,
+  "pgCtlStatusExitCode": 3,
+  "portListening": false,
+  "postgresAlreadyExited": true,
+  "gracefulStopProven": false,
+  "existingDatabasesTouched": false
+}

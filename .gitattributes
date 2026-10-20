@@ -21,3 +21,5 @@ docs/reviews/evidence/post28/*/r11-scenario-diagnostic/*.log whitespace=cr-at-eo
 docs/reviews/evidence/post28/*/r11-admin-mfa/** -text whitespace=cr-at-eol,-blank-at-eof
 
 docs/reviews/evidence/post28/*/r11-mfa-enrollment/** -text whitespace=cr-at-eol,-blank-at-eof
+
+docs/reviews/evidence/post28/*/r11-wire-contract/** -text whitespace=cr-at-eol,-blank-at-eof

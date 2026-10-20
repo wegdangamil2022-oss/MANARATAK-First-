@@ -1,0 +1,32 @@
+{
+  "sourceSha": "e53ff961d55d8a453795bea74e6b5caff53a4f0c",
+  "previousVersion": 1,
+  "currentVersion": 1,
+  "currentTheme": "SYSTEM",
+  "responses": [
+    {
+      "status": 403,
+      "keys": [
+        "type",
+        "title",
+        "status",
+        "detail",
+        "instance",
+        "code",
+        "traceId"
+      ]
+    },
+    {
+      "status": 403,
+      "keys": [
+        "type",
+        "title",
+        "status",
+        "detail",
+        "instance",
+        "code",
+        "traceId"
+      ]
+    }
+  ]
+}

@@ -125,3 +125,5 @@ R11 follow-up: five additional bounded scenario diagnostics completed; 30 operat
 R11 follow-up: fixed actual Admin login bootstrap cancellation, verified built Admin + MFA login/replay/logout in an isolated synthetic lab. Admin alone rebuilt; API/Web c8afe5f retained with independent source labels, not a unified release candidate. Linux contention/PG measurement added to CI; source guard corrected, actual Linux result pending. See POST28_R11_LINUX_ADMIN_FOLLOWUP_2026-10-20.md.
 
 R11 MFA enrollment: real built Admin UI enrollment, invalid password/code denial, encrypted pending credential, confirmation/session revocation, next-code login and enabled-state rendering verified. Mixed source local diagnostic; formal load acceptance remains open. See POST28_R11_MFA_ENROLLMENT_2026-10-20.md.
+
+R11 wire contract correction at 0402c97f6b5e93e7810a1053c6a43f0d410961f5: match canonical Problem Details code/status; targeted regression and real mapper pass. Native follow-up incomplete (fixture role first, then API unready with PostgreSQL already exited); no HTTP/Linux pass claimed after the fix.
