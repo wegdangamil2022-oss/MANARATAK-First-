@@ -105,7 +105,7 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     const evaluator=new AuthorizationEvaluatorService(new PrismaRoleRepository(db),new PrismaPolicyRepository(db),assignments,new DefaultPolicyEvaluator());
     certificates=certificateFacade(db);secondCertificates=certificateFacade(other);
     finance=new FinancePlatformUseCases(new PrismaFinanceRepository(db),{currencyReference:new PrismaFinanceCurrencyReferenceGateway(db),paymentGateways:new FinancePaymentGatewayRegistry([]),bankTransferGateways:new FinanceBankTransferGatewayRegistry([]),fxRateProvider:{providerKey:'R09_DISABLED',isConfigured:()=>false,fetchRate:async()=>{throw Error('R09_EXTERNAL_PROVIDER_FORBIDDEN');}},transferFeePolicy:{policyReference:'R09_UNUSED',basisPoints:0}});
-    await db.referenceCurrency.create({data:{id:fresh(),isoCode:'USD',name:'Synthetic USD',minorUnit:2}});
+    await db.referenceCurrency.upsert({where:{isoCode:'USD'},create:{id:fresh(),isoCode:'USD',name:'Synthetic USD',minorUnit:2},update:{}});
     students=[await principal('student'),await principal('student')];
     const cms=new PrismaCmsRepository(db),readModel=new CertificateReadModelService(new PrismaCertificateRepository(db),certificates);
     app=express();app.use(express.json());app.use(SecurityMiddlewareFactory.createCsrfGuard(security,{exemptBearerAuth:false}));
@@ -122,7 +122,7 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
   });
   afterAll(async()=>{
     await browser?.close();await new Promise(resolve=>server?server.close(resolve):resolve());await Promise.all([db?.$disconnect(),other?.$disconnect()]);
-    if(process.env.POST28_TARGET_CONTRACT_FILE)fs.writeFileSync(path.join(path.dirname(process.env.POST28_TARGET_CONTRACT_FILE),'r09-workflow-observations.json'),JSON.stringify(proof,null,2)+'\n');
+    if(process.env.POST28_TARGET_CONTRACT_FILE)fs.writeFileSync(path.join(path.dirname(process.env.POST28_TARGET_CONTRACT_FILE),'r09-workflow-observations-'+fresh()+'.json'),JSON.stringify(proof,null,2)+'\n',{flag:'wx'});
   });
 
   it('authors reviews publishes and withdraws current CMS snapshots using three actual capabilities',async()=>{
@@ -163,7 +163,8 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     await activateSyntheticAuthority();
     const student=students[0],courses=new PrismaCourseRepository(db),course=await courses.create({publicId:fresh(),slug:'r09-'+fresh(),canonicalName:fresh(),canonicalDedupKey:fresh(),displayName:'R09 completion source',accessType:'FREE_STUDY_AND_CERTIFICATE',originType:'NATIVE_MANARATAK_COURSE',directCourseUrl:'https://example.invalid/r09',status:'PUBLISHED',completenessStatus:'COMPLETE',certificateAvailable:true});
     const module=await db.courseModule.create({data:{courseId:course.id,title:'R09 actual module',position:1,status:'PUBLISHED'}}),lesson=await db.courseLesson.create({data:{courseId:course.id,moduleId:module.id,title:'R09 actual lesson',position:1,status:'PUBLISHED',lessonType:'ARTICLE',contentText:'Synthetic actual lesson'}});
-    await db.courseVersion.create({data:{courseId:course.id,versionNumber:1,reason:'R09 synthetic published fixture',createdBy:'R09_SYNTHETIC',snapshot:wire({course,modules:[module],lessons:[lesson],assets:[],quizzes:[],questionBanks:[],questions:[]})}});
+    await courses.updateStatus(course.id,'PUBLISHED');
+    expect(await db.courseVersion.count({where:{courseId:course.id}})).toBe(2);
     const progress=new CourseProgressUseCases(courses,new PrismaCourseCurriculumRepository(db),new PrismaCourseProgressRepository(db),undefined,undefined,new AtomicDomainMutationCoordinator(new AtomicAuditedOutboxMutationExecutor(new PrismaAtomicPersistenceUnitOfWork(db),new PrismaAuditRecordRepository(db),new PrismaTransactionalOutboxStore(db))));
     await progress.enroll(course.id,student.id);expect((await db.courseEnrollment.findUniqueOrThrow({where:{courseId_studentReferenceId:{courseId:course.id,studentReferenceId:student.id}}})).progressPercentage).toBe(0);
     await progress.markLessonProgress({courseId:course.id,studentReferenceId:student.id,lessonId:lesson.id,progressPercentage:100,status:'COMPLETED'});await progress.completeCourse(course.id,student.id);
@@ -208,7 +209,9 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     const key=fresh(),url='/student/'+owner.id+'/finance/invoices/'+inv.id+'/wallet-payment',body={walletId:wallet.id,consent:true,expectedVersion:inv.version,amount:money('100')};
     const replies=await Promise.all([call(owner,'post',url,body,key),call(owner,'post',url,body,key)]);expect(replies.filter(r=>r.status===200).length).toBeGreaterThan(0);expect(replies.every(r=>[200,409].includes(r.status)),JSON.stringify(replies.map(r=>({status:r.status,body:r.body})))).toBe(true);
     const facts=await financialFacts(inv.id),replay=await call(owner,'post',url,body,key);expect(replay.status,replay.text).toBe(200);expect(await financialFacts(inv.id)).toEqual(facts);expect(facts.invoice.status).toBe('PAID');expect(facts.invoice.dueMinorUnits).toBe('0');expect(facts.holds).toHaveLength(1);expect(facts.holds[0].status).toBe('CAPTURED');expect(facts.payments).toHaveLength(0);
-    expect(facts.postings).toHaveLength(1);const entries=facts.postings.flatMap(p=>p.entries),sum=direction=>entries.filter(e=>e.direction===direction).reduce((n,e)=>n+BigInt(e.amountMinorUnits),0n);expect(sum('DEBIT')).toBe(100n);expect(sum('CREDIT')).toBe(100n);
+    expect(facts.postings.map(p=>p.businessReferenceType).sort()).toEqual(['INVOICE','WALLET_HOLD_CAPTURE']);
+    const captures=facts.postings.filter(p=>p.businessReferenceType==='WALLET_HOLD_CAPTURE');expect(captures).toHaveLength(1);
+    const entries=captures.flatMap(p=>p.entries),sum=direction=>entries.filter(e=>e.direction===direction).reduce((n,e)=>n+BigInt(e.amountMinorUnits),0n);expect(sum('DEBIT')).toBe(100n);expect(sum('CREDIT')).toBe(100n);
     const denied=await call(students[1],'post','/student/'+students[1].id+'/finance/invoices/'+inv.id+'/wallet-payment',body,fresh());expect(denied.status).toBe(404);expect(await financialFacts(inv.id)).toEqual(facts);
     proof.observations.push({case:'SYNTHETIC_WALLET_PAYMENT_EXACTLY_ONE_EFFECT',invoiceId:inv.id,concurrentRequests:2,replayVerified:true,capturedHolds:1,providerPaymentRows:0,balancedDebit:'100',balancedCredit:'100',externalProvider:false});
   });

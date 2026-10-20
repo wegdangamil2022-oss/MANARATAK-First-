@@ -24,7 +24,7 @@ export const R09_LEARNER_APPLICATION_TABLES=Object.freeze(['CourseLessonProgress
 // complete a real lesson. This adds no DDL, ledger or production capability.
 export const R09_WORKFLOW_APPLICATION_TABLES=Object.freeze([
  'CmsCategory','CmsLocalizedContent','CmsContentTag','CmsContentAttachment',
- 'CmsWorkflowReview','CmsContentRevision','CmsEditorialLedger','CmsRedirect',
+ 'CmsWorkflowReview','CmsContentRevision','CmsEditorialLedger','CmsRedirect','CmsScheduledJob',
  'CourseModule','CourseLesson','CourseLessonProgress',
  ...CERTIFICATE_FIXTURE_APPLICATION_TABLES,
 ]);
