@@ -1,0 +1,27 @@
+{
+  "sourceSha": "68bb1809698435416656cb7b51ed0c1f5f1a545a",
+  "files": [
+    {
+      "path": "docs/reviews/section-27-task-status.json",
+      "sha256": "073f989ba58cd74799aa000801119d7ef81314a059c52169e8f194064679ee29"
+    },
+    {
+      "path": "config/release/section-task-inventory.json",
+      "sha256": "643d2feb6493fa8c7ee285199399c94f2151c014ccf35c77ab7867c8e99ccb31"
+    },
+    {
+      "path": "docs/reviews/MANARATAK_ADMIN_REVIEW_CODEX.md",
+      "sha256": "bacbc72cb40d958481d681a1e9d182987511fd5db79b9f2a99b46b3aa51fd5ec"
+    },
+    {
+      "path": "scripts/verify-cross-module-source-closure.mjs",
+      "sha256": "4bde7cc81c2231bb55696312b40ee40181dfb46c398a6235225a216c0ff5d35d"
+    }
+  ],
+  "masterTasks": 38,
+  "ledgerTasks": 38,
+  "releaseSection27Tasks": 38,
+  "allTaskIdentifiersExactlyMatch": true,
+  "sectionClosedOriginalValue": false,
+  "sectionClosedChanged": false
+}

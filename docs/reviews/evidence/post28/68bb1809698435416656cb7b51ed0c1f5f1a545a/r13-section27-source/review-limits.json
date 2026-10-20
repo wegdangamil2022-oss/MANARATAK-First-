@@ -1,0 +1,28 @@
+{
+  "taskReferences": 38,
+  "implementationFiles": 60,
+  "focusedManualReviews": [
+    "XMI-021",
+    "XMI-029",
+    "XMI-033"
+  ],
+  "otherTasksReferenceOnly": 35,
+  "sectionClosed": false,
+  "formalAcceptance": false,
+  "signaturesCreated": false,
+  "remainingSourceIssue": {
+    "file": "scripts/release/promote-environment.mjs",
+    "line": 61,
+    "description": "Windows CLI entry compares URL pathname to argv path; promotion command not invoked",
+    "status": "FIXED_IN_SUBSEQUENT_SOURCE_COMMIT_NOT_PROMOTION_ACCEPTANCE",
+    "productionPermissionGranted": false,
+    "fixSourceSha": "7877604b509c61f89ad7853d45b2beda30e2c2a6"
+  },
+  "collectorCorrections": {
+    "bufferLimit": "Read master document with explicit8MiB Git buffer",
+    "unicode": "Use escaped em/en dash in heading regex after a PowerShell read/write converted literal dash encoding",
+    "sourceOrTestSemanticsChanged": false
+  },
+  "section27TestsExecutedThisBatch": 0,
+  "releaseTestsExecutedThisBatch": 4
+}

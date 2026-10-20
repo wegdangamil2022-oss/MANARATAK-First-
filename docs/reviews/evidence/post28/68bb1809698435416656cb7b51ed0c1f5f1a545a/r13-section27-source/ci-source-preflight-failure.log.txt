@@ -1,0 +1,6 @@
+Selected failure lines; raw log retained outside Git.
+Raw log SHA256=644c414d07b9bd49e2c40225be6e531edfb5620cc4bd31a563702b77e92ea9d9
+2026-10-20T20:24:51.1555497Z       throw new Error('Environment inventory stale: run node scripts/config/environment-inventory.mjs --write');
+2026-10-20T20:24:51.1556113Z Error: Environment inventory stale: run node scripts/config/environment-inventory.mjs --write
+2026-10-20T20:24:51.1758799Z ##[error]Process completed with exit code 1.
+2026-10-20T20:24:51.2797611Z SOURCE_EXECUTION_REPORT=SOURCE_STEPS_FAILED_OR_SKIPPED RUNTIME_VERIFIED=FALSE PRODUCTION=BLOCKED

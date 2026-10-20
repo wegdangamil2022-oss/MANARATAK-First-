@@ -1,0 +1,22 @@
+{
+  "failedSourceSha": "68bb1809698435416656cb7b51ed0c1f5f1a545a",
+  "ciRunId": 39491660827,
+  "failedStep": "Cross-cutting source preflight",
+  "reason": "ENVIRONMENT_INVENTORY_STALE_AFTER_R13_CLI_TEST_REFERENCE",
+  "affectedRow": "SOURCE_SHA",
+  "variableNamesBeforeAndAfter": 324,
+  "secretValuesRead": false,
+  "exampleEnvironmentChanged": false,
+  "validatorChanged": false,
+  "failedCheckReexecuted": "node scripts/config/environment-inventory.mjs --check",
+  "correctedCheckOutcome": "PASS",
+  "generalTestOrBuildRepeated": false,
+  "newCiResult": "NOT_YET_VERIFIED",
+  "affectedRows": [
+    "SOURCE_SHA",
+    "PATH"
+  ],
+  "functionalDiff": "Add missing SOURCE_SHA test reference and PATH reference from the newly introduced isolated promotion-entry test",
+  "correctedSourceSha": "7877604b509c61f89ad7853d45b2beda30e2c2a6",
+  "checkRepeatedReason": "New tracked test introduced an additional PATH inventory source; regenerated and verified only affected inventory"
+}

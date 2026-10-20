@@ -272,7 +272,7 @@
       "id": "R13",
       "state": "REVIEW_PACKET_PREPARED_FORMAL_VALIDATION_STAGING_BLOCKED",
       "sourceReviewSha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
-      "latestReport": "docs/remediation/POST28_R13_REVIEW_PREPARATION_2026-10-20.md",
+      "latestReport": "docs/remediation/POST28_R13_SECTION27_SOURCE_CURATION_2026-10-20.md",
       "evidenceIndex": "docs/reviews/evidence/post28/56e14b1ef0aad35d48a67299feb3481233ae230f/r13-preparation/evidence-index.json",
       "verifierWindowsEntryFixed": true,
       "linkedHistoricalEvidenceFiles": 60,
@@ -293,7 +293,33 @@
         "R13-B04",
         "R13-B05",
         "R13-B06"
-      ]
+      ],
+      "section27SourceCuration": {
+        "sourceSha": "68bb1809698435416656cb7b51ed0c1f5f1a545a",
+        "taskReferences": 38,
+        "implementationFiles": 60,
+        "focusedManualReviewTasks": 3,
+        "otherTasksReferenceOnly": 35,
+        "sectionClosed": false,
+        "evidenceIndex": "docs/reviews/evidence/post28/68bb1809698435416656cb7b51ed0c1f5f1a545a/r13-section27-source/evidence-index.json"
+      },
+      "latestObservedCi": {
+        "sourceSha": "68bb1809698435416656cb7b51ed0c1f5f1a545a",
+        "runId": 39491660827,
+        "result": "failure",
+        "failedStep": "Cross-cutting source preflight",
+        "cause": "Stale SOURCE_SHA test reference corrected; PATH reference for new promotion-entry test also regenerated",
+        "correctionCi": "NOT_YET_VERIFIED",
+        "correctionSourceSha": "7877604b509c61f89ad7853d45b2beda30e2c2a6"
+      },
+      "pendingWindowsPromotionEntryFix": false,
+      "windowsPromotionEntryFix": {
+        "sourceSha": "7877604b509c61f89ad7853d45b2beda30e2c2a6",
+        "newEntryAndImportTestsPassed": 2,
+        "existingSyntheticReconcileTestsPassed": 2,
+        "commandInvoked": false,
+        "authorizationAndEvidenceGuardsUnchanged": true
+      }
     }
   ],
   "validation": {
