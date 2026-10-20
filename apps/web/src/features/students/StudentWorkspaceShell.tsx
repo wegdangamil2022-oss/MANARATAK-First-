@@ -160,7 +160,7 @@ export function StudentWorkspaceShell({
               onClick={() => onTabChange(item.id)}
               className={`mn-student-nav-tile min-w-0 min-h-[76px] rounded-xl border px-1.5 py-2.5 flex flex-col items-center justify-center gap-1.5 transition-colors duration-150 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] ${
                 active
-                  ? 'border-2 border-[#B38018] bg-white text-[#142B5F] dark:bg-[#10264A] dark:text-[#F3F6F8] shadow-[0_0_0_1px_rgba(179,128,24,0.14)] font-medium'
+                  ? 'border-2 border-[#142B5F] bg-white text-[#142B5F] dark:border-[#142B5F] dark:bg-[#10264A] dark:text-[#F3F6F8] shadow-sm font-medium'
                   : 'border-[#B38018]/65 bg-white text-[#29404B] dark:border-[#B38018]/75 dark:bg-[#10264A] dark:text-[#EEF4F6] hover:border-[#B38018] hover:bg-[#F5F8F8] dark:hover:bg-[#183456] font-medium'
               }`}
             >
