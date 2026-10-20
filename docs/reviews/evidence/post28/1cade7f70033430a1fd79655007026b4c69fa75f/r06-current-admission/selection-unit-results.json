@@ -1,0 +1,11 @@
+{
+  "sourceSha": "1cade7f70033430a1fd79655007026b4c69fa75f",
+  "command": "node --test tests/database/post28-suite-selection.test.mjs",
+  "executed": 6,
+  "passed": 6,
+  "failed": 0,
+  "skipped": 0,
+  "newCases": 2,
+  "redBeforeImplementation": "Missing requireCurrentSuiteSelection export",
+  "scope": "Selection safety; not DB acceptance"
+}

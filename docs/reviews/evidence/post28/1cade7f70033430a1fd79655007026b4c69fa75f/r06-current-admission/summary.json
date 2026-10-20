@@ -1,0 +1,43 @@
+{
+  "kind": "POST28_DATABASE_SUITE_EXECUTION",
+  "sourceSha": "1cade7f70033430a1fd79655007026b4c69fa75f",
+  "suite": "admission-null-identity",
+  "caseExact": null,
+  "fullDiscoveryCases": 5,
+  "fullProfileAcceptance": true,
+  "authorization": {
+    "migrationTransition": {
+      "schemaUnchanged": true,
+      "historicalPrefixMatched": 110,
+      "reviewedAppendOnlyMigration": {
+        "name": "20261019000100_admission_null_identity",
+        "checksum": "013eb65a4295987696e3202c06a32cf5874adb389a83467f39ca37cf67bb4efa"
+      },
+      "scope": "LOCAL_SYNTHETIC_ONLY",
+      "productionAuthorized": false
+    },
+    "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY",
+    "R04": "PASS_LOCAL_MATCHING_SCHEMA",
+    "R05": "BLOCKED_USER_AUTHORIZED_SCOPED_R06",
+    "fullR06Acceptance": false,
+    "deploymentAuthorized": false
+  },
+  "targets": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698874740500424040",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "expected": 5,
+  "executed": 5,
+  "passed": 5,
+  "failed": 0,
+  "skipped": 0
+}

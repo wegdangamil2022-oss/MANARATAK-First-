@@ -109,6 +109,10 @@
     {
       "id": "R06",
       "state": "CORE_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+      "latestPracticalReview": "docs/remediation/POST28_R06_CURRENT_REVIEW_2026-10-21.md",
+      "latestCurrentSchemaSuite": "admission-null-identity",
+      "latestDatabaseEvidenceSourceSha": "1cade7f70033430a1fd79655007026b4c69fa75f",
+      "latestDatabaseCasesPassed": 5,
       "formalAcceptance": "OPEN_COMPREHENSIVE_SCOPE",
       "reference": "docs/remediation/POST28_R06_CORE_CLOSURE_2026-10-19.md",
       "nullRepair": "docs/remediation/POST28_R06_NULL_IDENTITY_REPAIR_2026-10-19.md",

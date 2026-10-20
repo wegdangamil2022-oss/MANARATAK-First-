@@ -1,0 +1,10 @@
+{
+  "sourceSha": "1c02e579ab550c48aef6a8aa29a99139efc141f8",
+  "command": "node --test --test-name-pattern=\"runner exposes\" tests/database/post28-suite-selection.test.mjs",
+  "executed": 1,
+  "passed": 1,
+  "failed": 0,
+  "redBeforeFix": "The CLI hid PRE111 diagnostic as generic input invalid",
+  "sqlOrAssertionsChangedAfterDbRun": false,
+  "newDatabaseExecutionClaimed": false
+}
