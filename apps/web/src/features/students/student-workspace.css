@@ -58,3 +58,16 @@
 .dark .mn-student-attention .mn-student-attention-action:hover {
   background-color: #28617a;
 }
+
+/* Student quick-access selection: manual theme toggle must keep a clear gold
+   active state, without changing the inactive typography or card content. */
+.dark .mn-student-workspace .mn-student-nav button[aria-current='page'] {
+  background-color: #D6A43B;
+  color: #142B5F;
+}
+.dark .mn-student-workspace .mn-student-nav button[aria-current='page'] svg {
+  color: #142B5F;
+}
+.dark .mn-student-workspace .mn-student-nav button:not([aria-current='page']) {
+  color: #EEF4F6;
+}
