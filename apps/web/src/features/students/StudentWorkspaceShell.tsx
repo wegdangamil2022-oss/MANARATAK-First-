@@ -78,7 +78,7 @@ export function StudentWorkspaceShell({
       {/* Full-bleed student identity on mobile: navy dominant, restrained teal at the right edge. */}
       <section
         aria-label="بطاقة هوية الطالب"
-        className="mn-inverse relative isolate -mx-3 sm:-mx-6 mt-4 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-0 shadow-none text-white"
+        className="mn-inverse relative isolate -mx-3 sm:-mx-6 mt-0 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-0 shadow-none text-white"
         style={{ backgroundImage: 'linear-gradient(105deg, #142B5F 0%, #142B5F 67%, #173E67 85%, #0E7C86 100%)' }}
       >
         <div className="relative z-10 p-3.5 sm:p-5">
@@ -147,7 +147,7 @@ export function StudentWorkspaceShell({
       </section>
 
       {/* Original P15 navigation; no additional account sections. */}
-      <div role="navigation" aria-label="أقسام حساب الطالب" className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] mt-0 p-1.5 sm:p-2 rounded-none bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-x-0 border-t-0 border-b border-[var(--mn-border)] shadow-none grid grid-cols-4 lg:grid-cols-8 gap-1 sm:gap-1.5 mn-panel">
+      <div role="navigation" aria-label="أقسام حساب الطالب" className="mn-student-nav relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] mt-0 p-1.5 sm:p-2 rounded-none bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-x-0 border-t-0 border-b border-[var(--mn-border)] shadow-none grid grid-cols-4 lg:grid-cols-8 gap-1 sm:gap-1.5 mn-panel">
         {tabs.map((item) => {
           const Icon = item.icon;
           const active = tab === item.id;
@@ -160,12 +160,12 @@ export function StudentWorkspaceShell({
               onClick={() => onTabChange(item.id)}
               className={`min-w-0 rounded-xl px-1 sm:px-1.5 py-2 flex flex-col items-center gap-1 transition-all cursor-pointer ${
                 active
-                  ? 'bg-[var(--mn-primary)] text-white shadow-xs font-bold'
-                  : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)] dark:hover:bg-[var(--mn-surface-elevated)] font-medium'
+                  ? 'bg-[var(--mn-primary)] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-xs font-bold'
+                  : 'text-[#111827] dark:text-[#EEF4F6] hover:bg-[var(--mn-page)] dark:hover:bg-[var(--mn-surface-elevated)] font-bold'
               }`}
             >
-              <Icon className={`w-5 h-5 ${active ? 'text-[#E5B54F]' : ''}`} />
-              <span className="text-[10px] sm:text-[11px] font-bold leading-tight break-words w-full min-h-[2.4em] flex items-center justify-center text-center">{item.label}</span>
+              <Icon className={`w-5 h-5 ${active ? 'text-[#E5B54F] dark:text-[#142B5F]' : 'text-[#586A74] dark:text-[#EEF4F6]'}`} />
+              <span className="text-xs sm:text-sm font-bold font-['Cairo',sans-serif] leading-tight break-words w-full min-h-[2.4em] flex items-center justify-center text-center">{item.label}</span>
             </button>
           );
         })}
