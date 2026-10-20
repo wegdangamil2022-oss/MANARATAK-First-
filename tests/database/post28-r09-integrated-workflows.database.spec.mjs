@@ -43,6 +43,8 @@ import {CertificateUseCases} from '../../packages/application/src/certificates/u
 import {CertificateReadModelService} from '../../packages/application/src/certificates/use-cases/CertificateReadModelService.ts';
 import {CertificateCompletionEventConsumer} from '../../packages/application/src/certificates/use-cases/CertificateCompletionEventConsumer.ts';
 import {PrismaCertificateRepository} from '../../packages/infrastructure/src/certificates/PrismaCertificateRepository.ts';
+import {CertificateArtifactRenderUseCase} from '../../packages/application/src/certificates/use-cases/CertificateArtifactRenderUseCase.ts';
+import {ProviderNeutralCertificateRenderingService} from '../../packages/infrastructure/src/certificates/ProviderNeutralCertificateRenderingService.ts';
 import {PrismaCourseRepository} from '../../packages/infrastructure/src/courses/PrismaCourseRepository.ts';
 import {PrismaCourseCurriculumRepository} from '../../packages/infrastructure/src/courses/PrismaCourseCurriculumRepository.ts';
 import {PrismaCourseProgressRepository} from '../../packages/infrastructure/src/courses/PrismaCourseProgressRepository.ts';
@@ -77,11 +79,13 @@ function call(p,method,url,body,key=fresh()){
   if(!['get','head'].includes(method))req=req.set('Cookie','manaratak_refresh='+p.refresh).set('X-CSRF-Token',security.generateCsrfToken(p.refresh)).set('Idempotency-Key',key);
   return body===undefined?req:req.send(body);
 }
-async function historicalAsset(ownerId,ownerType,classification=AssetSecurityClassification.INTERNAL){
+async function historicalAsset(ownerId,ownerType,classification=AssetSecurityClassification.INTERNAL,artifact){
   // Inert materialized historical trust fixture, not a fresh scanner or sanitizer claim.
-  const id=fresh(),bytes=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aGZkAAAAASUVORK5CYII=','base64'),checksum=createHash('sha256').update(bytes).digest('hex');
-  const quarantine=new AssetStorageLocator(AssetStorageZone.QUARANTINE,'r09-synthetic','uploads/'+id+'.png');
-  await assets.save(new AssetRecord({id:new AssetId(id),reference:new AssetReference('r09-'+id),owner:new AssetOwnerReference(ownerId,ownerType),locator:new AssetStorageLocator(AssetStorageZone.CLEAN,'r09-synthetic','clean/'+id+'.png'),metadata:new AssetMetadata('synthetic.png','image/png','png',bytes.length),retention:new AssetRetentionMetadata(AssetRetentionCategory.TEMPORARY,new Date(Date.now()+180*86400000)),classification,state:AssetLifecycleState.ACTIVE,checksum:new AssetChecksum('sha256',checksum),sanitization:new AssetSanitizationMetadata(true,new Date(),'Synthetic historical trust fixture only'),malwareScan:{status:'PASSED',scannedAt:new Date().toISOString(),locator:quarantine.value},uploadVerification:{locator:quarantine.value,byteSize:bytes.length,verifiedMimeType:'image/png',checksumSha256:checksum,verifiedAt:new Date().toISOString(),signatureVerified:true}}));
+  const id=fresh(),bytes=artifact?Buffer.from(artifact.bytes):Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aGZkAAAAASUVORK5CYII=','base64'),checksum=createHash('sha256').update(bytes).digest('hex');
+  const extension=artifact?.fileExtension??'png',mime=artifact?.mimeType??'image/png';
+  const directory=path.join(path.dirname(process.env.POST28_TARGET_CONTRACT_FILE),'r09-materialized-assets');fs.mkdirSync(directory,{recursive:true});fs.writeFileSync(path.join(directory,id+'.'+extension),bytes,{flag:'wx'});
+  const quarantine=new AssetStorageLocator(AssetStorageZone.QUARANTINE,'r09-synthetic','uploads/'+id+'.'+extension);
+  await assets.save(new AssetRecord({id:new AssetId(id),reference:new AssetReference('r09-'+id),owner:new AssetOwnerReference(ownerId,ownerType),locator:new AssetStorageLocator(AssetStorageZone.CLEAN,'r09-synthetic','clean/'+id+'.'+extension),metadata:new AssetMetadata(artifact?.filename??'synthetic.png',mime,extension,bytes.length),retention:new AssetRetentionMetadata(AssetRetentionCategory.TEMPORARY,new Date(Date.now()+180*86400000)),classification,state:AssetLifecycleState.ACTIVE,checksum:new AssetChecksum('sha256',checksum),sanitization:new AssetSanitizationMetadata(true,new Date(),'Synthetic historical trust fixture only; NOT fresh EAP processing'),malwareScan:{status:'PASSED',scannedAt:new Date().toISOString(),locator:quarantine.value},uploadVerification:{locator:quarantine.value,byteSize:bytes.length,verifiedMimeType:mime,checksumSha256:checksum,verifiedAt:new Date().toISOString(),signatureVerified:true}}));
   return id;
 }
 function certificateFacade(client){return new CertificateUseCases(new PrismaCertificateRepository(client),new PrismaCourseRepository(client),new PrismaAssetRecordRepository(client),{signingSecret,signingKeyReference,productionLike:false,publicVerificationBaseUrl:'http://localhost:5173'},undefined,undefined,new PrismaCourseCurriculumRepository(client));}
@@ -187,10 +191,35 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     const unchanged=await db.certificate.findUniqueOrThrow({where:{id:first.id}});
     for(const kind of ['pdf','preview']){const denied=await call(students[1],'post','/student/certificates/'+first.id+'/artifacts/'+kind+'/delivery-grant',{});expect(denied.status,denied.text).toBe(404);expect(denied.text).not.toContain(student.id);}
     expect(await db.certificate.findUniqueOrThrow({where:{id:first.id}})).toEqual(unchanged);
+    // Exercise the real three-artifact renderer and durable attachment orchestration.
+    // Storage is an explicit historical trust fixture, never fresh EAP/provider acceptance.
+    const artifactFiles=[],repository=new PrismaCertificateRepository(db);
+    const renderer=new CertificateArtifactRenderUseCase(repository,new ProviderNeutralCertificateRenderingService({resolve:async(id,hash)=>{
+      const bytes=fs.readFileSync(path.join(path.dirname(process.env.POST28_TARGET_CONTRACT_FILE),'r09-materialized-assets',id+'.png'));expect(createHash('sha256').update(bytes).digest('hex')).toBe(hash);return{bytes,mimeType:'image/png'};
+    }}),{store:async({certificateId,artifact})=>{
+      const id=await historicalAsset(certificateId,'Certificate',artifact.kind==='QR'?AssetSecurityClassification.PUBLIC:AssetSecurityClassification.INTERNAL,artifact);
+      artifactFiles.push({id,kind:artifact.kind,extension:artifact.fileExtension,sha256:createHash('sha256').update(artifact.bytes).digest('hex'),bytes:artifact.bytes.length});return id;
+    }},certificates);
+    const rendered=await renderer.renderCertificate(first.id,'R09_SYNTHETIC_RENDERER',event.id);expect(rendered.replayed).toBe(false);
+    expect(artifactFiles.map(a=>a.kind)).toEqual(['PDF','PREVIEW','QR']);
+    for(const artifact of artifactFiles){
+      const file=fs.readFileSync(path.join(path.dirname(process.env.POST28_TARGET_CONTRACT_FILE),'r09-materialized-assets',artifact.id+'.'+artifact.extension));expect(createHash('sha256').update(file).digest('hex')).toBe(artifact.sha256);expect(file.length).toBe(artifact.bytes);
+      if(artifact.kind==='PDF')expect(file.subarray(0,5).toString()).toBe('%PDF-');else expect(file.toString()).toContain('<svg');
+    }
+    const attached=await db.certificate.findUniqueOrThrow({where:{id:first.id}});expect(attached.metadata.renderJob.state).toBe('COMPLETE');
+    const mutationCount=await db.certificateLedgerEntry.count({where:{certificateId:first.id,action:'ARTIFACTS_ATTACHED'}});expect(mutationCount).toBe(1);
+    expect(await renderer.renderCertificate(first.id,'R09_SYNTHETIC_RENDERER',event.id)).toMatchObject({...rendered,replayed:true});expect(artifactFiles).toHaveLength(3);
+    expect(await db.certificate.findUniqueOrThrow({where:{id:first.id}})).toEqual(attached);expect(await db.certificateLedgerEntry.count({where:{certificateId:first.id,action:'ARTIFACTS_ATTACHED'}})).toBe(mutationCount);
+    for(const kind of ['pdf','preview']){
+      expect(await certificates.deliveryArtifact(first.id,kind,student.id)).toBe(kind==='pdf'?rendered.certificatePdfAssetId:rendered.previewImageAssetId);
+      const denied=await call(students[1],'post','/student/certificates/'+first.id+'/artifacts/'+kind+'/delivery-grant',{});expect(denied.status,denied.text).toBe(404);expect(denied.text).not.toContain(student.id);
+    }
+    expect(await db.certificate.findUniqueOrThrow({where:{id:first.id}})).toEqual(attached);
     const valid=await request(app).get('/certificates/verify/'+first.verificationCode);expect(valid.status).toBe(200);expect(valid.body).toMatchObject({isValid:true,integrityVerified:true});expect(valid.text).not.toContain(student.id);
     await certificates.revoke(first.id,'Synthetic R09 revocation','R09_SYNTHETIC_AUTHORITY_CHECKER');await certificates.revoke(first.id,'Repeated synthetic R09 revocation','R09_SYNTHETIC_AUTHORITY_CHECKER');
     const revoked=await request(app).get('/certificates/verify/'+first.verificationCode);expect(revoked.body).toMatchObject({isValid:false,integrityVerified:true,status:'REVOKED'});expect(await db.certificateLedgerEntry.count({where:{certificateId:first.id,action:'REVOKED'}})).toBe(1);
-    proof.observations.push({case:'ACTUAL_LESSON_TO_ONE_SIGNED_CERTIFICATE',courseId:course.id,eventId:event.id,certificateId:first.id,consumers:2,replays:1,validThenRevoked:true,foreignArtifactsDenied:true,artifactRendererExercised:false});
+    await expect(certificates.deliveryArtifact(first.id,'pdf',student.id)).rejects.toThrow('CERTIFICATE_ARTIFACT_STATE_INVALID');await expect(renderer.renderCertificate(first.id)).rejects.toThrow('CERTIFICATE_ARTIFACT_STATE_INVALID');
+    proof.observations.push({case:'ACTUAL_LESSON_TO_ONE_SIGNED_CERTIFICATE',courseId:course.id,eventId:event.id,certificateId:first.id,consumers:2,replays:1,validThenRevoked:true,foreignArtifactsDenied:true,artifactRendererExercised:true,renderReplayWithoutAdditionalWrites:true,artifactFiles,freshEapProcessing:false,providerDeliveryGrantExercised:false});
   });
 
   it('keeps original student document bindings consent and private invoices unchanged on foreign access and mutation',async()=>{
