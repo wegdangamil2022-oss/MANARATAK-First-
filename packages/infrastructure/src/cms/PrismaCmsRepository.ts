@@ -208,6 +208,11 @@ export class PrismaCmsRepository implements ICmsRepository {
     const row = await this.db.cmsContentNode.findUnique({
       where: { id },
       include: {
+        publishedPayloads: {
+          where: { status: CmsContentStatus.PUBLISHED },
+          select: { locale: true },
+          orderBy: { locale: 'asc' },
+        },
         domainLinks: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] },
         localizedPayloads: {
           include: {
@@ -237,6 +242,7 @@ export class PrismaCmsRepository implements ICmsRepository {
     }
     return {
       ...this.content(row),
+      publishedLocales: row.publishedPayloads.map((entry: { locale: string }) => entry.locale),
       localizedPayloads: row.localizedPayloads.map((entry: any) => this.localized(entry)),
       tags: [...tags.values()],
       attachments,

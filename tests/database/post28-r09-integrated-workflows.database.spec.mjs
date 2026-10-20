@@ -147,6 +147,7 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     for(const locale of ['ar','en']){
       const draft=await call(author,'put','/admin/cms/content/'+id+'/localized',{locale,localizedSlug:slug+'-'+locale,title:'R09 '+locale+' published owner',summary:'Synthetic current owner summary',body:'<p>R09 '+locale+' public body</p>',seoMetadata:{title:'R09 '+locale,description:'Synthetic current owner metadata'}});expect(draft.status,draft.text).toBe(200);
       const neverPublishedArchive=await call(publisher,'post','/admin/cms/content/'+id+'/archive',{locale,expectedVersion:draft.body.version});expect(neverPublishedArchive.status,neverPublishedArchive.text).toBe(422);
+      expect((await call(author,'get','/admin/cms/content/'+id)).body.publishedLocales).not.toContain(locale);
       const firstPublic=await request(app).get('/cms/content/'+slug+'-'+locale).query({locale});expect(firstPublic.status).toBe(404);
       const submitted=await call(author,'post','/admin/cms/content/'+id+'/submit-review',{locale,expectedVersion:draft.body.version});expect(submitted.status,submitted.text).toBe(200);
       const forbidden=await call(author,'post','/admin/cms/content/'+id+'/approve',{locale,expectedVersion:submitted.body.version});expect(forbidden.status).toBe(403);
@@ -162,10 +163,12 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     // Editing a translation must not replace the last published immutable body.
     const edited=await call(author,'put','/admin/cms/content/'+id+'/localized',{locale:'ar',localizedSlug:slug+'-ar',title:'R09 unreviewed replacement',summary:'Draft only summary',body:'<p>R09 private replacement body</p>',seoMetadata:{title:'R09 draft',description:'Synthetic draft metadata'},expectedVersion:bodies.ar.version});expect(edited.status,edited.text).toBe(200);
     const stillPublished=await request(app).get('/cms/content/'+slug+'-ar').query({locale:'ar'});expect(stillPublished.status).toBe(200);expect(stillPublished.text).not.toContain('private replacement');expect(stillPublished.text).toContain('R09 ar public body');
+    const publicationDetail=await call(publisher,'get','/admin/cms/content/'+id);expect(publicationDetail.status,publicationDetail.text).toBe(200);expect(publicationDetail.body.publishedLocales).toEqual(['ar','en']);expect(publicationDetail.body.localizedPayloads.find(row=>row.locale==='ar').state).toBe('DRAFT');
     for(const locale of ['ar','en']){
       const current=await db.cmsLocalizedContent.findUniqueOrThrow({where:{contentId_locale:{contentId:id,locale}}});
       const stale=await call(publisher,'post','/admin/cms/content/'+id+'/archive',{locale,expectedVersion:current.version+1});expect(stale.status,stale.text).toBe(409);
       const archived=await call(publisher,'post','/admin/cms/content/'+id+'/archive',{locale,expectedVersion:current.version});expect(archived.status,archived.text).toBe(200);
+      expect((await call(publisher,'get','/admin/cms/content/'+id)).body.publishedLocales).not.toContain(locale);
       const hidden=await request(app).get('/cms/content/'+slug+'-'+locale).query({locale});expect(hidden.status).toBe(404);expect(hidden.text).not.toContain('public body');
     }
     await page.goto(origin+'/r09-origin');await page.goBack();await page.reload();expect(await page.getByRole('heading',{name:'R09 ar published owner',exact:true}).count()).toBe(0);expect(await page.locator('body').innerText()).not.toContain('R09 ar public body');
