@@ -20,6 +20,14 @@ export const R08_OUTBOX_FIXTURE_APPLICATION_TABLES=Object.freeze(['StudentWorksp
 export const R08_SESSION_FIXTURE_APPLICATION_TABLES=Object.freeze(['CredentialRecord']);
 export const R08_PROVIDER_FIXTURE_APPLICATION_TABLES=Object.freeze(['FinancePaymentAttemptRecord']);
 export const R09_LEARNER_APPLICATION_TABLES=Object.freeze(['CourseLessonProgress']);
+// Only the explicit R09 synthetic workflow lab may author CMS revisions and
+// complete a real lesson. This adds no DDL, ledger or production capability.
+export const R09_WORKFLOW_APPLICATION_TABLES=Object.freeze([
+ 'CmsCategory','CmsLocalizedContent','CmsContentTag','CmsContentAttachment',
+ 'CmsWorkflowReview','CmsContentRevision','CmsEditorialLedger','CmsRedirect',
+ 'CourseModule','CourseLesson','CourseLessonProgress',
+ ...CERTIFICATE_FIXTURE_APPLICATION_TABLES,
+]);
 export const TRANSACTION_APPLICATION_TABLES=Object.freeze([
  'ImportRateBudget', // Synthetic distributed source acquisition reservation tests.
  'CertificateVerificationLog', // Actual verification analytics transaction test.
