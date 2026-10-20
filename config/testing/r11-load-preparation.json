@@ -123,6 +123,13 @@
     "adminMfa": "docs/reviews/evidence/post28/50e109e3ece76c6b5acb832be9fcd747450821cb/r11-admin-mfa/evidence-index.json",
     "representativeLaunchDataset": false,
     "sloAcceptance": false,
-    "adminMfaEnrollment": "docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json"
+    "adminMfaEnrollment": "docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json",
+    "linuxContention": "docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json"
+  },
+  "practicalDiagnosticScope": {
+    "status": "PRACTICAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+    "validatedCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+    "closeout": "docs/remediation/POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.json",
+    "formalLoadSloAcceptance": false
   }
 }

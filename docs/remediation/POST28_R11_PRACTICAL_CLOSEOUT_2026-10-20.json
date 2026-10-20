@@ -1,0 +1,70 @@
+{
+  "kind": "POST28_R11_PRACTICAL_CLOSEOUT",
+  "status": "PRACTICAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+  "recordedAt": "2026-10-20T18:49:29.330Z",
+  "validatedCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "ci": {
+    "runId": 39475394144,
+    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39475394144",
+    "pushResult": "success",
+    "observedCheckRuns": 23,
+    "allObservedCheckRunsPassed": true
+  },
+  "evidence": "docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json",
+  "practicalScopeComplete": true,
+  "formalAcceptance": false,
+  "formalLoadSloAcceptance": false,
+  "productionAcceptance": false,
+  "allSoftwareDefectsExcluded": false,
+  "exceptions": [
+    {
+      "id": "E1",
+      "notExecuted": "Representative launch dataset, approved per-category SLO and representative concurrent load",
+      "impact": "Small synthetic diagnostics cannot establish production capacity or tail latency",
+      "blocksLocalDiagnostic": false,
+      "blocksProductionAcceptance": true,
+      "resolution": "Establish launch volume and category budgets before preparing a representative dataset and running the scoped load profile"
+    },
+    {
+      "id": "E2",
+      "notExecuted": "Driver pool checkout wait measurement",
+      "impact": "queryRoundTripMs and active connections do not measure pool wait; poolWaitMs remains null",
+      "blocksLocalDiagnostic": false,
+      "blocksProductionAcceptance": true,
+      "resolution": "Instrument supported pool checkout timing and measure under the agreed workload"
+    },
+    {
+      "id": "E3",
+      "notExecuted": "Complete built Admin CMS author/review/publish/withdraw browser journey",
+      "impact": "Current API workflow with distinct actors and public browser checks passed; entire Admin journey remains unverified",
+      "blocksLocalDiagnostic": false,
+      "blocksProductionAcceptance": true,
+      "resolution": "Execute only the remaining Admin UI workflow with separate synthetic actors and actual MFA"
+    },
+    {
+      "id": "E4",
+      "notExecuted": "Complete import review/publication pipeline under load",
+      "impact": "Only canonical source identities and initial receipts were measured; full pipeline throughput remains unknown",
+      "blocksLocalDiagnostic": false,
+      "blocksProductionAcceptance": true,
+      "resolution": "Run one inert-file import through actual review/publication and measure with the scoped workload"
+    },
+    {
+      "id": "E5",
+      "notExecuted": "All real outbox consumers under representative load",
+      "impact": "Claim/renew/complete and inert audit delivery are proven; this does not certify every consumer or provider",
+      "blocksLocalDiagnostic": false,
+      "blocksProductionAcceptance": true,
+      "resolution": "Exercise required real consumers with synthetic effects, scoped budgets and approved provider boundaries"
+    }
+  ],
+  "priorStageAcceptanceChanged": false,
+  "productionTouched": false,
+  "neonTouched": false,
+  "mainMerged": false,
+  "notes": [
+    "Practical closeout is separate from formal R11 SLO acceptance; no load-slo gate was marked PASS",
+    "Prior finance diagnostic elapsedSeconds=59.9998578 is preserved exactly and does not satisfy the strict 60-second formal floor",
+    "Final documentation commit is not automatically the verified release candidate SHA"
+  ]
+}

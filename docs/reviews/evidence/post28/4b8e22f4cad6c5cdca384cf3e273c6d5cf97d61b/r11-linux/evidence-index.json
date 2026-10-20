@@ -1,0 +1,97 @@
+{
+  "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "runId": 39475394144,
+  "runUrl": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39475394144",
+  "artifactId": 12288619502,
+  "archiveSha256": "688100b0692f2344f2e8f9e6d3e29181d39c44237dbf359020407678c47077ee",
+  "files": [
+    {
+      "path": "runtime-result.json",
+      "sha256": "ff02585320f48ca69f29422b0d29a248494f946035cfe43eb1e00c5adff8b029",
+      "bytes": 34606
+    },
+    {
+      "path": "r11-contention.json",
+      "sha256": "2ebe0359fc97ebc861a513963cb190a9a1ac397ce382c9a329376faa5a016475",
+      "bytes": 8745
+    },
+    {
+      "path": "runtime-layer.json",
+      "sha256": "7dc8624bf83882016a3a469908f26b4f55000fa7becc95761673a8d08be19528",
+      "bytes": 1910
+    },
+    {
+      "path": "linux-image-probe.json",
+      "sha256": "1ac25c5ab9f57bcc6f958e2670f3097b30ffa3ad59051370948ec58a607b993a",
+      "bytes": 1284
+    },
+    {
+      "path": "cms-rich-text-proof.json",
+      "sha256": "7c8d01a98a3afd947b6e020ecfc6e94ed9ca034f51cf68c47230738c15cf7d16",
+      "bytes": 629
+    },
+    {
+      "path": "ci-push-status.json",
+      "sha256": "decde45dd22be3f6d6c760ff2104daa2535e6a8ce773beef90e36c81a6f38c93",
+      "bytes": 14845
+    },
+    {
+      "path": "source-checks-observation.json",
+      "sha256": "447328e130d659b3a09f711b59461241a2c9ea2b54a375a052cb19fcb8f880a1",
+      "bytes": 5930
+    },
+    {
+      "path": "retained-evidence-audit.json",
+      "sha256": "2d5c832529ea29a677fd9bf251f9c3704a59a5ed76fb39eb3554e8723e7a03f7",
+      "bytes": 3490
+    },
+    {
+      "path": "audit-r11-retained-evidence.mjs.txt",
+      "sha256": "3b104c851d27b0accdc2e9c4604a5121c61c5bd18f5fafbd9eaa09eb0d2293b8",
+      "bytes": 3370
+    },
+    {
+      "path": "workflow-result.json",
+      "sha256": "a9a00cd150ee9f35856bd941d8fde77dec2431e5809646899ea66822d054fa29",
+      "bytes": 384
+    },
+    {
+      "path": "workflow-suite-summary.json",
+      "sha256": "a1de766d75f2921335f9ea05b9230c1b4a2658a96a87734eae13f41fcbb63a8c",
+      "bytes": 1230
+    },
+    {
+      "path": "workflow-observations.json",
+      "sha256": "195c092048cde255e1417265f75620975cd123442fd4b8dc4c8f9aff299eed64",
+      "bytes": 4166
+    }
+  ],
+  "measurements": {
+    "p50Ms": 31.51520299999538,
+    "p95Ms": 159.5060319999975,
+    "p99Ms": 159.5060319999975,
+    "elapsedSeconds": 60.00305169,
+    "maxima": {
+      "apiCpuPercent": 0.05,
+      "postgresCpuPercent": 0.03,
+      "apiResidentMemoryBytes": 221354393.6,
+      "postgresResidentMemoryBytes": 150260940.8,
+      "applicationConnections": 6
+    }
+  },
+  "diagnosticPassed": true,
+  "representativeLaunchDataset": false,
+  "sloAcceptance": false,
+  "productionAcceptance": false,
+  "supportingWorkflowArtifact": {
+    "id": 12289732415,
+    "archiveSha256": "bc6949656885c48cf77853014d0e1a93e9b733c30a99fa93cef3ae63406c7570",
+    "casesPassed": 5,
+    "formalR09Acceptance": false
+  },
+  "observedCheckRuns": {
+    "count": 23,
+    "allCompletedSuccessfully": true,
+    "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b"
+  }
+}

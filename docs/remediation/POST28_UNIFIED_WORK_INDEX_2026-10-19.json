@@ -193,15 +193,15 @@
     },
     {
       "id": "R11",
-      "state": "SEVEN_LOCAL_DIAGNOSTIC_CATEGORIES_RECORDED_FULL_SLO_OPEN",
-      "latestReport": "docs/remediation/POST28_R11_MFA_ENROLLMENT_2026-10-20.md",
+      "state": "PRACTICAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+      "latestReport": "docs/remediation/POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.md",
       "configuration": "config/testing/r11-load-preparation.json",
       "baselineSourceSha": "79055e7634ad33fe221872d58770d48c2ed09e58",
       "acceptanceEvidenceValidationHardened": true,
       "formalAcceptance": false,
       "productionAcceptance": false,
       "loadExecuted": true,
-      "latestEvidence": "docs/reviews/evidence/post28/50e109e3ece76c6b5acb832be9fcd747450821cb/r11-admin-mfa/evidence-index.json",
+      "latestEvidence": "docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json",
       "loadScope": "TWO_READ_AND_FIVE_PARTIAL_SCENARIO_DIAGNOSTICS_SMALL_SYNTHETIC_DATASET",
       "representativeLaunchDataset": false,
       "scenarioSourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
@@ -212,11 +212,31 @@
       "linuxContention": {
         "implementedAt": "4aed744292ce9bd1a1698f006aa18c894bcac160",
         "sourceGuardFixedAt": "33b6daa41ed162e35461961aa39d92119c6d640c",
-        "execution": "CANONICAL_ERROR_CONTRACT_FIXED_TARGETED_CHECKS_PASS_LINUX_PENDING",
+        "execution": "COMPLETED_DIAGNOSTIC",
         "wireContractFixedAt": "0402c97f6b5e93e7810a1053c6a43f0d410961f5",
-        "wireContractEvidence": "docs/reviews/evidence/post28/0402c97f6b5e93e7810a1053c6a43f0d410961f5/r11-wire-contract/evidence-index.json"
+        "wireContractEvidence": "docs/reviews/evidence/post28/0402c97f6b5e93e7810a1053c6a43f0d410961f5/r11-wire-contract/evidence-index.json",
+        "verifiedSourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+        "evidence": "docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json",
+        "pairs": 10,
+        "expectedConflicts": 10,
+        "unexpectedErrors": 0,
+        "poolWaitMeasured": false
       },
-      "mfaEnrollmentEvidence": "docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json"
+      "mfaEnrollmentEvidence": "docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json",
+      "ciPush": {
+        "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+        "runId": 39475394144,
+        "result": "success"
+      },
+      "practicalScopeComplete": true,
+      "practicalCloseout": "docs/remediation/POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.json",
+      "openFormalAcceptanceItems": [
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "E5"
+      ]
     }
   ],
   "validation": {

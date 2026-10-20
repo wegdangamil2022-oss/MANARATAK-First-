@@ -127,3 +127,7 @@ R11 follow-up: fixed actual Admin login bootstrap cancellation, verified built A
 R11 MFA enrollment: real built Admin UI enrollment, invalid password/code denial, encrypted pending credential, confirmation/session revocation, next-code login and enabled-state rendering verified. Mixed source local diagnostic; formal load acceptance remains open. See POST28_R11_MFA_ENROLLMENT_2026-10-20.md.
 
 R11 wire contract correction at 0402c97f6b5e93e7810a1053c6a43f0d410961f5: match canonical Problem Details code/status; targeted regression and real mapper pass. Native follow-up incomplete (fixture role first, then API unready with PostgreSQL already exited); no HTTP/Linux pass claimed after the fix.
+
+R11 Linux push 39475394144 at 4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b: complete runtime and contention diagnostic verified from digest-matched artifact; 10 winners, 10 expected version conflicts, durable replay, zero unexpected errors and confirmed cleanup. Full SLO acceptance remains open.
+
+R11 practical diagnostic scope closed with documented exceptions at validated candidate 4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b. Push 39475394144 succeeded; all 23 observed check runs succeeded; Linux contention and cleanup verified from digest-matched artifacts. Formal SLO and production acceptance remain OPEN. See POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.md and .json.
