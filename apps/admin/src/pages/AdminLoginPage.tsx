@@ -25,6 +25,8 @@ export function AdminLoginPage({ session, verifySession }: { session: DisplaySes
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    // Initial session verification can revoke the request controller; wait before starting a new login.
+    if (busy || session.kind === 'loading') return;
     setBusy(true);
     setMessage(null);
     setStudentSession(false);
@@ -71,7 +73,7 @@ export function AdminLoginPage({ session, verifySession }: { session: DisplaySes
           <label className="block text-sm font-bold" htmlFor="admin-mfa-code">{t('mfa_code')}</label>
           <input id="admin-mfa-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={mfaCode} onChange={event => setMfaCode(event.target.value)} className="w-full rounded-xl border border-slate-300 p-3" />
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={rememberMe} onChange={event => setRememberMe(event.target.checked)} /> تذكرني</label>
-          <button type="submit" disabled={busy} className="w-full rounded-xl bg-[#0E7C86] p-3 font-bold text-white disabled:opacity-60">{busy ? 'جارٍ التحقق...' : 'دخول الإدارة'}</button>
+          <button type="submit" disabled={busy || session.kind === 'loading'} className="w-full rounded-xl bg-[#0E7C86] p-3 font-bold text-white disabled:opacity-60">{busy || session.kind === 'loading' ? 'جارٍ التحقق...' : 'دخول الإدارة'}</button>
         </form>
         <div className="mt-5 flex justify-between text-sm">
           <a href={`${publicBase}/login`} className="underline">حساب الطالب واستعادة الدخول</a>
