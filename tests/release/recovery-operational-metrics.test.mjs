@@ -21,6 +21,8 @@ test('rejects event holes, changed payloads and unknown recovered events',()=>{
   for(const events of [[{id:'b',sha256:'b'.repeat(64)}],[{id:'a',sha256:'c'.repeat(64)}],[{id:'unknown',sha256:'a'.repeat(64)}]]){
     assert.throws(()=>operationalRecoveryMetrics({...input(),recoveredEvents:events}),/RECOVERY_EVENT_PARITY_INVALID/);
   }
+  const invalid=input();invalid.sourceEvents[0].sha256='g'.repeat(64);
+  assert.throws(()=>operationalRecoveryMetrics(invalid),/RECOVERY_EVENT_PARITY_INVALID/);
 });
 test('unverified services, missing event prefix and invalid clock cannot close operational recovery',()=>{
   for(const change of [{recoveredEvents:[]},{serviceVerifiedAt:'2026-10-20T14:59:59.000Z'},{sourceEvents:[]},{checks:{}}]){
