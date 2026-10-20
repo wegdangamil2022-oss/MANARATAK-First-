@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { verifySignedEvidence, DIGEST, hash } from '../release/lib/ReleaseContracts.mjs';
 import { validateDatabaseSnapshot } from './DatabaseSnapshot.mjs';
+import { recoveryTlsRoot } from './RecoveryConnection.mjs';
 export function databaseIdentity(databaseUrl) {
   const url = new URL(databaseUrl);
   if (!['postgres:', 'postgresql:'].includes(url.protocol) || url.search || url.hash)
@@ -74,7 +75,8 @@ function containedAsset(root, relative) {
     throw new Error('RECOVERY_ASSET_PATH_INVALID');
   return real;
 }
-export async function recoveryInputs({ databaseBackup, assetDirectory, assetManifest, proof, requireDatabaseSnapshot = false }) {
+export async function recoveryInputs({ databaseBackup, assetDirectory, assetManifest, proof, requireDatabaseSnapshot = false, tlsRootCertificateFile, requireTlsRoot = false }) {
+  if (requireTlsRoot) recoveryTlsRoot(tlsRootCertificateFile,proof.tlsRootCertificateSha256);
   if (
     fs.lstatSync(databaseBackup).isSymbolicLink() ||
     !fs.statSync(databaseBackup).isFile() ||
@@ -124,6 +126,10 @@ export function databaseSentinel(result, target, proof) {
     result.superuser !== false ||
     result.createRole !== false ||
     result.createDatabase !== false ||
+    result.replication !== false ||
+    result.bypassRls !== false ||
+    result.unsafeRoleMembership !== false ||
+    result.canConnectOtherDatabase !== false ||
     result.targetFingerprint !== target.fingerprint ||
     result.disposableInstanceId !== proof.disposableInstanceId ||
     result.sentinelOwnedByRestoreRole !== false ||
