@@ -138,7 +138,7 @@
 .mn-student-workspace .mn-student-summary-heading,
 .mn-student-workspace .mn-student-summary-invoices .mn-card h2 {
   font-family: 'Cairo', sans-serif !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   font-weight: 700;
   display: inline-block;
   width: max-content;
@@ -149,9 +149,9 @@
   border-bottom: 2px solid #D6A43B;
 }
 
-/* Invoice summary title uses the same line and 13px Cairo as other headings. */
+/* Invoice summary title uses the same line and 14px Cairo as other headings. */
 .mn-student-workspace .mn-student-summary-invoices .mn-card h2 {
   font-family: 'Cairo', sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
