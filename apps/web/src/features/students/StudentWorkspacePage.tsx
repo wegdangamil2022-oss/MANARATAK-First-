@@ -920,6 +920,7 @@ function SummaryView({
         style={{ backgroundImage: 'linear-gradient(105deg, #142B5F 0%, #142B5F 71%, #184366 88%, #0E7C86 100%)' }}
       >
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
+        <div className="relative z-10 p-3.5 sm:p-5">
           <div className="flex items-center gap-2.5 font-bold text-white">
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/60 bg-[#D6A43B]/15"><Bell className="h-4 w-4 text-[#EAC775]" /></span>
             <h2 className="text-[14.5px] sm:text-base font-bold text-white">يحتاج انتباهك</h2>
@@ -936,21 +937,6 @@ function SummaryView({
                 <button type="button" onClick={() => setTab('OPPORTUNITIES')}
                   className="shrink-0 rounded-lg border border-[#142B5F]/20 bg-[#142B5F]/5 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-[#142B5F] dark:text-[#E5B54F] hover:bg-[#142B5F]/10 cursor-pointer">
                   متابعة
-                </button>
-              </div>
-            ))}
-            {urgentAlerts.unread.slice(0, 2).map((n) => (
-              <div key={n.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs">
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[var(--mn-heading)]">{n.title}</h3>
-                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[var(--mn-text-muted)]">{n.message}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setTab('NOTIFICATIONS')}
-                  className="shrink-0 rounded-lg border border-[#142B5F]/20 bg-[#142B5F]/5 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-[#142B5F] dark:text-[#E5B54F] hover:bg-[#142B5F]/10 cursor-pointer"
-                >
-                  عرض
                 </button>
               </div>
             ))}
@@ -973,8 +959,24 @@ function SummaryView({
                 </button>
               </div>
             ))}
+            {urgentAlerts.unread.slice(0, 2).map((n) => (
+              <div key={n.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[var(--mn-heading)]">{n.title}</h3>
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[var(--mn-text-muted)]">{n.message}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTab('NOTIFICATIONS')}
+                  className="shrink-0 rounded-lg border border-[#142B5F]/20 bg-[#142B5F]/5 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-[#142B5F] dark:text-[#E5B54F] hover:bg-[#142B5F]/10 cursor-pointer"
+                >
+                  عرض
+                </button>
+              </div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
   ) : null;
 
   return (
