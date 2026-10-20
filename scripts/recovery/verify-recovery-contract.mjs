@@ -3,11 +3,13 @@ import fs from 'node:fs';
 const contract = JSON.parse(
   fs.readFileSync('config/recovery/production-recovery-contract.json', 'utf8'),
 );
+const within = (value, minimum, maximum = Infinity) =>
+  Number.isFinite(value) && value >= minimum && value <= maximum;
 const required = [
   ['identity', contract.kind === 'MANARATAK_PRODUCTION_RECOVERY_CONTRACT'],
-  ['RPO <= 5m', Number(contract.objectives?.regionalLossRpoMinutes) <= 5],
-  ['RTO <= 60m', Number(contract.objectives?.regionalLossRtoMinutes) <= 60],
-  ['PITR >= 30d', Number(contract.objectives?.pitrWindowDays) >= 30],
+  ['RPO <= 5m', within(contract.objectives?.regionalLossRpoMinutes, 0, 5)],
+  ['RTO <= 60m', within(contract.objectives?.regionalLossRtoMinutes, 0, 60)],
+  ['PITR >= 30d', within(contract.objectives?.pitrWindowDays, 30)],
   ['weekly restore audit', contract.objectives?.restoreAuditCadence === 'WEEKLY'],
   ['PostgreSQL owner', Boolean(contract.postgresql?.owner)],
   ['Asset owner', Boolean(contract.assets?.owner)],
