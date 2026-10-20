@@ -234,7 +234,7 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
       await db.universityAcademicProgram.create({data:{id:program,universityId:id,majorId:major.id,degreeLevelId:degree,status:'ACTIVE',majorMappingState:'CANONICALLY_MAPPED',sourceProgramName:'Synthetic canonical program',normalizedName:program}});
       const scholarship=fresh(),course=fresh();scholarships.push(scholarship);courses.push(course);
       await db.scholarship.create({data:{...owner(scholarship),countryReferenceId:country,publicationStatus:'PUBLISHED',verificationStatus:'VERIFIED',versions:{create:{versionNumber:1,status:'PUBLISHED',snapshot:{syntheticHistorical:true}}},majorTargets:{create:{targetKey:major.id,majorId:major.id,resolutionStatus:'RESOLVED'}},universityLinks:{create:{linkKey:program,universityId:id,academicProgramId:program,resolutionStatus:'RESOLVED'}}}});
-      await db.course.create({data:{...owner(course),originType:'NATIVE_MANARATAK_COURSE',accessType:'FREE_STUDY',directCourseUrl:'https://example.invalid/synthetic/'+course,learningLanguageReferenceId:language.id}});
+      await db.course.create({data:{...owner(course),originType:'NATIVE_MANARATAK_COURSE',accessType:'FREE_STUDY',directCourseUrl:'https://example.invalid/synthetic/'+course,learningLanguageReferenceId:language.id,learningLanguageResolutionState:'RESOLVED'}});
       await db.courseMajorProjection.create({data:{projectionKey:course,courseId:course,majorId:major.id,sourceType:'DIRECT_REVIEWED',relationshipType:'RELATED',projectionState:'APPROVED'}});
 
     }
@@ -244,7 +244,7 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
       const response=await fetchGraph(major.id,cursor?{universityCursor:cursor,scholarshipCursor,courseCursor}:{});expect(response.status,response.text).toBe(200);expect(response.headers['cache-control']).toBe('no-store');
       const edge=response.body.relationships.universities;expect(edge.total).toBe(3);expect(response.body.readScope.collections.universities.state).toBe('AVAILABLE');
       expect(response.text).not.toContain(students[1].id);expect(response.text).not.toContain('privateSentinel');
-      for(const name of ['scholarships','courses']){expect(response.body.readScope.collections[name]).toMatchObject({state:'AVAILABLE',total:3});expect(response.body.relationships[name].total).toBe(3);}
+      for(const name of ['scholarships','courses']){expect(response.body.readScope.collections[name],name).toMatchObject({state:'AVAILABLE',total:3});expect(response.body.relationships[name].total,name).toBe(3);}
       seenScholarships.push(...response.body.relationships.scholarships.data.map(row=>row.ownerId));seenCourses.push(...response.body.relationships.courses.data.map(row=>row.ownerId));
       seen.push(...edge.data.map(row=>row.ownerId));pages.push(edge);cursor=edge.nextCursor;scholarshipCursor=response.body.relationships.scholarships.nextCursor;courseCursor=response.body.relationships.courses.nextCursor;
       expect(pages.length).toBeLessThanOrEqual(3);

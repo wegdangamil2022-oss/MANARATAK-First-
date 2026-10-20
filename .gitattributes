@@ -7,3 +7,5 @@ packages/infrastructure/src/courses/ExternalCourseProviderSeed.ts -text
 packages/domain/src/academic-taxonomy/isced-f-baseline.ts -text
 # Preserve verified upstream dependency snapshots byte-for-byte.
 vendor/awilix-core/** -text whitespace=cr-at-eol
+# Retained R09 workflow receipts are hashed before Git staging.
+docs/reviews/evidence/post28/*/r09-shared-workflows/** -text

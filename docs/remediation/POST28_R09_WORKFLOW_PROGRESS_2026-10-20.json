@@ -3,7 +3,7 @@
   "date": "2026-10-20",
   "timezone": "Asia/Aden",
   "branch": "feat/post28-r07-artifact-preparation",
-  "latestSourceSha": "624b803",
+  "latestSourceSha": "29d57e16ca73159222be7b1da2c463552997e0d0",
   "formalR09Acceptance": false,
   "allMandatoryRowsClosed": false,
   "allTestsExecutedAtOneSha": false,
@@ -84,6 +84,18 @@
           "status": "passed",
           "sourceSha": "b878b761bced43486c4a061cbcd4e9c4d11d1100",
           "evidence": "docs/reviews/evidence/post28/b878b761bced43486c4a061cbcd4e9c4d11d1100/r09-shared-workflows/native-pg16-wkgOV5/R06-suites/r09-integrated-workflows-wtdx8o/vitest.json"
+        }
+      ]
+    },
+    {
+      "sourceSha": "29d57e16ca73159222be7b1da2c463552997e0d0",
+      "evidenceIndex": "docs/reviews/evidence/post28/29d57e16ca73159222be7b1da2c463552997e0d0/r09-shared-workflows/native-pg16-8u58iE/evidence-index.json",
+      "cases": [
+        {
+          "title": "traverses canonical owner relations beyond page one and distinguishes withdrawal zero and unavailable reads",
+          "status": "failed",
+          "sourceSha": "29d57e16ca73159222be7b1da2c463552997e0d0",
+          "evidence": "docs/reviews/evidence/post28/29d57e16ca73159222be7b1da2c463552997e0d0/r09-shared-workflows/native-pg16-8u58iE/R06-suites/r09-integrated-workflows-0Zn7NN/vitest.json"
         }
       ]
     }

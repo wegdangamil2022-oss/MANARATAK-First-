@@ -1,0 +1,38 @@
+
+ RUN  v4.1.11 C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered
+
+ ❯ tests/database/post28-r09-integrated-workflows.database.spec.mjs (5 tests | 1 failed | 4 skipped) 11301ms
+     ↓ authors reviews publishes and withdraws current CMS snapshots using three actual capabilities
+     ↓ completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it
+     ↓ keeps original student document bindings consent and private invoices unchanged on foreign access and mutation
+     × traverses canonical owner relations beyond page one and distinguishes withdrawal zero and unavailable reads 498ms
+     ↓ pays a real synthetic invoice once across concurrent HTTP replays with one balanced ledger effect
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  15:57:33
+   Duration  32.90s (transform 8.45s, setup 0ms, import 21.34s, tests 11.30s, environment 0ms)
+
+JSON report written to C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/native-pg16-8u58iE/R06-suites/r09-integrated-workflows-0Zn7NN/vitest.json
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/database/post28-r09-integrated-workflows.database.spec.mjs > R09 shared synthetic CMS learner certificate privacy and money workflows > traverses canonical owner relations beyond page one and distinguishes withdrawal zero and unavailable reads
+AssertionError: expected { state: 'AVAILABLE', …(4) } to match object { state: 'AVAILABLE', total: 3 }
+(3 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "state": "AVAILABLE",
+-   "total": 3,
++   "total": 0,
+  }
+
+ ❯ tests/database/post28-r09-integrated-workflows.database.spec.mjs:247:103
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+POST28_DATABASE_SUITE_EXECUTION_FAILED

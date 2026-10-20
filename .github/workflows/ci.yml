@@ -35,6 +35,8 @@ jobs:
       - run: npm ci
       - name: Install the browser for the new synthetic workflow profile
         run: npx playwright install --with-deps chromium
+      - name: Build the runtime configuration package required by source router imports
+        run: node node_modules/typescript/bin/tsc -b packages/config
       - name: Exercise new workflows once in one restricted PostgreSQL 16 dataset
         run: node scripts/release/post28-r09-workflow-lab.mjs "$RUNNER_TEMP/r09-workflows"
       - name: Retain workflow observations and cleanup without credentials
