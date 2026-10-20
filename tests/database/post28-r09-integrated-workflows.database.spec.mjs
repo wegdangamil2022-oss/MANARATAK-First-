@@ -226,24 +226,32 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
       await db.majorPublicationSnapshot.create({data:{versionId:version,majorId:id,profileId:profile,reviewerId:'R09_SYNTHETIC_HISTORICAL',payload:{...owner(id),profiles:[],contentSections:[]}}});
       return{id,profile,version};
     }
-    const major=await publishedMajor(),lookalike=await publishedMajor(),universities=[];
+    const major=await publishedMajor(),lookalike=await publishedMajor(),universities=[],scholarships=[],courses=[];
+    const language=await db.referenceLanguage.upsert({where:{isoCode:"ar"},create:{id:fresh(),isoCode:"ar",name:"Synthetic Arabic reference",direction:"RTL"},update:{}});
     for(let n=0;n<3;n++){
       const id=fresh(),program=fresh();universities.push(id);
       await db.university.create({data:{...owner(id),countryReferenceId:country,optionalFields:{privateSentinel:students[1].id}}});
       await db.universityAcademicProgram.create({data:{id:program,universityId:id,majorId:major.id,degreeLevelId:degree,status:'ACTIVE',majorMappingState:'CANONICALLY_MAPPED',sourceProgramName:'Synthetic canonical program',normalizedName:program}});
+      const scholarship=fresh(),course=fresh();scholarships.push(scholarship);courses.push(course);
+      await db.scholarship.create({data:{...owner(scholarship),countryReferenceId:country,publicationStatus:'PUBLISHED',verificationStatus:'VERIFIED',versions:{create:{versionNumber:1,status:'PUBLISHED',snapshot:{syntheticHistorical:true}}},majorTargets:{create:{targetKey:major.id,majorId:major.id,resolutionStatus:'RESOLVED'}},universityLinks:{create:{linkKey:program,universityId:id,academicProgramId:program,resolutionStatus:'RESOLVED'}}}});
+      await db.course.create({data:{...owner(course),originType:'NATIVE_MANARATAK_COURSE',accessType:'FREE_STUDY',directCourseUrl:'https://example.invalid/synthetic/'+course,learningLanguageReferenceId:language.id}});
+      await db.courseMajorProjection.create({data:{projectionKey:course,courseId:course,majorId:major.id,sourceType:'DIRECT_REVIEWED',relationshipType:'RELATED',projectionState:'APPROVED'}});
+
     }
     const fetchGraph=(id,query={})=>request(app).get('/graph/majors/'+id).query({pageSize:1,...query});
-    const pages=[],seen=[];let cursor;
+    const pages=[],seen=[],seenScholarships=[],seenCourses=[];let cursor,scholarshipCursor,courseCursor;
     do{
-      const response=await fetchGraph(major.id,cursor?{universityCursor:cursor}:{});expect(response.status,response.text).toBe(200);expect(response.headers['cache-control']).toBe('no-store');
+      const response=await fetchGraph(major.id,cursor?{universityCursor:cursor,scholarshipCursor,courseCursor}:{});expect(response.status,response.text).toBe(200);expect(response.headers['cache-control']).toBe('no-store');
       const edge=response.body.relationships.universities;expect(edge.total).toBe(3);expect(response.body.readScope.collections.universities.state).toBe('AVAILABLE');
       expect(response.text).not.toContain(students[1].id);expect(response.text).not.toContain('privateSentinel');
-      seen.push(...edge.data.map(row=>row.ownerId));pages.push(edge);cursor=edge.nextCursor;
+      for(const name of ['scholarships','courses']){expect(response.body.readScope.collections[name]).toMatchObject({state:'AVAILABLE',total:3});expect(response.body.relationships[name].total).toBe(3);}
+      seenScholarships.push(...response.body.relationships.scholarships.data.map(row=>row.ownerId));seenCourses.push(...response.body.relationships.courses.data.map(row=>row.ownerId));
+      seen.push(...edge.data.map(row=>row.ownerId));pages.push(edge);cursor=edge.nextCursor;scholarshipCursor=response.body.relationships.scholarships.nextCursor;courseCursor=response.body.relationships.courses.nextCursor;
       expect(pages.length).toBeLessThanOrEqual(3);
     }while(cursor);
-    expect(seen).toEqual([...universities].sort());expect(new Set(seen).size).toBe(3);expect(pages).toHaveLength(3);
+    expect(seen).toEqual([...universities].sort());expect(new Set(seen).size).toBe(3);expect(pages).toHaveLength(3);expect(seenScholarships).toEqual([...scholarships].sort());expect(seenCourses).toEqual([...courses].sort());
     const zero=await fetchGraph(lookalike.id);expect(zero.status).toBe(200);expect(zero.body.relationships.universities.total).toBe(0);expect(zero.body.readScope.collections.universities).toMatchObject({state:'AVAILABLE',total:0});
-    const inverse=await request(app).get('/graph/universities/'+universities[0]);expect(inverse.status,inverse.text).toBe(200);expect(inverse.body.relationships.majors.map(row=>row.ownerId)).toEqual([major.id]);
+    const inverse=await request(app).get('/graph/universities/'+universities[0]);expect(inverse.status,inverse.text).toBe(200);expect(inverse.body.relationships.majors.map(row=>row.ownerId)).toEqual([major.id]);expect(inverse.body.relationships.scholarships.data.map(row=>row.ownerId)).toEqual([scholarships[0]]);
     const page=await browser.newPage();try{
       await page.goto(origin+'/r09-origin');const viewed=await page.evaluate(async slug=>{const r=await fetch('/graph/majors/'+slug+'?pageSize=1');return{status:r.status,body:await r.json()};},major.id);
       expect(viewed.status).toBe(200);expect(viewed.body.subject.ownerId).toBe(major.id);expect(viewed.body.relationships.universities.total).toBe(3);
@@ -251,6 +259,8 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     const withdrawn=[...universities].sort()[1];await db.university.update({where:{id:withdrawn},data:{status:'ARCHIVED'}});
     const after=await fetchGraph(major.id,{universityCursor:pages[0].nextCursor});expect(after.status,after.text).toBe(200);expect(after.body.relationships.universities.total).toBe(2);expect(after.body.relationships.universities.data.map(row=>row.ownerId)).not.toContain(withdrawn);
     expect((await request(app).get('/graph/universities/'+withdrawn)).status).toBe(404);
+    await db.scholarship.update({where:{id:scholarships[0]},data:{status:'ARCHIVED',publicationStatus:'ARCHIVED'}});await db.course.update({where:{id:courses[0]},data:{status:'ARCHIVED'}});
+    const archivedOwners=await fetchGraph(major.id);expect(archivedOwners.status).toBe(200);for(const [name,hidden]of [['scholarships',scholarships[0]],['courses',courses[0]]]){expect(archivedOwners.body.relationships[name].total).toBe(2);expect(archivedOwners.body.relationships[name].data.map(row=>row.ownerId)).not.toContain(hidden);}
     let unlock,locked;const acquired=new Promise(resolve=>{locked=resolve;}),released=new Promise(resolve=>{unlock=resolve;});
     const lock=other.$transaction(async tx=>{await tx.$executeRawUnsafe('LOCK TABLE "University" IN ACCESS EXCLUSIVE MODE');locked();await released;},{timeout:15000});
     // A real temporary owner read outage, restricted to this disposable database.
@@ -258,7 +268,7 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     try{const unavailable=await fetchGraph(major.id);expect(unavailable.status,unavailable.text).toBe(200);expect(unavailable.body.readScope.collections.universities).toMatchObject({state:'UNAVAILABLE',errorCode:'OWNER_READ_UNAVAILABLE',total:null});}
     finally{unlock();await lock;}
     const recovered=await fetchGraph(major.id);expect(recovered.status).toBe(200);expect(recovered.body.readScope.collections.universities).toMatchObject({state:'AVAILABLE',total:2});
-    proof.observations.push({case:'CANONICAL_GRAPH_RELATIONSHIPS',majorId:major.id,lookalikeId:lookalike.id,universityIds:universities,pages:3,uniqueOwnerIds:true,inverseOwnerIds:true,withdrawnId:withdrawn,afterWithdrawalTotal:2,realOwnerReadOutage:'UNAVAILABLE_TOTAL_NULL',recovered:true,browserTransport:true,builtGraphUi:false,historicalPublicationFixture:true});
+    proof.observations.push({case:'CANONICAL_GRAPH_RELATIONSHIPS',majorId:major.id,lookalikeId:lookalike.id,universityIds:universities,scholarshipIds:scholarships,courseIds:courses,allThreeOwnersPaged:true,allThreeOwnersWithdrawn:true,pages:3,uniqueOwnerIds:true,inverseOwnerIds:true,withdrawnId:withdrawn,afterWithdrawalTotal:2,realOwnerReadOutage:'UNAVAILABLE_TOTAL_NULL',recovered:true,browserTransport:true,builtGraphUi:false,historicalPublicationFixture:true});
   });
 
   it('pays a real synthetic invoice once across concurrent HTTP replays with one balanced ledger effect',async()=>{

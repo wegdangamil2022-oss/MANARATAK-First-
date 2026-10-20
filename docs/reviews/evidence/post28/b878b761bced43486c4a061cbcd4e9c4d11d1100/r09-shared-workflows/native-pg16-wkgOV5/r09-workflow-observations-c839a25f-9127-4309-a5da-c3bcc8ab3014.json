@@ -1,0 +1,41 @@
+{
+  "kind": "POST28_R09_SHARED_WORKFLOW_INTEGRATION",
+  "sourceSha": "b878b761bced43486c4a061cbcd4e9c4d11d1100",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "externalProvidersEnabled": false,
+  "fullR09Acceptance": false,
+  "observations": [
+    {
+      "case": "CANONICAL_GRAPH_RELATIONSHIPS",
+      "majorId": "ce3d9784-50eb-4956-9c5b-6d564f3075c4",
+      "lookalikeId": "3df0b79d-15fb-4946-928c-4b72dc999a04",
+      "universityIds": [
+        "1694b877-540a-447d-9b46-77ce3e8ab457",
+        "2dbbb871-0087-4500-b249-c81d0eb6d2d6",
+        "317d78d8-2285-421d-b7b9-89e9ae351b25"
+      ],
+      "pages": 3,
+      "uniqueOwnerIds": true,
+      "inverseOwnerIds": true,
+      "withdrawnId": "2dbbb871-0087-4500-b249-c81d0eb6d2d6",
+      "afterWithdrawalTotal": 2,
+      "realOwnerReadOutage": "UNAVAILABLE_TOTAL_NULL",
+      "recovered": true,
+      "browserTransport": true,
+      "builtGraphUi": false,
+      "historicalPublicationFixture": true
+    }
+  ],
+  "role": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "155.0.4283.62",
+  "boundary": "ACTUAL_SOURCE_ROUTERS_REAL_JWT_DB_CAPABILITIES_NOT_BUILT_ADMIN_UI_OR_MFA"
+}

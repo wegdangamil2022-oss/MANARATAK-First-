@@ -1,0 +1,91 @@
+{
+  "kind": "POST28_R09_FOUR_REQUESTED_AREAS",
+  "date": "2026-10-20",
+  "timezone": "Asia/Aden",
+  "branch": "feat/post28-r07-artifact-preparation",
+  "latestSourceSha": "624b803",
+  "formalR09Acceptance": false,
+  "allMandatoryRowsClosed": false,
+  "allTestsExecutedAtOneSha": false,
+  "linuxSharedDataset": "AWAITING_CI_RESULT",
+  "retained": [
+    {
+      "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+      "evidenceIndex": "docs/reviews/evidence/post28/80e0f60c0bc0364e2b75987de3bbc0cc0f702234/r09-shared-workflows/native-pg16-uhcQAl/evidence-index.json",
+      "cases": [
+        {
+          "title": "authors reviews publishes and withdraws current CMS snapshots using three actual capabilities",
+          "status": "failed",
+          "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+          "evidence": "docs/reviews/evidence/post28/80e0f60c0bc0364e2b75987de3bbc0cc0f702234/r09-shared-workflows/native-pg16-uhcQAl/R06-suites/r09-integrated-workflows-aYfUUV/vitest.json"
+        },
+        {
+          "title": "completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it",
+          "status": "failed",
+          "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+          "evidence": "docs/reviews/evidence/post28/80e0f60c0bc0364e2b75987de3bbc0cc0f702234/r09-shared-workflows/native-pg16-uhcQAl/R06-suites/r09-integrated-workflows-aYfUUV/vitest.json"
+        },
+        {
+          "title": "keeps original student document bindings consent and private invoices unchanged on foreign access and mutation",
+          "status": "passed",
+          "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+          "evidence": "docs/reviews/evidence/post28/80e0f60c0bc0364e2b75987de3bbc0cc0f702234/r09-shared-workflows/native-pg16-uhcQAl/R06-suites/r09-integrated-workflows-aYfUUV/vitest.json"
+        },
+        {
+          "title": "pays a real synthetic invoice once across concurrent HTTP replays with one balanced ledger effect",
+          "status": "failed",
+          "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
+          "evidence": "docs/reviews/evidence/post28/80e0f60c0bc0364e2b75987de3bbc0cc0f702234/r09-shared-workflows/native-pg16-uhcQAl/R06-suites/r09-integrated-workflows-aYfUUV/vitest.json"
+        }
+      ]
+    },
+    {
+      "sourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+      "evidenceIndex": "docs/reviews/evidence/post28/dad88ff6aae6bcee35a6700ac71aeb0c165258cc/r09-shared-workflows/native-pg16-RmqS2x/evidence-index.json",
+      "cases": [
+        {
+          "title": "completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it",
+          "status": "passed",
+          "sourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+          "evidence": "docs/reviews/evidence/post28/dad88ff6aae6bcee35a6700ac71aeb0c165258cc/r09-shared-workflows/native-pg16-RmqS2x/R06-suites/r09-integrated-workflows-58jZq6/vitest.json"
+        },
+        {
+          "title": "pays a real synthetic invoice once across concurrent HTTP replays with one balanced ledger effect",
+          "status": "passed",
+          "sourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+          "evidence": "docs/reviews/evidence/post28/dad88ff6aae6bcee35a6700ac71aeb0c165258cc/r09-shared-workflows/native-pg16-RmqS2x/R06-suites/r09-integrated-workflows-gctqRR/vitest.json"
+        },
+        {
+          "title": "authors reviews publishes and withdraws current CMS snapshots using three actual capabilities",
+          "status": "failed",
+          "sourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+          "evidence": "docs/reviews/evidence/post28/dad88ff6aae6bcee35a6700ac71aeb0c165258cc/r09-shared-workflows/native-pg16-RmqS2x/R06-suites/r09-integrated-workflows-mUhwNb/vitest.json"
+        }
+      ]
+    },
+    {
+      "sourceSha": "fa28090044e6d6a84ef7db25085a098a3e955cfe",
+      "evidenceIndex": "docs/reviews/evidence/post28/fa28090044e6d6a84ef7db25085a098a3e955cfe/r09-shared-workflows/native-pg16-sGipFV/evidence-index.json",
+      "cases": [
+        {
+          "title": "authors reviews publishes and withdraws current CMS snapshots using three actual capabilities",
+          "status": "passed",
+          "sourceSha": "fa28090044e6d6a84ef7db25085a098a3e955cfe",
+          "evidence": "docs/reviews/evidence/post28/fa28090044e6d6a84ef7db25085a098a3e955cfe/r09-shared-workflows/native-pg16-sGipFV/R06-suites/r09-integrated-workflows-4RolZX/vitest.json"
+        }
+      ]
+    },
+    {
+      "sourceSha": "b878b761bced43486c4a061cbcd4e9c4d11d1100",
+      "evidenceIndex": "docs/reviews/evidence/post28/b878b761bced43486c4a061cbcd4e9c4d11d1100/r09-shared-workflows/native-pg16-wkgOV5/evidence-index.json",
+      "cases": [
+        {
+          "title": "traverses canonical owner relations beyond page one and distinguishes withdrawal zero and unavailable reads",
+          "status": "passed",
+          "sourceSha": "b878b761bced43486c4a061cbcd4e9c4d11d1100",
+          "evidence": "docs/reviews/evidence/post28/b878b761bced43486c4a061cbcd4e9c4d11d1100/r09-shared-workflows/native-pg16-wkgOV5/R06-suites/r09-integrated-workflows-wtdx8o/vitest.json"
+        }
+      ]
+    }
+  ]
+}

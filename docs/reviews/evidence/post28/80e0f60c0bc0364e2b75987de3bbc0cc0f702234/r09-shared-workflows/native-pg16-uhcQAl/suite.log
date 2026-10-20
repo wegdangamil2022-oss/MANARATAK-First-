@@ -1,0 +1,62 @@
+
+ RUN  v4.1.11 C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered
+
+ ❯ tests/database/post28-r09-integrated-workflows.database.spec.mjs (4 tests | 3 failed) 2699ms
+     × authors reviews publishes and withdraws current CMS snapshots using three actual capabilities 1208ms
+     × completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it 141ms
+     ✓ keeps original student document bindings consent and private invoices unchanged on foreign access and mutation 290ms
+     × pays a real synthetic invoice once across concurrent HTTP replays with one balanced ledger effect 154ms
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  04:01:56
+   Duration  20.71s (transform 7.63s, setup 0ms, import 17.76s, tests 2.70s, environment 0ms)
+
+JSON report written to C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/native-pg16-uhcQAl/R06-suites/r09-integrated-workflows-aYfUUV/vitest.json
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/database/post28-r09-integrated-workflows.database.spec.mjs > R09 shared synthetic CMS learner certificate privacy and money workflows > authors reviews publishes and withdraws current CMS snapshots using three actual capabilities
+AssertionError: {"error":"\nInvalid `prisma.cmsScheduledJob.updateMany()` invocation:\n\n\nError occurred during query execution:\nConnectorError(ConnectorError { user_facing_error: None, kind: QueryError(PostgresError { code: \"42501\", message: \"permission denied for table CmsScheduledJob\", severity: \"ERROR\", detail: None, column: None, hint: None }), transient: false })"}: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ tests/database/post28-r09-integrated-workflows.database.spec.mjs:149:366
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/database/post28-r09-integrated-workflows.database.spec.mjs > R09 shared synthetic CMS learner certificate privacy and money workflows > completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it
+PrismaClientKnownRequestError: 
+Invalid `prisma.courseVersion.create()` invocation:
+
+
+Unique constraint failed on the fields: (`courseId`,`versionNumber`)
+ ❯ $n.handleRequestError node_modules/@prisma/client/runtime/library.js:121:7315
+ ❯ $n.handleAndLogRequestError node_modules/@prisma/client/runtime/library.js:121:6623
+ ❯ $n.request node_modules/@prisma/client/runtime/library.js:121:6307
+ ❯ l node_modules/@prisma/client/runtime/library.js:130:9633
+ ❯ tests/database/post28-r09-integrated-workflows.database.spec.mjs:166:5
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/database/post28-r09-integrated-workflows.database.spec.mjs > R09 shared synthetic CMS learner certificate privacy and money workflows > pays a real synthetic invoice once across concurrent HTTP replays with one balanced ledger effect
+AssertionError: expected [ { …(12) }, { …(12) } ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ tests/database/post28-r09-integrated-workflows.database.spec.mjs:211:28
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+POST28_DATABASE_SUITE_EXECUTION_FAILED
