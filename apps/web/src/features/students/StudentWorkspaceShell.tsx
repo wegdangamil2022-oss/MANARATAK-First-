@@ -147,7 +147,7 @@ export function StudentWorkspaceShell({
       </section>
 
       {/* Original P15 navigation; no additional account sections. */}
-      <div role="navigation" aria-label="أقسام حساب الطالب" className="mn-student-nav relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] mt-0 p-1.5 sm:p-2 rounded-none bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-x-0 border-t-0 border-b border-[var(--mn-border)] shadow-none grid grid-cols-4 lg:grid-cols-8 gap-1 sm:gap-1.5 mn-panel">
+      <div role="navigation" aria-label="أقسام حساب الطالب" className="mn-student-nav relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] mt-0 px-2.5 py-2.5 sm:px-3 sm:py-3 rounded-none bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-x-0 border-t-0 border-b border-[var(--mn-border)] shadow-none grid grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-2.5 mn-panel">
         {tabs.map((item) => {
           const Icon = item.icon;
           const active = tab === item.id;
@@ -158,14 +158,14 @@ export function StudentWorkspaceShell({
               aria-current={active ? 'page' : undefined}
               title={item.id === 'PROFILE' ? 'ملفي وإعدادات الحساب' : item.label}
               onClick={() => onTabChange(item.id)}
-              className={`min-w-0 rounded-xl px-1 sm:px-1.5 py-2 flex flex-col items-center gap-1 transition-all cursor-pointer ${
+              className={`mn-student-nav-tile min-w-0 min-h-[76px] rounded-xl border px-1.5 py-2.5 flex flex-col items-center justify-center gap-1.5 transition-colors duration-150 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] ${
                 active
-                  ? 'bg-[var(--mn-primary)] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-xs font-bold'
-                  : 'text-[#111827] dark:text-[#EEF4F6] hover:bg-[var(--mn-page)] dark:hover:bg-[var(--mn-surface-elevated)] font-bold'
+                  ? 'border-[#D6A43B] bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-sm font-semibold'
+                  : 'border-[#D6A43B]/55 bg-[#FFFCF5] text-[#29404B] dark:border-[#D6A43B]/65 dark:bg-[#13294D] dark:text-[#EEF4F6] hover:border-[#B78A2B] hover:bg-[#FBF4E7] dark:hover:bg-[#1B365A] font-medium'
               }`}
             >
               <Icon className={`w-5 h-5 ${active ? 'text-[#E5B54F] dark:text-[#142B5F]' : 'text-[#586A74] dark:text-[#EEF4F6]'}`} />
-              <span className="text-[12px] font-bold font-['Cairo',sans-serif] leading-tight break-words w-full min-h-[2.4em] flex items-center justify-center text-center">{item.label}</span>
+              <span className="text-[11px] font-medium font-['Cairo',sans-serif] leading-[1.5] break-words w-full min-h-[2.3em] flex items-center justify-center text-center">{item.label}</span>
             </button>
           );
         })}
