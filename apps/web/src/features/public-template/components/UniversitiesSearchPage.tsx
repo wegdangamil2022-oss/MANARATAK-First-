@@ -1,6 +1,6 @@
 import { PublishedCatalogDiscovery } from './PublishedCatalogDiscovery';
 import { useTranslation as usePublicTemplateTranslation } from '../../../i18n/I18nProvider';
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Search,
   X,
@@ -36,16 +36,15 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
 }) => {
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
 
-  const[universities]=useState(initialUniversities);const[cursor,setCursor]=useState<string|undefined>();
-  const[nextCursor]=useState<string|null>(null);const[cursorHistory,setCursorHistory]=useState<Array<string|undefined>>([]);
-  const[serverLoading]=useState(false);const[serverError]=useState('');
+  // The design preview uses the same in-repository university cards as Studio.
+  // Keep the parent-provided fixtures reactive when they finish loading.
+  const universities = initialUniversities;
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContinent, setSelectedContinent] = useState('الكل');
   const [selectedCountry, setSelectedCountry] = useState('الكل');
   const [selectedCity, setSelectedCity] = useState('الكل');
 
-  useEffect(()=>{setCursor(undefined);setCursorHistory([]);},[searchQuery]);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [localSavedUniversities, setLocalSavedUniversities] = useState<string[]>([]);
   const savedUniversities = favoriteIds ?? localSavedUniversities;
@@ -113,8 +112,12 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
   };
 
   const filteredUniversities = useMemo(() => {
-
+    const query = searchQuery.trim().toLocaleLowerCase();
     return universities.filter((university) => {
+      if (query && ![
+        university.name, university.nameEn, university.country, university.city,
+        university.continent, university.description,
+      ].some((value) => String(value ?? '').toLocaleLowerCase().includes(query))) return false;
       if (selectedContinent !== 'الكل' && university.continent !== selectedContinent) {
         return false;
       }
@@ -139,12 +142,6 @@ const PrototypeUniversitiesSearchPage: React.FC<UniversitiesSearchPageProps> = (
       className="min-h-screen bg-[var(--mn-page)] text-[var(--mn-heading)] pb-24 font-['Cairo',sans-serif] select-none mn-panel "
       dir={publicDir}
     >
-      <section className="space-y-2 rounded border p-3" aria-label={publicT('public_university_pages')}>
-        <p>{publicT('public_search_uses_the_university_server_continent_country_and')}</p>
-        {serverLoading&&<p role="status">{publicT('public_loading_university_page')}</p>}{serverError&&<p role="status">{serverError}</p>}
-        <button type="button" disabled={serverLoading||!cursorHistory.length} onClick={()=>{setCursor(cursorHistory.at(-1));setCursorHistory(old=>old.slice(0,-1));}}>{publicT('public_previous_page')}</button>
-        <button type="button" disabled={serverLoading||!nextCursor} onClick={()=>{setCursorHistory(old=>[...old,cursor]);setCursor(nextCursor??undefined);setSelectedContinent('الكل');setSelectedCountry('الكل');setSelectedCity('الكل');}}>{publicT('public_next_page')}</button>
-      </section>
       {/* ========================================================================= */}
       {/* HERO EMERALD BANNER - COMPACT LUXURY ARABIC DESIGN WITH GOLD ACCENTS       */}
       {/* ========================================================================= */}
