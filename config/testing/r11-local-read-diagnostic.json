@@ -15,6 +15,11 @@
   "requestsPerSecond": 1,
   "maximumConcurrency": 1,
   "maximumRequests": 60,
+  "scholarshipOnlyFollowup": {
+    "requestsPerSecond": 0.5,
+    "maximumRequests": 30,
+    "reason": "Count nested readiness self-probes and warmup within unchanged global 100/minute protection; do not repeat completed public-search measurement"
+  },
   "timeoutMs": 2000,
   "maximumCpuPercent": 80,
   "cpuBasis": "API process delta CPU time divided by logical processor count and wall time",
