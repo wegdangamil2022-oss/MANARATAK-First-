@@ -60,5 +60,5 @@ try {
   const summary={kind:'POST28_DATABASE_SUITE_EXECUTION',sourceSha:sha,suite:name,caseExact:caseExact??null,fullDiscoveryCases:rows.length,fullProfileAcceptance:caseExact===undefined,authorization,targets,...counts};
   fs.writeFileSync(path.join(out,'summary.json'),JSON.stringify(summary,null,2)+'\n');console.log(JSON.stringify(summary));
 } catch(error) {
-  console.error(error.message?.match(/^POST28_[A-Z_]+$/)?.[0] ?? 'POST28_DATABASE_RUNNER_INPUT_INVALID');process.exitCode=1;
+  console.error(error.message?.match(/^POST28_[A-Z0-9_]+$/)?.[0] ?? 'POST28_DATABASE_RUNNER_INPUT_INVALID');process.exitCode=1;
 }

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
 import {databaseSuite} from '../../config/testing/post28-database-suites.mjs';
 import {selectedDiscovery,verifySuiteResults,requireCurrentSuiteSelection} from '../../scripts/database/post28-suite-policy.mjs';
 const root='/project',file=root+'/tests/database/post28-http-finance.database.spec.mjs';
@@ -18,6 +19,11 @@ test('compatible exact selections remain scoped and the post111 suite can run fu
  assert.doesNotThrow(()=>requireCurrentSuiteSelection('admission-import-concurrency','Post28 real nullable admission import concurrency > serializes two real import connections at the owner before nullable identity lookup'));
  assert.doesNotThrow(()=>requireCurrentSuiteSelection('admission-null-identity'));
  assert.equal(databaseSuite('admission-null-identity').minimumCases,5);
+});
+test('runner exposes the historical gate diagnostic before any database capability is supplied',()=>{
+ const result=spawnSync(process.execPath,['scripts/database/run-post28-suite.mjs','admission-import-concurrency'],{encoding:'utf8',env:{NODE_ENV:'test',SystemRoot:process.env.SystemRoot,PATH:process.env.PATH}});
+ assert.equal(result.status,1);
+ assert.equal(result.stderr.trim(),'POST28_HISTORICAL_PRE111_CASE_NOT_CURRENT_ACCEPTANCE');
 });
 test('exact selection still requires the complete mandatory discovery',()=>{
  assert.equal(selectedDiscovery('http-finance',rows,rows[0].name,root).length,1);
