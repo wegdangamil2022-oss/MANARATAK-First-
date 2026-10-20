@@ -52,7 +52,7 @@ async function hydrate(kind: CompareKind, slug: string, locale: 'ar'|'en'): Prom
 
 type CompareSuggestion = { kind: CompareKind; id: string; slug: string; title: string; subtitle?: string };
 type CompareFixtures = { scholarships?: Scholarship[]; universities?: University[]; majors?: Major[]; courses?: Course[]; paidCourses?: Course[]; importedCourses?: ImportedCourse[] };
-type ComparePageProps = CompareFixtures & { locale: 'ar' | 'en'; onBack: () => void; dataMode?: 'api' | 'prototype' };
+type ComparePageProps = CompareFixtures & { locale: 'ar' | 'en'; onBack: () => void; dataMode?: 'api' | 'prototype'; initialType?: string; initialItems?: string };
 
 // The visual comparison table is shared with API mode; only its data source changes.
 function designEntries(locale: 'ar' | 'en', fixtures: CompareFixtures): CompareEntry[] {
@@ -108,12 +108,12 @@ function designEntries(locale: 'ar' | 'en', fixtures: CompareFixtures): CompareE
   return [...sampleScholarships, ...sampleUniversities, ...sampleMajors, ...sampleCourses, ...externalCourses];
 }
 
-export function ComparePage({ locale, onBack, dataMode = 'api', scholarships, universities, majors, courses, paidCourses, importedCourses }: ComparePageProps) {
+export function ComparePage({ locale, onBack, dataMode = 'api', initialType, initialItems, scholarships, universities, majors, courses, paidCourses, importedCourses }: ComparePageProps) {
   const demoEntries = useMemo(() => dataMode === 'prototype'
     ? designEntries(locale, { scholarships, universities, majors, courses, paidCourses, importedCourses }) : [],
     [dataMode, locale, scholarships, universities, majors, courses, paidCourses, importedCourses]);
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
-  const initialKind = (params.get('type') as CompareKind) || 'universities';
+  const initialKind = (initialType || params.get('type') || 'universities') as CompareKind;
   const [kind,setKind] = useState<CompareKind>(['scholarships','universities','majors','courses'].includes(initialKind) ? initialKind : 'universities');
   const [items,setItems] = useState<CompareEntry[]>([]); const [query,setQuery] = useState(''); const [results,setResults] = useState<CompareSuggestion[]>([]);
   const [loading,setLoading] = useState(false); const [error,setError] = useState('');
@@ -124,7 +124,7 @@ export function ComparePage({ locale, onBack, dataMode = 'api', scholarships, un
     window.history.replaceState(window.history.state, '', `${url.pathname}?${url.searchParams.toString()}`);
   };
   useEffect(() => {
-    const raw=(new URLSearchParams(window.location.search).get('items')||'').split(',').map(v=>v.trim()).filter(Boolean).slice(0,MAX_ITEMS);
+    const raw=(initialItems || new URLSearchParams(window.location.search).get('items') || '').split(',').map(v=>v.trim()).filter(Boolean).slice(0,MAX_ITEMS);
     let active=true; setLoading(true); setError('');
     if (dataMode === 'prototype') {
       setItems(raw.flatMap(slug => demoEntries.filter(entry => entry.kind === kind && entry.slug === slug)).slice(0,MAX_ITEMS));
@@ -133,7 +133,7 @@ export function ComparePage({ locale, onBack, dataMode = 'api', scholarships, un
     }
     Promise.all(raw.map(slug=>hydrate(kind,slug,locale))).then(v=>{if(active)setItems(v)}).catch(e=>{if(active)setError(e instanceof Error?e.message:'COMPARE_LOAD_FAILED')}).finally(()=>{if(active)setLoading(false)});
     return()=>{active=false};
-  },[kind,locale,dataMode,demoEntries]);
+  },[kind,locale,dataMode,demoEntries,initialItems]);
   useEffect(()=>{ if(!query.trim()){setResults([]);return;} const timer=window.setTimeout(()=>{
     if (dataMode === 'prototype') {
       const q = query.trim().toLocaleLowerCase();
