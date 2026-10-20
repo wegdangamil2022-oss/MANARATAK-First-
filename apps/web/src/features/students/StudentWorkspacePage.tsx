@@ -1299,11 +1299,13 @@ function SummaryView({
 
       {/* 8. Invoices (If any exist) */}
       {invoices.length > 0 && (
-        <InvoicePanel
-          invoices={invoices}
-          paymentsByInvoice={paymentsByInvoice}
-          onToggle={onTogglePayments}
-        />
+        <div className="mn-student-summary-invoices">
+          <InvoicePanel
+            invoices={invoices}
+            paymentsByInvoice={paymentsByInvoice}
+            onToggle={onTogglePayments}
+          />
+        </div>
       )}
     </div>
   );
