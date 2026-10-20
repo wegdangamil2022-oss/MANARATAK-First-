@@ -926,48 +926,48 @@ function SummaryView({
           </div>
           <div className="mt-3 space-y-2">
             {urgentAlerts.criticalDeadlines.slice(0, 2).map((tracker) => (
-              <div key={tracker.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[#52C4BE]/55 bg-[#116E7C] px-3 py-2.5 shadow-2xs">
+              <div key={tracker.id} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 border-r-[3px] border-r-[#0E7C86] bg-white px-2.5 py-2 shadow-2xs">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-white">موعد تقديم قريب</h3>
-                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[#E3F6F4]">
+                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[#142B5F]">موعد تقديم قريب</h3>
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-4 text-[#526A71]">
                     {trackerDisplayName(tracker)} — {formatDate(tracker.deadlineAt)}
                   </p>
                 </div>
                 <button type="button" onClick={() => setTab('OPPORTUNITIES')}
-                  className="shrink-0 whitespace-nowrap rounded-lg border border-white/85 bg-white px-2.5 py-1.5 text-[12px] font-bold leading-5 text-[#142B5F] hover:bg-[#E9F6F6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white cursor-pointer font-['Cairo',sans-serif]">
+                  className="shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 bg-[#EEF7F7] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] hover:bg-[#DDEFEF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}>
                   متابعة
                 </button>
               </div>
             ))}
             {urgentAlerts.pendingInvoices.slice(0, 1).map((inv) => (
-              <div key={inv.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[#52C4BE]/55 bg-[#116E7C] px-3 py-2.5 shadow-2xs">
+              <div key={inv.id} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 border-r-[3px] border-r-[#0E7C86] bg-white px-2.5 py-2 shadow-2xs">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-white">
+                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[#142B5F]">
                     {inv.status === 'OVERDUE' ? 'فاتورة متأخرة' : 'فاتورة مستحقة'}
                   </h3>
-                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[#E3F6F4]">
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-4 text-[#526A71]">
                     {inv.invoiceNumber} ({formatMoney(inv.amountDue)})
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => onTogglePayments(inv.id)}
-                  className="shrink-0 whitespace-nowrap rounded-lg border border-white/85 bg-white px-2.5 py-1.5 text-[12px] font-bold leading-5 text-[#142B5F] hover:bg-[#E9F6F6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white cursor-pointer font-['Cairo',sans-serif]"
+                  className="shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 bg-[#EEF7F7] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] hover:bg-[#DDEFEF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}
                 >
                   تفاصيل الفاتورة
                 </button>
               </div>
             ))}
             {urgentAlerts.unread.slice(0, 2).map((n) => (
-              <div key={n.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[#52C4BE]/55 bg-[#116E7C] px-3 py-2.5 shadow-2xs">
+              <div key={n.id} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 border-r-[3px] border-r-[#0E7C86] bg-white px-2.5 py-2 shadow-2xs">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-white">{n.title}</h3>
-                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[#E3F6F4]">{n.message}</p>
+                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[#142B5F]">{n.title}</h3>
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-4 text-[#526A71]">{n.message}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setTab('NOTIFICATIONS')}
-                  className="shrink-0 whitespace-nowrap rounded-lg border border-white/85 bg-white px-2.5 py-1.5 text-[12px] font-bold leading-5 text-[#142B5F] hover:bg-[#E9F6F6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white cursor-pointer font-['Cairo',sans-serif]"
+                  className="shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 bg-[#EEF7F7] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] hover:bg-[#DDEFEF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}
                 >
                   عرض
                 </button>
