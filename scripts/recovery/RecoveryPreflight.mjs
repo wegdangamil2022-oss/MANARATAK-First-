@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { verifySignedEvidence, DIGEST, hash } from '../release/lib/ReleaseContracts.mjs';
+import { validateDatabaseSnapshot } from './DatabaseSnapshot.mjs';
 export function databaseIdentity(databaseUrl) {
   const url = new URL(databaseUrl);
   if (!['postgres:', 'postgresql:'].includes(url.protocol) || url.search || url.hash)
@@ -73,7 +74,7 @@ function containedAsset(root, relative) {
     throw new Error('RECOVERY_ASSET_PATH_INVALID');
   return real;
 }
-export async function recoveryInputs({ databaseBackup, assetDirectory, assetManifest, proof }) {
+export async function recoveryInputs({ databaseBackup, assetDirectory, assetManifest, proof, requireDatabaseSnapshot = false }) {
   if (
     fs.lstatSync(databaseBackup).isSymbolicLink() ||
     !fs.statSync(databaseBackup).isFile() ||
@@ -87,6 +88,12 @@ export async function recoveryInputs({ databaseBackup, assetDirectory, assetMani
   )
     throw new Error('RECOVERY_ASSET_MANIFEST_HASH_INVALID');
   const manifest = JSON.parse(fs.readFileSync(assetManifest, 'utf8'));
+  if (requireDatabaseSnapshot) {
+    validateDatabaseSnapshot(manifest.databaseSnapshot);
+    if (manifest.files?.some(file => typeof file.assetId !== 'string' || !file.assetId || typeof file.locator !== 'string' || !file.locator) ||
+        new Set(manifest.files?.map(file => file.assetId)).size !== manifest.files?.length)
+      throw new Error('RECOVERY_ASSET_REFERENCE_MANIFEST_INVALID');
+  }
   if (
     manifest.version !== 1 ||
     manifest.snapshotId !== proof.snapshotId ||

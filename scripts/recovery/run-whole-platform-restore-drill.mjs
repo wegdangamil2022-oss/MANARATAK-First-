@@ -2,6 +2,8 @@
 import childProcess from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { verifyDatabaseSnapshot } from './DatabaseSnapshot.mjs';
 import { required, requireSha } from '../release/lib/ReleaseContracts.mjs';
 import {
   recoveryTarget,
@@ -60,10 +62,11 @@ export async function executeRestore(
     completedAt: new Date(completedAt).toISOString(),
   };
 }
-if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   if (process.env.RECOVERY_DRILL_EXECUTION_AUTHORIZED !== 'true')
     throw new Error('RECOVERY_DRILL_NOT_AUTHORIZED');
   const input = {
+    requireDatabaseSnapshot: true,
     databaseUrl: required('DATABASE_URL'),
     databaseBackup: required('RECOVERY_DATABASE_BACKUP_FILE'),
     assetDirectory: required('RECOVERY_ASSET_RESTORE_DIR'),
@@ -112,6 +115,7 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
           '--clean',
           '--if-exists',
           '--no-owner',
+          '--no-acl',
           '--exit-on-error',
           '--dbname',
           target.database,
@@ -122,30 +126,16 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
       );
     },
     verifyDatabase: async (target, proof) => {
-      run('npm', ['run', 'test:database'], target, {
-        stdio: 'inherit',
-        env: {
-          ...connection(target),
-          DATABASE_URL: input.databaseUrl,
-          MANARATAK_DATABASE_INTEGRATION_ENABLED: 'true',
-        },
-      });
-      const checked = JSON.parse(
-        run(
-          'psql',
-          [
-            '-X',
-            '-At',
-            '-v',
-            'ON_ERROR_STOP=1',
-            '-c',
-            `SELECT json_build_object('snapshotId',snapshot_id,'assetReferencesMatched',asset_references_matched) FROM manaratak_recovery_snapshot WHERE snapshot_id='${proof.snapshotId}';`,
-          ],
-          target,
-          { encoding: 'utf8' },
-        ),
-      );
-      return checked;
+      const { PrismaClient } = await import('@prisma/client');
+      const client = new PrismaClient({datasources:{db:{url:input.databaseUrl}},log:[],errorFormat:'minimal'});
+      try {
+        const manifest = JSON.parse(fs.readFileSync(input.assetManifest,'utf8'));
+        const checked = await verifyDatabaseSnapshot(client,manifest.databaseSnapshot,manifest.files);
+        // Recheck independently owned sentinel after pg_restore as well.
+        const [guard] = await client.$queryRawUnsafe(`SELECT json_build_object('serverIdentity',(SELECT system_identifier::text FROM pg_control_system()),'database',current_database(),'role',current_user,'superuser',r.rolsuper,'createRole',r.rolcreaterole,'createDatabase',r.rolcreatedb,'targetFingerprint',g.target_fingerprint,'disposableInstanceId',g.disposable_instance_id,'sentinelOwnedByRestoreRole',pg_get_userbyid(c.relowner)=current_user,'sentinelWritableByRestoreRole',has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE')) AS value FROM pg_roles r JOIN manaratak_recovery_control.disposable_guard g ON g.guard_key='restore-target' JOIN pg_class c ON c.oid='manaratak_recovery_control.disposable_guard'::regclass WHERE r.rolname=current_user`);
+        databaseSentinel(guard?.value,target,proof);
+        return {...checked,snapshotId:proof.snapshotId};
+      } finally { await client.$disconnect(); }
     },
   });
   const out = process.env.RECOVERY_EVIDENCE_FILE || 'recovery-evidence/RESTORE_DRILL.json';

@@ -623,6 +623,13 @@ test('FSA018 corrupted backup aborts before even sentinel SQL', async () => {
   );
   assert.equal(calls, 0);
 });
+test('FSA018 runtime requires a data-derived database snapshot before sentinel SQL', async () => {
+  const input = {...recoveryFixture(), requireDatabaseSnapshot: true};
+  let calls = 0;
+  const forbidden = async () => { calls++; throw Error('UNEXPECTED_SQL'); };
+  await assert.rejects(() => executeRestore(input, {readSentinel:forbidden,restoreDatabase:forbidden,verifyDatabase:forbidden,now:()=>now}), /RECOVERY_DATABASE_SNAPSHOT_INVALID/);
+  assert.equal(calls, 0);
+});
 test('FSA018 corrupt asset aborts before all SQL', async () => {
   const input = recoveryFixture();
   fs.writeFileSync(path.join(input.assetDirectory, 'a.txt'), 'corrupt');
