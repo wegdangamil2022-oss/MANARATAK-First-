@@ -1,0 +1,15 @@
+{
+  "currentSourceSha": "433e420ec230c4dee9bd6e974329f0f48119e613",
+  "historicalSourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d",
+  "ownerCommandScripts": [
+    "scripts/seed-reference-currencies.ts",
+    "scripts/seed-reference-languages.ts",
+    "scripts/seed-reference-countries.ts",
+    "scripts/seed-degree-levels.ts",
+    "scripts/seed-taxonomy.ts",
+    "scripts/seed-external-course-providers.ts",
+    "scripts/bootstrap-phase18-student-tools.ts"
+  ],
+  "allGitBlobsUnchanged": true,
+  "currentSeedDatabaseExecutionClaimed": false
+}

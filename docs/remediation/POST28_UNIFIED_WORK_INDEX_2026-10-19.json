@@ -54,6 +54,7 @@
       "practicalClosure": "docs/remediation/POST28_R00_R03_PRACTICAL_CLOSEOUT_2026-10-21.md",
       "evidenceSourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
       "targetedB13Passed": 63,
+      "verifiedCurrentToolingCi": {"sourceSha":"46c9416c340fbe21d92fd1581b75e3ce84a09520","runId":39501061767,"result":"success","passedJobs":6},
       "verifiedPreviousDeliveryCi": {"sourceSha":"d1c379df7b3013aff17c60109ebf15f56e6aa8b7","runId":39496759696,"result":"success","passedJobs":6},
       "formalComprehensiveAcceptance": false,
       "reference": "docs/remediation/POST28_R01_REVALIDATION_2026-10-16.md"
@@ -81,13 +82,20 @@
     },
     {
       "id": "R04",
-      "state": "HISTORICAL_LOCAL_SCOPE_CLOSED_ONLY",
+      "state": "CURRENT_111_REPLAY_AND_HISTORICAL_REQUIRED_SEED_SCOPE_CLOSED_LOCAL",
+      "latestPracticalReview": "docs/remediation/POST28_R04_R05_PRACTICAL_REVIEW_2026-10-21.md",
+      "latestReplaySourceSha": "433e420ec230c4dee9bd6e974329f0f48119e613",
+      "latestReplayEvidence": "docs/reviews/evidence/post28/433e420ec230c4dee9bd6e974329f0f48119e613/r04-r05-practical-review/current-111-replay.json",
+      "formalComprehensiveAcceptance": false,
       "reference": "docs/remediation/POST28_R04_LOCAL_CLOSURE_2026-10-16.md",
       "evidenceSourceSha": "467d1369e8da0a93ea3444bc1ef6a56c5e53d57d"
     },
     {
       "id": "R05",
       "state": "CLOSED_LOCAL_SYNTHETIC_SCOPE",
+      "latestPracticalReview": "docs/remediation/POST28_R04_R05_PRACTICAL_REVIEW_2026-10-21.md",
+      "latestEvidenceReviewSourceSha": "433e420ec230c4dee9bd6e974329f0f48119e613",
+      "latestEvidenceReview": "docs/reviews/evidence/post28/433e420ec230c4dee9bd6e974329f0f48119e613/r04-r05-practical-review/retained-proof-review.json",
       "reference": "docs/remediation/POST28_R05_LOCAL_CLOSURE_2026-10-19.md",
       "technicalDecision": "RESOLVED_UNDER_EXPLICIT_USER_DELEGATION",
       "independentReview": "docs/reviews/POST28_R05_INDEPENDENT_IMPLEMENTATION_REVIEW_2026-10-19.md",

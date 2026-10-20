@@ -14,11 +14,11 @@
   ],
   "tests": {"b13":{"executed":63,"passed":63,"failed":0,"skipped":0},"labProfileAndNativePolicy":{"executed":13,"passed":13,"failed":0,"skipped":0,"newCases":2},"crossDatabaseConnectionDenials":3},
   "previousDeliveryCi": {"sourceSha":"d1c379df7b3013aff17c60109ebf15f56e6aa8b7","runId":39496759696,"result":"success","passedJobs":6},
-  "currentToolingCi": {"sourceSha":"46c9416c340fbe21d92fd1581b75e3ce84a09520","runId":39501061767,"lastObservedStatus":"in_progress","result":null,"acceptanceAssumed":false},
+  "currentToolingCi": {"sourceSha":"46c9416c340fbe21d92fd1581b75e3ce84a09520","runId":39501061767,"lastObservedStatus":"completed","result":"success","passedJobs":6,"acceptanceAssumed":false,"laterReadbackEvidence":"docs/reviews/evidence/post28/433e420ec230c4dee9bd6e974329f0f48119e613/r04-r05-practical-review/previous-source-ci-completed.json"},
   "evidence":"docs/reviews/evidence/post28/46c9416c340fbe21d92fd1581b75e3ce84a09520/r00-r03-practical-review/evidence-index.json",
   "exceptions": [
     {"id":"E01","remaining":"Full task/section27/matrix owner curation and launch market/language/provider budgets","blocksScopedLocalLab":false,"blocksFormalProductionAcceptance":true},
-    {"id":"E02","remaining":"Read actual final CI result for current tooling SHA","blocksScopedLocalLab":false,"blocksCurrentCandidateCiAcceptance":true},
+    {"id":"E02","remaining":null,"status":"RESOLVED_BY_ACTUAL_SUCCESSFUL_CI_READBACK_IN_R04_R05_BATCH","blocksScopedLocalLab":false,"blocksCurrentCandidateCiAcceptance":false},
     {"id":"E03","remaining":"Authorized independent signing identities and required recovery approvals","blocksScopedLocalLab":false,"blocksProtectedPromotionOrRecovery":true},
     {"id":"E04","remaining":"Approved actual host, storage, provider backup and final service/egress acceptance","blocksScopedLocalLab":false,"blocksUnprovenServiceActivationAndProductionAcceptance":true},
     {"id":"E05","remaining":"Representative SLO, pool wait, comprehensive combinations and stress","blocksScopedLocalLab":false,"blocksCapacityClaimsAndFormalAcceptance":true}

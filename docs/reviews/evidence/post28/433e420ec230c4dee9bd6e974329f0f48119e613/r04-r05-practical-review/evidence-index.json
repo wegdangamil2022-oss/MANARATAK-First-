@@ -1,0 +1,76 @@
+{
+  "kind": "POST28_R04_R05_PRACTICAL_REVIEW",
+  "sourceSha": "433e420ec230c4dee9bd6e974329f0f48119e613",
+  "files": [
+    {
+      "path": "GREENFIELD_MIGRATION_PARITY.json",
+      "bytes": 571,
+      "sha256": "a49c600ef71725ebb50fcc63d86affbdacbb78c4d4746e3bbb0e4b4135e4519d"
+    },
+    {
+      "path": "current-111-replay.json",
+      "bytes": 2335,
+      "sha256": "5eae29217e280b4a78539bf12ff2d29055e9f996dfb527e9f57b0bd1fb621d05"
+    },
+    {
+      "path": "current-replay-operator.mjs.txt",
+      "bytes": 6652,
+      "sha256": "1eca8b0da43682f8acecd8db65575f1035df0b47141b873e1ec66c0c103b0e43"
+    },
+    {
+      "path": "migration-ledger-after-redeploy-comparison.json",
+      "bytes": 421,
+      "sha256": "1e38dc7196ee60777e6b0df1ae847a3f08a1c5598f95b6d094fa462b43760bf8"
+    },
+    {
+      "path": "migration-ledger-comparison.json",
+      "bytes": 421,
+      "sha256": "1e38dc7196ee60777e6b0df1ae847a3f08a1c5598f95b6d094fa462b43760bf8"
+    },
+    {
+      "path": "migrations-to-schema.diff.sql",
+      "bytes": 24,
+      "sha256": "728442980e143e18c2aa9bd7d747a8ea8d85f510529e7540f90f35ea9dd1b268"
+    },
+    {
+      "path": "postgres-catalog-summary.json",
+      "bytes": 115,
+      "sha256": "f46e2aed83d7170efc47ce4024a8abaf329870139405028b46280d524069624c"
+    },
+    {
+      "path": "previous-source-ci-completed.json",
+      "bytes": 14919,
+      "sha256": "f2266c8e03c73e208b496399313adfde1cb683ab99dc6a369b6b59e7294bb955"
+    },
+    {
+      "path": "publication-normalization.json",
+      "bytes": 2441,
+      "sha256": "1f6a1169692ec77bf9f2699fb1e1027dae4da065c000d652a59cfa3d37259304"
+    },
+    {
+      "path": "redeploy-ledger-proof.json",
+      "bytes": 352,
+      "sha256": "39c2f33d318bc69db869241efa56d9df6d3e77773cf50fa2b56fa9031330fc48"
+    },
+    {
+      "path": "replayed-db-to-schema.diff.sql",
+      "bytes": 24,
+      "sha256": "728442980e143e18c2aa9bd7d747a8ea8d85f510529e7540f90f35ea9dd1b268"
+    },
+    {
+      "path": "retained-proof-review.json",
+      "bytes": 5156,
+      "sha256": "ccaaf868db0b75df538c73c4c454d04ee65daeb5bb2d0fde018dbeb6e4ab7c01"
+    },
+    {
+      "path": "retained-review-operator.mjs.txt",
+      "bytes": 5035,
+      "sha256": "ec6c6048777b4074aceccc6e3c8b70561a189fbba9fea11825e2d6bbb1e5a44e"
+    },
+    {
+      "path": "seed-owner-commands-unchanged.json",
+      "bytes": 547,
+      "sha256": "e7e9f509c5424a06235333387221d6160da1324b015675fe1f37cd7c20c1727d"
+    }
+  ]
+}
