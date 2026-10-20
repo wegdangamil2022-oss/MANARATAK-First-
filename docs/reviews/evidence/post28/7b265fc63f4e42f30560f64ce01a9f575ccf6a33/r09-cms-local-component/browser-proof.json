@@ -1,0 +1,28 @@
+{
+  "kind": "CMS_RICH_TEXT_BROWSER_SECURITY",
+  "sourceSha": "a7455c75e51f3c5a332b3577501a04b48725bf9c",
+  "workingTreeMayContainChanges": true,
+  "browserVersion": "155.0.4283.62",
+  "cases": [
+    {
+      "name": "allowed formatting and credential-free HTTPS link survive",
+      "passed": true
+    },
+    {
+      "name": "malicious markup 0",
+      "passed": true
+    },
+    {
+      "name": "malicious markup 1",
+      "passed": true
+    },
+    {
+      "name": "plain comparison text is preserved",
+      "passed": true
+    }
+  ],
+  "externalRequests": [],
+  "pageErrors": [],
+  "fullR09Acceptance": false,
+  "passed": true
+}

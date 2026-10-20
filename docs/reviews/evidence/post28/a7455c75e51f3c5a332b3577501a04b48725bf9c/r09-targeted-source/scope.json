@@ -1,0 +1,42 @@
+{
+  "kind": "POST28_R09_TARGETED_SOURCE_SCOPE",
+  "sourceSha": "a7455c75e51f3c5a332b3577501a04b48725bf9c",
+  "implementationSha": "c659a89ce199ee7857b3df52f11a780d30f7c9d4",
+  "redEvidenceContext": "Pre-fix working-tree experiments; not clean committed candidates. Source SHA identifies final candidate only.",
+  "greenEvidence": [
+    {
+      "file": "r09-localized-green.json",
+      "passed": 3,
+      "unselected": 3,
+      "source": "implementation working tree later committed as c659a89"
+    },
+    {
+      "file": "r09-enrollment-green.json",
+      "passed": 2,
+      "unselected": 0,
+      "source": "implementation working tree later committed as c659a89"
+    },
+    {
+      "file": "r09-b03-return-green.json",
+      "passed": 1,
+      "unselected": 7,
+      "source": "fixture correction working tree later committed as a7455c7"
+    }
+  ],
+  "previousCi": {
+    "runId": "39341546589",
+    "sourceSha": "c659a89ce199ee7857b3df52f11a780d30f7c9d4",
+    "failedStep": "Unit and source integration tests",
+    "failedTest": "B03 real learner entry > preserves the exact localized course return for an anonymous student",
+    "expected": "/en/student/courses/owner-a",
+    "actual": "/en/student/courses/owner-aundefined",
+    "cause": "useLocation test double omitted the real browser hash property",
+    "browserRun": "SKIPPED_DEPENDENCY_FAILED"
+  },
+  "limitations": {
+    "mockedRouterTestsAreNotRuntimeEvidence": true,
+    "fullR09Acceptance": false,
+    "productionAcceptance": false,
+    "historicalMatrixUnmodified": true
+  }
+}

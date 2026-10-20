@@ -1,0 +1,19 @@
+{
+    "archiveBytes":  38366,
+    "artifactId":  "12230259369",
+    "runId":  "39344907974",
+    "verifiedAgainstGitHubArtifactDigest":  true,
+    "entries":  [
+                    "linux-image-probe.json",
+                    "runtime-layer.json",
+                    "linux-runtime-proof/result.json",
+                    "linux-runtime-proof/api.log",
+                    "linux-runtime-proof/create.log",
+                    "linux-runtime-proof/initialize.log",
+                    "linux-runtime-proof/gateway.log",
+                    "linux-runtime-proof/r09-learner.png",
+                    "cms-rich-text-proof.json"
+                ],
+    "sourceSha":  "ce0690c36759fc73ac202a679f905054b7a4607b",
+    "archiveSha256":  "3700655017c4305ba7b74273522f7ee9f3cc79a286e674c63c9e29173238b814"
+}

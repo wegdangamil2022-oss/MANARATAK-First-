@@ -155,13 +155,13 @@
     },
     {
       "id": "R09",
-      "state": "IN_PROGRESS_FIRST_RETURN_PATH_FIX_VERIFIED",
+      "state": "IN_PROGRESS_LEARNER_AND_CMS_BROWSER_VERIFIED",
       "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md",
       "laterEvidence": "docs/remediation/POST28_R06_R07_PRACTICAL_HANDOFF_2026-10-19.md",
-      "latestReport": "docs/remediation/POST28_R09_FIRST_SLICE_2026-10-20.md",
-      "latestEvidence": "docs/reviews/evidence/post28/2141eb207c5c837457e5b9de5bfe5757f03d05a1/r09-return-path/evidence-index.json",
-      "latestEvidenceSourceSha": "2141eb207c5c837457e5b9de5bfe5757f03d05a1",
-      "formalAcceptance": "OPEN_BUILT_BROWSER_ENABLED_FEATURE_MATRIX"
+      "latestReport": "docs/remediation/POST28_R09_LEARNER_JOURNEY_2026-10-20.md",
+      "latestEvidence": "docs/reviews/evidence/post28/ce0690c36759fc73ac202a679f905054b7a4607b/r09-handoff/evidence-index.json",
+      "latestEvidenceSourceSha": "ce0690c36759fc73ac202a679f905054b7a4607b",
+      "formalAcceptance": "OPEN_REMAINING_ENABLED_FEATURE_MATRIX"
     }
   ],
   "validation": {
@@ -233,5 +233,20 @@
       "failed": 0,
       "pending": 0
     }
+  },
+  "r09LearnerSlice": {
+    "sourceSha": "ce0690c36759fc73ac202a679f905054b7a4607b",
+    "ciRun": "39344907974",
+    "status": "IN_PROGRESS_LEARNER_AND_CMS_BROWSER_VERIFIED",
+    "checks": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    },
+    "firstStudentProgress": 50,
+    "secondStudentProgress": 0,
+    "cmsSecurityBrowserCases": 4,
+    "fullR09Acceptance": false,
+    "productionAcceptance": false
   }
 }
