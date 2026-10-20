@@ -16,7 +16,9 @@ export function assertContentionOutcome(responses, current, previousVersion) {
   assert.deepEqual(responses.map(r => r.status).sort(), [200, 409], 'R11_CONTENTION_ONE_WINNER_REQUIRED');
   const winner = responses.find(r => r.status === 200);
   const loser = responses.find(r => r.status === 409);
-  assert.equal(loser.body.error, 'STUDENT_WORKSPACE_VERSION_CONFLICT', 'R11_EXPECTED_VERSION_CONFLICT');
+  // API v1 converts router errors to canonical Problem Details before they reach the browser.
+  assert.equal(loser.body.code, 'STUDENT_WORKSPACE_VERSION_CONFLICT', 'R11_EXPECTED_VERSION_CONFLICT');
+  assert.equal(loser.body.status, 409, 'R11_CONFLICT_PROBLEM_STATUS');
   assert.equal(winner.body.version, previousVersion + 1, 'R11_WINNER_VERSION');
   assert.equal(current.version, previousVersion + 1, 'R11_PERSISTED_VERSION');
   assert.equal(current.theme, winner.body.theme, 'R11_PERSISTED_WINNER');

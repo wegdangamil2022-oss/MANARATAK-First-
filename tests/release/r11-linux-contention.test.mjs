@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import {dockerResourceSample,assertContentionOutcome,runLinuxStudentContention} from '../../scripts/performance/LinuxStudentContention.mjs';
 
 test('R11 contention proof rejects two successes, hidden error, or lost update',()=>{
-  const success={status:200,body:{version:2,theme:'LIGHT'}},conflict={status:409,body:{error:'STUDENT_WORKSPACE_VERSION_CONFLICT'}};
+  const success={status:200,body:{version:2,theme:'LIGHT'}},conflict={status:409,body:{code:'STUDENT_WORKSPACE_VERSION_CONFLICT',status:409}};
   assert.equal(assertContentionOutcome([conflict,success],{version:2,theme:'LIGHT'},1),success);
   assert.throws(()=>assertContentionOutcome([success,success],{version:2,theme:'LIGHT'},1));
-  assert.throws(()=>assertContentionOutcome([success,{status:409,body:{error:'UNRELATED_CONFLICT'}}],{version:2,theme:'LIGHT'},1));
+  assert.throws(()=>assertContentionOutcome([success,{status:409,body:{code:'UNRELATED_CONFLICT',status:409}}],{version:2,theme:'LIGHT'},1));
+  assert.throws(()=>assertContentionOutcome([success,{status:409,body:{error:'STUDENT_WORKSPACE_VERSION_CONFLICT'}}],{version:2,theme:'LIGHT'},1));
+  assert.throws(()=>assertContentionOutcome([success,{status:409,body:{code:'STUDENT_WORKSPACE_VERSION_CONFLICT',status:400}}],{version:2,theme:'LIGHT'},1));
   assert.throws(()=>assertContentionOutcome([success,conflict],{version:3,theme:'LIGHT'},1));
   assert.throws(()=>assertContentionOutcome([success,conflict],{version:2,theme:'DARK'},1));
 });
