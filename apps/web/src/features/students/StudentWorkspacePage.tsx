@@ -1100,10 +1100,10 @@ function SummaryView({
             <button
               type="button"
               onClick={() => setTab('LEARNING')}
-              className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
+              className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-bold leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
               style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}
             >
-              <span style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>جميع الدورات</span>
+              <span style={{ fontSize: '11px', lineHeight: '18px', fontWeight: 700, fontFamily: "'Cairo', sans-serif" }}>جميع الدورات</span>
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -1150,9 +1150,9 @@ function SummaryView({
               <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
             </div>
             <button type="button" onClick={() => setTab('OPPORTUNITIES')}
-              className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
+              className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-bold leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
               style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>
-              <span style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>عرض الكل</span>
+              <span style={{ fontSize: '11px', lineHeight: '18px', fontWeight: 700, fontFamily: "'Cairo', sans-serif" }}>عرض الكل</span>
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
           </div>
