@@ -1235,7 +1235,11 @@ function SummaryView({
           </div>
 
           <ol id="student-summary-activity-timeline" className="mr-2.5 space-y-3 border-r-2 border-[#0E7C86]/35 pr-4 dark:border-[#5BC6C0]/45">
-            {activityLog.slice(0, showAllActivities ? undefined : 3)
+            {(showAllActivities
+              ? activityLog
+              : (dashboard.timeline.length > 0
+                ? [...dashboard.timeline].sort((first, second) => (Date.parse(second.occurredAt) || 0) - (Date.parse(first.occurredAt) || 0)).slice(0, 3)
+                : activityLog.slice(0, 3)))
               .map((item) => (
                 <li key={item.id} className="relative min-w-0">
                   <span aria-hidden="true" className="absolute -right-[22px] top-1 h-2.5 w-2.5 rounded-full border-2 border-[var(--mn-surface)] bg-[#0E7C86] dark:bg-[#5BC6C0]" />
