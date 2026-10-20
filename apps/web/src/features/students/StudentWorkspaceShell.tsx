@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { User, Home, Route, BookOpen, Heart, GraduationCap, ClipboardList, Bell, Settings2, MapPin, Clock3, Mail, Sparkles } from 'lucide-react';
+import { User, Home, Route, BookOpen, Heart, GraduationCap, ClipboardList, Bell, Settings2, MapPin, Clock3, Mail } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import './student-workspace.css';
 
@@ -75,24 +75,12 @@ export function StudentWorkspaceShell({
       data-high-contrast={String(Boolean(accessibility.highContrast))}
       className="mn-student-workspace w-full max-w-4xl mx-auto px-3 sm:px-6 pb-28 sm:pb-16 text-right font-['Cairo',sans-serif] min-h-screen text-[var(--mn-text)]"
     >
-      {/* Student identity: indigo on the left, teal on the right, subtle gold details. */}
+      {/* Full-bleed student identity on mobile: navy dominant, restrained teal at the right edge. */}
       <section
         aria-label="بطاقة هوية الطالب"
-        className="mn-inverse relative isolate overflow-hidden rounded-[26px] border border-[#46C1BB]/40 text-white shadow-md mx-auto w-full mt-4"
-        style={{ backgroundImage: 'radial-gradient(circle at 15% 13%, rgba(222,173,66,.14), transparent 32%), radial-gradient(circle at 89% 86%, rgba(230,184,89,.08), transparent 37%), linear-gradient(105deg, #142B5F 0%, #142B5F 54%, #184569 73%, #0E7C86 100%)' }}
+        className="mn-inverse relative isolate -mx-3 sm:-mx-6 mt-4 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-0 shadow-none text-white"
+        style={{ backgroundImage: 'linear-gradient(105deg, #142B5F 0%, #142B5F 67%, #173E67 85%, #0E7C86 100%)' }}
       >
-        {/* Purely decorative gold starlight, behind the content and reduced-motion safe. */}
-        <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-          <div className="absolute -left-12 -top-16 h-40 w-40 rounded-full bg-[#E6B75B]/15 blur-3xl" />
-          <div className="absolute -right-12 bottom-0 h-36 w-36 rounded-full bg-[#D6A43B]/10 blur-3xl" />
-          <Sparkles className="absolute top-[42%] right-[8%] h-3 w-3 text-[#F6D68B] opacity-45" strokeWidth={1.4} />
-          <svg className="absolute inset-0 w-full h-full opacity-25" viewBox="0 0 800 300" preserveAspectRatio="none" fill="none">
-            <path d="M-55 255 Q180 150 390 205 T855 120" stroke="#F0C778" strokeWidth="1.1" strokeLinecap="round" />
-            <path d="M-40 266 Q180 165 398 215 T855 135" stroke="#F0C778" strokeWidth=".6" strokeLinecap="round" opacity=".48" />
-          </svg>
-        </div>
-        <div className="relative z-10 h-[3px] w-full bg-gradient-to-r from-transparent via-[#E7B85F] to-transparent" />
-
         <div className="relative z-10 p-3.5 sm:p-5">
           {/* English name: avatar left/settings right. Arabic name: avatar right/settings left. */}
           <div dir={isLatinName ? 'ltr' : 'rtl'} className="flex items-start gap-2.5 sm:gap-3 min-w-0">
@@ -135,7 +123,7 @@ export function StudentWorkspaceShell({
                 {countryFlag ? `${countryFlag} ` : ''}{countryName || 'غير محددة'}
               </p>
             </div>
-            <div className="min-w-0 rounded-xl border border-[#65ADB9]/75 bg-[#19516E] px-2.5 py-2.5 sm:px-3 sm:py-3 shadow-sm">
+            <div className="min-w-0 rounded-xl border border-[#76ADBE]/75 bg-[#203F6A] px-2.5 py-2.5 sm:px-3 sm:py-3 shadow-sm">
               <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#C9F2EB]">
                 <Clock3 className="h-3.5 w-3.5 shrink-0" />
                 <span>التوقيت المحلي</span>
@@ -147,7 +135,7 @@ export function StudentWorkspaceShell({
           </div>
 
           {/* Email is intentionally LAST, below both compact cards. */}
-          <div className="mt-3.5 pt-2.5 border-t border-[#E5BD68]/55 flex items-center justify-center gap-2 min-w-0">
+          <div className="mt-3.5 pt-2.5 border-t border-[#D9ECF0]/40 flex items-center justify-center gap-2 min-w-0">
             <Mail className="h-3.5 w-3.5 shrink-0 text-[#8CE7DE]" />
             <span dir="ltr" className="min-w-0 truncate text-[10.5px] sm:text-[11.5px] font-medium text-white/90 font-['Cairo',sans-serif]">
               {email || 'لم يُضف بريد إلكتروني'}
