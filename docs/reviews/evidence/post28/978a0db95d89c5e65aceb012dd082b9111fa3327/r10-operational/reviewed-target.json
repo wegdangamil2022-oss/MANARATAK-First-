@@ -1,0 +1,80 @@
+{
+  "kind": "POST28_R10_REVIEWED_TARGET_PREPARATION",
+  "sourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+  "lab": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-gcSoOA",
+  "creation": {
+    "repository": "wegdangamil2022-oss/MANARATAK-First-",
+    "sha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+    "checkedAt": "2026-10-20T15:10:20.211Z",
+    "expiresAt": "2026-10-20T16:10:20.211Z",
+    "kind": "MANARATAK_NATIVE_LOCAL_CREATION_ATTESTATION",
+    "host": "127.0.0.1",
+    "port": 50958,
+    "targetDatabase": "manaratak_restore_f857130eecb0bcf998b0513da157aa36",
+    "targetFingerprint": "ce4a9e898053a1ff6bddf397d142a791c8ac9f9528cc82dd8a676037586544cc",
+    "sourceDatabase": "manaratak_post28_transactions_test",
+    "sourceDatabaseFingerprint": "c0ed4df26b9aab07deef5c32c8b9886735cc3e24158fa8bbf8744029b021a61a",
+    "serverIdentity": "7698767505733816892",
+    "runId": "c13d2cc0-34bf-43f0-964d-ba91659d57c4",
+    "producerSha256": "a8fbc1affa0d21a1d4b8d348798108baf0956177d57cb83d9d0df8e2c29eee8b",
+    "labStateFile": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-gcSoOA\\lab-state.json",
+    "labStateSha256": "6b4e43c857534d7b771bc0fb07f5fad1619858dbed4784afa50fb9c67f9eaab4",
+    "dataDirectoryIdentitySha256": "487ee8cadde28e503aaaac6ee95dbf582043dce851185cf30b80fb74aa33b8f2",
+    "postgresBinarySha256": "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+    "tlsRootCertificateSha256": "8cf0f90ef841efc487971351a21344701818422e89849a0af9384f4609f20a60"
+  },
+  "creationEnvelopeSha256": "a3b1c4e01b1ad5f162c38f8330eae47bb43bc857eddfcef30deb927dc303b588",
+  "target": {
+    "fingerprint": "ce4a9e898053a1ff6bddf397d142a791c8ac9f9528cc82dd8a676037586544cc",
+    "host": "127.0.0.1",
+    "port": "50958",
+    "database": "manaratak_restore_f857130eecb0bcf998b0513da157aa36",
+    "role": "manaratak_restore_runner"
+  },
+  "sourceFacts": {
+    "certificates": 1,
+    "certificateLedgers": 3,
+    "paidInvoices": 1,
+    "financialTransactions": 5,
+    "ledgerEntries": 10,
+    "withdrawnCmsSnapshots": 2,
+    "documentBindings": 1,
+    "outbox": 50,
+    "activeAssets": 6
+  },
+  "sourceSnapshotSha256": "070ada481dde35e8e52db7bab8a661e998527ffcaea06610e7ec980f219d1cf4",
+  "activeAssetCount": 6,
+  "tls": {
+    "rootSha256": "8cf0f90ef841efc487971351a21344701818422e89849a0af9384f4609f20a60",
+    "prisma": {
+      "ssl": true,
+      "version": "TLSv1.2"
+    },
+    "libpqVerified": true,
+    "noTlsRejected": true,
+    "libpqWrongCaRejected": true,
+    "libpqWrongHostRejected": true,
+    "prismaWrongCaRejected": true,
+    "prismaWrongHostRejected": true
+  },
+  "actualRoleChecks": {
+    "serverIdentity": "7698767505733816892",
+    "database": "manaratak_restore_f857130eecb0bcf998b0513da157aa36",
+    "role": "manaratak_restore_runner",
+    "superuser": false,
+    "createRole": false,
+    "createDatabase": false,
+    "replication": false,
+    "bypassRls": false,
+    "unsafeRoleMembership": false,
+    "canConnectOtherDatabase": false,
+    "targetFingerprint": "ce4a9e898053a1ff6bddf397d142a791c8ac9f9528cc82dd8a676037586544cc",
+    "disposableInstanceId": "c13d2cc0-34bf-43f0-964d-ba91659d57c4",
+    "sentinelOwnedByRestoreRole": false,
+    "sentinelWritableByRestoreRole": false
+  },
+  "roleChecksObservedBy": "post28_bootstrap",
+  "restoreRoleUsedForQueries": false,
+  "restoreExecuted": false,
+  "productionAcceptance": false
+}

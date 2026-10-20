@@ -168,14 +168,18 @@
     },
     {
       "id": "R10",
-      "state": "LOCAL_STRUCTURAL_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
-      "latestReport": "docs/remediation/POST28_R10_LOCAL_RESTORE_2026-10-20.md",
-      "latestEvidence": "docs/reviews/evidence/post28/bb86c6539dd28a7c7d24fc87076686e3259db8a3/r10-local-restore/evidence-index.json",
-      "latestEvidenceSourceSha": "bb86c6539dd28a7c7d24fc87076686e3259db8a3",
-      "formalAcceptance": "OPEN_OPERATIONAL_AND_PRODUCTION_SCOPE",
+      "state": "LOCAL_INTEGRATED_DIAGNOSTIC_RECOVERY_COMPLETE_PROVIDER_CONTROLS_NOT_PROVISIONED",
+      "latestReport": "docs/remediation/POST28_R10_OPERATIONAL_RECOVERY_2026-10-20.md",
+      "latestEvidence": "docs/reviews/evidence/post28/978a0db95d89c5e65aceb012dd082b9111fa3327/r10-operational/evidence-index.json",
+      "latestEvidenceSourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+      "formalAcceptance": "OPEN_PROVIDER_AND_PRODUCTION_SCOPE",
       "productionAcceptance": false,
       "restoreExecuted": true,
-      "independentReview": "docs/reviews/POST28_R10_INDEPENDENT_REVIEW_2026-10-20.md"
+      "independentReview": "docs/reviews/POST28_R10_INDEPENDENT_REVIEW_2026-10-20.md",
+      "integratedServiceRtoSeconds": 17,
+      "observedProbeRpoSeconds": 3.443,
+      "eventMeasurementScope": "TWO_SYNTHETIC_COMMITTED_OUTBOX_PROBES",
+      "providerControlsVerified": false
     }
   ],
   "validation": {

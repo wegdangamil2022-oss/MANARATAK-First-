@@ -1,0 +1,21 @@
+{
+  "kind": "POST28_NATIVE_LOCAL_LAB",
+  "runtime": "NATIVE_WINDOWS",
+  "scope": "DISPOSABLE",
+  "profile": "transactions",
+  "sourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+  "runId": "c13d2cc0-34bf-43f0-964d-ba91659d57c4",
+  "postgresMajor": 16,
+  "postgresVersion": "postgres (PostgreSQL) 16.15",
+  "pgBin": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\pg16-binaries\\pgsql\\bin",
+  "dataDirectory": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-gcSoOA\\data",
+  "directory": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-gcSoOA",
+  "port": 50958,
+  "status": "EMPTY_TARGETS_VERIFIED",
+  "createdAt": "2026-10-20T15:10:02.967Z",
+  "postgresBinarySha256": "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+  "postmasterPid": 13124,
+  "serverIdentity": "7698767505733816892",
+  "contractFile": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-gcSoOA\\targets.json",
+  "envFile": "C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\native-pg16-gcSoOA\\lab.env"
+}

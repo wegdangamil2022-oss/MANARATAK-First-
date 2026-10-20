@@ -1,0 +1,10 @@
+{
+  "sourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+  "donorSourceSha": "bb86c6539dd28a7c7d24fc87076686e3259db8a3",
+  "dumpSha256": "6461cdd9f3318d82b50757b4edd37be9fb62d0248364337eda23429dfb9e6122",
+  "newServerIdentity": "7698767505733816892",
+  "newRunId": "c13d2cc0-34bf-43f0-964d-ba91659d57c4",
+  "setupRole": "post28_tx_migrator",
+  "freshTargetVerifiedByCreator": true,
+  "previousSuitesRepeated": false
+}

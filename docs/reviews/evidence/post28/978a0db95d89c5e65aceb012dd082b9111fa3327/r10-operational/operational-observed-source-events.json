@@ -1,0 +1,16 @@
+{
+  "scope": "TWO_SYNTHETIC_COMMITTED_OUTBOX_PROBES",
+  "commitObservation": "AFTER_AUTOCOMMIT_RESPONSE",
+  "sourceEvents": [
+    {
+      "id": "172908d9-5bf2-408b-af43-277be9576ded",
+      "sha256": "7ddb2a4ecf9828cc09a66c708aca11f403fbeeab40f58c7fd5c226503e2c2ada",
+      "committedAt": "2026-10-20T15:34:36.870Z"
+    },
+    {
+      "id": "29c148b0-5f2e-44f5-bccf-d03aaa384d95",
+      "sha256": "4dc97477c1cf9946cc56cc63d4a6e728b220eb66e13fae190a383f8b51e6d405",
+      "committedAt": "2026-10-20T15:34:39.386Z"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "sourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+  "status": 200,
+  "rows": [
+    {
+      "publicId": "75508539-a17e-4fe6-92e8-7f0971c6d6f3",
+      "degreeLevel": null,
+      "degreeLevelType": "undefined",
+      "slug": "75508539-a17e-4fe6-92e8-7f0971c6d6f3"
+    },
+    {
+      "publicId": "3b8e382d-0f2a-48c2-8afb-47eee56b53d4",
+      "degreeLevel": null,
+      "degreeLevelType": "undefined",
+      "slug": "3b8e382d-0f2a-48c2-8afb-47eee56b53d4"
+    }
+  ],
+  "readOnlyHttpProbe": true,
+  "restoreRepeated": false
+}
