@@ -55,8 +55,9 @@ const initialRequests: StudentServiceRequestDto[] = [
 ];
 const initialDashboard: StudentDashboardSummaryDto = {
   workspace: {
-    id:'preview-workspace',studentReferenceId:previewStudentId,displayName:'طالب منارتك (معاينة)',
+    id:'preview-workspace',studentReferenceId:previewStudentId,displayName:'WEGDAN GAMIL ABDULHADI Ali',
     preferredLanguage:'ar',timezone:'Asia/Aden',theme:'LIGHT',status:'ACTIVE',version:1,
+    metadata:{countryNameAr:'اليمن',countryIso2:'YE',cityNameAr:'صنعاء'},
     notificationMatrix:{inApp:true,email:true,push:false,learning:true,scholarships:true,certificates:true,payments:true},
     privacyPreferences:{retainSearchHistory:true,allowPersonalization:false,allowProductAnalytics:false,publicProfileEnabled:false},
     accessibilityPreferences:{textScale:'DEFAULT',reduceMotion:false,highContrast:false},
@@ -129,7 +130,7 @@ async function callPreviewApi(method: string, ...args: unknown[]): Promise<unkno
   const a=args as any[];
   switch (method) {
     case 'getCurrentStudentIdentity':
-      return {principalId:previewStudentId,displayName:'طالب منارتك (معاينة)',primaryEmail:'student@example.invalid',roles:['STUDENT']};
+      return {principalId:previewStudentId,displayName:'WEGDAN GAMIL ABDULHADI Ali',primaryEmail:'student@example.invalid',roles:['STUDENT']};
     case 'getMyStudentDashboard':refreshCounters();return copy(dashboard);
     case 'getStudentInvoices':return {data:copy(invoices),page:1,total:invoices.length,totalPages:1};
     case 'getStudentInvoicePayments':return [];
