@@ -160,11 +160,11 @@ export function StudentWorkspaceShell({
               onClick={() => onTabChange(item.id)}
               className={`mn-student-nav-tile min-w-0 min-h-[76px] rounded-xl border px-1.5 py-2.5 flex flex-col items-center justify-center gap-1.5 transition-colors duration-150 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] ${
                 active
-                  ? 'border-[#D6A43B] bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F] shadow-sm font-semibold'
-                  : 'border-[#D6A43B]/55 bg-[#FFFCF5] text-[#29404B] dark:border-[#D6A43B]/65 dark:bg-[#13294D] dark:text-[#EEF4F6] hover:border-[#B78A2B] hover:bg-[#FBF4E7] dark:hover:bg-[#1B365A] font-medium'
+                  ? 'border-2 border-[#B38018] bg-white text-[#142B5F] dark:bg-[#10264A] dark:text-[#F3F6F8] shadow-[0_0_0_1px_rgba(179,128,24,0.14)] font-medium'
+                  : 'border-[#B38018]/65 bg-white text-[#29404B] dark:border-[#B38018]/75 dark:bg-[#10264A] dark:text-[#EEF4F6] hover:border-[#B38018] hover:bg-[#F5F8F8] dark:hover:bg-[#183456] font-medium'
               }`}
             >
-              <Icon className={`w-5 h-5 ${active ? 'text-[#E5B54F] dark:text-[#142B5F]' : 'text-[#586A74] dark:text-[#EEF4F6]'}`} />
+              <Icon className={`w-5 h-5 ${active ? 'text-[#142B5F] dark:text-[#F3F6F8]' : 'text-[#586A74] dark:text-[#EEF4F6]'}`} />
               <span className="text-[11px] font-medium font-['Cairo',sans-serif] leading-[1.5] break-words w-full min-h-[2.3em] flex items-center justify-center text-center">{item.label}</span>
             </button>
           );
