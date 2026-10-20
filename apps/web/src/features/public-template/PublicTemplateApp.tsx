@@ -24,7 +24,7 @@ import { PublicCourseEntry } from './components/PublicCourseEntry';
 // Statically imported heavy route views & modals for instant tab switching and transitions
 import { GlobalSearchPage } from './components/GlobalSearchPage';
 import { ComparePage } from './components/ComparePage';
-import { FavoritesPage } from './components/FavoritesPage';
+
 import { SmartSearchPage } from './components/SmartSearchPage';
 import { ScholarshipsSearchPage } from './components/ScholarshipsSearchPage';
 import { CountriesSearchPage } from './components/CountriesSearchPage';
@@ -47,7 +47,7 @@ import { ExamDetailModal } from './components/ExamDetailModal';
 import { MajorsSearchPage } from './components/MajorsSearchPage';
 import { UniversitiesSearchPage } from './components/UniversitiesSearchPage';
 import { AuthPage as PrototypeAuthPage } from './components/AuthPage';
-import { StudentWorkspacePreviewPage } from '../students/StudentWorkspacePreviewPage';
+
 import { StudentAuthPage as LiveStudentAuthPage } from '../students/StudentAuthPage';
 import { StudentWorkspacePage as LiveStudentWorkspacePage } from '../students/StudentWorkspacePage';
 
@@ -2262,33 +2262,7 @@ export default function App() {
             )}
 
             {/* TAB 3: FAVORITES VIEW */}
-            {activeTab === 'favorites' && (publicDataMode === 'prototype' ? (
-              <FavoritesPage
-                favoriteKeys={favoriteKeys}
-                scholarships={scholarships}
-                universities={universities}
-                majors={majors}
-                countries={countries}
-                importedCourses={importedCourses}
-                exams={exams}
-                articles={articles}
-                services={services}
-                tools={tools}
-                careers={careers}
-                onToggleFavorite={handleToggleFavorite}
-                onOpenScholarship={setSelectedScholarship}
-                onOpenUniversity={setSelectedUniversity}
-                onOpenMajor={setSelectedMajor}
-                onOpenCountry={(id) => { setCountryNavigationName(id); openSection('countries'); }}
-                onOpenCourse={(item) => { setSelectedImportedCourse(item); setSelectedCourseTrack('imported'); openSection('courses'); }}
-                onOpenExam={setSelectedExam}
-                onOpenArticle={setSelectedArticle}
-                onOpenService={setSelectedService}
-                onOpenTool={(id) => openStudentTools(id)}
-                onOpenCareer={(id) => { navigate({activeTab: 'search', selectedCategory: 'jobs', nestedDetailId: id}); }}
-                onNavigateCategory={(category) => openSection(category)}
-              />
-            ) : <LiveStudentWorkspacePage initialTab="VAULT" />)}
+            {activeTab === 'favorites' && <LiveStudentWorkspacePage initialTab="VAULT" />}
 
             {/* TAB 4: SMART AI TOOLS VIEW */}
             {activeTab === 'ai-tools' && (
@@ -2316,17 +2290,7 @@ export default function App() {
             )}
 
             {/* TAB: STUDENT WORKSPACE / P15 LIVE API OR EXPLICIT PROTOTYPE */}
-            {activeTab === 'account' && (publicDataMode === 'prototype' ? (
-              <StudentWorkspacePreviewPage
-                initialTab="SUMMARY"
-                favoriteKeys={favoriteKeys}
-                milestones={milestones}
-                notifications={notifications}
-                onOpenFavorites={() => openSection('favorites')}
-                onOpenAuth={() => openSection('auth')}
-                onNavigateCategory={(category) => openSection(category)}
-              />
-            ) : <LiveStudentWorkspacePage />)}
+            {activeTab === 'account' && <LiveStudentWorkspacePage initialTab="SUMMARY" />}
 
             {activeTab === 'auth' && (publicDataMode === 'prototype' ? (
               <PrototypeAuthPage onBackToWorkspace={() => openSection('account')} />
@@ -2346,17 +2310,7 @@ export default function App() {
                 window.history.replaceState({...window.history.state}, '', '/student');
               }} />
             ))}
-        {activeTab === 'tracker' && (publicDataMode === 'prototype' ? (
-          <StudentWorkspacePreviewPage
-                initialTab="OPPORTUNITIES"
-                favoriteKeys={favoriteKeys}
-                milestones={milestones}
-                notifications={notifications}
-                onOpenFavorites={() => openSection('favorites')}
-                onOpenAuth={() => openSection('auth')}
-                onNavigateCategory={(category) => openSection(category)}
-              />
-        ) : <LiveStudentWorkspacePage initialTab="JOURNEY" />)}
+        {activeTab === 'tracker' && <LiveStudentWorkspacePage initialTab="JOURNEY" />}
           </>
         )}
         </React.Suspense>
