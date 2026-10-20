@@ -142,10 +142,12 @@ export function StudentWorkspaceShell({
             </span>
           </div>
         </div>
+        {/* Gold baseline joins the identity panel to the quick-access navigation. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[3px] bg-gradient-to-r from-[#B38018] via-[#F2CE75] to-[#B38018]" />
       </section>
 
       {/* Original P15 navigation; no additional account sections. */}
-      <div role="navigation" aria-label="أقسام حساب الطالب" className="w-full max-w-4xl mx-auto mt-3.5 p-1 sm:p-1.5 rounded-2xl bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-white/10 shadow-sm grid grid-cols-4 lg:grid-cols-8 gap-1 sm:gap-1.5 mn-panel">
+      <div role="navigation" aria-label="أقسام حساب الطالب" className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] mt-0 p-1.5 sm:p-2 rounded-none bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border-x-0 border-t-0 border-b border-[var(--mn-border)] shadow-none grid grid-cols-4 lg:grid-cols-8 gap-1 sm:gap-1.5 mn-panel">
         {tabs.map((item) => {
           const Icon = item.icon;
           const active = tab === item.id;
@@ -162,8 +164,8 @@ export function StudentWorkspaceShell({
                   : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)] dark:hover:bg-[var(--mn-surface-elevated)] font-medium'
               }`}
             >
-              <Icon className={`w-4 h-4 ${active ? 'text-[#E5B54F]' : ''}`} />
-              <span className="text-[9.5px] sm:text-[11px] truncate w-full text-center">{item.label}</span>
+              <Icon className={`w-5 h-5 ${active ? 'text-[#E5B54F]' : ''}`} />
+              <span className="text-[10px] sm:text-[11px] font-bold leading-tight break-words w-full min-h-[2.4em] flex items-center justify-center text-center">{item.label}</span>
             </button>
           );
         })}
