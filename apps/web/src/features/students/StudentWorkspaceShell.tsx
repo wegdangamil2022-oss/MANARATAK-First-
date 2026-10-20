@@ -53,7 +53,7 @@ function localClock(zone: string | null | undefined, now: Date): string {
 
 export function StudentWorkspaceShell({
   children, activeTab: tab, onTabChange, displayName, email,
-  countryName, countryFlag, cityName, timezone, previewMode = false, accessibility = {},
+  countryName, countryFlag, cityName, timezone, accessibility = {},
 }: Props) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -62,6 +62,10 @@ export function StudentWorkspaceShell({
   }, []);
   const clock = localClock(timezone, now);
   const place = cityName || (timezone ? timezoneCities[timezone] : undefined);
+  // The name, not the platform locale, determines the profile-image alignment.
+  // Keep RTL for Arabic or mixed-script names; pure Latin names use LTR.
+  const studentName = (displayName || '').trim();
+  const isLatinName = /[A-Za-z]/.test(studentName) && !/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(studentName);
 
   return (
     <main
@@ -81,10 +85,7 @@ export function StudentWorkspaceShell({
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
           <div className="absolute -left-12 -top-16 h-40 w-40 rounded-full bg-[#E6B75B]/15 blur-3xl" />
           <div className="absolute -right-12 bottom-0 h-36 w-36 rounded-full bg-[#D6A43B]/10 blur-3xl" />
-          <Sparkles className="absolute top-7 left-[13%] h-5 w-5 text-[#EFC674] opacity-55" strokeWidth={1.4} />
           <Sparkles className="absolute top-[42%] right-[8%] h-3 w-3 text-[#F6D68B] opacity-45" strokeWidth={1.4} />
-          <span className="absolute bottom-[25%] left-[13%] h-1 w-1 rounded-full bg-[#F5CF83]/55" />
-          <span className="absolute top-[25%] left-[35%] h-1 w-1 rounded-full bg-[#F5CF83]/55" />
           <svg className="absolute inset-0 w-full h-full opacity-25" viewBox="0 0 800 300" preserveAspectRatio="none" fill="none">
             <path d="M-55 255 Q180 150 390 205 T855 120" stroke="#F0C778" strokeWidth="1.1" strokeLinecap="round" />
             <path d="M-40 266 Q180 165 398 215 T855 135" stroke="#F0C778" strokeWidth=".6" strokeLinecap="round" opacity=".48" />
@@ -93,24 +94,21 @@ export function StudentWorkspaceShell({
         <div className="relative z-10 h-[3px] w-full bg-gradient-to-r from-transparent via-[#E7B85F] to-transparent" />
 
         <div className="relative z-10 p-3.5 sm:p-5">
-          {/* Avatar and the exact existing title font sizes. */}
-          <div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
+          {/* English name: avatar left/settings right. Arabic name: avatar right/settings left. */}
+          <div dir={isLatinName ? 'ltr' : 'rtl'} className="flex items-start gap-2.5 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => onTabChange('PROFILE')}
               title="عرض وتعديل ملفي"
-              className="flex flex-1 items-center gap-2.5 sm:gap-3 min-w-0 text-right cursor-pointer group/profile focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#71E5D9]"
+              className="flex flex-1 items-center gap-2.5 sm:gap-3 min-w-0 text-start cursor-pointer group/profile focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#71E5D9]"
             >
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-[3px] border-[#43CDC3] bg-[#142B5F] shrink-0 flex items-center justify-center shadow-sm group-hover/profile:scale-[1.03] transition-transform">
                 <User className="w-7 h-7 sm:w-8 sm:h-8 text-[#65E0D4]" strokeWidth={1.8} />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-base sm:text-lg font-bold text-[#F0C872] leading-tight [overflow-wrap:anywhere] group-hover/profile:text-[#FFDE96] transition-colors">
+                <h1 dir={isLatinName ? 'ltr' : 'rtl'} className="text-base sm:text-lg font-bold text-[#F0C872] leading-tight [overflow-wrap:anywhere] group-hover/profile:text-[#FFDE96] transition-colors">
                   {displayName || 'حساب الطالب'}
                 </h1>
-                <p className="text-[10px] sm:text-[11px] text-white/85 mt-1 leading-relaxed">
-                  {previewMode ? 'حساب الطالب • معاينة التصميم' : 'حساب الطالب'}
-                </p>
               </div>
             </button>
             <button
