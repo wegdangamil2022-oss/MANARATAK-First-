@@ -3,6 +3,8 @@ import childProcess from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import os from 'node:os';
+import { verificationRestoreList } from '../database/post28-backup-contract.mjs';
 import { verifyDatabaseSnapshot } from './DatabaseSnapshot.mjs';
 import { required, requireSha } from '../release/lib/ReleaseContracts.mjs';
 import {
@@ -113,13 +115,19 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     restoreDatabase: async (target, backup) => {
       if (!/\.(dump|backup)$/i.test(backup))
         throw new Error('RECOVERY_CUSTOM_FORMAT_BACKUP_REQUIRED');
-      run(
+      const list = verificationRestoreList(run('pg_restore',['--list',backup],target,{encoding:'utf8'}));
+      const temporary = fs.mkdtempSync(path.join(os.tmpdir(),'manaratak-restore-list-'));
+      const listFile = path.join(temporary,'restore.list');
+      fs.writeFileSync(listFile,list.text,{flag:'wx',mode:0o600});
+      try { run(
         'pg_restore',
         [
           '--clean',
           '--if-exists',
           '--no-owner',
           '--no-acl',
+          '--use-list',
+          listFile,
           '--exit-on-error',
           '--dbname',
           target.database,
@@ -127,7 +135,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
         ],
         target,
         { stdio: 'inherit' },
-      );
+      ); } finally { fs.rmSync(temporary,{recursive:true,force:true}); }
     },
     verifyDatabase: async (target, proof) => {
       const { PrismaClient } = await import('@prisma/client');
