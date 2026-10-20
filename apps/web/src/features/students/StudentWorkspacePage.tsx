@@ -751,11 +751,6 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
     >
       <div className="w-full max-w-4xl mx-auto mt-5 space-y-5">
         {error && <Alert tone="error" message={error} onClose={() => setError(null)} />}
-        {import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' && (
-          <div role="status" className="rounded-xl border border-[#D6A43B]/40 bg-[#D6A43B]/10 p-3 text-xs leading-6 text-[var(--mn-heading)]">
-            معاينة حساب الطالب حسب مكونات الكود الأصلية: كل البيانات والأزرار للتصميم والتجربة فقط. لا يُرسل أي تعديل أو مستند إلى الخادم، وتُمسح تغييراتك عند إعادة تحميل الصفحة.
-          </div>
-        )}
         {notice && <Alert tone="success" message={import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? 'تم تنفيذ الإجراء داخل المعاينة فقط؛ لم يتم حفظ أي بيانات حقيقية.' : notice} onClose={() => setNotice(null)} />}
         {sectionFailures.length > 0 && <div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">تعذر تحميل: {sectionFailures.join('، ')}. <button type="button" onClick={() => setRetryKey(value => value + 1)} className="font-bold underline">إعادة التحميل</button></div>}
         {dashboard.partialFailures.length > 0 && (
@@ -890,14 +885,24 @@ function SummaryView({
   );
 
   const urgentAlerts = useMemo(() => {
-    const unread = dashboard.notifications.filter((n) => !n.readAt);
-    const pendingInvoices = invoices.filter((inv) => ['ISSUED', 'PARTIALLY_PAID', 'OVERDUE'].includes(inv.status));
-    const upcomingDeadlines = activeMilestones.filter((m) => m.deadlineAt);
+    const unread = dashboard.notifications.filter((notification) => !notification.readAt);
+    const pendingInvoices = invoices
+      .filter((invoice) => ['ISSUED', 'PARTIALLY_PAID', 'OVERDUE'].includes(invoice.status))
+      .sort((a, b) => Number(b.status === 'OVERDUE') - Number(a.status === 'OVERDUE'));
+    const now = Date.now();
+    const criticalDeadlines = activeMilestones
+      .filter((tracker) => {
+        if (!tracker.deadlineAt) return false;
+        const remaining = new Date(tracker.deadlineAt).getTime() - now;
+        return Number.isFinite(remaining) && remaining >= 0 && remaining <= 48 * 60 * 60 * 1000;
+      })
+      .sort((a, b) => new Date(a.deadlineAt || '').getTime() - new Date(b.deadlineAt || '').getTime());
     return {
       unread,
       pendingInvoices,
-      upcomingDeadlines,
-      hasUrgent: unread.length > 0 || pendingInvoices.length > 0,
+      criticalDeadlines,
+      hasCritical: criticalDeadlines.length > 0 || pendingInvoices.some((invoice) => invoice.status === 'OVERDUE'),
+      hasUrgent: unread.length > 0 || pendingInvoices.length > 0 || criticalDeadlines.length > 0,
     };
   }, [dashboard.notifications, invoices, activeMilestones]);
 
@@ -908,91 +913,117 @@ function SummaryView({
     applicationTrackers.length === 0
   );
 
-  return (
-    <div className="mt-3.5 space-y-4">
-      {/* 1. What Needs Attention (if real data proves it) */}
-      {urgentAlerts.hasUrgent && (
-        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/15 p-4 text-[var(--mn-heading)]">
-          <div className="flex items-center gap-2.5 font-bold text-sm text-amber-700 dark:text-amber-400">
-            <Bell className="w-4 h-4" />
-            <span>يحتاج انتباهك</span>
+  const attentionPanel = urgentAlerts.hasUrgent ? (
+      <section
+        aria-label="أمور تحتاج انتباه الطالب"
+        className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden border-y border-[#D6A43B]/35 text-right font-['Cairo',sans-serif]"
+        style={{ backgroundImage: 'linear-gradient(105deg, #142B5F 0%, #142B5F 71%, #184366 88%, #0E7C86 100%)' }}
+      >
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
+          <div className="flex items-center gap-2.5 font-bold text-white">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/60 bg-[#D6A43B]/15"><Bell className="h-4 w-4 text-[#EAC775]" /></span>
+            <h2 className="text-[14.5px] sm:text-base font-bold text-white">يحتاج انتباهك</h2>
           </div>
-          <div className="mt-2.5 space-y-2">
+          <div className="mt-3 space-y-2">
+            {urgentAlerts.criticalDeadlines.slice(0, 2).map((tracker) => (
+              <div key={tracker.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[#D6A43B]/45 bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[var(--mn-heading)]">موعد تقديم قريب</h3>
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[var(--mn-text-muted)]">
+                    {trackerDisplayName(tracker)} — {formatDate(tracker.deadlineAt)}
+                  </p>
+                </div>
+                <button type="button" onClick={() => setTab('OPPORTUNITIES')}
+                  className="shrink-0 rounded-lg border border-[#142B5F]/20 bg-[#142B5F]/5 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-[#142B5F] dark:text-[#E5B54F] hover:bg-[#142B5F]/10 cursor-pointer">
+                  متابعة
+                </button>
+              </div>
+            ))}
             {urgentAlerts.unread.slice(0, 2).map((n) => (
-              <div key={n.id} className="text-xs flex items-start justify-between gap-3 bg-[var(--mn-surface)] p-2.5 rounded-xl border border-[var(--mn-border)]">
-                <div>
-                  <div className="font-bold">{n.title}</div>
-                  <div className="text-[var(--mn-text-muted)] mt-0.5">{n.message}</div>
+              <div key={n.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[var(--mn-heading)]">{n.title}</h3>
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[var(--mn-text-muted)]">{n.message}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setTab('NOTIFICATIONS')}
-                  className="shrink-0 text-[10px] font-bold text-[var(--mn-primary)] hover:underline cursor-pointer"
+                  className="shrink-0 rounded-lg border border-[#142B5F]/20 bg-[#142B5F]/5 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-[#142B5F] dark:text-[#E5B54F] hover:bg-[#142B5F]/10 cursor-pointer"
                 >
                   عرض
                 </button>
               </div>
             ))}
             {urgentAlerts.pendingInvoices.slice(0, 1).map((inv) => (
-              <div key={inv.id} className="text-xs flex items-center justify-between gap-3 bg-[var(--mn-surface)] p-2.5 rounded-xl border border-[var(--mn-border)]">
-                <div>
-                  <span className="font-bold">فاتورة مستحقة: </span>
-                  <span>{inv.invoiceNumber} ({formatMoney(inv.amountDue)})</span>
+              <div key={inv.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[var(--mn-heading)]">
+                    {inv.status === 'OVERDUE' ? 'فاتورة متأخرة' : 'فاتورة مستحقة'}
+                  </h3>
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[var(--mn-text-muted)]">
+                    {inv.invoiceNumber} ({formatMoney(inv.amountDue)})
+                  </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => onTogglePayments(inv.id)}
-                  className="shrink-0 text-[10px] font-bold text-[var(--mn-primary)] hover:underline cursor-pointer"
+                  className="shrink-0 rounded-lg border border-[#142B5F]/20 bg-[#142B5F]/5 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-[#142B5F] dark:text-[#E5B54F] hover:bg-[#142B5F]/10 cursor-pointer"
                 >
                   تفاصيل الفاتورة
                 </button>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        </section>
+  ) : null;
 
+  return (
+    <div className="mt-3.5 space-y-3.5 sm:space-y-4 font-['Cairo',sans-serif]">
+      {/* Critical deadline or overdue invoice first; otherwise metrics first. */}
+      {urgentAlerts.hasCritical && attentionPanel}
       {/* 2. Quick Stat Counters (Only meaningful numbers, clickable to respective tabs) */}
       {!isNewStudent && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
           <button
             type="button"
             onClick={() => setTab('OPPORTUNITIES')}
-            className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-center shadow-2xs hover:shadow-xs transition-all mn-panel cursor-pointer group"
+            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-2 sm:p-2.5 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
           >
-            <Route className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-1 group-hover:scale-110 transition-transform" />
-            <div className="text-base font-bold text-[var(--mn-heading)]">{activeMilestones.length}</div>
-            <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">تقديمات نشطة</div>
+            <Route className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0.5 group-hover:scale-110 transition-transform" />
+            <div className="text-[17px] sm:text-lg leading-6 font-bold text-[var(--mn-heading)]">{activeMilestones.length}</div>
+            <div className="text-[12px] sm:text-[13px] font-bold leading-5 text-[var(--mn-text-muted)]">تقديمات نشطة</div>
           </button>
           <button
             type="button"
             onClick={() => setTab('LEARNING')}
-            className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-center shadow-2xs hover:shadow-xs transition-all mn-panel cursor-pointer group"
+            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-2 sm:p-2.5 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
           >
-            <BookOpen className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-1 group-hover:scale-110 transition-transform" />
-            <div className="text-base font-bold text-[var(--mn-heading)]">{dashboard.statistics.activeCourses}</div>
-            <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">دورات جارية</div>
+            <BookOpen className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0.5 group-hover:scale-110 transition-transform" />
+            <div className="text-[17px] sm:text-lg leading-6 font-bold text-[var(--mn-heading)]">{dashboard.statistics.activeCourses}</div>
+            <div className="text-[12px] sm:text-[13px] font-bold leading-5 text-[var(--mn-text-muted)]">دورات جارية</div>
           </button>
           <button
             type="button"
             onClick={() => setTab('VAULT')}
-            className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-center shadow-2xs hover:shadow-xs transition-all mn-panel cursor-pointer group"
+            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-2 sm:p-2.5 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
           >
-            <Heart className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-1 group-hover:scale-110 transition-transform" />
-            <div className="text-base font-bold text-[var(--mn-heading)]">{dashboard.statistics.savedItems}</div>
-            <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">عناصر محفوظة</div>
+            <Heart className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0.5 group-hover:scale-110 transition-transform" />
+            <div className="text-[17px] sm:text-lg leading-6 font-bold text-[var(--mn-heading)]">{dashboard.statistics.savedItems}</div>
+            <div className="text-[12px] sm:text-[13px] font-bold leading-5 text-[var(--mn-text-muted)]">عناصر محفوظة</div>
           </button>
           <button
             type="button"
             onClick={() => setTab('LEARNING')}
-            className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 text-center shadow-2xs hover:shadow-xs transition-all mn-panel cursor-pointer group"
+            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-2 sm:p-2.5 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
           >
-            <Award className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-1 group-hover:scale-110 transition-transform" />
-            <div className="text-base font-bold text-[var(--mn-heading)]">{dashboard.statistics.certificates}</div>
-            <div className="text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">شهادات صادرة</div>
+            <Award className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0.5 group-hover:scale-110 transition-transform" />
+            <div className="text-[17px] sm:text-lg leading-6 font-bold text-[var(--mn-heading)]">{dashboard.statistics.certificates}</div>
+            <div className="text-[12px] sm:text-[13px] font-bold leading-5 text-[var(--mn-text-muted)]">شهادات صادرة</div>
           </button>
         </div>
       )}
+
+      {!urgentAlerts.hasCritical && attentionPanel}
 
       {/* 3. New Student Welcome / Starting State (Clean consolidated starter card) */}
       {isNewStudent && (
