@@ -1053,7 +1053,7 @@ function SummaryView({
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#E5B54F]" />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="mn-student-summary-heading text-sm sm:text-base font-bold text-[var(--mn-heading)]">مرحبًا بك في مساحتك في منارتك</h2>
+              <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">مرحبًا بك في مساحتك في منارتك</h2>
               <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] mt-1 leading-relaxed">
                 مساحتك جاهزة لتتبع طلبات المنح، التسجيل في الدورات، واستكشاف الجامعات والتخصصات وحفظ ما يهمك.
               </p>
