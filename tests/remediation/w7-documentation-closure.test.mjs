@@ -21,8 +21,8 @@ test('readiness guard rejects Production Ready only when used as an active statu
 test('source CI permits only the explicitly authorized dependency-gated Linux browser lab',()=>{
   const ci=fs.readFileSync(new URL('../../.github/workflows/ci.yml',import.meta.url),'utf8');
   assert.equal(sourceCiBrowserBoundaryDeclared(ci),true);
-  const mode=/ --(?:r08-combined|r09-learner|r09-public)/g;
-  for(const permitted of ['',' --r08-combined',' --r09-learner',' --r09-public'])assert.equal(sourceCiBrowserBoundaryDeclared(ci.replace(mode,permitted)),true);
+  const mode=/ --(?:r08-combined|r09-learner|r09-public)(?: --r11-contention)?/g;
+  for(const permitted of ['',' --r08-combined',' --r09-learner',' --r09-public',' --r09-public --r11-contention'])assert.equal(sourceCiBrowserBoundaryDeclared(ci.replace(mode,permitted)),true);
   for(const altered of [
     ci.replace('needs: [source-quality, artifact-retrieval]','needs: source-quality'),
     ci.replace("POST28_LINUX_RUNTIME_REVIEW: 'YES'","POST28_LINUX_RUNTIME_REVIEW: 'NO'"),
@@ -31,6 +31,9 @@ test('source CI permits only the explicitly authorized dependency-gated Linux br
     ci.replace('  linux-runtime-review:','  unrestricted-browser:'),
     ci.replace(mode,' --arbitrary-command'),
     ci.replace(mode,' --r09-learner --arbitrary-command'),
+    ci.replace(mode,' --r11-contention'),
+    ci.replace(mode,' --r08-combined --r11-contention'),
+    ci.replace(mode,' --r09-public --r11-contention --arbitrary-command'),
   ])assert.equal(sourceCiBrowserBoundaryDeclared(altered),false);
 });
 
