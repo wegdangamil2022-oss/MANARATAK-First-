@@ -1,7 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {captureDatabaseSnapshot, validateDatabaseSnapshot, verifyDatabaseSnapshot} from '../../scripts/recovery/DatabaseSnapshot.mjs';
 const checksum='a'.repeat(64);
+test('CLI enters its authorization guard on Windows and Unix before database parsing',()=>{
+ const command=fileURLToPath(new URL('../../scripts/recovery/run-whole-platform-restore-drill.mjs',import.meta.url));
+ const result=spawnSync(process.execPath,[command],{encoding:'utf8',windowsHide:true,env:{...process.env,RECOVERY_DRILL_EXECUTION_AUTHORIZED:'false',DATABASE_URL:'invalid-do-not-connect'}});
+ assert.equal(result.status,1);assert.match(result.stderr,/RECOVERY_DRILL_NOT_AUTHORIZED/);
+});
 function client({digest=checksum, tables=['AssetRecord','Certificate'], assets=[], sequenceValue}={}) {
  const commands=[];
  return {commands,async $transaction(fn){return fn(this);},async $executeRawUnsafe(sql){commands.push(sql);},async $queryRawUnsafe(sql){
