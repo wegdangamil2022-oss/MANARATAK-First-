@@ -38,6 +38,8 @@ import { ApplicationMilestone, FavoriteKind, Language, PushNotificationItem, Use
 type WorkspaceSection = 'hub' | 'vault' | 'journey' | 'control';
 
 interface StudentWorkspacePageProps {
+  /** Opens the requested student preview tab directly without invoking the API. */
+  initialSection?: WorkspaceSection;
   profile?: UserProfile | null;
   language: Language;
   isDarkMode: boolean;
@@ -71,6 +73,7 @@ const kindLabels: Partial<Record<FavoriteKind, string>> = {
 };
 
 export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
+  initialSection = 'hub',
   profile,
   language,
   isDarkMode,
@@ -91,7 +94,7 @@ export const StudentWorkspacePage: React.FC<StudentWorkspacePageProps> = ({
 }) => {
   const { t: publicT, dir: publicDir } = usePublicTemplateTranslation();
 
-  const [section, setSection] = useState<WorkspaceSection>('hub');
+  const [section, setSection] = useState<WorkspaceSection>(initialSection);
   const [recommendationsEnabled, setRecommendationsEnabled] = useState(true);
   const [activityTrackingEnabled, setActivityTrackingEnabled] = useState(true);
   const [notificationPreviewEnabled, setNotificationPreviewEnabled] = useState(true);
