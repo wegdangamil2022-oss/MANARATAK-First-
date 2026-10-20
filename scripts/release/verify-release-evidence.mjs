@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import {
   required,
   verifySignedEvidence,
@@ -92,7 +94,7 @@ export function verifyPromotionInputs(env = process.env) {
   }
   return { manifest, evidence, verdict };
 }
-if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
+if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   const { verdict } = verifyPromotionInputs();
   fs.mkdirSync('release-evidence', { recursive: true });
   fs.writeFileSync(
