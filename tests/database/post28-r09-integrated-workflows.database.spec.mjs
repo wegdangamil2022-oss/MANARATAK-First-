@@ -133,6 +133,7 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     const bodies={};
     for(const locale of ['ar','en']){
       const draft=await call(author,'put','/admin/cms/content/'+id+'/localized',{locale,localizedSlug:slug+'-'+locale,title:'R09 '+locale+' published owner',summary:'Synthetic current owner summary',body:'<p>R09 '+locale+' public body</p>',seoMetadata:{title:'R09 '+locale,description:'Synthetic current owner metadata'}});expect(draft.status,draft.text).toBe(200);
+      const neverPublishedArchive=await call(publisher,'post','/admin/cms/content/'+id+'/archive',{locale,expectedVersion:draft.body.version});expect(neverPublishedArchive.status,neverPublishedArchive.text).toBe(422);
       const firstPublic=await request(app).get('/cms/content/'+slug+'-'+locale).query({locale});expect(firstPublic.status).toBe(404);
       const submitted=await call(author,'post','/admin/cms/content/'+id+'/submit-review',{locale,expectedVersion:draft.body.version});expect(submitted.status,submitted.text).toBe(200);
       const forbidden=await call(author,'post','/admin/cms/content/'+id+'/approve',{locale,expectedVersion:submitted.body.version});expect(forbidden.status).toBe(403);
@@ -150,6 +151,7 @@ describe('R09 shared synthetic CMS learner certificate privacy and money workflo
     const stillPublished=await request(app).get('/cms/content/'+slug+'-ar').query({locale:'ar'});expect(stillPublished.status).toBe(200);expect(stillPublished.text).not.toContain('private replacement');expect(stillPublished.text).toContain('R09 ar public body');
     for(const locale of ['ar','en']){
       const current=await db.cmsLocalizedContent.findUniqueOrThrow({where:{contentId_locale:{contentId:id,locale}}});
+      const stale=await call(publisher,'post','/admin/cms/content/'+id+'/archive',{locale,expectedVersion:current.version+1});expect(stale.status,stale.text).toBe(409);
       const archived=await call(publisher,'post','/admin/cms/content/'+id+'/archive',{locale,expectedVersion:current.version});expect(archived.status,archived.text).toBe(200);
       const hidden=await request(app).get('/cms/content/'+slug+'-'+locale).query({locale});expect(hidden.status).toBe(404);expect(hidden.text).not.toContain('public body');
     }
