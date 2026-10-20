@@ -14,11 +14,13 @@ import {preflightTargets} from '../database/post28-isolation.mjs';
 import {readDatabaseIdentity} from '../database/post28-preflight.mjs';
 import {R08CombinedRuntime} from './lib/R08CombinedRuntime.mjs';
 import {seedR09LearnerFixture,exerciseR09Learner} from './lib/R09LearnerRuntime.mjs';
+import {seedR09PublicFixture,exerciseR09Public} from './lib/R09PublicRuntime.mjs';
 
 const repo=fs.realpathSync(process.cwd()), run=fs.realpathSync(process.argv[2]);
 const r08Combined=process.argv[3]==='--r08-combined';
 const r09Learner=process.argv[3]==='--r09-learner';
-if(process.argv.length>4||(process.argv[3]&&!r08Combined&&!r09Learner))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
+const r09Public=process.argv[3]==='--r09-public';
+if(process.argv.length>4||(process.argv[3]&&!r08Combined&&!r09Learner&&!r09Public))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
 if(process.platform!=='linux'||process.arch!=='x64'||Number(process.versions.node.split('.')[0])!==22||process.env.POST28_LINUX_RUNTIME_REVIEW!=='YES')throw Error('POST28_LINUX_RUNTIME_REVIEW_NOT_AUTHORIZED');
 const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())throw Error('POST28_CLEAN_SOURCE_REQUIRED');
@@ -66,6 +68,7 @@ try{
     await setup.identityRecord.create({data:{id:fixtureId,type:'Human',status:'ACTIVE',createdBy:'R07_LINUX_SYNTHETIC_FIXTURE',user:{create:{displayName:'R07 Linux learner',primaryEmail:email,isEmailVerified:true}},account:{create:{accessState:'Active'}},credentials:{create:{type:'password',passwordHash:'scrypt:16384:8:1:'+salt.toString('hex')+':'+passwordHash.toString('hex')}},roleAssignments:{create:{id:randomUUID(),roleId:'student'}}}});
     await setup.studentWorkspace.create({data:{studentReferenceId:fixtureId,status:'ACTIVE',displayName:'R07 Linux learner'}});
     if(r09Learner)r09Fixture=await seedR09LearnerFixture(setup,'scrypt:16384:8:1:'+salt.toString('hex')+':'+passwordHash.toString('hex'));
+    if(r09Public)r09Fixture=await seedR09PublicFixture(setup);
   }finally{await setup.$disconnect();}
   db=new PrismaClient({datasources:{db:{url:env.DATABASE_URL}},log:[],errorFormat:'minimal'});
   const roles=await db.$queryRaw`SELECT current_user AS role, rolsuper, rolcreatedb, rolcreaterole, rolreplication, rolbypassrls FROM pg_roles WHERE rolname=current_user`;
@@ -106,6 +109,11 @@ try{
     report.combinedAuth=await combined.exercise({page,origin,email,password,db,fixtureId});
     observations.push({step:'TWO_BUILT_APIS_SHARED_PG_REDIS_TLS_AUTH',passed:true});report.redisConfigured=true;
     assert(network.filter(row=>row.status>=500).every(row=>row.path==='/api/v1/auth/login'&&row.status===500));
+  }else if(r09Public){
+    report.kind='POST28_R09_PUBLIC_ARTIFACT_RUNTIME';report.formalR09Acceptance=false;
+    report.publicJourney=await exerciseR09Public({page,origin,db,fixture:r09Fixture,proof});
+    observations.push({step:'R09_PUBLIC_OWNER_PAGINATION_AND_UNPUBLISHED_DENIAL',passed:true});report.redisConfigured=false;
+    assert.equal(network.filter(row=>row.status>=500).length,0);
   }else if(r09Learner){
     report.kind='POST28_R09_LEARNER_ARTIFACT_RUNTIME';report.formalR09Acceptance=false;
     report.learnerJourney=await exerciseR09Learner({page,origin,email,password,db,fixtureId,fixture:r09Fixture,proof,pageErrors});
