@@ -1,0 +1,48 @@
+{
+  "kind": "R13_EXPLICIT_RELEASE_BLOCKERS",
+  "sourceSha": "92eb66e5ab572ab51f19c5db14ed3fa2329a3072",
+  "decision": "BLOCKED",
+  "formalAcceptance": false,
+  "exceptions": [
+    {
+      "id": "R13-E01",
+      "notExecuted": "Final C2 freeze, accepted source section27 and all27 section/task owner-ledger curation with mandatory exact-SHA gate coverage",
+      "impact": "Risk-focused review of38 tasks and green CI do not close the original full acceptance matrix. The current candidate remains diagnostic C1; sectionClosed remainsfalse.",
+      "blocksIsolatedDiagnostic": false,
+      "blocksDeployment": true,
+      "resolution": "Resolve remaining mandatory acceptance/owner review, freeze a clean final candidate once, then execute the required exact-SHA gates without relabelling earlier evidence"
+    },
+    {
+      "id": "R13-E02",
+      "notExecuted": "Full formal R11 and R12 release scope, plus R10 hosting/provider backup controls",
+      "impact": "Representative load/SLO/pool wait, all required workers/financial/provider effects, actual host rollback and private asset/grant/retired-link delivery are not established by this source review. Existing scoped proofs remain valid only within their original limits.",
+      "blocksIsolatedDiagnostic": false,
+      "blocksDeployment": true,
+      "resolution": "Resolve documented R11-E1…E5, R12-E01…E04 and actual provider backup controls against the selected release target; keep unproven provider/worker actions disabled"
+    },
+    {
+      "id": "R13-E03",
+      "notExecuted": "Independently authorized source/runtime/approval signing and linked fresh evidence with protected trust keys",
+      "impact": "No trusted approval envelope has been verified. Current feature-branch CI intentionally does not sign source evidence as a main release; the PM delegation does not manufacture signer identities.",
+      "blocksIsolatedDiagnostic": false,
+      "blocksDeployment": true,
+      "resolution": "Use the existing protected trust roles and keys after a real candidate and evidence exist; obtain separate source/runtime/approval signatures and verify linked digests/freshness"
+    },
+    {
+      "id": "R13-E04",
+      "notExecuted": "Actual authorized validation and staging targets, configuration/ingress/TLS/provider identities and controller terminal health/smoke",
+      "impact": "Linux review image and disposable runtime do not prove a hosting environment. No real deployment endpoint is configured and no promotion was invoked.",
+      "blocksIsolatedDiagnostic": false,
+      "blocksDeployment": true,
+      "resolution": "Provision/approve isolated validation/staging identities within an explicit release scope after prerequisites; deploy the same reviewed artifacts without rebuilding or modifying them; verify bounded terminal health and smoke"
+    },
+    {
+      "id": "R13-E05",
+      "notExecuted": "R14 production review, rollout window, canary budget and production authority",
+      "impact": "No production GO, merge to main, external provider activation or real data mutation is authorized by this closeout.",
+      "blocksIsolatedDiagnostic": false,
+      "blocksDeployment": true,
+      "resolution": "Prepare a separate R14 decision only after R13 formal gates and staging; preserve NO_GO until then"
+    }
+  ]
+}

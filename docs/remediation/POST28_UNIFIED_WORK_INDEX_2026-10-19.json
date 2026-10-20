@@ -270,10 +270,10 @@
     },
     {
       "id": "R13",
-      "state": "REVIEW_PACKET_PREPARED_FORMAL_VALIDATION_STAGING_BLOCKED",
+      "state": "PRACTICAL_ISOLATED_REVIEW_SCOPE_COMPLETE_WITH_RELEASE_BLOCKERS",
       "sourceReviewSha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
-      "latestReport": "docs/remediation/POST28_R13_SECTION27_SOURCE_CURATION_2026-10-20.md",
-      "evidenceIndex": "docs/reviews/evidence/post28/56e14b1ef0aad35d48a67299feb3481233ae230f/r13-preparation/evidence-index.json",
+      "latestReport": "docs/remediation/POST28_R13_PRACTICAL_CLOSEOUT_2026-10-20.md",
+      "evidenceIndex": "docs/reviews/evidence/post28/92eb66e5ab572ab51f19c5db14ed3fa2329a3072/r13-practical-closeout/evidence-index.json",
       "verifierWindowsEntryFixed": true,
       "linkedHistoricalEvidenceFiles": 60,
       "sectionCount": 27,
@@ -304,13 +304,15 @@
         "evidenceIndex": "docs/reviews/evidence/post28/68bb1809698435416656cb7b51ed0c1f5f1a545a/r13-section27-source/evidence-index.json"
       },
       "latestObservedCi": {
-        "sourceSha": "68bb1809698435416656cb7b51ed0c1f5f1a545a",
-        "runId": 39491660827,
-        "result": "failure",
-        "failedStep": "Cross-cutting source preflight",
-        "cause": "Stale SOURCE_SHA test reference corrected; PATH reference for new promotion-entry test also regenerated",
-        "correctionCi": "NOT_YET_VERIFIED",
-        "correctionSourceSha": "7877604b509c61f89ad7853d45b2beda30e2c2a6"
+        "runId": 39493746596,
+        "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39493746596",
+        "status": "completed",
+        "result": "success",
+        "passedJobs": 6,
+        "failedJobs": 0,
+        "skippedJobs": 0,
+        "observedAt": "2026-10-20T20:53:07.277Z",
+        "finalDocumentationCommitCiNotAssumed": true
       },
       "pendingWindowsPromotionEntryFix": false,
       "windowsPromotionEntryFix": {
@@ -319,7 +321,21 @@
         "existingSyntheticReconcileTestsPassed": 2,
         "commandInvoked": false,
         "authorizationAndEvidenceGuardsUnchanged": true
-      }
+      },
+      "reviewedCandidateSha": "92eb66e5ab572ab51f19c5db14ed3fa2329a3072",
+      "practicalScopeComplete": true,
+      "sourceTaskRiskReviewComplete": true,
+      "sourceTaskReviewCount": 38,
+      "referenceOnlyTasksRemaining": 0,
+      "eligibleForProductionReview": false,
+      "releaseDecision": "BLOCKED",
+      "releaseBlockers": [
+        "R13-E01",
+        "R13-E02",
+        "R13-E03",
+        "R13-E04",
+        "R13-E05"
+      ]
     }
   ],
   "validation": {
@@ -349,7 +365,7 @@
     "browserRepeated": false
   },
   "resumeOrder": [
-    "R13_SECTION27_AND_TASK_INVENTORY_SOURCE_REVIEW_BEFORE_FINAL_C2_FREEZE",
+    "R13_RELEASE_BLOCKERS_BEFORE_FORMAL_VALIDATION_STAGING_OR_R14",
     "R11_PREPARATION_ONLY_WITH_APPROVED_BUDGET_AND_SCOPE",
     "R10_PROVIDER_CONTROLS_REQUIRE_REAL_HOSTING_ACCOUNT",
     "R09_MANDATORY_CHAINS_AND_DOMAIN_MATRIX",

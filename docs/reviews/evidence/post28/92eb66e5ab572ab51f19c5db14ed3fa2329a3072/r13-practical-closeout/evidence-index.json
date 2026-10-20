@@ -1,0 +1,84 @@
+{
+  "kind": "R13_PRACTICAL_REVIEW_AND_ACTUAL_LINUX_EVIDENCE",
+  "reviewedCandidateSha": "92eb66e5ab572ab51f19c5db14ed3fa2329a3072",
+  "files": [
+    {
+      "path": "section27-reviewed-source.json",
+      "bytes": 290403,
+      "sha256": "4662c40c57b2699ec9a27163cb438307507d89e55829f32636db035ae8fa090b"
+    },
+    {
+      "path": "review-verification.json",
+      "bytes": 492,
+      "sha256": "4f83ccbbc164b53668c07e0f74341e232747d4d55a7a70d8feecc5f07b7cb521"
+    },
+    {
+      "path": "operator.mjs.txt",
+      "bytes": 11709,
+      "sha256": "dcb75adb4d07b0e77c8c3376532a94e433037fea7ab6a19d2af3172bb874051b"
+    },
+    {
+      "path": "ci-completed-workflow.json",
+      "bytes": 14845,
+      "sha256": "57caf3ed986ec20f7a7710fed5b03ff8de7e77e434c3c4c8dcb545670dec885d"
+    },
+    {
+      "path": "linux-runtime-result.json",
+      "bytes": 34620,
+      "sha256": "d2d5f8cadd3c3bdf1e93c4abc442c87c4ebe784907ad31ce75b4e92bd245e9d9"
+    },
+    {
+      "path": "linux-image-probe.json",
+      "bytes": 1284,
+      "sha256": "27d06c72bf16718a4ad390edcf9a949fdb0765e5367d906d675966a8dabcb6d1"
+    },
+    {
+      "path": "linux-r11-contention.json",
+      "bytes": 8759,
+      "sha256": "20082b341a92d8b682408734c892ef2f6bb71c721424d1105f31bff22cacc4dc"
+    },
+    {
+      "path": "r09-workflow-result.json",
+      "bytes": 384,
+      "sha256": "abeaec2c1dca4da777b3d71704690d81f2d3045e7669796359f7844568278c4e"
+    },
+    {
+      "path": "r09-workflow-suite-summary.json",
+      "bytes": 1230,
+      "sha256": "950fb29a56fe056f1825d928ec3b2594b994c3e5538fdf6ab6fa2546aad07881"
+    },
+    {
+      "path": "artifact-retrieval.txt",
+      "bytes": 1041,
+      "sha256": "ab969fcde9cea4cc98412c3dfcebd6244c7fec6e423c10d131eb809eb2d689ae"
+    },
+    {
+      "path": "artifact-provenance.json",
+      "bytes": 1240,
+      "sha256": "2ce7bfadd29710365e23e0dbd93b7491fe585c25efc20c8b431e3fa3528b2a49"
+    },
+    {
+      "path": "practical-closeout.json",
+      "bytes": 7217,
+      "sha256": "418dcc316e11ef06bf5dfb37ff3161f0ba338963032e68f15835ff3a65c4d4c6"
+    },
+    {
+      "path": "release-blockers.json",
+      "bytes": 3309,
+      "sha256": "92ec58b9ddb63563a0183efa08ac186f8448c6cfe39df1cc6da7e7eb898aa0d2"
+    },
+    {
+      "path": "retention-operator.mjs.txt",
+      "bytes": 12027,
+      "sha256": "134e47faef35c35bc59de706a498079be026db0a05e6dbd69bcaccbb6762f6a3"
+    },
+    {
+      "path": "r09-workflow-vitest.json",
+      "bytes": 3155,
+      "sha256": "c277575fbc007d015ffb9a75cc38e7ce94f7cdaf021387ad0818e695d7c6ba78"
+    }
+  ],
+  "signatureVerified": false,
+  "releaseDecision": "BLOCKED",
+  "formalAcceptance": false
+}

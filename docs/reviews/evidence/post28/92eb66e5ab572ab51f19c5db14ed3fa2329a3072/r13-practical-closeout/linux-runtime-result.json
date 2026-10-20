@@ -1,0 +1,1370 @@
+{
+  "kind": "POST28_R09_PUBLIC_ARTIFACT_RUNTIME",
+  "sourceSha": "92eb66e5ab572ab51f19c5db14ed3fa2329a3072",
+  "imageId": "sha256:a3110a9916446411602e4662bc3c6f6d27037b4895b62baf7f3aabeebe03d671",
+  "node": "v22.16.0",
+  "environment": "DISPOSABLE",
+  "providerMode": "NO_EXTERNAL_EGRESS",
+  "observations": [
+    {
+      "step": "REVISION_READINESS",
+      "route": "/health/build",
+      "status": 200,
+      "sourceSha": "92eb66e5ab572ab51f19c5db14ed3fa2329a3072"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/admin/health/build",
+      "status": 200,
+      "sourceSha": "92eb66e5ab572ab51f19c5db14ed3fa2329a3072"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "sourceSha": "92eb66e5ab572ab51f19c5db14ed3fa2329a3072"
+    },
+    {
+      "step": "R11_TWO_CONCURRENT_WRITES_ONE_PERSISTED_WINNER_AND_REPLAY",
+      "passed": true
+    },
+    {
+      "step": "R09_PUBLIC_OWNER_PAGINATION_AND_UNPUBLISHED_DENIAL",
+      "passed": true
+    }
+  ],
+  "network": [
+    {
+      "method": "GET",
+      "path": "/health/build",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 409,
+      "resource": "fetch"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/student/workspace",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/ar/courses",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-DJP0K73X.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-BDO_GULS.js",
+      "status": 200,
+      "resource": "script"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-2.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-0.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/scholarships.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/universities.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/countries.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/exams.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/courses.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/majors",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/scholarships",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/international-tests",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/universities",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/services",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/student-tools",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/tools.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-2f3a1bfc-99e5-4603-974b-33188ecc2797",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-f5541e37-632c-4e72-9acf-f0fd5eb05a12",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-31001512-81b5-43dd-b8d4-743dd3fddcad",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-23c1d96d-272a-42bc-9e94-78c9820b704a",
+      "status": 404,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-2cee9027-7745-4eaa-9eef-4f7f705a9d50",
+      "status": 404,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-1262c49c-7eb9-4c4f-abd1-664fb157497c",
+      "status": 404,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-cde694c5-07c6-4d3b-abd5-0dcf13d50a87",
+      "status": 404,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/ar/courses/r09-2f3a1bfc-99e5-4603-974b-33188ecc2797",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-DJP0K73X.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-BDO_GULS.js",
+      "status": 200,
+      "resource": "script"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-2.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-0.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/majors",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/scholarships",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/international-tests",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/universities",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/services",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/student-tools",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-2f3a1bfc-99e5-4603-974b-33188ecc2797",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/ar/courses/r09-23c1d96d-272a-42bc-9e94-78c9820b704a",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-DJP0K73X.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-BDO_GULS.js",
+      "status": 200,
+      "resource": "script"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-2.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-0.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/scholarships",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/majors",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/international-tests",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/universities",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/services",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/student-tools",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-23c1d96d-272a-42bc-9e94-78c9820b704a",
+      "status": 404,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 409 (Conflict)",
+    "Failed to load resource: the server responded with a status of 409 (Conflict)",
+    "Failed to load resource: the server responded with a status of 409 (Conflict)",
+    "Failed to load resource: the server responded with a status of 409 (Conflict)",
+    "Failed to load resource: the server responded with a status of 409 (Conflict)",
+    "Failed to load resource: the server responded with a status of 409 (Conflict)",
+    "Failed to load resource: the server responded with a status of 409 (Conflict)",
+    "Failed to load resource: the server responded with a status of 409 (Conflict)",
+    "Failed to load resource: the server responded with a status of 409 (Conflict)",
+    "Failed to load resource: the server responded with a status of 409 (Conflict)",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "productionAcceptance": false,
+  "formalR07Acceptance": false,
+  "promotionAuthorized": false,
+  "databaseIdentity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698855542018666540",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "applicationRole": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "151.0.7922.34",
+  "r11Diagnostic": {
+    "kind": "R11_LINUX_STUDENT_CONTENTION_DIAGNOSTIC",
+    "sourceSha": "92eb66e5ab572ab51f19c5db14ed3fa2329a3072",
+    "status": "COMPLETED_DIAGNOSTIC",
+    "platform": "linux",
+    "pairs": [
+      {
+        "index": 0,
+        "latencyMs": 80.76156400000036,
+        "successfulWrites": 1,
+        "expectedConflicts": 1,
+        "replayNoNewVersion": true,
+        "queryRoundTripMs": 0.8413319999999658
+      },
+      {
+        "index": 1,
+        "latencyMs": 163.1314640000055,
+        "successfulWrites": 1,
+        "expectedConflicts": 1,
+        "replayNoNewVersion": true,
+        "queryRoundTripMs": 0.5284030000038911
+      },
+      {
+        "index": 2,
+        "latencyMs": 87.5604319999984,
+        "successfulWrites": 1,
+        "expectedConflicts": 1,
+        "replayNoNewVersion": true,
+        "queryRoundTripMs": 0.5020440000007511
+      },
+      {
+        "index": 3,
+        "latencyMs": 125.93700800000079,
+        "successfulWrites": 1,
+        "expectedConflicts": 1,
+        "replayNoNewVersion": true,
+        "queryRoundTripMs": 0.5080520000046818
+      },
+      {
+        "index": 4,
+        "latencyMs": 26.53973699999915,
+        "successfulWrites": 1,
+        "expectedConflicts": 1,
+        "replayNoNewVersion": true,
+        "queryRoundTripMs": 0.4409220000015921
+      },
+      {
+        "index": 5,
+        "latencyMs": 123.48598700000002,
+        "successfulWrites": 1,
+        "expectedConflicts": 1,
+        "replayNoNewVersion": true,
+        "queryRoundTripMs": 0.518859000003431
+      },
+      {
+        "index": 6,
+        "latencyMs": 83.64527299999463,
+        "successfulWrites": 1,
+        "expectedConflicts": 1,
+        "replayNoNewVersion": true,
+        "queryRoundTripMs": 0.5243770000015502
+      },
+      {
+        "index": 7,
+        "latencyMs": 122.7993540000025,
+        "successfulWrites": 1,
+        "expectedConflicts": 1,
+        "replayNoNewVersion": true,
+        "queryRoundTripMs": 0.4827939999959199
+      },
+      {
+        "index": 8,
+        "latencyMs": 26.52394600000116,
+        "successfulWrites": 1,
+        "expectedConflicts": 1,
+        "replayNoNewVersion": true,
+        "queryRoundTripMs": 0.48355499999888707
+      },
+      {
+        "index": 9,
+        "latencyMs": 28.2505930000043,
+        "successfulWrites": 1,
+        "expectedConflicts": 1,
+        "replayNoNewVersion": true,
+        "queryRoundTripMs": 0.471627000006265
+      }
+    ],
+    "resources": [
+      {
+        "api": {
+          "cpuPercent": 0.01,
+          "residentMemoryBytes": 130757427.2
+        },
+        "postgres": {
+          "cpuPercent": 0.03,
+          "residentMemoryBytes": 142396620.8
+        },
+        "applicationConnections": 6
+      },
+      {
+        "api": {
+          "cpuPercent": 0.04,
+          "residentMemoryBytes": 165570150.4
+        },
+        "postgres": {
+          "cpuPercent": 0.03,
+          "residentMemoryBytes": 146066636.8
+        },
+        "applicationConnections": 6
+      },
+      {
+        "api": {
+          "cpuPercent": 0.01,
+          "residentMemoryBytes": 168820736
+        },
+        "postgres": {
+          "cpuPercent": 0.02,
+          "residentMemoryBytes": 146905497.6
+        },
+        "applicationConnections": 6
+      },
+      {
+        "api": {
+          "cpuPercent": 0.03,
+          "residentMemoryBytes": 221354393.6
+        },
+        "postgres": {
+          "cpuPercent": 0.02,
+          "residentMemoryBytes": 149631795.2
+        },
+        "applicationConnections": 6
+      },
+      {
+        "api": {
+          "cpuPercent": 0,
+          "residentMemoryBytes": 248407654.4
+        },
+        "postgres": {
+          "cpuPercent": 0.01,
+          "residentMemoryBytes": 149631795.2
+        },
+        "applicationConnections": 6
+      },
+      {
+        "api": {
+          "cpuPercent": 0.01,
+          "residentMemoryBytes": 233727590.4
+        },
+        "postgres": {
+          "cpuPercent": 0.01,
+          "residentMemoryBytes": 149526937.6
+        },
+        "applicationConnections": 6
+      },
+      {
+        "api": {
+          "cpuPercent": 0.02,
+          "residentMemoryBytes": 233832448
+        },
+        "postgres": {
+          "cpuPercent": 0.03,
+          "residentMemoryBytes": 150051225.6
+        },
+        "applicationConnections": 6
+      },
+      {
+        "api": {
+          "cpuPercent": 0.03,
+          "residentMemoryBytes": 233308160
+        },
+        "postgres": {
+          "cpuPercent": 0.03,
+          "residentMemoryBytes": 149736652.8
+        },
+        "applicationConnections": 6
+      },
+      {
+        "api": {
+          "cpuPercent": 0.04,
+          "residentMemoryBytes": 254279680
+        },
+        "postgres": {
+          "cpuPercent": 0.05,
+          "residentMemoryBytes": 150051225.6
+        },
+        "applicationConnections": 6
+      },
+      {
+        "api": {
+          "cpuPercent": 0.05,
+          "residentMemoryBytes": 228589568
+        },
+        "postgres": {
+          "cpuPercent": 0.04,
+          "residentMemoryBytes": 150051225.6
+        },
+        "applicationConnections": 6
+      },
+      {
+        "api": {
+          "cpuPercent": 0,
+          "residentMemoryBytes": 175741337.6
+        },
+        "postgres": {
+          "cpuPercent": 0.02,
+          "residentMemoryBytes": 149841510.4
+        },
+        "applicationConnections": 6
+      }
+    ],
+    "durationSeconds": 60,
+    "maximumPairs": 10,
+    "maximumConcurrentMutations": 2,
+    "expectedConflicts": 10,
+    "unexpectedErrors": 0,
+    "poolWaitMs": null,
+    "poolWaitReason": "No driver pool checkout timing hook; query round trip is recorded separately",
+    "representativeLaunchDataset": false,
+    "sloAcceptance": false,
+    "productionAcceptance": false,
+    "databaseBefore": [
+      {
+        "numbackends": 6,
+        "xact_commit": "944",
+        "xact_rollback": "1",
+        "blks_read": "910",
+        "blks_hit": "493502",
+        "tup_returned": "1783251",
+        "deadlocks": "0",
+        "conflicts": "0"
+      }
+    ],
+    "explain": [
+      {
+        "QUERY PLAN": [
+          {
+            "Plan": {
+              "Node Type": "Limit",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 0.14,
+              "Total Cost": 8.16,
+              "Plan Rows": 1,
+              "Plan Width": 36,
+              "Actual Startup Time": 0.018,
+              "Actual Total Time": 0.018,
+              "Actual Rows": 1,
+              "Actual Loops": 1,
+              "Shared Hit Blocks": 2,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": [
+                {
+                  "Node Type": "Index Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": false,
+                  "Async Capable": false,
+                  "Scan Direction": "Forward",
+                  "Index Name": "StudentWorkspace_studentReferenceId_key",
+                  "Relation Name": "StudentWorkspace",
+                  "Alias": "StudentWorkspace",
+                  "Startup Cost": 0.14,
+                  "Total Cost": 8.16,
+                  "Plan Rows": 1,
+                  "Plan Width": 36,
+                  "Actual Startup Time": 0.017,
+                  "Actual Total Time": 0.017,
+                  "Actual Rows": 1,
+                  "Actual Loops": 1,
+                  "Index Cond": "(\"studentReferenceId\" = 'dc7a799b-0e8d-4ad6-a7af-d0a970edff8f'::text)",
+                  "Rows Removed by Index Recheck": 0,
+                  "Shared Hit Blocks": 2,
+                  "Shared Read Blocks": 0,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 0,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0
+                }
+              ]
+            },
+            "Planning": {
+              "Shared Hit Blocks": 124,
+              "Shared Read Blocks": 0,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 0,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0
+            },
+            "Planning Time": 0.284,
+            "Triggers": [],
+            "Execution Time": 0.029
+          }
+        ]
+      }
+    ],
+    "initialVersion": 1,
+    "elapsedSeconds": 59.99992601500001,
+    "databaseAfter": [
+      {
+        "numbackends": 6,
+        "xact_commit": "1312",
+        "xact_rollback": "23",
+        "blks_read": "932",
+        "blks_hit": "500453",
+        "tup_returned": "1788548",
+        "deadlocks": "0",
+        "conflicts": "0"
+      }
+    ],
+    "finalVersion": 11,
+    "p50Ms": 83.64527299999463,
+    "p95Ms": 163.1314640000055,
+    "p99Ms": 163.1314640000055,
+    "pairThroughput": 0.16666687218080894,
+    "logoutStatus": 200,
+    "activeSessionsAfterLogout": 0
+  },
+  "formalR09Acceptance": false,
+  "publicJourney": {
+    "anonymousRead": true,
+    "ownerIdsMatched": true,
+    "paginationPages": [
+      {
+        "ownerId": "2f3a1bfc-99e5-4603-974b-33188ecc2797",
+        "total": 3,
+        "hasMore": true
+      },
+      {
+        "ownerId": "31001512-81b5-43dd-b8d4-743dd3fddcad",
+        "total": 3,
+        "hasMore": true
+      },
+      {
+        "ownerId": "f5541e37-632c-4e72-9acf-f0fd5eb05a12",
+        "total": 3,
+        "hasMore": false
+      }
+    ],
+    "duplicateOwnerIds": false,
+    "hiddenStates": [
+      {
+        "status": "DRAFT",
+        "completenessStatus": "COMPLETE",
+        "unresolvedLanguage": false,
+        "httpStatus": 404
+      },
+      {
+        "status": "ARCHIVED",
+        "completenessStatus": "COMPLETE",
+        "unresolvedLanguage": false,
+        "httpStatus": 404
+      },
+      {
+        "status": "PUBLISHED",
+        "completenessStatus": "INCOMPLETE",
+        "unresolvedLanguage": false,
+        "httpStatus": 404
+      },
+      {
+        "status": "PUBLISHED",
+        "completenessStatus": "COMPLETE",
+        "unresolvedLanguage": true,
+        "httpStatus": 404
+      }
+    ],
+    "privateLessonContentAbsent": true,
+    "privateMetadataAbsent": true,
+    "emptyIsSuccessfulZero": true,
+    "publishedUiRendered": true,
+    "learnerLinkUsesOwnerId": true,
+    "hiddenUiFallsBackToCatalog": true,
+    "loadedCatalogMatchesOwners": true,
+    "allHiddenTitlesAbsentAfterCatalogLoad": true,
+    "fullPublicationLifecycleExercised": false,
+    "fullR09Acceptance": false
+  },
+  "redisConfigured": false,
+  "blockedExternalOrigins": [
+    "https://images.unsplash.com"
+  ],
+  "tls": {
+    "certificateSha256": "eac152468b680ed384cc53db2d6d2005d6b58b6d77b1df00f99890b35a069ea2",
+    "hostnameVerified": true,
+    "exactCertificateSpkiPinned": true,
+    "ignoreHTTPSErrors": false
+  },
+  "freshUnpackedThreeUnits": true,
+  "apiBootedInImage": true,
+  "databaseConnected": true,
+  "workersEnabled": false,
+  "cleanup": {
+    "ownedContainerStopped": true,
+    "ownedContainerRemoved": true,
+    "postgresStopped": true,
+    "postgresRemoved": true,
+    "networkRemoved": true,
+    "existingDatabasesTouched": false,
+    "apiExitCode": 0,
+    "drainMilliseconds": 171
+  },
+  "failure": null,
+  "passed": true,
+  "completedAt": "2026-10-20T20:52:57.199Z"
+}

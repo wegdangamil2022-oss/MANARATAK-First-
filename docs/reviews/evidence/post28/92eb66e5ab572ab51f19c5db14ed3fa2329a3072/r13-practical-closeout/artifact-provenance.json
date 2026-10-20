@@ -1,0 +1,33 @@
+{
+  "sourceSha": "92eb66e5ab572ab51f19c5db14ed3fa2329a3072",
+  "archives": [
+    {
+      "id": 12297617584,
+      "name": "linux-runtime-review-92eb66e5ab572ab51f19c5db14ed3fa2329a3072",
+      "archiveSha256": "3dc4c23851c63c77ac8732ef29da3ac5a36f6c6a020d559a6307cac6a6b979a9",
+      "bytes": 135039,
+      "expectedDigestMatched": true,
+      "source": "GitHub Actions artifacts, workflow39493746596"
+    },
+    {
+      "id": 12297692384,
+      "name": "r09-workflow-proof-92eb66e5ab572ab51f19c5db14ed3fa2329a3072",
+      "archiveSha256": "a79f17184e23441712bf4aaaf6cbdd62a48c86e71269ad2065bb797df21b3e6d",
+      "bytes": 10798,
+      "expectedDigestMatched": true,
+      "source": "GitHub Actions artifacts, workflow39493746596"
+    },
+    {
+      "id": 12297845503,
+      "name": "artifact-retrieval-92eb66e5ab572ab51f19c5db14ed3fa2329a3072",
+      "archiveSha256": "5997e3817691c3198cdda4c0462d4c5dbb1697d640479483b867cef64eec3e9f",
+      "bytes": 654,
+      "expectedDigestMatched": true,
+      "source": "GitHub Actions artifacts, workflow39493746596"
+    }
+  ],
+  "fullReleaseArchiveDownloadedThisBatch": false,
+  "releaseArchiveVerifiedByCiRetrievalJob": true,
+  "diagnosticArtifactNotFinalC2": true,
+  "signatureVerified": false
+}
