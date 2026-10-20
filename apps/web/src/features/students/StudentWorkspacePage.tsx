@@ -1100,7 +1100,7 @@ function SummaryView({
             <button
               type="button"
               onClick={() => setTab('LEARNING')}
-              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
+              className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
               style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}
             >
               <span style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>جميع الدورات</span>
@@ -1129,7 +1129,7 @@ function SummaryView({
             <div className="mt-2.5 flex justify-end">
               <Link
                 to={`../student/courses/${encodeURIComponent(activeCourse.courseId)}`}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] sm:text-xs font-semibold text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]"
+                className="mn-student-summary-primary-action inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] font-medium text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]"
               >
                 <span>متابعة التعلم</span>
                 <ArrowLeft className="h-3.5 w-3.5" />
@@ -1150,7 +1150,7 @@ function SummaryView({
               <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
             </div>
             <button type="button" onClick={() => setTab('OPPORTUNITIES')}
-              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
+              className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
               style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>
               <span style={{ fontSize: '11px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>عرض الكل</span>
               <ChevronLeft className="h-3.5 w-3.5" />
@@ -1187,7 +1187,7 @@ function SummaryView({
                         <span className="text-[10px] font-semibold text-[#526A71] dark:text-[#C8D5DD] font-['Cairo',sans-serif]" style={{ fontSize: '10px', lineHeight: '18px', fontFamily: "'Cairo', sans-serif" }}>لا يوجد موعد محدد</span>
                       )}
                       <button type="button" onClick={() => setTab('OPPORTUNITIES')}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] sm:text-xs font-semibold text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]">
+                        className="mn-student-summary-primary-action inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#142B5F] px-3 py-1.5 text-[11px] font-medium text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]">
                         <span className="font-['Cairo',sans-serif]">متابعة الملف</span>
                         <ArrowLeft className="h-3 w-3" />
                       </button>
