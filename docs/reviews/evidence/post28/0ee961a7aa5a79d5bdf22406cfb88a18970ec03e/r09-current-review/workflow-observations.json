@@ -1,0 +1,125 @@
+{
+  "kind": "POST28_R09_SHARED_WORKFLOW_INTEGRATION",
+  "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "externalProvidersEnabled": false,
+  "fullR09Acceptance": false,
+  "observations": [
+    {
+      "case": "CMS_AUTHOR_REVIEW_PUBLISH_WITHDRAW",
+      "actorIds": [
+        "47e6a52a-0095-44f9-9885-6fcd0094b98a",
+        "6def6c10-9620-4be1-b410-f5b84d0ce7e2",
+        "a84f5fea-6ca0-4a40-bc6c-fabd902224c7"
+      ],
+      "distinctActors": true,
+      "publicLocales": [
+        "ar",
+        "en"
+      ],
+      "browserLocale": "ar",
+      "draftNeverReplacesPublished": true,
+      "withdrawnOnHistoryAndReload": true,
+      "fullAdminUiOrMfaAcceptance": false
+    },
+    {
+      "case": "ACTUAL_LESSON_TO_ONE_SIGNED_CERTIFICATE",
+      "courseId": "84ba4af4-a012-4052-a1c3-e2a8d794d454",
+      "eventId": "course-completed:84ba4af4-a012-4052-a1c3-e2a8d794d454:671e5219-16da-4a2a-82e3-a7496c20a66f:v2",
+      "certificateId": "a7dc0fc1-af1a-4f2a-964b-3c731e0b27aa",
+      "consumers": 2,
+      "replays": 1,
+      "validThenRevoked": true,
+      "foreignArtifactsDenied": true,
+      "artifactRendererExercised": true,
+      "renderReplayWithoutAdditionalWrites": true,
+      "artifactFiles": [
+        {
+          "id": "efd5ea65-893e-4117-87c4-171ec9b6c359",
+          "kind": "PDF",
+          "extension": "pdf",
+          "sha256": "9c78945c4641fe4ea3e10bee03e2f08c44ef312477564fd377e2e836f0632ba7",
+          "bytes": 11313
+        },
+        {
+          "id": "84b1d282-266b-44d7-a77b-154171a752a9",
+          "kind": "PREVIEW",
+          "extension": "svg",
+          "sha256": "6a69e5e661d18073aab062da6caec0d2b2e65344c7c58fe3a757dde3b776e702",
+          "bytes": 389489
+        },
+        {
+          "id": "134b1bce-d33d-4498-ac05-8f22106325e2",
+          "kind": "QR",
+          "extension": "svg",
+          "sha256": "5e11a265d62c186f1fe1c90ffeacccd063965fbcc4e2e4d8665d667b08623ea6",
+          "bytes": 24245
+        }
+      ],
+      "freshEapProcessing": false,
+      "providerDeliveryGrantExercised": false
+    },
+    {
+      "case": "PRIVATE_DOCUMENT_AND_FINANCE_OWNERSHIP",
+      "bindingId": "4225c925-767a-4baf-8800-d4331ed47619",
+      "originalConsentAndBindingPreserved": true,
+      "foreignReadWriteAndAssetDenied": true,
+      "financialFactsUnchanged": true
+    },
+    {
+      "case": "CANONICAL_GRAPH_RELATIONSHIPS",
+      "majorId": "a78b3eef-2572-4190-82b2-5e0858cafb28",
+      "lookalikeId": "3af0f208-bee3-4fde-8654-ef61f6ddd2f9",
+      "universityIds": [
+        "a8854711-4d18-4207-aa5e-89f27599a755",
+        "c2c2f6b6-7b47-4b23-93e1-c4f05dcb034c",
+        "9ac55e76-2b41-4c22-bde4-cde9185e5721"
+      ],
+      "scholarshipIds": [
+        "d349fe31-33e9-44b5-99b1-10a2bdc92774",
+        "51030527-f605-4665-b349-a94598a343ac",
+        "0b3a1652-403d-42f5-810a-c3ba1d0bd9cb"
+      ],
+      "courseIds": [
+        "a27e96cb-8dda-491e-a51c-0418402d0b8f",
+        "eb5289c6-bd96-427c-826a-6528691c3983",
+        "f888e682-fc73-4728-809b-4348b9f3a44f"
+      ],
+      "allThreeOwnersPaged": true,
+      "allThreeOwnersWithdrawn": true,
+      "pages": 3,
+      "uniqueOwnerIds": true,
+      "inverseOwnerIds": true,
+      "withdrawnId": "a8854711-4d18-4207-aa5e-89f27599a755",
+      "afterWithdrawalTotal": 2,
+      "realOwnerReadOutage": "UNAVAILABLE_TOTAL_NULL",
+      "recovered": true,
+      "browserTransport": true,
+      "builtGraphUi": false,
+      "historicalPublicationFixture": true
+    },
+    {
+      "case": "SYNTHETIC_WALLET_PAYMENT_EXACTLY_ONE_EFFECT",
+      "invoiceId": "c687d708-fa4a-40b9-a0e8-9eb2e45c9174",
+      "concurrentRequests": 2,
+      "replayVerified": true,
+      "capturedHolds": 1,
+      "providerPaymentRows": 0,
+      "balancedDebit": "100",
+      "balancedCredit": "100",
+      "externalProvider": false
+    }
+  ],
+  "role": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "151.0.7922.34",
+  "boundary": "ACTUAL_SOURCE_ROUTERS_REAL_JWT_DB_CAPABILITIES_NOT_BUILT_ADMIN_UI_OR_MFA"
+}
