@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {verifyReleaseManifest,requireSha} from './lib/ReleaseContracts.mjs';
 
 const repo=fs.realpathSync(process.cwd()),policy=JSON.parse(fs.readFileSync(path.join(repo,'config/testing/r12-local-rollback-preparation.json')));
-assert.equal(process.argv.length,4,'R12_PREVIOUS_ARTIFACT_DIRECTORY_AND_NEW_OUTPUT_FILE_REQUIRED');
+assert([4,5].includes(process.argv.length),'R12_PREVIOUS_ARTIFACT_DIRECTORY_AND_NEW_OUTPUT_FILE_REQUIRED');
 const previousSha=requireSha(policy.previousCandidateSha),currentSha=requireSha(policy.currentCandidateSha);
 assert.notEqual(previousSha,currentSha,'R12_DISTINCT_CANDIDATES_REQUIRED');
 execFileSync('git',['merge-base','--is-ancestor',previousSha,currentSha],{cwd:repo,stdio:'pipe'});
@@ -23,6 +23,9 @@ const schema=execFileSync('git',['show',currentSha+':packages/infrastructure/pri
 const schemaMatches=previous.runtimeRequirements.prismaSchemaSha256===digest(schema),lockMatches=previous.runtimeRequirements.lockSha256===digest(lock);
 const api=previous.artifacts.find(a=>a.unit==='api');
 const sourceCompatible=apiChanges.length===0&&schemaMatches&&lockMatches;
+// An optional current artifact directory resolves the transfer blocker without treating source equality as a boot test.
+const current=process.argv[4]?verifyReleaseManifest(process.argv[4],currentSha):null;
+const artifactPairVerified=!!current&&current.runtimeRequirements.lockSha256===digest(lock)&&current.runtimeRequirements.prismaSchemaSha256===digest(schema);
 const output=path.resolve(process.argv[3]);assert(output!==repo&&!output.startsWith(repo+path.sep),'R12_REVIEW_OUTPUT_OUTSIDE_CHECKOUT_REQUIRED');
 const result={kind:'POST28_R12_PREVIOUS_SOURCE_SCREEN',observedRepositoryHead:git(['rev-parse','HEAD']),
   operatorSha256:digest(fs.readFileSync(fileURLToPath(import.meta.url))),observedAt:new Date().toISOString(),
@@ -34,7 +37,9 @@ const result={kind:'POST28_R12_PREVIOUS_SOURCE_SCREEN',observedRepositoryHead:gi
   sourceEqualityIsNotRuntimeCompatibility:true,rollbackOfDifferentApiImplementationDemonstrated:false,
   adminRollbackAllowed:false,adminExclusionReason:'Previous Admin predates the login bootstrap race fix; keep the reviewed current Admin',
   previousApiRuntimeCompatible:false,previousWorkerRuntimeCompatible:false,
-  currentArtifactLocallyVerified:false,rehearsalExecuted:false,formalR12Acceptance:false,productionAcceptance:false,
-  decision:sourceCompatible?'SOURCE_CANDIDATE_ONLY_RUNTIME_PROOF_REQUIRED':'FORWARD_FIX_OR_EXPLICIT_COMPATIBILITY_REVIEW_REQUIRED'};
+  currentArtifactLocallyVerified:!!current,currentApiArtifactSha256:current?.artifacts.find(a=>a.unit==='api').sha256??null,
+  artifactPairReadyForScopedApiRehearsal:artifactPairVerified&&sourceCompatible,
+  rehearsalExecuted:false,formalR12Acceptance:false,productionAcceptance:false,
+  decision:sourceCompatible?(artifactPairVerified?'ARTIFACT_PAIR_VERIFIED_RUNTIME_PROOF_REQUIRED':'SOURCE_CANDIDATE_ONLY_RUNTIME_PROOF_REQUIRED'):'FORWARD_FIX_OR_EXPLICIT_COMPATIBILITY_REVIEW_REQUIRED'};
 fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n',{flag:'wx'});
 console.log(JSON.stringify({decision:result.decision,schemaMatches,lockMatches,apiSourceChanged:apiChanges.length!==0,adminRollbackAllowed:false,rehearsalExecuted:false}));

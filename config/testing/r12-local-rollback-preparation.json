@@ -4,8 +4,13 @@
   "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
   "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
   "previousWorkerPackaging": "Embedded polling runtime in the API artifact; source equality alone does not prove runtime compatibility",
-  "unitsAllowedForRehearsal": ["api"],
-  "unitsExcludedFromRollback": ["admin", "web"],
+  "unitsAllowedForRehearsal": [
+    "api"
+  ],
+  "unitsExcludedFromRollback": [
+    "admin",
+    "web"
+  ],
   "deploymentMode": "STOP_START_ONLY_NO_OVERLAPPING_API_PROCESSES",
   "incidentOwner": "Delegated project manager, isolated local diagnostic only",
   "canaryBudget": {
@@ -19,10 +24,20 @@
   "maximumDrainWaitSeconds": 20,
   "target": "NEW_ISOLATED_SYNTHETIC_POSTGRES16_CLUSTER_ONLY",
   "protectedTables": [
-    "FinancialLedgerEntryRecord", "FinancialTransactionRecord", "FinancialAccountRecord",
-    "FinanceInvoiceRecord", "FinancePaymentRecord", "FinanceWalletRecord", "FinanceWalletHoldRecord",
-    "FinanceCommandRecord", "StudentPrivacyConsentDecision", "StudentApplicationDocumentBinding",
-    "CmsPublishedContent", "AuditRecord", "TransactionalOutboxRecord", "ApiIdempotencyRecord"
+    "FinancialLedgerEntryRecord",
+    "FinancialTransactionRecord",
+    "FinancialAccountRecord",
+    "FinanceInvoiceRecord",
+    "FinancePaymentRecord",
+    "FinanceWalletRecord",
+    "FinanceWalletHoldRecord",
+    "FinanceCommandRecord",
+    "StudentPrivacyConsentDecision",
+    "StudentApplicationDocumentBinding",
+    "CmsPublishedContent",
+    "AuditRecord",
+    "TransactionalOutboxRecord",
+    "ApiIdempotencyRecord"
   ],
   "requiredRuntimeProof": [
     "current-and-previous-artifacts-available-and-digest-verified",
@@ -34,13 +49,16 @@
     "previous-worker-drain-lease-and-newer-event-receipt-compatibility-tested-separately"
   ],
   "formalCanaryApproved": false,
-  "previousApiRuntimeCompatible": false,
+  "previousApiRuntimeCompatible": true,
   "previousWorkerRuntimeCompatible": false,
-  "rehearsalExecuted": false,
+  "rehearsalExecuted": true,
   "formalR12Acceptance": false,
   "productionAllowed": false,
   "externalProviderEffectsAllowed": false,
   "downMigrationsAllowed": false,
   "deleteReceiptsOrLedgerAllowed": false,
-  "r11FormalExceptionsRemainOpen": true
+  "r11FormalExceptionsRemainOpen": true,
+  "currentArtifactLocallyVerified": true,
+  "rehearsalScope": "LOCAL_API_ONLY_WITH_LOOPBACK_ADAPTER_AND_SHARED_LOCKED_WINDOWS_DEPENDENCIES",
+  "runtimeEvidence": "docs/reviews/evidence/post28/005595313b0ae1ff940fec44454f441f516c8d8e/r12-api-runtime/evidence-index.json"
 }

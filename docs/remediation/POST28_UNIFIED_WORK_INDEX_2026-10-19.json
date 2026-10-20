@@ -240,20 +240,21 @@
     },
     {
       "id": "R12",
-      "state": "SOURCE_PREPARATION_COMPLETE_RUNTIME_BLOCKED_ARTIFACT_TRANSFER",
-      "latestReport": "docs/remediation/POST28_R12_PREPARATION_2026-10-20.md",
+      "state": "LOCAL_API_ROLLBACK_PROVEN_PREVIOUS_WORKER_AND_CANARY_OPEN",
+      "latestReport": "docs/remediation/POST28_R12_API_REHEARSAL_2026-10-20.md",
       "configuration": "config/testing/r12-local-rollback-preparation.json",
-      "evidenceIndex": "docs/reviews/evidence/post28/601cb572d7ca4663c4d18f7fbf95342c2845bbd3/r12-source-review/evidence-index.json",
+      "evidenceIndex": "docs/reviews/evidence/post28/005595313b0ae1ff940fec44454f441f516c8d8e/r12-api-runtime/evidence-index.json",
       "rollbackEvidenceGateHardened": true,
       "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
       "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
       "previousApiSourceCompatible": true,
-      "previousApiRuntimeCompatible": false,
+      "previousApiRuntimeCompatible": true,
       "previousWorkerRuntimeCompatible": false,
       "adminRollbackAllowed": false,
-      "rehearsalExecuted": false,
+      "rehearsalExecuted": true,
       "formalAcceptance": false,
-      "productionAcceptance": false
+      "productionAcceptance": false,
+      "rehearsalScope": "LOCAL_API_ONLY"
     }
   ],
   "validation": {
@@ -283,7 +284,7 @@
     "browserRepeated": false
   },
   "resumeOrder": [
-    "R12_RETRIEVE_EXACT_CURRENT_ARTIFACT_AND_VERIFY_DIGEST_BEFORE_NEW_LAB",
+    "R12_PREVIOUS_WORKER_DRAIN_LEASE_AND_NEW_EVENT_RECEIPT_COMPATIBILITY",
     "R11_PREPARATION_ONLY_WITH_APPROVED_BUDGET_AND_SCOPE",
     "R10_PROVIDER_CONTROLS_REQUIRE_REAL_HOSTING_ACCOUNT",
     "R09_MANDATORY_CHAINS_AND_DOMAIN_MATRIX",

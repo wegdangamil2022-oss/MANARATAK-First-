@@ -1,0 +1,33 @@
+{
+  "kind": "POST28_R12_PREVIOUS_SOURCE_SCREEN",
+  "observedRepositoryHead": "005595313b0ae1ff940fec44454f441f516c8d8e",
+  "operatorSha256": "0c8723aeee49f4cc6a8cb2a3c1e1537695307107d79dc931352751c3f1c3b05f",
+  "observedAt": "2026-10-20T19:33:26.313Z",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "previousManifestVerified": true,
+  "previousApiArtifactSha256": "77019e10245a3cbe0530810de6d383529f25f23e00f0a9b5cb31eb07865f71d0",
+  "previousWorkerArtifactSha256": "77019e10245a3cbe0530810de6d383529f25f23e00f0a9b5cb31eb07865f71d0",
+  "workerPackaging": "API artifact contains embedded polling worker; no standalone worker artifact claimed",
+  "ancestorVerified": true,
+  "apiChanges": [],
+  "adminChanges": [
+    "apps/admin/src/pages/AdminLoginPage.tsx"
+  ],
+  "schemaMatches": true,
+  "lockMatches": true,
+  "apiAndWorkerSourceCompatibleCandidate": true,
+  "sourceEqualityIsNotRuntimeCompatibility": true,
+  "rollbackOfDifferentApiImplementationDemonstrated": false,
+  "adminRollbackAllowed": false,
+  "adminExclusionReason": "Previous Admin predates the login bootstrap race fix; keep the reviewed current Admin",
+  "previousApiRuntimeCompatible": false,
+  "previousWorkerRuntimeCompatible": false,
+  "currentArtifactLocallyVerified": true,
+  "currentApiArtifactSha256": "86ea6fb08569187a94f2a9d4d774c544e989fa329f2f72552dcd3a2ffba09459",
+  "artifactPairReadyForScopedApiRehearsal": true,
+  "rehearsalExecuted": false,
+  "formalR12Acceptance": false,
+  "productionAcceptance": false,
+  "decision": "ARTIFACT_PAIR_VERIFIED_RUNTIME_PROOF_REQUIRED"
+}
