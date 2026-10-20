@@ -1,0 +1,44 @@
+{
+  "sourceSha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
+  "kind": "R13_PREPARATION_ONLY",
+  "signatureVerified": false,
+  "decision": "BLOCKED",
+  "files": [
+    {
+      "path": "operator.mjs.txt",
+      "bytes": 10682,
+      "sha256": "3c105081daac7b2242052d71f830db6c379a73c49cf6ed65fd303b5dd80cf4ed"
+    },
+    {
+      "path": "previous-delivery-ci-observation.json",
+      "bytes": 14166,
+      "sha256": "357f222765d0cc425d634047b95c9f767b5d247a2070ab28744751526eebb7a3"
+    },
+    {
+      "path": "release-evidence/RELEASE_INDEX.json",
+      "bytes": 5589,
+      "sha256": "7435875ec87801786ece6a2ef0d8a16cc079ef46e2b3a92bd386d3c5163a31ee"
+    },
+    {
+      "path": "review-packet.json",
+      "bytes": 12925,
+      "sha256": "d8cccf4f0dfb489a48ae2faef9b4e5f05ac8c135abca011479da6a63f34039ff"
+    },
+    {
+      "path": "traceability-review.json",
+      "bytes": 132946,
+      "sha256": "73e09a0e75b706b25158f0d807f4b3968817cac8d86d60b4561b13e6ccc636f0"
+    },
+    {
+      "path": "unsigned-index-input.json",
+      "bytes": 91,
+      "sha256": "c4c0555f1c966cbd6cf948878b284dfb0bde780b1da89442dd23e1e098173918"
+    },
+    {
+      "path": "verifier-execution.json",
+      "bytes": 748,
+      "sha256": "6cec12a2fb5733d4cb0ec8ddd806c8c34f699c0c35c5559d0bcf432fd8d212f3"
+    }
+  ],
+  "catalogAssemblyNote": "Finding inventory uses the existing 54-row closure register (49 original plus 5 additions); 26 historical R06 continuation rows linked. Catalog corrections did not rerun verifiers or runtime tests."
+}

@@ -267,6 +267,33 @@
       ],
       "evidence": "docs/reviews/evidence/post28/70230e082e03f73761eee6437858c074839fb8d2/r12-worker-assets/evidence-index.json",
       "previousApiEvidenceIndex": "docs/reviews/evidence/post28/005595313b0ae1ff940fec44454f441f516c8d8e/r12-api-runtime/evidence-index.json"
+    },
+    {
+      "id": "R13",
+      "state": "REVIEW_PACKET_PREPARED_FORMAL_VALIDATION_STAGING_BLOCKED",
+      "sourceReviewSha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
+      "latestReport": "docs/remediation/POST28_R13_REVIEW_PREPARATION_2026-10-20.md",
+      "evidenceIndex": "docs/reviews/evidence/post28/56e14b1ef0aad35d48a67299feb3481233ae230f/r13-preparation/evidence-index.json",
+      "verifierWindowsEntryFixed": true,
+      "linkedHistoricalEvidenceFiles": 60,
+      "sectionCount": 27,
+      "relationships": 77,
+      "cases": 42,
+      "historicalContinuationRowsLinked": 26,
+      "fsaRequirements": 24,
+      "findings": 54,
+      "formalAcceptance": false,
+      "validationExecuted": false,
+      "stagingExecuted": false,
+      "productionAcceptance": false,
+      "blockers": [
+        "R13-B01",
+        "R13-B02",
+        "R13-B03",
+        "R13-B04",
+        "R13-B05",
+        "R13-B06"
+      ]
     }
   ],
   "validation": {
@@ -296,7 +323,7 @@
     "browserRepeated": false
   },
   "resumeOrder": [
-    "R13_PREPARATION_WITH_R12_RELEASE_BLOCKERS_E01_E04_OPEN",
+    "R13_SECTION27_AND_TASK_INVENTORY_SOURCE_REVIEW_BEFORE_FINAL_C2_FREEZE",
     "R11_PREPARATION_ONLY_WITH_APPROVED_BUDGET_AND_SCOPE",
     "R10_PROVIDER_CONTROLS_REQUIRE_REAL_HOSTING_ACCOUNT",
     "R09_MANDATORY_CHAINS_AND_DOMAIN_MATRIX",

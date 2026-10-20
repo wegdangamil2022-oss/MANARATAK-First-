@@ -1,0 +1,3592 @@
+{
+  "kind": "R13_NON_AUTHORITATIVE_TRACEABILITY_REVIEW",
+  "sourceSha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
+  "formalAcceptance": false,
+  "historicalCatalogsRebound": false,
+  "sectionTaskInventory": {
+    "coverage": "HEADING_ID_CANDIDATES_OWNER_CURATING_REQUIRED",
+    "sections": [
+      {
+        "section": 1,
+        "taskCount": 18,
+        "taskIds": [
+          "FGA-01-001",
+          "P0-01",
+          "P0-02",
+          "P1-01",
+          "P1-02",
+          "P1-03",
+          "P1-04",
+          "P1-05",
+          "P1-06",
+          "P1-07",
+          "P1-08",
+          "P1-09",
+          "P1-10",
+          "P1-11",
+          "P1-12",
+          "P1-13",
+          "P1-14",
+          "STD-API-001"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 2,
+        "taskCount": 22,
+        "taskIds": [
+          "FGA-02-001",
+          "FGA-02-002",
+          "P0-01",
+          "P0-02",
+          "P0-03",
+          "P0-04",
+          "P0-05",
+          "P1-01",
+          "P1-02",
+          "P1-03",
+          "P1-04",
+          "P1-05",
+          "P1-06",
+          "P1-07",
+          "P1-08",
+          "P1-09",
+          "P1-10",
+          "P2-01",
+          "P2-02",
+          "P2-03",
+          "P2-04",
+          "P2-05"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 3,
+        "taskCount": 25,
+        "taskIds": [
+          "FGA-03-001",
+          "FGA-03-002",
+          "P0-01",
+          "P0-02",
+          "P0-03",
+          "P0-04",
+          "P0-05",
+          "P0-06",
+          "P0-07",
+          "P1-01",
+          "P1-02",
+          "P1-03",
+          "P1-04",
+          "P1-05",
+          "P1-06",
+          "P1-07",
+          "P1-08",
+          "P1-09",
+          "P1-10",
+          "P1-11",
+          "P1-12",
+          "P1-13",
+          "P1-14",
+          "P1-15",
+          "P1-16"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 4,
+        "taskCount": 2,
+        "taskIds": [
+          "FGA-04-001",
+          "FGA-04-002"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 5,
+        "taskCount": 3,
+        "taskIds": [
+          "FGA-05-001",
+          "FGA-05-002",
+          "FGA-05-003"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 6,
+        "taskCount": 3,
+        "taskIds": [
+          "FGA-06-001",
+          "FGA-06-002",
+          "FGA-06-003"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 7,
+        "taskCount": 16,
+        "taskIds": [
+          "FGA-07-001",
+          "FGA-07-002",
+          "P0-01",
+          "P0-02",
+          "P0-03",
+          "P0-04",
+          "P0-05",
+          "P0-06",
+          "P1-01",
+          "P1-02",
+          "P1-03",
+          "P1-04",
+          "P1-05",
+          "P1-06",
+          "P1-07",
+          "P1-08"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 8,
+        "taskCount": 20,
+        "taskIds": [
+          "FGA-08-001",
+          "FGA-08-002",
+          "FGA-08-003",
+          "ITEST-ADM-001",
+          "ITEST-ADM-002",
+          "ITEST-ADM-003",
+          "ITEST-ADM-004",
+          "ITEST-ADM-005",
+          "ITEST-ADM-006",
+          "ITEST-ADM-007",
+          "ITEST-ADM-008",
+          "ITEST-ADM-009",
+          "ITEST-ADM-010",
+          "ITEST-ADM-011",
+          "ITEST-ADM-012",
+          "ITEST-ADM-013",
+          "ITEST-ADM-014",
+          "ITEST-ADM-015",
+          "ITEST-ADM-016",
+          "ITEST-ADM-017"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 9,
+        "taskCount": 26,
+        "taskIds": [
+          "FGA-09-001",
+          "FGA-09-002",
+          "MAJOR-ADM-001",
+          "MAJOR-ADM-002",
+          "MAJOR-ADM-003",
+          "MAJOR-ADM-004",
+          "MAJOR-ADM-005",
+          "MAJOR-ADM-006",
+          "MAJOR-ADM-007",
+          "MAJOR-ADM-008",
+          "MAJOR-ADM-009",
+          "MAJOR-ADM-010",
+          "MAJOR-ADM-011",
+          "MAJOR-ADM-012",
+          "MAJOR-ADM-013",
+          "MAJOR-ADM-014",
+          "MAJOR-ADM-015",
+          "MAJOR-ADM-016",
+          "MAJOR-ADM-017",
+          "MAJOR-ADM-018",
+          "MAJOR-ADM-019",
+          "MAJOR-ADM-020",
+          "MAJOR-ADM-021",
+          "MAJOR-ADM-022",
+          "MAJOR-ADM-023",
+          "MAJOR-ADM-024"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 10,
+        "taskCount": 26,
+        "taskIds": [
+          "FGA-10-001",
+          "FGA-10-002",
+          "FGA-10-003",
+          "UNI-ADM-001",
+          "UNI-ADM-002",
+          "UNI-ADM-003",
+          "UNI-ADM-004",
+          "UNI-ADM-005",
+          "UNI-ADM-006",
+          "UNI-ADM-007",
+          "UNI-ADM-008",
+          "UNI-ADM-009",
+          "UNI-ADM-010",
+          "UNI-ADM-011",
+          "UNI-ADM-012",
+          "UNI-ADM-013",
+          "UNI-ADM-014",
+          "UNI-ADM-015",
+          "UNI-ADM-016",
+          "UNI-ADM-017",
+          "UNI-ADM-018",
+          "UNI-ADM-019",
+          "UNI-ADM-020",
+          "UNI-ADM-021",
+          "UNI-ADM-022",
+          "UNI-ADM-023"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 11,
+        "taskCount": 33,
+        "taskIds": [
+          "FGA-11-001",
+          "FGA-11-002",
+          "FGA-11-003",
+          "SCH-ADM-001",
+          "SCH-ADM-002",
+          "SCH-ADM-003",
+          "SCH-ADM-004",
+          "SCH-ADM-005",
+          "SCH-ADM-006",
+          "SCH-ADM-007",
+          "SCH-ADM-008",
+          "SCH-ADM-009",
+          "SCH-ADM-010",
+          "SCH-ADM-011",
+          "SCH-ADM-012",
+          "SCH-ADM-013",
+          "SCH-ADM-014",
+          "SCH-ADM-015",
+          "SCH-ADM-016",
+          "SCH-ADM-017",
+          "SCH-ADM-018",
+          "SCH-ADM-019",
+          "SCH-ADM-020",
+          "SCH-ADM-021",
+          "SCH-ADM-022",
+          "SCH-ADM-023",
+          "SCH-ADM-024",
+          "SCH-ADM-025",
+          "SCH-ADM-026",
+          "SCH-ADM-027",
+          "SCH-ADM-028",
+          "SCH-ADM-029",
+          "SCH-ADM-030"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 12,
+        "taskCount": 28,
+        "taskIds": [
+          "FGA-12-001",
+          "FGA-12-002",
+          "STD-ADM-001",
+          "STD-ADM-002",
+          "STD-ADM-003",
+          "STD-ADM-004",
+          "STD-ADM-005",
+          "STD-ADM-006",
+          "STD-ADM-007",
+          "STD-ADM-008",
+          "STD-ADM-009",
+          "STD-ADM-010",
+          "STD-ADM-011",
+          "STD-ADM-012",
+          "STD-ADM-013",
+          "STD-ADM-014",
+          "STD-ADM-015",
+          "STD-ADM-016",
+          "STD-ADM-017",
+          "STD-ADM-018",
+          "STD-ADM-019",
+          "STD-ADM-020",
+          "STD-ADM-021",
+          "STD-ADM-022",
+          "STD-ADM-023",
+          "STD-ADM-024",
+          "STD-ADM-025",
+          "STD-ADM-026"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 13,
+        "taskCount": 30,
+        "taskIds": [
+          "CRS-ADM-001",
+          "CRS-ADM-002",
+          "CRS-ADM-003",
+          "CRS-ADM-004",
+          "CRS-ADM-005",
+          "CRS-ADM-006",
+          "CRS-ADM-007",
+          "CRS-ADM-008",
+          "CRS-ADM-009",
+          "CRS-ADM-010",
+          "CRS-ADM-011",
+          "CRS-ADM-012",
+          "CRS-ADM-013",
+          "CRS-ADM-014",
+          "CRS-ADM-015",
+          "CRS-ADM-016",
+          "CRS-ADM-017",
+          "CRS-ADM-018",
+          "CRS-ADM-019",
+          "CRS-ADM-020",
+          "CRS-ADM-021",
+          "CRS-ADM-022",
+          "CRS-ADM-023",
+          "CRS-ADM-024",
+          "CRS-ADM-025",
+          "CRS-ADM-026",
+          "CRS-ADM-027",
+          "CRS-ADM-028",
+          "FGA-13-001",
+          "FGA-13-002"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 14,
+        "taskCount": 35,
+        "taskIds": [
+          "CERT-ADM-001",
+          "CERT-ADM-002",
+          "CERT-ADM-003",
+          "CERT-ADM-004",
+          "CERT-ADM-005",
+          "CERT-ADM-006",
+          "CERT-ADM-007",
+          "CERT-ADM-008",
+          "CERT-ADM-009",
+          "CERT-ADM-010",
+          "CERT-ADM-011",
+          "CERT-ADM-012",
+          "CERT-ADM-013",
+          "CERT-ADM-014",
+          "CERT-ADM-015",
+          "CERT-ADM-016",
+          "CERT-ADM-017",
+          "CERT-ADM-018",
+          "CERT-ADM-019",
+          "CERT-ADM-020",
+          "CERT-ADM-021",
+          "CERT-ADM-022",
+          "CERT-ADM-023",
+          "CERT-ADM-024",
+          "CERT-ADM-025",
+          "CERT-ADM-026",
+          "CERT-ADM-027",
+          "CERT-ADM-028",
+          "CERT-ADM-029",
+          "CERT-ADM-030",
+          "CERT-ADM-031",
+          "CERT-ADM-032",
+          "CERT-ADM-033",
+          "FGA-14-001",
+          "FGA-14-002"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 15,
+        "taskCount": 28,
+        "taskIds": [
+          "FGA-15-001",
+          "FGA-15-002",
+          "STU-ADM-001",
+          "STU-ADM-002",
+          "STU-ADM-003",
+          "STU-ADM-004",
+          "STU-ADM-005",
+          "STU-ADM-006",
+          "STU-ADM-007",
+          "STU-ADM-008",
+          "STU-ADM-009",
+          "STU-ADM-010",
+          "STU-ADM-011",
+          "STU-ADM-012",
+          "STU-ADM-013",
+          "STU-ADM-014",
+          "STU-ADM-015",
+          "STU-ADM-016",
+          "STU-ADM-017",
+          "STU-ADM-018",
+          "STU-ADM-019",
+          "STU-ADM-020",
+          "STU-ADM-021",
+          "STU-ADM-022",
+          "STU-ADM-023",
+          "STU-ADM-024",
+          "STU-ADM-025",
+          "STU-ADM-026"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 16,
+        "taskCount": 32,
+        "taskIds": [
+          "CMS-ADM-001",
+          "CMS-ADM-002",
+          "CMS-ADM-003",
+          "CMS-ADM-004",
+          "CMS-ADM-005",
+          "CMS-ADM-006",
+          "CMS-ADM-007",
+          "CMS-ADM-008",
+          "CMS-ADM-009",
+          "CMS-ADM-010",
+          "CMS-ADM-011",
+          "CMS-ADM-012",
+          "CMS-ADM-013",
+          "CMS-ADM-014",
+          "CMS-ADM-015",
+          "CMS-ADM-016",
+          "CMS-ADM-017",
+          "CMS-ADM-018",
+          "CMS-ADM-019",
+          "CMS-ADM-020",
+          "CMS-ADM-021",
+          "CMS-ADM-022",
+          "CMS-ADM-023",
+          "CMS-ADM-024",
+          "CMS-ADM-025",
+          "CMS-ADM-026",
+          "CMS-ADM-027",
+          "CMS-ADM-028",
+          "CMS-ADM-029",
+          "CMS-ADM-030",
+          "FGA-16-001",
+          "FGA-16-002"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 17,
+        "taskCount": 25,
+        "taskIds": [
+          "FGA-17-001",
+          "LOC-ADM-001",
+          "LOC-ADM-002",
+          "LOC-ADM-003",
+          "LOC-ADM-004",
+          "LOC-ADM-005",
+          "LOC-ADM-006",
+          "LOC-ADM-007",
+          "LOC-ADM-008",
+          "LOC-ADM-009",
+          "LOC-ADM-010",
+          "LOC-ADM-011",
+          "LOC-ADM-012",
+          "LOC-ADM-013",
+          "LOC-ADM-014",
+          "LOC-ADM-015",
+          "LOC-ADM-016",
+          "LOC-ADM-017",
+          "LOC-ADM-018",
+          "LOC-ADM-019",
+          "LOC-ADM-020",
+          "LOC-ADM-021",
+          "LOC-ADM-022",
+          "LOC-ADM-023",
+          "LOC-ADM-024"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 18,
+        "taskCount": 32,
+        "taskIds": [
+          "AI-ADM-001",
+          "AI-ADM-002",
+          "AI-ADM-003",
+          "AI-ADM-004",
+          "AI-ADM-005",
+          "AI-ADM-006",
+          "AI-ADM-007",
+          "AI-ADM-008",
+          "AI-ADM-009",
+          "AI-ADM-010",
+          "AI-ADM-011",
+          "AI-ADM-012",
+          "AI-ADM-013",
+          "AI-ADM-014",
+          "AI-ADM-015",
+          "AI-ADM-016",
+          "AI-ADM-017",
+          "AI-ADM-018",
+          "AI-ADM-019",
+          "AI-ADM-020",
+          "AI-ADM-021",
+          "AI-ADM-022",
+          "AI-ADM-023",
+          "AI-ADM-024",
+          "AI-ADM-025",
+          "AI-ADM-026",
+          "AI-ADM-027",
+          "AI-ADM-028",
+          "AI-ADM-029",
+          "AI-ADM-030",
+          "FGA-18-001",
+          "FGA-18-002"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 19,
+        "taskCount": 30,
+        "taskIds": [
+          "FGA-19-001",
+          "FGA-19-002",
+          "TOOL-ADM-001",
+          "TOOL-ADM-002",
+          "TOOL-ADM-003",
+          "TOOL-ADM-004",
+          "TOOL-ADM-005",
+          "TOOL-ADM-006",
+          "TOOL-ADM-007",
+          "TOOL-ADM-008",
+          "TOOL-ADM-009",
+          "TOOL-ADM-010",
+          "TOOL-ADM-011",
+          "TOOL-ADM-012",
+          "TOOL-ADM-013",
+          "TOOL-ADM-014",
+          "TOOL-ADM-015",
+          "TOOL-ADM-016",
+          "TOOL-ADM-017",
+          "TOOL-ADM-018",
+          "TOOL-ADM-019",
+          "TOOL-ADM-020",
+          "TOOL-ADM-021",
+          "TOOL-ADM-022",
+          "TOOL-ADM-023",
+          "TOOL-ADM-024",
+          "TOOL-ADM-025",
+          "TOOL-ADM-026",
+          "TOOL-ADM-027",
+          "TOOL-ADM-028"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 20,
+        "taskCount": 31,
+        "taskIds": [
+          "FGA-20-001",
+          "FGA-20-002",
+          "FIN-ADM-001",
+          "FIN-ADM-002",
+          "FIN-ADM-003",
+          "FIN-ADM-004",
+          "FIN-ADM-005",
+          "FIN-ADM-006",
+          "FIN-ADM-007",
+          "FIN-ADM-008",
+          "FIN-ADM-009",
+          "FIN-ADM-010",
+          "FIN-ADM-011",
+          "FIN-ADM-012",
+          "FIN-ADM-013",
+          "FIN-ADM-014",
+          "FIN-ADM-015",
+          "FIN-ADM-016",
+          "FIN-ADM-017",
+          "FIN-ADM-018",
+          "FIN-ADM-019",
+          "FIN-ADM-020",
+          "FIN-ADM-021",
+          "FIN-ADM-022",
+          "FIN-ADM-023",
+          "FIN-ADM-024",
+          "FIN-ADM-025",
+          "FIN-ADM-026",
+          "FIN-ADM-027",
+          "FIN-ADM-028",
+          "FIN-ADM-029"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 21,
+        "taskCount": 31,
+        "taskIds": [
+          "SVC-ADM-001",
+          "SVC-ADM-002",
+          "SVC-ADM-003",
+          "SVC-ADM-004",
+          "SVC-ADM-005",
+          "SVC-ADM-006",
+          "SVC-ADM-007",
+          "SVC-ADM-008",
+          "SVC-ADM-009",
+          "SVC-ADM-010",
+          "SVC-ADM-011",
+          "SVC-ADM-012",
+          "SVC-ADM-013",
+          "SVC-ADM-014",
+          "SVC-ADM-015",
+          "SVC-ADM-016",
+          "SVC-ADM-017",
+          "SVC-ADM-018",
+          "SVC-ADM-019",
+          "SVC-ADM-020",
+          "SVC-ADM-021",
+          "SVC-ADM-022",
+          "SVC-ADM-023",
+          "SVC-ADM-024",
+          "SVC-ADM-025",
+          "SVC-ADM-026",
+          "SVC-ADM-027",
+          "SVC-ADM-028",
+          "SVC-FG-029",
+          "SVC-FG-030",
+          "SVC-FG-031"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 22,
+        "taskCount": 31,
+        "taskIds": [
+          "CAR-ADM-001",
+          "CAR-ADM-002",
+          "CAR-ADM-003",
+          "CAR-ADM-004",
+          "CAR-ADM-005",
+          "CAR-ADM-006",
+          "CAR-ADM-007",
+          "CAR-ADM-008",
+          "CAR-ADM-009",
+          "CAR-ADM-010",
+          "CAR-ADM-011",
+          "CAR-ADM-012",
+          "CAR-ADM-013",
+          "CAR-ADM-014",
+          "CAR-ADM-015",
+          "CAR-ADM-016",
+          "CAR-ADM-017",
+          "CAR-ADM-018",
+          "CAR-ADM-019",
+          "CAR-ADM-020",
+          "CAR-ADM-021",
+          "CAR-ADM-022",
+          "CAR-ADM-023",
+          "CAR-ADM-024",
+          "CAR-ADM-025",
+          "CAR-ADM-026",
+          "CAR-ADM-027",
+          "CAR-ADM-028",
+          "CAR-FG-029",
+          "CAR-FG-030",
+          "CAR-FG-031"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 23,
+        "taskCount": 29,
+        "taskIds": [
+          "NTF-ADM-001",
+          "NTF-ADM-002",
+          "NTF-ADM-003",
+          "NTF-ADM-004",
+          "NTF-ADM-005",
+          "NTF-ADM-006",
+          "NTF-ADM-007",
+          "NTF-ADM-008",
+          "NTF-ADM-009",
+          "NTF-ADM-010",
+          "NTF-ADM-011",
+          "NTF-ADM-012",
+          "NTF-ADM-013",
+          "NTF-ADM-014",
+          "NTF-ADM-015",
+          "NTF-ADM-016",
+          "NTF-ADM-017",
+          "NTF-ADM-018",
+          "NTF-ADM-019",
+          "NTF-ADM-020",
+          "NTF-ADM-021",
+          "NTF-ADM-022",
+          "NTF-ADM-023",
+          "NTF-ADM-024",
+          "NTF-ADM-025",
+          "NTF-ADM-026",
+          "NTF-ADM-027",
+          "NTF-FG-028",
+          "NTF-FG-029"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 24,
+        "taskCount": 27,
+        "taskIds": [
+          "RQ-ADM-001",
+          "RQ-ADM-002",
+          "RQ-ADM-003",
+          "RQ-ADM-004",
+          "RQ-ADM-005",
+          "RQ-ADM-006",
+          "RQ-ADM-007",
+          "RQ-ADM-008",
+          "RQ-ADM-009",
+          "RQ-ADM-010",
+          "RQ-ADM-011",
+          "RQ-ADM-012",
+          "RQ-ADM-013",
+          "RQ-ADM-014",
+          "RQ-ADM-015",
+          "RQ-ADM-016",
+          "RQ-ADM-017",
+          "RQ-ADM-018",
+          "RQ-ADM-019",
+          "RQ-ADM-020",
+          "RQ-ADM-021",
+          "RQ-ADM-022",
+          "RQ-ADM-023",
+          "RQ-ADM-024",
+          "RQ-ADM-025",
+          "RQ-ADM-026",
+          "RQ-FG-027"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 25,
+        "taskCount": 29,
+        "taskIds": [
+          "HR-ADM-001",
+          "HR-ADM-002",
+          "HR-ADM-003",
+          "HR-ADM-004",
+          "HR-ADM-005",
+          "HR-ADM-006",
+          "HR-ADM-007",
+          "HR-ADM-008",
+          "HR-ADM-009",
+          "HR-ADM-010",
+          "HR-ADM-011",
+          "HR-ADM-012",
+          "HR-ADM-013",
+          "HR-ADM-014",
+          "HR-ADM-015",
+          "HR-ADM-016",
+          "HR-ADM-017",
+          "HR-ADM-018",
+          "HR-ADM-019",
+          "HR-ADM-020",
+          "HR-ADM-021",
+          "HR-ADM-022",
+          "HR-ADM-023",
+          "HR-ADM-024",
+          "HR-ADM-025",
+          "HR-ADM-026",
+          "HR-ADM-027",
+          "HR-FG-028",
+          "HR-FG-029"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 26,
+        "taskCount": 29,
+        "taskIds": [
+          "DSH-ADM-001",
+          "DSH-ADM-002",
+          "DSH-ADM-003",
+          "DSH-ADM-004",
+          "DSH-ADM-005",
+          "DSH-ADM-006",
+          "DSH-ADM-007",
+          "DSH-ADM-008",
+          "DSH-ADM-009",
+          "DSH-ADM-010",
+          "DSH-ADM-011",
+          "DSH-ADM-012",
+          "DSH-ADM-013",
+          "DSH-ADM-014",
+          "DSH-ADM-015",
+          "DSH-ADM-016",
+          "DSH-ADM-017",
+          "DSH-ADM-018",
+          "DSH-ADM-019",
+          "DSH-ADM-020",
+          "DSH-ADM-021",
+          "DSH-ADM-022",
+          "DSH-ADM-023",
+          "DSH-ADM-024",
+          "DSH-ADM-025",
+          "DSH-ADM-026",
+          "DSH-ADM-027",
+          "DSH-ADM-028",
+          "DSH-FG-029"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      },
+      {
+        "section": 27,
+        "taskCount": 38,
+        "taskIds": [
+          "XMI-001",
+          "XMI-002",
+          "XMI-003",
+          "XMI-004",
+          "XMI-005",
+          "XMI-006",
+          "XMI-007",
+          "XMI-008",
+          "XMI-009",
+          "XMI-010",
+          "XMI-011",
+          "XMI-012",
+          "XMI-013",
+          "XMI-014",
+          "XMI-015",
+          "XMI-016",
+          "XMI-017",
+          "XMI-018",
+          "XMI-019",
+          "XMI-020",
+          "XMI-021",
+          "XMI-022",
+          "XMI-023",
+          "XMI-024",
+          "XMI-025",
+          "XMI-026",
+          "XMI-027",
+          "XMI-028",
+          "XMI-029",
+          "XMI-030",
+          "XMI-031",
+          "XMI-032",
+          "XMI-033",
+          "XMI-034",
+          "XMI-035",
+          "XMI-036",
+          "XMI-037",
+          "XMI-FG-038"
+        ],
+        "exactShaAcceptance": "NOT_REVIEWED"
+      }
+    ]
+  },
+  "section27": {
+    "sectionClosed": false,
+    "sourceStatus": "FUNCTIONAL_SOURCE_IMPLEMENTED_WITH_EXPLICIT_LIMITS",
+    "taskCount": 38,
+    "sourceStatusIsNotRuntimeAcceptance": true
+  },
+  "fsa": [
+    {
+      "id": "FSA-001",
+      "requirement": "CI والاختبارات الفعلية والنتائج السابقة | R00/R01 ثم CI C2 في R13 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-002",
+      "requirement": "authority وrepo/main/event/protected environments | R02/R13/R14 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-003",
+      "requirement": "مسار readiness وعقد HTTP/revision | R07/R08/R13 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-004",
+      "requirement": "replay/parity/FK/transaction/rollback/idempotency | R04–R06 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-005",
+      "requirement": "الوحدات الثلاث المبنية والمتصفح/الصلاحيات | R02/R07/R09 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-006",
+      "requirement": "السلاسل الخمس والمصفوفة الـ26 | R08/R09 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-007",
+      "requirement": "smoke exact200/no redirect/JSON/HTML/SHA | R07/R13 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-008",
+      "requirement": "absence503 وstatic build stamps | R07 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-009",
+      "requirement": "ingress/TLS/CORS/cookie/CSRF/topology | R03/R07/R08/R13 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-010",
+      "requirement": "Node22/runtime image/Prisma/native/external modules | R01/R07 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-011",
+      "requirement": "artifact/unit/SBOM/digests/signatures | R07/R13 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-012",
+      "requirement": "controller ID وterminal HEALTHY لا accepted | R13/R14 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-013",
+      "requirement": "recovery authority/opt-in/repo guards | R02/R10/R13 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-014",
+      "requirement": "signed target+طرفان+sentinel+least privilege | R03/R10 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-015",
+      "requirement": "backup controls/fresh snapshot/assets/PITR | R02 تجهيز، R10 إثبات |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-016",
+      "requirement": "worker duplicate/reorder/crash/lease/privacy/ledger | R06/R08 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-017",
+      "requirement": "measured RPO5m/RTO60m منفصلان عن structure | R10 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-018",
+      "requirement": "backup+assets preflight/no SQL before safety/parity | R02/R10 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-019",
+      "requirement": "فئات SLO السبع بقياس قابل للتكرار | R00/R02 budgets؛ R11 القياس |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-020",
+      "requirement": "old API/worker/expand-contract/ledger/incident owner | R05/R12 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-021",
+      "requirement": "AR/EN/SEO/deep links/denial/a11y/no prototypes | R09 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-022",
+      "requirement": "actual outcomes وsource/runtime/approval signatures | R01/R02/R13 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-023",
+      "requirement": "تنقية inventory للأقسام01–27 وربط أدلتها | R00–R02/R09، ثم freeze C2 وR13 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    },
+    {
+      "id": "FSA-FG-024",
+      "requirement": "approved market scope+canonical language+complete owner query+UI | R00/R02-coverage/R09 |",
+      "exactReviewShaRuntimeEvidenceLinked": false,
+      "status": "REQUIRES_EXACT_SHA_EVIDENCE_MAPPING"
+    }
+  ],
+  "findings": {
+    "declaredPlanCount": 54,
+    "originalAuditCount": 49,
+    "additionalCount": 5,
+    "register": "docs/remediation/ARCHITECTURAL_SECURITY_CLOSURE_REGISTER_2026-10-15.json",
+    "rows": [
+      {
+        "id": "ARCH-01",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+        "reports": [
+          "docs/reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ARCH-02",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+        "reports": [
+          "docs/reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ARCH-03",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "2c2d4f7bb0aff5c527eec4a9ecb89431418e871c",
+        "reports": [
+          "docs/reviews/B05_OWNER_CONTRACTS_DATABASE_PLAN_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ARCH-04",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+        "reports": [
+          "docs/reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ARCH-05",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "5cf33d33d1cd2988ceb583eed6a0bb86066672f7",
+        "reports": [
+          "docs/reviews/B02_AUTH_SESSION_BOUNDARY_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ARCH-06",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+        "reports": [
+          "docs/reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ARCH-07",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "93a1c4d1946db9480bd94ca2a3291be34b742c68",
+        "reports": [
+          "docs/reviews/B09_UNIFIED_WORKER_RUNTIME_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ARCH-08",
+        "sourceDisposition": "SOURCE_DOCUMENTATION_AND_CLEANUP_RECONCILED",
+        "evidenceCommit": "2f3048f82a75379bb16b1e82aa71b8fda409a779",
+        "reports": [
+          "docs/reviews/B14_FINAL_SOURCE_RECONCILIATION_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "FK-01",
+        "sourceDisposition": "OWNER_CONTRACT_SOURCE_RECONCILED_DATABASE_POLICY_OR_REHEARSAL_PENDING",
+        "evidenceCommit": "2c2d4f7bb0aff5c527eec4a9ecb89431418e871c",
+        "reports": [
+          "docs/reviews/B05_OWNER_CONTRACTS_DATABASE_PLAN_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "FK-02",
+        "sourceDisposition": "OWNER_CONTRACT_SOURCE_RECONCILED_DATABASE_POLICY_OR_REHEARSAL_PENDING",
+        "evidenceCommit": "2c2d4f7bb0aff5c527eec4a9ecb89431418e871c",
+        "reports": [
+          "docs/reviews/B05_OWNER_CONTRACTS_DATABASE_PLAN_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "FK-03",
+        "sourceDisposition": "OWNER_CONTRACT_SOURCE_RECONCILED_DATABASE_POLICY_OR_REHEARSAL_PENDING",
+        "evidenceCommit": "2c2d4f7bb0aff5c527eec4a9ecb89431418e871c",
+        "reports": [
+          "docs/reviews/B05_OWNER_CONTRACTS_DATABASE_PLAN_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "FK-04",
+        "sourceDisposition": "OWNER_CONTRACT_SOURCE_RECONCILED_DATABASE_POLICY_OR_REHEARSAL_PENDING",
+        "evidenceCommit": "2c2d4f7bb0aff5c527eec4a9ecb89431418e871c",
+        "reports": [
+          "docs/reviews/B05_OWNER_CONTRACTS_DATABASE_PLAN_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "REL-01",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "64f5d2e04d7c9fa4cf1210144d995b93f9e8b05f",
+        "reports": [
+          "docs/reviews/B06_SCHOLARSHIP_CANONICAL_AUTHORING_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "REL-02",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "64f5d2e04d7c9fa4cf1210144d995b93f9e8b05f",
+        "reports": [
+          "docs/reviews/B06_SCHOLARSHIP_CANONICAL_AUTHORING_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "REL-03",
+        "sourceDisposition": "NOT_CONFIRMED_NO_NEW_FIX_REQUIRED",
+        "evidenceCommit": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+        "reports": [
+          "docs/reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "REL-04",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "64f5d2e04d7c9fa4cf1210144d995b93f9e8b05f",
+        "reports": [
+          "docs/reviews/B06_SCHOLARSHIP_CANONICAL_AUTHORING_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "REL-05",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "64f5d2e04d7c9fa4cf1210144d995b93f9e8b05f",
+        "reports": [
+          "docs/reviews/B06_SCHOLARSHIP_CANONICAL_AUTHORING_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "A2A-01",
+        "sourceDisposition": "NOT_CONFIRMED_NO_NEW_FIX_REQUIRED",
+        "evidenceCommit": "d2bf0c3aa1b3c9aff735275a50034885ef1ce0ad",
+        "reports": [
+          "docs/reviews/B07_ADMIN_NAVIGATION_REVIEW_ASSETS_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "A2A-02",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "d2bf0c3aa1b3c9aff735275a50034885ef1ce0ad",
+        "reports": [
+          "docs/reviews/B07_ADMIN_NAVIGATION_REVIEW_ASSETS_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "A2A-03",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "d2bf0c3aa1b3c9aff735275a50034885ef1ce0ad",
+        "reports": [
+          "docs/reviews/B07_ADMIN_NAVIGATION_REVIEW_ASSETS_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "A2A-04",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "d2bf0c3aa1b3c9aff735275a50034885ef1ce0ad",
+        "reports": [
+          "docs/reviews/B07_ADMIN_NAVIGATION_REVIEW_ASSETS_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "A2A-05",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "d2bf0c3aa1b3c9aff735275a50034885ef1ce0ad",
+        "reports": [
+          "docs/reviews/B07_ADMIN_NAVIGATION_REVIEW_ASSETS_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "A2A-06",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "6f197e77f1eba0c4350560992beeb0872c86f21a",
+        "reports": [
+          "docs/reviews/B11_OWNER_TRANSLATION_CLOSURE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "A2A-07",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "d2bf0c3aa1b3c9aff735275a50034885ef1ce0ad",
+        "reports": [
+          "docs/reviews/B07_ADMIN_NAVIGATION_REVIEW_ASSETS_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "A2A-08",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "d2bf0c3aa1b3c9aff735275a50034885ef1ce0ad",
+        "reports": [
+          "docs/reviews/B07_ADMIN_NAVIGATION_REVIEW_ASSETS_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ADM-01",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "648e04330d421fbab20f63b43176da27731e1cb4",
+        "reports": [
+          "docs/reviews/B10a_FELLOWSHIP_AUTHORING_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ADM-02",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "5a963fdea05d35108ae2d5fbd9c229236f9d81fd",
+        "reports": [
+          "docs/reviews/B10b_UNIVERSITY_STRUCTURE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ADM-03",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "73ccbc83a568e36b86b7d52eae491842d44a4d61",
+        "reports": [
+          "docs/reviews/B10c_OWNER_DRAFT_CREATION_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ADM-04",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "d2bf0c3aa1b3c9aff735275a50034885ef1ce0ad",
+        "reports": [
+          "docs/reviews/B07_ADMIN_NAVIGATION_REVIEW_ASSETS_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ADM-05",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "8d890cbb91eca66434fd55bc1a75c8cf5024b43c",
+        "reports": [
+          "docs/reviews/B10d_COURSE_AUTHORING_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ADM-06",
+        "sourceDisposition": "ALUMNI_SOURCE_FIXED_SESSION_BOOKING_EXPLICITLY_DEFERRED",
+        "evidenceCommit": "44467b3aadcc6daad9aaf0d5334c1b4aeecd3670",
+        "reports": [
+          "docs/reviews/B12_ALUMNI_CONSENT_PROGRESS_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ADM-07",
+        "sourceDisposition": "SOURCE_IMPLEMENTED_TWO_CORRECTIONS_NOT_RERUN",
+        "evidenceCommit": "e8f67b7d8ee30c2daef2a65eb5512bb40929e3b2",
+        "reports": [
+          "docs/reviews/B13_FINANCE_SOURCE_CLOSURE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "ADM-08",
+        "sourceDisposition": "SOURCE_DOCUMENTATION_AND_CLEANUP_RECONCILED",
+        "evidenceCommit": "2f3048f82a75379bb16b1e82aa71b8fda409a779",
+        "reports": [
+          "docs/reviews/B14_FINAL_SOURCE_RECONCILIATION_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SYNC-01",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "03c7a6130ec1bdded7e1365615f13d96b4b0b7ab",
+        "reports": [
+          "docs/reviews/B03_PUBLIC_LEARNING_CONTAINMENT_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SYNC-02",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "8cb0c8f2355b953c1b453f7c55b51323be334296",
+        "reports": [
+          "docs/reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SYNC-03",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "8cb0c8f2355b953c1b453f7c55b51323be334296",
+        "reports": [
+          "docs/reviews/B03_PUBLIC_LEARNING_CONTAINMENT_2026-10-15.md",
+          "docs/reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SYNC-04",
+        "sourceDisposition": "PREVIOUS_FIX_RETAINED",
+        "evidenceCommit": "8cb0c8f2355b953c1b453f7c55b51323be334296",
+        "reports": [
+          "docs/reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SYNC-05",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "8cb0c8f2355b953c1b453f7c55b51323be334296",
+        "reports": [
+          "docs/reviews/B03_PUBLIC_LEARNING_CONTAINMENT_2026-10-15.md",
+          "docs/reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SYNC-06",
+        "sourceDisposition": "NOT_CONFIRMED_NO_NEW_FIX_REQUIRED",
+        "evidenceCommit": "8cb0c8f2355b953c1b453f7c55b51323be334296",
+        "reports": [
+          "docs/reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SYNC-07",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "8cb0c8f2355b953c1b453f7c55b51323be334296",
+        "reports": [
+          "docs/reviews/B10a_FELLOWSHIP_AUTHORING_2026-10-15.md",
+          "docs/reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SYNC-08",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "8cb0c8f2355b953c1b453f7c55b51323be334296",
+        "reports": [
+          "docs/reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SYNC-09",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "8cb0c8f2355b953c1b453f7c55b51323be334296",
+        "reports": [
+          "docs/reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SEC-01",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "0a8c6495e2ba354a5363cc3c13d46ce5aedffec7",
+        "reports": [
+          "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SEC-02",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "0a8c6495e2ba354a5363cc3c13d46ce5aedffec7",
+        "reports": [
+          "docs/reviews/B01_SEARCH_ACCESS_BOUNDARY_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SEC-03",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "5cf33d33d1cd2988ceb583eed6a0bb86066672f7",
+        "reports": [
+          "docs/reviews/B02_AUTH_SESSION_BOUNDARY_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SEC-04",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "5cf33d33d1cd2988ceb583eed6a0bb86066672f7",
+        "reports": [
+          "docs/reviews/B02_AUTH_SESSION_BOUNDARY_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SEC-05",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "5cf33d33d1cd2988ceb583eed6a0bb86066672f7",
+        "reports": [
+          "docs/reviews/B02_AUTH_SESSION_BOUNDARY_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SEC-06",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "5cf33d33d1cd2988ceb583eed6a0bb86066672f7",
+        "reports": [
+          "docs/reviews/B02_AUTH_SESSION_BOUNDARY_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "SEC-07",
+        "sourceDisposition": "NOT_CONFIRMED_NO_NEW_FIX_REQUIRED",
+        "evidenceCommit": "5c0f72cf268f4a127d1f9bc64b8af1bccb7fd1eb",
+        "reports": [
+          "docs/reviews/ARCHITECTURAL_SECURITY_VERIFIED_FINDINGS_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "NEW-01",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "8cb0c8f2355b953c1b453f7c55b51323be334296",
+        "reports": [
+          "docs/reviews/B08_PUBLIC_DISCOVERY_LOCALE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "NEW-02",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+        "reports": [
+          "docs/reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "NEW-03",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+        "reports": [
+          "docs/reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "NEW-04",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "5cf33d33d1cd2988ceb583eed6a0bb86066672f7",
+        "reports": [
+          "docs/reviews/B02_AUTH_SESSION_BOUNDARY_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      },
+      {
+        "id": "NEW-05",
+        "sourceDisposition": "SOURCE_REMEDIATED_RUNTIME_PENDING",
+        "evidenceCommit": "f80e3b0ab9aa29f0ea5312af3d6aa7ab461be7b7",
+        "reports": [
+          "docs/reviews/B04_OWNERSHIP_ASSET_GOVERNANCE_2026-10-15.md"
+        ],
+        "historicalRuntimeStatus": "PENDING_NOT_CERTIFIED",
+        "productionStatus": "NOT_VERIFIED",
+        "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+      }
+    ],
+    "completeCurrentFindingMappingVerified": false
+  },
+  "relationships": [
+    {
+      "matrixRowId": "R-001",
+      "caseIds": [
+        "CD-004",
+        "CD-024",
+        "CD-040"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-002",
+      "caseIds": [
+        "CD-003",
+        "CD-004",
+        "CD-024"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-003",
+      "caseIds": [
+        "CD-003",
+        "CD-017",
+        "CD-040"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-004",
+      "caseIds": [
+        "CD-001",
+        "CD-022",
+        "CD-033"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-005",
+      "caseIds": [
+        "CD-002",
+        "CD-003",
+        "CD-033"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-006",
+      "caseIds": [
+        "CD-002",
+        "CD-003",
+        "CD-041"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-007",
+      "caseIds": [
+        "CD-004",
+        "CD-005",
+        "CD-024"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-008",
+      "caseIds": [
+        "CD-009",
+        "CD-010",
+        "CD-033"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-009",
+      "caseIds": [
+        "CD-007",
+        "CD-008"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-010",
+      "caseIds": [
+        "CD-007",
+        "CD-008",
+        "CD-041"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-011",
+      "caseIds": [
+        "CD-011",
+        "CD-024"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-012",
+      "caseIds": [
+        "CD-006",
+        "CD-008",
+        "CD-023"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-013",
+      "caseIds": [
+        "CD-006",
+        "CD-007",
+        "CD-008"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-014",
+      "caseIds": [
+        "CD-021",
+        "CD-025",
+        "CD-038"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-015",
+      "caseIds": [
+        "CD-007",
+        "CD-021",
+        "CD-025"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-016",
+      "caseIds": [
+        "CD-012",
+        "CD-013",
+        "CD-016",
+        "CD-021"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-017",
+      "caseIds": [
+        "CD-001",
+        "CD-022"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-018",
+      "caseIds": [
+        "CD-009",
+        "CD-022"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-019",
+      "caseIds": [
+        "CD-006",
+        "CD-023"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-020",
+      "caseIds": [
+        "CD-012",
+        "CD-018",
+        "CD-019"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-021",
+      "caseIds": [
+        "CD-013",
+        "CD-015",
+        "CD-019"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-022",
+      "caseIds": [
+        "CD-013",
+        "CD-014",
+        "CD-016",
+        "CD-017"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-023",
+      "caseIds": [
+        "CD-028",
+        "CD-035"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-024",
+      "caseIds": [
+        "CD-027",
+        "CD-029"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-025",
+      "caseIds": [
+        "CD-027",
+        "CD-029"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-026",
+      "caseIds": [
+        "CD-027",
+        "CD-029"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-027",
+      "caseIds": [
+        "CD-028",
+        "CD-029"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-028",
+      "caseIds": [
+        "CD-028",
+        "CD-029",
+        "CD-036"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-029",
+      "caseIds": [
+        "CD-027",
+        "CD-032"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-030",
+      "caseIds": [
+        "CD-037"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-031",
+      "caseIds": [
+        "CD-029",
+        "CD-030"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-032",
+      "caseIds": [
+        "CD-029",
+        "CD-030"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-033",
+      "caseIds": [
+        "CD-027",
+        "CD-029"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-034",
+      "caseIds": [
+        "CD-030"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-035",
+      "caseIds": [
+        "CD-034"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-036",
+      "caseIds": [
+        "CD-034"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-037",
+      "caseIds": [
+        "CD-031"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-038",
+      "caseIds": [
+        "CD-009",
+        "CD-031"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-039",
+      "caseIds": [
+        "CD-029",
+        "CD-031",
+        "CD-037"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-040",
+      "caseIds": [
+        "CD-031",
+        "CD-037"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-041",
+      "caseIds": [
+        "CD-030"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-042",
+      "caseIds": [
+        "CD-001",
+        "CD-026"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-043",
+      "caseIds": [
+        "CD-003",
+        "CD-026"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-044",
+      "caseIds": [
+        "CD-004",
+        "CD-026"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-045",
+      "caseIds": [
+        "CD-003",
+        "CD-026"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-046",
+      "caseIds": [
+        "CD-002",
+        "CD-006",
+        "CD-026"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-047",
+      "caseIds": [
+        "CD-006",
+        "CD-008",
+        "CD-026"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-048",
+      "caseIds": [
+        "CD-012",
+        "CD-013",
+        "CD-026"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-049",
+      "caseIds": [
+        "CD-028",
+        "CD-026"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-050",
+      "caseIds": [
+        "CD-032",
+        "CD-026"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-051",
+      "caseIds": [
+        "CD-026",
+        "CD-031"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-052",
+      "caseIds": [
+        "CD-026",
+        "CD-037"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-053",
+      "caseIds": [
+        "CD-026",
+        "CD-030"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-054",
+      "caseIds": [
+        "CD-026",
+        "CD-034"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-055",
+      "caseIds": [
+        "CD-026",
+        "CD-034"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-056",
+      "caseIds": [
+        "CD-018",
+        "CD-022",
+        "CD-039"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-057",
+      "caseIds": [
+        "CD-003",
+        "CD-039"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-058",
+      "caseIds": [
+        "CD-011",
+        "CD-024",
+        "CD-039"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-059",
+      "caseIds": [
+        "CD-016",
+        "CD-021",
+        "CD-039"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-060",
+      "caseIds": [
+        "CD-002",
+        "CD-023",
+        "CD-039"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-061",
+      "caseIds": [
+        "CD-007",
+        "CD-009",
+        "CD-010",
+        "CD-039"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-062",
+      "caseIds": [
+        "CD-012",
+        "CD-016",
+        "CD-019",
+        "CD-039"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-063",
+      "caseIds": [
+        "CD-028",
+        "CD-029"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-064",
+      "caseIds": [
+        "CD-032",
+        "CD-042"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-065",
+      "caseIds": [
+        "CD-031",
+        "CD-037"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-066",
+      "caseIds": [
+        "CD-030",
+        "CD-034"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-067",
+      "caseIds": [
+        "CD-034"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-068",
+      "caseIds": [
+        "CD-042"
+      ],
+      "sourceStatus": "Source Closed",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "R-069",
+      "caseIds": [
+        "CD-010",
+        "CD-032",
+        "CD-033",
+        "CD-042"
+      ],
+      "sourceStatus": "Source Closed",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "X-001",
+      "caseIds": [
+        "CD-035",
+        "CD-036"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "X-002",
+      "caseIds": [
+        "CD-036"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "X-003",
+      "caseIds": [
+        "CD-015",
+        "CD-019",
+        "CD-035",
+        "CD-041"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "X-004",
+      "caseIds": [
+        "CD-029",
+        "CD-036"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "X-005",
+      "caseIds": [
+        "CD-028",
+        "CD-035"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "X-006",
+      "caseIds": [
+        "CD-026",
+        "CD-041"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "X-007",
+      "caseIds": [
+        "CD-025",
+        "CD-032",
+        "CD-039",
+        "CD-042"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    },
+    {
+      "matrixRowId": "X-008",
+      "caseIds": [
+        "CD-037"
+      ],
+      "sourceStatus": "Runtime Pending",
+      "historicalRuntimeStatus": "NOT_EXECUTED",
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED",
+      "historicalCatalogOnly": true
+    }
+  ],
+  "cases": [
+    {
+      "caseId": "CD-001",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Actual University author HTTP, geography withdrawal and per-request public card/count/hydration snapshots now proven. Other reference coherence and owning-phase browser/formal R05 gates remain.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "59fdad6b651ccf6637be277d4539f7f21654b1f7",
+                "ea2ab45ccbe8036800fd5af5522130eab3f37c72"
+              ],
+              "suite": "university-geography",
+              "scope": "18 distinct real PostgreSQL cases across initial 13 passing and 5 corrected final cases; 4 repeated affected regressions excluded from distinct count. Actual university owner commands/coordinator/audit/outbox, canonical geography consistency, root/campus commits, exact DB outbox failure rollback, owner revision CAS, foreign campus rejection. Two cases assert existing database constraints directly. No HTTP or full publication workflow proof."
+            },
+            {
+              "sourceShas": [
+                "55179686b04f328d9705be0352509b403868956a",
+                "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+                "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+                "78b11aa1979ec6e3354f288006553846b278605e",
+                "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+                "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+                "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+              ],
+              "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+              "scope": "Real JWT UniversityAdminRouter root geography accept/reject/If-Match/CSRF/actor proof; permission revocation denies replay. Not full university publication workflow."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication",
+            "docs/reviews/evidence/post28/9e9b09408bd1feb081ad94b37df4d4989e092e33/R06-university-author",
+            "docs/reviews/evidence/post28/8c15bdbfe1d744365e7245d80812792571b6dcdf/R06-university-public-geography",
+            "docs/reviews/evidence/post28/e37cafa7fe4fae8f3a5da08443cdd4658649322e/R06-university-read-snapshot"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-002",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Program workspace queries and DEGREE/MAJOR facets now reject withdrawn University country/region/city while administrative workspace stays visible. Canonical author, current Major-version and graph withdrawal proof preserved. Other child/reference withdrawal and browser gates remain.",
+          "historicalEvidence": [
+            {
+              "sourceSha": "41fb7c90ccb732177a160677669634982fc61173",
+              "suite": "university-relations",
+              "scope": "Real owner publication and degree profile read eligibility; not full mutation/API/campus scenario"
+            },
+            {
+              "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+              "suite": "owner-relations",
+              "scope": "Repository authoring accepts same-owner campus/unit, rejects foreign and archived references before program write; wrong university mutation rejected; owner withdrawal hides public program. Not full API author/review/publish atomic chain."
+            },
+            {
+              "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+              "suite": "relation-commands",
+              "scope": "Actual AdminUniversityUseCases with real atomic coordinator, unit of work, audit and outbox; program/campus/nullable test writes commit together; PostgreSQL outbox failure rolls owner revision and all relations back. No Admin HTTP permission proof."
+            },
+            {
+              "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+              "suite": "exact rollback regression",
+              "scope": "Explicit injection-reached assertion plus Prisma P2010/meta SQLSTATE22012; owner/approval and audit/outbox rollback. Two already counted cases, no new distinct count."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/9e9b09408bd1feb081ad94b37df4d4989e092e33/R06-university-author",
+            "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author",
+            "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version",
+            "docs/reviews/evidence/post28/8c15bdbfe1d744365e7245d80812792571b6dcdf/R06-university-public-geography",
+            "docs/reviews/evidence/post28/e37cafa7fe4fae8f3a5da08443cdd4658649322e/R06-university-read-snapshot"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-003",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Canonical program author/publication and same-owner active Major/Profile/current published Version proof now covered by actual HTTP and SQL graphs. Withdrawn/foreign current versions fail closed without changing the published University owner; restored same-owner version restores visibility. Broader geography/reference withdrawal and built-browser gates remain.",
+          "historicalEvidence": [
+            {
+              "sourceSha": "41fb7c90ccb732177a160677669634982fc61173",
+              "suite": "university-relations",
+              "scope": "Real owner publication and degree profile read eligibility; not full mutation/API/campus scenario"
+            },
+            {
+              "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+              "suite": "owner-relations",
+              "scope": "Missing degree profile rejected in authoring. Public eligibility rejects foreign major/profile version, draft/superseded version and retired profile. Publication workflow concurrency not fully executed."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
+            "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication",
+            "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-004",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "دورة الاختبار/إصداره كاملة وcountry/language/taxonomy وAPI والروابط القديمة.",
+          "historicalEvidence": [
+            {
+              "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+              "suite": "owner-relations",
+              "scope": "Actual admission validator with PostgreSQL proves matching test variant/version, rejects foreign explicit and implicit versions, nonpublic/superseded/draft versions and out of range score. Not all test country/language/taxonomy API lifecycles."
+            },
+            {
+              "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+              "suite": "relation-commands",
+              "scope": "Actual owner command persists an eligible test requirement with both nullable variant/version fields absent."
+            }
+          ],
+          "newEvidence": [],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-005",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "DB uniqueness for every direct writer with NULL, reviewed append-only migration and R04/R05 schema gates; candidate index unexecuted. Application/admin/import concurrency proof does not close this database gap.",
+          "historicalEvidence": [
+            {
+              "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+              "suite": "relation-commands",
+              "scope": "Owner validator rejects duplicate nullable keys in one request; two real connections through existing owner row lock/revision CAS yield one success, one stale rejection and exactly one logical requirement. Does not prove direct/import paths or adopt DEC-06 schema remedy."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/e9a94eac920552470a0e648c315bfae48f97669b/R06-admission-import-20261018"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-006",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "استكمال دورة نشر المالك وجميع الكتابات/القراءات المتأثرة بسحب مرجع البرنامج.",
+          "historicalEvidence": [
+            {
+              "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+              "suite": "relation-commands",
+              "scope": "Actual scholarship repository derives university from eligible program, rejects explicit foreign university and archived program/draft actual major version before scholarship creation. Creates DRAFT version and DRAFT cycle, not automatic publication. Not full scholarship Admin audit/outbox chain."
+            },
+            {
+              "sourceSha": "77ee49859b19adb923f0c98e5d6bbee3d3c75fc8",
+              "suite": "scholarship-admin",
+              "scope": "11 real owner cases plus 5 real HTTP cases passed before replay fix. Canonical replacement with correct parent, foreign/missing/unpublished owner rejection, duplicate keys, revision/actor/reason guards, full links/version/cycle/sponsor/audit/outbox SQLSTATE22012 rollback, two-writer CAS, stable child ID, readiness invalidation, published/archive write rejection and parent withdrawal between lookup and actual transaction."
+            },
+            {
+              "sourceSha": "6b5f8db81ef339fc7ea41b4797a4de6fc2480607",
+              "suite": "scholarship-public-relations",
+              "scope": "4 PostgreSQL cases: exact forward/reverse results and counts; rejects FK-valid foreign university link; hides relations after university/major/profile/version/program lifecycle withdrawal and root/version unpublication. Published rows are explicit historical fixtures, not an owner publish workflow."
+            },
+            {
+              "sourceSha": "84dbfcdff3cb274022dadf542fa4d25f1735c28b",
+              "suite": "scholarship-admin exact replay cases",
+              "scope": "Actual mounted app.ts callback extracted and executed with real JWT, sessions, CSRF, persisted roles/evaluator/idempotency store; denies cached replay after permission withdrawal and permits authorized replay without repeated owner/audit/outbox."
+            }
+          ],
+          "newEvidence": [],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-007",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Built-browser verification of exact pairs and full owner publication lifecycle; derived details/admin code and interactive component are implemented and tested.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "7c15845d5a7af8572b6cef15e3222a3c8fc98e76"
+              ],
+              "evidence": "docs/reviews/evidence/post28/7c15845d5a7af8572b6cef15e3222a3c8fc98e76/r06-dec01-review/case-accounting.json",
+              "scope": "Same owner program proves degree-major pair in real public HTTP filtering before count and pagination; invalid/unresolved/foreign-owner and obsolete/mismatched version rejected. Dashboard, final UI and full owner workflow not accepted."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/1ea67d54555c17ce725483a087a404dc113088d0/R06-pairs"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-008",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Built-browser filter/details parity and remaining owner lifecycle; actual two-connection major/program withdrawal during public reads is now coherent and proven.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "7c15845d5a7af8572b6cef15e3222a3c8fc98e76"
+              ],
+              "evidence": "docs/reviews/evidence/post28/7c15845d5a7af8572b6cef15e3222a3c8fc98e76/r06-dec01-review/case-accounting.json",
+              "scope": "Same owner program proves degree-major pair in real public HTTP filtering before count and pagination; invalid/unresolved/foreign-owner and obsolete/mismatched version rejected. Dashboard, final UI and full owner workflow not accepted."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/1ea67d54555c17ce725483a087a404dc113088d0/R06-pairs",
+            "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-009",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Canonical funding-country data/source contract requires reviewed schema decision and R04/R05 gates; then implement owner/import/API filters and prove publication/rollback. Built-browser parity remains. Study destination and explicit canonical nationality inclusion/exclusion/source labels and separate donor filter are implemented and proven.",
+          "historicalEvidence": [],
+          "newEvidence": [
+            "docs/remediation/POST28_R06_COUNTRY_SEMANTICS_2026-10-18.md",
+            "docs/reviews/evidence/post28/f29504b5ac830ba54df7c02c501118c6e78c402a/R06-country-contract"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-010",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "المسار الكامل raw import→verification→review→publication وCMS/graph دون تسرب.",
+          "historicalEvidence": [
+            {
+              "sourceSha": "d8fba0c2fd911946176738beeaf4716b1c7ed4df",
+              "suite": "owner-relations",
+              "scope": "Real scholarship gateway rejects withdrawn owner and nonpublic/foreign/closed/future cycles. Not full raw-import verification, CMS or graph counts scenario."
+            },
+            {
+              "sourceSha": "6b5f8db81ef339fc7ea41b4797a4de6fc2480607",
+              "suite": "scholarship-public-relations",
+              "scope": "Unpublished scholarship and obsolete published-version proof excluded in both forward and reverse counts. Not complete raw import/verification/CMS workflow."
+            }
+          ],
+          "newEvidence": [],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-011",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "نشر وتغيير الاختبار والبرنامج والمنحة وإبطال القراءات بجميع الاتجاهات.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "55179686b04f328d9705be0352509b403868956a",
+                "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+                "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+                "78b11aa1979ec6e3354f288006553846b278605e",
+                "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+                "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+                "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+              ],
+              "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+              "scope": "Real ScholarshipPublicRouter and Prisma projection withdraw test documents after archive, visibility revocation or current-version unpublication; public test-filter totals exclude withdrawn proof. Existing program proof remains separate; no full owner publication/invalidation workflow acceptance."
+            }
+          ],
+          "newEvidence": [],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-012",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Current public source proof now gates detail, list/count, relationship reads and CMS owner checks. Full admin JWT route matrix and owning-phase browser parity remain.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+                "a78b6b94dc31cc6cc280c42314cf47e544a8b929"
+              ],
+              "evidence": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-review/case-accounting.json",
+              "scope": "DEC03 free-study policy implemented with independent paid/free/unknown certificate evidence. Real publication/audit/outbox, HTTP router and actual UI data adapter; no browser or real provider link check."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts",
+            "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source",
+            "docs/reviews/evidence/post28/13082808c616f4aefddecfc0d96893b3d3e6008a/R06-course-publication-races",
+            "docs/reviews/evidence/post28/e3997a36571f000d2dd054fa50df3e6d55669ecb/R06-course-read-snapshot",
+            "docs/reviews/evidence/post28/225e62c678ac2ced60efce8120c0912e1f80755c/R06-course-source-withdrawal"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-013",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "مسار HTTP/JWT لأمر الدورة وreverse Major graph والمصفوفة الكاملة؛ المنشور يتطلب unpublish وفق العقد القائم.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+                "a78b6b94dc31cc6cc280c42314cf47e544a8b929"
+              ],
+              "evidence": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-review/case-accounting.json",
+              "scope": "DEC05 link rejection invalidates its TAXONOMY_MAPPING projections atomically; independent direct links and provenance retained. Local PostgreSQL concurrency/retry/statement-failure rollback tested; no full source-change/reconciliation/cache/owner-command audit acceptance."
+            },
+            {
+              "sourceShas": [
+                "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+                "c2b3af690ee32dc02ea0e021153d0a312e17321a"
+              ],
+              "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+              "scope": "Actual CourseAdminCommandUseCases transaction now supports relationship writes without nested $transaction; rejection/projection invalidation/root version/audit/outbox atomic, real SQL22012 rollback in both audit and outbox, optimistic concurrency and stale replay. Published structure still requires actual unpublish first."
+            }
+          ],
+          "newEvidence": [],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-014",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "كل مسارات المراجعة والإعادة/refresh والقراءات العكسية ضمن سير المالك وHTTP.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "70f851ea862ba13f3c63abf6a25871ae1b358a7e",
+                "a78b6b94dc31cc6cc280c42314cf47e544a8b929"
+              ],
+              "evidence": "docs/reviews/evidence/post28/70f851ea862ba13f3c63abf6a25871ae1b358a7e/r06-dec-policy-review/case-accounting.json",
+              "scope": "DEC05 independent DIRECT_REVIEWED projection retained after taxonomy rejection; reapproval does not silently restore withdrawn derived projection. PostgreSQL proof, not full API/browser/source-refresh acceptance."
+            },
+            {
+              "sourceShas": [
+                "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+                "c2b3af690ee32dc02ea0e021153d0a312e17321a"
+              ],
+              "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+              "scope": "Independent DIRECT_REVIEWED projections preserved during owner rejection and removed-source reconciliation; source change forces dependent mapping projection REVIEW_REQUIRED."
+            }
+          ],
+          "newEvidence": [],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-015",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "URL/import refresh والعامل/crash/ack وجميع إسقاطات/كاش العميل؛ no-store لا يثبت مصفوفة الكاش كاملة.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+                "c2b3af690ee32dc02ea0e021153d0a312e17321a"
+              ],
+              "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+              "scope": "Removed terms reconciled through actual owner command with audit/outbox; next real public HTTP no-store graph withdraws stale derived mapping while independent reviewed relation remains. Full import/URL-change/worker/browser-cache matrix not proven."
+            }
+          ],
+          "newEvidence": [],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-016",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "دورة reverse Major router كاملة والنشر/الأرشفة وإثبات تطابق الواجهة.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+                "c2b3af690ee32dc02ea0e021153d0a312e17321a"
+              ],
+              "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+              "scope": "Real public course HTTP page/count rejects PROPOSED/REVIEW_REQUIRED mappings and mappings targeting DRAFT/ARCHIVED majors; approved+published allowed. Full reverse Major router lifecycle not accepted."
+            }
+          ],
+          "newEvidence": [],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-017",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "إثبات واجهة المتصفح وعدم عرض facet غير مدعوم وتطابق reverse view؛ لا اختراع ربط درجة.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "75a2726164bcfe9e30f6667ac058f7b821a8f819",
+                "c2b3af690ee32dc02ea0e021153d0a312e17321a"
+              ],
+              "evidence": "docs/reviews/evidence/post28/75a2726164bcfe9e30f6667ac058f7b821a8f819/r06-owner-visibility-review/case-accounting.json",
+              "scope": "General major listing accepts approved course link without profile and infers no degree from training text. Real API rejects unsupported degree/profile facets with400; built browser control matrix not accepted."
+            }
+          ],
+          "newEvidence": [],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-018",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Program workspace/facets geography, program-language8 and actual canonical University author workflows proven; full language author/review/browser matrix remains, with Course headquarters semantics preserved.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "55179686b04f328d9705be0352509b403868956a",
+                "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+                "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+                "78b11aa1979ec6e3354f288006553846b278605e",
+                "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+                "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+                "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+              ],
+              "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+              "scope": "Provider headquarters has no derived study country; active canonical language review, rejects inactive/deprecated reference; raw labels excluded, card/list/relationship HTTP and publication guard withdraw deprecated language. No teaching-market DEC-07 acceptance."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/48102fc653314f2bc49308b62301a21305a2bf2c/R06-languages",
+            "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
+            "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version",
+            "docs/reviews/evidence/post28/8c15bdbfe1d744365e7245d80812792571b6dcdf/R06-university-public-geography",
+            "docs/reviews/evidence/post28/e37cafa7fe4fae8f3a5da08443cdd4658649322e/R06-university-read-snapshot"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-019",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Post-publication domain/link/identity/URL/provider mismatch withdrawal now has actual HTTP and PostgreSQL proof. Prior source acquisition, publication locks and atomic link-check evidence remain. Controlled refresh, full admin JWT and worker crash-to-canonical handoff remain.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "55179686b04f328d9705be0352509b403868956a",
+                "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+                "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+                "78b11aa1979ec6e3354f288006553846b278605e",
+                "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+                "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+                "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+              ],
+              "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+              "scope": "Two-connection provider/native-key/language identity dedup and preserved IDs; domain allowlist, persisted synthetic redirect/history evidence, stale result rejection, controlled identity edit guard and raw source publication rejection. No external network check or end-to-end import approval."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network",
+            "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
+            "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts",
+            "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source",
+            "docs/reviews/evidence/post28/13082808c616f4aefddecfc0d96893b3d3e6008a/R06-course-publication-races",
+            "docs/reviews/evidence/post28/e3997a36571f000d2dd054fa50df3e6d55669ecb/R06-course-read-snapshot",
+            "docs/reviews/evidence/post28/225e62c678ac2ced60efce8120c0912e1f80755c/R06-course-source-withdrawal"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-020",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": "CASE_NOT_LISTED_IN_RELATIONSHIP_INDEX",
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-021",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-022",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-023",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-024",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-025",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-026",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "مصفوفة جميع أوامر العلاقات المباشرة وroles/actor/reason/audit؛ إثبات MFA/فصل الواجبات والطوارئ حيث يلزم.",
+          "historicalEvidence": [
+            "Real use-case maker/checker identity rejection, server quorum2, decision replay/concurrent CAS/rollback; HTTP authorization not executed",
+            {
+              "sourceSha": "293b2eee2514b29c91a2d6f8ad3a35353cab9454",
+              "suite": "http-finance",
+              "scope": "Real JWT, session, principal lifecycle and student role reads; FX two-checker approval consumption/activation, foreign binding rejection, stale version, two connections, outbox SQL rollback. Not all Admin role permissions."
+            },
+            {
+              "sourceSha": "ea2286d37a7c7b32b9bbde03d69c43aa736252b0",
+              "suite": "relation-commands",
+              "scope": "Actual University owner context/revision required; transaction audit/outbox and rollback verified. Reviewer context is synthetic local input, not an authenticated Admin principal."
+            },
+            {
+              "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+              "suite": "exact rollback regression",
+              "scope": "Explicit injection-reached assertion plus Prisma P2010/meta SQLSTATE22012; owner/approval and audit/outbox rollback. Two already counted cases, no new distinct count."
+            },
+            {
+              "sourceSha": "84dbfcdff3cb274022dadf542fa4d25f1735c28b",
+              "suite": "scholarship-admin",
+              "scope": "Current admin:scholarships:manage revalidated before cached receipt; original defect on77ee4985 returned200 after permission withdrawal, fixed to403; legitimate replay200 with unchanged persisted facts. No full production MFA/duty/emergency-policy proof."
+            },
+            {
+              "sourceShas": [
+                "59fdad6b651ccf6637be277d4539f7f21654b1f7",
+                "ea2ab45ccbe8036800fd5af5522130eab3f37c72"
+              ],
+              "suite": "university-geography",
+              "scope": "18 distinct real PostgreSQL cases across initial 13 passing and 5 corrected final cases; 4 repeated affected regressions excluded from distinct count. Actual university owner commands/coordinator/audit/outbox, canonical geography consistency, root/campus commits, exact DB outbox failure rollback, owner revision CAS, foreign campus rejection. Two cases assert existing database constraints directly. No HTTP or full publication workflow proof."
+            },
+            {
+              "sourceShas": [
+                "55179686b04f328d9705be0352509b403868956a",
+                "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+                "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+                "78b11aa1979ec6e3354f288006553846b278605e",
+                "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+                "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+                "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+              ],
+              "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+              "scope": "Current JWT/persisted RBAC checked before private cached responses on universities and student-document-reviews; Finance action permissions precede owner receipt replay. No full production MFA/duty/emergency proof."
+            }
+          ],
+          "newEvidence": [],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-027",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-028",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Three actual PG cases now prove guarded attachment/replay, own-student artifact identity resolution, foreign-owner denial, withdrawal after certificate revocation, two-connection competing attachment immutability and revoked/foreign attachment rollback. Real rendered PDF bytes are materialized under explicitly synthetic historical ACTIVE trust. Fresh EAP processing/full three-artifact orchestration, JWT issued-artifact HTTP delivery and crash recovery remain; production signer/provider approvals and browser gates remain.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "55179686b04f328d9705be0352509b403868956a",
+                "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+                "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+                "78b11aa1979ec6e3354f288006553846b278605e",
+                "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+                "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+                "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+              ],
+              "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+              "scope": "Real CourseProgressUseCases enrollment/completion audit/outbox commit, retry/concurrency and SQLSTATE22012 rollback. External-linked enrollment/completion and certificate claims refused. P14 real consumer/gateway/worker acknowledges noncredential event and retries native eligible events lacking approved template; no certificate issued or inbox invented."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/6ad9dc526147315bcacb57a54892a6e7199b5713/R06-certificate-locks",
+            "docs/reviews/evidence/post28/a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5/R06-certificate-runtime",
+            "docs/reviews/evidence/post28/51b0e139c0356c318121a25b72232c7663cfce59/R06-learning-path-completion",
+            "docs/reviews/evidence/post28/20f8b6560cb359ec1f7a23e95aa81fdea7eee80b/R06-path-certificate-eligibility",
+            "docs/reviews/evidence/post28/0f81149fd46344b14b5e932be5828e1e6de952cc/R06-path-certificate-issuance",
+            "docs/reviews/evidence/post28/aa90799417996f04d12af807c65ac1a3694e159d/R06-learning-path-http",
+            "docs/reviews/evidence/post28/3d04e28ba209c38765e43fc553563e17669bce4f/R06-path-certificate-rendering",
+            "docs/reviews/evidence/post28/b8f7643d22324ef51ffef2d92e35e2720d73d4e8/R06-certificate-attachment"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-029",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Actual student document HTTP18 now covers PDF asset list scoping, foreign delivery and upload-completion denial, and allocation consent rejection as well as binding/readiness/consent/replay/concurrent unlink. Invoice/certificate ownership remains proven. Successful issued artifact delivery and wider graph coverage remain.",
+          "historicalEvidence": [
+            "Real use-case cross-student collection writes and encrypted private-result reads rejected; expiry/suspension enforced. HTTP principal binding and graph isolation not executed",
+            {
+              "sourceSha": "293b2eee2514b29c91a2d6f8ad3a35353cab9454",
+              "suite": "http-finance",
+              "scope": "Actual student router/JWT/DB sessions/persona and collection owners; query impersonation and cross-owner collection update rejected; role withdrawal and suspension enforced. Actual university graph router/service/owner repositories exclude both student collections and private metadata sentinels. Does not prove every certificate/invoice/document graph route."
+            },
+            {
+              "sourceSha": "f14ed30f667715b309292bf113dc09e48a6d63b2",
+              "suite": "http-finance exact selection",
+              "scope": "Foreign path alias returns contract 403; strict body rejects injected principal; 1 actual selected pass, 13 deliberate exclusions. Saved report verified on 1c19ec1fdefdebe57061287ad2737d0e24e862c2 without rerunning DB."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
+            "docs/reviews/evidence/post28/378fc1050d31930d782b3ceae503e6bcfda7ebc1/R06-source-network",
+            "docs/reviews/evidence/post28/be687e82df88317ab2aae10ce0cdb7689246c9c9/R06-student-isolation",
+            "docs/reviews/evidence/post28/a1e7f34f2c4086d8f71009540ee6f1a52f71e7e5/R06-certificate-runtime",
+            "docs/reviews/evidence/post28/741b324c6f4f2ac1a43f7a2ab23a0523befa7a26/R06-student-document-http",
+            "docs/reviews/evidence/post28/92461e771267d7026dcbd900fed7b30d7e8794ba/R06-student-assets-http"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-030",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Real issued invoice student ownership HTTP reads and denied foreign payment attempts now proven without provider dispatch. Still service origin/currency link scenarios and genuine sandbox payment/refund/settlement/replay; local financial 14-case evidence preserved.",
+          "historicalEvidence": [
+            "SQL invoice/receipt/outbox atomicity and exact unit storage; no full payment-provider/refund/double-posting owner proof",
+            "Real canonical currency lookup, invoice calculation/create/edit/issue replay, exact balanced postings, concurrent issue and rollback. Service origin/payment/refund full chain not executed",
+            {
+              "sourceSha": "293b2eee2514b29c91a2d6f8ad3a35353cab9454",
+              "suite": "http-finance",
+              "scope": "Manual FX approval consumption and activation with real DB, atomic outbox rollback and concurrent single executor. Unconfigured payment/automatic FX fail closed without provider call/payment write. No successful payment/refund/settlement claim."
+            },
+            {
+              "sourceSha": "7ee6451e57b99c1a3d5edcdc9a760798b86df33c",
+              "suite": "exact rollback regression",
+              "scope": "Explicit injection-reached assertion plus Prisma P2010/meta SQLSTATE22012; owner/approval and audit/outbox rollback. Two already counted cases, no new distinct count."
+            },
+            {
+              "sourceShas": [
+                "55179686b04f328d9705be0352509b403868956a",
+                "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+                "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+                "78b11aa1979ec6e3354f288006553846b278605e",
+                "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+                "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+                "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+              ],
+              "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+              "scope": "Real FinanceAdminRouter invoice action/JWT/receipt checks. Unconfigured refund provider rejected before approval consumption/reservation; unavailable bank cannot submit or settle; reconciliation records provider absence. Real local credit, installments, wallet holds/release/capture/replay/conflict/CAS/rollback with balanced synthetic historical funding; no external payment/refund/settlement success proof."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/be687e82df88317ab2aae10ce0cdb7689246c9c9/R06-student-isolation"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-031",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-032",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-033",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-034",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-035",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Actual generic worker process crash proof and canonical Course receipt replay/concurrency now exist; full owner worker crash-to-canonical handoff mapping and other owner receipts remain.",
+          "historicalEvidence": [
+            "2 actual lease fencing/reclaim/stale-write cases; no full import-to-owner/ack crash chain",
+            {
+              "sourceShas": [
+                "55179686b04f328d9705be0352509b403868956a",
+                "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+                "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+                "78b11aa1979ec6e3354f288006553846b278605e",
+                "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+                "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+                "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+              ],
+              "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+              "scope": "Real persisted completion worker dispatch with retries and provider/native/language identity concurrent dedup; not full import-to-owner crash/ack recovery."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/e9a94eac920552470a0e648c315bfae48f97669b/R06-admission-import-20261018",
+            "docs/reviews/evidence/post28/4e0549faab38ad9e40d42af6540f96157730aa22/R06-worker-crash",
+            "docs/reviews/evidence/post28/24502258bfce3725039403335f669aab82b09cdd/R06-course-receipts"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-036",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Student document HTTP18 proves own asset listing despite foreign owner query, foreign delivery404, foreign upload completion denied before processing and missing explicit upload consent rejected before asset creation. Earlier binding14/consent10/attestation24 and actual PDF6 proofs preserved. Successful fresh student upload-to-delivery owner workflow, owning-phase browser and production provider licensing remain.",
+          "historicalEvidence": [
+            "39 asset lifecycle/CAS/reference/restore cases and two document binding lock-order cases; no full tenant/consent/download authorization flow",
+            "Privacy consent actor validation, actual consent state/audit/outbox atomicity, search/analytics withdrawal and stale writer rollback; document download consent/grant race not executed",
+            {
+              "sourceSha": "10e0ddf1fa72697dae2c5597786c0707ef6c3687",
+              "suite": "document-consent",
+              "scope": "Review consent withdrawal with real persistence and controlled external ports; no storage revocation proof"
+            },
+            {
+              "sourceShas": [
+                "55179686b04f328d9705be0352509b403868956a",
+                "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+                "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+                "78b11aa1979ec6e3354f288006553846b278605e",
+                "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+                "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+                "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+              ],
+              "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+              "scope": "Real scholarship gateway and AssetReferencePolicy/Prisma asset storage back document attestations and HTTP reviewer. Verified/rejected, CAS two-reviewer race, revoked consent/owner/cycle/asset trust, duplicate queue exclusion and actual DB outbox rollback. Stored clean evidence is synthetic; real secure delivery absent refuses open. No already-delivered storage grant revocation claim."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/6e5e9691c6f5d51fb3b12a0ec7c311d1e45cff37/R06-real-pdf-20261018",
+            "docs/reviews/evidence/post28/fa6accd597e0928450ec723a0f320368da010488/R06-publication",
+            "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
+            "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
+            "docs/reviews/evidence/post28/741b324c6f4f2ac1a43f7a2ab23a0523befa7a26/R06-student-document-http",
+            "docs/reviews/evidence/post28/92461e771267d7026dcbd900fed7b30d7e8794ba/R06-student-assets-http"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-037",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-038",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-039",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-040",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [
+        {
+          "status": "PARTIAL_NOT_ACCEPTED",
+          "fullScenarioPassed": false,
+          "whatRemains": "Course and University independent-connection snapshots retained. Current source-proof withdrawal and native Course relationship regressions pass. Broader cursor traversal, remaining owner workflows and owning-phase browser gates remain.",
+          "historicalEvidence": [
+            {
+              "sourceShas": [
+                "55179686b04f328d9705be0352509b403868956a",
+                "8d91be9ddf0799e65a0e8f1b74a4bdfc2d4b9d21",
+                "b57a7cff4c9e511d007e5095eaf893114b8f6aec",
+                "78b11aa1979ec6e3354f288006553846b278605e",
+                "56a59af9ccfb4ff332f0f8f18df43b965712e42e",
+                "ba1b9f43145ac3f7de9dd0756528cdd75f8d47d9",
+                "bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3"
+              ],
+              "evidence": "docs/reviews/evidence/post28/bdab0eeb25ed2d4c349e6f18c3b66e5d7e57c2d3/r06-closure-review/case-accounting.json",
+              "scope": "Current canonical test version and language withdrawal affect next actual public request/list; no full multi-page parent/reference lifecycle matrix or snapshot/pagination consistency acceptance."
+            }
+          ],
+          "newEvidence": [
+            "docs/reviews/evidence/post28/60c3808dc8c9dc9b08c8de0591c7bbab25234a42/R06-snapshots",
+            "docs/reviews/evidence/post28/54df6f85e7dd36a78a3936a72556392a2236819c/R06-review-delivery",
+            "docs/reviews/evidence/post28/6a97b4baf6e90b6c3c2dcbed86b263b7a6e6cadf/R06-owner-locks",
+            "docs/reviews/evidence/post28/8a7391f3348e2d5c60a28a6e121186c5f4d7d846/R06-real-course-source",
+            "docs/reviews/evidence/post28/dd1c3471bbd2eb3150d27142187ca7cec3daa02f/R06-program-author",
+            "docs/reviews/evidence/post28/9a8213521532e5af7e82821dc233c1481a4cb551/R06-program-version",
+            "docs/reviews/evidence/post28/13082808c616f4aefddecfc0d96893b3d3e6008a/R06-course-publication-races",
+            "docs/reviews/evidence/post28/8c15bdbfe1d744365e7245d80812792571b6dcdf/R06-university-public-geography",
+            "docs/reviews/evidence/post28/e37cafa7fe4fae8f3a5da08443cdd4658649322e/R06-university-read-snapshot",
+            "docs/reviews/evidence/post28/e3997a36571f000d2dd054fa50df3e6d55669ecb/R06-course-read-snapshot",
+            "docs/reviews/evidence/post28/225e62c678ac2ced60efce8120c0912e1f80755c/R06-course-source-withdrawal"
+          ],
+          "scope": "HISTORICAL_SCOPED_PROGRESS_NOT_EXACT_REVIEW_SHA_ACCEPTANCE"
+        }
+      ],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-041",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    },
+    {
+      "caseId": "CD-042",
+      "historicalStatus": "NOT_EXECUTED",
+      "traceabilityGap": null,
+      "continuationReferences": [],
+      "exactReviewShaAcceptance": "NOT_ESTABLISHED"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DEC-01",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "technicalApproval": null,
+      "reference": "docs/remediation/post28-readiness-20261016/decisions.json",
+      "currentAuthorityMustBeReviewed": true
+    },
+    {
+      "id": "DEC-02",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "technicalApproval": null,
+      "reference": "docs/remediation/post28-readiness-20261016/decisions.json",
+      "currentAuthorityMustBeReviewed": true
+    },
+    {
+      "id": "DEC-03",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "technicalApproval": null,
+      "reference": "docs/remediation/post28-readiness-20261016/decisions.json",
+      "currentAuthorityMustBeReviewed": true
+    },
+    {
+      "id": "DEC-04",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "technicalApproval": null,
+      "reference": "docs/remediation/post28-readiness-20261016/decisions.json",
+      "currentAuthorityMustBeReviewed": true
+    },
+    {
+      "id": "DEC-05",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "technicalApproval": null,
+      "reference": "docs/remediation/post28-readiness-20261016/decisions.json",
+      "currentAuthorityMustBeReviewed": true
+    },
+    {
+      "id": "DEC-06",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "technicalApproval": null,
+      "reference": "docs/remediation/post28-readiness-20261016/decisions.json",
+      "currentAuthorityMustBeReviewed": true
+    },
+    {
+      "id": "DEC-07",
+      "status": "OWNER_FUNCTIONAL_DIRECTION_APPROVED",
+      "ownerApproval": {
+        "document": "docs/remediation/POST28_DEC_01_07_OWNER_FUNCTIONAL_POLICY_2026-10-16.md",
+        "sourceSha": "4eb9d8246a1be023a458fe0fd293dc758ce7a370",
+        "scope": "FUNCTIONAL_DIRECTION_ONLY"
+      },
+      "technicalApproval": null,
+      "reference": "docs/remediation/post28-readiness-20261016/decisions.json",
+      "currentAuthorityMustBeReviewed": true
+    }
+  ]
+}

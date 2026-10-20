@@ -1,0 +1,256 @@
+{
+  "version": 1,
+  "sha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
+  "sourceStatus": "SOURCE_UNVERIFIED",
+  "runtimeStatus": "RUNTIME_UNVERIFIED",
+  "decision": "BLOCKED",
+  "gates": [
+    {
+      "id": "source-ci",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "database-parity",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "built-browser",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "cross-module-canary",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "artifact-boot",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "worker-effects",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "security",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "backup-restore",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "load-slo",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "rollback",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "locale-indexing",
+      "status": "MISSING",
+      "executed": false
+    },
+    {
+      "id": "business-discovery",
+      "status": "MISSING",
+      "executed": false
+    }
+  ],
+  "failures": [
+    "TASK_INVENTORY_OWNER_CURATING_PENDING",
+    "source-ci",
+    "database-parity",
+    "built-browser",
+    "cross-module-canary",
+    "artifact-boot",
+    "worker-effects",
+    "security",
+    "backup-restore",
+    "load-slo",
+    "rollback",
+    "locale-indexing",
+    "business-discovery",
+    "PRIOR_SECTION_BLOCKERS",
+    "SECTION_1_TASK_REVIEW_INCOMPLETE",
+    "SECTION_2_TASK_REVIEW_INCOMPLETE",
+    "SECTION_3_TASK_REVIEW_INCOMPLETE",
+    "SECTION_4_TASK_REVIEW_INCOMPLETE",
+    "SECTION_5_TASK_REVIEW_INCOMPLETE",
+    "SECTION_6_TASK_REVIEW_INCOMPLETE",
+    "SECTION_7_TASK_REVIEW_INCOMPLETE",
+    "SECTION_8_TASK_REVIEW_INCOMPLETE",
+    "SECTION_9_TASK_REVIEW_INCOMPLETE",
+    "SECTION_10_TASK_REVIEW_INCOMPLETE",
+    "SECTION_11_TASK_REVIEW_INCOMPLETE",
+    "SECTION_12_TASK_REVIEW_INCOMPLETE",
+    "SECTION_13_TASK_REVIEW_INCOMPLETE",
+    "SECTION_14_TASK_REVIEW_INCOMPLETE",
+    "SECTION_15_TASK_REVIEW_INCOMPLETE",
+    "SECTION_16_TASK_REVIEW_INCOMPLETE",
+    "SECTION_17_TASK_REVIEW_INCOMPLETE",
+    "SECTION_18_TASK_REVIEW_INCOMPLETE",
+    "SECTION_19_TASK_REVIEW_INCOMPLETE",
+    "SECTION_20_TASK_REVIEW_INCOMPLETE",
+    "SECTION_21_TASK_REVIEW_INCOMPLETE",
+    "SECTION_22_TASK_REVIEW_INCOMPLETE",
+    "SECTION_23_TASK_REVIEW_INCOMPLETE",
+    "SECTION_24_TASK_REVIEW_INCOMPLETE",
+    "SECTION_25_TASK_REVIEW_INCOMPLETE",
+    "SECTION_26_TASK_REVIEW_INCOMPLETE",
+    "SECTION_27_TASK_REVIEW_INCOMPLETE",
+    "RELEASE_AUTHORITY"
+  ],
+  "kind": "NON_AUTHORITATIVE_RELEASE_EVIDENCE_INDEX",
+  "signatureVerified": false,
+  "note": "Indexing input cannot authorize promotion; independently signed source/runtime/approval envelopes are required.",
+  "domainMatrix": [
+    {
+      "section": 1,
+      "owner": "IAM",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 2,
+      "owner": "AUDIT",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 3,
+      "owner": "ASSETS",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 4,
+      "owner": "SETTINGS",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 5,
+      "owner": "IMPORT",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 6,
+      "owner": "REFERENCE",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 7,
+      "owner": "TAXONOMY",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 8,
+      "owner": "TESTS",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 9,
+      "owner": "MAJORS",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 10,
+      "owner": "UNIVERSITIES",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 11,
+      "owner": "SCHOLARSHIPS",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 12,
+      "owner": "COUNTRY_GRAPH",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 13,
+      "owner": "COURSES",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 14,
+      "owner": "CERTIFICATES",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 15,
+      "owner": "STUDENTS",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 16,
+      "owner": "CMS",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 17,
+      "owner": "LOCALIZATION",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 18,
+      "owner": "AI",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 19,
+      "owner": "STUDENT_TOOLS",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 20,
+      "owner": "FINANCE",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 21,
+      "owner": "SERVICES",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 22,
+      "owner": "CAREERS",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 23,
+      "owner": "NOTIFICATIONS",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 24,
+      "owner": "REVIEW_QUEUE",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 25,
+      "owner": "HEALTH",
+      "status": "UNVERIFIED"
+    },
+    {
+      "section": 26,
+      "owner": "DASHBOARD",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "contentCoverage": {
+    "sha": "56e14b1ef0aad35d48a67299feb3481233ae230f",
+    "rows": [],
+    "mandatoryReady": true,
+    "launchScopeDeclared": false,
+    "productionDecision": "UNVERIFIED"
+  },
+  "generatedAt": "2026-10-20T20:19:18.309Z"
+}
