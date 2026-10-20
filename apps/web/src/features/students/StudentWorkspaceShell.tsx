@@ -165,7 +165,7 @@ export function StudentWorkspaceShell({
               }`}
             >
               <Icon className={`w-5 h-5 ${active ? 'text-[#E5B54F] dark:text-[#142B5F]' : 'text-[#586A74] dark:text-[#EEF4F6]'}`} />
-              <span className="text-xs sm:text-sm font-bold font-['Cairo',sans-serif] leading-tight break-words w-full min-h-[2.4em] flex items-center justify-center text-center">{item.label}</span>
+              <span className="text-[12px] font-bold font-['Cairo',sans-serif] leading-tight break-words w-full min-h-[2.4em] flex items-center justify-center text-center">{item.label}</span>
             </button>
           );
         })}
