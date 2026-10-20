@@ -10,7 +10,7 @@ import './student-workspace.css';
  * All new visual changes to the workspace chrome must go here.
  */
 export type StudentWorkspaceTab = 'SUMMARY' | 'OPPORTUNITIES' | 'LEARNING' | 'VAULT' | 'SERVICES' | 'CAREERS' | 'NOTIFICATIONS' | 'PROFILE';
-const tabs: Array<{ id: Exclude<StudentWorkspaceTab, 'PROFILE'>; label: string; icon: LucideIcon }> = [
+const tabs: Array<{ id: StudentWorkspaceTab; label: string; icon: LucideIcon }> = [
   { id: 'SUMMARY', label: 'ملخصي', icon: Home },
   { id: 'OPPORTUNITIES', label: 'فرصي', icon: Route },
   { id: 'LEARNING', label: 'تعلمي', icon: BookOpen },
@@ -18,6 +18,7 @@ const tabs: Array<{ id: Exclude<StudentWorkspaceTab, 'PROFILE'>; label: string; 
   { id: 'CAREERS', label: 'مساري المهني', icon: GraduationCap },
   { id: 'SERVICES', label: 'طلباتي', icon: ClipboardList },
   { id: 'NOTIFICATIONS', label: 'إشعاراتي', icon: Bell },
+  { id: 'PROFILE', label: 'ملفي وإعداداتي', icon: User },
 ];
 
 type Props = {
@@ -114,8 +115,8 @@ export function StudentWorkspaceShell({
         </div>
       </div>
 
-      {/* Navigation Tabs Bar - 5 main tabs: ملخصي | فرصي | تعلمي | محفوظاتي | طلباتي */}
-      <div role="navigation" aria-label="أقسام حساب الطالب" className="w-full max-w-4xl mx-auto mt-3.5 p-1 sm:p-1.5 rounded-2xl bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-white/10 shadow-sm grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-1.5 mn-panel">
+      {/* All eight canonical P15 workspace sections, including the existing profile tab. */}
+      <div role="navigation" aria-label="أقسام حساب الطالب" className="w-full max-w-4xl mx-auto mt-3.5 p-1 sm:p-1.5 rounded-2xl bg-[var(--mn-surface)] dark:bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-white/10 shadow-sm grid grid-cols-4 lg:grid-cols-8 gap-1 sm:gap-1.5 mn-panel">
         {tabs.map((item) => {
           const Icon = item.icon;
           const active = tab === item.id;
@@ -124,6 +125,7 @@ export function StudentWorkspaceShell({
               key={item.id}
               type="button"
               aria-current={active ? 'page' : undefined}
+              title={item.id === 'PROFILE' ? 'ملفي وإعدادات الحساب' : item.label}
               onClick={() => onTabChange(item.id)}
               className={`min-w-0 rounded-xl px-1 sm:px-1.5 py-2 flex flex-col items-center gap-1 transition-all cursor-pointer ${
                 active
