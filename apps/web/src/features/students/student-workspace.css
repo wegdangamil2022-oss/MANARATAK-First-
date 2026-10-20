@@ -59,15 +59,34 @@
   background-color: #28617a;
 }
 
-/* Student quick-access selection: manual theme toggle must keep a clear gold
-   active state, without changing the inactive typography or card content. */
-.dark .mn-student-workspace .mn-student-nav button[aria-current='page'] {
-  background-color: #D6A43B;
+/* Account navigation: gold frames, not gold-filled cards.
+   The selected tab has a stronger frame; all interiors stay white in light mode
+   and indigo in the manually toggled dark mode. */
+.mn-student-workspace .mn-student-nav .mn-student-nav-tile {
+  background-color: #ffffff;
+  border-color: rgba(179, 128, 24, 0.72);
+}
+.mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] {
+  background-color: #ffffff;
+  border: 2px solid #B38018;
   color: #142B5F;
 }
-.dark .mn-student-workspace .mn-student-nav button[aria-current='page'] svg {
+.mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] svg {
   color: #142B5F;
 }
-.dark .mn-student-workspace .mn-student-nav button:not([aria-current='page']) {
+.dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile {
+  background-color: #10264A;
+  border-color: rgba(214, 164, 59, 0.75);
   color: #EEF4F6;
+}
+.dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] {
+  background-color: #10264A;
+  border: 2px solid #D6A43B;
+  color: #F3F6F8;
+}
+.dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] svg {
+  color: #F3F6F8;
+}
+.dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile:hover {
+  background-color: #183456;
 }
