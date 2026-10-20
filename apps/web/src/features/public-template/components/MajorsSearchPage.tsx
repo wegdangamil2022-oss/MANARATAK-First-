@@ -55,9 +55,31 @@ export const MajorsSearchPage: React.FC<MajorsSearchPageProps> = ({
 
   const degreeLevels=['الكل',...Object.keys(DEGREE_CODES)];
 
-  const catalog = useBoundedCatalog<Major>(JSON.stringify([searchQuery, selectedFaculty, selectedDegree, locale]), async (cursor, signal) => {
-    return searchPublishedMajors({ search: searchQuery.trim() || undefined, degreeLevel: DEGREE_CODES[selectedDegree], academicFieldOrDiscipline: selectedFaculty === 'الكل' ? undefined : selectedFaculty, cursor }, locale, signal);
-  });
+  // The published catalog remains API-owned. Only the explicitly selected
+  // non-production design preview searches its bundled example records.
+  const prototypePreview = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype';
+  const catalog = useBoundedCatalog<Major>(
+    JSON.stringify([searchQuery, selectedFaculty, selectedDegree, locale, prototypePreview ? majors.map((item) => item.id) : null]),
+    async (cursor, signal) => {
+      if (prototypePreview) {
+        const query = searchQuery.trim().toLowerCase();
+        const faculty = selectedFaculty.trim().toLowerCase();
+        const filtered = majors.filter((major) => {
+          const academicField = getMajorFaculty(major);
+          const searchable = [major.name, major.nameEn, academicField, major.description];
+          return (!query || searchable.some((value) => value.toLowerCase().includes(query))) &&
+            (selectedFaculty === 'الكل' || academicField.toLowerCase().includes(faculty)) &&
+            (selectedDegree === 'الكل' || major.degreeLevels?.some((degree) => degree === selectedDegree));
+        });
+        const offset = cursor === undefined ? 0 : Number(cursor);
+        if (!Number.isSafeInteger(offset) || offset < 0) throw new Error('INVALID_PREVIEW_CURSOR');
+        const page = filtered.slice(offset, offset + 20);
+        const nextOffset = offset + page.length;
+        return { data: page, total: filtered.length, nextCursor: nextOffset < filtered.length ? String(nextOffset) : null };
+      }
+      return searchPublishedMajors({ search: searchQuery.trim() || undefined, degreeLevel: DEGREE_CODES[selectedDegree], academicFieldOrDiscipline: selectedFaculty === 'الكل' ? undefined : selectedFaculty, cursor }, locale, signal);
+    },
+  );
   const { rows: filteredMajors, total, cursor: nextCursor, busy: loading, error } = catalog;
 
   const handleResetFilters = () => {
