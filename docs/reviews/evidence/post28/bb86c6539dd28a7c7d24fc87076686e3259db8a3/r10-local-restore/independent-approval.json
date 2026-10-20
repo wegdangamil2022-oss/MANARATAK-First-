@@ -1,0 +1,50 @@
+{
+  "kind": "POST28_R10_INDEPENDENT_LOCAL_EXECUTION_DECISION",
+  "version": 1,
+  "reviewerId": "/root/r10_independent_review",
+  "reviewerType": "DELEGATED_INDEPENDENT_AI_TECHNICAL_REVIEWER_NOT_HUMAN_SIGNER",
+  "decision": "APPROVE_LOCAL_SYNTHETIC_RESTORE",
+  "checkedAt": "2026-10-20T14:47:42Z",
+  "sourceSha": "bb86c6539dd28a7c7d24fc87076686e3259db8a3",
+  "scope": "LOCAL_SYNTHETIC_LOOPBACK",
+  "targetFingerprint": "8193f68f7333dd6bb92177f5af2899b9bf2a4359c750e8cc50bc3512b2d64600",
+  "sourceDatabaseFingerprint": "4adf23274da63e2b4f8bdd431d8bc0021df74b5dcc5e4ebe618726659d870623",
+  "host": "127.0.0.1",
+  "port": "49806",
+  "targetDatabase": "manaratak_restore_25b1069f5c519af8ec4bb1e054c8df56",
+  "role": "manaratak_restore_runner",
+  "serverIdentity": "7698757869367514992",
+  "runId": "71469a1e-b64a-45f6-8164-82cdb114cabd",
+  "tlsRootCertificateSha256": "3f2b80d674cf10dbfdc993f775434d80b2b3e0722bba06fe2ed1b4c015f9ab91",
+  "creationPublicKeyFileSha256": "2a13de46f6b07b293c5e4884437fe2f759af27d996d4659241af0cc4922851bd",
+  "reviewReport": "docs/reviews/POST28_R10_INDEPENDENT_REVIEW_2026-10-20.md",
+  "evidenceDirectory": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/native-pg16-JTNxRe",
+  "reviewedEvidence": [
+    {"file":"reviewed-target.json","sha256":"bbec28d258f6cb4c3a3ac09600581852d894f4a9e10321d5453e501363b3aba2"},
+    {"file":"creation-envelope.json","sha256":"06fc0de447fbac34c9d4e24acc602238cdcf1ed358c75a409306438ed9eaaef6"},
+    {"file":"reviewed-cleanup.json","sha256":"296eabeb237ee1196cf15d9364cf10819d3f5cea95548e9a8751e1e0273bc69e"},
+    {"file":"source-files.json","sha256":"08e487d5dbbfb24f171de55b434102833afa6a2cb8ad96df309933a75bb851f7"},
+    {"file":"source-snapshot.json","sha256":"1f5d5b7526c492f30518b7442bcf470847e1bb3df9acefb3fc41c28fedc1afef"}
+  ],
+  "conditions": [
+    "EXACT_REVIEWED_EXECUTION_SOURCE_AND_TARGET_ONLY",
+    "RESTART_ONLY_AFTER_REAL_LAB_SERVER_BINARY_IDENTITY_RECHECK",
+    "FRESH_ACTUAL_CONSISTENT_DUMP_AND_SIGNED_HASH_BOUND_MANIFEST_BEFORE_RESTORE",
+    "NO_BACKUP_CAPTURE_TIMESTAMP_RELABEL_OR_FRESHNESS_GUARD_RELAXATION",
+    "REISSUE_EXPIRED_OR_STATE_CHANGED_CREATION_ATTESTATION_ONLY_AFTER_REAL_RECHECK_WITH_ORIGINAL_CREATION_HISTORY_PRESERVED",
+    "PIN_AUTHORITY_KEYS_OUTSIDE_SUBMITTED_ASSERTIONS",
+    "BIND_THIS_ACTUAL_DECISION_HASH_AND_OWNER_DELEGATE_DECISION_IN_LOCAL_AUTHORIZATION",
+    "ALL_TLS_INPUT_HASH_CONTAINMENT_ROLE_AND_PRE_POST_SENTINEL_GUARDS_MUST_PASS",
+    "NEW_TARGET_EXECUTION_CODE_CHANGE_OR_FAILED_GUARD_REQUIRES_REVIEW"
+  ],
+  "restoreExecutedByReviewer": false,
+  "databaseConnectedByReviewer": false,
+  "productionAcceptance": false,
+  "formalR10Acceptance": false,
+  "limits": [
+    "LOCAL_STRUCTURAL_RESTORE_ONLY_NOT_PRODUCTION_AUTHORIZATION",
+    "NO_EXISTING_UNRELATED_DATABASE_NEON_PROVIDER_DEPLOYMENT_OR_MAIN_MERGE",
+    "NO_HUMAN_SIGNATURE_OR_PRODUCTION_DENY_IDENTITY_IS_FABRICATED",
+    "OPERATIONAL_EVENT_RPO_SERVICE_RTO_PITR_WORM_KMS_AUDIT_AND_CROSS_REGION_REMAIN_UNPROVEN"
+  ]
+}

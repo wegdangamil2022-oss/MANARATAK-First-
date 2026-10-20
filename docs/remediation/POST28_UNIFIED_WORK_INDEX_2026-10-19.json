@@ -168,12 +168,14 @@
     },
     {
       "id": "R10",
-      "state": "PREPARATION_AND_READ_ONLY_VERIFIER_COMPLETE_RESTORE_NOT_EXECUTED",
-      "latestReport": "docs/remediation/POST28_R10_PREPARATION_2026-10-20.md",
-      "latestEvidence": "docs/reviews/evidence/post28/b53ce95404a96ab1fbcb45d08cdb11aacfc7a9ee/r10-preparation/evidence-index.json",
-      "latestEvidenceSourceSha": "b53ce95404a96ab1fbcb45d08cdb11aacfc7a9ee",
-      "formalAcceptance": "OPEN_RESTORE_NOT_EXECUTED",
-      "productionAcceptance": false
+      "state": "LOCAL_STRUCTURAL_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+      "latestReport": "docs/remediation/POST28_R10_LOCAL_RESTORE_2026-10-20.md",
+      "latestEvidence": "docs/reviews/evidence/post28/bb86c6539dd28a7c7d24fc87076686e3259db8a3/r10-local-restore/evidence-index.json",
+      "latestEvidenceSourceSha": "bb86c6539dd28a7c7d24fc87076686e3259db8a3",
+      "formalAcceptance": "OPEN_OPERATIONAL_AND_PRODUCTION_SCOPE",
+      "productionAcceptance": false,
+      "restoreExecuted": true,
+      "independentReview": "docs/reviews/POST28_R10_INDEPENDENT_REVIEW_2026-10-20.md"
     }
   ],
   "validation": {
@@ -203,8 +205,9 @@
     "browserRepeated": false
   },
   "resumeOrder": [
+    "R11_PREPARATION_ONLY_WITH_APPROVED_BUDGET_AND_SCOPE",
+    "R10_DEFERRED_OPERATIONAL_RECOVERY_AND_PROVIDER_CONTROLS",
     "R09_MANDATORY_CHAINS_AND_DOMAIN_MATRIX",
-    "R10_PREPARATION_ONLY_IF_INDEPENDENT_AND_AUTHORIZED",
     "DEFERRED_R08_FULL_PROVIDER_MATRIX_AND_HOSTING",
     "R07_FORMAL_RELEASE_CONFIGURATION_AND_REVIEW_GATES"
   ],

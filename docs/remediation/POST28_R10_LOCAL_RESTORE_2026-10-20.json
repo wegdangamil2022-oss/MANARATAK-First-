@@ -1,0 +1,44 @@
+{
+  "kind": "POST28_R10_LOCAL_STRUCTURAL_CLOSURE",
+  "state": "LOCAL_STRUCTURAL_SCOPE_COMPLETE_WITH_DOCUMENTED_EXCEPTIONS",
+  "sourceSha": "bb86c6539dd28a7c7d24fc87076686e3259db8a3",
+  "evidenceIndex": "docs/reviews/evidence/post28/bb86c6539dd28a7c7d24fc87076686e3259db8a3/r10-local-restore/evidence-index.json",
+  "restoreExecuted": true,
+  "sourceFacts": {
+    "certificates": 1,
+    "certificateLedgers": 3,
+    "paidInvoices": 1,
+    "financialTransactions": 5,
+    "ledgerEntries": 10,
+    "withdrawnCmsSnapshots": 2,
+    "documentBindings": 1,
+    "outbox": 49,
+    "activeAssets": 6
+  },
+  "restoredFacts": {
+    "certificates": 1,
+    "certificateLedgers": 3,
+    "paidInvoices": 1,
+    "financialTransactions": 5,
+    "ledgerEntries": 10,
+    "withdrawnCmsSnapshots": 2,
+    "documentBindings": 1,
+    "outbox": 49,
+    "activeAssets": 6
+  },
+  "tableCount": 282,
+  "assetCount": 6,
+  "sourceUnchanged": true,
+  "formalR10Acceptance": false,
+  "productionAcceptance": false,
+  "operationalRpoMeasured": false,
+  "integratedServiceRtoMeasured": false,
+  "exceptions": [
+    "EVENT_WATERMARK_RPO",
+    "INTEGRATED_SERVICE_RTO",
+    "PROVIDER_PITR_WORM_KMS_AUDIT_CROSS_REGION",
+    "FULL_SQL_SECURITY_CATALOG_PARITY",
+    "PROVIDER_STORAGE_AND_FRESH_EAP"
+  ],
+  "next": "FOLLOW_OWNER_PRACTICAL_PRIORITY_R11_PREPARATION_WITH_ITS_OWN_BUDGET_AND_SAFETY_GATES"
+}

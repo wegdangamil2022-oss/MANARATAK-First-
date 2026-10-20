@@ -1,0 +1,41 @@
+{
+  "sourceSha": "bb86c6539dd28a7c7d24fc87076686e3259db8a3",
+  "probes": [
+    {
+      "name": "remote target",
+      "sqlCalls": 0,
+      "mutations": 0,
+      "rejected": true
+    },
+    {
+      "name": "privileged role",
+      "sqlCalls": 0,
+      "mutations": 0,
+      "rejected": true
+    },
+    {
+      "name": "one approval",
+      "sqlCalls": 0,
+      "mutations": 0,
+      "rejected": true
+    },
+    {
+      "name": "corrupted backup",
+      "sqlCalls": 0,
+      "mutations": 0,
+      "rejected": true
+    },
+    {
+      "name": "corrupted asset",
+      "sqlCalls": 0,
+      "mutations": 0,
+      "rejected": true
+    },
+    {
+      "name": "wrong root certificate",
+      "sqlCalls": 0,
+      "mutations": 0,
+      "rejected": true
+    }
+  ]
+}

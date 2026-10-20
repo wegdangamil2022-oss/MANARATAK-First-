@@ -66,3 +66,70 @@ The initial REQUEST CHANGES above remains the historical disposition on `1442a3c
 - I reviewed the new focused unit cases without re-running unaffected suites. String/URL construction assertions alone do not establish a live TLS handshake or exact target privileges.
 
 **Follow-up disposition: source changes acceptable for the stated local-only model; execution approval is still PENDING exact-target preparation evidence.** No new large source-level defect was identified. Before approval, the reviewer must inspect the actual fresh target, creation/producer evidence, real TLS positive and wrong-CA/wrong-host rejection results for both client paths, actual role/sentinel denial checks, and actual input/approval bindings. No database was accessed by this reviewer. Fresh backup capture must occur close enough to invocation to meet the unchanged backup-age guard; do not use a fabricated timestamp or broaden that guard.
+
+## Final local disposition — 2026-10-20T14:47:42Z
+
+**APPROVE_LOCAL_SYNTHETIC_RESTORE** for the exact target and source below, subject to the existing signed input and runtime guards. This is the independent technical decision requested by the owner delegate; it does not alter the initial rejected source disposition, approve production, or claim that a restore has already happened.
+
+| Identity | Approved value |
+| --- | --- |
+| Reviewed execution source SHA | `bb86c6539dd28a7c7d24fc87076686e3259db8a3` |
+| Scope | `LOCAL_SYNTHETIC_LOOPBACK` |
+| Host and port | `127.0.0.1:49806` |
+| Target database | `manaratak_restore_25b1069f5c519af8ec4bb1e054c8df56` |
+| Target role | `manaratak_restore_runner` |
+| Target fingerprint | `8193f68f7333dd6bb92177f5af2899b9bf2a4359c750e8cc50bc3512b2d64600` |
+| Source database fingerprint | `4adf23274da63e2b4f8bdd431d8bc0021df74b5dcc5e4ebe618726659d870623` |
+| PostgreSQL system identifier | `7698757869367514992` |
+| Creator run ID | `71469a1e-b64a-45f6-8164-82cdb114cabd` |
+| Lab directory | `C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/native-pg16-JTNxRe` |
+| TLS root certificate SHA-256 | `3f2b80d674cf10dbfdc993f775434d80b2b3e0722bba06fe2ed1b4c015f9ab91` |
+| Pinned bootstrap public-key file SHA-256 | `2a13de46f6b07b293c5e4884437fe2f759af27d996d4659241af0cc4922851bd` |
+
+Independent verification performed offline:
+
+- Confirmed that execution SHA differs from the source-reviewed `15ed3d6` only in this review document; no execution code changed.
+- Read the actual preparation harness `work/prepare-r10-reviewed-lab.mjs`, including fresh creator invocation, narrowly checked same-lab resumes, role provisioning, actual SQL used for role observations, positive TLS and negative CA/hostname/plaintext paths, asset copying, snapshot capture, and PID/binary-checked shutdown. Initialization failures and their targeted harness corrections do not constitute a successful restore and are not presented as one.
+- Verified the creation envelope's Ed25519 signature against the separately read bootstrap public key; matched envelope payload to the target preparation, state-file hash, known producer hash, actual PostgreSQL binary hash, resolved data-directory identity, and TLS certificate hash. The envelope was unexpired at review (`checkedAt=14:37:27Z`, `expiresAt=15:37:27Z`).
+- Validated the 282-table database snapshot identity and six physical backup asset hashes. Snapshot identity: `f45e87b1361b3291f07074fcd57b31c07e2e1bd85f8b4fbe3ca14c137daa2c39`.
+- Inspected actual preparation results and their producing assertions: TLS enabled (`TLSv1.2`) through Prisma and verified libpq; wrong CA and wrong hostname rejected by each; plaintext rejected by PostgreSQL. These are harness-observed runtime results, not an independent new database connection by this reviewer.
+- Passed the recorded actual role result through the corrected `databaseSentinel` function offline. All prohibited attributes, memberships, cross-database CONNECT access, and sentinel mutation flags are false. The preparation explicitly states these checks were observed by `post28_bootstrap`; the restore role has not yet queried the target. Actual restore-role sentinel checks remain mandatory before and after mutation.
+- Verified recorded cleanup is stopped and restore was not executed. Source facts include certificate=1, certificate ledger=3, paid invoice=1, transactions=5, ledger entries=10, withdrawn CMS snapshots=2, document binding=1, outbox=49, and active assets=6. Their relevance is representative restored-state parity, not exhaustive workflow acceptance.
+
+Reviewed safe evidence file hashes:
+
+| File in the exact lab directory | SHA-256 |
+| --- | --- |
+| `reviewed-target.json` | `bbec28d258f6cb4c3a3ac09600581852d894f4a9e10321d5453e501363b3aba2` |
+| `creation-envelope.json` | `06fc0de447fbac34c9d4e24acc602238cdcf1ed358c75a409306438ed9eaaef6` |
+| `reviewed-cleanup.json` | `296eabeb237ee1196cf15d9364cf10819d3f5cea95548e9a8751e1e0273bc69e` |
+| `source-files.json` | `08e487d5dbbfb24f171de55b434102833afa6a2cb8ad96df309933a75bb851f7` |
+| `source-snapshot.json` | `1f5d5b7526c492f30518b7442bcf470847e1bb3df9acefb3fc41c28fedc1afef` |
+
+Execution conditions: restore only into this target; first verify the same real lab/server identity when restarting it. If restart changes the state-file hash or the envelope expires, the bootstrap authority must recheck and attest the same actual identity with a fresh check/expiry; it must preserve the original creation history. Take an actual fresh consistent dump and manifest, bind their hashes and this approval's recorded hash into the local authorization, and leave the backup-age, source-SHA, TLS, file-containment, role, and sentinel checks enabled. Any different target, execution-code change, or newly failed guard requires renewed review rather than reusing this approval. No synthetic replacement production identity, invented human signature, or manually written successful restore receipt is authorized.
+
+No production data/host, existing unrelated database, provider effect, migration-history change, deployment, or main merge is approved. Structural local success must keep `productionAcceptance=false`, `formalR10Acceptance=false`, and the previously stated RPO/RTO/PITR/provider limitations. This reviewer has read no private/env key files, made no database connection, and executed no restore.
+
+## Post-restore evidence review — approved local execution completed
+
+The implementation agent executed the authorized local drill at `bb86c6539dd28a7c7d24fc87076686e3259db8a3` on the exact approved target. I reviewed its results offline, including `work/execute-r10-reviewed-restore.mjs`; I did not execute the harness, repeat tests, connect to PostgreSQL, or read private keys/env files.
+
+**Disposition: LOCAL STRUCTURAL RESTORE VERIFIED IN THE RECORDED SCOPE.** The evidence supports recording the local structural portion of R10 as completed. It supports no production recovery or operational SLO acceptance.
+
+- Actual CLI result: `PASS`, `structuralRestorability=true`, `scope=LOCAL_SYNTHETIC_LOOPBACK`; start `2026-10-20T14:50:46.525Z`, completion `2026-10-20T14:50:53.657Z`.
+- Verified the actual restore authorization Ed25519 signature with the retained public key, dump and manifest file hashes, independent decision hash binding, snapshot identity, and snapshot/source SHA consistency. No dump or manifest was accepted merely from a claimed ID.
+- The database parity result includes **282 public tables** with original snapshot digest `f45e87b1361b3291f07074fcd57b31c07e2e1bd85f8b4fbe3ca14c137daa2c39`; all **six physically copied restored asset files** match their manifest hashes. I independently rehashed the retained dump, manifest, and restored asset files offline.
+- Source and restored facts match: certificate=1; certificate ledger=3; paid invoice=1; transactions=5; ledger entries=10; withdrawn CMS snapshots=2; document binding=1; outbox=49; ACTIVE assets=6. The full row snapshot parity, rather than these counts alone, is the stronger preservation evidence. The source remained unchanged before/after dump and after restore according to the harness's actual snapshot assertions.
+- The actual restore-role sentinel result retains the exact server/database/fingerprint/run identity and has every excessive privilege flag false. The harness repeats corrected sentinel checks after restoration; no destructive application suite was used to verify the restored snapshot.
+- Six negative preflight probes reject remote target, privileged role, single approval, corrupt dump, corrupt asset, and wrong trust root with **zero SQL callbacks and zero mutations**. These are controlled callback-counted preflight probes, not six failed database restores.
+- Restart evidence preserves original lab creation timestamp, matches actual system identifier/binary/data-directory/CA identities, and records that the existing creation attestation was still valid. Cleanup records a safely stopped lab, actual restore invocation, and no unrelated existing database touched.
+
+| Retained evidence file | SHA-256 |
+| --- | --- |
+| `reviewed-restore-result.json` | `036495059cc7fa3f7b69de8aed4c9ff82fb2b397de29f16bed3abfbe8e4e5114` |
+| `reviewed-restore-verification.json` | `17392f14c34a3a919fa117714dca3c45023dac821074356667b2996f613ab989` |
+| `reviewed-preflight-negative.json` | `de96b3c6402712ef43387748b39198f1b86243265768934974b87973da8553aa` |
+| `restart-identity-check.json` | `58b886dc5b415882c134e012c9eb8a023a0cc330bb1e2ef33dbbcc3ec5a3bbc5` |
+| `reviewed-restore-cleanup.json` | `3bbcb6360c93cb03a8b266e69a89ecd5a4c7edd4aa159caea6be85bb77337e28` |
+
+The reported **7.132 seconds** is database drill elapsed time; **1.665 seconds** is backup-capture-age proxy. Neither is integrated service RTO or recovered-event RPO. API/Web/Admin were not booted against the restored state in this drill; no fresh EAP scan, protected delivery test, PITR, managed provider retention, WORM/KMS/audit, or cross-region recovery was performed. The same-cluster source/target topology remains local structural evidence. `formalR10Acceptance=false` and `productionAcceptance=false` remain correct. This addendum does not modify the previously recorded approval JSON or retrospectively change its hash.
