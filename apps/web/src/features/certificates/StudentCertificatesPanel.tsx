@@ -1,5 +1,7 @@
+import { PreviewStudentApiClient } from '../students/studentWorkspacePreviewApi';
+const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ApiClient, type StudentCertificateProjectionDto } from '../../api/client';
+import { ApiClient as LiveApiClient, type StudentCertificateProjectionDto } from '../../api/client';
 import { certificateCopy, certificateStatusCopy } from '@manaratak/shared';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { StudentCertificateActions } from './StudentCertificateActions';
