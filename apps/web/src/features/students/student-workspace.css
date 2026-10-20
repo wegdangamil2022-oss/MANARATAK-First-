@@ -98,3 +98,37 @@
   background-color: #183456;
   border-color: #D6A43B;
 }
+
+/* Compact summary actions: one physical size and one typeface across buttons/links.
+ * The site's mobile button reset gives <button> a 44px minimum height,
+ * while course actions are <a>; normalise their visual dimensions here.
+ * Scope overrides to summary actions only, preserving global controls.
+ */
+.mn-student-workspace .mn-student-summary-header-link,
+.mn-student-workspace .mn-student-summary-header-link span {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 18px !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+.mn-student-workspace .mn-student-summary-header-link {
+  min-height: 34px;
+  white-space: nowrap;
+  padding: 0 2px;
+}
+.mn-student-workspace .mn-student-summary-primary-action,
+.mn-student-workspace .mn-student-summary-primary-action span {
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 11px !important;
+  line-height: 18px !important;
+  font-weight: 600;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+.mn-student-workspace .mn-student-summary-primary-action {
+  min-height: 32px;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
