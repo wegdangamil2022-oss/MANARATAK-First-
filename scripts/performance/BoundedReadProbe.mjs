@@ -22,8 +22,21 @@ export async function runBoundedReadProbe(plan, { sampleResources, signal } = {}
   const url = validateReadProbe(plan);
   if (typeof sampleResources !== 'function') throw Error('R11_RESOURCE_OBSERVER_REQUIRED');
   const observations = [], resources = [], started = performance.now();
-  let reason = null, transferBytes = 0;
+  let reason = null, transferBytes = 0, sourceVerifiedAt = -Infinity;
   async function resourceGuard() {
+    if (performance.now() - sourceVerifiedAt >= 3000) {
+      try {
+        const response = await fetch(new URL('/api/v1/monitoring/health/readiness', url), {
+          redirect: 'error', signal: AbortSignal.timeout(plan.timeoutMs),
+        });
+        const body = await response.json();
+        if (response.status !== 200 || response.headers.get('x-manaratak-source-sha') !== plan.sourceSha ||
+            body.protocolVersion !== 2 || body.status !== 'UP' || body.code !== 'AVAILABLE') {
+          reason = 'SOURCE_READINESS_INVALID'; return false;
+        }
+        sourceVerifiedAt = performance.now();
+      } catch { reason = 'SOURCE_READINESS_UNAVAILABLE'; return false; }
+    }
     let sample;
     try { sample = await sampleResources(); } catch { reason = 'RESOURCE_OBSERVER_UNAVAILABLE'; return false; }
     if (!sample || !finite(sample.cpuPercent, 0, 100) ||
@@ -57,7 +70,8 @@ export async function runBoundedReadProbe(plan, { sampleResources, signal } = {}
             if (bytes > 1024 ** 2) { await reader.cancel(); throw Error('RESPONSE_TOO_LARGE'); }
           }
         } finally { reader.releaseLock(); }
-        if (response.headers.get('x-manaratak-source-sha') !== plan.sourceSha) reason = 'SOURCE_SHA_MISMATCH';
+        const revision = response.headers.get('x-manaratak-source-sha');
+        if (revision !== null && revision !== plan.sourceSha) reason = 'SOURCE_SHA_MISMATCH';
         else if (status !== 200) reason = status === 429 ? 'RATE_LIMIT_REACHED' : 'HTTP_ERROR';
       } catch (error) {
         timedOut = error.name === 'TimeoutError';

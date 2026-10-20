@@ -8,7 +8,13 @@ const plan = url => ({ url, sourceSha: sha, durationSeconds: 0.01, requestsPerSe
   maximumResidentMemoryBytes: 10000000, maximumConnections: 3 });
 const healthy = async () => ({ cpuPercent: 0, residentMemoryBytes: 1000, activeConnections: 1 });
 async function server(t, handler) {
-  const s = http.createServer(handler); await new Promise(resolve => s.listen(0, '127.0.0.1', resolve));
+  const s = http.createServer((req, res) => {
+    if (req.url === '/api/v1/monitoring/health/readiness') {
+      res.setHeader('x-manaratak-source-sha', sha);
+      res.end(JSON.stringify({ protocolVersion: 2, status: 'UP', code: 'AVAILABLE' })); return;
+    }
+    handler(req, res);
+  }); await new Promise(resolve => s.listen(0, '127.0.0.1', resolve));
   t.after(() => { s.closeAllConnections(); s.close(); });
   return `http://127.0.0.1:${s.address().port}/api/v1/search/public?q=test`;
 }
@@ -19,7 +25,7 @@ test('R11 read probe rejects external origins, arbitrary paths and excessive bud
   assert.throws(() => validateReadProbe({ ...plan('http://127.0.0.1:3000/api/v1/search/public'), requestsPerSecond: 100 }), /PLAN_INVALID/);
 });
 test('R11 read probe records real response bytes and latency without claiming SLO', async t => {
-  const url = await server(t, (_req, res) => { res.setHeader('x-manaratak-source-sha', sha); res.end('{}'); });
+  const url = await server(t, (_req, res) => { res.end('{}'); });
   const result = await runBoundedReadProbe(plan(url), { sampleResources: healthy });
   assert.equal(result.status, 'COMPLETED_DIAGNOSTIC'); assert.equal(result.sampleCount, 1);
   assert.equal(result.transferBytes, 2); assert.ok(result.p99Ms >= 0); assert.equal(result.sloAcceptance, false);
@@ -34,10 +40,17 @@ test('R11 resource ceiling aborts before sending traffic; missing observation fa
 });
 test('R11 stops at first rate limit or revision mismatch and does not follow redirect', async t => {
   for (const status of [429, 200, 302]) {
-    const url = await server(t, (_req, res) => { res.statusCode = status; if (status === 429) res.setHeader('x-manaratak-source-sha', sha); res.setHeader('location', 'https://example.invalid/'); res.end('{}'); });
+    const url = await server(t, (_req, res) => { res.statusCode = status; res.setHeader('x-manaratak-source-sha', status === 200 ? 'b'.repeat(40) : sha); res.setHeader('location', 'https://example.invalid/'); res.end('{}'); });
     const result = await runBoundedReadProbe(plan(url), { sampleResources: healthy });
     assert.equal(result.status, 'ABORTED'); assert.equal(result.sampleCount, 1);
     assert.equal(result.abortReason, status === 302 ? 'REQUEST_FAILED' : status === 429 ? 'RATE_LIMIT_REACHED' : 'SOURCE_SHA_MISMATCH');
     assert.equal(result.errorCount, 1);
   }
+});
+
+test('R11 invalid API readiness revision prevents workload requests', async t => {
+  let requests = 0;
+  const url = await server(t, (_req, res) => { requests++; res.end('{}'); });
+  const result = await runBoundedReadProbe({ ...plan(url), sourceSha: 'b'.repeat(40) }, { sampleResources: healthy });
+  assert.equal(result.abortReason, 'SOURCE_READINESS_INVALID'); assert.equal(requests, 0);
 });
