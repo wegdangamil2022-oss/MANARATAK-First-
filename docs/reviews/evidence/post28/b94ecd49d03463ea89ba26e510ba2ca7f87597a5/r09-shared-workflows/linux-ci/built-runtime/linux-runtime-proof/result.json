@@ -1,0 +1,814 @@
+{
+  "kind": "POST28_R09_PUBLIC_ARTIFACT_RUNTIME",
+  "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+  "imageId": "sha256:3f8d04fd975fb9f656cb9d68a681bd1ef4c5149a700d6afbde3c294c053f9ffe",
+  "node": "v22.16.0",
+  "environment": "DISPOSABLE",
+  "providerMode": "NO_EXTERNAL_EGRESS",
+  "observations": [
+    {
+      "step": "REVISION_READINESS",
+      "route": "/health/build",
+      "status": 200,
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/admin/health/build",
+      "status": 200,
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+    },
+    {
+      "step": "REVISION_READINESS",
+      "route": "/api/v1/monitoring/health/readiness",
+      "status": 200,
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+    },
+    {
+      "step": "R09_PUBLIC_OWNER_PAGINATION_AND_UNPUBLISHED_DENIAL",
+      "passed": true
+    }
+  ],
+  "network": [
+    {
+      "method": "GET",
+      "path": "/ar/courses",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-DJP0K73X.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-CWTPTknM.js",
+      "status": 200,
+      "resource": "script"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-2.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/scholarships.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/universities.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-0.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/countries.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/exams.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/courses.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/scholarships",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/majors",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/international-tests",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/universities",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/services",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/student-tools",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/preview-art/tools.svg",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-37f3bcf4-83be-4f17-aa36-03b705c3f2f3",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-e378ca6b-8d10-4b32-8b3f-6db9241cac27",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-754adf28-c6fb-4bca-b939-90abc8d485e8",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-a25dfde3-da34-4383-b768-38767bd80880",
+      "status": 404,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-d3651a1a-f307-44e5-a8f5-c7e1db29e007",
+      "status": 404,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-7721639f-d32b-4442-8344-20c5938987b6",
+      "status": 404,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-88688c32-332d-4a96-a512-331b499804a2",
+      "status": 404,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/ar/courses/r09-37f3bcf4-83be-4f17-aa36-03b705c3f2f3",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-DJP0K73X.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-CWTPTknM.js",
+      "status": 200,
+      "resource": "script"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-2.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-0.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/majors",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/international-tests",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/universities",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/scholarships",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/services",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/student-tools",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-37f3bcf4-83be-4f17-aa36-03b705c3f2f3",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/ar/courses/r09-a25dfde3-da34-4383-b768-38767bd80880",
+      "status": 200,
+      "resource": "document"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-DJP0K73X.css",
+      "status": 200,
+      "resource": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/index-CWTPTknM.js",
+      "status": 200,
+      "resource": "script"
+    },
+    {
+      "method": "GET",
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "resource": "image"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-2.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/fonts/cairo-0.woff2",
+      "status": 200,
+      "resource": "font"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/majors",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/scholarships",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/international-tests",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/universities",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/study-destinations",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/cms/content",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/services",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/student/saved-items/hydrated",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/careers/jobs",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/student-tools",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses/r09-a25dfde3-da34-4383-b768-38767bd80880",
+      "status": 404,
+      "resource": "fetch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/courses",
+      "status": 200,
+      "resource": "fetch"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: net::ERR_FAILED",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "productionAcceptance": false,
+  "formalR07Acceptance": false,
+  "promotionAuthorized": false,
+  "databaseIdentity": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698742982067896365",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "applicationRole": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "151.0.7922.34",
+  "formalR09Acceptance": false,
+  "publicJourney": {
+    "anonymousRead": true,
+    "ownerIdsMatched": true,
+    "paginationPages": [
+      {
+        "ownerId": "37f3bcf4-83be-4f17-aa36-03b705c3f2f3",
+        "total": 3,
+        "hasMore": true
+      },
+      {
+        "ownerId": "754adf28-c6fb-4bca-b939-90abc8d485e8",
+        "total": 3,
+        "hasMore": true
+      },
+      {
+        "ownerId": "e378ca6b-8d10-4b32-8b3f-6db9241cac27",
+        "total": 3,
+        "hasMore": false
+      }
+    ],
+    "duplicateOwnerIds": false,
+    "hiddenStates": [
+      {
+        "status": "DRAFT",
+        "completenessStatus": "COMPLETE",
+        "unresolvedLanguage": false,
+        "httpStatus": 404
+      },
+      {
+        "status": "ARCHIVED",
+        "completenessStatus": "COMPLETE",
+        "unresolvedLanguage": false,
+        "httpStatus": 404
+      },
+      {
+        "status": "PUBLISHED",
+        "completenessStatus": "INCOMPLETE",
+        "unresolvedLanguage": false,
+        "httpStatus": 404
+      },
+      {
+        "status": "PUBLISHED",
+        "completenessStatus": "COMPLETE",
+        "unresolvedLanguage": true,
+        "httpStatus": 404
+      }
+    ],
+    "privateLessonContentAbsent": true,
+    "privateMetadataAbsent": true,
+    "emptyIsSuccessfulZero": true,
+    "publishedUiRendered": true,
+    "learnerLinkUsesOwnerId": true,
+    "hiddenUiFallsBackToCatalog": true,
+    "loadedCatalogMatchesOwners": true,
+    "allHiddenTitlesAbsentAfterCatalogLoad": true,
+    "fullPublicationLifecycleExercised": false,
+    "fullR09Acceptance": false
+  },
+  "redisConfigured": false,
+  "blockedExternalOrigins": [
+    "https://images.unsplash.com"
+  ],
+  "tls": {
+    "certificateSha256": "e697e47da52f12c85814daab46c5dac3404d9414c127c2ec8ed63572b88e598c",
+    "hostnameVerified": true,
+    "exactCertificateSpkiPinned": true,
+    "ignoreHTTPSErrors": false
+  },
+  "freshUnpackedThreeUnits": true,
+  "apiBootedInImage": true,
+  "databaseConnected": true,
+  "workersEnabled": false,
+  "cleanup": {
+    "ownedContainerStopped": true,
+    "ownedContainerRemoved": true,
+    "postgresStopped": true,
+    "postgresRemoved": true,
+    "networkRemoved": true,
+    "existingDatabasesTouched": false,
+    "apiExitCode": 0,
+    "drainMilliseconds": 157
+  },
+  "failure": null,
+  "passed": true,
+  "completedAt": "2026-10-20T13:35:08.703Z"
+}

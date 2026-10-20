@@ -155,12 +155,12 @@
     },
     {
       "id": "R09",
-      "state": "PRACTICAL_RECORDED_JOURNEYS_COMPLETE_FORMAL_R09_OPEN",
+      "state": "FIVE_SCOPED_SHARED_WORKFLOWS_PASS_FORMAL_R09_OPEN",
       "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md",
       "laterEvidence": "docs/remediation/POST28_R06_R07_PRACTICAL_HANDOFF_2026-10-19.md",
-      "latestReport": "docs/remediation/POST28_R09_PRACTICAL_HANDOFF_2026-10-20.md",
-      "latestEvidence": "docs/reviews/evidence/post28/819216eba0d09afb3048235e310e2854ef54779d/r09-practical-handoff/evidence-index.json",
-      "latestEvidenceSourceSha": "819216eba0d09afb3048235e310e2854ef54779d",
+      "latestReport": "docs/remediation/POST28_R09_WORKFLOW_PROGRESS_2026-10-20.md",
+      "latestEvidence": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json",
+      "latestEvidenceSourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
       "formalAcceptance": "OPEN_MANDATORY_CHAINS_AND_DOMAIN_MATRIX"
     }
   ],
@@ -282,6 +282,26 @@
       "R09-E05",
       "R09-E06"
     ],
+    "formalR09Acceptance": false,
+    "productionAcceptance": false
+  },
+  "r09SharedWorkflows": {
+    "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+    "ciRun": "39430049248",
+    "checks": {
+      "passed": 23,
+      "failed": 0,
+      "pending": 0
+    },
+    "tests": {
+      "executed": 5,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    "sameSyntheticDatabase": true,
+    "fullBuiltAdminMfaAccepted": false,
+    "allMandatoryRowsClosed": false,
     "formalR09Acceptance": false,
     "productionAcceptance": false
   }

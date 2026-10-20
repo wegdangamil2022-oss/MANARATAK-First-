@@ -1,0 +1,16 @@
+{
+  "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+  "kind": "POST28_R09_WORKFLOW_LAB",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "formalR09Acceptance": false,
+  "selectedCases": [
+    "FULL_NEW_R09_WORKFLOW_PROFILE"
+  ],
+  "cleanup": {
+    "existingDatabasesTouched": false,
+    "databaseRemoved": true,
+    "networkRemoved": true
+  },
+  "passed": true
+}

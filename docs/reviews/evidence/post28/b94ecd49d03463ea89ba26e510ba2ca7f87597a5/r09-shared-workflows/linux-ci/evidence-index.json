@@ -1,0 +1,146 @@
+{
+  "kind": "POST28_R09_LINUX_SHARED_WORKFLOW_EVIDENCE",
+  "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+  "ciRun": "39430049248",
+  "ciJob": "118656894806",
+  "ciUrl": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39430049248",
+  "artifacts": [
+    {
+      "id": 12268376774,
+      "name": "r09-workflow-proof-b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "digest": "bb01df25650f0ec4a57cfdda95407bd95bfb42bdc46b521cebe0d2362cc081c6",
+      "bytes": 10507,
+      "sha256Verified": true
+    },
+    {
+      "id": 12267064917,
+      "name": "linux-runtime-review-b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "digest": "7942294f5795688c8d1a73648263a08c34304917938e9202dc154ec75e0072a2",
+      "bytes": 129425,
+      "sha256Verified": true
+    }
+  ],
+  "files": [
+    {
+      "path": "workflow/create.log",
+      "bytes": 884,
+      "sha256": "58b1ddb65e9bc8b358a57352be91be37111c24d756c7cbb050d039e4b017a763"
+    },
+    {
+      "path": "workflow/initialize.log",
+      "bytes": 4435,
+      "sha256": "1163c19f2f19cd3ab0ad692b8894d74fecfcf06546bf31adf2a63e48848928de"
+    },
+    {
+      "path": "workflow/r09-workflow-observations-0d9af1dc-5e18-4e86-b9c9-a9ea5c616a8b.json",
+      "bytes": 3262,
+      "sha256": "5dea3c00a626605ee3e0c4327a89372378b5dce13c8ab80cdf7c0f5077487264"
+    },
+    {
+      "path": "workflow/result.json",
+      "bytes": 384,
+      "sha256": "4e739561826962320be784a1a11d2c148627cc0f76ca4d84e11fdb314884ff22"
+    },
+    {
+      "path": "workflow/setup.json",
+      "bytes": 5486,
+      "sha256": "0b1cc39f696bb5fc911d9c5a224e3eff21da4f72e40119efaad6efcfa609ab31"
+    },
+    {
+      "path": "workflow/suite-0-discovery.json",
+      "bytes": 1675,
+      "sha256": "6ec828c4c0210d58c53e4291f78e7a7a98d19c324bdde9c883de2ef8ba280abc"
+    },
+    {
+      "path": "workflow/suite-0-selection.json",
+      "bytes": 106,
+      "sha256": "8fd874358d03faf78c182e8fd43d75b0960d9d303cf1bd0a29ead2a4014ce18c"
+    },
+    {
+      "path": "workflow/suite-0-summary.json",
+      "bytes": 1230,
+      "sha256": "402e7f9e310ac2f6c2927333ac0c3b0f469895671f3f9b29bb783be4e98b23e7"
+    },
+    {
+      "path": "workflow/suite-0-vitest.json",
+      "bytes": 3157,
+      "sha256": "7a1b81cedae52238e46e45e1a102e80017ccd218ea17bd02647fc6a3718b5198"
+    },
+    {
+      "path": "workflow/workflows.log",
+      "bytes": 2451,
+      "sha256": "123b43ed964d2fff62c5688693a10a385836fea4d6b8a9b5eceee9f6cc42069b"
+    },
+    {
+      "path": "built-runtime/cms-rich-text-proof.json",
+      "bytes": 629,
+      "sha256": "39a0000bfd3ea8f2a8cc63fbb547d3872ed460682eb779e1220dd28c530e119b"
+    },
+    {
+      "path": "built-runtime/linux-image-probe.json",
+      "bytes": 1284,
+      "sha256": "43483164db08cb196da0b578dba78107a2e5bcb519efdb768d4bf9f1c0926e63"
+    },
+    {
+      "path": "built-runtime/runtime-layer.json",
+      "bytes": 1910,
+      "sha256": "7d3bb53403604d7c40242a5b55b925a590bdb55efb38223aeeea628e599dad94"
+    },
+    {
+      "path": "built-runtime/linux-runtime-proof/result.json",
+      "bytes": 19822,
+      "sha256": "d00fec85544c5f75514f88af35dc6c82bafd5e662bce91e7d4c5131f5b17839c"
+    },
+    {
+      "path": "built-runtime/linux-runtime-proof/r09-public-course.png",
+      "bytes": 79252,
+      "sha256": "537b69764cb98964bafc0a8c0e9f445e1b0df7c4a6c690228f1773bdb49834f2"
+    },
+    {
+      "path": "built-runtime/linux-runtime-proof/r09-public-hidden.png",
+      "bytes": 49170,
+      "sha256": "17c2871270e78bb99d406289bcc4e0cb9485d80be96a2d52610da99112a86cd2"
+    },
+    {
+      "path": "github-checks.json",
+      "bytes": 5882,
+      "sha256": "e3e68337d4a7df4561153c27323142704be9a01b8cf8c820e4684afb1926eca0"
+    }
+  ],
+  "tests": {
+    "expected": 5,
+    "executed": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "oneDatabase": true
+  },
+  "checks": {
+    "passed": 23,
+    "failed": 0,
+    "pending": 0
+  },
+  "workflowDatabaseIdentity": {
+    "label": "DB-T",
+    "database": "manaratak_post28_transactions_test",
+    "role": "post28_app",
+    "serverIdentity": "7698743107307868205",
+    "databaseOid": "16386",
+    "postgresMajor": 16,
+    "timezone": "UTC",
+    "publicTables": 282,
+    "probeReadOnly": true
+  },
+  "builtRuntimeUsesSeparateDisposableDatabase": true,
+  "formalR09Acceptance": false,
+  "productionAcceptance": false,
+  "boundary": "ACTUAL_SOURCE_ROUTERS_REAL_JWT_DB_CAPABILITIES_NOT_BUILT_ADMIN_UI_OR_MFA",
+  "runtimeConsoleBoundary": {
+    "pageErrors": [],
+    "blockedExternalOrigins": [
+      "https://images.unsplash.com"
+    ],
+    "consoleErrorsRetainedInRawResult": true,
+    "wholeBrowserConsoleClean": false
+  }
+}

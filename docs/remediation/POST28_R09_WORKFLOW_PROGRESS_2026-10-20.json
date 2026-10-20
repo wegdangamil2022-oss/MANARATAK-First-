@@ -3,11 +3,11 @@
   "date": "2026-10-20",
   "timezone": "Asia/Aden",
   "branch": "feat/post28-r07-artifact-preparation",
-  "latestSourceSha": "29d57e16ca73159222be7b1da2c463552997e0d0",
+  "latestSourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
   "formalR09Acceptance": false,
   "allMandatoryRowsClosed": false,
   "allTestsExecutedAtOneSha": false,
-  "linuxSharedDataset": "AWAITING_CI_RESULT",
+  "linuxSharedDataset": "PASS_FIVE_NEW_SCENARIOS_ONE_DATABASE",
   "retained": [
     {
       "sourceSha": "80e0f60c0bc0364e2b75987de3bbc0cc0f702234",
@@ -98,6 +98,150 @@
           "evidence": "docs/reviews/evidence/post28/29d57e16ca73159222be7b1da2c463552997e0d0/r09-shared-workflows/native-pg16-8u58iE/R06-suites/r09-integrated-workflows-0Zn7NN/vitest.json"
         }
       ]
+    },
+    {
+      "sourceSha": "130fbe0a5c6e42030922cd1669bcc816d03b93ba",
+      "evidenceIndex": "docs/reviews/evidence/post28/130fbe0a5c6e42030922cd1669bcc816d03b93ba/r09-shared-workflows/native-pg16-FcU9PS/evidence-index.json",
+      "cases": [
+        {
+          "title": "traverses canonical owner relations beyond page one and distinguishes withdrawal zero and unavailable reads",
+          "status": "passed",
+          "sourceSha": "130fbe0a5c6e42030922cd1669bcc816d03b93ba",
+          "evidence": "docs/reviews/evidence/post28/130fbe0a5c6e42030922cd1669bcc816d03b93ba/r09-shared-workflows/native-pg16-FcU9PS/R06-suites/r09-integrated-workflows-Ik32R6/vitest.json"
+        }
+      ]
+    },
+    {
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "evidenceIndex": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json",
+      "scope": "ALL_FIVE_NEW_SCENARIOS_SAME_DATABASE",
+      "cases": [
+        {
+          "case": "CMS_AUTHOR_REVIEW_PUBLISH_WITHDRAW",
+          "status": "passed",
+          "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+        },
+        {
+          "case": "ACTUAL_LESSON_TO_ONE_SIGNED_CERTIFICATE",
+          "status": "passed",
+          "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+        },
+        {
+          "case": "PRIVATE_DOCUMENT_AND_FINANCE_OWNERSHIP",
+          "status": "passed",
+          "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+        },
+        {
+          "case": "CANONICAL_GRAPH_RELATIONSHIPS",
+          "status": "passed",
+          "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+        },
+        {
+          "case": "SYNTHETIC_WALLET_PAYMENT_EXACTLY_ONE_EFFECT",
+          "status": "passed",
+          "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+        }
+      ]
     }
-  ]
+  ],
+  "ciCandidateSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+  "latestPassingGraphSourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+  "targetedEvidenceFilesChecked": 93,
+  "report": "docs/remediation/POST28_R09_WORKFLOW_PROGRESS_2026-10-20.md",
+  "acceptanceOverlay": [
+    {
+      "caseId": "CD-021",
+      "matrixRowIds": [
+        "R-014",
+        "R-015",
+        "R-016",
+        "R-059"
+      ],
+      "status": "PASS_SCOPED_SYNTHETIC_OWNER_HTTP",
+      "formalAcceptance": false,
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "proof": "Universities scholarships courses: exact owner IDs and totals through three cursor pages; duplicate display names remain isolated; inverse university major and scholarship IDs; owners withdrawn.",
+      "earlierSourceSha": "130fbe0a5c6e42030922cd1669bcc816d03b93ba",
+      "latestEvidenceIndex": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json"
+    },
+    {
+      "caseId": "CD-028",
+      "matrixRowIds": [
+        "R-023",
+        "R-027",
+        "R-028",
+        "X-005"
+      ],
+      "status": "PASS_NATIVE_COURSE_COMPLETION_TO_ONE_CERTIFICATE",
+      "formalAcceptance": false,
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "proof": "Actual enrollment lesson progress completion outbox two consumers inbox one certificate and signed verification then revocation; artifact renderer excluded.",
+      "earlierSourceSha": "dad88ff6aae6bcee35a6700ac71aeb0c165258cc",
+      "latestEvidenceIndex": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json"
+    },
+    {
+      "caseId": "CD-029",
+      "matrixRowIds": [
+        "R-028",
+        "R-032"
+      ],
+      "status": "PASS_SPECIFIED_DOCUMENT_CERTIFICATE_INVOICE_OWNERSHIP",
+      "formalAcceptance": false,
+      "proof": "Original binding consent asset tracker and finance state unchanged on foreign HTTP read and mutation; broader student resources not accepted by inference.",
+      "earlierSourceSha": null,
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "latestEvidenceIndex": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json"
+    },
+    {
+      "caseId": "CD-038",
+      "matrixRowIds": [
+        "R-050",
+        "R-064"
+      ],
+      "status": "PARTIAL_REAL_SOURCE_WORKFLOW_NOT_BUILT_ADMIN_UI",
+      "formalAcceptance": false,
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "proof": "Actual persisted JWT capabilities author review publish withdrawal API and public browser history; built Admin UI MFA academic content link not tested.",
+      "earlierSourceSha": "fa28090044e6d6a84ef7db25085a098a3e955cfe",
+      "latestEvidenceIndex": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json"
+    },
+    {
+      "caseId": "CD-039",
+      "matrixRowIds": [
+        "R-059",
+        "R-060",
+        "R-061",
+        "R-062"
+      ],
+      "status": "PARTIAL_AVAILABLE_ZERO_UNAVAILABLE_RECOVERY",
+      "formalAcceptance": false,
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "proof": "Real table lock yields UNAVAILABLE total null, successful empty owner yields AVAILABLE total zero; INCOMPLETE UNSUPPORTED other owners remain open.",
+      "earlierSourceSha": "130fbe0a5c6e42030922cd1669bcc816d03b93ba",
+      "latestEvidenceIndex": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json"
+    },
+    {
+      "caseId": "CD-040",
+      "matrixRowIds": [
+        "R-014",
+        "R-015",
+        "R-016"
+      ],
+      "status": "PASS_SCOPED_WITHDRAWAL_DURING_PAGING",
+      "formalAcceptance": false,
+      "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "proof": "University scholarship course withdrawal reflected in totals and current owner reads; all other parent/reference combinations remain open.",
+      "earlierSourceSha": "130fbe0a5c6e42030922cd1669bcc816d03b93ba",
+      "latestEvidenceIndex": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json"
+    }
+  ],
+  "allFiveNewScenariosExecutedTogetherAtSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+  "historicalEvidenceRebound": false,
+  "ciRun": "39430049248",
+  "checks": {
+    "passed": 23,
+    "failed": 0,
+    "pending": 0
+  },
+  "linuxEvidenceIndex": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json"
 }

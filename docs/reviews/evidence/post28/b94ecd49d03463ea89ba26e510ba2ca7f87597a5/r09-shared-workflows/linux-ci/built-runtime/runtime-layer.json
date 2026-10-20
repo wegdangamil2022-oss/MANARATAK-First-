@@ -1,0 +1,63 @@
+{
+  "kind": "POST28_DIAGNOSTIC_RUNTIME_LAYER",
+  "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+  "node": "v22.16.0",
+  "nodeMajor": 22,
+  "os": "linux",
+  "architecture": "x64",
+  "engineFile": "libquery_engine-debian-openssl-3.0.x.so.node",
+  "engineSha256": "35860a5c0fb2f79e7b38c40747c4d212318d97e1910ca528b133c802716de0b8",
+  "generatedSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+  "lockSha256": "ffa6cc00dbb15ef8e637246c690cfaa73f287aa1e8a6c7e9e94f8eed5daa3735",
+  "sourceSchemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+  "formattedSourceSchemaSha256": "cd9fdff87ed21b2680f6dda774376a0dd5e2acb52e472519877c4fc88b0f5969",
+  "formattedSchemaMatches": true,
+  "installExitCode": 0,
+  "installLogSha256": "d36cddaa82b743934891eb7ef3c98b1aa7e46e5f2d264bb9da47b74eb4b60279",
+  "installCommand": [
+    "npm",
+    "ci",
+    "--omit=dev",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund"
+  ],
+  "verification": {
+    "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+    "nativeLoaded": true,
+    "modules": [
+      "@node-rs/xxhash",
+      "@prisma/client",
+      "cors",
+      "express",
+      "fontkit",
+      "helmet",
+      "pdfkit",
+      "svg-to-pdfkit",
+      "uuid"
+    ],
+    "stageAccepted": false
+  },
+  "runtimeArchiveSha256": "858bd9aa5b033b4f7ec9f2fc1e4c62bee2ff7ff661f695f44a7aab6f02e99f95",
+  "runtimeArchiveBytes": 443985920,
+  "freshUnpackVerified": {
+    "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+    "nativeLoaded": true,
+    "modules": [
+      "@node-rs/xxhash",
+      "@prisma/client",
+      "cors",
+      "express",
+      "fontkit",
+      "helmet",
+      "pdfkit",
+      "svg-to-pdfkit",
+      "uuid"
+    ],
+    "stageAccepted": false
+  },
+  "generatedClientCopiedFromCleanBuild": true,
+  "checkoutPresent": false,
+  "stageAccepted": false,
+  "promotionAuthorized": false
+}
