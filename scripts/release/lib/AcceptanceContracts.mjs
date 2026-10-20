@@ -164,8 +164,8 @@ export function acceptanceDetails(evidence, sha) {
   if (
     backup?.structuralRestorability !== true ||
     backup?.sloPassed !== true ||
-    !(backup?.rtoMinutes >= 0 && backup.rtoMinutes <= 60) ||
-    !(backup?.rpoMinutes >= 0 && backup.rpoMinutes <= 5) ||
+    !(Number.isFinite(backup?.rtoMinutes) && backup.rtoMinutes >= 0 && backup.rtoMinutes <= 60) ||
+    !(Number.isFinite(backup?.rpoMinutes) && backup.rpoMinutes >= 0 && backup.rpoMinutes <= 5) ||
     backup?.assetParity !== true
   )
     failures.push('RESTORE_OBJECTIVES_UNVERIFIED');
