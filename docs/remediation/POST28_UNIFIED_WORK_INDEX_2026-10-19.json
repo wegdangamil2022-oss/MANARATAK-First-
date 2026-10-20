@@ -190,6 +190,17 @@
       },
       "browserFollowupEvidence": "docs/reviews/evidence/post28/c8afe5f253d132f671ecd035a0330de7794b6ee8/r10-operational/evidence-index.json",
       "majorsWarningResolved": true
+    },
+    {
+      "id": "R11",
+      "state": "PREPARATION_ONLY_LOAD_NOT_EXECUTED",
+      "latestReport": "docs/remediation/POST28_R11_PREPARATION_2026-10-20.md",
+      "configuration": "config/testing/r11-load-preparation.json",
+      "baselineSourceSha": "79055e7634ad33fe221872d58770d48c2ed09e58",
+      "acceptanceEvidenceValidationHardened": true,
+      "formalAcceptance": false,
+      "productionAcceptance": false,
+      "loadExecuted": false
     }
   ],
   "validation": {

@@ -454,6 +454,32 @@ test('FSA023 stale evidence and duplicate gate not PASS', () => {
 });
 test('FSA004…021 mere PASS booleans lack required execution details', () =>
   assert.ok(acceptanceDetails(proof(), sha).length > 0));
+
+test('R11 rejects absent or nonnumeric measurement duration and empty dataset identity', () => {
+  const row = {
+    id: 'public-search', p95Ms: 10, p99Ms: 20, maximumP99Ms: 100,
+    durationSeconds: 60, fixture: 'synthetic-catalog-v1', errorBudgetPassed: true,
+    poolSaturationSafe: true, rateLimitSafe: true, queueLagSafe: true,
+  };
+  const failures = (categories) => acceptanceDetails({ gates: [{ id: 'load-slo', categories }] }, sha);
+  assert.equal(failures([row]).includes('public-search:SLO_UNVERIFIED'), false);
+  for (const durationSeconds of [undefined, null, NaN, Infinity, '60', 59]) {
+    assert.equal(failures([{ ...row, durationSeconds }]).includes('public-search:SLO_UNVERIFIED'), true);
+  }
+  for (const fixture of [' ', true, {}]) {
+    assert.equal(failures([{ ...row, fixture }]).includes('public-search:SLO_UNVERIFIED'), true);
+  }
+});
+
+test('R11 conflicting duplicate category cannot hide a failing load observation', () => {
+  const row = {
+    id: 'public-search', p95Ms: 10, p99Ms: 20, maximumP99Ms: 100,
+    durationSeconds: 60, fixture: 'synthetic-catalog-v1', errorBudgetPassed: true,
+    poolSaturationSafe: true, rateLimitSafe: true, queueLagSafe: true,
+  };
+  const failures = acceptanceDetails({ gates: [{ id: 'load-slo', categories: [row, { ...row, p99Ms: 1000 }] }] }, sha);
+  assert.ok(failures.includes('public-search:SLO_UNVERIFIED'));
+});
 test('FSA006 26-domain fixture matrix cannot use page-load-only evidence', () => {
   const rows = DOMAINS.map((owner) => ({
     owner,

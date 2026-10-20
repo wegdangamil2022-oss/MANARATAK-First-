@@ -208,9 +208,12 @@ export function acceptanceDetails(evidence, sha) {
     'finance-stub',
     'worker-queues',
   ]) {
-    const row = load?.categories?.find((row) => row.id === category);
+    const rows = Array.isArray(load?.categories)
+      ? load.categories.filter((row) => row?.id === category)
+      : [];
+    const row = rows[0];
     if (
-      !row ||
+      rows.length !== 1 ||
       !Number.isFinite(row.p95Ms) ||
       !Number.isFinite(row.p99Ms) ||
       !Number.isFinite(row.maximumP99Ms) ||
@@ -218,8 +221,10 @@ export function acceptanceDetails(evidence, sha) {
       row.p99Ms < row.p95Ms ||
       row.maximumP99Ms <= 0 ||
       row.p99Ms > row.maximumP99Ms ||
+      !Number.isFinite(row.durationSeconds) ||
       row.durationSeconds < 60 ||
-      !row.fixture ||
+      typeof row.fixture !== 'string' ||
+      !row.fixture.trim() ||
       row.errorBudgetPassed !== true ||
       row.poolSaturationSafe !== true ||
       row.rateLimitSafe !== true ||
