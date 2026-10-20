@@ -874,6 +874,8 @@ function SummaryView({
   identity: { principalId: string; displayName: string; primaryEmail?: string; roles?: string[]; roleNames?: string[] } | null;
   applicationTrackers: StudentApplicationTrackerDto[];
 }) {
+  const [showAllActivities, setShowAllActivities] = useState(false);
+
   const activeMilestones = useMemo(
     () => applicationTrackers.filter((item) => item.status === 'ACTIVE'),
     [applicationTrackers],
@@ -1098,7 +1100,7 @@ function SummaryView({
             <button
               type="button"
               onClick={() => setTab('LEARNING')}
-              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
+              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-5 text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
             >
               <span>جميع الدورات</span>
               <ChevronLeft className="h-3.5 w-3.5" />
@@ -1136,103 +1138,100 @@ function SummaryView({
         </section>
       )}
 
-      {/* 5. Active Application Trackers (If any exist) */}
+      {/* 5. Active application trackers: last two updates, with complete details in Opportunities. */}
       {activeMilestones.length > 0 && (
-        <div className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                <Route className="w-4 h-4 text-[#E5B54F]" />
-              </div>
-              <div>
-                <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
-                <p className="text-[10px] text-[var(--mn-text-muted)]">متابعة مراحل التقديم والمواعيد</p>
-              </div>
+        <section aria-label="ملفات التقديم النشطة" className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]">
+          <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+                <Route className="h-4 w-4 text-[#E5B54F]" />
+              </span>
+              <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
             </div>
-            <button
-              type="button"
-              onClick={() => setTab('OPPORTUNITIES')}
-              className="text-[11px] font-semibold text-[#142B5F] dark:text-[#E5B54F] hover:underline flex items-center gap-1 cursor-pointer"
-            >
+            <button type="button" onClick={() => setTab('OPPORTUNITIES')}
+              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium leading-5 text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]">
               <span>عرض الكل</span>
-              <ChevronLeft className="w-3 h-3" />
+              <ChevronLeft className="h-3.5 w-3.5" />
             </button>
           </div>
 
           <div className="space-y-2">
-            {activeMilestones.slice(0, 2).map((item) => {
-              const completed = item.checklist.filter((c) => c.completed).length;
-              const progress = item.checklist.length ? Math.round((completed / item.checklist.length) * 100) : 0;
-              return (
-                <div
-                  key={item.id}
-                  className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] bg-[var(--mn-surface)] px-2 py-0.5 rounded-md border border-[var(--mn-border)] text-[#142B5F] dark:text-[#E5B54F] font-bold">
-                        {item.stage} (حسب تحديثك)
+            {[...activeMilestones]
+              .sort((first, second) => (Date.parse(second.updatedAt) || 0) - (Date.parse(first.updatedAt) || 0))
+              .slice(0, 2)
+              .map((item) => {
+                const completed = item.checklist.filter((task) => task.completed).length;
+                const progress = item.checklist.length ? Math.round((completed / item.checklist.length) * 100) : 0;
+                return (
+                  <div key={item.id} className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5">
+                    <div className="flex min-w-0 items-start justify-between gap-2">
+                      <h3 className="min-w-0 flex-1 text-xs sm:text-sm font-bold leading-5 text-[var(--mn-heading)] break-words">
+                        {trackerDisplayName(item)}
+                      </h3>
+                      <span className="shrink-0 text-[11px] font-bold tabular-nums text-[#0E7C86] dark:text-[#72DED1]" dir="ltr" title="نسبة إنجاز مهام الملف">
+                        {progress}%
                       </span>
-                      {item.deadlineAt && (
-                        <span className="text-[10px] text-[var(--mn-text-muted)] flex items-center gap-1">
-                          <CalendarClock className="w-3 h-3" />
-                          <span>الموعد: {formatDate(item.deadlineAt)}</span>
-                        </span>
-                      )}
                     </div>
-                    <h3 className="text-xs sm:text-sm font-bold text-[var(--mn-heading)] mt-1 truncate">
-                      {trackerDisplayName(item)}
-                    </h3>
+                    <p className="mt-0.5 truncate text-[11px] leading-5 text-[var(--mn-text-muted)]" title={item.stage}>
+                      {item.stage}
+                    </p>
+                    <div className="mt-1.5 flex min-w-0 items-center justify-between gap-2">
+                      {item.deadlineAt ? (
+                        <span className="inline-flex min-w-0 items-center gap-1 text-[10px] text-[var(--mn-text-muted)]">
+                          <CalendarClock className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{formatDate(item.deadlineAt)}</span>
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-[var(--mn-text-muted)]">لا يوجد موعد محدد</span>
+                      )}
+                      <button type="button" onClick={() => setTab('OPPORTUNITIES')}
+                        className="inline-flex shrink-0 items-center gap-1 text-[11px] leading-5 font-medium text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]">
+                        <span>متابعة الملف</span>
+                        <ArrowLeft className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                    <span className="text-xs font-bold text-[var(--mn-text-muted)]">{progress}% مكتمل</span>
-                    <button
-                      type="button"
-                      onClick={() => setTab('OPPORTUNITIES')}
-                      className="rounded-lg bg-[var(--mn-surface)] border border-[var(--mn-border)] px-2.5 py-1 text-xs font-semibold text-[var(--mn-heading)] hover:border-[#D6A43B] transition-colors cursor-pointer"
-                    >
-                      متابعة المهام
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* 6. Recent Activity Timeline (If items exist) */}
+      {/* 6. Recent activities: compact timeline, expanded history only on demand. */}
       {dashboard.timeline.length > 0 && (
-        <div className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-                <HistoryIcon className="w-4 h-4 text-[#E5B54F]" />
-              </div>
-              <div>
-                <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">آخر الأنشطة والخطوات</h2>
-                <p className="text-[10px] text-[var(--mn-text-muted)]">سجل زمني لتقدمك وتحديثاتك</p>
-              </div>
+        <section aria-label="آخر الأنشطة والخطوات" className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]">
+          <div className="mb-3 flex min-w-0 items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+                <HistoryIcon className="h-4 w-4 text-[#E5B54F]" />
+              </span>
+              <h2 className="text-[14.5px] sm:text-base font-bold text-[var(--mn-heading)]">آخر الأنشطة والخطوات</h2>
             </div>
+            {dashboard.timeline.length > 3 && (
+              <button type="button" onClick={() => setShowAllActivities((previous) => !previous)}
+                aria-expanded={showAllActivities} aria-controls="student-summary-activity-timeline"
+                className="inline-flex shrink-0 items-center gap-1 text-[11px] leading-5 font-medium text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]">
+                <span>{showAllActivities ? 'إخفاء' : 'السجل'}</span>
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
-          <div className="space-y-2">
-            {dashboard.timeline.slice(0, 3).map((item) => (
-              <div
-                key={item.id}
-                className="rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 text-right"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-xs font-bold text-[var(--mn-heading)] line-clamp-1">{item.title}</h3>
-                  <time className="text-[10px] text-[var(--mn-text-muted)] shrink-0 font-mono">{formatDate(item.occurredAt)}</time>
-                </div>
-                {item.description && (
-                  <p className="text-[10.5px] text-[var(--mn-text-muted)] mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+          <ol id="student-summary-activity-timeline" className="mr-2.5 space-y-3 border-r-2 border-[#0E7C86]/35 pr-4 dark:border-[#5BC6C0]/45">
+            {[...dashboard.timeline]
+              .sort((first, second) => (Date.parse(second.occurredAt) || 0) - (Date.parse(first.occurredAt) || 0))
+              .slice(0, showAllActivities ? undefined : 3)
+              .map((item) => (
+                <li key={item.id} className="relative min-w-0">
+                  <span aria-hidden="true" className="absolute -right-[22px] top-1 h-2.5 w-2.5 rounded-full border-2 border-[var(--mn-surface)] bg-[#0E7C86] dark:bg-[#5BC6C0]" />
+                  <h3 className="text-xs sm:text-sm font-medium leading-5 text-[var(--mn-heading)] break-words">{item.title}</h3>
+                  <time className="mt-0.5 block text-[10px] leading-4 text-[var(--mn-text-muted)]">
+                    {formatDate(item.occurredAt)}
+                  </time>
+                </li>
+              ))}
+          </ol>
+        </section>
       )}
 
       {/* 7. Explore Platform Directory (Scholarships, Courses, Majors, Universities) - only for active students to avoid duplicate CTA for new students */}
