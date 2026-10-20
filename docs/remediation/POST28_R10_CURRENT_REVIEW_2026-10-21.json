@@ -18,7 +18,7 @@
   "formalR10Acceptance":false,
   "providerState":"DESIGN_SELECTED_NOT_PROVISIONED",
   "providerControlsVerified":false,
-  "ci":{"runId":39513312392,"lastObservedStatus":"in_progress","result":null,"passAssumed":false},
+  "ci":{"runId":39513312392,"lastObservedStatus":"completed","result":"success","passedJobs":6,"passAssumed":false},
   "evidence":"docs/reviews/evidence/post28/d83ee3e9513af2fd61dc2e7681cb99e3c6dff466/r10-current-offline-review/evidence-index.json",
   "next":"CURRENT_FIX_CI_THEN_R11_REVIEW"
 }

@@ -1,5 +1,7 @@
 # R10 — إصلاح بوابة الأهداف والتحقق من النسخة المحفوظة
 
+تحديث النتيجة: اكتمل CI 39513312392 على `d83ee3e` ونجحت مهامه الست. [قراءة النتيجة المحفوظة في مراجعة R11](../reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/r10-fix-ci-completed.json). وصف «جارٍ» أدناه يمثل وقت القراءة السابقة فقط.
+
 الحالة: **النطاق التشخيصي المحلي مكتمل مع استثناءات؛ قبول المزود والإنتاج ما زال معلقًا.** إصلاح المصدر `d83ee3e9513af2fd61dc2e7681cb99e3c6dff466` على الفرع `feat/post28-r07-artifact-preparation`. [أدلة المراجعة الحالية](../reviews/evidence/post28/d83ee3e9513af2fd61dc2e7681cb99e3c6dff466/r10-current-offline-review/evidence-index.json).
 
 ## إصلاح فعلي

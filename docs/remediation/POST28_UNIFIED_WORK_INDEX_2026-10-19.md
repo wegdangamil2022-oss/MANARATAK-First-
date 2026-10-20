@@ -110,7 +110,7 @@
 
 متابعة لاحقة: أُصلح زر سحب المنشور مع وجود مسودة بديلة، وأُثبت توليد ملفات الشهادة الثلاثة وربطها وإعادة التنفيذ دون أثر إضافي. [تقرير التوليد والسحب وحدود التسليم](POST28_R09_RENDER_WITHDRAWAL_2026-10-20.md). المصدر الجديد `d4ffe62`؛ لا تنطبق عليه تلقائيًا نتيجة CI السابقة.
 
-R10 — تحديث 2026-10-21: أُصلحت بوابة أهداف التعافي لتمنع القيم النصية والسالبة وnull، وتحققت قراءة النسخة المحفوظة كاملةً دون قاعدة، ومطابقة 69 ملف دليل و6 أصول. القياسات التشغيلية السابقة مثبتة بمصدرها؛ ضوابط المزود غير مجهزة وCI الإصلاح الجديد جارٍ. [المراجعة الحالية والاستثناءات](POST28_R10_CURRENT_REVIEW_2026-10-21.md). التسليم البنيوي الأقدم محفوظ في [تقريره](POST28_R10_LOCAL_RESTORE_2026-10-20.md).
+R10 — تحديث 2026-10-21: أُصلحت بوابة أهداف التعافي لتمنع القيم النصية والسالبة وnull، وتحققت قراءة النسخة المحفوظة كاملةً دون قاعدة، ومطابقة 69 ملف دليل و6 أصول. نجح CI الإصلاح d83ee3e في المهام الست. القياسات التشغيلية السابقة مثبتة بمصدرها؛ ضوابط المزود غير مجهزة. [المراجعة الحالية والاستثناءات](POST28_R10_CURRENT_REVIEW_2026-10-21.md). التسليم البنيوي الأقدم محفوظ في [تقريره](POST28_R10_LOCAL_RESTORE_2026-10-20.md).
 
 R10 operational continuation: actual API/Web/Admin recovery on restored DB verified at 978a0db; local RTO17s and two-probe RPO3.443s with one actual lost post-backup event. AWS design selected, not provisioned; production/provider gates remain open. See POST28_R10_OPERATIONAL_RECOVERY_2026-10-20.md.
 
@@ -131,6 +131,8 @@ R11 wire contract correction at 0402c97f6b5e93e7810a1053c6a43f0d410961f5: match 
 R11 Linux push 39475394144 at 4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b: complete runtime and contention diagnostic verified from digest-matched artifact; 10 winners, 10 expected version conflicts, durable replay, zero unexpected errors and confirmed cleanup. Full SLO acceptance remains open.
 
 R11 practical diagnostic scope closed with documented exceptions at validated candidate 4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b. Push 39475394144 succeeded; all 23 observed check runs succeeded; Linux contention and cleanup verified from digest-matched artifacts. Formal SLO and production acceptance remain OPEN. See POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.md and .json.
+
+R11 — مراجعة 2026-10-21: أصلح 2934821 بدء عملية بعد استنفاد المدة أثناء انتظار مراقب الموارد، ومنع استبدال زمن الاستجابة المقاس بقيمة السيناريو. نجحت الحالات الخمس المتأثرة، وطابقت 30 ملف دليل سابق دون إعادة الحمل. CI الإصلاح 39514942840 جارٍ؛ E1–E5 والقبول الشامل مفتوحان. [المراجعة والأدلة الحالية](POST28_R11_CURRENT_REVIEW_2026-10-21.md).
 
 R12 started: rollback evidence gate now requires previous API compatibility, identified prior source and API/worker digests, a real incident-owner string and a bounded approved canary record. Previous API/worker source is unchanged between c8afe5f and 4b8e22f; previous Admin excluded. Current artifact transfer failed through two channels; no runtime or database action taken. See POST28_R12_PREPARATION_2026-10-20.md.
 

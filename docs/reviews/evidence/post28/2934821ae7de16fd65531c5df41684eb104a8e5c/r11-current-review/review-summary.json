@@ -1,0 +1,70 @@
+{
+  "kind": "R11_CURRENT_DIAGNOSTIC_REVIEW",
+  "sourceSha": "2934821ae7de16fd65531c5df41684eb104a8e5c",
+  "reviewedAt": "2026-10-20T23:25:02.913Z",
+  "fixes": [
+    "Recheck deadline after awaiting resource observer before starting mutation",
+    "Measured latency takes precedence over scenario-returned properties"
+  ],
+  "targetedTests": {
+    "newBeforeFix": {
+      "executed": 2,
+      "passed": 0,
+      "failed": 2
+    },
+    "afterFix": {
+      "executed": 5,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    "existingTestsRepeated": 3,
+    "repeatReason": "Directly affected shared scenario runner",
+    "targetedEslintPassed": true
+  },
+  "retainedEvidence": [
+    {
+      "index": "docs/reviews/evidence/post28/4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b/r11-linux/evidence-index.json",
+      "files": 12,
+      "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json",
+      "files": 10,
+      "sourceSha": "6d440363adb1477101402f00371e2319c3aae84f",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r07-current-closure/evidence-index.json",
+      "files": 8,
+      "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "gitRef": "HEAD",
+      "readOnly": true
+    }
+  ],
+  "historicalContention": {
+    "sourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+    "pairs": 10,
+    "expectedConflicts": 10,
+    "unexpectedErrors": 0,
+    "poolWaitMs": null,
+    "sloAcceptance": false
+  },
+  "historicalMeasurementsRebound": false,
+  "historicalMeasurementRerun": false,
+  "representativeLaunchDatasetPrepared": false,
+  "fullAdminCmsMfaJourneyCompleted": false,
+  "formalR11Acceptance": false,
+  "productionAcceptance": false,
+  "existingDatabasesTouched": false,
+  "remainingExceptions": [
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5"
+  ]
+}
