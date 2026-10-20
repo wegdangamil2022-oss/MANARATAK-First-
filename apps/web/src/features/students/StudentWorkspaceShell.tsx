@@ -75,7 +75,7 @@ export function StudentWorkspaceShell({
       <section
         aria-label="بطاقة هوية الطالب"
         className="mn-inverse relative isolate overflow-hidden rounded-[26px] border border-[#46C1BB]/40 text-white shadow-md mx-auto w-full mt-4"
-        style={{ backgroundImage: 'radial-gradient(circle at 15% 13%, rgba(222,173,66,.19), transparent 35%), radial-gradient(circle at 89% 86%, rgba(230,184,89,.11), transparent 39%), linear-gradient(105deg, #142B5F 0%, #174C70 45%, #0E7C86 100%)' }}
+        style={{ backgroundImage: 'radial-gradient(circle at 15% 13%, rgba(222,173,66,.14), transparent 32%), radial-gradient(circle at 89% 86%, rgba(230,184,89,.08), transparent 37%), linear-gradient(105deg, #142B5F 0%, #142B5F 54%, #184569 73%, #0E7C86 100%)' }}
       >
         {/* Purely decorative gold starlight, behind the content and reduced-motion safe. */}
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden pointer-events-none select-none">
@@ -118,17 +118,17 @@ export function StudentWorkspaceShell({
               onClick={() => onTabChange('PROFILE')}
               title="ملفي وإعداداتي"
               aria-label="فتح ملفي وإعداداتي"
-              className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm text-white flex items-center justify-center hover:bg-white/20 cursor-pointer focus-visible:outline focus-visible:outline-offset-2"
+              className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#24466B] border border-[#75C5C4]/70 text-white flex items-center justify-center shadow-sm hover:bg-[#2B5676] cursor-pointer focus-visible:outline focus-visible:outline-offset-2"
             >
               <Settings2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
 
-          <div className="my-3.5 sm:my-4 h-px bg-white/25" />
+          <div className="my-3.5 sm:my-4 h-px bg-[#D9ECF0]/40" />
 
           {/* Compact residence and actual IANA-timezone clock: no progress/courses here. */}
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <div className="min-w-0 rounded-xl border border-white/25 bg-white/10 px-2.5 py-2.5 sm:px-3 sm:py-3">
+            <div className="min-w-0 rounded-xl border border-[#76ADBE]/75 bg-[#203F6A] px-2.5 py-2.5 sm:px-3 sm:py-3 shadow-sm">
               <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#C9F2EB]">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                 <span>دولة الطالب</span>
@@ -137,7 +137,7 @@ export function StudentWorkspaceShell({
                 {countryFlag ? `${countryFlag} ` : ''}{countryName || 'غير محددة'}
               </p>
             </div>
-            <div className="min-w-0 rounded-xl border border-white/25 bg-white/10 px-2.5 py-2.5 sm:px-3 sm:py-3">
+            <div className="min-w-0 rounded-xl border border-[#65ADB9]/75 bg-[#19516E] px-2.5 py-2.5 sm:px-3 sm:py-3 shadow-sm">
               <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#C9F2EB]">
                 <Clock3 className="h-3.5 w-3.5 shrink-0" />
                 <span>التوقيت المحلي</span>
@@ -149,7 +149,7 @@ export function StudentWorkspaceShell({
           </div>
 
           {/* Email is intentionally LAST, below both compact cards. */}
-          <div className="mt-3.5 pt-2.5 border-t border-[#E5BD68]/35 flex items-center justify-center gap-2 min-w-0">
+          <div className="mt-3.5 pt-2.5 border-t border-[#E5BD68]/55 flex items-center justify-center gap-2 min-w-0">
             <Mail className="h-3.5 w-3.5 shrink-0 text-[#8CE7DE]" />
             <span dir="ltr" className="min-w-0 truncate text-[10.5px] sm:text-[11.5px] font-medium text-white/90 font-['Cairo',sans-serif]">
               {email || 'لم يُضف بريد إلكتروني'}
