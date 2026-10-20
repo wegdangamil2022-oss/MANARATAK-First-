@@ -80,7 +80,7 @@ export function StudentWorkspaceShell({
                 </div>
                 {email && (
                   <p className="text-[10.5px] sm:text-[11.5px] text-white/70 font-mono mt-0.5 truncate">
-                    {identity.primaryEmail}
+                    {email}
                   </p>
                 )}
               </div>
