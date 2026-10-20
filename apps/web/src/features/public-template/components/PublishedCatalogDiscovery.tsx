@@ -33,7 +33,7 @@ export function PublishedCatalogDiscovery({ kind, onBack, countryId = '', onScho
       return { ...result, data: result.data.map(dto => { const item = mapPublicUniversityDto(dto); return { id: item.id, title: item.name, description: item.country, select: () => onUniversity?.(item) }; }) };
     }
     if (kind === 'courses') {
-      const result = await ApiClient.getCourses({ category: query || undefined, cursor, limit: 20, originType: track === 'native' ? 'NATIVE_MANARATAK_COURSE' : track === 'imported' ? 'EXTERNAL_LINKED_COURSE' : undefined, accessType: track === 'paid' ? 'PAID' : track ? 'FREE' : funding || undefined }, locale, signal);
+      const result = await ApiClient.getCourses({ category: query || undefined, cursor, limit: 20, originType: track === 'native' ? 'NATIVE_MANARATAK_COURSE' : track === 'imported' ? 'EXTERNAL_LINKED_COURSE' : undefined, accessType: track === 'paid' ? 'PAID' : funding || undefined }, locale, signal);
       return { ...result, data: result.data.map(dto => { const item = mapCourse(dto); return { id: item.course.id, title: item.course.title, description: item.course.description ?? '', select: () => onCourse?.(item) }; }) };
     }
     const number = Number(cursor ?? 1);
