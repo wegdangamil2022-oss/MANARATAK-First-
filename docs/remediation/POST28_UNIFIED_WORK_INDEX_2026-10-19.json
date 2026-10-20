@@ -194,7 +194,7 @@
     {
       "id": "R11",
       "state": "SEVEN_LOCAL_DIAGNOSTIC_CATEGORIES_RECORDED_FULL_SLO_OPEN",
-      "latestReport": "docs/remediation/POST28_R11_LINUX_ADMIN_FOLLOWUP_2026-10-20.md",
+      "latestReport": "docs/remediation/POST28_R11_MFA_ENROLLMENT_2026-10-20.md",
       "configuration": "config/testing/r11-load-preparation.json",
       "baselineSourceSha": "79055e7634ad33fe221872d58770d48c2ed09e58",
       "acceptanceEvidenceValidationHardened": true,
@@ -207,13 +207,14 @@
       "scenarioSourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
       "adminMfaBuiltLoginDiagnostic": true,
       "adminLoginBootstrapRaceFixedAt": "50e109e3ece76c6b5acb832be9fcd747450821cb",
-      "adminMfaEnrollmentUiTested": false,
+      "adminMfaEnrollmentUiTested": true,
       "fullCmsBuiltLifecycleTested": false,
       "linuxContention": {
         "implementedAt": "4aed744292ce9bd1a1698f006aa18c894bcac160",
         "sourceGuardFixedAt": "33b6daa41ed162e35461961aa39d92119c6d640c",
-        "execution": "FIRST_ATTEMPT_ABORTED_LOGIN_429_ORDER_FIX_PENDING_CI"
-      }
+        "execution": "LOGIN_429_RESOLVED_FIRST_PAIR_ASSERTION_UNDER_DIAGNOSIS"
+      },
+      "mfaEnrollmentEvidence": "docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json"
     }
   ],
   "validation": {

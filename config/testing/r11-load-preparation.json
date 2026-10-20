@@ -122,6 +122,7 @@
     "scenarioCategories": "docs/reviews/evidence/post28/399f816506677c3cdf14e79103f4c854d6416b2d/r11-scenario-diagnostic/evidence-index.json",
     "adminMfa": "docs/reviews/evidence/post28/50e109e3ece76c6b5acb832be9fcd747450821cb/r11-admin-mfa/evidence-index.json",
     "representativeLaunchDataset": false,
-    "sloAcceptance": false
+    "sloAcceptance": false,
+    "adminMfaEnrollment": "docs/reviews/evidence/post28/6d440363adb1477101402f00371e2319c3aae84f/r11-mfa-enrollment/evidence-index.json"
   }
 }

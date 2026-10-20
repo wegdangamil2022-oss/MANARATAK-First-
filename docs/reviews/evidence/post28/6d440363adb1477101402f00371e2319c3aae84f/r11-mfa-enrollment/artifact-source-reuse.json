@@ -1,0 +1,44 @@
+{
+  "workloadSourceSha": "6d440363adb1477101402f00371e2319c3aae84f",
+  "verifiedAt": "2026-10-20T18:09:44.512Z",
+  "contracts": [
+    {
+      "unit": "api",
+      "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "paths": [
+        "apps/api",
+        "packages",
+        "vendor",
+        "package.json",
+        "package-lock.json"
+      ],
+      "changedFiles": []
+    },
+    {
+      "unit": "web",
+      "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "paths": [
+        "apps/web",
+        "packages",
+        "vendor",
+        "package.json",
+        "package-lock.json"
+      ],
+      "changedFiles": []
+    },
+    {
+      "unit": "admin",
+      "sourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+      "paths": [
+        "apps/admin",
+        "packages",
+        "vendor",
+        "package.json",
+        "package-lock.json"
+      ],
+      "changedFiles": []
+    }
+  ],
+  "unitsRelabelled": false,
+  "unifiedCandidate": false
+}
