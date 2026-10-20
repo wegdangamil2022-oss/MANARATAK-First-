@@ -57,6 +57,8 @@ export function publicUrlForState(state: NavigationState): string {
       ? currentAuthPath : '/login';
   }
   else if (state.activeTab === 'account') path = '/student';
+  else if (state.activeTab === 'favorites') path = '/favorites';
+  else if (state.activeTab === 'tracker') path = '/tracker';
   else if (state.activeTab === 'ai-tools') path = '/tools';
   else if (state.selectedScholarship) path = `/scholarships/${entityKey(state.selectedScholarship)}`;
   else if (state.selectedUniversity) path = `/universities/${entityKey(state.selectedUniversity)}`;
