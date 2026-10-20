@@ -3,6 +3,10 @@ import {databaseSuite} from '../../config/testing/post28-database-suites.mjs';
 
 const fail = code => {throw new Error(code);};
 const relative = (root, file) => path.relative(root, path.resolve(file)).replaceAll('\\','/');
+export function requireCurrentSuiteSelection(name,caseExact){
+ const historical=databaseSuite(name).historicalPre111Cases;
+ if(historical?.length&&(caseExact===undefined||historical.includes(caseExact)))fail('POST28_HISTORICAL_PRE111_CASE_NOT_CURRENT_ACCEPTANCE');
+}
 export function verifyDiscovery(name, rows, root = process.cwd()) {
   const suite = databaseSuite(name);
   if (!Array.isArray(rows) || rows.length < suite.minimumCases) fail('POST28_SUITE_CASES_MISSING');

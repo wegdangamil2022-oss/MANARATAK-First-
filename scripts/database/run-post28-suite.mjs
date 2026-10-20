@@ -5,7 +5,7 @@ import {execFileSync,spawnSync} from 'node:child_process';
 import {preflightTargets} from './post28-isolation.mjs';
 import {readDatabaseIdentity} from './post28-preflight.mjs';
 import {databaseSuite} from '../../config/testing/post28-database-suites.mjs';
-import {verifyDiscovery,verifySuiteResults,selectedDiscovery} from './post28-suite-policy.mjs';
+import {verifyDiscovery,verifySuiteResults,selectedDiscovery,requireCurrentSuiteSelection} from './post28-suite-policy.mjs';
 import {requireDatabaseMutationGate} from '../lib/database-mutation-gate.mjs';
 import {requirePost28LocalExecution} from './post28-neon-policy.mjs';
 
@@ -15,6 +15,7 @@ try {
   const name=process.argv[2];databaseSuite(name);
   if (process.argv.length !== 3 && !(process.argv.length === 5 && process.argv[3] === '--case-exact')) throw new Error('POST28_CASE_SELECTION_INVALID');
   const caseExact = process.argv[4];
+  requireCurrentSuiteSelection(name,caseExact);
   const authorization=requireScopedR06Authorization();
   if(process.env.POST28_TARGET_LABEL!=='DB-T') throw new Error('POST28_TRANSACTION_TEST_TARGET_REQUIRED');
   requireDatabaseMutationGate('post28 disposable transaction suite',{allowedPurposes:['maintenance']});

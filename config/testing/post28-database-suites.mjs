@@ -1,4 +1,5 @@
 export const DATABASE_SUITES = Object.freeze({
+  'admission-null-identity': {files:['tests/database/post28-admission-null-identity.database.spec.mjs'],minimumCases:5},
   'r09-integrated-workflows': {files:['tests/database/post28-r09-integrated-workflows.database.spec.mjs'],minimumCases:5},
   'r08-provider-outcomes': {files:['tests/database/post28-r08-provider-outcomes.database.spec.mjs'],minimumCases:4},
   'r08-session-processes': {files:['tests/database/post28-r08-session-processes.database.spec.mjs'],minimumCases:5},
@@ -17,7 +18,10 @@ export const DATABASE_SUITES = Object.freeze({
   'import-worker-crash': {files: ['tests/database/post28-import-worker-crash.database.spec.mjs'],minimumCases:5},
   'scholarship-read-concurrency': {files: ['tests/database/post28-scholarship-read-concurrency.database.spec.mjs'],minimumCases:7},
   'program-language': {files: ['tests/database/post28-program-language.database.spec.mjs'],minimumCases:8},
-  'admission-import-concurrency': {files: ['tests/database/post28-admission-import-concurrency.database.spec.mjs'],minimumCases:10},
+  'admission-import-concurrency': {files: ['tests/database/post28-admission-import-concurrency.database.spec.mjs'],minimumCases:10,historicalPre111Cases:[
+    'Post28 real nullable admission import concurrency > rejects an import over preexisting duplicate nullable identities without selecting an arbitrary winner',
+    'Post28 real nullable admission import concurrency > audits nullable duplicates read-only without hiding or deleting historical rows',
+  ]},
   'real-pdf-lifecycle': {files: ['tests/database/post28-real-pdf-lifecycle.database.spec.mjs'],minimumCases:6},
   'scholarship-country-semantics': {files: ['tests/database/post28-scholarship-country-semantics.database.spec.mjs'],minimumCases:11},
   'course-major-visibility': {files: ['tests/database/post28-course-major-visibility.database.spec.mjs'],minimumCases:8},
