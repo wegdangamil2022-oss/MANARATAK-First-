@@ -724,6 +724,17 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
   const notifications = (workspace.notificationMatrix || {}) as Record<string, boolean>;
   const privacy = (workspace.privacyPreferences || {}) as Record<string, boolean>;
   const accessibility = (workspace.accessibilityPreferences || {}) as Record<string, unknown>;
+  // Residence is shown ONLY when recorded in the workspace; timezone alone does not establish country.
+  const accountMetadata = (workspace.metadata || {}) as Record<string, unknown>;
+  const accountCountryName = typeof accountMetadata.countryNameAr === 'string' ? accountMetadata.countryNameAr
+    : typeof accountMetadata.countryName === 'string' ? accountMetadata.countryName : undefined;
+  const accountCountryIso2 = typeof accountMetadata.countryIso2 === 'string' ? accountMetadata.countryIso2.toUpperCase()
+    : typeof accountMetadata.residenceCountryIso2 === 'string' ? accountMetadata.residenceCountryIso2.toUpperCase() : '';
+  const accountCountryFlag = /^[A-Z]{2}$/.test(accountCountryIso2)
+    ? String.fromCodePoint(...Array.from(accountCountryIso2).map(letter => 127397 + letter.charCodeAt(0)))
+    : undefined;
+  const accountCityName = typeof accountMetadata.cityNameAr === 'string' ? accountMetadata.cityNameAr
+    : typeof accountMetadata.cityName === 'string' ? accountMetadata.cityName : undefined;
 
   return (
     <StudentWorkspaceShell
@@ -731,11 +742,12 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
       onTabChange={handleTabChange}
       displayName={workspace.displayName || identity?.displayName || 'حساب الطالب'}
       email={identity?.primaryEmail}
-      statusLabel={arabicStatus(workspace.status)}
-      stats={statistics}
+      countryName={accountCountryName}
+      countryFlag={accountCountryFlag}
+      cityName={accountCityName}
+      timezone={workspace.timezone}
+      previewMode={import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype'}
       accessibility={accessibility}
-      onLogout={() => void logout()}
-      logoutDisabled={saving}
     >
       <div className="w-full max-w-4xl mx-auto mt-5 space-y-5">
         {error && <Alert tone="error" message={error} onClose={() => setError(null)} />}
