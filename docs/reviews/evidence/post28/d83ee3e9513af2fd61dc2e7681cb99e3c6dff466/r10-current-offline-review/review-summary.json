@@ -1,0 +1,58 @@
+{
+  "kind": "R10_CURRENT_OFFLINE_REVIEW",
+  "reviewSourceSha": "d83ee3e9513af2fd61dc2e7681cb99e3c6dff466",
+  "retainedEvidence": [
+    {
+      "index": "docs/reviews/evidence/post28/978a0db95d89c5e65aceb012dd082b9111fa3327/r10-operational/evidence-index.json",
+      "files": 46,
+      "sourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/c8afe5f253d132f671ecd035a0330de7794b6ee8/r10-operational/evidence-index.json",
+      "files": 15,
+      "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+      "gitRef": "HEAD",
+      "readOnly": true
+    },
+    {
+      "index": "docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r07-current-closure/evidence-index.json",
+      "files": 8,
+      "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+      "gitRef": "HEAD",
+      "readOnly": true
+    }
+  ],
+  "recoveryPathsUnchanged": [
+    "scripts/recovery/OperationalRecoveryMetrics.mjs",
+    "scripts/recovery/DatabaseSnapshot.mjs",
+    "scripts/recovery/BackupEvidencePolicy.mjs",
+    "scripts/recovery/RecoveryConnection.mjs",
+    "scripts/recovery/RecoveryPreflight.mjs",
+    "scripts/recovery/LocalRecoveryTarget.mjs",
+    "scripts/recovery/run-whole-platform-restore-drill.mjs"
+  ],
+  "sourceVerifierFix": "Strict finite numeric RPO/RTO/PITR values; no coercion or negative recovery objectives",
+  "tests": {
+    "newCliTestsPassed": 4,
+    "invalidObjectiveValuesRejected": 12,
+    "redBeforeFix": {
+      "passed": 1,
+      "failed": 3
+    },
+    "directW6CasePassed": 1,
+    "otherW6CasesNotRun": true,
+    "actualSourceContractPassed": true,
+    "targetedEslintPassed": true
+  },
+  "providerState": "DESIGN_SELECTED_NOT_PROVISIONED",
+  "providerControlsVerified": false,
+  "resourcesCreated": false,
+  "budgetApproved": false,
+  "newServiceRecoveryDrill": false,
+  "newRpoRtoMeasurement": false,
+  "formalR10Acceptance": false,
+  "productionAcceptance": false,
+  "existingDatabasesTouched": false
+}

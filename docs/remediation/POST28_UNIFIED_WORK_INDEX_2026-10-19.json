@@ -209,6 +209,11 @@
     {
       "id": "R10",
       "state": "LOCAL_INTEGRATED_DIAGNOSTIC_RECOVERY_COMPLETE_PROVIDER_CONTROLS_NOT_PROVISIONED",
+      "latestPracticalReview": "docs/remediation/POST28_R10_CURRENT_REVIEW_2026-10-21.md",
+      "latestReviewSourceSha": "d83ee3e9513af2fd61dc2e7681cb99e3c6dff466",
+      "latestReviewEvidence": "docs/reviews/evidence/post28/d83ee3e9513af2fd61dc2e7681cb99e3c6dff466/r10-current-offline-review/evidence-index.json",
+      "numericRecoveryObjectiveGateHardened":true,
+      "latestFixCi":{"runId":39513312392,"lastObservedStatus":"in_progress","result":null},
       "latestReport": "docs/remediation/POST28_R10_OPERATIONAL_RECOVERY_2026-10-20.md",
       "latestEvidence": "docs/reviews/evidence/post28/978a0db95d89c5e65aceb012dd082b9111fa3327/r10-operational/evidence-index.json",
       "latestEvidenceSourceSha": "978a0db95d89c5e65aceb012dd082b9111fa3327",

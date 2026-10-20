@@ -1,0 +1,58 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import {execFileSync,spawnSync} from 'node:child_process';
+import {verifyEvidenceIndex} from './r07-filtered/scripts/lib/verify-evidence-index.mjs';
+import {operationalRecoveryMetrics} from './r07-filtered/scripts/recovery/OperationalRecoveryMetrics.mjs';
+import {validateDatabaseSnapshot} from './r07-filtered/scripts/recovery/DatabaseSnapshot.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),original='978a0db95d89c5e65aceb012dd082b9111fa3327';
+const current=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+const evidence=path.join(repo,'docs/reviews/evidence/post28',original,'r10-operational');
+const read=file=>JSON.parse(fs.readFileSync(file,'utf8').replace(/^\uFEFF/,''));
+const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+const retained=[];
+for(const index of [
+ `docs/reviews/evidence/post28/${original}/r10-operational/evidence-index.json`,
+ 'docs/reviews/evidence/post28/c8afe5f253d132f671ecd035a0330de7794b6ee8/r10-operational/evidence-index.json',
+ 'docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r07-current-closure/evidence-index.json',
+])retained.push({index,...verifyEvidenceIndex(path.join(repo,index),{root:repo,gitRef:'HEAD'})});
+const index=read(path.join(evidence,'evidence-index.json'));
+const dump=path.join(work,'native-pg16-gcSoOA/reviewed-source.dump');
+assert.equal(hash(fs.readFileSync(dump)),index.dumpSha256);
+const authorization=read(path.join(evidence,'restore-authorization.json'));
+assert.equal(authorization.algorithm,'Ed25519');
+assert(crypto.verify(null,Buffer.from(authorization.payload),fs.readFileSync(path.join(evidence,'restore-authority-public.pem')),Buffer.from(authorization.signature,'base64')));
+assert.equal(JSON.parse(authorization.payload).databaseBackupSha256,index.dumpSha256);
+const executable=path.join(work,'pg16-binaries/pgsql/bin/pg_restore.exe');
+const version=execFileSync(executable,['--version'],{encoding:'utf8'}).trim();assert.match(version,/PostgreSQL\) 16\./);
+const toc=execFileSync(executable,['--list',dump],{encoding:'utf8',maxBuffer:8*1024*1024});
+const tableDataEntries=toc.split(/\r?\n/).filter(line=>/^[0-9]+; \d+ \d+ TABLE DATA public /.test(line)).length;
+assert.equal(tableDataEntries,282);
+// No --dbname: emit the complete SQL stream to an ignored stdout, without connecting
+// to PostgreSQL or writing plaintext restored content to disk or evidence.
+const scan=spawnSync(executable,['--no-owner','--no-privileges','--file=-',dump],{stdio:['ignore','ignore','pipe'],timeout:30000});
+assert.ifError(scan.error);assert.equal(scan.status,0,'OFFLINE_ARCHIVE_READ_FAILED');
+assert.equal(hash(fs.readFileSync(dump)),index.dumpSha256);
+const snapshot=validateDatabaseSnapshot(read(path.join(evidence,'source-snapshot.json')));
+assert.equal(snapshot.tables.length,282);
+const files=read(path.join(evidence,'source-files.json'));assert.equal(files.length,6);
+for(const asset of files){assert.match(asset.path,/^[a-f0-9-]+\.(png|svg|pdf)$/);assert.equal(hash(fs.readFileSync(path.join(evidence,'restored-assets',asset.path))),asset.sha256);}
+const result=read(path.join(evidence,'operational-recovery-result.json'));
+const objectives=read(path.join(repo,'config/recovery/production-recovery-contract.json')).objectives;
+const metrics=operationalRecoveryMetrics({...result,objectives,checks:{databaseParity:result.priorSnapshotParity.databaseSnapshotMatched,assets:result.priorSnapshotParity.assetReferencesMatched,apiReadiness:result.services.apiReadiness,webBrowser:result.services.webBrowser,adminBrowser:result.services.adminBrowser,authenticatedRead:result.services.authenticatedRead}});
+for(const key of ['status','rpoSeconds','rtoSeconds','lostEventCount','lastRecoveredEventId','lastRecoveredCommittedAt'])assert.equal(metrics[key],result[key]);
+assert.deepEqual(metrics.lostEventIds,result.lostEventIds);
+assert.equal(result.measurementScope,'TWO_SYNTHETIC_COMMITTED_OUTBOX_PROBES');assert.equal(result.commitObservation,'AFTER_AUTOCOMMIT_RESPONSE');
+const recoveryPaths=['scripts/recovery/OperationalRecoveryMetrics.mjs','scripts/recovery/DatabaseSnapshot.mjs','scripts/recovery/BackupEvidencePolicy.mjs','scripts/recovery/RecoveryConnection.mjs','scripts/recovery/RecoveryPreflight.mjs','scripts/recovery/LocalRecoveryTarget.mjs','scripts/recovery/run-whole-platform-restore-drill.mjs'];
+assert.equal(execFileSync('git',['diff','--name-only',original,current,'--',...recoveryPaths],{cwd:repo,encoding:'utf8'}).trim(),'');
+const provider=read(path.join(repo,'config/recovery/aws-review-target.json'));assert.equal(provider.state,'DESIGN_SELECTED_NOT_PROVISIONED');
+for(const key of ['resourcesCreated','budgetApproved','runtimeControlsVerified','regionalRpoRtoVerified','productionAcceptance'])assert.equal(provider[key],false);
+const dest=path.join(repo,'docs/reviews/evidence/post28',current,'r10-current-offline-review');fs.mkdirSync(dest,{recursive:true});
+const write=(name,data)=>fs.writeFileSync(path.join(dest,name),JSON.stringify(data,null,2)+'\n');
+write('backup-readability.json',{kind:'R10_OFFLINE_RETAINED_ARCHIVE_CHECK',reviewSourceSha:current,originalRecoverySourceSha:original,verifiedAt:new Date().toISOString(),dumpSha256:index.dumpSha256,dumpBytes:fs.statSync(dump).size,originalAuthorizationCryptographicSignatureValid:true,originalAuthorizationReusedOrRenewed:false,originalAuthorizationCurrentValidityClaimed:false,pgRestoreVersion:version,pgRestoreExecutableSha256:hash(fs.readFileSync(executable)),tableDataEntries,completeOfflineSqlStreamRead:true,sqlOutputDiscarded:true,sqlWrittenToDisk:false,databaseConnected:false,restoreExecuted:false,assetsPhysicallyRehashed:files.length,snapshotDigestValidated:true,sourceSnapshotSha256:snapshot.sha256,dumpUnchanged:true});
+write('historical-metrics-recomputed.json',{...metrics,reviewSourceSha:current,originalRecoverySourceSha:original,measurementScope:result.measurementScope,commitObservation:result.commitObservation,measurementRepeated:false,calculationOnly:true});
+write('review-summary.json',{kind:'R10_CURRENT_OFFLINE_REVIEW',reviewSourceSha:current,retainedEvidence:retained,recoveryPathsUnchanged:recoveryPaths,sourceVerifierFix:'Strict finite numeric RPO/RTO/PITR values; no coercion or negative recovery objectives',tests:{newCliTestsPassed:4,invalidObjectiveValuesRejected:12,redBeforeFix:{passed:1,failed:3},directW6CasePassed:1,otherW6CasesNotRun:true,actualSourceContractPassed:true,targetedEslintPassed:true},providerState:provider.state,providerControlsVerified:false,resourcesCreated:false,budgetApproved:false,newServiceRecoveryDrill:false,newRpoRtoMeasurement:false,formalR10Acceptance:false,productionAcceptance:false,existingDatabasesTouched:false});
+fs.copyFileSync(path.join(work,'review-r10-current-offline.mjs'),path.join(dest,'operator.mjs.txt'));
+write('evidence-index.json',{kind:'R10_CURRENT_OFFLINE_REVIEW_EVIDENCE',sourceSha:current,files:fs.readdirSync(dest).filter(n=>n!=='evidence-index.json').sort().map(name=>{const b=fs.readFileSync(path.join(dest,name));return {path:name,bytes:b.length,sha256:hash(b)};})});
+console.log(JSON.stringify({sourceSha:current,destination:dest,retainedFiles:retained.reduce((n,r)=>n+r.files,0),archiveReadOffline:true,tables:tableDataEntries,assets:files.length,historicalRtoSeconds:metrics.rtoSeconds,historicalRpoSeconds:metrics.rpoSeconds,newRestore:false}));

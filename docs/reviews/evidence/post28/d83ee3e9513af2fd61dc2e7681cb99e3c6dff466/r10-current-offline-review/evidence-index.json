@@ -1,0 +1,26 @@
+{
+  "kind": "R10_CURRENT_OFFLINE_REVIEW_EVIDENCE",
+  "sourceSha": "d83ee3e9513af2fd61dc2e7681cb99e3c6dff466",
+  "files": [
+    {
+      "path": "backup-readability.json",
+      "bytes": 1033,
+      "sha256": "3d94a50fac5fba08453fa0f53412c162c64441bf8034ebac5a9ca357874011a8"
+    },
+    {
+      "path": "historical-metrics-recomputed.json",
+      "bytes": 997,
+      "sha256": "af2f1adebe992642e1c6470c6bc5719225e3fcc041d33f6a168a0abc482b7b08"
+    },
+    {
+      "path": "operator.mjs.txt",
+      "bytes": 7501,
+      "sha256": "05ae69e1b4e7bc7d21064b743fd05ca9249d6af4677c4f5f50630927c8bbb35c"
+    },
+    {
+      "path": "review-summary.json",
+      "bytes": 2041,
+      "sha256": "1fe2a955b6815cb9b41daf6e55b58091d65cba06148e843fab4c1f6251e3741c"
+    }
+  ]
+}
