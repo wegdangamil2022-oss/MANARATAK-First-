@@ -232,6 +232,14 @@ const router = createBrowserRouter([
         element: <PublicTemplateApp />,
       },
       {
+        path: 'favorites',
+        element: <PublicTemplateApp />,
+      },
+      {
+        path: 'tracker',
+        element: <PublicTemplateApp />,
+      },
+      {
         path: 'admin/*',
         element: <CanonicalAdminRedirect legacyPath={window.location.pathname} />,
       },
