@@ -2251,7 +2251,33 @@ export default function App() {
             )}
 
             {/* TAB 3: FAVORITES VIEW */}
-            {activeTab === 'favorites' && <LiveStudentWorkspacePage initialTab="VAULT" />}
+            {activeTab === 'favorites' && (publicDataMode === 'prototype' ? (
+              <FavoritesPage
+                favoriteKeys={favoriteKeys}
+                scholarships={scholarships}
+                universities={universities}
+                majors={majors}
+                countries={countries}
+                importedCourses={importedCourses}
+                exams={exams}
+                articles={articles}
+                services={services}
+                tools={tools}
+                careers={careers}
+                onToggleFavorite={handleToggleFavorite}
+                onOpenScholarship={setSelectedScholarship}
+                onOpenUniversity={setSelectedUniversity}
+                onOpenMajor={setSelectedMajor}
+                onOpenCountry={(id) => { setCountryNavigationName(id); openSection('countries'); }}
+                onOpenCourse={(item) => { setSelectedImportedCourse(item); setSelectedCourseTrack('imported'); openSection('courses'); }}
+                onOpenExam={setSelectedExam}
+                onOpenArticle={setSelectedArticle}
+                onOpenService={setSelectedService}
+                onOpenTool={(id) => openStudentTools(id)}
+                onOpenCareer={(id) => { navigate({activeTab: 'search', selectedCategory: 'jobs', nestedDetailId: id}); }}
+                onNavigateCategory={(category) => openSection(category)}
+              />
+            ) : <LiveStudentWorkspacePage initialTab="VAULT" />)}
 
             {/* TAB 4: SMART AI TOOLS VIEW */}
             {activeTab === 'ai-tools' && (
@@ -2279,9 +2305,30 @@ export default function App() {
             )}
 
             {/* TAB: STUDENT WORKSPACE / P15 LIVE API OR EXPLICIT PROTOTYPE */}
-            {activeTab === 'account' && <LiveStudentWorkspacePage />}
+            {activeTab === 'account' && (publicDataMode === 'prototype' ? (
+              <PrototypeStudentWorkspacePage
+                profile={null}
+                language={language}
+                isDarkMode={isDarkMode}
+                favoriteTypeCounts={favoriteTypeCounts}
+                favoritesCount={favoriteKeys.length}
+                milestones={milestones}
+                notifications={notifications}
+                onOpenFavorites={() => openSection('favorites')}
+                onOpenTracker={() => openSection('tracker')}
+                onOpenNotifications={() => setIsNotificationOpen(true)}
+                onOpenGlobalSearch={() => openSection('search')}
+                onOpenSmartSearch={() => { setIsSmartSearchOpen(true); openSection('search'); }}
+                onOpenTools={() => openStudentTools()}
+                onOpenAuth={() => openSection('auth')}
+                onToggleLanguage={openLanguage}
+                onToggleDarkMode={() => setIsDarkMode((value) => !value)}
+              />
+            ) : <LiveStudentWorkspacePage />)}
 
-            {activeTab === 'auth' && (
+            {activeTab === 'auth' && (publicDataMode === 'prototype' ? (
+              <PrototypeAuthPage onBackToWorkspace={() => openSection('account')} />
+            ) : (
               <LiveStudentAuthPage onAuthenticated={(_destination, identity) => {
                 const postLoginReturn = consumePostLoginReturn(identity.principalId);
                 const accountChanged = rememberAuthenticatedIdentity(identity.principalId);
@@ -2296,8 +2343,28 @@ export default function App() {
                 setActiveTab('account');
                 window.history.replaceState({...window.history.state}, '', '/student');
               }} />
-            )}
-        {activeTab === 'tracker' && <LiveStudentWorkspacePage initialTab="JOURNEY" />}
+            ))}
+        {activeTab === 'tracker' && (publicDataMode === 'prototype' ? (
+          <PrototypeStudentWorkspacePage
+            initialSection="journey"
+            profile={null}
+            language={language}
+            isDarkMode={isDarkMode}
+            favoriteTypeCounts={favoriteTypeCounts}
+            favoritesCount={favoriteKeys.length}
+            milestones={milestones}
+            notifications={notifications}
+            onOpenFavorites={() => openSection('favorites')}
+            onOpenTracker={() => openSection('tracker')}
+            onOpenNotifications={() => setIsNotificationOpen(true)}
+            onOpenGlobalSearch={() => openSection('search')}
+            onOpenSmartSearch={() => { setIsSmartSearchOpen(true); openSection('search'); }}
+            onOpenTools={() => openStudentTools()}
+            onOpenAuth={() => openSection('auth')}
+            onToggleLanguage={openLanguage}
+            onToggleDarkMode={() => setIsDarkMode((value) => !value)}
+          />
+        ) : <LiveStudentWorkspacePage initialTab="JOURNEY" />)}
           </>
         )}
         </React.Suspense>
