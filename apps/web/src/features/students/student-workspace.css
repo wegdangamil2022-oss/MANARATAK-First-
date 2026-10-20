@@ -135,7 +135,8 @@
 
 /* Summary section titles: gold line immediately touching the title box,
    following the intrinsic text width rather than spanning the card. */
-.mn-student-workspace .mn-student-summary-heading {
+.mn-student-workspace .mn-student-summary-heading,
+.mn-student-workspace .mn-student-summary-invoices .mn-card h2 {
   display: inline-block;
   width: max-content;
   max-width: 100%;
@@ -143,4 +144,11 @@
   padding-bottom: 0;
   line-height: 1.22;
   border-bottom: 2px solid #D6A43B;
+}
+
+/* Invoice summary title uses the same line and 13px Cairo as other headings. */
+.mn-student-workspace .mn-student-summary-invoices .mn-card h2 {
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
 }
