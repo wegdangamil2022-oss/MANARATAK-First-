@@ -1,7 +1,9 @@
+import { PreviewStudentApiClient } from './studentWorkspacePreviewApi';
+const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, ExternalLink } from 'lucide-react';
-import { ApiClient, type StudentNotificationProjectionDto } from '../../api/client';
+import { ApiClient as LiveApiClient, type StudentNotificationProjectionDto } from '../../api/client';
 
 export function studentNotificationLink(value?: string | null): string | null {
   if (!value || !value.startsWith('/') || value.startsWith('//') || /[\\\u0000-\u001f]/.test(value))
