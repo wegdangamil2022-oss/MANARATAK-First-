@@ -1,0 +1,46 @@
+{
+  "kind": "R12_LOCAL_BUILT_WORKER_STOP_START_ROLLBACK",
+  "operatorSourceSha": "70230e082e03f73761eee6437858c074839fb8d2",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "runtimeDependencySourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "sharedLockedWindowsDependencies": true,
+  "differentApiImplementationDemonstrated": false,
+  "workersEnabled": true,
+  "loopbackListenAdapter": true,
+  "loopbackAdapterSha256": "3dcd1f307eba0cab1036071d27f4c13d97f1c5e7c5a5153d8c0716f181f9bac5",
+  "previousWorkerRuntimeCompatible": false,
+  "formalR12Acceptance": false,
+  "productionAcceptance": false,
+  "observations": [
+    {
+      "phase": "current",
+      "apiPid": 9888,
+      "readinessSourceSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+      "listeners": [
+        {
+          "LocalAddress": "127.0.0.1",
+          "LocalPort": 56690
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "applicationRole": {
+    "role": "post28_r12_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "failure": {
+    "phase": "CURRENT_WORKER",
+    "code": "R12_API_STOP_TIMEOUT",
+    "message": "R12_API_STOP_TIMEOUT"
+  },
+  "cleanup": {
+    "apisStopped": false,
+    "gatewayStopped": true
+  }
+}

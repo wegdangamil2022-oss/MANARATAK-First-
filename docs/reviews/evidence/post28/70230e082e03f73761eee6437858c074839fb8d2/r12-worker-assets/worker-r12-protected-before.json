@@ -1,0 +1,17 @@
+{
+  "FinancialLedgerEntryRecord": [],
+  "FinancialTransactionRecord": [],
+  "FinancialAccountRecord": [],
+  "FinanceInvoiceRecord": [],
+  "FinancePaymentRecord": [],
+  "FinanceWalletRecord": [],
+  "FinanceWalletHoldRecord": [],
+  "FinanceCommandRecord": [],
+  "StudentPrivacyConsentDecision": [],
+  "StudentApplicationDocumentBinding": [],
+  "CmsPublishedContent": [],
+  "AuditRecord": [],
+  "TransactionalOutboxRecord": [],
+  "ApiIdempotencyRecord": [],
+  "_prisma_migrations": []
+}

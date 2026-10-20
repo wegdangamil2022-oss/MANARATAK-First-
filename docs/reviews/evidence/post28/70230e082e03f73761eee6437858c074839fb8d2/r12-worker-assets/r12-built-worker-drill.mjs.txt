@@ -1,0 +1,83 @@
+import {pathToFileURL} from 'node:url';
+import fs from 'node:fs';import path from 'node:path';import https from 'node:https';import net from 'node:net';import crypto from 'node:crypto';import assert from 'node:assert/strict';import{spawn,execFileSync}from'node:child_process';import{createRequire}from'node:module';import{performance}from'node:perf_hooks';
+import{gatewayHandler}from'./r07-filtered/scripts/release/serve-artifact-gateway.mjs';
+import{verifyReleaseManifest}from'./r07-filtered/scripts/release/lib/ReleaseContracts.mjs';
+import{verifyRuntimeLayer}from'./r07-filtered/scripts/release/lib/RuntimeLayerPolicy.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),prepared=JSON.parse(fs.readFileSync(path.join(work,'r12-unpack.json'))),policy=JSON.parse(fs.readFileSync(path.join(repo,'config/testing/r12-local-rollback-preparation.json'))),lab=process.env.R12_LAB,state=JSON.parse(fs.readFileSync(path.join(lab,'lab-state.json'))),fixture=JSON.parse(fs.readFileSync(path.join(lab,'scenario-private.json')));
+assert.equal(new URL(process.env.DATABASE_URL).hostname,'127.0.0.1');assert.equal(new URL(process.env.DATABASE_URL).port,String(state.port));
+const previousManifest=verifyReleaseManifest(prepared.previousArtifacts,prepared.previousSha),currentManifest=verifyReleaseManifest(prepared.currentArtifacts,prepared.currentSha);
+verifyRuntimeLayer(prepared.sharedRuntime,previousManifest,JSON.parse(fs.readFileSync(path.join(prepared.sharedRuntime,'runtime-layer.json'))));
+for(const key of ['lockSha256','prismaSchemaSha256'])assert.equal(previousManifest.runtimeRequirements[key],currentManifest.runtimeRequirements[key]);
+const require=createRequire(path.join(repo,'package.json')),{PrismaClient}=require('@prisma/client'),db=new PrismaClient({log:[],errorFormat:'minimal'});
+const keys=crypto.generateKeyPairSync('rsa',{modulusLength:2048,privateKeyEncoding:{type:'pkcs8',format:'pem'},publicKeyEncoding:{type:'spki',format:'pem'}}),csrfSecret=crypto.randomBytes(32).toString('hex'),sessionSecret=crypto.randomBytes(32).toString('hex');
+const privateValues=[fixture.email,fixture.password,fixture.mfaEncryptionKey,keys.privateKey,csrfSecret,sessionSecret,process.env.DATABASE_URL],redact=v=>privateValues.reduce((s,k)=>s.replaceAll(k,'[REDACTED]'),String(v)).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]');
+const hash=v=>crypto.createHash('sha256').update(v).digest('hex'),json=(f,v)=>fs.writeFileSync(path.join(lab,f),JSON.stringify(v,null,2)+'\n');
+const report={kind:'R12_LOCAL_BUILT_WORKER_STOP_START_ROLLBACK',operatorSourceSha:state.sourceSha,currentCandidateSha:prepared.currentSha,previousCandidateSha:prepared.previousSha,runtimeDependencySourceSha:prepared.runtimeDependencySourceSha,sharedLockedWindowsDependencies:true,differentApiImplementationDemonstrated:false,workersEnabled:true,loopbackListenAdapter:true,loopbackAdapterSha256:hash(fs.readFileSync(path.join(work,'r12-worker-control.mjs'))),previousWorkerRuntimeCompatible:false,formalR12Acceptance:false,productionAcceptance:false,observations:[],passed:false};
+let gateway,active,ca,origin,canaryStarted,requests=0;const children=[],jar=new Map();let phase='PREFLIGHT';
+const freePort=()=>new Promise(resolve=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
+const apiPort=await freePort(),gatewayPort=await freePort(),apiOrigin='http://127.0.0.1:'+apiPort;origin='https://127.0.0.1:'+gatewayPort;
+async function bookend(){const out={};for(const table of [...policy.protectedTables,'_prisma_migrations'])out[table]=await db.$queryRawUnsafe('SELECT id,encode(sha256(convert_to(to_jsonb(t)::text,\'UTF8\')),\'hex\') AS sha256 FROM public."'+table+'" t ORDER BY id');return out;}
+function preserved(before,after){for(const [table,rows]of Object.entries(before)){const next=new Map(after[table].map(r=>[r.id,r.sha256]));for(const r of rows)assert.equal(next.get(r.id),r.sha256,'R12_HISTORICAL_ROW_CHANGED:'+table);if(!['AuditRecord','TransactionalOutboxRecord','ApiIdempotencyRecord'].includes(table))assert.equal(after[table].length,rows.length,'R12_PROTECTED_ROW_COUNT_CHANGED:'+table);}}
+async function startApi(label){assert(!active||active.exitCode!==null||active.signalCode!==null,'R12_API_OVERLAP_FORBIDDEN');const sha=label==='current'?prepared.currentSha:prepared.previousSha;
+ const env={SystemRoot:process.env.SystemRoot,PATH:path.dirname(process.execPath),NODE_PATH:path.join(prepared.sharedRuntime,'node_modules'),NODE_ENV:'test',PORT:String(apiPort),DATABASE_URL:process.env.DATABASE_URL,DIRECT_URL:process.env.DATABASE_URL,DATABASE_REQUIRED:'true',RELEASE_SOURCE_SHA:sha,HEALTH_DEPLOYMENT_REVISION:sha,JWT_ACTIVE_KEY_ID:'r12-synthetic',JWT_PRIVATE_KEY_PEM:keys.privateKey,JWT_PUBLIC_KEY_PEM:keys.publicKey,CSRF_SECRET:csrfSecret,SESSION_SECRET:sessionSecret,ADMIN_AUTH_MODE:'strict',TRUST_PROXY_HOPS:'1',SECURE_COOKIE:'true',CORS_ORIGIN:origin,PUBLIC_WEB_URL:origin,ADMIN_WEB_URL:origin+'/admin',BACKGROUND_WORKER_ENABLED:'false',STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED:'true',STUDENT_WORKSPACE_OUTBOX_WORKER_INTERVAL_MS:'1000',OWNER_DOMAIN_OUTBOX_WORKER_ENABLED:'false',CERTIFICATE_COMPLETION_WORKER_ENABLED:'false'};
+ const child=spawn(process.execPath,['--import',pathToFileURL(path.join(work,'r12-worker-control.mjs')).href,'apps/api/dist/server.cjs'],{cwd:prepared.roots[label],env,windowsHide:true,stdio:['ignore','pipe','pipe','ipc']});active=child;const item={label,child,log:'',closed:new Promise(resolve=>child.once('exit',resolve))};children.push(item);child.stdout.on('data',b=>item.log+=b);child.stderr.on('data',b=>item.log+=b);child.once('error',()=>{});
+ const deadline=performance.now()+policy.maximumApiReadinessWaitSeconds*1000;let ready=false;while(performance.now()<deadline){if(child.exitCode!==null)break;try{const r=await fetch(apiOrigin+'/api/v1/monitoring/health/readiness',{signal:AbortSignal.timeout(1000)});if(r.status===200&&r.headers.get('x-manaratak-source-sha')===sha){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,100));}assert(ready,'R12_'+label.toUpperCase()+'_API_NOT_READY');const listeners=JSON.parse(execFileSync(path.join(process.env.SystemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoProfile','-Command','ConvertTo-Json -Compress -InputObject @(Get-NetTCPConnection -State Listen -OwningProcess '+child.pid+' -ErrorAction Stop | Select-Object LocalAddress,LocalPort)'],{encoding:'utf8',windowsHide:true}));assert(listeners.length>0&&listeners.every(row=>row.LocalAddress==='127.0.0.1'&&row.LocalPort===apiPort),'R12_NON_LOOPBACK_LISTENER');report.observations.push({phase:label,apiPid:child.pid,readinessSourceSha:sha,listeners});console.log('R12_API_READY='+label);
+}
+async function stopApi(){if(!active)return;const item=children.find(c=>c.child===active),began=performance.now();if(active.exitCode===null&&active.signalCode===null){active.send({type:'R12_STOP'});await Promise.race([item.closed,new Promise((_,reject)=>{const timer=setTimeout(()=>reject(Error('R12_API_STOP_TIMEOUT')),policy.maximumDrainWaitSeconds*1000);timer.unref();})]);}
+ const listening=await new Promise(resolve=>{const c=net.createConnection({host:'127.0.0.1',port:apiPort});c.once('connect',()=>{c.destroy();resolve(true);});c.once('error',()=>resolve(false));});assert.equal(listening,false,'R12_OLD_API_PORT_STILL_LISTENING');report.observations.push({stopped:item.label,portClosed:true,stopMilliseconds:performance.now()-began});active=null;
+}
+function request(method,route,body,headers={}){assert(route.startsWith('/api/v1/')&&!route.includes('://'));assert(++requests<=policy.canaryBudget.maximumRequests,'R12_CANARY_REQUEST_LIMIT');assert(performance.now()-canaryStarted<=policy.canaryBudget.durationSeconds*1000,'R12_CANARY_DEADLINE');return new Promise((resolve,reject)=>{const raw=body===undefined?undefined:JSON.stringify(body);const req=https.request(origin+route,{method,ca,timeout:2000,headers:{origin,'content-type':'application/json',...(raw?{'content-length':Buffer.byteLength(raw)}:{}),cookie:[...jar].map(([k,v])=>k+'='+v).join('; '),...headers}},res=>{let bytes='';res.on('data',b=>bytes+=b);res.on('end',()=>{try{for(const line of res.headers['set-cookie']??[]){const pair=line.split(';')[0],i=pair.indexOf('=');if(pair.slice(i+1))jar.set(pair.slice(0,i),pair.slice(i+1));else jar.delete(pair.slice(0,i));if(pair.slice(0,i).startsWith('manaratak_')&&!/Max-Age=0/i.test(line))assert(/HttpOnly/i.test(line)&&/Secure/i.test(line)&&/SameSite=Strict/i.test(line),'R12_COOKIE_POLICY');}const result={status:res.statusCode,body:JSON.parse(bytes),headers:res.headers};report.observations.push({phase,method,path:route,status:res.statusCode,sourceSha:res.headers['x-manaratak-source-sha']});resolve(result);}catch(error){reject(error);}});});req.once('timeout',()=>req.destroy(Error('R12_REQUEST_TIMEOUT')));req.once('error',reject);if(raw)req.write(raw);req.end();});}
+try{
+ const [role]=await db.$queryRawUnsafe('SELECT current_user AS role,rolsuper,rolcreatedb,rolcreaterole,rolbypassrls,rolreplication FROM pg_roles WHERE rolname=current_user');for(const k of ['rolsuper','rolcreatedb','rolcreaterole','rolbypassrls','rolreplication'])assert.equal(role[k],false);report.applicationRole=role;
+ const before=await bookend();json('r12-protected-before.json',before);
+ const cert=path.join(lab,'r12-tls.crt'),tlsKey=path.join(lab,'r12-tls.key');execFileSync('C:/Program Files/Git/usr/bin/openssl.exe',['req','-x509','-newkey','rsa:2048','-nodes','-days','1','-subj','/CN=127.0.0.1','-addext','subjectAltName=IP:127.0.0.1','-keyout',tlsKey,'-out',cert],{stdio:'pipe',windowsHide:true});ca=fs.readFileSync(cert);
+ gateway=https.createServer({cert:ca,key:fs.readFileSync(tlsKey)},gatewayHandler({apiOrigin,web:(_req,res)=>{res.writeHead(404);res.end();},admin:(_req,res)=>{res.writeHead(404);res.end();}}));await new Promise(resolve=>gateway.listen(gatewayPort,'127.0.0.1',resolve));
+
+ const delay=ms=>new Promise(r=>setTimeout(r,ms));
+ async function until(check,label){const until=performance.now()+10000;while(performance.now()<until){if(await check())return;await delay(25);}throw Error('R12_WAIT_'+label);}
+ const event=(id,type='IdentityStatusChanged.v1')=>({id,eventType:type,domain:'IDENTITY',aggregateType:'Identity',aggregateId:fixture.id,payload:{identityId:fixture.id,identityType:'Human',newStatus:'ACTIVE'},metadata:{ownerDomain:'IDENTITY',schemaVersion:1}});
+ const first=crypto.randomUUID(),unknown=crypto.randomUUID(),blocked=crypto.randomUUID();
+ phase='CURRENT_WORKER';await startApi('current');
+ await db.transactionalOutboxRecord.create({data:event(first)});
+ await until(async()=> (await db.transactionalOutboxRecord.findUnique({where:{id:first}}))?.state==='PROCESSED','CURRENT_EVENT');
+ const receipt=await db.studentWorkspaceEventInbox.findUniqueOrThrow({where:{eventId:first}});assert(receipt.processedAt);
+ const version=(await db.studentWorkspace.findUniqueOrThrow({where:{studentReferenceId:fixture.id}})).version;
+ await stopApi();
+ // Deliberate redelivery of our own synthetic envelope only; preserve the committed inbox receipt.
+ await db.transactionalOutboxRecord.update({where:{id:first},data:{state:'PENDING',processedAt:null,availableAt:new Date()}});
+ await db.transactionalOutboxRecord.create({data:event(unknown,'IdentityStatusChanged.v2')});
+ phase='PREVIOUS_WORKER_REPLAY';await startApi('previous');
+ await until(async()=> (await db.transactionalOutboxRecord.findUnique({where:{id:first}}))?.state==='PROCESSED','PREVIOUS_REPLAY');
+ assert.deepEqual(await db.studentWorkspaceEventInbox.findUniqueOrThrow({where:{eventId:first}}),receipt);
+ assert.equal((await db.studentWorkspace.findUniqueOrThrow({where:{studentReferenceId:fixture.id}})).version,version);
+ assert.equal(await db.studentWorkspaceEventInbox.count({where:{eventId:first}}),1);
+ // A row lock creates real in-flight work inside the built previous API worker.
+ const lockDb=new PrismaClient({log:[],errorFormat:'minimal'});let releaseLock,lockedResolve;
+ const locked=new Promise(r=>lockedResolve=r),released=new Promise(r=>releaseLock=r);
+ const locking=lockDb.$transaction(async tx=>{await tx.$queryRawUnsafe('SELECT id FROM "StudentWorkspace" WHERE "studentReferenceId"=$1 FOR UPDATE',fixture.id);lockedResolve();await released;},{timeout:10000});
+ try{
+  await locked;await db.transactionalOutboxRecord.create({data:event(blocked)});
+  await until(async()=> (await db.transactionalOutboxRecord.findUnique({where:{id:blocked}}))?.state==='PROCESSING','ACTIVE_LEASE');
+  const owned=await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:blocked}});assert(owned.claimedBy&&owned.claimToken&&owned.claimUntil);
+  const child=active,item=children.find(c=>c.child===child),started=performance.now();child.send({type:'R12_STOP'});
+  await until(async()=>item.log.includes('graceful drain has started'),'DRAIN_STARTED');await delay(100);
+  assert.equal(child.exitCode,null,'R12_DRAIN_DID_NOT_WAIT');assert.equal(child.signalCode,null);
+  releaseLock();await locking;
+  await Promise.race([item.closed,delay(16000).then(()=>{throw Error('R12_GRACEFUL_EXIT_TIMEOUT');})]);
+  assert.equal(child.exitCode,0);assert(item.log.includes('Graceful shutdown completed.'));
+  const finished=await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:blocked}});assert.equal(finished.state,'PROCESSED');assert.equal(finished.claimToken,null);
+  assert.equal(await db.studentWorkspaceEventInbox.count({where:{eventId:blocked}}),1);
+  report.inFlightDrain={blockedByRealDatabaseRowLock:true,waitedForRelease:true,elapsedMilliseconds:performance.now()-started,exitCode:child.exitCode,signalTransport:'owned IPC emits SIGTERM into unmodified built handler; Windows is not Linux signal delivery'};
+ }finally{releaseLock();await locking;await lockDb.$disconnect();}
+ await stopApi();
+ const untouched=await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:unknown}});assert.equal(untouched.state,'PENDING');assert.equal(untouched.attempts,0);assert.equal(untouched.claimToken,null);assert.equal(await db.studentWorkspaceEventInbox.count({where:{eventId:unknown}}),0);
+ const after=await bookend();preserved(before,after);json('r12-protected-after.json',after);
+ report.passed=true;report.previousBuiltWorkerScopedRuntimeCompatible=true;report.receiptRedeliveryWithoutDuplicateEffect=true;report.unsupportedEventSafelyUnclaimed=true;report.historicalRowsPreserved=true;report.syntheticEnvelopeInjection=true;report.schemaOnlySyntheticDatabase=true;report.productionCanaryApproved=false;
+
+}catch(error){report.failure={phase,code:/^R12_[A-Z_]+$/.test(error.message)?error.message:'R12_CANARY_ASSERTION_OR_DEPENDENCY_FAILED',message:redact(error.message)};process.exitCode=1;}
+finally{
+ try{await stopApi();report.cleanup={apisStopped:children.every(c=>c.child.exitCode!==null||c.child.signalCode!==null),gatewayStopped:false};}catch{report.cleanup={apisStopped:false,gatewayStopped:false};report.passed=false;process.exitCode=1;}
+ for(const item of children)fs.writeFileSync(path.join(lab,'r12-api-'+item.label+'.log'),redact(item.log));
+ if(gateway){gateway.closeAllConnections();await new Promise(resolve=>gateway.close(resolve));report.cleanup.gatewayStopped=true;}
+ await db.$disconnect();json('r12-result.json',report);console.log('R12_API_ROLLBACK_RESULT='+report.passed);
+}

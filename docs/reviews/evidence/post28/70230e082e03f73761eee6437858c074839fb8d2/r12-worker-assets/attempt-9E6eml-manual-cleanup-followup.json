@@ -1,0 +1,9 @@
+{
+  "observedAt": "2026-10-20T20:02:06.890Z",
+  "ownedProcessId": 9888,
+  "ownershipVerifiedBeforeTermination": true,
+  "terminationReason": "Wrong preload loaded; IPC stop handler absent",
+  "processNowAbsent": true,
+  "postgresAlreadyStopped": true,
+  "originalCleanupFailureRecordPreserved": true
+}

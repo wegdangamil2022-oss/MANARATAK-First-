@@ -1,0 +1,67 @@
+{
+  "kind": "POST28_R12_PRACTICAL_CLOSEOUT",
+  "recordedAt": "2026-10-20T20:02:06.897Z",
+  "status": "LOCAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_RELEASE_BLOCKERS",
+  "scope": "API stop/start receipt/session continuity; built StudentWorkspace identity worker redelivery and in-flight stop; real-PG lease ownership CAS; frozen-source real-PG asset byte and new-grant lifecycle contracts",
+  "sourceHead": "70230e082e03f73761eee6437858c074839fb8d2",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "practicalLocalScopeComplete": true,
+  "formalR12Acceptance": false,
+  "productionAcceptance": false,
+  "allWorkerRoutesAccepted": false,
+  "assetBuiltHttpDeliveryAccepted": false,
+  "r11FormalExceptionsRemainOpen": true,
+  "priorStageAcceptanceChanged": false,
+  "evidence": "docs/reviews/evidence/post28/70230e082e03f73761eee6437858c074839fb8d2/r12-worker-assets/evidence-index.json",
+  "previousApiEvidence": "docs/reviews/evidence/post28/005595313b0ae1ff940fec44454f441f516c8d8e/r12-api-runtime/evidence-index.json",
+  "exceptions": [
+    {
+      "id": "R12-E01",
+      "notExecuted": "Linux signal delivery and unified Linux runtime rollback of the selected prior artifact under actual hosting routing/configuration",
+      "impact": "Windows IPC invokes the unmodified built SIGTERM handler and proves its in-flight wait; it is not Linux OS signal or hosting integration evidence",
+      "blocksLocalDiagnostic": false,
+      "blocksProductionAcceptance": true,
+      "resolution": "Use reviewed Linux x64/Node22/PG16 hosting or isolated Linux CI with both exact artifacts and the agreed worker/routing configuration"
+    },
+    {
+      "id": "R12-E02",
+      "notExecuted": "Built API asset HTTP authorization and actual provider grant download/revocation, plus retired CMS links after rollback",
+      "impact": "Frozen-source real-PG asset read/checksum/new-grant denial passed; provider URL is inert and no real grant was fetched. Existing issued URL revocation and complete private-document/CMS journey are unproven",
+      "blocksLocalDiagnostic": false,
+      "blocksProductionAcceptance": true,
+      "resolution": "Run only the remaining built API delivery and retired-link cases with a reviewed isolated provider, existing Consent/Binding, ownership actors and bounded grants"
+    },
+    {
+      "id": "R12-E03",
+      "notExecuted": "All worker routes, all newer financial/certificate/import effects and a rollback across differing handler implementations",
+      "impact": "Built StudentWorkspace identity route/receipt and real-PG generic ownership CAS passed. API/worker implementations are identical between the artifact pair. Unsupported v2 remains pending and must block promoting an unsupported consumer",
+      "blocksLocalDiagnostic": false,
+      "blocksProductionAcceptance": true,
+      "resolution": "Approve the actual rollback worker/event inventory; prove remaining routes or keep those workers disabled and select forward fix for incompatible contracts"
+    },
+    {
+      "id": "R12-E04",
+      "notExecuted": "Production canary approval, incident runbook execution and provider/hosting configuration proof",
+      "impact": "Local budget and PM delegation do not authorize production. Formal R11 and prior-stage exceptions remain open",
+      "blocksLocalDiagnostic": false,
+      "blocksProductionAcceptance": true,
+      "resolution": "Resolve the recorded R11 exceptions, hosting/provider readiness and release/canary approval before promotion"
+    }
+  ],
+  "ci": {
+    "sourceSha": "70230e082e03f73761eee6437858c074839fb8d2",
+    "runId": 39485486289,
+    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39485486289",
+    "status": "completed",
+    "result": "success",
+    "observedAt": "2026-10-20T20:06:23.453Z",
+    "observedJobs": 6,
+    "allObservedJobsPassed": true,
+    "fullWorkflowCompletionVerified": true,
+    "finalDocumentationCommitCiVerified": false
+  },
+  "productionTouched": false,
+  "neonTouched": false,
+  "mainMerged": false
+}
