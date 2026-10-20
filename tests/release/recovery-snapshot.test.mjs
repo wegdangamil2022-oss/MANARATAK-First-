@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {captureDatabaseSnapshot, validateDatabaseSnapshot, verifyDatabaseSnapshot} from '../../scripts/recovery/DatabaseSnapshot.mjs';
 const checksum='a'.repeat(64);
-function client({digest=checksum, tables=['AssetRecord','Certificate'], assets=[]}={}) {
+function client({digest=checksum, tables=['AssetRecord','Certificate'], assets=[], sequenceValue}={}) {
  const commands=[];
  return {commands,async $transaction(fn){return fn(this);},async $executeRawUnsafe(sql){commands.push(sql);},async $queryRawUnsafe(sql){
   commands.push(sql);
@@ -10,6 +10,8 @@ function client({digest=checksum, tables=['AssetRecord','Certificate'], assets=[
   if(sql.includes('pg_catalog.pg_attribute'))return [{table:'Certificate',column:'id',type:'text',nullable:false}];
   if(sql.includes('pg_catalog.pg_constraint'))return [];
   if(sql.includes('pg_catalog.pg_indexes'))return [];
+  if(sql.includes('pg_catalog.pg_sequences'))return sequenceValue===undefined?[]:[{name:'counter',start_value:'1',increment_by:'1',min_value:'1',max_value:'10000',cache_size:'1',cycle:false}];
+  if(sql.startsWith('SELECT last_value'))return [{last_value:String(sequenceValue),is_called:true}];
   if(sql.includes('"cleanStorageLocator"'))return assets;
   return [{rowCount:'2',sha256:digest}];
  }};
@@ -28,6 +30,10 @@ test('row digest mismatch cannot be accepted even when counts and schema match',
 test('a missing table cannot be accepted',async()=>{
  const snapshot=await captureDatabaseSnapshot(client());
  await assert.rejects(()=>verifyDatabaseSnapshot(client({tables:['AssetRecord']}),snapshot,[]),/DATABASE_PARITY/);
+});
+test('changed sequence state is rejected even when every table is unchanged',async()=>{
+ const snapshot=await captureDatabaseSnapshot(client({sequenceValue:4}));
+ await assert.rejects(()=>verifyDatabaseSnapshot(client({sequenceValue:5}),snapshot,[]),/DATABASE_PARITY/);
 });
 test('invalid expected identity fails before any database operation',async()=>{
  const db=client();await assert.rejects(()=>verifyDatabaseSnapshot(db,{tables:[]},[]),/SNAPSHOT_INVALID/);assert.equal(db.commands.length,0);

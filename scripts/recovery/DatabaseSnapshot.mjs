@@ -1,10 +1,10 @@
 import {hash, DIGEST} from '../release/lib/ReleaseContracts.mjs';
 
-const identity = snapshot => ({version:1,scope:'PUBLIC_APPLICATION_TABLES',catalogSha256:snapshot.catalogSha256,tables:snapshot.tables});
+const identity = snapshot => ({version:1,scope:'PUBLIC_APPLICATION_TABLES',catalogSha256:snapshot.catalogSha256,tables:snapshot.tables,sequences:snapshot.sequences});
 export function validateDatabaseSnapshot(snapshot) {
   if(snapshot?.version!==1 || snapshot.scope!=='PUBLIC_APPLICATION_TABLES' ||
     !DIGEST.test(snapshot.catalogSha256??'') || !Array.isArray(snapshot.tables) ||
-    snapshot.tables.length<1 || snapshot.tables.length>1024 ||
+    snapshot.tables.length<1 || snapshot.tables.length>1024 || !Array.isArray(snapshot.sequences) ||
     new Set(snapshot.tables.map(t=>t.name)).size!==snapshot.tables.length ||
     snapshot.tables.some(t=>typeof t.name!=='string'||!t.name.length||t.name.includes('\0')||Buffer.byteLength(t.name)>63||!/^(0|[1-9][0-9]*)$/.test(t.rowCount)||!DIGEST.test(t.sha256??'')) ||
     snapshot.sha256!==hash(JSON.stringify(identity(snapshot))))throw Error('RECOVERY_DATABASE_SNAPSHOT_INVALID');
@@ -20,13 +20,19 @@ async function measure(tx) {
   const columns=await tx.$queryRawUnsafe(`SELECT c.relname::text AS "table",a.attname::text AS "column",pg_catalog.format_type(a.atttypid,a.atttypmod) AS type,a.attnotnull AS "notNull",pg_get_expr(d.adbin,d.adrelid) AS "default" FROM pg_catalog.pg_attribute a JOIN pg_catalog.pg_class c ON c.oid=a.attrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace LEFT JOIN pg_catalog.pg_attrdef d ON d.adrelid=a.attrelid AND d.adnum=a.attnum WHERE n.nspname='public' AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped ORDER BY c.relname COLLATE "C",a.attnum`);
   const constraints=await tx.$queryRawUnsafe(`SELECT c.relname::text AS "table",k.conname::text AS name,k.convalidated AS validated,pg_get_constraintdef(k.oid) AS definition FROM pg_catalog.pg_constraint k JOIN pg_catalog.pg_class c ON c.oid=k.conrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' ORDER BY c.relname COLLATE "C",k.conname COLLATE "C"`);
   const indexes=await tx.$queryRawUnsafe(`SELECT tablename::text,indexname::text,indexdef FROM pg_catalog.pg_indexes WHERE schemaname='public' ORDER BY tablename COLLATE "C",indexname COLLATE "C"`);
+  const sequenceDefinitions=await tx.$queryRawUnsafe(`SELECT sequencename::text AS name,start_value::text,increment_by::text,min_value::text,max_value::text,cache_size::text,cycle FROM pg_catalog.pg_sequences WHERE schemaname='public' ORDER BY sequencename COLLATE "C"`),sequences=[];
+  for(const definition of sequenceDefinitions){
+    const quoted='"'+definition.name.replaceAll('"','""')+'"';
+    const [state]=await tx.$queryRawUnsafe(`SELECT last_value::text,is_called FROM public.${quoted}`);
+    sequences.push({...definition,...state});
+  }
   const rows=[];
   for(const {name} of tables) {
     const quoted='"'+name.replaceAll('"','""')+'"';
     const [result]=await tx.$queryRawUnsafe(`SELECT count(*)::text AS "rowCount",encode(sha256(convert_to(coalesce(string_agg(payload,E'\\n' ORDER BY payload COLLATE "C"),''),'UTF8')),'hex') AS sha256 FROM (SELECT to_jsonb(t)::text AS payload FROM public.${quoted} t) snapshot_rows`);
     rows.push({name,rowCount:result.rowCount,sha256:result.sha256});
   }
-  const snapshot=identity({catalogSha256:hash(JSON.stringify({columns,constraints,indexes})),tables:rows});
+  const snapshot=identity({catalogSha256:hash(JSON.stringify({columns,constraints,indexes})),tables:rows,sequences});
   return {...snapshot,sha256:hash(JSON.stringify(snapshot))};
 }
 const transaction=(client,fn)=>client.$transaction(fn,{isolationLevel:'RepeatableRead',timeout:120000,maxWait:10000});

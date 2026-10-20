@@ -58,6 +58,10 @@ export async function executeRestore(
     snapshotId: assets.snapshotId,
     sha: input.sha,
     environment: 'DISPOSABLE',
+    rpoMeasurementBasis: 'BACKUP_CAPTURE_TIMESTAMP_PROXY_NOT_RECOVERED_EVENT_WATERMARK',
+    integratedServiceRtoMeasured: false,
+    formalR10Acceptance: false,
+    productionAcceptance: false,
     startedAt: new Date(startedAt).toISOString(),
     completedAt: new Date(completedAt).toISOString(),
   };
