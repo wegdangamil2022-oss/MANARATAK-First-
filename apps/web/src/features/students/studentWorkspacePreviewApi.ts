@@ -17,7 +17,7 @@ const saved = (id: string, type: string, entityId: string, name: string, collect
 const initialTrackers: StudentApplicationTrackerDto[] = [
   {
     id: 'preview-tracker-csc', studentReferenceId: previewStudentId, scholarshipId: 'csc-china',
-    scholarshipSlug: 'csc-china', stage: 'PREPARING_DOCUMENTS', notes: 'أراجع المتطلبات وأجهز شهاداتي.',
+    scholarshipSlug: 'csc-china', cycleReferenceId: 'preview-cycle-2027', stage: 'تجهيز المستندات', notes: 'أراجع المتطلبات وأجهز شهاداتي.',
     deadlineAt: '2027-03-31T00:00:00Z', status: 'ACTIVE', version: 1,
     createdAt: timestamp, updatedAt: timestamp,
     owner: { id:'csc-china', slug:'csc-china', displayName:'منحة الحكومة الصينية (CSC)', country:'الصين', available: true },
@@ -30,7 +30,7 @@ const initialTrackers: StudentApplicationTrackerDto[] = [
   },
   {
     id:'preview-tracker-uk',studentReferenceId:previewStudentId,scholarshipId:'chevening-uk',
-    scholarshipSlug:'chevening-uk',stage:'APPLICATION_SUBMITTED',notes:'ملف تجربة للمقارنة فقط.',
+    scholarshipSlug:'chevening-uk',cycleReferenceId:'preview-cycle-uk',stage:'تم إرسال الطلب',notes:'ملف تجربة للمقارنة فقط.',
     deadlineAt:'2027-10-15T00:00:00Z',status:'ACTIVE',version:1,createdAt:timestamp,updatedAt:timestamp,
     owner:{id:'chevening-uk',slug:'chevening-uk',displayName:'منحة تشيفنينغ البريطانية',country:'المملكة المتحدة',available:true},
     ownerSnapshot:{displayName:'منحة تشيفنينغ البريطانية',country:'المملكة المتحدة'},
@@ -106,6 +106,12 @@ let dashboard: StudentDashboardSummaryDto = structuredClone(initialDashboard);
 let trackers: StudentApplicationTrackerDto[] = structuredClone(initialTrackers);
 let invoices: StudentFinanceInvoiceDto[] = structuredClone(initialInvoices);
 let requests: StudentServiceRequestDto[] = structuredClone(initialRequests);
+let uploadIndex = 0;
+let uploadedAssets: Array<{ id:string; reference:string; lifecycleState:string; metadata:{ originalFilename:string;mimeType:string } }> = [
+  {id:'preview-asset-1',reference:'preview-asset-1',lifecycleState:'ACTIVE',metadata:{originalFilename:'نموذج-السجل-الأكاديمي.pdf',mimeType:'application/pdf'}},
+];
+let boundDocuments: Record<string, Record<string, string>> = {};
+let documentConsents: Record<string, boolean> = {};
 let snapshots: StudentWorkspaceSnapshotDto[] = [{id:'preview-snapshot-one',label:'إعداداتي السابقة',workspaceVersion:1,createdAt:timestamp}];
 let careerProfile = {headline:'طالب ومهتم بالبحث العلمي',summary:'ملف مهني تجريبي',skills:['البحث','اللغة الإنجليزية'],version:1};
 let alumni = {displayName:'طالب منارتك',visibility:'PRIVATE',version:1};
@@ -150,7 +156,7 @@ async function callPreviewApi(method: string, ...args: unknown[]): Promise<unkno
       return copy(trackers.find(t=>t.id===a[0]));
     }
     case 'archiveMyStudentApplicationTracker':
-      trackers=trackers.map(t=>t.id===a[0]?{...t,status:'ARCHIVED',version:t.version+1,archivedAt:timestamp}:t);
+      trackers=trackers.map(t=>t.id===a[0]?{...t,status:t.status==='ARCHIVED'?'ACTIVE':'ARCHIVED',version:t.version+1,archivedAt:t.status==='ARCHIVED'?null:timestamp}:t);
       return copy(trackers.find(t=>t.id===a[0]));
     case 'removeMyStudentApplicationTracker':
       trackers=trackers.filter(t=>t.id!==a[0]);return undefined;
@@ -192,7 +198,14 @@ async function callPreviewApi(method: string, ...args: unknown[]): Promise<unkno
     case 'resetMyStudentDashboardLayout':return changedWorkspace({layoutPreferences:{}});
     case 'clearMyStudentSearchHistory':return undefined;
     case 'logoutStudent':return undefined;
-    case 'listMyActiveStudentAssets':return {items:[],hasMore:false,nextCursor:null};
+    case 'listMyActiveStudentAssets':return {items:copy(uploadedAssets.filter(x=>x.metadata.mimeType.startsWith(String(a[0]||'image/')))),hasMore:false,nextCursor:null};
+    case 'completeMyDocumentUpload':return {assetId:String(a[0]),lifecycleState:'ACTIVE'};
+    case 'requestMyDocumentUpload':{
+      const id='preview-upload-'+(++uploadIndex);
+      uploadedAssets.push({id,reference:id,lifecycleState:'ACTIVE',metadata:{originalFilename:String(a[0]?.originalFilename||'نموذج.pdf'),mimeType:String(a[0]?.mimeType||'application/pdf')}});
+      // No upload URL: the original uploader must bypass file transfer in preview.
+      return {assetId:id};
+    }
     case 'getMyStudentAssetDeliveryGrant':throw new Error('معاينة فقط: لا توجد ملفات شخصية حقيقية.');
     case 'listMyCertificates':return {data:copy(dashboard.certificates),nextCursor:null};
     case 'markStudentNotificationRead':
@@ -206,10 +219,35 @@ async function callPreviewApi(method: string, ...args: unknown[]): Promise<unkno
       if(path.startsWith('alumni-network'))return {data:[],totalPages:1};
       return {data:[],totalPages:1};
     }
-    case 'getMyApplicationDocuments':return {ownerState:'AVAILABLE',entries:[]};
-    case 'getScholarshipApplicationCycles':return {cycles:[]};
-    case 'listMyServiceAvailability':return {data:[],nextCursor:null};
-    case 'listMyServicePackages':return {data:[],nextCursor:null};
+    case 'getMyApplicationDocuments':{
+      const trackerId=String(a[0]);
+      const requirements=[
+        {requirementId:'preview-requirement-passport',displayName:'نسخة جواز السفر (تجريبي)',required:true},
+        {requirementId:'preview-requirement-transcript',displayName:'كشف الدرجات (تجريبي)',required:true},
+      ];
+      return {ownerState:'AVAILABLE',entries:requirements.map(r=>{
+        const doc=boundDocuments[trackerId]?.[r.requirementId];
+        const k=trackerId+':'+r.requirementId;
+        return {...r,linked:Boolean(doc),bindable:true,state:doc?'ASSET_AVAILABLE_UNVERIFIED':'UNFULFILLED',
+          reviewConsentGranted:Boolean(documentConsents[k]),verification:'NOT_ATTESTED'};
+      })};
+    }
+    case 'getScholarshipApplicationCycles':return {scholarshipId:String(a[0]),displayName:'نموذج منح',cycles:[{id:'preview-cycle-2027',cycleKey:'2027',closesAt:null}]};
+    case 'bindMyApplicationDocument':{
+      const trackerId=String(a[0]);const input=a[1]||{};
+      boundDocuments[trackerId]={...(boundDocuments[trackerId]||{}),[input.requirementId]:String(input.assetId)};
+      trackers=trackers.map(t=>t.id===trackerId?{...t,version:t.version+1}:t);return undefined;
+    }
+    case 'unbindMyApplicationDocument':{
+      const trackerId=String(a[0]);if(boundDocuments[trackerId])delete boundDocuments[trackerId][String(a[1])];
+      trackers=trackers.map(t=>t.id===trackerId?{...t,version:t.version+1}:t);return undefined;
+    }
+    case 'setMyDocumentReviewConsent':{
+      documentConsents[String(a[0])+':'+String(a[1])]=Boolean(a[3]);return undefined;
+    }
+    case 'listMyServiceAvailability':return {data:[{id:'preview-service-slot-1',startsAt:'2027-01-12T10:00:00Z',endsAt:'2027-01-12T10:30:00Z',timezone:'Asia/Aden'}],nextCursor:null};
+    case 'listMyServicePackages':return {data:[{id:'preview-service-package-1',displayName:'نموذج باقة استشارة أكاديمية',price:amount('1500'),items:[{serviceId:'academic-consultation',displayName:'استشارة اختيار الجامعة',quantity:1,inputSchema:[{key:'الدرجة المطلوبة',type:'TEXT',required:false}]}]}],nextCursor:null};
+    case 'bookMyServiceRequest':return {publicId:'DEMO-BOOK-001',status:'PREVIEW_ONLY',holdExpiresAt:timestamp,pricingSnapshot:{finalAmountMinorUnits:'1500',currencyCode:'USD'}};
     case 'listMyServiceDeliverables':return {data:[],nextCursor:null};
     case 'getMyPrivateToolResult':return {status:'NOT_AVAILABLE',result:null};
     case 'getCareerJobBySlug':return {id:'preview-job',metadata:{applicationChannel:'INTERNAL'},title:'وظيفة تجريبية'};
