@@ -1,0 +1,58 @@
+{
+  "kind": "POST28_R09_SHARED_WORKFLOW_INTEGRATION",
+  "sourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "externalProvidersEnabled": false,
+  "fullR09Acceptance": false,
+  "observations": [
+    {
+      "case": "ACTUAL_LESSON_TO_ONE_SIGNED_CERTIFICATE",
+      "courseId": "308d82db-d547-4357-99ea-bc767e93de05",
+      "eventId": "course-completed:308d82db-d547-4357-99ea-bc767e93de05:5f34b14d-f24d-4e2e-a50c-40dfed29ab44:v2",
+      "certificateId": "28653b47-14bd-4c76-a9d7-534606d6118c",
+      "consumers": 2,
+      "replays": 1,
+      "validThenRevoked": true,
+      "foreignArtifactsDenied": true,
+      "artifactRendererExercised": true,
+      "renderReplayWithoutAdditionalWrites": true,
+      "artifactFiles": [
+        {
+          "id": "2a64caf7-8682-4dc4-9c90-90065d5f8eae",
+          "kind": "PDF",
+          "extension": "pdf",
+          "sha256": "7507eb8ddade28c0f247949ba6f161caca7923aa0009e240f9ca914227e7b1e4",
+          "bytes": 11324
+        },
+        {
+          "id": "db30303d-0674-4e6d-a751-6fc53a3aae55",
+          "kind": "PREVIEW",
+          "extension": "svg",
+          "sha256": "3495565e7d88647b7420cf3d23d8ce2b5425490fca52e305177fb439bd191c0e",
+          "bytes": 389733
+        },
+        {
+          "id": "6e57a58a-ffc4-4d36-9ca6-5c612d9d93ac",
+          "kind": "QR",
+          "extension": "svg",
+          "sha256": "7b86ed9c662b335b7c41cf8356a74b2647a0b1212c634f10e55729a72058bd44",
+          "bytes": 24332
+        }
+      ],
+      "freshEapProcessing": false,
+      "providerDeliveryGrantExercised": false
+    }
+  ],
+  "role": {
+    "role": "post28_app",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "ddl": false,
+    "ledger": false
+  },
+  "browserVersion": "155.0.4283.62",
+  "boundary": "ACTUAL_SOURCE_ROUTERS_REAL_JWT_DB_CAPABILITIES_NOT_BUILT_ADMIN_UI_OR_MFA"
+}

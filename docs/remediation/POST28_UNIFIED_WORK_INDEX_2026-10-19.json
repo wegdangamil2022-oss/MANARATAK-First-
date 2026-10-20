@@ -158,9 +158,9 @@
       "state": "FIVE_SCOPED_SHARED_WORKFLOWS_PASS_FORMAL_R09_OPEN",
       "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md",
       "laterEvidence": "docs/remediation/POST28_R06_R07_PRACTICAL_HANDOFF_2026-10-19.md",
-      "latestReport": "docs/remediation/POST28_R09_WORKFLOW_PROGRESS_2026-10-20.md",
-      "latestEvidence": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json",
-      "latestEvidenceSourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+      "latestReport": "docs/remediation/POST28_R09_RENDER_WITHDRAWAL_2026-10-20.md",
+      "latestEvidence": "docs/reviews/evidence/post28/d4ffe62a4b00a9154de541f120be16e1317dd000/r09-shared-workflows/native-pg16-rhG4J6/evidence-index.json",
+      "latestEvidenceSourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
       "formalAcceptance": "OPEN_MANDATORY_CHAINS_AND_DOMAIN_MATRIX"
     }
   ],
@@ -304,5 +304,22 @@
     "allMandatoryRowsClosed": false,
     "formalR09Acceptance": false,
     "productionAcceptance": false
+  },
+  "r09RenderWithdrawal": {
+    "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+    "report": "docs/remediation/POST28_R09_RENDER_WITHDRAWAL_2026-10-20.md",
+    "rendererSourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+    "selectedDatabaseCasesPassed": 2,
+    "uiTestsPassed": 8,
+    "selectionRejectedAttempts": 1,
+    "fullR09Acceptance": false,
+    "latestCi": {
+      "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+      "status": "IN_PROGRESS",
+      "run": "39434553130",
+      "previous23CheckPassSourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+    },
+    "providerDeliveryGrantExercised": false,
+    "freshEapProcessing": false
   }
 }

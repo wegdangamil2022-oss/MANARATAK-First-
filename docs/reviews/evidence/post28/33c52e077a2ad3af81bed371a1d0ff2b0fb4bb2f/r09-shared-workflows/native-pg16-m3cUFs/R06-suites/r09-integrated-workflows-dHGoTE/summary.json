@@ -1,0 +1,43 @@
+{
+  "kind": "POST28_DATABASE_SUITE_EXECUTION",
+  "sourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+  "suite": "r09-integrated-workflows",
+  "caseExact": "R09 shared synthetic CMS learner certificate privacy and money workflows > completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it",
+  "fullDiscoveryCases": 5,
+  "fullProfileAcceptance": false,
+  "authorization": {
+    "migrationTransition": {
+      "schemaUnchanged": true,
+      "historicalPrefixMatched": 110,
+      "reviewedAppendOnlyMigration": {
+        "name": "20261019000100_admission_null_identity",
+        "checksum": "013eb65a4295987696e3202c06a32cf5874adb389a83467f39ca37cf67bb4efa"
+      },
+      "scope": "LOCAL_SYNTHETIC_ONLY",
+      "productionAuthorized": false
+    },
+    "scope": "LOCAL_DB_T_SCOPED_TESTS_ONLY",
+    "R04": "PASS_LOCAL_MATCHING_SCHEMA",
+    "R05": "BLOCKED_USER_AUTHORIZED_SCOPED_R06",
+    "fullR06Acceptance": false,
+    "deploymentAuthorized": false
+  },
+  "targets": [
+    {
+      "label": "DB-T",
+      "database": "manaratak_post28_transactions_test",
+      "role": "post28_app",
+      "serverIdentity": "7698746719165402652",
+      "databaseOid": "16386",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "publicTables": 282,
+      "probeReadOnly": true
+    }
+  ],
+  "expected": 1,
+  "executed": 1,
+  "passed": 1,
+  "failed": 0,
+  "skipped": 0
+}

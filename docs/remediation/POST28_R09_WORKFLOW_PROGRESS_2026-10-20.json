@@ -3,7 +3,7 @@
   "date": "2026-10-20",
   "timezone": "Asia/Aden",
   "branch": "feat/post28-r07-artifact-preparation",
-  "latestSourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+  "latestSourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
   "formalR09Acceptance": false,
   "allMandatoryRowsClosed": false,
   "allTestsExecutedAtOneSha": false,
@@ -142,6 +142,35 @@
           "sourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
         }
       ]
+    },
+    {
+      "sourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+      "evidenceIndex": "docs/reviews/evidence/post28/33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f/r09-shared-workflows/native-pg16-pOI9VF/evidence-index.json",
+      "cases": []
+    },
+    {
+      "sourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+      "evidenceIndex": "docs/reviews/evidence/post28/33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f/r09-shared-workflows/native-pg16-m3cUFs/evidence-index.json",
+      "cases": [
+        {
+          "title": "completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it",
+          "status": "passed",
+          "sourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+          "evidence": "docs/reviews/evidence/post28/33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f/r09-shared-workflows/native-pg16-m3cUFs/R06-suites/r09-integrated-workflows-dHGoTE/vitest.json"
+        }
+      ]
+    },
+    {
+      "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+      "evidenceIndex": "docs/reviews/evidence/post28/d4ffe62a4b00a9154de541f120be16e1317dd000/r09-shared-workflows/native-pg16-rhG4J6/evidence-index.json",
+      "cases": [
+        {
+          "title": "authors reviews publishes and withdraws current CMS snapshots using three actual capabilities",
+          "status": "passed",
+          "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+          "evidence": "docs/reviews/evidence/post28/d4ffe62a4b00a9154de541f120be16e1317dd000/r09-shared-workflows/native-pg16-rhG4J6/R06-suites/r09-integrated-workflows-D00mNQ/vitest.json"
+        }
+      ]
     }
   ],
   "ciCandidateSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
@@ -243,5 +272,21 @@
     "failed": 0,
     "pending": 0
   },
-  "linuxEvidenceIndex": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json"
+  "linuxEvidenceIndex": "docs/reviews/evidence/post28/b94ecd49d03463ea89ba26e510ba2ca7f87597a5/r09-shared-workflows/linux-ci/evidence-index.json",
+  "checksSourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5",
+  "latestDirectedContinuation": {
+    "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+    "report": "docs/remediation/POST28_R09_RENDER_WITHDRAWAL_2026-10-20.md",
+    "rendererSourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+    "selectedDatabaseCasesPassed": 2,
+    "uiTestsPassed": 8,
+    "selectionRejectedAttempts": 1,
+    "fullR09Acceptance": false
+  },
+  "latestCi": {
+    "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+    "status": "IN_PROGRESS",
+    "run": "39434553130",
+    "previous23CheckPassSourceSha": "b94ecd49d03463ea89ba26e510ba2ca7f87597a5"
+  }
 }

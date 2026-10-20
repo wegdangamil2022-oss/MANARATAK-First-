@@ -1,0 +1,97 @@
+{
+  "kind": "POST28_R09_RAW_WORKFLOW_EVIDENCE",
+  "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "formalR09Acceptance": false,
+  "cleanup": {
+    "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+    "runId": "1a3a6c31-7af4-4dbc-a099-3121147a1f20",
+    "exit": 0,
+    "stopped": true,
+    "existingDatabasesTouched": false
+  },
+  "cases": [
+    {
+      "title": "authors reviews publishes and withdraws current CMS snapshots using three actual capabilities",
+      "status": "passed",
+      "sourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+      "evidence": "docs/reviews/evidence/post28/d4ffe62a4b00a9154de541f120be16e1317dd000/r09-shared-workflows/native-pg16-rhG4J6/R06-suites/r09-integrated-workflows-D00mNQ/vitest.json"
+    }
+  ],
+  "files": [
+    {
+      "path": "cleanup.json",
+      "bytes": 160,
+      "sha256": "e662164120042a29bdda8d3266b6781c6211f132796122b14e58378eaeaeaa40"
+    },
+    {
+      "path": "initialize.log",
+      "bytes": 4435,
+      "sha256": "85a849007324a15475515e9d161b1c1c7c6251f106fa7e9ed3dbf2269a2b002d"
+    },
+    {
+      "path": "r09-workflow-observations-cd349fbe-4709-4864-81d2-2a25f327deb6.json",
+      "bytes": 1060,
+      "sha256": "42ccf801ea563137e2de2f483575e7a7e1127aded111795be2fdd5df60183c2c"
+    },
+    {
+      "path": "suite-0.log",
+      "bytes": 1810,
+      "sha256": "bdaa0116d66b39e34952919a5f94f4e2a3e29d2338752fb700e0e3b4244c3c71"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 5486,
+      "sha256": "70e58ffbb072f0cee1259f5100ddf5976942276d83bed58116c25b7629180fd0"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "d2171a9bf4ab6982fd61f53b7e0db2488e08472fe063ab49b9bd96acb35c8aaa"
+    },
+    {
+      "path": "R06-setup/0-validate.log",
+      "bytes": 144,
+      "sha256": "9bac6f2900d82077fd9ba3d76d872874f55c2b9bf30c910010cf33354fcf9dd6"
+    },
+    {
+      "path": "R06-setup/1-migrate.log",
+      "bytes": 16275,
+      "sha256": "3df8ffe42bb2a3a72a7e11b79b2a43e89f75fd54d0b796d8b9132ec917dd0919"
+    },
+    {
+      "path": "R06-setup/2-migrate.log",
+      "bytes": 258,
+      "sha256": "87eb9b4152f3b393c2a26d3fed6f6633331f8d97d089a4f48080f7070ec4eaa8"
+    },
+    {
+      "path": "R06-setup/3-migrate.log",
+      "bytes": 25,
+      "sha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed"
+    },
+    {
+      "path": "R06-suites/r09-integrated-workflows-D00mNQ/discovery.json",
+      "bytes": 1840,
+      "sha256": "ad8ffea88185ed1227f17af6be2578adcb53f004e143180405fbda7b07835dc5"
+    },
+    {
+      "path": "R06-suites/r09-integrated-workflows-D00mNQ/selection.json",
+      "bytes": 273,
+      "sha256": "f4052727beed2e3877609a3faf1ecce5947f389d85279e4cf05eafd756269eaf"
+    },
+    {
+      "path": "R06-suites/r09-integrated-workflows-D00mNQ/vitest.json",
+      "bytes": 3082,
+      "sha256": "a81bc08c3bfd5c78327bc3b93025a16c1b11e0ebe8b69a64e7d469ef1cda6a61"
+    },
+    {
+      "path": "R06-suites/r09-integrated-workflows-D00mNQ/summary.json",
+      "bytes": 1397,
+      "sha256": "ba5f05c675e9e77991e08138273f63177f1374ce843989918274289e75f09d8a"
+    }
+  ],
+  "selectionRejectedBeforeExecution": false,
+  "freshEapProcessing": false,
+  "providerDeliveryGrantExercised": false
+}

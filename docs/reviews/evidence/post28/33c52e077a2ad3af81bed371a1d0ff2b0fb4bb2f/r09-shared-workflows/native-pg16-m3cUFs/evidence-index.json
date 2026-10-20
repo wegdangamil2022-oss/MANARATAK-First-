@@ -1,0 +1,112 @@
+{
+  "kind": "POST28_R09_RAW_WORKFLOW_EVIDENCE",
+  "sourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+  "syntheticOnly": true,
+  "productionAcceptance": false,
+  "formalR09Acceptance": false,
+  "cleanup": {
+    "sourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+    "runId": "79d451b4-b636-42fd-98cd-7aeea47b05d2",
+    "exit": 0,
+    "stopped": true,
+    "existingDatabasesTouched": false
+  },
+  "cases": [
+    {
+      "title": "completes an actual lesson and issues one signed certificate across two consumers then verifies and revokes it",
+      "status": "passed",
+      "sourceSha": "33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f",
+      "evidence": "docs/reviews/evidence/post28/33c52e077a2ad3af81bed371a1d0ff2b0fb4bb2f/r09-shared-workflows/native-pg16-m3cUFs/R06-suites/r09-integrated-workflows-dHGoTE/vitest.json"
+    }
+  ],
+  "files": [
+    {
+      "path": "cleanup.json",
+      "bytes": 160,
+      "sha256": "7666c0ab2afdd45921356865bcd62b0a9828609aba51da39dbb45f22ff1d7545"
+    },
+    {
+      "path": "initialize.log",
+      "bytes": 4435,
+      "sha256": "9f5c897db9577883a5ef4774768a8867141cb96bca84992ab61ecfb2ac91b699"
+    },
+    {
+      "path": "r09-workflow-observations-0042d914-4806-4043-b1dd-cd76956b682d.json",
+      "bytes": 1937,
+      "sha256": "d42770ec0ea83bff00f687d0a4753307306cc9d1a9518bbbb71bf6ae2f967600"
+    },
+    {
+      "path": "suite-0.log",
+      "bytes": 1844,
+      "sha256": "b4505b41fd162cdccf6defc503d5cd57b0123065fe4d63638c2e66f2f47e7562"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 5486,
+      "sha256": "e29b385c840367199759955fd797e67ca405b6843d3826fcd0e0cfc5608f75d0"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "46ee582aef18a922119a01e071036202ef44ea19cf65bc4ef6f6593bddbfe714"
+    },
+    {
+      "path": "R06-setup/0-validate.log",
+      "bytes": 144,
+      "sha256": "9bac6f2900d82077fd9ba3d76d872874f55c2b9bf30c910010cf33354fcf9dd6"
+    },
+    {
+      "path": "R06-setup/1-migrate.log",
+      "bytes": 16275,
+      "sha256": "6d725c19eaf11fa2189d38b5ebcf4d71c5ad2087861f0deeea51c9fed1597bc9"
+    },
+    {
+      "path": "R06-setup/2-migrate.log",
+      "bytes": 258,
+      "sha256": "02bb72c7f9246d674105f162b25343540a088f8f59deb44160e2877ae4d45f99"
+    },
+    {
+      "path": "R06-setup/3-migrate.log",
+      "bytes": 25,
+      "sha256": "198913094e3f41610eb893459ab65a3c79991b65d4ef5fcb8c325ebe52ebf1ed"
+    },
+    {
+      "path": "R06-suites/r09-integrated-workflows-dHGoTE/discovery.json",
+      "bytes": 1840,
+      "sha256": "ad8ffea88185ed1227f17af6be2578adcb53f004e143180405fbda7b07835dc5"
+    },
+    {
+      "path": "R06-suites/r09-integrated-workflows-dHGoTE/selection.json",
+      "bytes": 290,
+      "sha256": "47cbb8b7f92426c823ae427bf472d73f1b38de022cf37c057aabe3edb447b696"
+    },
+    {
+      "path": "R06-suites/r09-integrated-workflows-dHGoTE/vitest.json",
+      "bytes": 3082,
+      "sha256": "f5e38bd96380832ddfeb3a927ab0d528bf7432100ee499b506b4cdc2cca241aa"
+    },
+    {
+      "path": "R06-suites/r09-integrated-workflows-dHGoTE/summary.json",
+      "bytes": 1414,
+      "sha256": "919123e590b473a9018501a955e94562de14efe66f0f7c0d660c7aa0218e12a9"
+    },
+    {
+      "path": "r09-materialized-assets/2a64caf7-8682-4dc4-9c90-90065d5f8eae.pdf",
+      "bytes": 11324,
+      "sha256": "7507eb8ddade28c0f247949ba6f161caca7923aa0009e240f9ca914227e7b1e4"
+    },
+    {
+      "path": "r09-materialized-assets/db30303d-0674-4e6d-a751-6fc53a3aae55.svg",
+      "bytes": 389733,
+      "sha256": "3495565e7d88647b7420cf3d23d8ce2b5425490fca52e305177fb439bd191c0e"
+    },
+    {
+      "path": "r09-materialized-assets/6e57a58a-ffc4-4d36-9ca6-5c612d9d93ac.svg",
+      "bytes": 24332,
+      "sha256": "7b86ed9c662b335b7c41cf8356a74b2647a0b1212c634f10e55729a72058bd44"
+    }
+  ],
+  "selectionRejectedBeforeExecution": false,
+  "freshEapProcessing": false,
+  "providerDeliveryGrantExercised": false
+}
