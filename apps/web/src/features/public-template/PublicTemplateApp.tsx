@@ -2281,7 +2281,7 @@ export default function App() {
 
             {/* TAB 4: SMART AI TOOLS VIEW */}
             {activeTab === 'ai-tools' && (
-              <AIToolsPage tools={tools} detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)} searchAnchor={detailSearchAnchor} searchTerm={detailSearchTerm}
+              <AIToolsPage dataMode={publicDataMode} tools={tools} detailId={navigation.state.nestedDetailId} onDetailChange={(id) => navigation.field('nestedDetailId')[1](id)} searchAnchor={detailSearchAnchor} searchTerm={detailSearchTerm}
                 onBack={goBack}
                 onNavigateCategory={(category) => {
                   setFavoriteLaunch(null);
