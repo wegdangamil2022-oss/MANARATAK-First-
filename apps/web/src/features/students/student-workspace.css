@@ -59,16 +59,15 @@
   background-color: #28617a;
 }
 
-/* Account navigation: gold frames, not gold-filled cards.
-   The selected tab has a stronger frame; all interiors stay white in light mode
-   and indigo in the manually toggled dark mode. */
+/* Account navigation: gold borders for inactive tabs, navy borders for selected tabs.
+   All interiors remain white in light mode and indigo in dark mode. */
 .mn-student-workspace .mn-student-nav .mn-student-nav-tile {
   background-color: #ffffff;
   border-color: rgba(179, 128, 24, 0.72);
 }
 .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] {
   background-color: #ffffff;
-  border: 2px solid #B38018;
+  border: 2px solid #142B5F;
   color: #142B5F;
 }
 .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] svg {
@@ -81,7 +80,7 @@
 }
 .dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] {
   background-color: #10264A;
-  border: 2px solid #D6A43B;
+  border: 2px solid #142B5F;
   color: #F3F6F8;
 }
 .dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] svg {
