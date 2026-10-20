@@ -164,8 +164,8 @@ export function mapPublicUniversityDto(dto: PublicUniversityDto): University {
   };
 }
 
-function degreeLevels(value: string): DegreeLevel[] {
-  const normalized = value.toLowerCase();
+function degreeLevels(value: string | null | undefined): DegreeLevel[] {
+  const normalized = (value ?? '').toLowerCase();
   const result: DegreeLevel[] = [];
   if (/bachelor|undergraduate|بكالوريوس/.test(normalized)) result.push('بكالوريوس');
   if (/master|postgraduate|ماجستير/.test(normalized)) result.push('ماجستير');
