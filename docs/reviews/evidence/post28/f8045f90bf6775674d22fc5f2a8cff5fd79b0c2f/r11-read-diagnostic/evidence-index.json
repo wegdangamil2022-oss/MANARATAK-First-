@@ -1,0 +1,138 @@
+{
+  "kind": "R11_LOCAL_READ_EVIDENCE",
+  "retainedAt": "2026-10-20T16:43:18.626Z",
+  "retentionSourceSha": "f8045f90bf6775674d22fc5f2a8cff5fd79b0c2f",
+  "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "operatorHarnesses": [
+    {
+      "name": "run-r11-local-read.mjs",
+      "sha256": "586b3ea0d3bd6b90bdfab77778c418f6d0c26909a11066c601b7f723e621dbe6"
+    },
+    {
+      "name": "run-r11-scholarship-followup.mjs",
+      "sha256": "ea980c1824c7e2fab0392c2ac861ef095e3b9c15ce946a5863fb5e17ce916831"
+    }
+  ],
+  "files": [
+    {
+      "path": "search-completed-and-scholarship-aborted/dataset.json",
+      "bytes": 332537,
+      "sha256": "dc6e9b9b2eddc19c29fcd7e6d7b11a08ef815884ed652681fbe932b56ce390ab"
+    },
+    {
+      "path": "search-completed-and-scholarship-aborted/public-search-plan.json",
+      "bytes": 1391,
+      "sha256": "a22b8edb10db6f1d4ae3a93d488804365054e69f98785a6ce12ac5da7dbf8b12"
+    },
+    {
+      "path": "search-completed-and-scholarship-aborted/public-search-result.json",
+      "bytes": 20201,
+      "sha256": "5946b153f30beebe3abcb00602bf0cfe03630c75c05f47fafe82788e5ad7ad29"
+    },
+    {
+      "path": "search-completed-and-scholarship-aborted/public-search-preflight.json",
+      "bytes": 1723,
+      "sha256": "577abc326f96c5fa086777468a0469de6ee9c62f8bc8237ccc9dbb88a08e2414"
+    },
+    {
+      "path": "search-completed-and-scholarship-aborted/scholarship-filters-plan.json",
+      "bytes": 1402,
+      "sha256": "552c53af3bafffdd6ec93dba2a7fda9e49254cbb82a5ab82ffca322f3ae0d318"
+    },
+    {
+      "path": "search-completed-and-scholarship-aborted/scholarship-filters-result.json",
+      "bytes": 20132,
+      "sha256": "094d7773d3f4876ab0fbde16d62761939d3732c8c365ad55d5048283032ffaae"
+    },
+    {
+      "path": "search-completed-and-scholarship-aborted/scholarship-filters-preflight.json",
+      "bytes": 1661,
+      "sha256": "c8b873d4914b80c800515e66ad021b23d70cedf94bf028b2ab9b13e12b55540e"
+    },
+    {
+      "path": "search-completed-and-scholarship-aborted/result.json",
+      "bytes": 47998,
+      "sha256": "46a9ac549588554555eafd1c41ca5ad4f6a5571471e3281c792e63e7b95c7301"
+    },
+    {
+      "path": "search-completed-and-scholarship-aborted/cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "search-completed-and-scholarship-aborted/api.log",
+      "bytes": 75344,
+      "sha256": "c8f66c3274f280bb4f3348c836d7bc4b0a920887351668c205682bb464119554"
+    },
+    {
+      "path": "scholarship-completed/dataset.json",
+      "bytes": 332537,
+      "sha256": "32a0e94c8996ba9ecb4ac527b13e4a84440b1b11c3dae04c2aa8c04e931b57b2"
+    },
+    {
+      "path": "scholarship-completed/scholarship-filters-plan.json",
+      "bytes": 1814,
+      "sha256": "1993e0f5f8f0fe819608a278a92db4616f1e40a2440a3eb31bc18805ab0c514e"
+    },
+    {
+      "path": "scholarship-completed/scholarship-filters-result.json",
+      "bytes": 10604,
+      "sha256": "608ecd7c4c6c8e3d7ed1736b2e65871c1ae8da78757e7c6b2da76aa6e95f76e6"
+    },
+    {
+      "path": "scholarship-completed/scholarship-filters-preflight.json",
+      "bytes": 1661,
+      "sha256": "c8b873d4914b80c800515e66ad021b23d70cedf94bf028b2ab9b13e12b55540e"
+    },
+    {
+      "path": "scholarship-completed/result.json",
+      "bytes": 13145,
+      "sha256": "86bba1b2189506de616bf1d3943d3a25dd54c9cb69244c010d8219419790994f"
+    },
+    {
+      "path": "scholarship-completed/cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "scholarship-completed/api.log",
+      "bytes": 24996,
+      "sha256": "7f85d5d94cc81e5e611ca2b9120c046a6208799f5cd3a7ddca471b99d1414014"
+    },
+    {
+      "path": "two-rps-rate-limit-abort/public-search-plan.json",
+      "bytes": 1392,
+      "sha256": "b670efd286b74f06d8a371783b6b44be6221dd32443a56eac675c9bac294c761"
+    },
+    {
+      "path": "two-rps-rate-limit-abort/public-search-result.json",
+      "bytes": 23953,
+      "sha256": "34a48b957efd2b903ce53380fb5e29ca1319ad18c0326e9d6c4ad31737e54c07"
+    },
+    {
+      "path": "two-rps-rate-limit-abort/cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "initial-header-contract-abort/public-search-result.json",
+      "bytes": 998,
+      "sha256": "29c1bec5242686449f3c516afaa3b71a48a931018f4117597c2855b25510266e"
+    },
+    {
+      "path": "initial-header-contract-abort/cleanup.json",
+      "bytes": 82,
+      "sha256": "b6281905daeb75646d9ec1d6de95ec8eb04a8195f0336b311723b4c586619c63"
+    },
+    {
+      "path": "previous-source-ci.json",
+      "bytes": 5930,
+      "sha256": "7833957fb6dc0e75ad3960380dbc2a05478d9fa89b64bdb589e055983c2d65e8"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 2369,
+      "sha256": "c25edd5fd63d05db6911fcb91bc19642811b759bf5ee2d32c4ab563309bcbe21"
+    }
+  ]
+}

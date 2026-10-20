@@ -1,0 +1,40 @@
+{
+  "kind": "R11_BOUNDED_READ_DIAGNOSTIC",
+  "sourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "status": "ABORTED",
+  "abortReason": "SOURCE_SHA_MISMATCH",
+  "route": "/api/v1/search/public",
+  "query": "?q=R09&locale=en&limit=20",
+  "elapsedSeconds": 0.4075988999999972,
+  "sampleCount": 1,
+  "p50Ms": 6.107899999995425,
+  "p95Ms": 6.107899999995425,
+  "p99Ms": 6.107899999995425,
+  "throughput": 2.453392293256942,
+  "transferBytes": 1159,
+  "errorCount": 1,
+  "timeoutCount": 0,
+  "observations": [
+    {
+      "status": 200,
+      "latencyMs": 6.107899999995425,
+      "bytes": 1159,
+      "timedOut": false,
+      "failed": true
+    }
+  ],
+  "resources": [
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 176693248,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T16:29:26.877Z",
+      "ageMs": 0
+    }
+  ],
+  "concurrency": 1,
+  "maximumRequestsPerSecond": 2,
+  "productionAcceptance": false,
+  "representativeLaunchDataset": false,
+  "sloAcceptance": false
+}

@@ -117,3 +117,5 @@ R10 operational continuation: actual API/Web/Admin recovery on restored DB verif
 R10 delivery update: all 23 check runs passed at c8afe5f (push 39451932873, PR 39451943225), including artifact retrieval and actual Linux runtime. The majors warning was independently verified fixed in the browser; original RTO/RPO were not repeated. Evidence-only followup retains exact source attribution. Actual provider controls remain unprovisioned.
 
 R11 preparation: corrected load evidence acceptance for missing/nonfinite duration, invalid fixture identity and conflicting duplicate categories. Seven workload categories and outstanding budget/dataset requirements are recorded in POST28_R11_PREPARATION_2026-10-20.md. No load or SLO acceptance claimed; R10 provider controls remain open.
+
+R11: actual bounded API read diagnostics completed: public search 60 samples and scholarship text filtering 30 samples. Raw rate-limit aborts retained, existing limiter unchanged, all new labs stopped. Small synthetic data and five remaining categories prevent full SLO acceptance. See POST28_R11_LOCAL_READ_DIAGNOSTIC_2026-10-20.md.

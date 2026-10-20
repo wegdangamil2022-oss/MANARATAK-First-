@@ -54,3 +54,10 @@ test('R11 invalid API readiness revision prevents workload requests', async t =>
   const result = await runBoundedReadProbe({ ...plan(url), sourceSha: 'b'.repeat(40) }, { sampleResources: healthy });
   assert.equal(result.abortReason, 'SOURCE_READINESS_INVALID'); assert.equal(requests, 0);
 });
+
+test('R11 response body timeout is counted even after response headers arrive', async t => {
+  const url = await server(t, (_req, res) => { res.writeHead(200); res.write('unfinished'); });
+  const result = await runBoundedReadProbe({ ...plan(url), timeoutMs: 100 }, { sampleResources: healthy });
+  assert.equal(result.abortReason, 'REQUEST_TIMEOUT'); assert.equal(result.timeoutCount, 1);
+  assert.equal(result.errorCount, 1);
+});
