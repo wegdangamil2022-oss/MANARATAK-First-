@@ -6,7 +6,7 @@ vi.mock('../../apps/admin/src/api/client',()=>({adminApiClient:api}));
 vi.mock('../../apps/admin/src/i18n/I18nProvider',()=>({useTranslation:()=>({t:(key:string)=>key})}));
 vi.mock('@manaratak/shared',()=>({canAccessAdminPath:()=>false,firstAllowedAdminPath:()=>'/cms'}));
 let tree:ReactTestRenderer|undefined;
-beforeEach(()=>{api.request.mockReset();(globalThis as any).IS_REACT_ACT_ENVIRONMENT=true;});
+beforeEach(()=>{api.request.mockReset();(globalThis as typeof globalThis & {IS_REACT_ACT_ENVIRONMENT:boolean}).IS_REACT_ACT_ENVIRONMENT=true;});
 afterEach(async()=>{if(tree)await act(async()=>tree!.unmount());tree=undefined;});
 
 it('blocks submission while initial session verification can cancel pending requests',async()=>{

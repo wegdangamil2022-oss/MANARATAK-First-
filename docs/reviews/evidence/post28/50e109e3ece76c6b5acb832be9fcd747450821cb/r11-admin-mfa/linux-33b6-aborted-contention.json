@@ -1,0 +1,31 @@
+{
+  "kind": "R11_LINUX_STUDENT_CONTENTION_DIAGNOSTIC",
+  "sourceSha": "33b6daa41ed162e35461961aa39d92119c6d640c",
+  "status": "ABORTED",
+  "platform": "linux",
+  "pairs": [],
+  "resources": [
+    {
+      "api": {
+        "cpuPercent": 0.01,
+        "residentMemoryBytes": 149841510.4
+      },
+      "postgres": {
+        "cpuPercent": 0.02,
+        "residentMemoryBytes": 159383552
+      },
+      "applicationConnections": 6
+    }
+  ],
+  "durationSeconds": 60,
+  "maximumPairs": 10,
+  "maximumConcurrentMutations": 2,
+  "expectedConflicts": 0,
+  "unexpectedErrors": 1,
+  "poolWaitMs": null,
+  "poolWaitReason": "No driver pool checkout timing hook; query round trip is recorded separately",
+  "representativeLaunchDataset": false,
+  "sloAcceptance": false,
+  "productionAcceptance": false,
+  "failure": "R11_CONTENTION_INVARIANT_OR_DEPENDENCY_FAILED"
+}

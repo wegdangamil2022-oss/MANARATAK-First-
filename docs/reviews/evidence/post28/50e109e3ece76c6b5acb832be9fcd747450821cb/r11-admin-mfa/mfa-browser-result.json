@@ -1,0 +1,193 @@
+{
+  "status": "COMPLETED_SYNTHETIC_MFA_LOGIN_DIAGNOSTIC",
+  "sourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+  "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "adminBuiltBundle": true,
+  "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+  "mixedSourceLocalDiagnostic": true,
+  "cleanReleaseCandidate": false,
+  "httpsCertificateSpkiPinned": true,
+  "ignoreHTTPSErrors": false,
+  "passwordWithoutOtpRejected": 401,
+  "validOtpLogin": 200,
+  "otpReplayRejected": 401,
+  "adminCmsReadRendered": true,
+  "sessionMfaFresh": true,
+  "logoutRevoked": true,
+  "historicalRowsPreserved": true,
+  "role": {
+    "role": "post28_r11_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "network": [
+    {
+      "path": "/admin/login",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/cms",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/navigation",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/redirects",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/announcements",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/blocks",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/mfa",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/logout",
+      "status": 200,
+      "method": "POST"
+    }
+  ],
+  "pageErrors": [],
+  "totpFixture": "Preconfirmed encrypted credential for a new synthetic identity; enrollment UI not exercised",
+  "fullCmsLifecycle": false,
+  "sloAcceptance": false,
+  "productionAcceptance": false
+}

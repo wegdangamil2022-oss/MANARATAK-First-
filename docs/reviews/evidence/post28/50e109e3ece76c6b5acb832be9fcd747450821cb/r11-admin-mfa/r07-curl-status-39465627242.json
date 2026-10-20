@@ -1,0 +1,330 @@
+{
+  "id": 39465627242,
+  "sha": "4aed744292ce9bd1a1698f006aa18c894bcac160",
+  "status": "completed",
+  "result": "failure",
+  "observedAt": "2026-10-20T17:31:47.406Z",
+  "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39465627242",
+  "jobs": [
+    {
+      "id": 118778171035,
+      "name": "R08 isolated Redis and Linux worker shutdown",
+      "status": "completed",
+      "result": "success",
+      "check": "https://api.github.com/repos/wegdangamil2022-oss/MANARATAK-First-/check-runs/118778171035",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Run npm ci",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Exercise actual Linux process signals and absolute deadline",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Provision new restricted Redis and exercise counter and health isolation",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Retain scoped Redis diagnostic receipt",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Exercise only new refund recovery and timeout cases in a new PG16 lab",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Retain new provider fault proof without lab credentials",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "result": "success"
+        }
+      ]
+    },
+    {
+      "id": 118778171605,
+      "name": "Full source closure gates",
+      "status": "completed",
+      "result": "failure",
+      "check": "https://api.github.com/repos/wegdangamil2022-oss/MANARATAK-First-/check-runs/118778171605",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Use Node.js",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Validate branch naming",
+          "status": "completed",
+          "result": "skipped"
+        },
+        {
+          "name": "Validate commit messages",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Source quality and cycle/accessibility gate",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Cross-cutting source preflight",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "CI and migration source regression contracts",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Install local Nginx contract fixture",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Authoritative registered source-closure manifest",
+          "status": "completed",
+          "result": "failure"
+        },
+        {
+          "name": "Prisma source schema validate and client generation",
+          "status": "completed",
+          "result": "skipped"
+        },
+        {
+          "name": "Typecheck all referenced workspaces",
+          "status": "completed",
+          "result": "skipped"
+        },
+        {
+          "name": "Verify Vercel TypeScript configuration and compilation",
+          "status": "completed",
+          "result": "skipped"
+        },
+        {
+          "name": "Lint source",
+          "status": "completed",
+          "result": "skipped"
+        },
+        {
+          "name": "Build all required applications and packages",
+          "status": "completed",
+          "result": "skipped"
+        },
+        {
+          "name": "Unit and source integration tests",
+          "status": "completed",
+          "result": "skipped"
+        },
+        {
+          "name": "Build deterministic immutable release artifacts",
+          "status": "completed",
+          "result": "skipped"
+        },
+        {
+          "name": "Upload immutable release artifacts",
+          "status": "completed",
+          "result": "skipped"
+        },
+        {
+          "name": "Write P12 source CI evidence",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Upload P12 source CI evidence",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Post Use Node.js",
+          "status": "completed",
+          "result": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "result": "success"
+        }
+      ]
+    },
+    {
+      "id": 118778171719,
+      "name": "Translation quality gates",
+      "status": "completed",
+      "result": "success",
+      "check": "https://api.github.com/repos/wegdangamil2022-oss/MANARATAK-First-/check-runs/118778171719",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Use Node.js",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Install dependencies",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Run source-only translation quality gates",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Post Use Node.js",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "result": "success"
+        }
+      ]
+    },
+    {
+      "id": 118778173498,
+      "name": "Deployment configuration",
+      "status": "completed",
+      "result": "success",
+      "check": "https://api.github.com/repos/wegdangamil2022-oss/MANARATAK-First-/check-runs/118778173498",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Validate Docker Compose configuration",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "result": "success"
+        }
+      ]
+    },
+    {
+      "id": 118779127965,
+      "name": "Retrieve and verify immutable artifacts from Actions storage",
+      "status": "completed",
+      "result": "skipped",
+      "check": "https://api.github.com/repos/wegdangamil2022-oss/MANARATAK-First-/check-runs/118779127965",
+      "steps": []
+    },
+    {
+      "id": 118779128758,
+      "name": "Linux x64 review image and native runtime",
+      "status": "completed",
+      "result": "skipped",
+      "check": "https://api.github.com/repos/wegdangamil2022-oss/MANARATAK-First-/check-runs/118779128758",
+      "steps": []
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12285081803,
+      "name": "r08-redis-diagnostic-4aed744292ce9bd1a1698f006aa18c894bcac160",
+      "digest": "sha256:8ec265a18b1ef25334f8c3ac7bb93a2075adfe83a0422ac05192b25447d8b241",
+      "size": 667,
+      "expired": false
+    },
+    {
+      "id": 12284563033,
+      "name": "r08-provider-faults-4aed744292ce9bd1a1698f006aa18c894bcac160",
+      "digest": "sha256:c7eee4f73fb9620d023b888d03dc598ed1cabb11ead24e27bff7d614c1e9b282",
+      "size": 11957,
+      "expired": false
+    },
+    {
+      "id": 12284368543,
+      "name": "p12-full-source-ci-closure",
+      "digest": "sha256:ab7c5e611d9137f7191ddfb07986316be32a8bb2b0e37b6f8722fb335f3bd532",
+      "size": 1086,
+      "expired": false
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"sourceSha":"50e109e3ece76c6b5acb832be9fcd747450821cb","output":"C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\r11-admin-fix-50e109e3ece76c6b5acb832be9fcd747450821cb","adminRebuilt":true,"apiRebuilt":false,"webRebuilt":false,"reason":"Admin login bootstrap race fix; mixed-version local diagnostic, not release candidate"}

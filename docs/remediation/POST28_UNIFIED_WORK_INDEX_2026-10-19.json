@@ -194,17 +194,26 @@
     {
       "id": "R11",
       "state": "SEVEN_LOCAL_DIAGNOSTIC_CATEGORIES_RECORDED_FULL_SLO_OPEN",
-      "latestReport": "docs/remediation/POST28_R11_LOCAL_SCENARIO_DIAGNOSTIC_2026-10-20.md",
+      "latestReport": "docs/remediation/POST28_R11_LINUX_ADMIN_FOLLOWUP_2026-10-20.md",
       "configuration": "config/testing/r11-load-preparation.json",
       "baselineSourceSha": "79055e7634ad33fe221872d58770d48c2ed09e58",
       "acceptanceEvidenceValidationHardened": true,
       "formalAcceptance": false,
       "productionAcceptance": false,
       "loadExecuted": true,
-      "latestEvidence": "docs/reviews/evidence/post28/399f816506677c3cdf14e79103f4c854d6416b2d/r11-scenario-diagnostic/evidence-index.json",
+      "latestEvidence": "docs/reviews/evidence/post28/50e109e3ece76c6b5acb832be9fcd747450821cb/r11-admin-mfa/evidence-index.json",
       "loadScope": "TWO_READ_AND_FIVE_PARTIAL_SCENARIO_DIAGNOSTICS_SMALL_SYNTHETIC_DATASET",
       "representativeLaunchDataset": false,
-      "scenarioSourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d"
+      "scenarioSourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+      "adminMfaBuiltLoginDiagnostic": true,
+      "adminLoginBootstrapRaceFixedAt": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+      "adminMfaEnrollmentUiTested": false,
+      "fullCmsBuiltLifecycleTested": false,
+      "linuxContention": {
+        "implementedAt": "4aed744292ce9bd1a1698f006aa18c894bcac160",
+        "sourceGuardFixedAt": "33b6daa41ed162e35461961aa39d92119c6d640c",
+        "execution": "FIRST_ATTEMPT_ABORTED_LOGIN_429_ORDER_FIX_PENDING_CI"
+      }
     }
   ],
   "validation": {

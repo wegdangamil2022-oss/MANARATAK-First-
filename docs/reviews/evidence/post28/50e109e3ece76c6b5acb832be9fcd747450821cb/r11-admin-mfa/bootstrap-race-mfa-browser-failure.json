@@ -1,0 +1,52 @@
+{
+  "message": "page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\"",
+  "stack": "page.waitForResponse: Timeout 30000ms exceeded while waiting for event \"response\"\n    at loginResponse (C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\r11-admin-mfa-worker.mjs:26:31)\n    at C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\r11-admin-mfa-worker.mjs:27:13",
+  "network": [
+    {
+      "path": "/admin/login",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-BBQmrKnX.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    }
+  ],
+  "pageErrors": []
+}

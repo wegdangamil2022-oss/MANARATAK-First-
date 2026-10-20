@@ -1,14 +1,23 @@
 {
   "version": 1,
   "kind": "POST28_R11_LOAD_PREPARATION",
-  "status": "PREPARATION_ONLY_NOT_EXECUTED",
+  "status": "LOCAL_DIAGNOSTICS_RECORDED_FORMAL_LOAD_PREPARATION_OPEN",
   "sourceBaseline": "79055e7634ad33fe221872d58770d48c2ed09e58",
   "environment": "NEW_ISOLATED_SYNTHETIC_DB_L_REQUIRED",
-  "runtimeTarget": { "os": "linux", "arch": "x64", "nodeMajor": 22, "postgresMajor": 16 },
+  "runtimeTarget": {
+    "os": "linux",
+    "arch": "x64",
+    "nodeMajor": 22,
+    "postgresMajor": 16
+  },
   "externalProviderEffectsAllowed": false,
   "productionAllowed": false,
   "formalAcceptance": false,
-  "approval": { "approvedBy": null, "approvedAt": null, "decisionRef": null },
+  "approval": {
+    "approvedBy": null,
+    "approvedAt": null,
+    "decisionRef": null
+  },
   "dataset": {
     "fixture": null,
     "manifestSha256": null,
@@ -28,32 +37,91 @@
   },
   "categoryContract": {
     "requiredBeforeExecution": [
-      "scenarioRef", "payloadSha256", "cacheMode", "warmupSeconds", "durationSeconds",
-      "minimumSamples", "requestsPerSecond", "maximumConcurrency", "maximumP99Ms",
-      "maximumErrorRatio", "maximumTimeoutRatio", "maximumQueueLagMs"
+      "scenarioRef",
+      "payloadSha256",
+      "cacheMode",
+      "warmupSeconds",
+      "durationSeconds",
+      "minimumSamples",
+      "requestsPerSecond",
+      "maximumConcurrency",
+      "maximumP99Ms",
+      "maximumErrorRatio",
+      "maximumTimeoutRatio",
+      "maximumQueueLagMs"
     ],
     "requiredObservations": [
-      "p50Ms", "p95Ms", "p99Ms", "sampleCount", "throughput", "errorCount", "timeoutCount",
-      "poolWaitMs", "activeConnections", "cpuPercent", "residentMemoryBytes", "queryCosts",
-      "transferBytes", "rateLimitBehavior", "queueLagMs", "oldestDueMs", "drain", "leaseLosses"
+      "p50Ms",
+      "p95Ms",
+      "p99Ms",
+      "sampleCount",
+      "throughput",
+      "errorCount",
+      "timeoutCount",
+      "poolWaitMs",
+      "activeConnections",
+      "cpuPercent",
+      "residentMemoryBytes",
+      "queryCosts",
+      "transferBytes",
+      "rateLimitBehavior",
+      "queueLagMs",
+      "oldestDueMs",
+      "drain",
+      "leaseLosses"
     ],
     "limitsMustPrecedeMeasurement": true,
     "missingMeasurementsAreNotZero": true,
     "minimumDurationSecondsFromExistingAcceptanceContract": 60
   },
   "categories": [
-    { "id": "public-search", "approvedBudget": null, "measuredRecord": null },
-    { "id": "scholarship-filters", "approvedBudget": null, "measuredRecord": null },
-    { "id": "student-writes", "approvedBudget": null, "measuredRecord": null },
-    { "id": "admin-scans", "approvedBudget": null, "measuredRecord": null },
-    { "id": "imports", "approvedBudget": null, "measuredRecord": null },
-    { "id": "finance-stub", "approvedBudget": null, "measuredRecord": null },
-    { "id": "worker-queues", "approvedBudget": null, "measuredRecord": null }
+    {
+      "id": "public-search",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "scholarship-filters",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "student-writes",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "admin-scans",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "imports",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "finance-stub",
+      "approvedBudget": null,
+      "measuredRecord": null
+    },
+    {
+      "id": "worker-queues",
+      "approvedBudget": null,
+      "measuredRecord": null
+    }
   ],
   "executionBlockers": [
     "Representative launch dataset and volume not established",
     "Per-category SLO and workload budgets not established",
-    "Lab resource ceilings and abort policy not established",
+    "Full SLO resource ceilings not established; bounded local diagnostic ceilings exist separately",
     "DB-L and candidate-bound runtime not provisioned for load"
-  ]
+  ],
+  "localDiagnosticEvidence": {
+    "readCategories": "docs/reviews/evidence/post28/f8045f90bf6775674d22fc5f2a8cff5fd79b0c2f/r11-read-diagnostic/evidence-index.json",
+    "scenarioCategories": "docs/reviews/evidence/post28/399f816506677c3cdf14e79103f4c854d6416b2d/r11-scenario-diagnostic/evidence-index.json",
+    "adminMfa": "docs/reviews/evidence/post28/50e109e3ece76c6b5acb832be9fcd747450821cb/r11-admin-mfa/evidence-index.json",
+    "representativeLaunchDataset": false,
+    "sloAcceptance": false
+  }
 }

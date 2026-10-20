@@ -107,6 +107,26 @@ try{
   const context=await browser.newContext({ignoreHTTPSErrors:false,viewport:{width:1440,height:1000}});
   const blocked=new Set();await context.route('**/*',route=>{const target=new URL(route.request().url());if(target.origin===origin||['data:','blob:'].includes(target.protocol))return route.continue();blocked.add(target.origin);return route.abort();});
   const page=await context.newPage();page.on('pageerror',error=>pageErrors.push(redact(error.message)));page.on('console',message=>{if(message.type()==='error')consoleErrors.push(redact(message.text()).slice(0,400));});page.on('response',response=>{const target=new URL(response.url());if(target.origin===origin)network.push({method:response.request().method(),path:target.pathname,status:response.status(),resource:response.request().resourceType()});});
+  if(r11Diagnostic){
+    // A static same-origin document avoids SPA bootstrap requests consuming this diagnostic's budget.
+    // Run the bounded 60-second diagnostic before the separate public browsing workload.
+    await page.goto(origin+'/health/build');
+    const request=input=>page.evaluate(async input=>{
+      const headers={'content-type':'application/json',...(input.csrf?{'x-csrf-token':input.csrf}:{}),...(input.key?{'idempotency-key':input.key}:{})};
+      const response=await fetch(input.path,{method:input.method,headers,credentials:'include',redirect:'error',signal:AbortSignal.timeout(2000),...(input.body?{body:JSON.stringify(input.body)}:{})});
+      return {status:response.status,body:await response.json(),csrf:response.headers.get('x-csrf-token'),sourceSha:response.headers.get('x-manaratak-source-sha')};
+    },input);
+    const sampleResources=async()=>{
+      for(const id of [apiId,state.containerId])assert.equal(JSON.parse(docker(['inspect',id]))[0].Config.Labels['codex.post28.run'],state.runId);
+      const rows=docker(['stats','--no-stream','--format','{{json .}}',apiId,state.containerId]).split('\n').map(line=>JSON.parse(line));
+      const find=id=>{const row=rows.find(r=>id.startsWith(r.ID));assert(row);return dockerResourceSample(row);};
+      const [connections]=await db.$queryRaw`SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname=current_database() AND usename=current_user`;
+      return {api:find(apiId),postgres:find(state.containerId),applicationConnections:connections.n};
+    };
+    report.r11Diagnostic=await runLinuxStudentContention({origin,sourceSha:sha,fixtureId,email,password,request,db,sampleResources,
+      record:value=>fs.writeFileSync(path.join(proof,'r11-contention.json'),JSON.stringify(value,null,2)+'\n',{flag:'wx'})});
+    observations.push({step:'R11_TWO_CONCURRENT_WRITES_ONE_PERSISTED_WINNER_AND_REPLAY',passed:true});
+  }
   if(combined){
     report.combinedAuth=await combined.exercise({page,origin,email,password,db,fixtureId});
     observations.push({step:'TWO_BUILT_APIS_SHARED_PG_REDIS_TLS_AUTH',passed:true});report.redisConfigured=true;
@@ -134,24 +154,6 @@ try{
   const logout=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/auth/logout'&&response.request().method()==='POST');await page.locator('button[title="تسجيل الخروج من الحساب"]').first().click();assert.equal((await logout).status(),200);await page.waitForURL(origin+'/');
   assert.equal(await db.sessionRecord.count({where:{identityId:fixtureId,revokedAt:null}}),0);assert.equal(await page.evaluate(async()=>{const response=await fetch('/api/v1/auth/me',{credentials:'include'});return response.status;}),401);observations.push({step:'UI_LOGOUT_PERSISTENT_SESSION_REVOKED',status:401});
   assert.equal(network.filter(row=>row.status>=500).length,0);report.redisConfigured=false;
-  }
-  if(r11Diagnostic){
-    await page.goto(origin+'/login');
-    const request=input=>page.evaluate(async input=>{
-      const headers={'content-type':'application/json',...(input.csrf?{'x-csrf-token':input.csrf}:{}),...(input.key?{'idempotency-key':input.key}:{})};
-      const response=await fetch(input.path,{method:input.method,headers,credentials:'include',redirect:'error',signal:AbortSignal.timeout(2000),...(input.body?{body:JSON.stringify(input.body)}:{})});
-      return {status:response.status,body:await response.json(),csrf:response.headers.get('x-csrf-token'),sourceSha:response.headers.get('x-manaratak-source-sha')};
-    },input);
-    const sampleResources=async()=>{
-      for(const id of [apiId,state.containerId])assert.equal(JSON.parse(docker(['inspect',id]))[0].Config.Labels['codex.post28.run'],state.runId);
-      const rows=docker(['stats','--no-stream','--format','{{json .}}',apiId,state.containerId]).split('\n').map(line=>JSON.parse(line));
-      const find=id=>{const row=rows.find(r=>id.startsWith(r.ID));assert(row);return dockerResourceSample(row);};
-      const [connections]=await db.$queryRaw`SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname=current_database() AND usename=current_user`;
-      return {api:find(apiId),postgres:find(state.containerId),applicationConnections:connections.n};
-    };
-    report.r11Diagnostic=await runLinuxStudentContention({origin,sourceSha:sha,fixtureId,email,password,request,db,sampleResources,
-      record:value=>fs.writeFileSync(path.join(proof,'r11-contention.json'),JSON.stringify(value,null,2)+'\n',{flag:'wx'})});
-    observations.push({step:'R11_TWO_CONCURRENT_WRITES_ONE_PERSISTED_WINNER_AND_REPLAY',passed:true});
   }
   assert.equal(pageErrors.length,0);report.blockedExternalOrigins=[...blocked];report.tls={certificateSha256:hash(ca),hostnameVerified:true,exactCertificateSpkiPinned:true,ignoreHTTPSErrors:false};report.freshUnpackedThreeUnits=true;report.apiBootedInImage=true;report.databaseConnected=true;report.workersEnabled=false;
 }catch(error){failure=redact(error.message);process.exitCode=1;}
