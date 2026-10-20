@@ -170,11 +170,24 @@ export function acceptanceDetails(evidence, sha) {
   )
     failures.push('RESTORE_OBJECTIVES_UNVERIFIED');
   const rollback = evidence.gates?.find((gate) => gate.id === 'rollback');
+  const rollbackBudget = rollback?.canaryBudget;
   if (
     rollback?.expandContractCompatible !== true ||
+    rollback?.previousApiCompatible !== true ||
     rollback?.previousWorkerCompatible !== true ||
+    typeof rollback?.previousSourceSha !== 'string' || !SHA.test(rollback.previousSourceSha) ||
+    rollback.previousSourceSha === sha ||
+    typeof rollback?.previousApiArtifactSha256 !== 'string' || !/^[0-9a-f]{64}$/.test(rollback.previousApiArtifactSha256) ||
+    typeof rollback?.previousWorkerArtifactSha256 !== 'string' || !/^[0-9a-f]{64}$/.test(rollback.previousWorkerArtifactSha256) ||
     rollback?.ledgerPreserved !== true ||
-    !rollback?.incidentOwner
+    typeof rollback?.incidentOwner !== 'string' || !rollback.incidentOwner.trim() ||
+    typeof rollbackBudget?.approvedBy !== 'string' || !rollbackBudget.approvedBy.trim() ||
+    !Number.isSafeInteger(rollbackBudget?.maximumRequests) || rollbackBudget.maximumRequests < 1 ||
+    !Number.isSafeInteger(rollbackBudget?.maximumConcurrency) || rollbackBudget.maximumConcurrency < 1 ||
+    rollbackBudget.maximumConcurrency > rollbackBudget.maximumRequests ||
+    !Number.isFinite(rollbackBudget?.durationSeconds) || rollbackBudget.durationSeconds <= 0 ||
+    !Number.isSafeInteger(rollbackBudget?.maximumUnexpectedErrors) || rollbackBudget.maximumUnexpectedErrors < 0 ||
+    rollbackBudget.maximumUnexpectedErrors > rollbackBudget.maximumRequests
   )
     failures.push('ROLLBACK_COMPATIBILITY_UNVERIFIED');
   const scenarios = [

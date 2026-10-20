@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "scope": "LOCAL_API_STOP_START_ROLLBACK_PREPARATION",
+  "currentCandidateSha": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+  "previousCandidateSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "previousWorkerPackaging": "Embedded polling runtime in the API artifact; source equality alone does not prove runtime compatibility",
+  "unitsAllowedForRehearsal": ["api"],
+  "unitsExcludedFromRollback": ["admin", "web"],
+  "deploymentMode": "STOP_START_ONLY_NO_OVERLAPPING_API_PROCESSES",
+  "incidentOwner": "Delegated project manager, isolated local diagnostic only",
+  "canaryBudget": {
+    "approvedBy": "Delegated project manager under owner authorization, local diagnostic only",
+    "maximumRequests": 24,
+    "maximumConcurrency": 1,
+    "durationSeconds": 60,
+    "maximumUnexpectedErrors": 0
+  },
+  "maximumApiReadinessWaitSeconds": 15,
+  "maximumDrainWaitSeconds": 20,
+  "target": "NEW_ISOLATED_SYNTHETIC_POSTGRES16_CLUSTER_ONLY",
+  "protectedTables": [
+    "FinancialLedgerEntryRecord", "FinancialTransactionRecord", "FinancialAccountRecord",
+    "FinanceInvoiceRecord", "FinancePaymentRecord", "FinanceWalletRecord", "FinanceWalletHoldRecord",
+    "FinanceCommandRecord", "StudentPrivacyConsentDecision", "StudentApplicationDocumentBinding",
+    "CmsPublishedContent", "AuditRecord", "TransactionalOutboxRecord", "ApiIdempotencyRecord"
+  ],
+  "requiredRuntimeProof": [
+    "current-and-previous-artifacts-available-and-digest-verified",
+    "same-reviewed-forward-schema-with-no-down-migration",
+    "current-api-process-stopped-before-previous-api-starts",
+    "fixed-loopback-routing-and-private-synthetic-key-continuity",
+    "previous-api-preserves-session-csrf-and-replays-new-receipt-without-another-effect",
+    "historical-protected-rows-and-financial-counts-preserved",
+    "previous-worker-drain-lease-and-newer-event-receipt-compatibility-tested-separately"
+  ],
+  "formalCanaryApproved": false,
+  "previousApiRuntimeCompatible": false,
+  "previousWorkerRuntimeCompatible": false,
+  "rehearsalExecuted": false,
+  "formalR12Acceptance": false,
+  "productionAllowed": false,
+  "externalProviderEffectsAllowed": false,
+  "downMigrationsAllowed": false,
+  "deleteReceiptsOrLedgerAllowed": false,
+  "r11FormalExceptionsRemainOpen": true
+}

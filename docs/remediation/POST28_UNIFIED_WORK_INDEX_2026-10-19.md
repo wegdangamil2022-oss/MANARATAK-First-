@@ -131,3 +131,5 @@ R11 wire contract correction at 0402c97f6b5e93e7810a1053c6a43f0d410961f5: match 
 R11 Linux push 39475394144 at 4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b: complete runtime and contention diagnostic verified from digest-matched artifact; 10 winners, 10 expected version conflicts, durable replay, zero unexpected errors and confirmed cleanup. Full SLO acceptance remains open.
 
 R11 practical diagnostic scope closed with documented exceptions at validated candidate 4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b. Push 39475394144 succeeded; all 23 observed check runs succeeded; Linux contention and cleanup verified from digest-matched artifacts. Formal SLO and production acceptance remain OPEN. See POST28_R11_PRACTICAL_CLOSEOUT_2026-10-20.md and .json.
+
+R12 started: rollback evidence gate now requires previous API compatibility, identified prior source and API/worker digests, a real incident-owner string and a bounded approved canary record. Previous API/worker source is unchanged between c8afe5f and 4b8e22f; previous Admin excluded. Current artifact transfer failed through two channels; no runtime or database action taken. See POST28_R12_PREPARATION_2026-10-20.md.
