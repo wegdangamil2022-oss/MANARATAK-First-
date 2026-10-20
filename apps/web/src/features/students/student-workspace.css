@@ -59,33 +59,42 @@
   background-color: #28617a;
 }
 
-/* Account navigation: gold borders for inactive tabs, navy borders for selected tabs.
-   All interiors remain white in light mode and indigo in dark mode. */
+/* Exact student navigation contract, shared by preview and real workspace:
+ * Light: selected = solid navy box + navy border, non-selected = white + navy border.
+ * Dark: selected = solid gold box + gold border, non-selected = navy + gold border.
+ * The selected tab follows aria-current when students switch sections.
+ */
 .mn-student-workspace .mn-student-nav .mn-student-nav-tile {
   background-color: #ffffff;
-  border-color: rgba(179, 128, 24, 0.72);
+  border: 1px solid rgba(20, 43, 95, 0.60);
+  color: #29404B;
 }
 .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] {
-  background-color: #ffffff;
+  background-color: #142B5F;
   border: 2px solid #142B5F;
-  color: #142B5F;
+  color: #ffffff;
 }
 .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] svg {
-  color: #142B5F;
+  color: #ffffff;
+}
+.mn-student-workspace .mn-student-nav .mn-student-nav-tile:not([aria-current='page']):hover {
+  background-color: #F5F8F8;
+  border-color: #142B5F;
 }
 .dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile {
   background-color: #10264A;
-  border-color: rgba(214, 164, 59, 0.75);
+  border: 1px solid rgba(214, 164, 59, 0.75);
   color: #EEF4F6;
 }
 .dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] {
-  background-color: #10264A;
-  border: 2px solid #142B5F;
-  color: #F3F6F8;
+  background-color: #D6A43B;
+  border: 2px solid #D6A43B;
+  color: #142B5F;
 }
 .dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile[aria-current='page'] svg {
-  color: #F3F6F8;
+  color: #142B5F;
 }
-.dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile:hover {
+.dark .mn-student-workspace .mn-student-nav .mn-student-nav-tile:not([aria-current='page']):hover {
   background-color: #183456;
+  border-color: #D6A43B;
 }
