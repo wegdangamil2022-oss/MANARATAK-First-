@@ -98,7 +98,9 @@ check('MNT-AUD-0066', 'provider-neutral DR contract, readiness and restore drill
     exists('scripts/recovery/verify-runtime-backup-readiness.mjs') &&
     exists('docs/operations/PLATFORM_DISASTER_RECOVERY_RUNBOOK.md') &&
     requireAll(verifier, ['RECOVERY_SOURCE_CONTRACT=PASS', 'REQUIRED_BEFORE_PRODUCTION']) &&
-    requireAll(drill, ['pg_restore', 'test:database', 'RESTORE_DRILL.json']) &&
+    requireAll(drill, ['pg_restore', 'verifyDatabaseSnapshot', 'databaseSentinel', 'RESTORE_DRILL.json']) &&
+    !drill.includes('test:database') &&
+    read('scripts/recovery/DatabaseSnapshot.mjs').includes('SET TRANSACTION READ ONLY') &&
     requireAll(workflow, ['schedule:', 'recovery:runtime:readiness', 'recovery:restore:drill']);
 });
 
