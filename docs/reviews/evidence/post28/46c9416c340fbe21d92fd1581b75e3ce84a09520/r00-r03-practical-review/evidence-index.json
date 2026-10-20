@@ -1,0 +1,46 @@
+{
+  "kind": "POST28_R00_R03_PRACTICAL_REVIEW_INDEX",
+  "sourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+  "files": [
+    {
+      "path": "b13-current-result.json",
+      "bytes": 12495,
+      "sha256": "d9efad7940463e20676e8e2cd9caa8ede25c32513a551a3d2c39c11ac2bcaca3"
+    },
+    {
+      "path": "baseline.json",
+      "bytes": 1738,
+      "sha256": "5680dd8530e270fb48761b8ba45c9d56be78ee1efab46439c2ffb83efa8fe625"
+    },
+    {
+      "path": "catalog-and-reuse.json",
+      "bytes": 2339,
+      "sha256": "d98b810bbe0ec4444ab5a01bac0c00ed2a7a35abf7ec7e51b698091425e840a2"
+    },
+    {
+      "path": "ci-current-tooling-observed.json",
+      "bytes": 323,
+      "sha256": "d405c26d93881dbad1369fa9e00ea0b3ad3578b01c85b4dea8ac84793002fd75"
+    },
+    {
+      "path": "ci-previous-delivery.json",
+      "bytes": 15082,
+      "sha256": "6f1a34514319e1e3d27d6155a2cbbccc10f6eea78eb9925d813241f0acacbf75"
+    },
+    {
+      "path": "fresh-greenfield-lab.json",
+      "bytes": 3805,
+      "sha256": "f198a7c65ffbeda8b6ab37011c65172eab62ac814aa98330f9b7185134a6f74b"
+    },
+    {
+      "path": "fresh-lab-operator.mjs.txt",
+      "bytes": 4241,
+      "sha256": "516fb08e45998b84cc9282cac9f037b07beb59fadb9d419e8888d5989f04a473"
+    },
+    {
+      "path": "profile-unit-results.json",
+      "bytes": 613,
+      "sha256": "83cf4790f475feff5f6e393ff0c25d7024e51a814b3ba0699ee50b04b5d04111"
+    }
+  ]
+}

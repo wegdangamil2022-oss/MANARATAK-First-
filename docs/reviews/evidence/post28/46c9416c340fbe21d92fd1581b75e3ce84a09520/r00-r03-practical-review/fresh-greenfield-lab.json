@@ -1,0 +1,134 @@
+{
+  "kind": "POST28_R03_FRESH_GREENFIELD_REVIEW",
+  "sourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+  "startedAt": "2026-10-20T21:23:21.181Z",
+  "existingDatabasesTouched": false,
+  "businessMigrationsApplied": false,
+  "providerCallsMade": false,
+  "applicationStarted": false,
+  "runId": "7971ad34-ce02-4f91-983d-05b13c11d60d",
+  "postgresVersion": "postgres (PostgreSQL) 16.15",
+  "emptyPairPreflight": {
+    "kind": "POST28_READ_ONLY_TARGET_PREFLIGHT",
+    "sourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+    "runId": "7971ad34-ce02-4f91-983d-05b13c11d60d",
+    "targets": [
+      {
+        "label": "DB-G",
+        "database": "manaratak_post28_greenfield_test",
+        "role": "post28_migrator",
+        "serverIdentity": "7698863747596022816",
+        "databaseOid": "16387",
+        "postgresMajor": 16,
+        "timezone": "UTC",
+        "publicTables": 0,
+        "probeReadOnly": true
+      },
+      {
+        "label": "DB-S",
+        "database": "manaratak_post28_shadow_test",
+        "role": "post28_shadow",
+        "serverIdentity": "7698863747596022816",
+        "databaseOid": "16469",
+        "postgresMajor": 16,
+        "timezone": "UTC",
+        "publicTables": 0,
+        "probeReadOnly": true
+      }
+    ],
+    "pass": true,
+    "runtimeExecutionAuthorized": false
+  },
+  "identities": [
+    {
+      "database": "manaratak_post28_greenfield_test",
+      "role": "post28_migrator",
+      "sessionRole": "post28_migrator",
+      "databaseOid": "16387",
+      "serverIdentity": "7698863747596022816",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "probeReadOnly": true,
+      "superuser": false,
+      "createRole": false,
+      "createDatabase": false,
+      "replication": false,
+      "bypassRls": false,
+      "privilegedMembership": false,
+      "globalWrite": false,
+      "databaseOwner": false,
+      "databaseCreate": false,
+      "schemaCreate": true,
+      "publicTables": 0,
+      "unvalidatedConstraints": 0,
+      "invalidIndexes": 0
+    },
+    {
+      "database": "manaratak_post28_shadow_test",
+      "role": "post28_shadow",
+      "sessionRole": "post28_shadow",
+      "databaseOid": "16469",
+      "serverIdentity": "7698863747596022816",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "probeReadOnly": true,
+      "superuser": false,
+      "createRole": false,
+      "createDatabase": false,
+      "replication": false,
+      "bypassRls": false,
+      "privilegedMembership": false,
+      "globalWrite": false,
+      "databaseOwner": false,
+      "databaseCreate": false,
+      "schemaCreate": true,
+      "publicTables": 0,
+      "unvalidatedConstraints": 0,
+      "invalidIndexes": 0
+    },
+    {
+      "database": "manaratak_post28_greenfield_test",
+      "role": "post28_app",
+      "sessionRole": "post28_app",
+      "databaseOid": "16387",
+      "serverIdentity": "7698863747596022816",
+      "postgresMajor": 16,
+      "timezone": "UTC",
+      "probeReadOnly": true,
+      "superuser": false,
+      "createRole": false,
+      "createDatabase": false,
+      "replication": false,
+      "bypassRls": false,
+      "privilegedMembership": false,
+      "globalWrite": false,
+      "databaseOwner": false,
+      "databaseCreate": false,
+      "schemaCreate": false,
+      "publicTables": 0,
+      "unvalidatedConstraints": 0,
+      "invalidIndexes": 0
+    }
+  ],
+  "crossDatabaseDenials": [
+    {
+      "case": "migrator_to_shadow",
+      "connectionDenied": true
+    },
+    {
+      "case": "shadow_to_greenfield",
+      "connectionDenied": true
+    },
+    {
+      "case": "app_to_shadow",
+      "connectionDenied": true
+    }
+  ],
+  "pass": true,
+  "cleanup": {
+    "ownedClusterStopped": true,
+    "postmasterPidRemoved": true,
+    "privateLabRetainedOutsideGit": true
+  },
+  "finishedAt": "2026-10-20T21:23:32.008Z"
+}

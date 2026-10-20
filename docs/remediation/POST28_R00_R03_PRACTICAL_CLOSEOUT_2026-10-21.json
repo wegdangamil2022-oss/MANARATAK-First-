@@ -1,0 +1,36 @@
+{
+  "kind": "POST28_R00_R03_PRACTICAL_CLOSEOUT",
+  "localDate": "2026-10-21",
+  "timezone": "Asia/Aden",
+  "sourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+  "branch": "feat/post28-r07-artifact-preparation",
+  "authorization": "OWNER_REQUEST_COMPLETE_IMPORTANT_GAPS_R00_THROUGH_R03_DEFER_EXPENSIVE_FORMAL_CLOSURE",
+  "status": "PRACTICAL_SCOPE_CLOSED_WITH_DOCUMENTED_EXCEPTIONS",
+  "stages": [
+    {"id":"R00","practicalScopeComplete":true,"scope":"Fetched heads, baseline diff, capabilities, preparation responsibility map and effect boundaries","formalComprehensiveAcceptance":false},
+    {"id":"R01","practicalScopeComplete":true,"scope":"Actual previous-delivery CI readback, current native B13 source tests and directly affected lab regression checks","formalComprehensiveAcceptance":false},
+    {"id":"R02","practicalScopeComplete":true,"scope":"Tooling and producer linkage review, historical catalog structure and retained proof digest verification","formalComprehensiveAcceptance":false},
+    {"id":"R03","practicalScopeComplete":true,"scope":"New empty native PostgreSQL16 greenfield/shadow pair, ordinary app role and cross-database connection denials, owned shutdown","formalComprehensiveAcceptance":false}
+  ],
+  "tests": {"b13":{"executed":63,"passed":63,"failed":0,"skipped":0},"labProfileAndNativePolicy":{"executed":13,"passed":13,"failed":0,"skipped":0,"newCases":2},"crossDatabaseConnectionDenials":3},
+  "previousDeliveryCi": {"sourceSha":"d1c379df7b3013aff17c60109ebf15f56e6aa8b7","runId":39496759696,"result":"success","passedJobs":6},
+  "currentToolingCi": {"sourceSha":"46c9416c340fbe21d92fd1581b75e3ce84a09520","runId":39501061767,"lastObservedStatus":"in_progress","result":null,"acceptanceAssumed":false},
+  "evidence":"docs/reviews/evidence/post28/46c9416c340fbe21d92fd1581b75e3ce84a09520/r00-r03-practical-review/evidence-index.json",
+  "exceptions": [
+    {"id":"E01","remaining":"Full task/section27/matrix owner curation and launch market/language/provider budgets","blocksScopedLocalLab":false,"blocksFormalProductionAcceptance":true},
+    {"id":"E02","remaining":"Read actual final CI result for current tooling SHA","blocksScopedLocalLab":false,"blocksCurrentCandidateCiAcceptance":true},
+    {"id":"E03","remaining":"Authorized independent signing identities and required recovery approvals","blocksScopedLocalLab":false,"blocksProtectedPromotionOrRecovery":true},
+    {"id":"E04","remaining":"Approved actual host, storage, provider backup and final service/egress acceptance","blocksScopedLocalLab":false,"blocksUnprovenServiceActivationAndProductionAcceptance":true},
+    {"id":"E05","remaining":"Representative SLO, pool wait, comprehensive combinations and stress","blocksScopedLocalLab":false,"blocksCapacityClaimsAndFormalAcceptance":true}
+  ],
+  "historicalCatalogRewritten":false,
+  "sourceEvidenceRebound":false,
+  "independentApprovalFabricated":false,
+  "existingDatabasesTouched":false,
+  "businessMigrationsApplied":false,
+  "productionAcceptance":false,
+  "deploymentAuthorized":false,
+  "mainMerged":false,
+  "priorStageR04ThroughR13AcceptanceChanged":false,
+  "nextStageReview":"R04"
+}

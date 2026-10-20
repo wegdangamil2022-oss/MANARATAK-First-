@@ -41,24 +41,41 @@
   "stages": [
     {
       "id": "R00",
-      "state": "BASELINE_AND_INVENTORY_PRESENT_GENERAL_ACCEPTANCE_OPEN",
+      "state": "PRACTICAL_SCOPE_CLOSED_WITH_DOCUMENTED_EXCEPTIONS",
+      "practicalClosure": "docs/remediation/POST28_R00_R03_PRACTICAL_CLOSEOUT_2026-10-21.md",
+      "evidenceSourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+      "formalComprehensiveAcceptance": false,
       "reference": "docs/remediation/POST28_R00_BASELINE_2026-10-16.md",
       "laterDecisions": "docs/remediation/POST28_R06_DEC_POLICY_CONTINUATION_2026-10-16.md"
     },
     {
       "id": "R01",
-      "state": "SOURCE_FIXES_AND_EVIDENCE_PRESENT_REMOTE_CI_NOT_REVALIDATED",
+      "state": "PRACTICAL_SCOPE_CLOSED_WITH_DOCUMENTED_EXCEPTIONS",
+      "practicalClosure": "docs/remediation/POST28_R00_R03_PRACTICAL_CLOSEOUT_2026-10-21.md",
+      "evidenceSourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+      "targetedB13Passed": 63,
+      "verifiedPreviousDeliveryCi": {"sourceSha":"d1c379df7b3013aff17c60109ebf15f56e6aa8b7","runId":39496759696,"result":"success","passedJobs":6},
+      "formalComprehensiveAcceptance": false,
       "reference": "docs/remediation/POST28_R01_REVALIDATION_2026-10-16.md"
     },
     {
       "id": "R02",
-      "state": "SOURCE_GUARDS_AND_LOCAL_DB_EVIDENCE_PRESENT_FORMAL_COVERAGE_OPEN",
+      "state": "PRACTICAL_SCOPE_CLOSED_WITH_DOCUMENTED_EXCEPTIONS",
+      "practicalClosure": "docs/remediation/POST28_R00_R03_PRACTICAL_CLOSEOUT_2026-10-21.md",
+      "evidenceSourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+      "historicalCatalogChangedToPass": false,
+      "formalComprehensiveAcceptance": false,
       "reference": "docs/remediation/POST28_R02_REVALIDATION_2026-10-16.md",
       "laterDecisions": "docs/remediation/POST28_R06_DEC_POLICY_CONTINUATION_2026-10-16.md"
     },
     {
       "id": "R03",
-      "state": "LOCAL_ISOLATION_EVIDENCED_FULL_ENVIRONMENT_ACCEPTANCE_OPEN",
+      "state": "PRACTICAL_FRESH_EMPTY_GREENFIELD_SCOPE_CLOSED_WITH_EXCEPTIONS",
+      "practicalClosure": "docs/remediation/POST28_R00_R03_PRACTICAL_CLOSEOUT_2026-10-21.md",
+      "evidenceSourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+      "latestEvidence": "docs/reviews/evidence/post28/46c9416c340fbe21d92fd1581b75e3ce84a09520/r00-r03-practical-review/fresh-greenfield-lab.json",
+      "nativeGreenfieldSupported": true,
+      "formalComprehensiveAcceptance": false,
       "reference": "docs/remediation/POST28_LOCAL_R03_R04_EXECUTION_2026-10-16.md",
       "laterEvidence": "docs/reviews/evidence/post28/467d1369e8da0a93ea3444bc1ef6a56c5e53d57d/r04-closure/R03-app.json"
     },

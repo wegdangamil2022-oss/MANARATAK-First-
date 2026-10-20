@@ -1,0 +1,61 @@
+{
+  "kind": "POST28_R02_CATALOG_AND_PRODUCER_REVIEW",
+  "sourceSha": "46c9416c340fbe21d92fd1581b75e3ce84a09520",
+  "command": "node scripts/testing/verify-post28-readiness-inventory.mjs",
+  "exitCode": 0,
+  "relationships": 77,
+  "cases": 42,
+  "fixtureSpecifications": 13,
+  "taskHeadingCandidates": 679,
+  "decisions": 7,
+  "historicalCatalogRuntimeExecuted": false,
+  "historicalCatalogVerdict": "BLOCKED_PENDING_ACCEPTANCE_REQUIREMENTS",
+  "catalogRewrittenToPass": false,
+  "retainedR13Index": "docs/reviews/evidence/post28/92eb66e5ab572ab51f19c5db14ed3fa2329a3072/r13-practical-closeout/evidence-index.json",
+  "retainedFilesHashVerified": 15,
+  "evidenceRebound": false,
+  "producerFiles": [
+    {
+      "file": "scripts/database/run-post28-suite.mjs",
+      "sha256": "cbe6b74f9d47b943ee5dcf6f1d3e12cfd68393e2892a85c2a0a8f87247a20388"
+    },
+    {
+      "file": "config/testing/post28-database-suites.mjs",
+      "sha256": "623eed44952c63f6e73dfafdbeb07f83efa3ee07072f1e7de1f1273186577a6a"
+    },
+    {
+      "file": "scripts/database/post28-suite-policy.mjs",
+      "sha256": "500fdb7dab216e32d5c9d8a86997af36b700e925c5b093c90eb8afded8f6ca93"
+    },
+    {
+      "file": "scripts/database/post28-isolation.mjs",
+      "sha256": "cb2ce8c9aadcbe5a5d792406e05829c79ab340ae1fbb00fc80fda2d6481761ff"
+    },
+    {
+      "file": "scripts/release/post28-linux-artifact-runtime.mjs",
+      "sha256": "d85a198d28d6f0b4266ec6905b09c1385c11f57dae689f85261c0a3ae2a174b1"
+    },
+    {
+      "file": "scripts/release/post28-r08-redis-lab.mjs",
+      "sha256": "f41a37cb4abd0a279c715a13aade853c240c9439cb0736a90253e5257b179274"
+    },
+    {
+      "file": "scripts/release/post28-r08-provider-faults.mjs",
+      "sha256": "c35c7ac22c7dd399fb3cf13c56daf42df1be377d5ee6622db26885ce6bdebf4f"
+    },
+    {
+      "file": "scripts/recovery/run-whole-platform-restore-drill.mjs",
+      "sha256": "ba087bd3bfd95204744876f60df0ce04b9d8ff47ec9374f1c5a38bdcf621b28c"
+    },
+    {
+      "file": "scripts/release/inspect-post28-rollback-source.mjs",
+      "sha256": "0c8723aeee49f4cc6a8cb2a3c1e1537695307107d79dc931352751c3f1c3b05f"
+    },
+    {
+      "file": "scripts/release/verify-release-evidence.mjs",
+      "sha256": "77aafebc8637957ee4f7fb67dbde3068e97b94b5f9c47ed3cde35b9c19ddcb34"
+    }
+  ],
+  "sourceReviewOnly": true,
+  "fullMatrixAccepted": false
+}
