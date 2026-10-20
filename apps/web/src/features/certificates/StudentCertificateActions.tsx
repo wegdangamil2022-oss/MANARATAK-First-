@@ -38,6 +38,20 @@ export function StudentCertificateActions({
     const controller = new AbortController();
     requestRef.current = controller;
     try {
+      if (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype') {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="540" viewBox="0 0 900 540">
+          <rect width="900" height="540" fill="#f7f8fb"/><rect x="25" y="25" width="850" height="490" fill="none" stroke="#142B5F" stroke-width="4"/>
+          <text x="450" y="155" text-anchor="middle" font-size="38" fill="#142B5F" font-family="sans-serif">MANARATAK</text>
+          <text x="450" y="255" text-anchor="middle" font-size="45" fill="#B38018" font-family="sans-serif">DEMO / PREVIEW</text>
+          <text x="450" y="320" text-anchor="middle" font-size="25" fill="#142B5F" font-family="sans-serif">NOT A VALID CERTIFICATE</text>
+          <text x="450" y="388" text-anchor="middle" font-size="20" fill="#142B5F" font-family="sans-serif">Design-only visual placeholder</text>
+        </svg>`;
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        closePreview();
+        previewRef.current = URL.createObjectURL(blob);
+        setPreview(previewRef.current);
+        return;
+      }
       const grant = await ApiClient.getMyCertificateArtifactDeliveryGrant(
         certificate.id,
         'preview',
@@ -79,6 +93,10 @@ export function StudentCertificateActions({
     setBusy(true);
     setError('');
     try {
+      if (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype') {
+        setError(copy('معاينة فقط: لا توجد شهادة رسمية أو ملف PDF قابل للتنزيل. استخدم زر عرض الشهادة لتجربة التصميم.'));
+        return;
+      }
       const grant = await ApiClient.getMyCertificateArtifactDeliveryGrant(certificate.id, 'pdf');
       if (!/^https?:\/\//i.test(grant.url)) throw new Error(copy('رابط ملف الشهادة غير صالح.'));
       const response = await fetch(grant.url, { headers: grant.headers });
@@ -128,11 +146,12 @@ export function StudentCertificateActions({
             {previewBusy ? copy('جارٍ التحميل…') : copy('عرض الشهادة')}
           </button>
         )}
-        {verifyPath && (
-          <Link to={verifyPath} className="text-[var(--mn-secondary)] underline">
-            {copy('التحقق من الشهادة')}
-          </Link>
-        )}
+        {verifyPath && (import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? (
+          <button type="button" onClick={() => setError(copy('هذه شهادة توضيحية فقط؛ لا توجد شهادة رسمية للتحقق منها.'))}
+            className="text-[var(--mn-secondary)] underline">{copy('التحقق من الشهادة')}</button>
+        ) : (
+          <Link to={verifyPath} className="text-[var(--mn-secondary)] underline">{copy('التحقق من الشهادة')}</Link>
+        ))}
         {certificate.certificatePdfAssetId ? (
           <button
             type="button"
