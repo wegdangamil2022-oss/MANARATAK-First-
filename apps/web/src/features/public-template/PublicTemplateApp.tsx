@@ -233,6 +233,8 @@ export default function App() {
     }
     else if (section === 'login' || section === 'signup' || section === 'register' || section === 'verify-email' || section === 'forgot-password' || section === 'reset-password') patch = { activeTab: 'auth' };
     else if (section === 'student') patch = { activeTab: 'account' };
+    else if (section === 'favorites') patch = { activeTab: 'favorites' };
+    else if (section === 'tracker') patch = { activeTab: 'tracker' };
     else if (section === 'search') patch = { activeTab: 'search', selectedCategory: 'all', globalSearchQuery: params.get('q') || '' };
     else if (section === 'compare') patch = { activeTab: 'search', selectedCategory: 'all', isComparePage: true };
     else if (section === 'scholarships') {
@@ -644,6 +646,10 @@ export default function App() {
   const openSection = (target: string) => {
     setIsMenuOpen(false);
     setIsNotificationOpen(false);
+    if (publicDataMode === 'prototype' && target === 'notifications') {
+      setIsNotificationOpen(true);
+      return;
+    }
     if (publicDataMode === 'api' && target === 'notifications') {
       openStudentAccount('notifications');
       return;
@@ -2384,7 +2390,7 @@ export default function App() {
         }}
         favoritesCount={favoriteKeys.length}
         unreadNotificationsCount={unreadNotificationsCount}
-        isNotificationsOpen={false}
+        isNotificationsOpen={isNotificationOpen}
       />
 
       {/* Slide-out Navigation Drawer Menu */}
