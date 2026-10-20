@@ -1,0 +1,74 @@
+{
+  "kind": "POST28_R10_PREPARATION_EVIDENCE",
+  "sourceSha": "b53ce95404a96ab1fbcb45d08cdb11aacfc7a9ee",
+  "syntheticOnly": true,
+  "restoreExecuted": false,
+  "formalR10Acceptance": false,
+  "productionAcceptance": false,
+  "dumpRetainedOutsideGit": true,
+  "dumpSha256": "974537a01a7e11dfd14aac80fa296561d1d0f8c781165980012d4abd6316bd53",
+  "files": [
+    {
+      "path": "preparation-result.json",
+      "bytes": 1269,
+      "sha256": "65715b9b87dbd3f5446b18d9033852b63a06a45c3ca38ecc5759a9b8fa7ae62c"
+    },
+    {
+      "path": "database-snapshot.json",
+      "bytes": 45211,
+      "sha256": "64b89fb2c6093c56e9ba2994dc00f3adc3fa60bc3113202a2713b2235697783d"
+    },
+    {
+      "path": "asset-manifest.json",
+      "bytes": 48438,
+      "sha256": "c34adbe2f86b04524f560e83ed8ca88917e3184b08aab610d2f74ac4d9f6135f"
+    },
+    {
+      "path": "restore-list.json",
+      "bytes": 367,
+      "sha256": "5fd33e32555017ae1d2489f7ffb8df7084fddfcebf50db9069fdd06ca34ccfe4"
+    },
+    {
+      "path": "restore-target-preparation.json",
+      "bytes": 956,
+      "sha256": "32f2b3ae52b7833515d3c227f6b188d40f3df05f64e86556d40f6aeaef610a8c"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 128,
+      "sha256": "8ca462dccd08b781548f9f189b44791af840c0c8904b4e6f38bedc06b7c0da9c"
+    },
+    {
+      "path": "initialize.log",
+      "bytes": 4064,
+      "sha256": "81759f552bea9c992a6066bb39e51f17372d108be861fb6c5408a6073bbfd6b8"
+    },
+    {
+      "path": "R06-setup/result.json",
+      "bytes": 5022,
+      "sha256": "c2555e717d42118219042c326c793f743fb3bd0b8ff77e99b421ed897609250b"
+    },
+    {
+      "path": "R06-setup/checks.json",
+      "bytes": 1393,
+      "sha256": "764267e9e5a2d59113d78492603624440d1244611e88564052ef90261660f871"
+    },
+    {
+      "path": "earlier-preparation/native-pg16-lZJkGD-cleanup.json",
+      "bytes": 128,
+      "sha256": "c4130ec7ebd9a83d017df62af05adf085b223638b489334f65781158f1764fb1"
+    },
+    {
+      "path": "earlier-preparation/native-pg16-zbX4uH-cleanup.json",
+      "bytes": 128,
+      "sha256": "8ca462dccd08b781548f9f189b44791af840c0c8904b4e6f38bedc06b7c0da9c"
+    }
+  ],
+  "limits": [
+    "NO_RESTORE_PARITY_YET",
+    "NO_MEASURED_EVENT_RPO_OR_INTEGRATED_SERVICE_RTO",
+    "NO_PITR_OR_PROVIDER_BACKUP_CONTROLS",
+    "NO_TLS_OR_SIGNED_TWO_PARTY_AUTHORIZATION_YET",
+    "INERT_ASSET_BYTES_ONLY"
+  ]
+}

@@ -155,13 +155,25 @@
     },
     {
       "id": "R09",
-      "state": "FIVE_SCOPED_SHARED_WORKFLOWS_PASS_FORMAL_R09_OPEN",
+      "state": "PRACTICAL_SCOPE_CLOSED_OWNER_ACCEPTED_DOCUMENTED_EXCEPTIONS",
       "reference": "docs/remediation/POST28_R08_R09_PREPARATION_2026-10-16.md",
       "laterEvidence": "docs/remediation/POST28_R06_R07_PRACTICAL_HANDOFF_2026-10-19.md",
       "latestReport": "docs/remediation/POST28_R09_RENDER_WITHDRAWAL_2026-10-20.md",
       "latestEvidence": "docs/reviews/evidence/post28/d4ffe62a4b00a9154de541f120be16e1317dd000/r09-shared-workflows/native-pg16-rhG4J6/evidence-index.json",
       "latestEvidenceSourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
-      "formalAcceptance": "OPEN_MANDATORY_CHAINS_AND_DOMAIN_MATRIX"
+      "formalAcceptance": "OPEN_COMPREHENSIVE_SCOPE_PRODUCTION_NOT_AUTHORIZED",
+      "latestCandidateCiSourceSha": "d4ffe62a4b00a9154de541f120be16e1317dd000",
+      "latestCandidateCiState": "PASS_ALL_23_CHECKS",
+      "ownerPriorityDecision": "OWNER_ACCEPTS_PRACTICAL_CLOSURE_WITHOUT_FULL_MATRIX_ACCEPTANCE"
+    },
+    {
+      "id": "R10",
+      "state": "PREPARATION_AND_READ_ONLY_VERIFIER_COMPLETE_RESTORE_NOT_EXECUTED",
+      "latestReport": "docs/remediation/POST28_R10_PREPARATION_2026-10-20.md",
+      "latestEvidence": "docs/reviews/evidence/post28/b53ce95404a96ab1fbcb45d08cdb11aacfc7a9ee/r10-preparation/evidence-index.json",
+      "latestEvidenceSourceSha": "b53ce95404a96ab1fbcb45d08cdb11aacfc7a9ee",
+      "formalAcceptance": "OPEN_RESTORE_NOT_EXECUTED",
+      "productionAcceptance": false
     }
   ],
   "validation": {

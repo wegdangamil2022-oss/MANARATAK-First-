@@ -9,3 +9,4 @@ packages/domain/src/academic-taxonomy/isced-f-baseline.ts -text
 vendor/awilix-core/** -text whitespace=cr-at-eol
 # Retained R09 workflow receipts are hashed before Git staging.
 docs/reviews/evidence/post28/*/r09-shared-workflows/** -text
+docs/reviews/evidence/post28/*/r10-preparation/** -text

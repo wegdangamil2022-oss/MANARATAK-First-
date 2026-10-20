@@ -1,0 +1,22 @@
+{
+  "kind": "POST28_R10_EMPTY_TARGET_PREPARATION",
+  "sourceSha": "b53ce95404a96ab1fbcb45d08cdb11aacfc7a9ee",
+  "serverIdentity": "7698752688182075744",
+  "database": "manaratak_restore_51405a2b7d87bb6d9bde90c8f1bb0862",
+  "role": "manaratak_restore_runner",
+  "targetFingerprint": "0ba5c4edc29ceccdd2f248ecc96ce2e54eded85d29a07b6a22fcd17e4e41b2a0",
+  "sourceDatabaseFingerprint": "f1f7494895508105f8817efbf12bfe3e6207ac0cf9a60f35d285c6a38ea7a975",
+  "disposableInstanceId": "4de5f84f-8dd5-49b6-9444-cb453f8e4f96",
+  "host": "127.0.0.1",
+  "port": "49432",
+  "sourceAndTargetDatabaseDistinct": true,
+  "sourceAndTargetServerSameDisposableCluster": true,
+  "bootstrapCreatedSentinel": true,
+  "restoreRoleHasSentinelSelectOnly": true,
+  "restoreRoleUsedForQueries": false,
+  "restoreExecuted": false,
+  "authorizationSigned": false,
+  "independentApprovals": [],
+  "productionIdentityConfigured": false,
+  "transport": "LOCAL_PG16_TLS_NOT_YET_CONFIGURED"
+}

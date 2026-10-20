@@ -1,0 +1,38 @@
+{
+  "kind": "POST28_R10_SNAPSHOT_PREPARATION",
+  "sourceSha": "b53ce95404a96ab1fbcb45d08cdb11aacfc7a9ee",
+  "syntheticOnly": true,
+  "postgresMajor": 16,
+  "role": {
+    "role": "manaratak_snapshot_reader",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "ddl": false
+  },
+  "tableCount": 282,
+  "rows": 175,
+  "snapshotSha256": "343be085021c703f668038256da32e2ad82888017e3220fd5c3b3684f5b6db5c",
+  "snapshotId": "snapshot_0b68304a160cc52af380f7cd8708a6d2",
+  "capturedAt": "2026-10-20T14:12:42.834Z",
+  "dumpSha256": "974537a01a7e11dfd14aac80fa296561d1d0f8c781165980012d4abd6316bd53",
+  "dumpBytes": 1044110,
+  "sourceUnchangedDuringDump": true,
+  "restoredDumpParityVerified": false,
+  "restoreListContractPassed": true,
+  "verified": {
+    "databaseSnapshotMatched": true,
+    "assetReferencesMatched": true,
+    "databaseSnapshotSha256": "343be085021c703f668038256da32e2ad82888017e3220fd5c3b3684f5b6db5c",
+    "tableCount": 282,
+    "assetCount": 1,
+    "readOnly": true
+  },
+  "writeDenied": true,
+  "tamperRejected": true,
+  "assetFixture": "INERT_SYNTHETIC_RECOVERY_BYTES_NOT_DELIVERABLE_OR_EAP_ACCEPTANCE",
+  "restoreExecuted": false,
+  "formalR10Acceptance": false,
+  "productionAcceptance": false
+}
