@@ -1,5 +1,7 @@
+import { PreviewStudentApiClient } from './studentWorkspacePreviewApi';
+const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
 import { useEffect, useRef, useState } from 'react';
-import { ApiClient, type StudentServicePackageDto } from '../../api/client';
+import { ApiClient as LiveApiClient, type StudentServicePackageDto } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 type Slot = { id: string; startsAt: string; timezone: string };
 export function StudentServiceBookingPanel({ requestId }: { requestId: string }) {
