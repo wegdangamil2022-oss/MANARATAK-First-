@@ -916,7 +916,7 @@ function SummaryView({
   const attentionPanel = urgentAlerts.hasUrgent ? (
       <section
         aria-label="أمور تحتاج انتباه الطالب"
-        className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden border-y border-[var(--mn-border)] bg-white dark:bg-[#09152F] text-[#142B5F] dark:text-[#F4F9FC] text-right font-['Cairo',sans-serif]"
+        className="mn-student-attention relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden border-y border-[var(--mn-border)] bg-white dark:bg-[#09152F] text-[#142B5F] dark:text-[#F4F9FC] text-right font-['Cairo',sans-serif]"
       >
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
         <div className="relative z-10 px-3 py-3.5 sm:px-5 sm:py-4">
@@ -926,7 +926,7 @@ function SummaryView({
           </div>
           <div className="mt-3 space-y-2">
             {urgentAlerts.criticalDeadlines.slice(0, 2).map((tracker) => (
-              <div key={tracker.id} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 dark:border-[#55B5B4]/65 border-r-[3px] border-r-[#0E7C86] dark:border-r-[#55CBC5] bg-white dark:bg-[#142B4E] px-2.5 py-2 shadow-2xs">
+              <div key={tracker.id} className="mn-student-attention-card flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 dark:border-[#55B5B4]/65 border-r-[3px] border-r-[#0E7C86] dark:border-r-[#55CBC5] bg-white dark:bg-[#142B4E] px-2.5 py-2 shadow-2xs">
                 <div className="min-w-0 flex-1">
                   <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[#142B5F] dark:text-[#F2F7FA]">موعد تقديم قريب</h3>
                   <p className="mt-0.5 text-[11px] sm:text-xs leading-4 text-[#526A71] dark:text-[#CCDFE4]">
@@ -934,13 +934,13 @@ function SummaryView({
                   </p>
                 </div>
                 <button type="button" onClick={() => setTab('OPPORTUNITIES')}
-                  className="shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}>
+                  className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}>
                   متابعة
                 </button>
               </div>
             ))}
             {urgentAlerts.pendingInvoices.slice(0, 1).map((inv) => (
-              <div key={inv.id} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 dark:border-[#55B5B4]/65 border-r-[3px] border-r-[#0E7C86] dark:border-r-[#55CBC5] bg-white dark:bg-[#142B4E] px-2.5 py-2 shadow-2xs">
+              <div key={inv.id} className="mn-student-attention-card flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 dark:border-[#55B5B4]/65 border-r-[3px] border-r-[#0E7C86] dark:border-r-[#55CBC5] bg-white dark:bg-[#142B4E] px-2.5 py-2 shadow-2xs">
                 <div className="min-w-0 flex-1">
                   <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[#142B5F] dark:text-[#F2F7FA]">
                     {inv.status === 'OVERDUE' ? 'فاتورة متأخرة' : 'فاتورة مستحقة'}
@@ -952,14 +952,14 @@ function SummaryView({
                 <button
                   type="button"
                   onClick={() => onTogglePayments(inv.id)}
-                  className="shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}
+                  className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}
                 >
                   تفاصيل الفاتورة
                 </button>
               </div>
             ))}
             {urgentAlerts.unread.slice(0, 2).map((n) => (
-              <div key={n.id} className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 dark:border-[#55B5B4]/65 border-r-[3px] border-r-[#0E7C86] dark:border-r-[#55CBC5] bg-white dark:bg-[#142B4E] px-2.5 py-2 shadow-2xs">
+              <div key={n.id} className="mn-student-attention-card flex min-w-0 items-center justify-between gap-2 rounded-lg border border-[#0E7C86]/50 dark:border-[#55B5B4]/65 border-r-[3px] border-r-[#0E7C86] dark:border-r-[#55CBC5] bg-white dark:bg-[#142B4E] px-2.5 py-2 shadow-2xs">
                 <div className="min-w-0 flex-1">
                   <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[#142B5F] dark:text-[#F2F7FA]">{n.title}</h3>
                   <p className="mt-0.5 text-[11px] sm:text-xs leading-4 text-[#526A71] dark:text-[#CCDFE4]">{n.message}</p>
@@ -967,7 +967,7 @@ function SummaryView({
                 <button
                   type="button"
                   onClick={() => setTab('NOTIFICATIONS')}
-                  className="shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}
+                  className="mn-student-attention-action shrink-0 whitespace-nowrap rounded-md border border-[#0E7C86]/35 dark:border-[#55B5B4]/65 bg-[#EEF7F7] dark:bg-[#1D4461] px-2 py-0.5 text-[12px] leading-4 font-semibold text-[#142B5F] dark:text-[#F2FAFA] hover:bg-[#DDEFEF] dark:hover:bg-[#28617A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86] cursor-pointer font-['Cairo',sans-serif]" style={{ fontSize: '12px', lineHeight: '16px', paddingBlock: '3px', paddingInline: '8px' }}
                 >
                   عرض
                 </button>
