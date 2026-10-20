@@ -916,59 +916,58 @@ function SummaryView({
   const attentionPanel = urgentAlerts.hasUrgent ? (
       <section
         aria-label="أمور تحتاج انتباه الطالب"
-        className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden border-y border-[#D6A43B]/35 text-right font-['Cairo',sans-serif]"
-        style={{ backgroundImage: 'linear-gradient(105deg, #142B5F 0%, #142B5F 71%, #184366 88%, #0E7C86 100%)' }}
+        className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden border-y border-[var(--mn-border)] bg-white text-[#142B5F] text-right font-['Cairo',sans-serif]"
       >
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
-        <div className="relative z-10 p-3.5 sm:p-5">
-          <div className="flex items-center gap-2.5 font-bold text-white">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/60 bg-[#D6A43B]/15"><Bell className="h-4 w-4 text-[#EAC775]" /></span>
-            <h2 className="text-[14.5px] sm:text-base font-bold text-white">يحتاج انتباهك</h2>
+        <div className="relative z-10 px-3 py-3.5 sm:px-5 sm:py-4">
+          <div className="flex items-center gap-2.5 font-bold text-[#142B5F]">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/60 bg-[#142B5F]"><Bell className="h-4 w-4 text-[#EAC775]" /></span>
+            <h2 className="text-[14.5px] sm:text-base font-bold text-[#142B5F]">يحتاج انتباهك</h2>
           </div>
           <div className="mt-3 space-y-2">
             {urgentAlerts.criticalDeadlines.slice(0, 2).map((tracker) => (
-              <div key={tracker.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[#D6A43B]/45 bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs">
+              <div key={tracker.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[#52C4BE]/55 bg-[#116E7C] px-3 py-2.5 shadow-2xs">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[var(--mn-heading)]">موعد تقديم قريب</h3>
-                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[var(--mn-text-muted)]">
+                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-white">موعد تقديم قريب</h3>
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[#E3F6F4]">
                     {trackerDisplayName(tracker)} — {formatDate(tracker.deadlineAt)}
                   </p>
                 </div>
                 <button type="button" onClick={() => setTab('OPPORTUNITIES')}
-                  className="shrink-0 rounded-lg border border-[#142B5F]/20 bg-[#142B5F]/5 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-[#142B5F] dark:text-[#E5B54F] hover:bg-[#142B5F]/10 cursor-pointer">
+                  className="shrink-0 whitespace-nowrap rounded-lg border border-white/85 bg-white px-2.5 py-1.5 text-[12px] font-bold leading-5 text-[#142B5F] hover:bg-[#E9F6F6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white cursor-pointer font-['Cairo',sans-serif]">
                   متابعة
                 </button>
               </div>
             ))}
             {urgentAlerts.pendingInvoices.slice(0, 1).map((inv) => (
-              <div key={inv.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs">
+              <div key={inv.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[#52C4BE]/55 bg-[#116E7C] px-3 py-2.5 shadow-2xs">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[var(--mn-heading)]">
+                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-white">
                     {inv.status === 'OVERDUE' ? 'فاتورة متأخرة' : 'فاتورة مستحقة'}
                   </h3>
-                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[var(--mn-text-muted)]">
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[#E3F6F4]">
                     {inv.invoiceNumber} ({formatMoney(inv.amountDue)})
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => onTogglePayments(inv.id)}
-                  className="shrink-0 rounded-lg border border-[#142B5F]/20 bg-[#142B5F]/5 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-[#142B5F] dark:text-[#E5B54F] hover:bg-[#142B5F]/10 cursor-pointer"
+                  className="shrink-0 whitespace-nowrap rounded-lg border border-white/85 bg-white px-2.5 py-1.5 text-[12px] font-bold leading-5 text-[#142B5F] hover:bg-[#E9F6F6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white cursor-pointer font-['Cairo',sans-serif]"
                 >
                   تفاصيل الفاتورة
                 </button>
               </div>
             ))}
             {urgentAlerts.unread.slice(0, 2).map((n) => (
-              <div key={n.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2.5 shadow-2xs">
+              <div key={n.id} className="flex min-w-0 items-center justify-between gap-2.5 rounded-xl border border-[#52C4BE]/55 bg-[#116E7C] px-3 py-2.5 shadow-2xs">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-[var(--mn-heading)]">{n.title}</h3>
-                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[var(--mn-text-muted)]">{n.message}</p>
+                  <h3 className="text-[13px] sm:text-[14px] font-bold leading-5 text-white">{n.title}</h3>
+                  <p className="mt-0.5 text-[11px] sm:text-xs leading-5 text-[#E3F6F4]">{n.message}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setTab('NOTIFICATIONS')}
-                  className="shrink-0 rounded-lg border border-[#142B5F]/20 bg-[#142B5F]/5 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-[#142B5F] dark:text-[#E5B54F] hover:bg-[#142B5F]/10 cursor-pointer"
+                  className="shrink-0 whitespace-nowrap rounded-lg border border-white/85 bg-white px-2.5 py-1.5 text-[12px] font-bold leading-5 text-[#142B5F] hover:bg-[#E9F6F6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white cursor-pointer font-['Cairo',sans-serif]"
                 >
                   عرض
                 </button>
@@ -989,38 +988,38 @@ function SummaryView({
           <button
             type="button"
             onClick={() => setTab('OPPORTUNITIES')}
-            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-2 sm:p-2.5 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
+            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-1.5 py-1.5 sm:px-2 sm:py-2 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
           >
-            <Route className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0.5 group-hover:scale-110 transition-transform" />
-            <div className="text-[17px] sm:text-lg leading-6 font-bold text-[var(--mn-heading)]">{activeMilestones.length}</div>
-            <div className="text-[12px] sm:text-[13px] font-bold leading-5 text-[var(--mn-text-muted)]">تقديمات نشطة</div>
+            <Route className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0 group-hover:scale-110 transition-transform" />
+            <div className="text-[15px] sm:text-base leading-5 font-bold text-[var(--mn-heading)]">{activeMilestones.length}</div>
+            <div className="text-[10px] sm:text-[11px] font-bold leading-4 text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">تقديمات نشطة</div>
           </button>
           <button
             type="button"
             onClick={() => setTab('LEARNING')}
-            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-2 sm:p-2.5 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
+            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-1.5 py-1.5 sm:px-2 sm:py-2 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
           >
-            <BookOpen className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0.5 group-hover:scale-110 transition-transform" />
-            <div className="text-[17px] sm:text-lg leading-6 font-bold text-[var(--mn-heading)]">{dashboard.statistics.activeCourses}</div>
-            <div className="text-[12px] sm:text-[13px] font-bold leading-5 text-[var(--mn-text-muted)]">دورات جارية</div>
+            <BookOpen className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0 group-hover:scale-110 transition-transform" />
+            <div className="text-[15px] sm:text-base leading-5 font-bold text-[var(--mn-heading)]">{dashboard.statistics.activeCourses}</div>
+            <div className="text-[10px] sm:text-[11px] font-bold leading-4 text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">دورات جارية</div>
           </button>
           <button
             type="button"
             onClick={() => setTab('VAULT')}
-            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-2 sm:p-2.5 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
+            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-1.5 py-1.5 sm:px-2 sm:py-2 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
           >
-            <Heart className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0.5 group-hover:scale-110 transition-transform" />
-            <div className="text-[17px] sm:text-lg leading-6 font-bold text-[var(--mn-heading)]">{dashboard.statistics.savedItems}</div>
-            <div className="text-[12px] sm:text-[13px] font-bold leading-5 text-[var(--mn-text-muted)]">عناصر محفوظة</div>
+            <Heart className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0 group-hover:scale-110 transition-transform" />
+            <div className="text-[15px] sm:text-base leading-5 font-bold text-[var(--mn-heading)]">{dashboard.statistics.savedItems}</div>
+            <div className="text-[10px] sm:text-[11px] font-bold leading-4 text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">عناصر محفوظة</div>
           </button>
           <button
             type="button"
             onClick={() => setTab('LEARNING')}
-            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-2 sm:p-2.5 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
+            className="group flex min-w-0 flex-col items-center justify-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] px-1.5 py-1.5 sm:px-2 sm:py-2 text-center shadow-2xs transition-all hover:border-[#142B5F]/50 hover:shadow-xs mn-panel cursor-pointer"
           >
-            <Award className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0.5 group-hover:scale-110 transition-transform" />
-            <div className="text-[17px] sm:text-lg leading-6 font-bold text-[var(--mn-heading)]">{dashboard.statistics.certificates}</div>
-            <div className="text-[12px] sm:text-[13px] font-bold leading-5 text-[var(--mn-text-muted)]">شهادات صادرة</div>
+            <Award className="w-4 h-4 mx-auto text-[#142B5F] dark:text-[#E5B54F] mb-0 group-hover:scale-110 transition-transform" />
+            <div className="text-[15px] sm:text-base leading-5 font-bold text-[var(--mn-heading)]">{dashboard.statistics.certificates}</div>
+            <div className="text-[10px] sm:text-[11px] font-bold leading-4 text-[var(--mn-text-muted)] font-['Cairo',sans-serif]">شهادات صادرة</div>
           </button>
         </div>
       )}
