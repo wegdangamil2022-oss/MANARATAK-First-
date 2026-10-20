@@ -739,7 +739,12 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
     >
       <div className="w-full max-w-4xl mx-auto mt-5 space-y-5">
         {error && <Alert tone="error" message={error} onClose={() => setError(null)} />}
-        {notice && <Alert tone="success" message={notice} onClose={() => setNotice(null)} />}
+        {import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' && (
+          <div role="status" className="rounded-xl border border-[#D6A43B]/40 bg-[#D6A43B]/10 p-3 text-xs leading-6 text-[var(--mn-heading)]">
+            معاينة حساب الطالب حسب مكونات الكود الأصلية: كل البيانات والأزرار للتصميم والتجربة فقط. لا يُرسل أي تعديل أو مستند إلى الخادم، وتُمسح تغييراتك عند إعادة تحميل الصفحة.
+          </div>
+        )}
+        {notice && <Alert tone="success" message={import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? 'تم تنفيذ الإجراء داخل المعاينة فقط؛ لم يتم حفظ أي بيانات حقيقية.' : notice} onClose={() => setNotice(null)} />}
         {sectionFailures.length > 0 && <div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">تعذر تحميل: {sectionFailures.join('، ')}. <button type="button" onClick={() => setRetryKey(value => value + 1)} className="font-bold underline">إعادة التحميل</button></div>}
         {dashboard.partialFailures.length > 0 && (
           <Alert
