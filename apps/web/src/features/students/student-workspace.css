@@ -132,3 +132,15 @@
   padding: 6px 12px;
   white-space: nowrap;
 }
+
+/* Summary section titles: gold line immediately touching the title box,
+   following the intrinsic text width rather than spanning the card. */
+.mn-student-workspace .mn-student-summary-heading {
+  display: inline-block;
+  width: max-content;
+  max-width: 100%;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  line-height: 1.22;
+  border-bottom: 2px solid #D6A43B;
+}
