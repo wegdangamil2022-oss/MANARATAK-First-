@@ -16,7 +16,7 @@
   "existingDatabasesTouched":false,
   "ownedLabStopped":true,
   "providerCallsMade":false,
-  "finalDeliveryCi":"NOT_YET_VERIFIED",
+  "finalDeliveryCi":{"sourceSha":"0ee961a7aa5a79d5bdf22406cfb88a18970ec03e","runId":39506916987,"result":"success","passedJobs":6,"evidence":"docs/reviews/evidence/post28/0ee961a7aa5a79d5bdf22406cfb88a18970ec03e/r07-current-closure/ci-completed.json"},
   "evidence":"docs/reviews/evidence/post28/1cade7f70033430a1fd79655007026b4c69fa75f/r06-current-admission/evidence-index.json",
   "productionAcceptance":false,
   "deploymentAuthorized":false,

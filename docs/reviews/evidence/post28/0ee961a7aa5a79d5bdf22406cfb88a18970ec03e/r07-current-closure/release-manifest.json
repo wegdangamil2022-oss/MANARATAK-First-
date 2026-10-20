@@ -1,0 +1,65 @@
+{
+  "version": 2,
+  "kind": "MANARATAK_IMMUTABLE_RELEASE",
+  "sourceSha": "0ee961a7aa5a79d5bdf22406cfb88a18970ec03e",
+  "nodeVersion": "v22.16.0",
+  "createdAt": "2026-10-20T22:26:51.337Z",
+  "artifacts": [
+    {
+      "unit": "api",
+      "file": "manaratak-api-0ee961a7aa5a79d5bdf22406cfb88a18970ec03e.tar",
+      "sha256": "86ea6fb08569187a94f2a9d4d774c544e989fa329f2f72552dcd3a2ffba09459",
+      "size": 31078400
+    },
+    {
+      "unit": "web",
+      "file": "manaratak-web-0ee961a7aa5a79d5bdf22406cfb88a18970ec03e.tar",
+      "sha256": "3ae51876fea0c67480db28a9bad92191823ef6fcc833e2db007b310d0d7604ab",
+      "size": 11653120
+    },
+    {
+      "unit": "admin",
+      "file": "manaratak-admin-0ee961a7aa5a79d5bdf22406cfb88a18970ec03e.tar",
+      "sha256": "167ffb1747499d6fce7c9ff3f13452c7240bb327c19d8b862c880d7bf1c1bfa2",
+      "size": 8355840
+    }
+  ],
+  "sbom": {
+    "file": "release-sbom.cdx.json",
+    "sha256": "e41b5d7f11901432beacfeef57d69602debcc6e4e357b9e152b5e5c277f9c099"
+  },
+  "sourceLedger": {
+    "taskInventorySha256": "643d2feb6493fa8c7ee285199399c94f2151c014ccf35c77ab7867c8e99ccb31",
+    "section27Closed": false
+  },
+  "runtimeRequirements": {
+    "nodeMajor": 22,
+    "lockSha256": "ffa6cc00dbb15ef8e637246c690cfaa73f287aa1e8a6c7e9e94f8eed5daa3735",
+    "prismaSchemaSha256": "4cd2360304039023bf2f50304b098c5bfd044221ba7a4019c2f27ec2c9a01d59",
+    "generatedPrismaClientRequired": true,
+    "externalModules": [
+      "@node-rs/xxhash",
+      "@prisma/client",
+      "cors",
+      "express",
+      "fontkit",
+      "helmet",
+      "pdfkit",
+      "svg-to-pdfkit",
+      "uuid"
+    ],
+    "bootEvidence": "UNVERIFIED",
+    "deploymentUnits": [
+      "api",
+      "web",
+      "admin"
+    ]
+  },
+  "provenance": {
+    "repository": "wegdangamil2022-oss/MANARATAK-First-",
+    "workflow": "wegdangamil2022-oss/MANARATAK-First-/.github/workflows/ci.yml@refs/heads/feat/post28-r07-artifact-preparation",
+    "builder": "github-actions/Enterprise CI Pipeline",
+    "runId": "39506916987",
+    "runAttempt": "1"
+  }
+}
