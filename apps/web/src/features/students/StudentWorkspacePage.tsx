@@ -941,7 +941,7 @@ function SummaryView({
         <div className="relative z-10 px-3 py-3.5 sm:px-5 sm:py-4">
           <div className="flex items-center gap-2.5 font-bold text-[#142B5F] dark:text-[#F4F9FC]">
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/60 bg-[#142B5F]"><Bell className="h-4 w-4 text-[#EAC775]" /></span>
-            <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F4F9FC]">يحتاج انتباهك</h2>
+            <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[#142B5F] dark:text-[#F4F9FC]">يحتاج انتباهك</h2>
           </div>
           <div className="mt-3 space-y-2">
             {urgentAlerts.criticalDeadlines.slice(0, 2).map((tracker) => (
@@ -1053,7 +1053,7 @@ function SummaryView({
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#E5B54F]" />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">مرحبًا بك في مساحتك في منارتك</h2>
+              <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">مرحبًا بك في مساحتك في منارتك</h2>
               <p className="text-[11px] sm:text-xs text-[var(--mn-text-muted)] mt-1 leading-relaxed">
                 مساحتك جاهزة لتتبع طلبات المنح، التسجيل في الدورات، واستكشاف الجامعات والتخصصات وحفظ ما يهمك.
               </p>
@@ -1108,7 +1108,7 @@ function SummaryView({
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
                 <BookOpen className="h-4 w-4 text-[#E5B54F]" />
               </span>
-              <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">متابعة التعلم</h2>
+              <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">متابعة التعلم</h2>
             </div>
             <button
               type="button"
@@ -1160,7 +1160,7 @@ function SummaryView({
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
                 <Route className="h-4 w-4 text-[#E5B54F]" />
               </span>
-              <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
+              <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">ملفات التقديم النشطة</h2>
             </div>
             <button type="button" onClick={() => setTab('OPPORTUNITIES')}
               className="mn-student-summary-header-link inline-flex shrink-0 items-center gap-1 text-[11px] font-bold leading-[18px] text-[#142B5F] dark:text-[#E5B54F] hover:underline cursor-pointer font-['Cairo',sans-serif]"
@@ -1220,7 +1220,7 @@ function SummaryView({
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
                 <HistoryIcon className="h-4 w-4 text-[#E5B54F]" />
               </span>
-              <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">آخر الأنشطة والخطوات</h2>
+              <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">آخر الأنشطة والخطوات</h2>
             </div>
             <button
               type="button"
@@ -1261,7 +1261,7 @@ function SummaryView({
               <div className="w-7 h-7 rounded-full bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
               </div>
-              <h2 className="mn-student-summary-heading text-[13px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">استكشف الفرص في منارتك</h2>
+              <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">استكشف الفرص في منارتك</h2>
             </div>
             <div className="h-[2px] w-14 mx-auto bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent rounded-full my-1.5" />
             <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">
