@@ -3,7 +3,7 @@
  * VITE_PUBLIC_TEMPLATE_DATA_MODE=prototype. Production/live composition never imports it.
  */
 import { INITIAL_SCHOLARSHIPS, MOCK_UNIVERSITIES, MOCK_COURSES, MOCK_MAJORS, MOCK_EXAMS, MOCK_COUNTRIES, GOLDEN_IMPORTED_COURSES, MANARATAK_NATIVE_COURSES } from './data/mockData';
-import { GOLDEN_ARTICLES, ARTICLE_PREVIEWS } from './data/articleData';
+import { GOLDEN_ARTICLES, ARTICLE_PREVIEWS, type ArticlePreviewRecord } from './data/articleData';
 import type { PublicArticle } from './types';
 import { PUBLIC_SERVICES } from './data/serviceData';
 import { STUDENT_TOOLS_PREVIEW } from './data/studentToolsData';
@@ -14,7 +14,7 @@ import type { PublicLiveLoadResult } from './publicLiveDataSource';
  * Their detail pages clearly disclose that the complete article has not been
  * published. Live/API content must never consume these synthetic records.
  */
-const PROTOTYPE_ARTICLES: PublicArticle[] = [
+const PROTOTYPE_ARTICLE_RECORDS: ArticlePreviewRecord[] = [
   ...ARTICLE_PREVIEWS.filter((record) => !GOLDEN_ARTICLES.some((article) => article.id === record.id)),
   {
     id: 'art_106',
@@ -26,7 +26,8 @@ const PROTOTYPE_ARTICLES: PublicArticle[] = [
     author: 'فريق منارتك',
     updatedAt: '2026',
   },
-].map((record): PublicArticle => ({
+];
+const PROTOTYPE_ARTICLES: PublicArticle[] = PROTOTYPE_ARTICLE_RECORDS.map((record): PublicArticle => ({
   id: record.id,
   slug: `preview-${record.id.replace(/[^a-zA-Z0-9-]/g, '-')}`,
   titleAr: record.titleAr,
