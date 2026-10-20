@@ -111,12 +111,15 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
         options,
       );
       if (active.current === reference)
-        setNotice(
-          label(
-            `حُجز الموعد مؤقتًا: ${result.publicId}. التأكيد يتطلب تسوية المالية قبل انتهاء الحجز.`,
-            `Temporary booking: ${result.publicId}. Finance settlement is required before hold expiry.`,
-          ),
-        );
+        setNotice(import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype'
+          ? label(
+              `معاينة فقط: تمت محاكاة حجز الموعد برمز ${result.publicId}. لم يتم إنشاء حجز أو دفع حقيقي.`,
+              `Design preview only: booking ${result.publicId} was simulated. No booking or payment was created.`,
+            )
+          : label(
+              `حُجز الموعد مؤقتًا: ${result.publicId}. التأكيد يتطلب تسوية المالية قبل انتهاء الحجز.`,
+              `Temporary booking: ${result.publicId}. Finance settlement is required before hold expiry.`,
+            ));
     } catch {
       if (active.current === reference)
         setNotice(
