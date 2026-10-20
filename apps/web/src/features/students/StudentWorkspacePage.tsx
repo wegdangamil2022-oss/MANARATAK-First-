@@ -916,7 +916,7 @@ function SummaryView({
   const attentionPanel = urgentAlerts.hasUrgent ? (
       <section
         aria-label="أمور تحتاج انتباه الطالب"
-        className="mn-student-attention relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden border-y border-[var(--mn-border)] bg-white dark:bg-[#09152F] text-[#142B5F] dark:text-[#F4F9FC] text-right font-['Cairo',sans-serif]"
+        className="mn-student-attention relative w-full overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-white dark:bg-[#09152F] text-[#142B5F] dark:text-[#F4F9FC] text-right font-['Cairo',sans-serif]"
       >
         <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#D6A43B] to-transparent" />
         <div className="relative z-10 px-3 py-3.5 sm:px-5 sm:py-4">
@@ -1083,7 +1083,7 @@ function SummaryView({
 
       {/* 4. Active In-Progress Course (If any exists) */}
       {activeCourse && (
-        <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-y border-x-0 border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-none mn-panel">
+        <div className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
@@ -1136,7 +1136,7 @@ function SummaryView({
 
       {/* 5. Active Application Trackers (If any exist) */}
       {activeMilestones.length > 0 && (
-        <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-y border-x-0 border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-none mn-panel">
+        <div className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
@@ -1201,7 +1201,7 @@ function SummaryView({
 
       {/* 6. Recent Activity Timeline (If items exist) */}
       {dashboard.timeline.length > 0 && (
-        <div className="relative -mx-3 sm:-mx-6 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] rounded-none border-y border-x-0 border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-none mn-panel">
+        <div className="relative w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel">
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 shrink-0 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
