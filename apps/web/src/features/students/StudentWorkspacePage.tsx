@@ -1,3 +1,5 @@
+import { PreviewStudentApiClient } from './studentWorkspacePreviewApi';
+const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;
 import {OwnerReferenceNotice} from './OwnerReferenceNotice';
 import {useTranslation} from '../../i18n/I18nProvider';
 import {StudentPrivateToolResult} from './StudentPrivateToolResult';
@@ -12,7 +14,7 @@ import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Award, Bell, BookOpen, Bookmark, CheckCircle2, ClipboardList, Compass, Folder, Heart, Home, LockKeyhole, RefreshCw, Route, Settings2, Star, X, User, ListChecks, GraduationCap, CalendarClock, Sparkles, Clock3, Languages, Moon, Sun, LogIn, ShieldCheck, ChevronLeft, History as HistoryIcon, Archive, Trash2, ExternalLink, ChevronDown, ChevronUp, FileText, Check, AlertTriangle, CreditCard, Receipt, Info, LogOut, Shield, RotateCcw, Save, Eye } from 'lucide-react';
 import {
-  ApiClient,
+  ApiClient as LiveApiClient,
   HydratedStudentSavedItemDto,
   StudentSavedItemDto,
   MoneyAmountDto,
