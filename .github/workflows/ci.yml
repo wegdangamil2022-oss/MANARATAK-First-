@@ -222,7 +222,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
         env:
           POST28_LINUX_RUNTIME_REVIEW: 'YES'
-        run: node scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r07-linux" --r09-public
+        run: node scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r07-linux" --r09-public --r11-contention
       - name: Verify rich text sanitization in Chromium without external requests
         if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
         run: node scripts/security/verify-cms-rich-text-browser.mjs "$RUNNER_TEMP/r07-linux/cms-rich-text-proof.json"

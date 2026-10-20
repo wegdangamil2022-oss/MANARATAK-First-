@@ -15,12 +15,14 @@ import {readDatabaseIdentity} from '../database/post28-preflight.mjs';
 import {R08CombinedRuntime} from './lib/R08CombinedRuntime.mjs';
 import {seedR09LearnerFixture,exerciseR09Learner} from './lib/R09LearnerRuntime.mjs';
 import {seedR09PublicFixture,exerciseR09Public} from './lib/R09PublicRuntime.mjs';
+import {dockerResourceSample,runLinuxStudentContention} from '../performance/LinuxStudentContention.mjs';
 
 const repo=fs.realpathSync(process.cwd()), run=fs.realpathSync(process.argv[2]);
 const r08Combined=process.argv[3]==='--r08-combined';
 const r09Learner=process.argv[3]==='--r09-learner';
 const r09Public=process.argv[3]==='--r09-public';
-if(process.argv.length>4||(process.argv[3]&&!r08Combined&&!r09Learner&&!r09Public))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
+const r11Diagnostic=process.argv[4]==='--r11-contention';
+if(process.argv.length>5||(process.argv[4]&&!r11Diagnostic)||(r11Diagnostic&&!r09Public)||(process.argv[3]&&!r08Combined&&!r09Learner&&!r09Public))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
 if(process.platform!=='linux'||process.arch!=='x64'||Number(process.versions.node.split('.')[0])!==22||process.env.POST28_LINUX_RUNTIME_REVIEW!=='YES')throw Error('POST28_LINUX_RUNTIME_REVIEW_NOT_AUTHORIZED');
 const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())throw Error('POST28_CLEAN_SOURCE_REQUIRED');
@@ -132,6 +134,24 @@ try{
   const logout=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/v1/auth/logout'&&response.request().method()==='POST');await page.locator('button[title="تسجيل الخروج من الحساب"]').first().click();assert.equal((await logout).status(),200);await page.waitForURL(origin+'/');
   assert.equal(await db.sessionRecord.count({where:{identityId:fixtureId,revokedAt:null}}),0);assert.equal(await page.evaluate(async()=>{const response=await fetch('/api/v1/auth/me',{credentials:'include'});return response.status;}),401);observations.push({step:'UI_LOGOUT_PERSISTENT_SESSION_REVOKED',status:401});
   assert.equal(network.filter(row=>row.status>=500).length,0);report.redisConfigured=false;
+  }
+  if(r11Diagnostic){
+    await page.goto(origin+'/login');
+    const request=input=>page.evaluate(async input=>{
+      const headers={'content-type':'application/json',...(input.csrf?{'x-csrf-token':input.csrf}:{}),...(input.key?{'idempotency-key':input.key}:{})};
+      const response=await fetch(input.path,{method:input.method,headers,credentials:'include',redirect:'error',signal:AbortSignal.timeout(2000),...(input.body?{body:JSON.stringify(input.body)}:{})});
+      return {status:response.status,body:await response.json(),csrf:response.headers.get('x-csrf-token'),sourceSha:response.headers.get('x-manaratak-source-sha')};
+    },input);
+    const sampleResources=async()=>{
+      for(const id of [apiId,state.containerId])assert.equal(JSON.parse(docker(['inspect',id]))[0].Config.Labels['codex.post28.run'],state.runId);
+      const rows=docker(['stats','--no-stream','--format','{{json .}}',apiId,state.containerId]).split('\n').map(line=>JSON.parse(line));
+      const find=id=>{const row=rows.find(r=>id.startsWith(r.ID));assert(row);return dockerResourceSample(row);};
+      const [connections]=await db.$queryRaw`SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname=current_database() AND usename=current_user`;
+      return {api:find(apiId),postgres:find(state.containerId),applicationConnections:connections.n};
+    };
+    report.r11Diagnostic=await runLinuxStudentContention({origin,sourceSha:sha,fixtureId,email,password,request,db,sampleResources,
+      record:value=>fs.writeFileSync(path.join(proof,'r11-contention.json'),JSON.stringify(value,null,2)+'\n',{flag:'wx'})});
+    observations.push({step:'R11_TWO_CONCURRENT_WRITES_ONE_PERSISTED_WINNER_AND_REPLAY',passed:true});
   }
   assert.equal(pageErrors.length,0);report.blockedExternalOrigins=[...blocked];report.tls={certificateSha256:hash(ca),hostnameVerified:true,exactCertificateSpkiPinned:true,ignoreHTTPSErrors:false};report.freshUnpackedThreeUnits=true;report.apiBootedInImage=true;report.databaseConnected=true;report.workersEnabled=false;
 }catch(error){failure=redact(error.message);process.exitCode=1;}
