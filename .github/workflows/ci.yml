@@ -19,34 +19,6 @@ env:
   ADMIN_AUTH_MODE: strict
 
 jobs:
-  r09-workflow-diagnostics:
-    name: R09 isolated workflow ownership and transaction proof
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: 22.16.0
-          cache: npm
-      - run: npm ci
-      - name: Install the browser for the new synthetic workflow profile
-        run: npx playwright install --with-deps chromium
-      - name: Build the runtime configuration package required by source router imports
-        run: node node_modules/typescript/bin/tsc -b packages/config
-      - name: Exercise new workflows once in one restricted PostgreSQL 16 dataset
-        run: node scripts/release/post28-r09-workflow-lab.mjs "$RUNNER_TEMP/r09-workflows"
-      - name: Retain workflow observations and cleanup without credentials
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: r09-workflow-proof-${{ github.sha }}
-          path: ${{ runner.temp }}/r09-workflows/proof
-          if-no-files-found: warn
-
   r08-runtime-diagnostics:
     name: R08 isolated Redis and Linux worker shutdown
     runs-on: ubuntu-latest
@@ -254,6 +226,19 @@ jobs:
       - name: Verify rich text sanitization in Chromium without external requests
         if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
         run: node scripts/security/verify-cms-rich-text-browser.mjs "$RUNNER_TEMP/r07-linux/cms-rich-text-proof.json"
+      - name: Build configuration needed by the new source-router workflow profile
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: node node_modules/typescript/bin/tsc -b packages/config
+      - name: Exercise R09 shared workflows in a new restricted PostgreSQL 16 dataset
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: node scripts/release/post28-r09-workflow-lab.mjs "$RUNNER_TEMP/r09-workflows"
+      - name: Retain R09 workflow observations and cleanup without credentials
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r09-workflow-proof-${{ github.sha }}
+          path: ${{ runner.temp }}/r09-workflows/proof
+          if-no-files-found: warn
       - name: Retain review proof without publishing the image
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
