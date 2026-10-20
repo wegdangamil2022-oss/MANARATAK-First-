@@ -14,6 +14,13 @@ vi.mock('../../src/features/public-template/publicScholarshipDataSource',()=>({m
 (globalThis as typeof globalThis & {IS_REACT_ACT_ENVIRONMENT:boolean}).IS_REACT_ACT_ENVIRONMENT=true;
 beforeEach(()=>vi.clearAllMocks());
 describe('R09 public course track request contract',()=>{
+  it('offers canonical free access choices and sends the selected value unchanged',async()=>{
+    let view!:ReturnType<typeof create>;await act(async()=>{view=create(<PublishedCatalogDiscovery kind="courses" onBack={()=>{}} />);});await pending.request;
+    const values=view.root.findAllByType('option').map(option=>option.props.value);
+    expect(values).toEqual(expect.arrayContaining(['FREE_STUDY','FREE_CERTIFICATE','FREE_STUDY_AND_CERTIFICATE','PAID']));expect(values).not.toContain('FREE');
+    await act(async()=>view.root.findAllByType('select')[1].props.onChange({target:{value:'FREE_STUDY'}}));await pending.request;
+    expect(ApiClient.getCourses).toHaveBeenLastCalledWith(expect.objectContaining({accessType:'FREE_STUDY'}),'ar',expect.any(AbortSignal));act(()=>view.unmount());
+  });
   it.each([['native','NATIVE_MANARATAK_COURSE',undefined],['imported','EXTERNAL_LINKED_COURSE',undefined],['paid',undefined,'PAID']] as const)('uses valid API filters for %s',async(track,originType,accessType)=>{
     let view!:ReturnType<typeof create>;await act(async()=>{view=create(<PublishedCatalogDiscovery kind="courses" courseTrack={track} onBack={()=>{}} />);});await pending.request;
     expect(ApiClient.getCourses).toHaveBeenCalledWith(expect.objectContaining({originType,accessType}),'ar',expect.any(AbortSignal));

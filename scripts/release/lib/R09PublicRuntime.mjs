@@ -47,6 +47,8 @@ export async function exerciseR09Public({page,origin,db,fixture,proof}) {
   const importedResponse=page.waitForResponse(response=>{const url=new URL(response.url());return url.pathname==='/api/v1/public/courses'&&url.searchParams.get('originType')==='EXTERNAL_LINKED_COURSE';});
   await page.getByRole('combobox',{name:'Course track'}).selectOption('imported');assert.equal((await importedResponse).status(),200);await page.getByRole('status').filter({hasText:'لا توجد نتائج مطابقة'}).waitFor();
   await page.getByRole('combobox',{name:'Course track'}).selectOption('');await page.getByRole('status').filter({hasText:'الإجمالي: 3'}).waitFor();
+  const freeResponse=page.waitForResponse(response=>{const url=new URL(response.url());return url.pathname==='/api/v1/public/courses'&&url.searchParams.get('accessType')==='FREE_STUDY';});
+  await page.getByRole('combobox',{name:'Course access'}).selectOption('FREE_STUDY');assert.equal((await freeResponse).status(),200);await page.getByRole('status').filter({hasText:'الإجمالي: 3'}).waitFor();
   await page.screenshot({path:path.join(proof,'r09-public-hidden.png'),fullPage:true});
   return {anonymousRead:true,ownerIdsMatched:true,paginationPages:pages,duplicateOwnerIds:false,hiddenStates:fixture.hidden.map(row=>({status:row.status,completenessStatus:row.completenessStatus,unresolvedLanguage:Boolean(row.learningLanguageRaw),httpStatus:404})),privateLessonContentAbsent:true,privateMetadataAbsent:true,emptyIsSuccessfulZero:true,publishedUiRendered:true,learnerLinkUsesOwnerId:true,hiddenUiFallsBackToCatalog:true,loadedCatalogMatchesOwners:true,allHiddenTitlesAbsentAfterCatalogLoad:true,fullPublicationLifecycleExercised:false,fullR09Acceptance:false};
 }
