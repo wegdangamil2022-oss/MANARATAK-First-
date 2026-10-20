@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   Bell, BookOpen, BriefcaseBusiness, CalendarClock, ChevronLeft,
   CheckCircle2, ClipboardList, GraduationCap, Heart, Info,
@@ -22,7 +22,7 @@ export interface StudentWorkspacePreviewProps {
   onOpenFavorites: () => void;
   onNavigateCategory: (category: string) => void;
 }
-type PreviewPanelProps = { title: string; description?: string; children: React.ReactNode };
+type PreviewPanelProps = { title: string; description?: string; children: ReactNode };
 function PreviewPanel({ title, description, children }: PreviewPanelProps) {
   return <section className="mn-panel rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs space-y-3">
     <div><h2 className="text-sm sm:text-base font-bold text-[var(--mn-heading)]">{title}</h2>
@@ -141,7 +141,7 @@ export function StudentWorkspacePreviewPage({
               const checked = doneChecklist.includes(id);
               return <label key={id} className="flex cursor-pointer items-center gap-2 text-xs">
                 <input type="checkbox" checked={checked} onChange={() => setDoneChecklist(current => checked ? current.filter(x=>x!==id) : [...current,id])}/>
-                <span>{task.label}</span>
+                <span>{task.task}</span>
               </label>;
             })}
           </section>)}
