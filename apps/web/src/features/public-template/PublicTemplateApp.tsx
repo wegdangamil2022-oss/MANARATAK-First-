@@ -1102,7 +1102,7 @@ export default function App() {
           </div>
         )}
         {isCompareRoute ? (
-          <ComparePage locale={language} onBack={goBack} />
+          <ComparePage locale={language} onBack={goBack} dataMode={publicDataMode} scholarships={scholarships} universities={universities} majors={majors} courses={courses} paidCourses={paidCourses} importedCourses={importedCourses} />
         ) : navigation.state.auxiliaryPage ? (
           <PublicInfoPage dataMode={publicDataMode} page={navigation.state.auxiliaryPage} onBack={goBack} onServices={() => openSection('services')} />
         ) : isSmartSearchOpen ? (
