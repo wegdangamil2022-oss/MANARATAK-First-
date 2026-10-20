@@ -193,17 +193,18 @@
     },
     {
       "id": "R11",
-      "state": "TWO_LOCAL_READ_DIAGNOSTICS_COMPLETE_FULL_SLO_OPEN",
-      "latestReport": "docs/remediation/POST28_R11_LOCAL_READ_DIAGNOSTIC_2026-10-20.md",
+      "state": "SEVEN_LOCAL_DIAGNOSTIC_CATEGORIES_RECORDED_FULL_SLO_OPEN",
+      "latestReport": "docs/remediation/POST28_R11_LOCAL_SCENARIO_DIAGNOSTIC_2026-10-20.md",
       "configuration": "config/testing/r11-load-preparation.json",
       "baselineSourceSha": "79055e7634ad33fe221872d58770d48c2ed09e58",
       "acceptanceEvidenceValidationHardened": true,
       "formalAcceptance": false,
       "productionAcceptance": false,
       "loadExecuted": true,
-      "latestEvidence": "docs/reviews/evidence/post28/f8045f90bf6775674d22fc5f2a8cff5fd79b0c2f/r11-read-diagnostic/evidence-index.json",
-      "loadScope": "TWO_READ_CATEGORIES_SMALL_SYNTHETIC_DATASET",
-      "representativeLaunchDataset": false
+      "latestEvidence": "docs/reviews/evidence/post28/399f816506677c3cdf14e79103f4c854d6416b2d/r11-scenario-diagnostic/evidence-index.json",
+      "loadScope": "TWO_READ_AND_FIVE_PARTIAL_SCENARIO_DIAGNOSTICS_SMALL_SYNTHETIC_DATASET",
+      "representativeLaunchDataset": false,
+      "scenarioSourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d"
     }
   ],
   "validation": {

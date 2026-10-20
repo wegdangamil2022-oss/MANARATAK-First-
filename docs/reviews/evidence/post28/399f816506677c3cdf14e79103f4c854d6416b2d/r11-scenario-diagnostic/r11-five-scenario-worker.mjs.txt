@@ -1,0 +1,123 @@
+﻿import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import crypto from 'node:crypto';import assert from 'node:assert/strict';import {execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+import {runBoundedScenario} from './r07-filtered/scripts/performance/BoundedScenarioProbe.mjs';
+import {StudentWorkspaceUseCases} from './r07-filtered/packages/application/src/students/use-cases/StudentWorkspaceUseCases.ts';
+import {PrismaStudentWorkspaceRepository} from './r07-filtered/packages/infrastructure/src/students/PrismaStudentWorkspaceRepository.ts';
+import {PrismaCourseImportAnalysisRepository} from './r07-filtered/packages/infrastructure/src/courses/PrismaCourseImportAnalysisRepository.ts';
+import {FinancePlatformUseCases} from './r07-filtered/packages/application/src/finance-platform/use-cases/FinancePlatformUseCases.ts';
+import {PrismaFinanceRepository} from './r07-filtered/packages/infrastructure/src/finance-platform/PrismaFinanceRepository.ts';
+import {PrismaFinanceCurrencyReferenceGateway,FinancePaymentGatewayRegistry,FinanceBankTransferGatewayRegistry} from './r07-filtered/packages/infrastructure/src/finance-platform/FinanceSafetyGateways.ts';
+import {TransactionalOutboxDispatcher} from './r07-filtered/packages/application/src/event-foundation/use-cases/TransactionalOutboxDispatcher.ts';
+import {PrismaTransactionalOutboxStore} from './r07-filtered/packages/infrastructure/src/event-foundation/PrismaTransactionalOutboxStore.ts';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),lab=process.env.R11_LAB,origin=process.env.R11_API_ORIGIN;
+const fixture=JSON.parse(fs.readFileSync(path.join(lab,'scenario-private.json'))),state=JSON.parse(fs.readFileSync(path.join(lab,'lab-state.json')));
+const config=JSON.parse(fs.readFileSync(path.join(repo,'config/testing/r11-local-scenario-diagnostic.json'))),sha=execFileSync('C:/Program Files/Git/cmd/git.exe',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+assert.equal(state.sourceSha,sha);assert.equal(new URL(origin).hostname,'127.0.0.1');assert.equal(new URL(process.env.DATABASE_URL).port,String(state.port));
+const require=createRequire(path.join(repo,'package.json')),{PrismaClient}=require('@prisma/client');
+let queryCount=0,queryDurationMs=0;
+const db=new PrismaClient({log:[{emit:'event',level:'query'}],errorFormat:'minimal'});db.$on('query',e=>{queryCount++;queryDurationMs+=e.duration;});
+const json=(name,value)=>fs.writeFileSync(path.join(lab,name),JSON.stringify(value,null,2)+'\n'),fresh=()=>crypto.randomUUID(),wire=v=>JSON.parse(JSON.stringify(v));
+const hash=v=>crypto.createHash('sha256').update(JSON.stringify(v)).digest('hex');
+let cookies='',csrf='',firstMutation,previous,cached,cachedAt=0,sourceAt=0;
+async function call(method,route,body,key,signal){
+ const headers={origin,'content-type':'application/json',...(cookies?{cookie:cookies}:{}),...(csrf?{'x-csrf-token':csrf}:{}),...(key?{'idempotency-key':key}:{})};
+ const response=await fetch(origin+route,{method,headers,body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:signal??AbortSignal.timeout(2000)});
+ if(route==='/api/v1/auth/login')cookies=response.headers.getSetCookie().map(v=>v.split(';')[0]).join('; ');
+ const data=await response.json();assert.equal(response.status,200,'R11_HTTP_'+route+'_'+response.status);return {data,headers:response.headers};
+}
+async function observe(){
+ if(Date.now()-sourceAt>3000){const r=await fetch(origin+'/api/v1/monitoring/health/readiness',{redirect:'error',signal:AbortSignal.timeout(2000)});assert.equal(r.status,200);assert.equal(r.headers.get('x-manaratak-source-sha'),config.expectedApiSourceSha);assert.equal((await r.json()).code,'AVAILABLE');sourceAt=Date.now();}
+ if(cached&&Date.now()-cachedAt<2000)return {...cached,ageMs:Date.now()-cachedAt};
+ const pids=[process.pid,Number(process.env.R11_API_PID)];assert.ok(pids.every(Number.isSafeInteger));
+ const p=JSON.parse(execFileSync(path.join(process.env.SystemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoProfile','-Command',`$taskProcesses=Get-Process -Id ${pids.join(',')}; @{cpu=($taskProcesses|Measure-Object CPU -Sum).Sum;memory=($taskProcesses|Measure-Object WorkingSet64 -Sum).Sum}|ConvertTo-Json -Compress`],{windowsHide:true,encoding:'utf8',timeout:2000}));
+ const now=Date.now(),cpuPercent=previous?Math.max(0,(p.cpu-previous.cpu)*100000/(now-previous.at)/os.cpus().length):0;previous={cpu:p.cpu,at:now};
+ const [connections]=await db.$queryRawUnsafe('SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname=current_database() AND usename=current_user');
+ cached={cpuPercent,residentMemoryBytes:p.memory,activeConnections:connections.n,sampledAt:new Date().toISOString()};cachedAt=Date.now();return cached;
+}
+async function protectedRows(){
+ const result={};
+ for(const table of ['StudentPrivacyConsentDecision','StudentApplicationDocumentBinding','FinancialLedgerEntryRecord','FinanceInvoiceRecord']){
+  result[table]=await db.$queryRawUnsafe(`SELECT id,encode(sha256(convert_to(to_jsonb(t)::text,'UTF8')),'hex') AS sha256 FROM public."${table}" t ORDER BY id`);
+ }
+ return result;
+}
+const ctx=(version,key=fresh())=>({actorId:fixture.id,reason:'R11 inert synthetic local diagnostic',correlationId:fresh(),idempotencyKey:key,...(version?{expectedVersion:version}:{})});
+try{
+ const [role]=await db.$queryRawUnsafe("SELECT current_user AS role,rolsuper,rolcreatedb,rolcreaterole,rolbypassrls,rolreplication,current_setting('statement_timeout') AS statement_timeout,current_setting('lock_timeout') AS lock_timeout FROM pg_roles WHERE rolname=current_user");
+ assert.equal(role.role,'post28_r11_actor');for(const f of ['rolsuper','rolcreatedb','rolcreaterole','rolbypassrls','rolreplication'])assert.equal(role[f],false);assert.equal(role.statement_timeout,'2s');
+ const protectedBefore=await protectedRows();json('protected-before.json',protectedBefore);
+ await call('POST','/api/v1/auth/login',{email:fixture.email,password:fixture.password});const token=await call('GET','/api/v1/auth/csrf-token');csrf=token.headers.get('x-csrf-token');assert.ok(csrf);
+ let workspace=(await call('GET','/api/v1/student/workspace')).data;const initialVersion=workspace.version;assert.ok(Number.isSafeInteger(initialVersion));
+ const students=new StudentWorkspaceUseCases(new PrismaStudentWorkspaceRepository(db,crypto.randomBytes(32).toString('hex')));
+ const imports=new PrismaCourseImportAnalysisRepository(db),providerId=fresh();
+ await db.externalCourseProvider.create({data:{id:providerId,publicId:providerId,slug:providerId,canonicalName:providerId,normalizedCanonicalName:providerId,displayName:'R11 inert file provider',status:'APPROVED',sourceTrustLevel:'OFFICIAL',importStrategy:'FILE'}});
+ const finance=new FinancePlatformUseCases(new PrismaFinanceRepository(db),{currencyReference:new PrismaFinanceCurrencyReferenceGateway(db),paymentGateways:new FinancePaymentGatewayRegistry([]),bankTransferGateways:new FinanceBankTransferGatewayRegistry([]),fxRateProvider:{providerKey:'R11_DISABLED',isConfigured:()=>false,fetchRate:async()=>{throw Error('R11_EXTERNAL_PROVIDER_FORBIDDEN');}},transferFeePolicy:{policyReference:'R11_UNUSED',basisPoints:0}});
+ assert.ok(await db.referenceCurrency.findUnique({where:{isoCode:'USD'}}));
+ const results=[],createdIdentities=[],invoices=[];let cursor;
+ const money={amountMinorUnits:'100',currencyCode:'USD',scale:2};
+ const scenarios={
+  'student-writes':async({index,signal})=>{
+   const body={expectedVersion:workspace.version,theme:index%2?'LIGHT':'DARK'},key=fresh();
+   const response=(await call('PUT','/api/v1/student/workspace',body,key,signal)).data;
+   assert.equal(response.version,workspace.version+1);assert.equal(response.theme,body.theme);workspace=response;
+   if(!firstMutation)firstMutation={body,key,response};return {verified:true,version:response.version};
+  },
+  'admin-scans':async()=>{
+   const page=await students.listSupportWorkspaces({query:fixture.namespace,limit:20,...(cursor?{cursor}:{})});
+   assert.ok(page.items.length>0&&page.items.length<=20);assert.ok(page.total>=81);
+   assert.equal(new Set(page.items.map(i=>i.studentReferenceId)).size,page.items.length);
+   assert.ok(!JSON.stringify(page).includes('R11_PRIVATE_SENTINEL'));cursor=page.nextCursor??undefined;
+   return {verified:true,items:page.items.length,total:page.total,hasMore:page.hasMore};
+  },
+  'imports':async({index})=>{
+   const input={providerId,sourceNativeKey:'r11-'+index,languageVersionKey:'en',identityStrategy:'PROVIDER_NATIVE_KEY',originalTitle:'R11 source '+index,normalizedOriginalTitle:'r11 source '+index,currentUrl:'https://r11.example.invalid/course/'+index};
+   const a=await imports.ensureSourceIdentity(input),b=await imports.ensureSourceIdentity(input);assert.equal(a.created,true);assert.equal(b.created,false);assert.equal(a.identity.id,b.identity.id);
+   await imports.recordInitialUrl({courseSourceIdentityId:a.identity.id,url:input.currentUrl,normalizedUrl:input.currentUrl});
+   createdIdentities.push(a.identity.id);return {verified:true,identityCreated:1,replayCreated:0};
+  },
+  'finance-stub':async()=>{
+   const draft=await finance.createDraftInvoice({originDomain:'R11_SYNTHETIC',originReferenceId:fresh(),studentReferenceId:fixture.id,payerReferenceId:fixture.id,lineItems:[{description:'R11 inert obligation',quantity:1,unitPrice:money}]},ctx());
+   const invoice=await finance.issueInvoice(draft.id,ctx(draft.version));const command=ctx(invoice.version);
+   const credit=await finance.createCreditNote(invoice.id,{...money,amountMinorUnits:'25'},'R11 local synthetic credit',command);
+   const facts=async()=>({ledger:await db.financialLedgerEntryRecord.count(),commands:await db.financeCommandRecord.count(),outbox:await db.transactionalOutboxRecord.count(),audits:await db.auditRecord.count()});
+   const before=await facts();assert.deepEqual(wire(await finance.createCreditNote(invoice.id,{...money,amountMinorUnits:'25'},'R11 local synthetic credit',command)),wire(credit));assert.deepEqual(await facts(),before);
+   const row=await db.financeInvoiceRecord.findUniqueOrThrow({where:{id:invoice.id}});assert.equal(row.dueMinorUnits,'75');
+   const postings=await db.financialTransactionRecord.findMany({where:{businessReferenceId:invoice.id},include:{entries:true}});assert.ok(postings.length>0);
+   for(const tx of postings){const sum=d=>tx.entries.filter(e=>e.direction===d).reduce((n,e)=>n+BigInt(e.amountMinorUnits),0n);assert.equal(sum('DEBIT'),sum('CREDIT'));}
+   invoices.push(invoice.id);return {verified:true,invoiceDueMinorUnits:row.dueMinorUnits,replayNoNewEffects:true,balanced:true};
+  }
+ };
+ for(const category of ['student-writes','admin-scans','imports','finance-stub']){
+  const beforeQueries=queryCount,beforeDuration=queryDurationMs;const result=await runBoundedScenario({...config,category,sourceSha:sha},{step:scenarios[category],sampleResources:observe});
+  result.queryObservations={scope:'HARNESS_PRISMA_CLIENT_ONLY_EXCLUDES_BUILT_API',count:queryCount-beforeQueries,totalEngineDurationMs:queryDurationMs-beforeDuration};json(category+'-result.json',result);results.push(result);
+  console.log(JSON.stringify({category,status:result.status,samples:result.sampleCount,p95Ms:result.p95Ms,abortReason:result.abortReason}));if(result.status==='ABORTED')throw Error('R11_'+category.toUpperCase().replaceAll('-','_')+'_ABORTED');
+  if(category==='student-writes'){
+   assert.equal(workspace.version,initialVersion+result.sampleCount);
+   assert.deepEqual((await call('PUT','/api/v1/student/workspace',firstMutation.body,firstMutation.key)).data,firstMutation.response);
+   assert.equal((await call('GET','/api/v1/student/workspace')).data.version,workspace.version);
+   const denied=await fetch(origin+'/api/v1/admin/courses',{headers:{cookie:cookies},signal:AbortSignal.timeout(2000)});assert.equal(denied.status,403);
+   json('student-http-invariants.json',{cookieLogin:true,csrf:true,persistedVersions:result.sampleCount,idempotentReplayNoVersionIncrement:true,studentAdminDenied:403});
+  }
+ }
+ const queueDomain='R11_QUEUE_'+fresh(),availableAt=new Date(),queueIds=Array.from({length:30},()=>fresh());
+ await db.transactionalOutboxRecord.createMany({data:queueIds.map(id=>({id,domain:queueDomain,eventType:'R11InertProbe',aggregateType:'R11SyntheticProbe',aggregateId:fixture.id,payload:{synthetic:true},metadata:{scope:'LOCAL_DIAGNOSTIC'},availableAt}))});
+ const delivery={deliver:async(entry)=>{assert.equal(entry.domain,queueDomain);await db.auditRecord.createMany({data:[{id:'r11-'+entry.id,reference:'r11-'+entry.id,action:'R11_INERT_QUEUE_DELIVERY',category:'SYSTEM',severity:'INFO',actorId:fixture.id,actorType:'SYSTEM',targetId:entry.id,targetType:'R11SyntheticProbe',source:'R11_DIAGNOSTIC_STUB',timestamp:new Date(),contextMetadata:{synthetic:true}}],skipDuplicates:true});}};
+ const dispatcher=new TransactionalOutboxDispatcher(new PrismaTransactionalOutboxStore(db),delivery);
+ const result=await runBoundedScenario({...config,category:'worker-queues',sourceSha:sha},{sampleResources:observe,step:async()=>{
+  const next=await db.transactionalOutboxRecord.findFirstOrThrow({where:{domain:queueDomain,state:'PENDING'},orderBy:{createdAt:'asc'}}),lagMs=Math.max(0,Date.now()-next.availableAt.getTime());
+  const r=await dispatcher.dispatchBatch({workerId:'r11-local',batchSize:1,claimDurationMs:3000,maxAttempts:2,baseBackoffMs:100,maxBackoffMs:100,domain:queueDomain,eventTypes:['R11InertProbe']});
+  assert.equal(r.claimed,1);assert.equal(r.processed,1);assert.equal(r.failed,0);assert.equal(r.leaseLost,0);
+  assert.equal((await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:next.id}})).state,'PROCESSED');assert.equal(await db.auditRecord.count({where:{targetId:next.id,source:'R11_DIAGNOSTIC_STUB'}}),1);
+  return {verified:true,lagMs,processed:r.processed,leaseLost:r.leaseLost};
+ }});json('worker-queues-result.json',result);results.push(result);assert.equal(result.status,'COMPLETED_DIAGNOSTIC');
+ assert.equal(await db.transactionalOutboxRecord.count({where:{domain:queueDomain,state:'PENDING'}}),0);assert.equal(await db.auditRecord.count({where:{targetId:{in:queueIds},source:'R11_DIAGNOSTIC_STUB'}}),30);
+ const replay=await db.transactionalOutboxRecord.findUniqueOrThrow({where:{id:queueIds[0]}});await delivery.deliver(replay);assert.equal(await db.auditRecord.count({where:{targetId:queueIds[0],source:'R11_DIAGNOSTIC_STUB'}}),1);
+ const after=await protectedRows();for(const [table,rows] of Object.entries(protectedBefore)){const map=new Map(after[table].map(r=>[r.id,r.sha256]));for(const row of rows)assert.equal(map.get(row.id),row.sha256,'HISTORICAL_'+table);}
+ assert.equal(await db.courseSourceIdentity.count({where:{id:{in:createdIdentities}}}),30);assert.equal(await db.courseSourceUrlHistory.count({where:{courseSourceIdentityId:{in:createdIdentities}}}),30);
+ json('invariants.json',{historicalRowsPreserved:true,protectedBeforeSha256:hash(protectedBefore),consentUnchanged:true,bindingUnchanged:true,importsCreated:30,initialUrlReceipts:30,syntheticInvoices:invoices.length,financialReplaysWithoutNewEffects:true,queueProcessed:30,queueRemaining:0,queueLeaseLosses:0,queueSinkDuplicateSafe:true,externalProvidersUsed:false});
+ json('five-scenario-result.json',{sourceSha:sha,apiSourceSha:config.expectedApiSourceSha,role,results,categories:results.length,productionAcceptance:false,sloAcceptance:false});
+ console.log(JSON.stringify({category:'worker-queues',status:result.status,samples:result.sampleCount,p95Ms:result.p95Ms,allFiveComplete:true}));
+}catch(error){json('scenario-failure.json',{name:error.name,message:String(error.message).replaceAll(fixture.email,'[REDACTED]').replaceAll(fixture.password,'[REDACTED]').replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]')});throw error;
+}finally{await db.$disconnect();}
+
+

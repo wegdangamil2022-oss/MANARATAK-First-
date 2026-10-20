@@ -1,0 +1,427 @@
+{
+  "kind": "R11_BOUNDED_SCENARIO_DIAGNOSTIC",
+  "category": "worker-queues",
+  "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+  "status": "COMPLETED_DIAGNOSTIC",
+  "abortReason": null,
+  "sampleCount": 30,
+  "elapsedSeconds": 60.00966829999999,
+  "throughput": 0.499919443814023,
+  "p50Ms": 13.209000000002561,
+  "p95Ms": 36.52650000000722,
+  "p99Ms": 36.858299999992596,
+  "observations": [
+    {
+      "latencyMs": 17.435900000011316,
+      "verified": true,
+      "lagMs": 328,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 15.028099999995902,
+      "verified": true,
+      "lagMs": 2024,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 20.40500000002794,
+      "verified": true,
+      "lagMs": 4338,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 21.27609999998822,
+      "verified": true,
+      "lagMs": 6039,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 13.209000000002561,
+      "verified": true,
+      "lagMs": 8337,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 28.995400000014342,
+      "verified": true,
+      "lagMs": 10053,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 9.702399999980116,
+      "verified": true,
+      "lagMs": 12354,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 36.52650000000722,
+      "verified": true,
+      "lagMs": 14066,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 10.927700000000186,
+      "verified": true,
+      "lagMs": 16366,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 36.858299999992596,
+      "verified": true,
+      "lagMs": 18081,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 9.71020000000135,
+      "verified": true,
+      "lagMs": 20384,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 36.04790000000503,
+      "verified": true,
+      "lagMs": 22094,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 11.122999999963213,
+      "verified": true,
+      "lagMs": 24390,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 11.930099999997765,
+      "verified": true,
+      "lagMs": 26106,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 9.833099999988917,
+      "verified": true,
+      "lagMs": 28394,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 13.889399999985471,
+      "verified": true,
+      "lagMs": 30119,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 10.705599999986589,
+      "verified": true,
+      "lagMs": 32417,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 12.154299999994691,
+      "verified": true,
+      "lagMs": 34132,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 9.89069999998901,
+      "verified": true,
+      "lagMs": 36436,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 28.338400000007823,
+      "verified": true,
+      "lagMs": 38148,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 9.39269999996759,
+      "verified": true,
+      "lagMs": 40438,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 34.45869999995921,
+      "verified": true,
+      "lagMs": 42162,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 9.959300000045914,
+      "verified": true,
+      "lagMs": 44460,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 28.23359999997774,
+      "verified": true,
+      "lagMs": 46176,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 9.305999999982305,
+      "verified": true,
+      "lagMs": 48473,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 33.633199999982025,
+      "verified": true,
+      "lagMs": 50189,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 9.191200000001118,
+      "verified": true,
+      "lagMs": 52486,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 34.31719999999041,
+      "verified": true,
+      "lagMs": 54202,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 9.779799999960233,
+      "verified": true,
+      "lagMs": 56502,
+      "processed": 1,
+      "leaseLost": 0
+    },
+    {
+      "latencyMs": 36.162699999986216,
+      "verified": true,
+      "lagMs": 58215,
+      "processed": 1,
+      "leaseLost": 0
+    }
+  ],
+  "resources": [
+    {
+      "cpuPercent": 0.40721918165233256,
+      "residentMemoryBytes": 295235584,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:05.968Z"
+    },
+    {
+      "cpuPercent": 0.40721918165233256,
+      "residentMemoryBytes": 295235584,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:05.968Z",
+      "ageMs": 1696
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 296267776,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:09.978Z"
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 296267776,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:09.978Z",
+      "ageMs": 1698
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 297259008,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:13.978Z"
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 297259008,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:13.978Z",
+      "ageMs": 1713
+    },
+    {
+      "cpuPercent": 0.6481251037000165,
+      "residentMemoryBytes": 298020864,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:17.995Z"
+    },
+    {
+      "cpuPercent": 0.6481251037000165,
+      "residentMemoryBytes": 298020864,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:17.995Z",
+      "ageMs": 1709
+    },
+    {
+      "cpuPercent": 0.32470906068162925,
+      "residentMemoryBytes": 296640512,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:22.006Z"
+    },
+    {
+      "cpuPercent": 0.32470906068162925,
+      "residentMemoryBytes": 296640512,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:22.006Z",
+      "ageMs": 1712
+    },
+    {
+      "cpuPercent": 0.5831674545906942,
+      "residentMemoryBytes": 297205760,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:26.025Z"
+    },
+    {
+      "cpuPercent": 0.5831674545906942,
+      "residentMemoryBytes": 297205760,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:26.025Z",
+      "ageMs": 1707
+    },
+    {
+      "cpuPercent": 0.39003994008986526,
+      "residentMemoryBytes": 297246720,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:30.031Z"
+    },
+    {
+      "cpuPercent": 0.39003994008986526,
+      "residentMemoryBytes": 297246720,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:30.031Z",
+      "ageMs": 1715
+    },
+    {
+      "cpuPercent": 0.13007825507825507,
+      "residentMemoryBytes": 297295872,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:34.035Z"
+    },
+    {
+      "cpuPercent": 0.13007825507825507,
+      "residentMemoryBytes": 297295872,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:34.035Z",
+      "ageMs": 1724
+    },
+    {
+      "cpuPercent": 0.1294639158173834,
+      "residentMemoryBytes": 297439232,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:38.058Z"
+    },
+    {
+      "cpuPercent": 0.1294639158173834,
+      "residentMemoryBytes": 297439232,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:38.058Z",
+      "ageMs": 1714
+    },
+    {
+      "cpuPercent": 0.12959276768682093,
+      "residentMemoryBytes": 297504768,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:42.077Z"
+    },
+    {
+      "cpuPercent": 0.12959276768682093,
+      "residentMemoryBytes": 297504768,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:42.077Z",
+      "ageMs": 1709
+    },
+    {
+      "cpuPercent": 0.2602865234049642,
+      "residentMemoryBytes": 297517056,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:46.078Z"
+    },
+    {
+      "cpuPercent": 0.2602865234049642,
+      "residentMemoryBytes": 297517056,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:46.078Z",
+      "ageMs": 1721
+    },
+    {
+      "cpuPercent": 0.2589922095143378,
+      "residentMemoryBytes": 298082304,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:50.101Z"
+    },
+    {
+      "cpuPercent": 0.2589922095143378,
+      "residentMemoryBytes": 298082304,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:50.101Z",
+      "ageMs": 1712
+    },
+    {
+      "cpuPercent": 0.06489326356009635,
+      "residentMemoryBytes": 297054208,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:54.114Z"
+    },
+    {
+      "cpuPercent": 0.06489326356009635,
+      "residentMemoryBytes": 297054208,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:54.114Z",
+      "ageMs": 1713
+    },
+    {
+      "cpuPercent": 0.5191461084807708,
+      "residentMemoryBytes": 297259008,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:58.127Z"
+    },
+    {
+      "cpuPercent": 0.5191461084807708,
+      "residentMemoryBytes": 297259008,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:10:58.127Z",
+      "ageMs": 1713
+    },
+    {
+      "cpuPercent": 0.1945343625498008,
+      "residentMemoryBytes": 297283584,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:11:02.143Z"
+    },
+    {
+      "cpuPercent": 0.1945343625498008,
+      "residentMemoryBytes": 297283584,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:11:02.143Z",
+      "ageMs": 1710
+    }
+  ],
+  "concurrency": 1,
+  "externalProvidersAllowed": false,
+  "representativeLaunchDataset": false,
+  "sloAcceptance": false,
+  "productionAcceptance": false
+}

@@ -1,0 +1,7 @@
+{
+  "cookieLogin": true,
+  "csrf": true,
+  "persistedVersions": 30,
+  "idempotentReplayNoVersionIncrement": true,
+  "studentAdminDenied": 403
+}

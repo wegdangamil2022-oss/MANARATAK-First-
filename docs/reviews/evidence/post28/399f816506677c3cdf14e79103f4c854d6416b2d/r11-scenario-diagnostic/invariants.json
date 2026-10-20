@@ -1,0 +1,15 @@
+{
+  "historicalRowsPreserved": true,
+  "protectedBeforeSha256": "71d837b10dc6c13041b085e4251cd9ac63fc91ce372fcb12f3ee79d5e0d75958",
+  "consentUnchanged": true,
+  "bindingUnchanged": true,
+  "importsCreated": 30,
+  "initialUrlReceipts": 30,
+  "syntheticInvoices": 30,
+  "financialReplaysWithoutNewEffects": true,
+  "queueProcessed": 30,
+  "queueRemaining": 0,
+  "queueLeaseLosses": 0,
+  "queueSinkDuplicateSafe": true,
+  "externalProvidersUsed": false
+}

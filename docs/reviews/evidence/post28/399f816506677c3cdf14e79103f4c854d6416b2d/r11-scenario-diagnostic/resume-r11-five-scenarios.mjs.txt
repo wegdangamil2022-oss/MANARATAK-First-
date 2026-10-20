@@ -1,0 +1,56 @@
+﻿import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import crypto from 'node:crypto';import net from 'node:net';
+import assert from 'node:assert/strict';import {spawn,spawnSync,execFileSync} from 'node:child_process';
+import {runBoundedReadProbe} from './r07-filtered/scripts/performance/BoundedReadProbe.mjs';
+import {verificationRestoreList} from './r07-filtered/scripts/database/post28-backup-contract.mjs';
+import {verifyReleaseManifest} from './r07-filtered/scripts/release/lib/ReleaseContracts.mjs';
+import {verifyRuntimeLayer} from './r07-filtered/scripts/release/lib/RuntimeLayerPolicy.mjs';
+const work=import.meta.dirname,repo=path.join(work,'r07-filtered'),bin=path.join(work,'pg16-binaries/pgsql/bin');
+const sha=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+const policy=JSON.parse(fs.readFileSync(path.join(repo,'config/testing/r11-local-read-diagnostic.json'))),hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+const json=(p,v)=>fs.writeFileSync(p,JSON.stringify(v,null,2)+'\n');
+assert.equal(execFileSync('git',['status','--porcelain'],{cwd:repo,encoding:'utf8'}).trim(),'');
+assert.equal(execFileSync('git',['diff','--name-only',policy.expectedApiSourceSha,sha,'--',...policy.artifactReuseRequiresUnchanged],{cwd:repo,encoding:'utf8'}).trim(),'');
+const artifacts=path.join(work,'r10-major-fix-candidate'),manifest=verifyReleaseManifest(path.join(artifacts,'artifacts'),policy.expectedApiSourceSha);
+verifyRuntimeLayer(path.join(artifacts,'api-boot-root'),manifest,JSON.parse(fs.readFileSync(path.join(artifacts,'api-boot-root/runtime-layer.json'))));
+const state=JSON.parse(fs.readFileSync(path.join(work,'native-pg16-UdSQDL/lab-state.json'))),lab=state.directory;
+fs.writeFileSync(path.join(work,'r11-five-current-lab.txt'),lab);
+const privateEnv=Object.fromEntries(fs.readFileSync(state.envFile,'utf8').trim().split(/\r?\n/).map(l=>{const i=l.indexOf('=');return[l.slice(0,i),l.slice(i+1)];}));
+const bootstrap=fs.readFileSync(path.join(lab,'bootstrap-password'),'utf8').trim(),setup=new URL(privateEnv.POST28_TRANSACTION_SETUP_URL),readerPassword=crypto.randomBytes(24).toString('hex');
+const database=JSON.parse(fs.readFileSync(path.join(lab,'dataset.json'))).physicalTarget;
+const pgEnv=(role,password,db)=>({...process.env,PGHOST:'127.0.0.1',PGPORT:String(state.port),PGDATABASE:db,PGUSER:role,PGPASSWORD:password,PGSSLMODE:'disable'});
+const sql=(query,role='post28_r11_actor',password=readerPassword,db=database)=>{const r=spawnSync(path.join(bin,'psql.exe'),['-X','-At','-v','ON_ERROR_STOP=1'],{input:query,env:pgEnv(role,password,db),encoding:'utf8',windowsHide:true,timeout:10000});if(r.status!==0)throw Error('R11_SQL_FAILED:'+r.stderr.replaceAll(password,'[REDACTED]'));return r.stdout.trim();};
+const bootSql=(q,db=database)=>sql(q,'post28_bootstrap',bootstrap,db);
+let api,closed,apiLog='',scenarioFixture;
+try{
+
+ assert.equal(hash(fs.readFileSync(path.join(bin,'postgres.exe'))),state.postgresBinarySha256);
+ const started=spawnSync(path.join(bin,'pg_ctl.exe'),['-D',state.dataDirectory,'-l',path.join(lab,'server.log'),'-w','start'],{windowsHide:true,encoding:'utf8',timeout:30000});assert.equal(started.status,0,'OWNED_SYNTHETIC_RESTART');
+ state.postmasterPid=Number(fs.readFileSync(path.join(state.dataDirectory,'postmaster.pid'),'utf8').split('\n')[0]);
+ const identity=JSON.parse(bootSql("SELECT json_build_object('identity',(SELECT system_identifier::text FROM pg_control_system()));",'postgres'));assert.equal(identity.identity,state.serverIdentity);
+ const dataset=JSON.parse(fs.readFileSync(path.join(lab,'dataset.json')));assert.equal(dataset.identity.serverIdentity,state.serverIdentity);
+ scenarioFixture=JSON.parse(fs.readFileSync(path.join(lab,'scenario-private.json')));
+
+ bootSql(`ALTER ROLE post28_r11_actor PASSWORD '${readerPassword}';`,'postgres');
+ const runtime=path.join(lab,'api-boot-root');
+ verifyRuntimeLayer(runtime,manifest,JSON.parse(fs.readFileSync(path.join(runtime,'runtime-layer.json'))));
+ const port=await new Promise(resolve=>{const s=net.createServer();s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
+ const dbUrl=new URL(`postgresql://post28_r11_actor@127.0.0.1:${state.port}/${database}`);dbUrl.password=readerPassword;dbUrl.searchParams.set('connection_limit','3');
+ const origin='http://127.0.0.1:'+port;
+ api=spawn(process.execPath,['apps/api/dist/server.cjs'],{cwd:runtime,env:{SystemRoot:process.env.SystemRoot,PATH:path.dirname(process.execPath),NODE_ENV:'test',PORT:String(port),DATABASE_URL:dbUrl.href,DIRECT_URL:dbUrl.href,DATABASE_REQUIRED:'true',RELEASE_SOURCE_SHA:manifest.sourceSha,HEALTH_DEPLOYMENT_REVISION:manifest.sourceSha,CORS_ORIGIN:origin,PUBLIC_WEB_URL:origin,ADMIN_WEB_URL:origin+'/admin',BACKGROUND_WORKER_ENABLED:'false',STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED:'false',OWNER_DOMAIN_OUTBOX_WORKER_ENABLED:'false',CERTIFICATE_COMPLETION_WORKER_ENABLED:'false'},windowsHide:true,stdio:['ignore','pipe','pipe']});
+ api.stdout.on('data',b=>apiLog+=b);api.stderr.on('data',b=>apiLog+=b);closed=new Promise(resolve=>api.once('exit',resolve));
+ for(let i=0;i<100;i++){try{const r=await fetch(origin+'/api/v1/monitoring/health/readiness',{signal:AbortSignal.timeout(1000)});if(r.status===200)break;}catch{}if(i===99)throw Error('R11_API_NOT_READY');await new Promise(r=>setTimeout(r,100));}
+
+ const worker=spawn(process.execPath,['--import','tsx',path.join(work,'r11-five-scenario-worker.mjs')],{cwd:repo,env:{SystemRoot:process.env.SystemRoot,PATH:path.dirname(process.execPath),NODE_ENV:'test',DATABASE_URL:dbUrl.href,R11_LAB:lab,R11_API_ORIGIN:origin,R11_API_PID:String(api.pid),TSX_TSCONFIG_PATH:path.join(repo,'tsconfig.base.json')},windowsHide:true,stdio:['ignore','pipe','pipe']});
+ let workerLog='';worker.stdout.on('data',b=>{workerLog+=b;process.stdout.write(b);});worker.stderr.on('data',b=>workerLog+=b);
+ const exit=await new Promise(resolve=>worker.once('exit',resolve));
+ fs.writeFileSync(path.join(lab,'scenario-worker.log'),[dbUrl.href,readerPassword,scenarioFixture.email,scenarioFixture.password].reduce((s,v)=>s.replaceAll(v,'[REDACTED]'),workerLog).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]'));
+ if(exit!==0)throw Error('R11_SCENARIO_WORKER_FAILED_'+exit);
+}catch(error){console.error('R11_OPERATOR_ERROR',error.stack);throw error;}finally{
+ if(api&&api.exitCode===null){api.kill();await closed;}
+ fs.writeFileSync(path.join(lab,'api.log'),[bootstrap,readerPassword,privateEnv.DATABASE_URL,privateEnv.POST28_TRANSACTION_SETUP_URL,...(scenarioFixture?[scenarioFixture.email,scenarioFixture.password]:[])].reduce((s,v)=>s.replaceAll(v,'[REDACTED]'),apiLog).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]'));
+ assert.equal(Number(fs.readFileSync(path.join(state.dataDirectory,'postmaster.pid'),'utf8').split('\n')[0]),state.postmasterPid);
+ const actual=execFileSync('powershell.exe',['-NoProfile','-Command',`(Get-Process -Id ${state.postmasterPid}).Path`],{encoding:'utf8',windowsHide:true}).trim();assert.equal(fs.realpathSync(actual),fs.realpathSync(path.join(bin,'postgres.exe')));
+ const stopped=spawnSync(path.join(bin,'pg_ctl.exe'),['-D',state.dataDirectory,'-m','fast','-w','stop'],{stdio:'ignore',windowsHide:true,timeout:30000}).status===0;
+ json(path.join(lab,'cleanup.json'),{stopped,apiStopped:!api||api.exitCode!==null||api.signalCode!==null,existingDatabasesTouched:false});assert.equal(stopped,true);console.log(JSON.stringify({lab,stopped}));
+}
+

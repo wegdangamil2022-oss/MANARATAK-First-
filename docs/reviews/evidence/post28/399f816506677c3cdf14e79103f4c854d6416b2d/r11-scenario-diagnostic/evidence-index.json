@@ -1,0 +1,114 @@
+{
+  "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+  "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "files": [
+    {
+      "path": "dataset.json",
+      "sha256": "875235d26398709a9a96f5439ae76164397af7397c31d2456e6ef5157e6b51c7",
+      "bytes": 332570
+    },
+    {
+      "path": "protected-before.json",
+      "sha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459",
+      "bytes": 2229
+    },
+    {
+      "path": "student-http-invariants.json",
+      "sha256": "02660c51121c4ff2e61665124ce46a1bf6a7cd36be93eb7faf63b9a73d562892",
+      "bytes": 144
+    },
+    {
+      "path": "student-writes-result.json",
+      "sha256": "d3045a5aaa3bb3c8b45653cf3c4668d2fac3aa67e28fc789a2e22314faed5801",
+      "bytes": 8947
+    },
+    {
+      "path": "admin-scans-result.json",
+      "sha256": "8680b4fa29102809784f3da975ec64edc99ca29cfdeb329b4a6d98d82afa2b5b",
+      "bytes": 10072
+    },
+    {
+      "path": "imports-result.json",
+      "sha256": "abb1769bf24a8c904e02c4f230a0ece80026adb8f3dd5bb8dee0992380f29c98",
+      "bytes": 9865
+    },
+    {
+      "path": "finance-stub-result.json",
+      "sha256": "fe1d98e1f972d4c7753f8cfe71b210612c483d3ffd5fa553b5e78bb48b4af035",
+      "bytes": 11109
+    },
+    {
+      "path": "worker-queues-result.json",
+      "sha256": "b91639dfe31347838fb6565c0ab23e0b184a811e5634a6f673c137d7aef817e1",
+      "bytes": 10119
+    },
+    {
+      "path": "invariants.json",
+      "sha256": "da76ccfc1356a2ec7a286a31408d239ff9e8755cc04792f815c2919562d17799",
+      "bytes": 453
+    },
+    {
+      "path": "five-scenario-result.json",
+      "sha256": "dde721ab776d03f54dca57939a6a6a5e7796b273d2b3fe47f0093bd0c2a0fc4d",
+      "bytes": 58836
+    },
+    {
+      "path": "cleanup.json",
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f",
+      "bytes": 81
+    },
+    {
+      "path": "scenario-worker.log",
+      "sha256": "c6928684b28e6078b765174e531bc4c8a235799527e7338a7a548c104618aba2",
+      "bytes": 593
+    },
+    {
+      "path": "r11-five-scenario-worker.mjs.txt",
+      "sha256": "bbad99b0221d781574252e04f576da8e9deab16180663e58cdf88c5956d84050",
+      "bytes": 15880
+    },
+    {
+      "path": "resume-r11-five-scenarios.mjs.txt",
+      "sha256": "b5d2e22011014a865d976f0312158ee2616d9a8e11df5f69dcd557eb202f5d4e",
+      "bytes": 7526
+    },
+    {
+      "path": "prior-ci-checks.json",
+      "sha256": "c4d819edce2114570fafd7d710cda791dc6a9a051a60afdfd49c541754a71e16",
+      "bytes": 5930
+    },
+    {
+      "path": "scenario-source-ci-checks.json",
+      "sha256": "7201aff6a31a8a1f6cb978382ba40b7a20a6c404d4a5642e5300688ea39265fd",
+      "bytes": 4604
+    },
+    {
+      "path": "premeasurement-lab-state.json",
+      "sha256": "69f0154b419f527911be61b4600a86db313b04b97a981fad25b4e938429c1ec0",
+      "bytes": 1192
+    },
+    {
+      "path": "premeasurement-cleanup.json",
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f",
+      "bytes": 81
+    },
+    {
+      "path": "premeasurement-scenario-worker.log",
+      "sha256": "63cef4a63edbbddeeabc345904ce87bfb9217d5f6ad80243c91ad3cf0b09b486",
+      "bytes": 977
+    },
+    {
+      "path": "summary.json",
+      "sha256": "1eb7fc3d92449a756d64740f27869954716f1f8cf87bd261c24880614ee1889a"
+    }
+  ],
+  "operatorSources": "Preserved as text for provenance; relative paths refer to original operator workspace, not this evidence directory.",
+  "privateFilesExcluded": [
+    "lab.env",
+    "bootstrap-password",
+    "scenario-private.json",
+    "dump",
+    "runtime-generated-keys"
+  ],
+  "fullSloAcceptance": false
+}

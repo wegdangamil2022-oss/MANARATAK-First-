@@ -1,0 +1,372 @@
+{
+  "kind": "R11_BOUNDED_SCENARIO_DIAGNOSTIC",
+  "category": "student-writes",
+  "sourceSha": "399f816506677c3cdf14e79103f4c854d6416b2d",
+  "status": "COMPLETED_DIAGNOSTIC",
+  "abortReason": null,
+  "sampleCount": 30,
+  "elapsedSeconds": 60.012534200000005,
+  "throughput": 0.49989557014907726,
+  "p50Ms": 23.107700000000477,
+  "p95Ms": 55.34599999999773,
+  "p99Ms": 60.205699999998615,
+  "observations": [
+    {
+      "latencyMs": 54.6242000000002,
+      "verified": true,
+      "version": 2
+    },
+    {
+      "latencyMs": 27.935999999999694,
+      "verified": true,
+      "version": 3
+    },
+    {
+      "latencyMs": 19.02139999999963,
+      "verified": true,
+      "version": 4
+    },
+    {
+      "latencyMs": 29.175500000000284,
+      "verified": true,
+      "version": 5
+    },
+    {
+      "latencyMs": 20.251500000000306,
+      "verified": true,
+      "version": 6
+    },
+    {
+      "latencyMs": 23.107700000000477,
+      "verified": true,
+      "version": 7
+    },
+    {
+      "latencyMs": 32.519900000001144,
+      "verified": true,
+      "version": 8
+    },
+    {
+      "latencyMs": 20.154899999999543,
+      "verified": true,
+      "version": 9
+    },
+    {
+      "latencyMs": 22.47229999999763,
+      "verified": true,
+      "version": 10
+    },
+    {
+      "latencyMs": 44.43189999999959,
+      "verified": true,
+      "version": 11
+    },
+    {
+      "latencyMs": 17.879300000000512,
+      "verified": true,
+      "version": 12
+    },
+    {
+      "latencyMs": 47.72560000000158,
+      "verified": true,
+      "version": 13
+    },
+    {
+      "latencyMs": 22.65139999999883,
+      "verified": true,
+      "version": 14
+    },
+    {
+      "latencyMs": 51.89999999999782,
+      "verified": true,
+      "version": 15
+    },
+    {
+      "latencyMs": 44.166400000001886,
+      "verified": true,
+      "version": 16
+    },
+    {
+      "latencyMs": 30.845100000002276,
+      "verified": true,
+      "version": 17
+    },
+    {
+      "latencyMs": 19.121800000000803,
+      "verified": true,
+      "version": 18
+    },
+    {
+      "latencyMs": 60.205699999998615,
+      "verified": true,
+      "version": 19
+    },
+    {
+      "latencyMs": 18.301299999999173,
+      "verified": true,
+      "version": 20
+    },
+    {
+      "latencyMs": 55.021999999997206,
+      "verified": true,
+      "version": 21
+    },
+    {
+      "latencyMs": 17.86069999999745,
+      "verified": true,
+      "version": 22
+    },
+    {
+      "latencyMs": 55.34599999999773,
+      "verified": true,
+      "version": 23
+    },
+    {
+      "latencyMs": 20.660299999995914,
+      "verified": true,
+      "version": 24
+    },
+    {
+      "latencyMs": 33.262399999999616,
+      "verified": true,
+      "version": 25
+    },
+    {
+      "latencyMs": 18.09730000000127,
+      "verified": true,
+      "version": 26
+    },
+    {
+      "latencyMs": 54.18880000000354,
+      "verified": true,
+      "version": 27
+    },
+    {
+      "latencyMs": 20.031700000006822,
+      "verified": true,
+      "version": 28
+    },
+    {
+      "latencyMs": 18.662499999998545,
+      "verified": true,
+      "version": 29
+    },
+    {
+      "latencyMs": 17.439999999995052,
+      "verified": true,
+      "version": 30
+    },
+    {
+      "latencyMs": 47.87020000000484,
+      "verified": true,
+      "version": 31
+    }
+  ],
+  "resources": [
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 350396416,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:05.913Z"
+    },
+    {
+      "cpuPercent": 0,
+      "residentMemoryBytes": 350396416,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:05.913Z",
+      "ageMs": 1659
+    },
+    {
+      "cpuPercent": 0.45975199663724253,
+      "residentMemoryBytes": 351629312,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:09.875Z"
+    },
+    {
+      "cpuPercent": 0.45975199663724253,
+      "residentMemoryBytes": 351629312,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:09.875Z",
+      "ageMs": 1710
+    },
+    {
+      "cpuPercent": 0.3869489846458643,
+      "residentMemoryBytes": 341622784,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:13.913Z"
+    },
+    {
+      "cpuPercent": 0.3869489846458643,
+      "residentMemoryBytes": 341622784,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:13.913Z",
+      "ageMs": 1686
+    },
+    {
+      "cpuPercent": 0.13106022479449755,
+      "residentMemoryBytes": 341458944,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:17.886Z"
+    },
+    {
+      "cpuPercent": 0.13106022479449755,
+      "residentMemoryBytes": 341458944,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:17.886Z",
+      "ageMs": 1727
+    },
+    {
+      "cpuPercent": 1.229296066252588,
+      "residentMemoryBytes": 263290880,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:21.911Z"
+    },
+    {
+      "cpuPercent": 1.229296066252588,
+      "residentMemoryBytes": 263290880,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:21.911Z",
+      "ageMs": 1715
+    },
+    {
+      "cpuPercent": 0.39052736815796046,
+      "residentMemoryBytes": 266096640,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:25.912Z"
+    },
+    {
+      "cpuPercent": 0.39052736815796046,
+      "residentMemoryBytes": 266096640,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:25.912Z",
+      "ageMs": 1727
+    },
+    {
+      "cpuPercent": 0.12962502074000332,
+      "residentMemoryBytes": 266522624,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:29.930Z"
+    },
+    {
+      "cpuPercent": 0.12962502074000332,
+      "residentMemoryBytes": 266522624,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:29.930Z",
+      "ageMs": 1722
+    },
+    {
+      "cpuPercent": 0.6469979296066253,
+      "residentMemoryBytes": 267706368,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:33.955Z"
+    },
+    {
+      "cpuPercent": 0.6469979296066253,
+      "residentMemoryBytes": 267706368,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:33.955Z",
+      "ageMs": 1711
+    },
+    {
+      "cpuPercent": 0.3254394734649671,
+      "residentMemoryBytes": 268148736,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:37.956Z"
+    },
+    {
+      "cpuPercent": 0.3254394734649671,
+      "residentMemoryBytes": 268148736,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:37.956Z",
+      "ageMs": 1724
+    },
+    {
+      "cpuPercent": 0.4533490839757937,
+      "residentMemoryBytes": 268533760,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:41.977Z"
+    },
+    {
+      "cpuPercent": 0.4533490839757937,
+      "residentMemoryBytes": 268533760,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:41.977Z",
+      "ageMs": 1717
+    },
+    {
+      "cpuPercent": 0.5841849451645065,
+      "residentMemoryBytes": 269066240,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:45.989Z"
+    },
+    {
+      "cpuPercent": 0.5841849451645065,
+      "residentMemoryBytes": 269066240,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:45.989Z",
+      "ageMs": 1718
+    },
+    {
+      "cpuPercent": 0.25912106135986734,
+      "residentMemoryBytes": 269107200,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:50.009Z"
+    },
+    {
+      "cpuPercent": 0.25912106135986734,
+      "residentMemoryBytes": 269107200,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:50.009Z",
+      "ageMs": 1712
+    },
+    {
+      "cpuPercent": 0.6463555886489617,
+      "residentMemoryBytes": 269697024,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:54.038Z"
+    },
+    {
+      "cpuPercent": 0.6463555886489617,
+      "residentMemoryBytes": 269697024,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:54.038Z",
+      "ageMs": 1697
+    },
+    {
+      "cpuPercent": 0.2610039254990395,
+      "residentMemoryBytes": 270274560,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:58.029Z"
+    },
+    {
+      "cpuPercent": 0.2610039254990395,
+      "residentMemoryBytes": 270274560,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:06:58.029Z",
+      "ageMs": 1719
+    },
+    {
+      "cpuPercent": 0.2590566194147393,
+      "residentMemoryBytes": 271454208,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:07:02.050Z"
+    },
+    {
+      "cpuPercent": 0.2590566194147393,
+      "residentMemoryBytes": 271454208,
+      "activeConnections": 4,
+      "sampledAt": "2026-10-20T17:07:02.050Z",
+      "ageMs": 1712
+    }
+  ],
+  "concurrency": 1,
+  "externalProvidersAllowed": false,
+  "representativeLaunchDataset": false,
+  "sloAcceptance": false,
+  "productionAcceptance": false,
+  "queryObservations": {
+    "scope": "HARNESS_PRISMA_CLIENT_ONLY_EXCLUDES_BUILT_API",
+    "count": 18,
+    "totalEngineDurationMs": 3
+  }
+}
