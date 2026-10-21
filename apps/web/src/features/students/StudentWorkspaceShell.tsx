@@ -91,8 +91,7 @@ export function StudentWorkspaceShell({
       {/* Full-bleed student identity on mobile: navy dominant, restrained teal at the right edge. */}
       <section
         aria-label="بطاقة هوية الطالب"
-        className="mn-inverse relative isolate -mx-3 sm:-mx-6 mt-0 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-0 shadow-none text-white"
-        style={{ backgroundImage: 'linear-gradient(105deg, #142B5F 0%, #142B5F 67%, #173E67 85%, #0E7C86 100%)' }}
+        className="mn-student-identity-header mn-inverse relative isolate -mx-3 sm:-mx-6 mt-0 w-[calc(100%+1.5rem)] sm:w-[calc(100%+3rem)] overflow-hidden rounded-none border-0 shadow-none text-white"
       >
         <div className="relative z-10 p-3.5 sm:p-5">
           {/* English name: avatar left/settings right. Arabic name: avatar right/settings left. */}
