@@ -1,5 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { User, Home, Route, BookOpen, Heart, GraduationCap, ClipboardList, Bell, Settings2, MapPin, Clock3, Mail } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { User, Home, Route, BookOpen, Heart, GraduationCap, ClipboardList, Bell, Settings2, MapPin, Clock3, Mail, ArrowRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import './student-workspace.css';
 
@@ -56,16 +56,26 @@ export function StudentWorkspaceShell({
   countryName, countryFlag, cityName, timezone, accessibility = {},
 }: Props) {
   const [now, setNow] = useState(() => new Date());
+  const previousTab = useRef(tab);
   useEffect(() => {
     const tick = window.setInterval(() => setNow(new Date()), 30_000);
     return () => window.clearInterval(tick);
   }, []);
+
+  // Start a newly opened section at the top; preserve certificate deep links.
+  useEffect(() => {
+    if (previousTab.current === tab) return;
+    previousTab.current = tab;
+    if (window.location.hash === '#certificates' && (tab === 'LEARNING' || tab === 'VAULT')) return;
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [tab]);
   const clock = localClock(timezone, now);
   const place = cityName || (timezone ? timezoneCities[timezone] : undefined);
   // The name, not the platform locale, determines the profile-image alignment.
   // Keep RTL for Arabic or mixed-script names; pure Latin names use LTR.
   const studentName = (displayName || '').trim();
   const isLatinName = /[A-Za-z]/.test(studentName) && !/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(studentName);
+  const sectionTitle = tabs.find((item) => item.id === tab)?.label || 'حساب الطالب';
 
   return (
     <main
@@ -75,6 +85,9 @@ export function StudentWorkspaceShell({
       data-high-contrast={String(Boolean(accessibility.highContrast))}
       className="mn-student-workspace w-full max-w-4xl mx-auto px-3 sm:px-6 pb-28 sm:pb-16 text-right font-['Cairo',sans-serif] min-h-screen text-[var(--mn-text)]"
     >
+      {/* The full identity and tile navigation are exclusive to ملخصي. */}
+      {tab === 'SUMMARY' && (
+        <>
       {/* Full-bleed student identity on mobile: navy dominant, restrained teal at the right edge. */}
       <section
         aria-label="بطاقة هوية الطالب"
@@ -170,6 +183,25 @@ export function StudentWorkspaceShell({
           );
         })}
       </div>
+        </>
+      )}
+
+      {/* Section detail view keeps its original content and styling. */}
+      {tab !== 'SUMMARY' && (
+        <nav aria-label="تنقل حساب الطالب" className="mt-4 sm:mt-5 flex min-w-0 items-center justify-between gap-3 font-['Cairo',sans-serif]">
+          <h1 className="min-w-0 text-[14px] font-bold text-[var(--mn-heading)]">{sectionTitle}</h1>
+          <button
+            type="button"
+            onClick={() => onTabChange('SUMMARY')}
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-[12px] font-bold text-[var(--mn-heading)] hover:border-[#D6A43B] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86]"
+            title="العودة إلى ملخصي"
+          >
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <span>ملخصي</span>
+          </button>
+        </nav>
+      )}
+
       {children}
     </main>
   );
