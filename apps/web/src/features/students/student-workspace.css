@@ -335,6 +335,47 @@
   min-width: 0;
 }
 
+/* Services tab: isolated Cairo typography across requests, invoices, payment
+ * details, booking packages and downloadable deliverables. */
+.mn-student-workspace .mn-student-services-page,
+.mn-student-workspace .mn-student-services-page :where(*) {
+  font-family: 'Cairo', sans-serif !important;
+}
+.mn-student-workspace .mn-student-services-heading {
+  display: inline-block;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid #D6A43B;
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+}
+.mn-student-workspace .mn-student-services-section,
+.mn-student-workspace .mn-student-service-booking-panel {
+  min-width: 0;
+}
+.mn-student-workspace .mn-student-services-page :where(input, select, textarea, button, a):focus-visible {
+  outline: 2px solid #0E7C86;
+  outline-offset: 2px;
+}
+.mn-student-workspace .mn-student-services-page :where(select, textarea, input:not([type='checkbox'])) {
+  font-family: 'Cairo', sans-serif !important;
+}
+.mn-student-workspace .mn-student-services-page :where(.mn-student-services-section, .mn-student-service-booking-panel) :where(p, time) {
+  line-height: 1.75;
+}
+.mn-student-workspace .mn-student-service-booking-panel :where(button, input, select) {
+  font-family: 'Cairo', sans-serif !important;
+}
+.mn-student-workspace .mn-student-services-section :where(article, button) {
+  min-width: 0;
+}
+
 /* Scholarship application document details stay compact and legible with
  * Cairo typography. Only tools within the Opportunities tab are affected. */
 .mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(p, label) {

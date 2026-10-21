@@ -59,8 +59,8 @@ check('P13-WEB hydrated saved items client/UI',has(apiClient,'listMyHydratedStud
 check('P13-WEB real auth client',has(apiClient,'loginStudent')&&has(apiClient,'logoutStudent')&&has(apiClient,'getCurrentStudentIdentity'));
 check('P13-WEB live student auth component',has(webAuth,'await ApiClient.login(')&&has(webAuth,'await ApiClient.getCurrentSessionIdentity()')&&has(webAuth,'resolveAuthenticatedDestination(identity)'));
 check('P13-WEB live logout',has(webStudent,'ApiClient.logoutStudent')&&has(webStudent,"window.location.assign('/')"));
-check('P13-WEB live account uses live workspace',has(publicApp,"publicDataMode === 'api'")&&has(publicApp,'<LiveStudentWorkspacePage />')&&has(publicApp,'<LiveStudentAuthPage'));
-check('P13-WEB prototype workspace explicit only',has(publicApp,'PrototypeStudentWorkspacePage')&&has(publicApp,'PrototypeAuthPage'));
+check('P13-WEB account uses canonical workspace and retains live auth',has(publicApp,"from '../students/StudentWorkspacePage'")&&has(publicApp,'<LiveStudentWorkspacePage initialTab="SUMMARY" />')&&has(publicApp,'<LiveStudentAuthPage'));
+check('P13-WEB shared workspace selects offline preview only explicitly',has(webStudent,"import { PreviewStudentApiClient } from './studentWorkspacePreviewApi'")&&has(webStudent,"const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype' ? PreviewStudentApiClient : LiveApiClient;")&&has(publicApp,"publicDataMode === 'prototype' ? (")&&has(publicApp,'<PrototypeAuthPage'));
 check('P13-WEB favorites/journey live use P15 API surface',has(publicApp,'<LiveStudentWorkspacePage initialTab="VAULT" />')&&has(publicApp,'<LiveStudentWorkspacePage initialTab="JOURNEY" />'));
 check('P13-WEB local personal state initialized prototype-only',(read(publicApp).match(/publicDataMode !== 'prototype'/g)||[]).length>=5);
 check('P13-WEB local push simulation prototype-only',has(publicApp,"if (publicDataMode !== 'prototype') return;"));
@@ -96,6 +96,8 @@ check('P13-PKG full CI includes P13',scripts['ci:source:full']?.includes('phase1
 const ci=read('.github/workflows/ci.yml'); const closureManifest=JSON.parse(read('scripts/ci/source-closure-manifest.json')); const p7p13Gate=(closureManifest.gates??[]).find(g=>g.id==='p7-p13-plan'); check('P13-CI runs canonical closure manifest',ci.includes('npm run ci:closure:manifest')); check('P13-MANIFEST final source audit registered',p7p13Gate?.classification==='SOURCE'&&String(p7p13Gate.command).includes('phase13:plan:verify'));
 
 function run(label,file){const r=spawnSync(process.execPath,[file],{cwd:root,encoding:'utf8'}); const out=`${r.stdout||''}${r.stderr||''}`; check(label,r.status===0,out.trim().slice(-1600)); return out;}
+const previewBoundary = spawnSync(process.execPath, ['--test', 'tests/security/public-prototype-build-guard-runtime.test.mjs', 'tests/security/student-workspace-preview-isolation.test.mjs'], {cwd:root,encoding:'utf8'});
+check('P13-WEB preview isolation and production/staging build rejection execute',previewBoundary.status===0,`${previewBoundary.stdout||''}${previewBoundary.stderr||''}`.trim().slice(-1600));
 for(const [label,file,marker] of [
  ['P13-RUN P7','scripts/verify-p7-plan-closure.mjs','P7_PLAN_CLOSURE_VERIFIER = PASS'],
  ['P13-RUN P8','scripts/verify-p8-plan-closure.mjs','P8_PLAN_CLOSURE_VERIFIER = PASS'],

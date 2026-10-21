@@ -3,6 +3,7 @@ const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype'
 import { useEffect, useRef, useState } from 'react';
 import { ApiClient as LiveApiClient, type StudentServicePackageDto } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
+import { CalendarClock } from 'lucide-react';
 type Slot = { id: string; startsAt: string; timezone: string };
 export function StudentServiceBookingPanel({ requestId }: { requestId: string }) {
   const { language, dir } = useTranslation();
@@ -170,13 +171,19 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
   return (
     <section
       dir={dir}
-      className="space-y-3 rounded-2xl border p-4"
+      className="mn-student-service-booking-panel space-y-3 rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-2xs mn-panel dark:border-white/10 sm:p-4"
       aria-label={label('مواعيد ومخرجات الخدمة', 'Service bookings and deliverables')}
     >
-      <p role="status">{notice}</p>
+      <div className="mb-3 flex min-w-0 items-center gap-2">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+          <CalendarClock className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />
+        </span>
+        <h3 className="mn-student-services-heading min-w-0 text-[14px] font-bold text-[var(--mn-heading)]">{label('مواعيد ومخرجات الخدمة', 'Service bookings and deliverables')}</h3>
+      </div>
+      {notice && <p role="status" className="rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-[11px] leading-[1.8] text-[var(--mn-text-muted)]">{notice}</p>}
       {packages.length > 0 && (
         <>
-          <label>
+          <label className="block text-[11px] font-semibold text-[var(--mn-heading)]">
             {label('الخدمة أو الباقة', 'Service or package')}
             <select
               value={packageId}
@@ -186,7 +193,7 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
                 setInputs({});
                 setConsent(false);
               }}
-              className="block rounded-xl border p-2"
+              className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[12px] text-[var(--mn-heading)]"
             >
               <option value="">{label('الخدمة المفردة', 'Single service')}</option>
               {packages.map((pkg) => (
@@ -197,7 +204,7 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
             </select>
           </label>
           {packageCursor && (
-            <button type="button" disabled={busy} onClick={() => void more('packages')}>
+            <button type="button" disabled={busy} onClick={() => void more('packages')} className="min-h-9 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-heading)] disabled:opacity-50">
               {label('المزيد من الباقات', 'More packages')}
             </button>
           )}
@@ -206,13 +213,13 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
       {selected && (
         <div className="space-y-3">
           {selected.items.map((item) => (
-            <fieldset key={item.serviceId} className="rounded-xl border p-3">
-              <legend>
+            <fieldset key={item.serviceId} className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3">
+              <legend className="px-1 text-[12px] font-bold text-[var(--mn-heading)]">
                 {item.localizedContent?.[language]?.displayName ?? item.displayName} ×{' '}
                 {item.quantity}
               </legend>
               {item.inputSchema.map((field) => (
-                <label key={field.key} className="block">
+                <label key={field.key} className="mt-2 block text-[11px] font-semibold text-[var(--mn-heading)]">
                   {field.key}
                   <input
                     type={
@@ -248,14 +255,17 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
                         },
                       }))
                     }
-                    className="rounded-xl border p-2"
+                    className={field.type === 'BOOLEAN'
+                      ? 'mt-1 h-4 w-4 accent-[#142B5F]'
+                      : 'mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-[12px] text-[var(--mn-heading)]'}
                   />
                 </label>
               ))}
             </fieldset>
           ))}
-          <label>
+          <label className="flex items-start gap-2 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-[11px] font-semibold leading-[1.8] text-[var(--mn-heading)]">
             <input
+              className="mt-1 h-4 w-4 shrink-0 accent-[#142B5F]"
               type="checkbox"
               checked={consent}
               onChange={(event) => setConsent(event.target.checked)}
@@ -273,7 +283,7 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
             type="button"
             key={slot.id}
             disabled={busy || Boolean(selected && !consent)}
-            className="rounded-xl border p-3"
+            className="min-h-10 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[12px] font-semibold text-[var(--mn-heading)] transition-colors hover:border-[#D6A43B] disabled:opacity-50"
             onClick={() => void book(slot.id)}
           >
             {new Date(slot.startsAt).toLocaleString(language, { timeZone: slot.timezone })} —{' '}
@@ -282,7 +292,7 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
         ))}
       </div>
       {slotCursor && (
-        <button type="button" disabled={busy} onClick={() => void more('slots')}>
+        <button type="button" disabled={busy} onClick={() => void more('slots')} className="min-h-9 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-heading)] disabled:opacity-50">
           {label('المزيد من المواعيد', 'More availability')}
         </button>
       )}
@@ -292,7 +302,7 @@ export function StudentServiceBookingPanel({ requestId }: { requestId: string })
           key={file.id}
           disabled={busy}
           onClick={() => void download(file.id)}
-          className="rounded-xl border p-3"
+          className="min-h-9 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-heading)] transition-colors hover:border-[#D6A43B] disabled:opacity-50"
         >
           {label('تنزيل المخرج', 'Download deliverable')}: {file.artifactType}
         </button>
