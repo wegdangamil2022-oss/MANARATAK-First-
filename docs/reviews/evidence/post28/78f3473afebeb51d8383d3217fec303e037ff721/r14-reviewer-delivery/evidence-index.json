@@ -1,0 +1,54 @@
+{
+  "kind": "POST28_SCOPED_EVIDENCE_INDEX",
+  "operatorSourceSha": "78f3473afebeb51d8383d3217fec303e037ff721",
+  "apiSourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+  "productionAcceptance": false,
+  "files": [
+    {
+      "path": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/r14-review-result.json",
+      "bytes": 6340,
+      "sha256": "919b632f4104a8e3796ab4d4699f1575fc55ed5bfbbddb205f364c2bfba1dd30",
+      "sourceOriginalSha256": "919b632f4104a8e3796ab4d4699f1575fc55ed5bfbbddb205f364c2bfba1dd30"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/review-cleanup.json",
+      "bytes": 108,
+      "sha256": "b6e6ba846759b7e007a5a0d07e305545a64a00bd75163c311bec9fec15d23189",
+      "sourceOriginalSha256": "b6e6ba846759b7e007a5a0d07e305545a64a00bd75163c311bec9fec15d23189"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/review-protected-before.json",
+      "bytes": 2229,
+      "sha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459",
+      "sourceOriginalSha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/review-protected-after.json",
+      "bytes": 2229,
+      "sha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459",
+      "sourceOriginalSha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/ci-six-jobs-completed.json",
+      "bytes": 14713,
+      "sha256": "37acfb0a8b5220aee834e356318641c6c1318d4889986cd1ae2a75e38c0f7e30"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/run-r14-review.mjs.txt",
+      "bytes": 11245,
+      "sha256": "2f954de4bf8d734455dd40c22d8d6ab97761ab6cbfb47c8428b91c41a9de58a2",
+      "sourceOriginalSha256": "2f954de4bf8d734455dd40c22d8d6ab97761ab6cbfb47c8428b91c41a9de58a2"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/r14-review-worker.mjs.txt",
+      "bytes": 17982,
+      "sha256": "b2e821232496f87e06ca8695366dba5760a757c71b75621fd8b8c97508b9e625",
+      "sourceOriginalSha256": "5724d7d4a263c76d87f4cc2fb3a5c844c8ec1f218adcd648e83c5f478cae1fe1"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/summary.json",
+      "bytes": 1937,
+      "sha256": "93185cc7fcb3ea6df1fc9bea6c2b421ed2cbe18d22c42e57be50845b13861d36"
+    }
+  ]
+}

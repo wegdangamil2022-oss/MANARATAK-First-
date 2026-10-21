@@ -34,35 +34,13 @@
   "candidateCi": {
     "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
     "runId": 39522846173,
-    "lastObservedStatus": "in_progress",
-    "result": null,
-    "observedAt": "2026-10-21T00:44:31.964Z",
-    "jobs": [
-      {
-        "name": "Translation quality gates",
-        "status": "completed",
-        "result": "success"
-      },
-      {
-        "name": "Full source closure gates",
-        "status": "in_progress",
-        "result": null
-      },
-      {
-        "name": "Deployment configuration",
-        "status": "completed",
-        "result": "success"
-      },
-      {
-        "name": "R08 isolated Redis and Linux worker shutdown",
-        "status": "completed",
-        "result": "success"
-      }
-    ],
-    "passedJobs": 3,
-    "allSixJobsSucceeded": false
+    "result": "success",
+    "passedJobs": 6,
+    "lastObservedStatus": "completed",
+    "allSixJobsSucceeded": true,
+    "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/ci-six-jobs-completed.json"
   },
-  "nextFunctionalStep": "BUILT_REVIEWER_AUTHENTICATED_CONTENT_WITH_CURRENT_CONSENT_THEN_SIGNED_CERTIFICATE_DELIVERY",
+  "nextFunctionalStep": "BUILT_API_SIGNED_CERTIFICATE_DELIVERY",
   "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
   "latestAdminCmsLocalDiagnostic": {
     "completed": true,
@@ -87,32 +65,8 @@
     "ci": {
       "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
       "runId": 39522846173,
-      "lastObservedStatus": "in_progress",
-      "result": null,
-      "observedAt": "2026-10-21T00:44:31.964Z",
-      "jobs": [
-        {
-          "name": "Translation quality gates",
-          "status": "completed",
-          "result": "success"
-        },
-        {
-          "name": "Full source closure gates",
-          "status": "in_progress",
-          "result": null
-        },
-        {
-          "name": "Deployment configuration",
-          "status": "completed",
-          "result": "success"
-        },
-        {
-          "name": "R08 isolated Redis and Linux worker shutdown",
-          "status": "completed",
-          "result": "success"
-        }
-      ],
-      "passedJobs": 3
+      "result": "success",
+      "passedJobs": 6
     }
   },
   "previousCandidateSourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
@@ -156,5 +110,12 @@
         "result": "success"
       }
     ]
+  },
+  "latestReviewerDeliveryDiagnostic": {
+    "passed": true,
+    "scope": "BUILT_API_WINDOWS_SYNTHETIC_CONSENT_GATED_STREAM_WITH_MFA",
+    "report": "docs/remediation/POST28_REVIEWER_DELIVERY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/78f3473afebeb51d8383d3217fec303e037ff721/r14-reviewer-delivery/evidence-index.json",
+    "formalAcceptance": false
   }
 }
