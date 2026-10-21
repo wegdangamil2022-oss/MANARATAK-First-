@@ -87,7 +87,7 @@ try{
   const gatewayPort=await freePort(),origin='https://127.0.0.1:'+gatewayPort;
   const url=new URL(env.DATABASE_URL);url.hostname=state.containerName;url.port='5432';
   const apiEnv={NODE_ENV:'test',PORT:'3000',DATABASE_URL:url.href,DIRECT_URL:url.href,DATABASE_REQUIRED:'true',RELEASE_SOURCE_SHA:sha,HEALTH_DEPLOYMENT_REVISION:sha,CORS_ORIGIN:origin,PUBLIC_WEB_URL:origin,ADMIN_WEB_URL:origin+'/admin',TRUST_PROXY_HOPS:'1',SECURE_COOKIE:'true',BACKGROUND_WORKER_ENABLED:'false',STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED:'false',OWNER_DOMAIN_OUTBOX_WORKER_ENABLED:'false',CERTIFICATE_COMPLETION_WORKER_ENABLED:'false'};
-  if(r14AdminCms){apiEnv.MANARATAK_MFA_ENCRYPTION_KEY=randomBytes(32).toString('hex');secrets.push(apiEnv.MANARATAK_MFA_ENCRYPTION_KEY);}
+  if(r14AdminCms){apiEnv.MANARATAK_MFA_ENCRYPTION_KEY=randomBytes(32).toString('hex');secrets.push(apiEnv.MANARATAK_MFA_ENCRYPTION_KEY);apiEnv.PUBLIC_WEB_URL='https://r14.example.invalid';}
   if(r08Combined){combined=new R08CombinedRuntime({docker,state,imageId:image.imageId,secrets});Object.assign(apiEnv,combined.prepare());report.kind='POST28_R08_COMBINED_ARTIFACT_RUNTIME';}
   secrets.push(url.href);const apiEnvFile=path.join(state.directory,'api.env');fs.writeFileSync(apiEnvFile,Object.entries(apiEnv).map(([key,value])=>key+'='+value).join('\n')+'\n',{mode:0o600,flag:'wx'});
   apiId=docker(['run','-d','--label','codex.post28.run='+state.runId,'--network',state.network,'--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','--memory=768m','--pids-limit=128','--tmpfs','/opt/manaratak/storage:rw,uid=1000,gid=1000,mode=0700,size=67108864','--tmpfs','/tmp:rw,nosuid,noexec,size=16777216','--env-file',apiEnvFile,image.imageId]);

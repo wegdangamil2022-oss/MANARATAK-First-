@@ -81,9 +81,9 @@ export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof,
     for (const locale of ['ar', 'en']) {
       const title = (locale === 'ar' ? 'محتوى صناعي ' : 'Synthetic content ') + fixture.slug, body = 'R14_PUBLISHED_' + locale + '_' + fixture.slug;
       await open(author, locale); await author.getByLabel('الرابط المحلي', { exact: true }).fill(fixture.slug); await author.getByLabel('العنوان', { exact: true }).fill(title); await author.getByLabel('الملخص', { exact: true }).fill('Synthetic ' + locale + ' summary');
-      await author.getByLabel('نص المحتوى', { exact: true }).fill('<p>' + body + '</p>'); await author.getByLabel('عنوان SEO', { exact: true }).fill('Synthetic title'); await author.getByLabel('وصف SEO', { exact: true }).fill('Synthetic publishing and withdrawal diagnostic');
+      await author.getByLabel('نص المحتوى').fill('<p>' + body + '</p>'); await author.getByLabel('عنوان SEO', { exact: true }).fill('Synthetic title'); await author.getByLabel('وصف SEO', { exact: true }).fill('Synthetic publishing and withdrawal diagnostic');
       await action(author, content.id, 'حفظ النسخة على الخادم', 'localized', 'PUT');
-      const publicUrl = origin + '/api/v1/cms/pages/http-resolve?path=' + encodeURIComponent('/' + locale + '/articles/' + fixture.slug);
+      const publicUrl = origin + '/api/v1/public/cms/pages/http-resolve?path=' + encodeURIComponent('/' + locale + '/articles/' + fixture.slug);
       assert.equal((await publicPage.goto(publicUrl)).status(), 404);
       await action(author, content.id, 'إرسال للمراجعة', 'submit-review'); assert.equal(await author.getByRole('button', { name: 'اعتماد كناشر', exact: true }).isDisabled(), true);
       const denied = await author.evaluate(async ({ id, locale }) => { const token = await fetch('/api/v1/auth/csrf-token', { credentials: 'include' }); return (await fetch('/api/v1/admin/cms/content/' + id + '/approve', { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/json', 'idempotency-key': crypto.randomUUID(), 'x-csrf-token': token.headers.get('x-csrf-token') }, body: JSON.stringify({ locale, expectedVersion: 1 }) })).status; }, { id: content.id, locale });
@@ -93,7 +93,7 @@ export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof,
       assert((await publicPage.locator('body').innerText()).includes(body));
       await webPage.goto(origin + '/' + locale + '/articles/' + fixture.slug); await webPage.getByRole('heading', { name: title, exact: true }).waitFor();
       assert((await webPage.locator('body').innerText()).includes(body));
-      await open(author, locale); await author.getByLabel('نص المحتوى', { exact: true }).fill('<p>R14_UNPUBLISHED_' + locale + '</p>'); await action(author, content.id, 'حفظ النسخة على الخادم', 'localized', 'PUT');
+      await open(author, locale); await author.getByLabel('نص المحتوى').fill('<p>R14_UNPUBLISHED_' + locale + '</p>'); await action(author, content.id, 'حفظ النسخة على الخادم', 'localized', 'PUT');
       assert.equal((await publicPage.reload()).status(), 200); assert(!(await publicPage.locator('body').innerText()).includes('R14_UNPUBLISHED_' + locale));
       await webPage.reload(); await webPage.getByRole('heading', { name: title, exact: true }).waitFor(); assert(!(await webPage.locator('body').innerText()).includes('R14_UNPUBLISHED_' + locale));
       await open(publisher, locale); await action(publisher, content.id, 'أرشفة', 'archive'); await publicPage.goto(origin + '/admin/login'); await publicPage.goBack();
