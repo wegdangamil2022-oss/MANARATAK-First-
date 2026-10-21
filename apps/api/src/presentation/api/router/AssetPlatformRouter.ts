@@ -452,6 +452,10 @@ export class AssetPlatformRouter {
           result: 'FAILURE',
           error
         });
+        if (error instanceof Error && error.message === 'CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED') {
+          res.setHeader('Cache-Control', 'no-store');
+          return void res.status(410).json({error: 'CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'});
+        }
         throw error;
       }
     }));

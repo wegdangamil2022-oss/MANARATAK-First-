@@ -52,6 +52,14 @@ describe('AssetPlatformRouter', () => {
     return app;
   };
 
+  it('returns an audited migration response for blocked certificate capabilities', async () => {
+    const lifecycle=createMockProcessLifecycleUseCase(),save=vi.fn(async()=>{});
+    lifecycle.requestDeliveryGrant.mockRejectedValue(new Error('CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'));
+    const app=express();app.use(express.json());app.use('/assets',AssetPlatformRouter.create({ingestAssetUseCase:createMockIngestUseCase() as never,processAssetLifecycleUseCase:lifecycle as never,auditRecordRepo:{save} as never}));
+    const response=await request(app).post('/assets/private-certificate/delivery-grant').send({});
+    expect(response.status).toBe(410);expect(response.body).toEqual({error:'CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'});expect(save).toHaveBeenCalledTimes(1);
+  });
+
   it('POST /assets/upload-locator requests upload locator', async () => {
     const ingestUseCase = createMockIngestUseCase();
     ingestUseCase.requestUploadLocator.mockResolvedValue({
