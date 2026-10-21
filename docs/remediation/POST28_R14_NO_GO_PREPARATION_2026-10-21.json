@@ -2,7 +2,7 @@
   "kind": "POST28_R14_NO_GO_PREPARATION",
   "localDate": "2026-10-21",
   "reviewSha": "83e210e0eb9505c875129948bd52171986f458b3",
-  "candidateSourceSha": "81666a9535f2516529372fd70077e1ea46564df8",
+  "candidateSourceSha": "6f7b68572f007a45d10263759800d8cbbfd49135",
   "branch": "feat/post28-r07-artifact-preparation",
   "releaseDecision": "NO_GO",
   "decisionScope": "PREPARATION_MEMO_NOT_PRODUCTION_AUTHORIZATION",
@@ -18,11 +18,11 @@
   "hostingState": "DESIGN_SELECTED_NOT_PROVISIONED",
   "hostingBudgetApproved": false,
   "localRemainingWork": [
-    "Finish unified exact-SHA Linux Admin CMS Arabic/English lifecycle after diagnostic pacing fix; partial Linux real-MFA publishing already observed",
     "Authenticated certificate delivery fixed and browser/IO-revocation proved locally; previously issued provider capabilities still require target-specific expiry or invalidation evidence",
     "Worker route queue fault diagnostic completed on Windows; real use-case/provider crash and lease/effect-once evidence still requires route-specific scope; Redis transport substituted here",
     "Scoped Linux rollback with selected exact artifacts and actual signal transport",
-    "Representative launch dataset and prior SLO/resource budget; pool checkout instrumentation"
+    "Representative launch dataset and prior SLO/resource budget; pool checkout instrumentation",
+    "Public English UI remains source-disabled; internal English editorial lifecycle proof is not public English release acceptance"
   ],
   "releaseBlockers": [
     "R13-E01",
@@ -32,62 +32,60 @@
     "R13-E05"
   ],
   "candidateCi": {
-    "sourceSha": "81666a9535f2516529372fd70077e1ea46564df8",
-    "runId": 39631278019,
+    "sourceSha": "6f7b68572f007a45d10263759800d8cbbfd49135",
+    "runId": 39635712633,
     "status": "completed",
-    "result": "failure",
-    "allSixJobsSucceeded": false,
-    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39631278019",
-    "observedAt": "2026-10-21T16:29:39.412Z",
+    "result": "success",
+    "allSixJobsSucceeded": true,
+    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39635712633",
+    "observedAt": "2026-10-21T16:51:44.407Z",
     "jobs": [
       {
-        "id": 119329803771,
-        "name": "R08 isolated Redis and Linux worker shutdown",
-        "status": "completed",
-        "conclusion": "success",
-        "currentOrFailedSteps": []
-      },
-      {
-        "id": 119329804187,
-        "name": "Deployment configuration",
-        "status": "completed",
-        "conclusion": "success",
-        "currentOrFailedSteps": []
-      },
-      {
-        "id": 119329804339,
+        "id": 119345483086,
         "name": "Full source closure gates",
         "status": "completed",
         "conclusion": "success",
         "currentOrFailedSteps": []
       },
       {
-        "id": 119329804340,
+        "id": 119345483536,
+        "name": "R08 isolated Redis and Linux worker shutdown",
+        "status": "completed",
+        "conclusion": "success",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119345483670,
+        "name": "Deployment configuration",
+        "status": "completed",
+        "conclusion": "success",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119345483715,
         "name": "Translation quality gates",
         "status": "completed",
         "conclusion": "success",
         "currentOrFailedSteps": []
       },
       {
-        "id": 119335739662,
+        "id": 119349029557,
         "name": "Retrieve and verify immutable artifacts from Actions storage",
         "status": "completed",
         "conclusion": "success",
         "currentOrFailedSteps": []
       },
       {
-        "id": 119335901750,
+        "id": 119349211588,
         "name": "Linux x64 review image and native runtime",
         "status": "completed",
-        "conclusion": "failure",
-        "currentOrFailedSteps": [
-          "Exercise R14 three-actor CMS MFA lifecycle in Arabic and English at one artifact SHA"
-        ]
+        "conclusion": "success",
+        "currentOrFailedSteps": []
       }
     ],
-    "evidence": "docs/reviews/evidence/post28/83ce0e56af89ab05bdbf99fb18ef213b22d48645/r14-linux-cms-preparation/fresh-import-candidate-ci.json"
+    "evidence": "docs/reviews/evidence/post28/83ce0e56af89ab05bdbf99fb18ef213b22d48645/r14-linux-cms-preparation/navigation-candidate-ci.json"
   },
-  "nextFunctionalStep": "UNIFIED_EXACT_SHA_LINUX_ADMIN_CMS_AND_SCOPED_ROLLBACK_WITH_RETAINED_ARTIFACTS",
+  "nextFunctionalStep": "SCOPED_LINUX_ROLLBACK_WITH_RETAINED_EXACT_ARTIFACTS_AND_ACTUAL_SIGNALS",
   "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
   "latestAdminCmsLocalDiagnostic": {
     "completed": true,
@@ -235,15 +233,23 @@
     "runtimeSourceUnchangedAfterInventoryFix": true
   },
   "latestAdminCmsLinuxDiagnostic": {
-    "sourceSha": "81666a9535f2516529372fd70077e1ea46564df8",
-    "passed": false,
+    "sourceSha": "6f7b68572f007a45d10263759800d8cbbfd49135",
+    "passed": true,
     "scope": "LINUX_X64_NODE22_PG16_SAME_SHA_BUILT_API_WEB_ADMIN_THREE_ACTOR_MFA_AR_EN",
     "cleanupPassed": true,
-    "drainMilliseconds": 120,
-    "allActorSessionsRevoked": false,
-    "requestBudget": null,
+    "drainMilliseconds": 142,
+    "allActorSessionsRevoked": true,
+    "requestBudget": {
+      "maximumRequests": 60,
+      "windowMilliseconds": 61000,
+      "count": 450,
+      "delayed": 245,
+      "maximumDelayMilliseconds": 29377,
+      "serverLimitsChanged": false,
+      "rejectedRequestsRetried": false
+    },
     "report": "docs/remediation/POST28_R14_LINUX_CMS_2026-10-21.md",
-    "evidence": "docs/reviews/evidence/post28/81666a9535f2516529372fd70077e1ea46564df8/r14-linux-cms-runtime/evidence-index.json",
+    "evidence": "docs/reviews/evidence/post28/6f7b68572f007a45d10263759800d8cbbfd49135/r14-linux-cms-runtime/evidence-index.json",
     "formalAcceptance": false
   },
   "repetitionScope": "Affected local profile and boundary tests plus automatic full source CI after tooling commits; no manual repeat of unaffected local R05-R13 suites",

@@ -1,12 +1,12 @@
 # R14 — رحلة CMS العربية والإنجليزية من حزم Linux موحدة
 
-المرشح `83ce0e56af89ab05bdbf99fb18ef213b22d48645` على `feat/post28-r07-artifact-preparation`. هذه مراجعة تشخيصية محلية، ولا تغير قرار NO_GO أو قبول R13/R14 الرسمي.
+المرشح المتحقق `6f7b68572f007a45d10263759800d8cbbfd49135` على `feat/post28-r07-artifact-preparation`. نجحت رحلة Linux المحددة ووظائف CI الست. هذه مراجعة تشخيصية محلية، ولا تغير قرار NO_GO أو قبول R13/R14 الرسمي. تحفظ الأقسام التالية تاريخ المحاولات السابقة دون تحويل نتائجها الفاشلة إلى PASS.
 
 ## التنفيذ
 
 أضيف ملف تشغيل اختياري `--r14-admin-cms` إلى مشغل Linux المعزول، مع ثلاث هويات صناعية منفصلة للتأليف والمراجعة والنشر. ينفذ المتصفح إعداد MFA وتأكيده، ويتحقق من إلغاء الجلسة، ثم يسجل الدخول بكود خطوة زمنية جديدة. لا تُحقن موافقة MFA مسبقة. يشغل API/Web/Admin من حزم المصدر نفسه، ويربطها بقاعدة PostgreSQL16 جديدة وصورة API محدودة الصلاحيات وشبكة داخلية. لا اتصالات بمزود خارجي أو قاعدة سابقة.
 
-المسار المقصود لكل من العربية والإنجليزية: مسودة مخفية، إرسال للمراجعة، رفض اعتماد المؤلف، مراجعة بهوية ثانية، نشر بهوية ثالثة، ظهور النص في HTML العام وWeb المبني، بقاء النسخة المنشورة عند تعديل مسودة، ثم سحب واختفاء النص من HTML وWeb. يتحقق أيضًا من إلغاء جلسات الهويات ومطابقة بصمات الجداول المحمية قبل/بعد. المختبر جديد؛ جدول محمي فارغ لا يثبت حفظ بيانات تاريخية موجودة.
+المسار المثبت لكل من العربية والإنجليزية: مسودة مخفية، إرسال للمراجعة، رفض اعتماد المؤلف، مراجعة بهوية ثانية، نشر بهوية ثالثة، بقاء snapshot المنشورة عند تعديل المسودة، ثم سحب واستجابة404 من API المحتوى. العربية وحدها مفعلة للعرض العام: ثبت ظهورها في HTML وWeb واختفاؤها بعد السحب. الإنجليزية تبقى محجوبة في HTML العام مع noindex/nofollow، ويعيد Web مسارها للعربية؛ لا يُدعى عرض عام إنجليزي. ثبت أيضًا إلغاء جلسات الهويات ومطابقة بصمات الجداول المحمية قبل/بعد. المختبر جديد؛ الجداول المحمية الخمسة فارغة، فلا يثبت هذا الفحص حفظ صفوف تاريخية موجودة.
 
 توسعة صلاحيات قاعدة التشغيل مقيدة بخيار `--r14-admin-cms-fixtures` للمختبر وحده، وتقتصر إضافاتها على Credential وسجلات CMS المطلوبة. لا DDL أو تعديل سجل migrations أو إضافة صلاحيات مال وConsent وBinding. لم تتغير migrations أو guards أو assertions الإلزامية.
 
@@ -56,3 +56,15 @@ CI 39631278019 at source 81666a9535f2516529372fd70077e1ea46564df8 completed five
 The disabled English route had already redirected to the Arabic fallback. Reloading the resulting fallback page did not request the article again, so the diagnostic waited for an event that navigation could not produce. The corrected check explicitly navigates to the original localized article URL before requiring the owner response of 404 and absence of the published heading/body. No assertion, locale policy, MFA freshness, server rate limit, or product guard was relaxed. Two directly related profile/locale tests and the helper lint passed; the full browser journey still requires the subsequent Linux run.
 
 The failed lab shut down cleanly: API exit 0, drain 120 ms, owned API/PostgreSQL containers and network removed, no existing database touched. Artifact bytes were verified before extraction. Formal R14 acceptance and production authorization remain false.
+
+## النتيجة المتحققة للمرشح6f7b685
+
+نجح [CI39635712633](https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39635712633) بوظائفه الست. استُرجعت حزمة دليل CMS بحجم525577 بايت مع التحقق من digest المخزن قبل فكها، ثم فُحص مصدر النتيجة والعقود والتنظيف قبل حفظها. دليل التشغيل من API/Web/Admin المبنية من SHA واحد، على Linux x64 وNode22.16.0 وPostgreSQL16 جديد، بدور post28_app دون superuser أو bypassRLS أو إنشاء أدوار/قواعد أو DDL أو تعديل سجل migrations.
+
+أتمت الهويات الصناعية الثلاث MFA الفعلي وتسجيل دخول جديد، ثم دورة التأليف والمراجعة والنشر والسحب بالعربية والإنجليزية. رُفض اعتماد المؤلف403، وبقي نشر المراجع معطلًا، ولم تُبدل المسودة النص المنشور. ثبتت404 واختفاء النص بعد السحب. الإنجليزية هنا دورة تحرير وsnapshot من API فقط؛ بقي العرض العام الإنجليزي محجوبًا وفق سياسة المصدر، ولم تُفتح جاهزيته لتجاوز الفحص.
+
+سُجلت642 استجابة متصفح، منها450 طلب API حجزتها ميزانية التشخيص، دون429 أو5xx أو أخطاء pageerror. سُجل الخروج وألغيت كل جلسات الهويات. أوقفت إشارة SIGTERM الفعلية API بخروج0؛ استغرق docker stop المقاس142ms، وأزيلت الحاويات والشبكة المملوكة للمختبر. هذا قياس تشغيل صناعي ساكن، وليس SLO لتعافي الإنتاج أو إثبات drain لعامل تحت حمل. لا قواعد سابقة أو آثار مزود خارجي. حافظت بصمات الجداول المحمية الخمسة على حالتها الفارغة؛ لا يعمم ذلك على حفظ صفوف تاريخية غير موجودة في هذا المختبر.
+
+فُحص محليًا ملفا profile/locale المرتبطان بالإصلاح مع lint فقط؛ أعاد CI مجموعته التلقائية على المصدر الجديد. بقيت المحاولات الفاشلة محفوظة بنتائجها الأصلية. [فهرس النتيجة والبصمات ولقطة Admin](../reviews/evidence/post28/6f7b68572f007a45d10263759800d8cbbfd49135/r14-linux-cms-runtime/evidence-index.json).
+
+أغلقت فجوة رحلة CMS موحدة المصدر ضمن هذا النطاق التشخيصي. التالي بروفة تراجع Linux بالحزم المحددة، ثم حدود الموارد والحمل والمزود والثقة والإصدار. يبقى R13/R14 الرسميان غير مقبولين، وقرار الإنتاج NO_GO.
