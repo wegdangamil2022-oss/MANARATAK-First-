@@ -3,7 +3,8 @@
   "git": {
     "deploymentEnabled": {
       "main": true,
-      "feat/post28-r07-artifact-preparation": false
+      "feat/post28-r07-artifact-preparation": false,
+      "fix/relationship-audit-20261022": false
     }
   },
   "rewrites": [

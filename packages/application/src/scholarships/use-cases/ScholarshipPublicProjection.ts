@@ -17,7 +17,14 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
       version?.status === 'PUBLISHED' && version.id === test.currentPublishedVersionId && version.testId === test.id;
   };
   const country = (value:unknown) => (value as {country?:{id:string;name:string;nameAr?:string|null;isActive:boolean;lifecycleState:string}}).country;
+  const publicEligibility = (source.eligibilityItems ?? []).filter(e =>
+    (resolved(e.resolutionStatus) || ![e.countryReferenceId,e.degreeLevelId,e.majorId,e.internationalTestId].some(Boolean)) &&
+    (!e.majorId || majorPublished(e)) && (!e.internationalTestId || testPublished(e)));
+  const publicDocuments = (source.requiredDocumentItems ?? []).filter(d =>
+    !d.internationalTestId || (resolved(d.resolutionStatus) && testPublished(d)));
   return {
+    hasUnavailableRequirements: publicEligibility.length !== (source.eligibilityItems ?? []).length ||
+      publicDocuments.length !== (source.requiredDocumentItems ?? []).length,
     publicId: source.publicId, slug: source.slug, canonicalName: source.canonicalName,
     displayName, providerName: source.providerName,
     fundedProgramPairs: (source.fundedProgramPairs ?? []).map(pair => ({
@@ -47,19 +54,14 @@ export function projectPublishedScholarship(source: ScholarshipDto, displayName:
       .map((d) => ({targetKey:d.targetKey,degreeLevelId:d.degreeLevelId,sourceLabel:d.sourceLabel,resolutionStatus:'RESOLVED'})),
     majorTargets: (source.majorTargets ?? []).filter((m) => m.majorId && resolved(m.resolutionStatus) && majorPublished(m))
       .map((m) => ({targetKey:m.targetKey,majorId:m.majorId,sourceLabel:m.sourceLabel,resolutionStatus:'RESOLVED'})),
-    eligibilityItems: (source.eligibilityItems ?? []).filter(
-        (e) =>
-      (resolved(e.resolutionStatus) || ![e.countryReferenceId,e.degreeLevelId,e.majorId,e.internationalTestId].some(Boolean)) &&
-      (!e.majorId || majorPublished(e)) &&
-          (!e.internationalTestId || testPublished(e)),
-      )
+    eligibilityItems: publicEligibility
       .map((e) => ({itemKey:e.itemKey,itemTypeCode:e.itemTypeCode,operatorCode:e.operatorCode,
         countryLabel:country(e)?.isActive && country(e)?.lifecycleState==='ACTIVE' ? country(e)?.nameAr || country(e)?.name : undefined,
         valueText:e.valueText,minimumValue:e.minimumValue,maximumValue:e.maximumValue,
         countryReferenceId:e.countryReferenceId,degreeLevelId:e.degreeLevelId,
         majorId:e.majorId,internationalTestId:e.internationalTestId,
         isRequired:e.isRequired,priorityOrder:e.priorityOrder})),
-    requiredDocumentItems: (source.requiredDocumentItems ?? []).filter((d) => !d.internationalTestId || (resolved(d.resolutionStatus) && testPublished(d)))
+    requiredDocumentItems: publicDocuments
       .map((d) => ({documentKey:d.documentKey,documentTypeCode:d.documentTypeCode,
         displayName:d.displayName,description:d.description,internationalTestId:d.internationalTestId,
         isRequired:d.isRequired,displayOrder:d.displayOrder})),

@@ -60,14 +60,14 @@ export function mapPublicScholarshipDto(dto: PublicScholarshipDto, now = new Dat
   const requiredTests = [
     ...new Map(
       [
-        ...(dto.eligibilityItems ?? []).filter((item) => Boolean(item.internationalTestId))
+        ...(dto.eligibilityItems ?? []).filter((item) => item.isRequired !== false && Boolean(item.internationalTestId))
           .map((item) => ({
             internationalTestId: item.internationalTestId!,
             valueText: item.valueText,
             kind: 'EXAM',
           })),
         ...(dto.requiredDocumentItems ?? [])
-          .filter((item) => Boolean(item.internationalTestId))
+          .filter((item) => item.isRequired !== false && Boolean(item.internationalTestId))
           .map((item) => ({
             internationalTestId: item.internationalTestId!,
             valueText: item.displayName,

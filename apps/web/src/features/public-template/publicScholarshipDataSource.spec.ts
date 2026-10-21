@@ -56,4 +56,19 @@ describe('public scholarship data source', () => {
 
     await expect(loadPublishedScholarships()).rejects.toThrow('unavailable');
   });
+
+  it('retains canonical required tests while keeping optional evidence out of the required summary', () => {
+    const mapped = mapPublicScholarshipDto({
+      publicId: 's', slug: 's', canonicalName: 'S', displayName: 'S', updatedAt: '',
+      fundingCoverage: '', coverageDetails: '', degreeLevel: '', eligibleMajorsOrFields: [],
+      eligibilityItems: [{ itemKey: 'score', itemTypeCode: 'TEST', internationalTestId: 'toefl', valueText: 'TOEFL 90', isRequired: true }],
+      requiredDocumentItems: [
+        { documentKey: 'optional', displayName: 'Optional IELTS', internationalTestId: 'ielts', isRequired: false },
+        { documentKey: 'certificate', displayName: 'TOEFL certificate', internationalTestId: 'toefl' },
+        { documentKey: 'unresolved', displayName: 'Some test label' },
+      ],
+    });
+    expect(mapped.requiredExams?.map(item => item.id)).toEqual(['toefl']);
+    expect(mapped.publishedData?.requiredDocumentItems).toHaveLength(3);
+  });
 });

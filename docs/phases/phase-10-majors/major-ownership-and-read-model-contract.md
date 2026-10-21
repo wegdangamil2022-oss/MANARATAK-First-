@@ -16,6 +16,8 @@
 
 ## Read Models
 
+P13 owns the course-to-major relationship in `CourseMajorProjection`, including taxonomy/mapping lineage and explicit review state. The Major reverse view consumes approved P13 relationships through `CourseRelationshipQueryService` / `CrossDomainGraphReadService`; P10 does not create a second course collection or infer course identity from text. Public eligibility must hold for both owners. See [canonical relationship navigation](../../architecture/PUBLIC_CANONICAL_RELATIONSHIP_NAVIGATION.md).
+
 - List endpoints return bounded summaries: default page size 50, maximum 100.
 - Database search and canonical filters execute in Prisma query predicates.
 - The static source catalog is cached, filtered, and paginated before DB enrichment; enrichment queries only the current page's codes.

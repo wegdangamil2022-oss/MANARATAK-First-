@@ -9,7 +9,7 @@ const testRecord = {
 };
 
 describe('InternationalTestPublicRouter locale contract', () => {
-  const createRepository = () => ({ listPublished: vi.fn(), findBySlug: vi.fn(), findPublishedBySlug: vi.fn() });
+  const createRepository = () => ({ listPublished: vi.fn(), findBySlug: vi.fn(), findById: vi.fn(), findPublishedById: vi.fn(), findPublishedBySlug: vi.fn() });
   const createApp = (repository: ReturnType<typeof createRepository>) => {
     const app = express();
     app.use('/public/international-tests', InternationalTestPublicRouter.create({ internationalTestRepository: repository as any }));
@@ -29,5 +29,33 @@ describe('InternationalTestPublicRouter locale contract', () => {
     const res = await request(createApp(repository)).get('/public/international-tests?locale=de');
     expect(res.status).toBe(400);
     expect(res.body.code).toBe('UNSUPPORTED_LOCALE');
+  });
+
+  it('opens a canonical requirement outside the catalog page through the public snapshot', async () => {
+    const repository = createRepository();
+    repository.findPublishedById.mockResolvedValue({ ...testRecord, id: 'toefl-canonical', slug: 'toefl', internalNotes: 'PRIVATE' });
+    const res = await request(createApp(repository)).get('/public/international-tests/id/toefl-canonical?locale=en');
+    expect(res.status).toBe(200);
+    expect(res.body.id).toBe('toefl-canonical');
+    expect(res.body).not.toHaveProperty('internalNotes');
+    expect(res.headers['cache-control']).toBe('no-store');
+    expect(repository.listPublished).not.toHaveBeenCalled();
+    expect(repository.findById).not.toHaveBeenCalled();
+  });
+
+  it('does not fall back to a draft or withdrawn admin record', async () => {
+    const repository = createRepository();
+    repository.findPublishedById.mockResolvedValue(null);
+    repository.findById.mockResolvedValue({ ...testRecord, status: 'NEEDS_REVIEW' });
+    const res = await request(createApp(repository)).get('/public/international-tests/id/t1');
+    expect(res.status).toBe(404);
+    expect(repository.findById).not.toHaveBeenCalled();
+  });
+
+  it('rejects a mismatched owner ID and invalid locale on relationship reads', async () => {
+    const repository = createRepository();
+    repository.findPublishedById.mockResolvedValue({ ...testRecord, id: 'another-test' });
+    expect((await request(createApp(repository)).get('/public/international-tests/id/t1')).status).toBe(404);
+    expect((await request(createApp(repository)).get('/public/international-tests/id/t1?locale=de')).status).toBe(400);
   });
 });

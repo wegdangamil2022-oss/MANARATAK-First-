@@ -27,6 +27,11 @@ export class InternationalTestPublicRouter {
     }));
 
     router.get('/id/:id/admission-score-scales',asyncHandler(async(req:Request,res:Response)=>{const {versionId}=z.object({versionId:z.string().trim().min(1).max(160).optional()}).strict().parse(req.query);res.setHeader('Cache-Control','no-store');const data=await cradle.internationalTestRepository.getPublishedAdmissionScoreContract?.(z.string().trim().min(1).max(160).parse(req.params.id),versionId);if(!data)return void res.status(404).json({error:'PUBLISHED_SCORE_CONTRACT_UNAVAILABLE'});res.json({data});}));
+    router.get('/id/:id', asyncHandler(async (req: Request, res: Response) => {
+      res.setHeader('Cache-Control', 'no-store');
+      const id = z.string().trim().min(1).max(160).parse(req.params.id);
+      res.json(await localized.getPublishedById(id, parseRequestLocale(req.query)));
+    }));
     router.get('/:slug/admission-score-scales',asyncHandler(async(req:Request,res:Response)=>{
       const {versionId}=z.object({versionId:z.string().trim().min(1).max(160).optional()}).strict().parse(req.query);
       res.setHeader('Cache-Control','no-store');

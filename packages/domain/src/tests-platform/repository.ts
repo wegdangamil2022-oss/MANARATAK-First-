@@ -40,6 +40,8 @@ export interface IInternationalTestRepository {
   findBySlug(slug: string): Promise<InternationalTestDto | null>;
   /** Public boundary: predicate is enforced in persistence, not after DTO mapping. */
   findPublishedBySlug(slug: string): Promise<InternationalTestDto | null>;
+  /** Canonical relationship navigation; never substitute the mutable admin read. */
+  findPublishedById?(id: string): Promise<InternationalTestDto | null>;
   findByDedupKey(dedupKey: string): Promise<InternationalTestDto | null>;
   create(data: UpsertInternationalTestDto): Promise<InternationalTestDto>;
   update(id: string, data: Partial<UpsertInternationalTestDto>): Promise<InternationalTestDto>;
