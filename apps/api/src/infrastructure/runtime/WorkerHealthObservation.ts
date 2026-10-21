@@ -17,7 +17,8 @@ export class WorkerHealthObservation {
     if (!this.prefix || !this.redis) return;
     const healthy = ['RUNNING', 'IDLE'].includes(String(snapshot.state));
     if (!healthy && !['DEGRADED', 'FAILED', 'STOPPED'].includes(String(snapshot.state))) return;
-    const timestamp = (healthy ? [snapshot.lastPollAt, snapshot.lastSuccessAt] : [snapshot.lastFailureAt, snapshot.lastErrorAt, snapshot.lastStoppedAt])
+    let state = snapshot.state;
+    let timestamp = (healthy ? [snapshot.lastPollAt, snapshot.lastSuccessAt] : [snapshot.lastFailureAt, snapshot.lastErrorAt, snapshot.lastStoppedAt])
       .filter((v): v is string => typeof v === 'string')
       .sort()
       .at(-1);
@@ -25,15 +26,19 @@ export class WorkerHealthObservation {
     if (
       healthy &&
       typeof snapshot.lastErrorAt === 'string' &&
-      Date.parse(snapshot.lastErrorAt) > Date.parse(timestamp)
-    )
-      return;
+      Date.parse(snapshot.lastErrorAt) >= Date.parse(timestamp)
+    ) {
+      // Durable workers return to IDLE after recording a failed job. Store the
+      // failure too; skipping it would leave the previous healthy Redis record.
+      state = 'DEGRADED';
+      timestamp = snapshot.lastErrorAt;
+    }
     // Serialize lifecycle writes: a failure must not be dropped while a prior
     // successful observation is still being stored.
     const previous = this.pending.get(name) ?? Promise.resolve();
     const task = previous.catch(() => undefined).then(async () => {
       await this.redis.set(`${this.prefix}:${name}`, JSON.stringify({
-        state: snapshot.state, observedAt: timestamp,
+        state, observedAt: timestamp,
         protocolVersion: 1, scope: 'DEPLOYMENT_CLUSTER',
       }), { PX: 3_600_000 });
     });

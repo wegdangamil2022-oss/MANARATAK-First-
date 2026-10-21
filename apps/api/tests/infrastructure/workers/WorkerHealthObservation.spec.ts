@@ -5,6 +5,17 @@ import {freshWorkerEvidence} from '../../../src/presentation/monitoring/RuntimeH
 const scope={environment:'test',apiOrigin:'https://api.example.invalid',revision:'r08'};
 function redisFixture(){const values=new Map<string,string>();return {get:vi.fn(async(key:string)=>values.get(key)??null),set:vi.fn(async(key:string,value:string,_options?:unknown)=>{values.set(key,value);})};}
 describe('R08 worker health Redis boundary',()=>{
+  it.each([0, 1])('replaces prior healthy evidence when an IDLE background job fails %i ms after its poll',async offset=>{
+    const redis=redisFixture(),health=new WorkerHealthObservation(redis,scope);
+    const poll=new Date(Date.now()-100).toISOString(),error=new Date(Date.parse(poll)+offset).toISOString();
+    await health.publish('background-jobs',{state:'IDLE',lastPollAt:poll});
+    await health.publish('background-jobs',{state:'IDLE',lastPollAt:poll,lastErrorAt:error});
+    expect(await health.read('background-jobs')).toMatchObject({state:'DEGRADED',observedAt:error});
+    expect(freshWorkerEvidence(await health.read('background-jobs'),15000)).toBe(false);
+    const recovered=new Date(Date.parse(error)+1).toISOString();
+    await health.publish('background-jobs',{state:'IDLE',lastPollAt:recovered,lastErrorAt:error});
+    expect(freshWorkerEvidence(await health.read('background-jobs'),15000)).toBe(true);
+  });
   it('R08 replaces healthy evidence with a failed observation and a real Redis expiry option',async()=>{
     const redis=redisFixture(),health=new WorkerHealthObservation(redis,scope);
     await health.publish('owner',{state:'RUNNING',lastSuccessAt:new Date().toISOString()});
