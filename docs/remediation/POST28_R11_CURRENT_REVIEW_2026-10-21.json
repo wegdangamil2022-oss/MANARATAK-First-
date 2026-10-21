@@ -46,7 +46,7 @@
   "databaseConnected": false,
   "externalProviderEnabled": false,
   "evidence": "docs/reviews/evidence/post28/2934821ae7de16fd65531c5df41684eb104a8e5c/r11-current-review/evidence-index.json",
-  "next": "SCOPED_LINUX_ROLLBACK_THEN_REMAINING_RELEASE_BLOCKERS",
+  "next": "REMAINING_RELEASE_TARGET_PROVIDER_TRUST_AND_CAPACITY_GATES_NO_AUTOMATIC_GO",
   "latestAdminCmsLocalDiagnostic": {
     "completed": true,
     "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",

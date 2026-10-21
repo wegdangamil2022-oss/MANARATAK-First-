@@ -94,7 +94,7 @@
       "implementationResolution": {
         "state": "IMPLEMENTATION_FIXED_DEPLOYMENT_TRANSITION_PENDING",
         "implementationSourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
-        "currentComparedSourceSha": "77ca2767ce571c3f520cdb95d8651e681c21a08c",
+        "currentComparedSourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
         "deliveryContract": "AUTHENTICATED_BOUNDED_STREAM_RECHECKED_BEFORE_AND_AFTER_IO",
         "genericCertificateProviderGrantsDisabled": true,
         "previousCapabilitiesInvalidated": false,
@@ -181,5 +181,77 @@
       "ar"
     ],
     "publicEnglishReleaseAccepted": false
+  },
+  "latestLinuxRollbackDiagnostic": {
+    "sourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
+    "previousSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+    "passed": true,
+    "scope": "LINUX_ACTUAL_SIGTERM_API_CURRENT_PREVIOUS_CURRENT_SESSION_CSRF_WORKSPACE_RECEIPT_CONTINUITY",
+    "sharedLockedDependencyLayer": true,
+    "workersEnabled": false,
+    "financialEffectOnceClaimed": false,
+    "differentApiImplementationDemonstrated": false,
+    "requestCount": 14,
+    "elapsedMilliseconds": 2494,
+    "cleanupPassed": true,
+    "report": "docs/remediation/POST28_R14_LINUX_ROLLBACK_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b/r14-linux-rollback/evidence-index.json",
+    "formalAcceptance": false
+  },
+  "currentSourceCi": {
+    "sourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
+    "runId": 39648892069,
+    "observedAt": "2026-10-21T18:20:48.224Z",
+    "jobs": [
+      {
+        "id": 119391671122,
+        "name": "Translation quality gates",
+        "status": "completed",
+        "conclusion": "success",
+        "activeOrFailedSteps": []
+      },
+      {
+        "id": 119391671516,
+        "name": "Deployment configuration",
+        "status": "completed",
+        "conclusion": "success",
+        "activeOrFailedSteps": []
+      },
+      {
+        "id": 119391671580,
+        "name": "Full source closure gates",
+        "status": "completed",
+        "conclusion": "success",
+        "activeOrFailedSteps": []
+      },
+      {
+        "id": 119391671637,
+        "name": "R08 isolated Redis and Linux worker shutdown",
+        "status": "completed",
+        "conclusion": "success",
+        "activeOrFailedSteps": []
+      },
+      {
+        "id": 119395438115,
+        "name": "Retrieve and verify immutable artifacts from Actions storage",
+        "status": "completed",
+        "conclusion": "success",
+        "activeOrFailedSteps": []
+      },
+      {
+        "id": 119395694792,
+        "name": "Linux x64 review image and native runtime",
+        "status": "completed",
+        "conclusion": "success",
+        "activeOrFailedSteps": []
+      }
+    ],
+    "allSixSucceeded": true,
+    "formalAcceptance": false,
+    "allSixJobsSucceeded": true,
+    "result": "success",
+    "status": "completed",
+    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39648892069",
+    "evidence": "docs/reviews/evidence/post28/aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b/r14-linux-rollback/ci-observation.json"
   }
 }

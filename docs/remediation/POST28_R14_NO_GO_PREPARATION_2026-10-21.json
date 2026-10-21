@@ -2,7 +2,7 @@
   "kind": "POST28_R14_NO_GO_PREPARATION",
   "localDate": "2026-10-21",
   "reviewSha": "83e210e0eb9505c875129948bd52171986f458b3",
-  "candidateSourceSha": "6f7b68572f007a45d10263759800d8cbbfd49135",
+  "candidateSourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
   "branch": "feat/post28-r07-artifact-preparation",
   "releaseDecision": "NO_GO",
   "decisionScope": "PREPARATION_MEMO_NOT_PRODUCTION_AUTHORIZATION",
@@ -20,7 +20,6 @@
   "localRemainingWork": [
     "Authenticated certificate delivery fixed and browser/IO-revocation proved locally; previously issued provider capabilities still require target-specific expiry or invalidation evidence",
     "Worker route queue fault diagnostic completed on Windows; real use-case/provider crash and lease/effect-once evidence still requires route-specific scope; Redis transport substituted here",
-    "Scoped Linux rollback with selected exact artifacts and actual signal transport",
     "Representative launch dataset and prior SLO/resource budget; pool checkout instrumentation",
     "Public English UI remains source-disabled; internal English editorial lifecycle proof is not public English release acceptance"
   ],
@@ -32,60 +31,62 @@
     "R13-E05"
   ],
   "candidateCi": {
-    "sourceSha": "6f7b68572f007a45d10263759800d8cbbfd49135",
-    "runId": 39635712633,
-    "status": "completed",
-    "result": "success",
-    "allSixJobsSucceeded": true,
-    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39635712633",
-    "observedAt": "2026-10-21T16:51:44.407Z",
+    "sourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
+    "runId": 39648892069,
+    "observedAt": "2026-10-21T18:20:48.224Z",
     "jobs": [
       {
-        "id": 119345483086,
-        "name": "Full source closure gates",
-        "status": "completed",
-        "conclusion": "success",
-        "currentOrFailedSteps": []
-      },
-      {
-        "id": 119345483536,
-        "name": "R08 isolated Redis and Linux worker shutdown",
-        "status": "completed",
-        "conclusion": "success",
-        "currentOrFailedSteps": []
-      },
-      {
-        "id": 119345483670,
-        "name": "Deployment configuration",
-        "status": "completed",
-        "conclusion": "success",
-        "currentOrFailedSteps": []
-      },
-      {
-        "id": 119345483715,
+        "id": 119391671122,
         "name": "Translation quality gates",
         "status": "completed",
         "conclusion": "success",
-        "currentOrFailedSteps": []
+        "activeOrFailedSteps": []
       },
       {
-        "id": 119349029557,
+        "id": 119391671516,
+        "name": "Deployment configuration",
+        "status": "completed",
+        "conclusion": "success",
+        "activeOrFailedSteps": []
+      },
+      {
+        "id": 119391671580,
+        "name": "Full source closure gates",
+        "status": "completed",
+        "conclusion": "success",
+        "activeOrFailedSteps": []
+      },
+      {
+        "id": 119391671637,
+        "name": "R08 isolated Redis and Linux worker shutdown",
+        "status": "completed",
+        "conclusion": "success",
+        "activeOrFailedSteps": []
+      },
+      {
+        "id": 119395438115,
         "name": "Retrieve and verify immutable artifacts from Actions storage",
         "status": "completed",
         "conclusion": "success",
-        "currentOrFailedSteps": []
+        "activeOrFailedSteps": []
       },
       {
-        "id": 119349211588,
+        "id": 119395694792,
         "name": "Linux x64 review image and native runtime",
         "status": "completed",
         "conclusion": "success",
-        "currentOrFailedSteps": []
+        "activeOrFailedSteps": []
       }
     ],
-    "evidence": "docs/reviews/evidence/post28/83ce0e56af89ab05bdbf99fb18ef213b22d48645/r14-linux-cms-preparation/navigation-candidate-ci.json"
+    "allSixSucceeded": true,
+    "formalAcceptance": false,
+    "allSixJobsSucceeded": true,
+    "result": "success",
+    "status": "completed",
+    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39648892069",
+    "evidence": "docs/reviews/evidence/post28/aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b/r14-linux-rollback/ci-observation.json"
   },
-  "nextFunctionalStep": "SCOPED_LINUX_ROLLBACK_WITH_RETAINED_EXACT_ARTIFACTS_AND_ACTUAL_SIGNALS",
+  "nextFunctionalStep": "REMAINING_RELEASE_TARGET_PROVIDER_TRUST_AND_CAPACITY_GATES_NO_AUTOMATIC_GO",
   "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
   "latestAdminCmsLocalDiagnostic": {
     "completed": true,
@@ -200,7 +201,7 @@
       "implementationResolution": {
         "state": "IMPLEMENTATION_FIXED_DEPLOYMENT_TRANSITION_PENDING",
         "implementationSourceSha": "19b6a6d28c44d99507cc8df2dc38eb2070528296",
-        "currentComparedSourceSha": "77ca2767ce571c3f520cdb95d8651e681c21a08c",
+        "currentComparedSourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
         "deliveryContract": "AUTHENTICATED_BOUNDED_STREAM_RECHECKED_BEFORE_AND_AFTER_IO",
         "genericCertificateProviderGrantsDisabled": true,
         "previousCapabilitiesInvalidated": false,
@@ -310,5 +311,56 @@
     "internalEnglishEditorialLifecyclePermitted": true,
     "sourcePolicyChanged": false,
     "diagnosticFixSourceSha": "d927710984de2fb7ffbf56e71cd742eaeb44536a"
-  }
+  },
+  "latestLinuxRollbackDiagnostic": {
+    "sourceSha": "aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b",
+    "previousSourceSha": "fb1a375eba5d09d3f7a01d5515270ed2cf011280",
+    "passed": true,
+    "scope": "LINUX_ACTUAL_SIGTERM_API_CURRENT_PREVIOUS_CURRENT_SESSION_CSRF_WORKSPACE_RECEIPT_CONTINUITY",
+    "sharedLockedDependencyLayer": true,
+    "workersEnabled": false,
+    "financialEffectOnceClaimed": false,
+    "differentApiImplementationDemonstrated": false,
+    "requestCount": 14,
+    "elapsedMilliseconds": 2494,
+    "cleanupPassed": true,
+    "report": "docs/remediation/POST28_R14_LINUX_ROLLBACK_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b/r14-linux-rollback/evidence-index.json",
+    "formalAcceptance": false
+  },
+  "localOperationalDiagnosticScope": "COMPLETE_FOR_DISABLED_WORKER_SYNTHETIC_PROFILE_WITH_DOCUMENTED_RELEASE_BLOCKERS",
+  "unresolvedWorkClassification": [
+    {
+      "id": "WORKER_PROVIDER_COMPATIBILITY",
+      "localProfileBlocked": false,
+      "productionOrFeatureEnablementBlocked": true,
+      "requirement": "Route-specific real use-case/provider crash, lease fencing and financial effect-once evidence before enabling these routes; current rollback keeps workers disabled."
+    },
+    {
+      "id": "OLD_PROVIDER_CAPABILITIES",
+      "localProfileBlocked": false,
+      "productionOrFeatureEnablementBlocked": true,
+      "conditional": "Only if earlier provider capabilities were issued in the target.",
+      "requirement": "Inventory existing capabilities and demonstrate expiry or provider invalidation. Authenticated certificate implementation is fixed; no old capability invalidation was demonstrated."
+    },
+    {
+      "id": "HOSTING_BACKUP_AND_TRUST",
+      "localProfileBlocked": false,
+      "productionOrFeatureEnablementBlocked": true,
+      "requirement": "Approved provisioned validation/staging targets, TLS/ingress, PITR/WORM/KMS/restore controls and independent protected trust signatures; no account or budget provisioned."
+    },
+    {
+      "id": "LAUNCH_CAPACITY",
+      "localProfileBlocked": false,
+      "productionOrFeatureEnablementBlocked": true,
+      "requirement": "Representative launch dataset, approved SLO/resource budget and actual pool checkout wait measurement; comprehensive stress combinations deferred."
+    },
+    {
+      "id": "PUBLIC_ENGLISH",
+      "localProfileBlocked": false,
+      "productionOrFeatureEnablementBlocked": true,
+      "conditional": "Only for public English release.",
+      "requirement": "Editorial approval and public readiness source policy before enabling English. Arabic-only public profile remains supported."
+    }
+  ]
 }
