@@ -1,5 +1,7 @@
 # M10-12 / M10-13 / M10-14 — source execution
 
+2026-10-22 source update: the owner replaced scholarship v3.21 with degree-only v6.6 (947 unique sections; 703 explicit source candidates held for canonical review; 244 verification-pending markers not promoted). The old 514/349/359 counts and verification results below describe the earlier input, not acceptance of v6.6. Current provenance and source-only restrictions: `workspace/import-sources/scholarships/README.md`. The current derived queues were regenerated offline; no database work was authorized or performed for this replacement.
+
 Authority: revised activation plan v2, sections 21 / 28 / 30 and capability register v2. Dependencies M0–M9 are accepted for planning; no DB audit or Google AI Studio connection was requested or performed.
 
 | Task | Implemented source behavior | Remaining acceptance |

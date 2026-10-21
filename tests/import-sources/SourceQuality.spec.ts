@@ -101,6 +101,49 @@ describe('scholarship source evidence', () => {
   });
 });
 
+describe('degree scholarship guide format', () => {
+  const record = (metadata: string, fields = '') => `### منحة رقم 0001 — Example\n${metadata}\n${fields}`;
+  const identity = '**المعرّف الأصلي:** `SCH-OC-0001`';
+
+  it.each([false, true])('resolves named sections when participating universities are present: %s', participating => {
+    const offset = participating ? 1 : 0;
+    const fields = [
+      '#### 2. الجهة المانحة\nProvider',
+      '#### 3. المعلومات الأساسية\nBachelor',
+      '#### 7. التخصصات المتاحة\nComputing',
+      ...(participating ? ['#### 8. الجامعات المشاركة\nPartner University'] : []),
+      `#### ${8 + offset}. الشروط ومعايير التقديم\nTOEFL or approved alternative`,
+      `#### ${9 + offset}. ملاحظات مهمة\nReview required`,
+      `#### ${10 + offset}. المستندات المطلوبة\nConditional documents`,
+      `#### ${11 + offset}. رابط التقديم\nhttps://apply.example/`,
+      `#### ${12 + offset}. الروابط الرسمية\nhttps://official.example/`,
+    ].join('\n');
+    const result = reconcileScholarshipGuide(record(`${identity}\n**حالة الاستيراد النهائية:** IMPORTED`, fields), sourceHash, null);
+    expect(result.summaryDifference).toBeNull();
+    expect(result.decisions[0].applicationUrls).toEqual(['https://apply.example/']);
+    expect(result.decisions[0].canonicalQueue.find(item => item.target === 'UNIVERSITY')?.rawValue).toBe(participating ? 'Partner University' : '');
+    expect(result.decisions[0].canonicalQueue.find(item => item.target === 'INTERNATIONAL_TEST')?.rawValue).toBe('TOEFL or approved alternative');
+    expect(result.decisions[0].canonicalQueue.every(item => item.canonicalId === null && item.state === 'REVIEW_REQUIRED')).toBe(true);
+    expect(result.databaseWrites).toBe(0);
+  });
+
+  it('requires a unique valid source identity and rejects ambiguous metadata', () => {
+    expect(() => readScholarshipMasterGuide(record('**حالة الاستيراد:** IMPORTED'))).toThrow('SCHOLARSHIP_GUIDE_MISSING_ID');
+    expect(() => readScholarshipMasterGuide(record('**المعرّف الأصلي:** `bad-id`'))).toThrow('SCHOLARSHIP_GUIDE_INVALID_ID');
+    expect(() => readScholarshipMasterGuide(record(identity) + record(identity))).toThrow('SCHOLARSHIP_GUIDE_DUPLICATE_ID');
+    expect(() => readScholarshipMasterGuide(record(`${identity}\n**المعرّف الجديد:** \`SCH-M153-0001\``))).toThrow('SCHOLARSHIP_GUIDE_INVALID_ID');
+    expect(() => readScholarshipMasterGuide(record(`${identity}\n**حالة الاستيراد النهائية:** IMPORTED\n**القرار:** REVIEW`))).toThrow('SCHOLARSHIP_GUIDE_MULTIPLE_FINAL_MARKERS');
+  });
+
+  it('reads explicit batch metadata without promoting a pending verification marker', () => {
+    const rows = readScholarshipMasterGuide(record('**المعرّف الجديد:** `SCH-M153-0001`\n**حالة الاستيراد:** IMPORTED — BATCH 01'));
+    expect(rows[0].sourceRecordId).toBe('SCH-M153-0001');
+    expect(rows[0].explicitlyImported).toBe(true);
+    expect(readScholarshipMasterGuide(record(`${identity}\n**القرار:** IMPORTED — OPEN`))[0].explicitlyImported).toBe(true);
+    expect(readScholarshipMasterGuide(record(`${identity}\n**حالة الاستيراد النهائية:** CHINA 420 — 2027 VERIFICATION PENDING`))[0].explicitlyImported).toBe(false);
+  });
+});
+
 describe('course source identity and relationship review', () => {
   const raw: ImportedCourseMasterRowContract = { sourceOrder: 1, providerLabel: 'Provider', courseName: 'Course', directCourseUrl: 'https://provider.example/course/1', studyFreeRaw: 'Yes', freeCertificateRaw: 'Yes', certificateTypeRaw: 'Certificate', languageRaw: 'English', studyLevelRaw: 'Beginner', courseDurationRaw: '1 hour', shortCourseTopicsRaw: 'Computing' };
   const item = (datasetId: string, sourceRowNumber: number, row = raw): CourseSourceRow => ({ datasetId, artifactHash: reviewedCourseArtifactHashes[datasetId as keyof typeof reviewedCourseArtifactHashes] ?? sourceHash, sourceRowNumber, row });

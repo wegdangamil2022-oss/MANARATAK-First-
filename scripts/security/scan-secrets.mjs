@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { isKnownNonSecretSourceUrl } from './source-url-exceptions.mjs';
 
 const tracked = spawnSync('git', ['ls-files', '-z'], { encoding: 'utf8' });
 if (tracked.status !== 0) {
@@ -27,6 +28,7 @@ for (const file of tracked.stdout.split('\0').filter(Boolean)) {
   for (const [kind, signature] of signatures) {
     signature.lastIndex = 0;
     for (const match of source.matchAll(signature)) {
+      if (isKnownNonSecretSourceUrl(file, source, kind, match)) continue;
       const line = source.slice(0, match.index).split(/\r?\n/).length;
       findings.push(`${kind} ${file}:${line}`);
     }

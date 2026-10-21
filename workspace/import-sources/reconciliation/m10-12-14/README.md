@@ -2,6 +2,8 @@
 
 These are deterministic, **offline source artifacts**, not DB contents or permission to import. Canonical IDs remain `null` until an explicit reviewed choice against a verified canonical snapshot and live owner validation.
 
+2026-10-22: the owner replaced the active scholarship source with degree-only v6.6. Scholarship queues and source hashes were regenerated; the prior queues remain in Git. See [source replacement and screening](../../scholarships/README.md). Database writes remain paused.
+
 2026-10-13: the city CSVs were deliberately corrected and extended in [the city source reconciliation](../../../reports/city-region-reconciliation/2026-10-13/README.md). These derived queues and their source hashes were regenerated against the changed files; upstream university workbooks, course and scholarship inputs remain unchanged.
 
 From the repository root:
@@ -23,7 +25,7 @@ On a clean checkout, first run `npm run build -w @manaratak/application` to comp
 | `summary.json` | Actual source counts; source-only status; no DB counts. |
 | `universities-geography.jsonl` | One row per ambiguous/missing/territory university city. INS ID, physical source row, raw labels, row hash, candidates, hold/correction policy. |
 | `universities-stage34-quarantine.jsonl` | One row per unique invalid INS ID; stage-tagged issues, original Markdown line/hash. No double-counting overlap. |
-| `scholarships-sections.jsonl` | All 514 sections with disposition and source decision. Only 349 explicit candidates get a canonical review queue; all remain held. |
+| `scholarships-sections.jsonl` | All 947 sections with disposition and source decision. Only 703 explicit source candidates get a canonical review queue; 244 verification-pending markers stay unpromoted. All remain held. |
 | `courses-url-decisions.json` | Three excluded URL overlaps with both original rows and exact artifact evidence; one separate English edition annotation. |
 | `courses-relationships.jsonl` | First line declares common policies; following lines group exact raw provider/language/topic terms and retain dataset/physical-row evidence. Candidate codes/public IDs are source proposals, never DB UUIDs. |
 
@@ -38,11 +40,11 @@ On a clean checkout, first run `npm run build -w @manaratak/application` to comp
 
 ## Scholarships
 
-514 unique sections = 349 explicit `IMPORTED` candidates + 5 merged duplicates + 2 review + 1 excluded + 1 control-only + 156 unmarked. No unknown marker exists in the current file; future unknown markers stay held.
+947 unique sections = 703 explicit `IMPORTED` source candidates + 244 China transcription / 2027 verification-pending markers. The latter remain `UNKNOWN_MARKER` and `DO_NOT_PROMOTE`; the source's status text is retained verbatim.
 
-The summary's 359 is not evidence identifying ten more records. No synthetic ten records, no inferred status changes, no automatic merge. Every section retains its raw-byte source hash and decision. Original CRLF and section text are preserved by the reader.
+The old v3.21 summary's 359 is not used for the replacement. The new file declares total records rather than a distinct imported count, so the declared imported count and summary difference are null. No inferred status changes or automatic merge occurs. Every section retains its original text, line endings, source hash and decision. Section labels, rather than shifted ordinal positions, distinguish participating universities, requirements and application links.
 
-The 349 candidates require explicit provider university / beneficiary university / AcademicProgram owner / DegreeLevel / InternationalTest reviews. General majors are not canonical programs. An existing INS identity is required for university resolution. A program must belong to the selected university. A non-university provider or inapplicable test requires a reviewed semantic decision, not a name-based inference.
+The 703 candidates require explicit provider university / beneficiary university / AcademicProgram owner / DegreeLevel / InternationalTest reviews. General majors are not canonical programs. An existing INS identity is required for university resolution. A program must belong to the selected university. A missing participating-university section stays empty, never populated from eligibility text. A non-university provider or inapplicable test requires a reviewed semantic decision, not a name-based inference.
 
 ## Courses
 

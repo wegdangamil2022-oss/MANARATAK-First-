@@ -20,14 +20,15 @@ describe('M10 offline source quality preparation', () => {
     expect(summary.universities.geography.total).toBe(10723);
     expect(summary.universities.stage34).toMatchObject({ uniqueSourceIds: 1530, stage3Invalid: 1320, stage4Invalid: 558, invalidInBoth: 487, uniqueInvalidIds: 1391, sourceValidBoth: 139 });
     expect(summary.universities.stage34.uniqueInvalidIds).toBe(summary.universities.stage34.stage3Invalid + summary.universities.stage34.stage4Invalid - summary.universities.stage34.invalidInBoth);
-    expect(summary.scholarships).toMatchObject({ totalSections: 514, explicitImportedCandidates: 349, summaryDifference: 10, counts: { MERGED_DUPLICATE: 5, UNMARKED: 156 } });
+    expect(summary.scholarships).toMatchObject({ totalSections: 947, uniqueSourceIds: 947, explicitImportedCandidates: 703, declaredImportedCount: null, summaryDifference: null, counts: { EXPLICIT_IMPORTED_CANDIDATE: 703, UNKNOWN_MARKER: 244 } });
     expect(summary.courses).toMatchObject({ inputRows: 21562, projectedRows: 21559, distinctUrls: 21559, decisions: 4 });
     expect(summary.databaseWrites).toBe(0);
     const manifest = JSON.parse(output['manifest.json']) as { artifacts: Array<{ path: string; sha256: string }> };
     expect(manifest.artifacts.some(artifact => artifact.path.startsWith('workspace/reports/active-geography-alignment/'))).toBe(false);
     for (const artifact of manifest.artifacts) expect(createHash('sha256').update(fs.readFileSync(path.join(root, artifact.path))).digest('hex')).toBe(artifact.sha256);
     const scholarshipRows = output['scholarships-sections.jsonl'].trim().split('\n').map(row => JSON.parse(row));
-    expect(scholarshipRows.filter(row => row.decision === 'HOLD_CANONICAL_AND_OFFICIAL_SOURCE_REVIEW')).toHaveLength(349);
+    expect(scholarshipRows.filter(row => row.decision === 'HOLD_CANONICAL_AND_OFFICIAL_SOURCE_REVIEW')).toHaveLength(703);
+    expect(scholarshipRows.filter(row => row.decision === 'DO_NOT_PROMOTE')).toHaveLength(244);
     expect(scholarshipRows.some(row => row.canonicalQueue.some((item: { canonicalId: string | null }) => item.canonicalId !== null))).toBe(false);
   }, 90_000);
   it('detects edited output and never rewrites it in check mode', () => {

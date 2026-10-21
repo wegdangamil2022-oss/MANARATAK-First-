@@ -18,9 +18,17 @@ export function readScholarshipMasterGuide(content: string): ScholarshipGuideRec
   const starts = [0, ...[...content.matchAll(/\r?\n/g)].map(match => match.index! + match[0].length)];
   let startOffset = 0;
   let current: ScholarshipGuideRecord | undefined;
+  let degreeFormat = false;
+  let metadata = true;
   let activeField: string | undefined;
+  const registerIdentity = (id: string) => {
+    if (seen.has(id)) throw new Error(`SCHOLARSHIP_GUIDE_DUPLICATE_ID:${id}`);
+    seen.add(id);
+    current!.sourceRecordId = id;
+  };
   const finish = (endOffset: number) => {
     if (!current) return;
+    if (!current.sourceRecordId) throw new Error(`SCHOLARSHIP_GUIDE_MISSING_ID:${current.sourceLineNumber}`);
     current.rawContent = content.slice(startOffset, endOffset);
     current.sourceHash = createHash('sha256').update(current.rawContent, 'utf8').digest('hex');
     for (const [key, value] of Object.entries(current.fields)) current.fields[key] = value.trim();
@@ -28,28 +36,39 @@ export function readScholarshipMasterGuide(content: string): ScholarshipGuideRec
   };
   for (let index = 0; index < lines.length; index += 1) {
     const heading = /^# (SCH-[A-Z0-9-]+)\s*[—-]\s*(.+)$/.exec(lines[index]);
-    if (heading) {
+    const degreeHeading = /^### منحة رقم (\d+)\s*—\s*(.+)$/.exec(lines[index]);
+    if (heading || degreeHeading) {
       finish(starts[index]);
       startOffset = starts[index];
-      if (seen.has(heading[1])) throw new Error(`SCHOLARSHIP_GUIDE_DUPLICATE_ID:${heading[1]}`);
-      seen.add(heading[1]);
+      degreeFormat = Boolean(degreeHeading);
+      metadata = true;
       current = {
-        sourceRecordId: heading[1], sourceLineNumber: index + 1, title: heading[2].trim(),
+        sourceRecordId: '', sourceLineNumber: index + 1, title: (heading ?? degreeHeading)![2].trim(),
         importStatus: null, fields: Object.create(null) as Record<string, string>, explicitlyImported: false,
         rawContent: '', sourceHash: '',
       };
+      if (heading) registerIdentity(heading[1]);
       activeField = undefined;
       continue;
     }
     if (!current) continue;
-    const status = /^\*\*حالة الاستيراد النهائية:\*\*\s*(.+?)\s*$/.exec(lines[index]);
+    if (degreeFormat && metadata && /^\*\*المعرّف (?:الأصلي|الجديد):\*\*/.test(lines[index])) {
+      const identity = /^\*\*المعرّف (?:الأصلي|الجديد):\*\*\s*`(SCH-[A-Z0-9-]+)`\s*$/.exec(lines[index]);
+      if (!identity || current.sourceRecordId) throw new Error(`SCHOLARSHIP_GUIDE_INVALID_ID:${index + 1}`);
+      registerIdentity(identity[1]);
+      continue;
+    }
+    const status = degreeFormat
+      ? metadata ? /^\*\*(?:حالة الاستيراد(?: النهائية)?|القرار):\*\*\s*(.+?)\s*$/.exec(lines[index]) : null
+      : /^\*\*حالة الاستيراد النهائية:\*\*\s*(.+?)\s*$/.exec(lines[index]);
     if (status) {
       if (current.importStatus !== null) throw new Error(`SCHOLARSHIP_GUIDE_MULTIPLE_FINAL_MARKERS:${current.sourceRecordId}`);
       current.importStatus = status[1].trim();
       current.explicitlyImported = /^IMPORTED(?:$|[_\s(—-])/.test(current.importStatus);
     }
-    const field = /^## (\d+\. .+)$/.exec(lines[index]);
+    const field = (degreeFormat ? /^#### (\d+\. .+)$/ : /^## (\d+\. .+)$/).exec(lines[index]);
     if (field) {
+      metadata = false;
       activeField = field[1];
       if (activeField in current.fields) throw new Error(`SCHOLARSHIP_GUIDE_DUPLICATE_FIELD:${current.sourceRecordId}`);
       current.fields[activeField] = '';
