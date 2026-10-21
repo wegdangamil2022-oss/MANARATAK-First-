@@ -256,6 +256,37 @@
   line-height: 1.65;
 }
 
+/* Saved items tab: same Cairo typography, native spacing, and gold title rule
+ * as Summary, Opportunities, and Learning. Scoped so no other tab changes. */
+.mn-student-workspace .mn-student-vault-page,
+.mn-student-workspace .mn-student-vault-page :where(*) {
+  font-family: 'Cairo', sans-serif !important;
+}
+.mn-student-workspace .mn-student-vault-heading {
+  display: inline-block;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid #D6A43B;
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+}
+.mn-student-workspace .mn-student-vault-item {
+  min-width: 0;
+}
+.mn-student-workspace .mn-student-vault-page :where(input, select) {
+  font-family: 'Cairo', sans-serif !important;
+}
+.mn-student-workspace .mn-student-vault-page :where(button, a, select, input):focus-visible {
+  outline: 2px solid #0E7C86;
+  outline-offset: 2px;
+}
+
 /* Scholarship application document details stay compact and legible with
  * Cairo typography. Only tools within the Opportunities tab are affected. */
 .mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(p, label) {
