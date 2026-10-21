@@ -4101,12 +4101,12 @@ function ActivityList({ items }: { items: StudentDashboardSummaryDto['timeline']
 
 function ProgressRow({ label, value }: { label: string; value: number }) {
   return (
-    <div>
-      <div className="mb-2 flex justify-between text-sm">
-        <span className="font-bold">{label}</span>
-        <span className="text-[var(--mn-text-muted)]">{value}%</span>
+    <div className="font-['Cairo',sans-serif]">
+      <div className="mb-2 flex items-center justify-between gap-3 text-[12px] leading-[1.6]">
+        <span className="font-bold text-[var(--mn-heading)]">{label}</span>
+        <span className="shrink-0 font-medium text-[var(--mn-text-muted)]">{value}%</span>
       </div>
-      <progress className="mn-native-progress mn-native-progress-secondary h-2.5 w-full" value={Math.min(100, Math.max(0, value))} max={100} aria-label={label} />
+      <progress className="mn-native-progress mn-native-progress-secondary h-2 w-full" value={Math.min(100, Math.max(0, value))} max={100} aria-label={label} />
     </div>
   );
 }
