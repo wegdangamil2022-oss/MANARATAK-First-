@@ -34,6 +34,11 @@ test('source CI permits only the explicitly authorized dependency-gated Linux br
     ci.replace(mode,' --r11-contention'),
     ci.replace(mode,' --r08-combined --r11-contention'),
     ci.replace(mode,' --r09-public --r11-contention --arbitrary-command'),
+    ci.replace('--r14-admin-cms','--arbitrary-command'),
+    ci.replace('--r14-admin-cms','--r14-admin-cms --arbitrary-command'),
+    ci.replace('node --import tsx scripts/release/post28-linux-artifact-runtime','node scripts/release/post28-linux-artifact-runtime'),
+    ci.replace(/(name: Exercise R14[\s\S]*?POST28_LINUX_RUNTIME_REVIEW:) 'YES'/,"$1 'NO'"),
+    ci.replace(/(name: Exercise R14[\s\S]*?github.ref == )'refs\/heads\/feat\/post28-r07-artifact-preparation'/,"$1'refs/heads/main'"),
   ])assert.equal(sourceCiBrowserBoundaryDeclared(altered),false);
 });
 
