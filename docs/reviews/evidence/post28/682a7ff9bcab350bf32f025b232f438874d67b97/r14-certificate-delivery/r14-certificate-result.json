@@ -1,0 +1,207 @@
+{
+  "kind": "R14_BUILT_API_SIGNED_CERTIFICATE_DELIVERY_DIAGNOSTIC",
+  "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+  "apiBundleSha256": "13f042467b11f4b9d8615d1e021ca1c982fe8b928e4cc98faace4a990e20e7c2",
+  "cleanReleaseArtifact": false,
+  "syntheticOnly": true,
+  "freshEapProcessing": false,
+  "certificateDeliveryExercised": true,
+  "reviewerConsentDeliveryExercised": false,
+  "productionAcceptance": false,
+  "passed": true,
+  "observations": [
+    {
+      "phase": "student-logins",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "student-logins",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "student-logins",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "student-logins",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "signed-public-verification",
+      "method": "GET",
+      "path": "/api/v1/public/certificates/verify/MNR-80FF9ABB524BF2C7E4",
+      "status": 200
+    },
+    {
+      "phase": "foreign-certificate-pdf",
+      "method": "POST",
+      "path": "/api/v1/student/certificates/cee85b58-28f3-43c6-9e17-8a47f8d41fbd/artifacts/pdf/delivery-grant",
+      "status": 404
+    },
+    {
+      "phase": "owner-certificate-pdf",
+      "method": "POST",
+      "path": "/api/v1/student/certificates/cee85b58-28f3-43c6-9e17-8a47f8d41fbd/artifacts/pdf/delivery-grant",
+      "status": 200
+    },
+    {
+      "phase": "MATCHING_RENDERED_ARTIFACT",
+      "kind": "pdf",
+      "assetId": "0281cbdb-b18d-4487-ba14-978b919f1035",
+      "sha256": "71e78bb47dae8ad51d3254c7b9cbb04ab7fa75c1eb15b70076062ff7a498974b",
+      "bytes": 11446
+    },
+    {
+      "phase": "foreign-certificate-preview",
+      "method": "POST",
+      "path": "/api/v1/student/certificates/cee85b58-28f3-43c6-9e17-8a47f8d41fbd/artifacts/preview/delivery-grant",
+      "status": 404
+    },
+    {
+      "phase": "owner-certificate-preview",
+      "method": "POST",
+      "path": "/api/v1/student/certificates/cee85b58-28f3-43c6-9e17-8a47f8d41fbd/artifacts/preview/delivery-grant",
+      "status": 200
+    },
+    {
+      "phase": "MATCHING_RENDERED_ARTIFACT",
+      "kind": "preview",
+      "assetId": "9849512c-98c7-4869-a9f1-f3c3c8ca234e",
+      "sha256": "45c357b1630ec0cf45211c3dfba6dd716d3d8d1bb7d6cb859681efe571e5f15f",
+      "bytes": 392154
+    },
+    {
+      "phase": "generic-asset-bypass-denied",
+      "method": "POST",
+      "path": "/api/v1/student/assets/0281cbdb-b18d-4487-ba14-978b919f1035/delivery-grant",
+      "status": 404
+    },
+    {
+      "phase": "revoked-public-verification",
+      "method": "GET",
+      "path": "/api/v1/public/certificates/verify/MNR-80FF9ABB524BF2C7E4",
+      "status": 200
+    },
+    {
+      "phase": "revoked-delivery-pdf",
+      "method": "POST",
+      "path": "/api/v1/student/certificates/cee85b58-28f3-43c6-9e17-8a47f8d41fbd/artifacts/pdf/delivery-grant",
+      "status": 400
+    },
+    {
+      "phase": "revoked-delivery-preview",
+      "method": "POST",
+      "path": "/api/v1/student/certificates/cee85b58-28f3-43c6-9e17-8a47f8d41fbd/artifacts/preview/delivery-grant",
+      "status": 400
+    },
+    {
+      "phase": "logout",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200
+    },
+    {
+      "phase": "logout",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200
+    }
+  ],
+  "calls": [
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/assets/delivery-grants",
+      "method": "POST",
+      "signed": true
+    },
+    {
+      "path": "/v1/assets/delivery-grants",
+      "method": "POST",
+      "signed": true
+    }
+  ],
+  "role": {
+    "role": "post28_r11_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "newSyntheticCertificateSignatureVerifiedByBuiltApi": true,
+  "preIssuedGrantStatusAfterCertificateRevocation": 200,
+  "instantRevocationOfPreviouslyIssuedGrantProved": false,
+  "preIssuedCapabilityPrivacyFinding": "PRIOR_PROVIDER_URL_REMAINS_USABLE_UNTIL_ITS_BOUNDED_EXPIRY",
+  "originalCertificatesIssuersTemplatesBindingsAndFinancePreserved": true,
+  "certificateSetup": {
+    "courseId": "dad442d8-fe2a-49df-b4cb-7c5dd7d4ee05",
+    "sourceEventId": "course-completed:dad442d8-fe2a-49df-b4cb-7c5dd7d4ee05:aa48d155-15b9-4ec8-8d3b-8115ac0c26c0:v2",
+    "certificateId": "cee85b58-28f3-43c6-9e17-8a47f8d41fbd",
+    "templateId": "bd6a203f-d507-4d7d-82cc-3eaf1c5d0552",
+    "templateVersionId": "4fd6572e-740c-40fb-8453-5834374ae608",
+    "retainedIndustrialIssuerId": "2428b74c-0c5a-40ce-9126-b00437946d6d",
+    "retainedIssuerAndTemplateUnchanged": true,
+    "signingKind": "NEW_EPHEMERAL_HMAC_FOR_LOCAL_TEST_ONLY_NOT_PRODUCTION_TRUST_OR_HISTORICAL_KEY_VALIDATION",
+    "artifactFiles": [
+      {
+        "id": "0281cbdb-b18d-4487-ba14-978b919f1035",
+        "kind": "PDF",
+        "mimeType": "application/pdf",
+        "extension": "pdf",
+        "sha256": "71e78bb47dae8ad51d3254c7b9cbb04ab7fa75c1eb15b70076062ff7a498974b",
+        "bytes": 11446
+      },
+      {
+        "id": "9849512c-98c7-4869-a9f1-f3c3c8ca234e",
+        "kind": "PREVIEW",
+        "mimeType": "image/svg+xml",
+        "extension": "svg",
+        "sha256": "45c357b1630ec0cf45211c3dfba6dd716d3d8d1bb7d6cb859681efe571e5f15f",
+        "bytes": 392154
+      },
+      {
+        "id": "44f78d78-00f1-400c-ac1d-d534050a6ec1",
+        "kind": "QR",
+        "mimeType": "image/svg+xml",
+        "extension": "svg",
+        "sha256": "2cdad89e6f925d8efa4d62606046ac3e98e58d38403632c1f0bf35f50b096970",
+        "bytes": 25199
+      }
+    ],
+    "freshEapProcessing": false
+  },
+  "foreignAndRevokedCertificateDeniedBeforeProvider": true,
+  "pdfAndPreviewDigestMatched": true,
+  "genericAssetRouteCannotBypassCertificateOwnerType": true,
+  "cleanup": {
+    "apiStopped": true,
+    "providerStopped": true
+  }
+}
