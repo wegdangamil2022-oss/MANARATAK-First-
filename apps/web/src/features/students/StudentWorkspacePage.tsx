@@ -2593,10 +2593,10 @@ function ServiceRequestsView({
                       type="button"
                       disabled={saving}
                       onClick={() => onOpen(request.publicId || request.id)}
-                      className={`w-full text-right rounded-2xl border p-3.5 transition-all cursor-pointer mn-panel ${
+                      className={`w-full min-w-0 text-right rounded-xl border p-3.5 transition-colors cursor-pointer ${
                         isSelected
-                          ? 'border-[#D6A43B] bg-[var(--mn-surface)] ring-1 ring-[#D6A43B]/40 shadow-xs'
-                          : 'border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] hover:border-[#D6A43B]/40'
+                          ? 'border-[#D6A43B] bg-[var(--mn-page)] ring-1 ring-[#D6A43B]/40 shadow-xs dark:bg-[var(--mn-surface-elevated)]'
+                          : 'border-[var(--mn-border)] bg-[var(--mn-page)] hover:border-[#D6A43B]/40 dark:border-white/10 dark:bg-[var(--mn-surface-elevated)]'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -2675,7 +2675,7 @@ function ServiceRequestsView({
 
                   {/* Structured Request Parameters (Human-friendly, No raw JSON, No technical UUIDs) */}
                   <div>
-                    <h4 className="text-xs font-bold text-[var(--mn-heading)] mb-2.5 flex items-center gap-1.5">
+                    <h4 className="mb-2.5 flex items-center gap-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
                       <Info className="w-3.5 h-3.5 text-[#D6A43B]" />
                       <span>بيانات ومعايير الطلب المسجلة</span>
                     </h4>
@@ -2707,7 +2707,7 @@ function ServiceRequestsView({
 
                   {/* Actual Real Timestamps Timeline */}
                   <div>
-                    <h4 className="text-xs font-bold text-[var(--mn-heading)] mb-2.5 flex items-center gap-1.5">
+                    <h4 className="mb-2.5 flex items-center gap-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
                       <CalendarClock className="w-3.5 h-3.5 text-[#D6A43B]" />
                       <span>سجل المواعيد والتوثيق</span>
                     </h4>
@@ -2814,7 +2814,7 @@ function ServiceRequestsView({
               ) : requestedNotFoundId ? (
                 <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-8 text-center mn-panel">
                   <AlertTriangle className="w-8 h-8 mx-auto text-amber-600 dark:text-amber-400 mb-2" />
-                  <h3 className="font-bold text-sm text-[var(--mn-heading)]">الطلب المطلوب غير موجود أو غير مصرّح بعرضه</h3>
+                  <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">الطلب المطلوب غير موجود أو غير مصرّح بعرضه</h3>
                   <p className="text-xs text-[var(--mn-text-muted)] mt-1.5 max-w-xs mx-auto leading-relaxed">
                     المعرّف المُدخل <span className="font-mono font-bold">#{requestedNotFoundId}</span> لا يطابق أي طلب في سجلك المصرح به. يمكنك اختيار أحد طلباتك من القائمة المقابلة.
                   </p>
@@ -2822,7 +2822,7 @@ function ServiceRequestsView({
               ) : (
                 <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-8 text-center mn-panel">
                   <ClipboardList className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-                  <h3 className="font-bold text-sm text-[var(--mn-heading)]">اختر طلبًا لعرض تفاصيله</h3>
+                  <h3 className="text-[14px] font-bold text-[var(--mn-heading)]">اختر طلبًا لعرض تفاصيله</h3>
                   <p className="text-xs text-[var(--mn-text-muted)] mt-1 max-w-xs mx-auto">
                     اضغط على أي طلب من القائمة المقابلة للاطلاع على تفاصيل المعايير والمواعيد والفاتورة المرتبطة.
                   </p>
@@ -2838,7 +2838,7 @@ function ServiceRequestsView({
           {invoices.length === 0 ? (
             <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 text-center mn-panel">
               <CreditCard className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-              <h4 className="font-bold text-sm text-[var(--mn-heading)]">لا توجد فواتير أو مدفوعات مسجلة بحسابك</h4>
+              <h4 className="text-[14px] font-bold text-[var(--mn-heading)]">لا توجد فواتير أو مدفوعات مسجلة بحسابك</h4>
               <p className="text-xs text-[var(--mn-text-muted)] mt-1 max-w-sm mx-auto">
                 عند طلب خدمات مدفوعة أو استشارات خاصة ستظهر فواتيرك وإيصالات السداد هنا.
               </p>
@@ -2852,7 +2852,7 @@ function ServiceRequestsView({
                 return (
                   <div
                     key={invoice.id}
-                    className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel flex flex-col justify-between hover:border-[#D6A43B]/40 transition-all"
+                    className="min-w-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3.5 flex flex-col justify-between transition-colors hover:border-[#D6A43B]/40 dark:border-white/10 dark:bg-[var(--mn-surface-elevated)]"
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2">
@@ -2902,7 +2902,7 @@ function ServiceRequestsView({
                           {invoice.lineItems.map((item, idx) => (
                             <div key={idx} className="text-[10.5px] text-[var(--mn-text-muted)] flex justify-between">
                               <span>{item.description}</span>
-                              <span className="font-mono font-semibold">{formatMoney(item.totalPrice)}</span>
+                              <span className="shrink-0 text-[11px] font-semibold text-[var(--mn-heading)]">{formatMoney(item.totalPrice)}</span>
                             </div>
                           ))}
                         </div>
