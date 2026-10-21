@@ -1,0 +1,10 @@
+{
+  "runId": "6dec7701-181f-49cc-b7f7-848611ee1fec",
+  "pid": 12844,
+  "postgresBinarySha256": "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+  "serverIdentity": "7698905035126672816",
+  "database": "manaratak_r11_load_abcb8186ef8d4ba4",
+  "role": "post28_r11_actor",
+  "restartOwnedLabOnly": true,
+  "sourceStateEnvelopeAltered": false
+}

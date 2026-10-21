@@ -1,0 +1,9 @@
+{
+  "runId": "6dec7701-181f-49cc-b7f7-848611ee1fec",
+  "verifiedPid": 3812,
+  "verifiedPostgresBinarySha256": "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+  "stopped": true,
+  "pidFileAbsent": true,
+  "existingDatabasesTouched": false,
+  "reason": "pg_ctl pipe wait timed out after actual start; explicit owned cleanup"
+}

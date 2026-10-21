@@ -1,0 +1,132 @@
+{
+  "kind": "POST28_SCOPED_EVIDENCE_INDEX",
+  "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+  "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+  "productionAcceptance": false,
+  "files": [
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/cms-browser-result.json",
+      "bytes": 41209,
+      "sha256": "7e7566bf3da028da6c65165d7ca6b4022e1e3502e34ac2909ac619e628db3630",
+      "sourceOriginalSha256": "7e7566bf3da028da6c65165d7ca6b4022e1e3502e34ac2909ac619e628db3630"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/cms-resume-cleanup.json",
+      "bytes": 144,
+      "sha256": "57fd2aa418abf49e5bf34ed4ce0e1b62f17531374c21b3ec4990fa74af6d0c1e",
+      "sourceOriginalSha256": "57fd2aa418abf49e5bf34ed4ce0e1b62f17531374c21b3ec4990fa74af6d0c1e"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/cms-resume-identity.json",
+      "bytes": 360,
+      "sha256": "ab98c3418f8653276300ed9ba9a6ba6ac5c0b77cf300d753c6da93b78763cefc",
+      "sourceOriginalSha256": "ab98c3418f8653276300ed9ba9a6ba6ac5c0b77cf300d753c6da93b78763cefc"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/mfa-protected-before.json",
+      "bytes": 2229,
+      "sha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459",
+      "sourceOriginalSha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/cms-resume-protected-before.json",
+      "bytes": 2229,
+      "sha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459",
+      "sourceOriginalSha256": "c388ba3fdd879e229a9caf03cf4c6b84f718f9dbd710711b8488e2b80df74459"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/cms-resume-startup-cleanup.json",
+      "bytes": 345,
+      "sha256": "d21c52b028b59c2e6268912b4923f5932690def628a185ca6e8da16a28f9440f",
+      "sourceOriginalSha256": "9690fe77e06799b5a5d3e4c5bbfca3b910eb5ce6f0a747d7215e4f89ac64b299"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/cms-public-diagnostic.json",
+      "bytes": 669,
+      "sha256": "126eafb2d12efe93ad6815446531d97677b723eb80f8bc0c99c2011979459120",
+      "sourceOriginalSha256": "126eafb2d12efe93ad6815446531d97677b723eb80f8bc0c99c2011979459120"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/cms-diagnostic-cleanup.json",
+      "bytes": 144,
+      "sha256": "57fd2aa418abf49e5bf34ed4ce0e1b62f17531374c21b3ec4990fa74af6d0c1e",
+      "sourceOriginalSha256": "57fd2aa418abf49e5bf34ed4ce0e1b62f17531374c21b3ec4990fa74af6d0c1e"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/cms-browser-failure.json",
+      "bytes": 24659,
+      "sha256": "f438d144a41585ec2ec70ce745a3642af7b8f23f2b0817e297166e1d35e20187",
+      "sourceOriginalSha256": "f438d144a41585ec2ec70ce745a3642af7b8f23f2b0817e297166e1d35e20187"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/selector-failure-cms-resume-failure.json",
+      "bytes": 10403,
+      "sha256": "1392f61f19a1ffb05b2470bdf987fbcc2137221cce8ecb6360fe92b8553ba33b",
+      "sourceOriginalSha256": "1392f61f19a1ffb05b2470bdf987fbcc2137221cce8ecb6360fe92b8553ba33b"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/selector-failure-cms-resume-cleanup.json",
+      "bytes": 144,
+      "sha256": "57fd2aa418abf49e5bf34ed4ce0e1b62f17531374c21b3ec4990fa74af6d0c1e",
+      "sourceOriginalSha256": "57fd2aa418abf49e5bf34ed4ce0e1b62f17531374c21b3ec4990fa74af6d0c1e"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/first-lab-browser-failure.json",
+      "bytes": 18096,
+      "sha256": "69ca5eb89fd91582518704431d9960201054371360997def5ee085b15f90fccb",
+      "sourceOriginalSha256": "69ca5eb89fd91582518704431d9960201054371360997def5ee085b15f90fccb"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/first-lab-cleanup.json",
+      "bytes": 81,
+      "sha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f",
+      "sourceOriginalSha256": "7f37afccd064d60d2731e6879b18226c53a6b4fa45bddcb3c5fa4ce7a1013d8f"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/cms-withdrawn-admin.png",
+      "bytes": 521756,
+      "sha256": "afb9e7763d406b3f553fb47b443a2670b14fdc52b7fd282930f4e711aa94f37b",
+      "sourceOriginalSha256": "afb9e7763d406b3f553fb47b443a2670b14fdc52b7fd282930f4e711aa94f37b"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/run-r14-admin-cms.mjs.txt",
+      "bytes": 14537,
+      "sha256": "7e78bfb952f10c467452f81ee4c046eb087e35cf994afa6b77bedf915a35227e",
+      "sourceOriginalSha256": "7e78bfb952f10c467452f81ee4c046eb087e35cf994afa6b77bedf915a35227e"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/r14-admin-cms-worker.mjs.txt",
+      "bytes": 13645,
+      "sha256": "57cb7c593f5911df3b24155d6feda189e21018d1d45e5f9e25fc83c7a7b653eb",
+      "sourceOriginalSha256": "57cb7c593f5911df3b24155d6feda189e21018d1d45e5f9e25fc83c7a7b653eb"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/run-r14-admin-cms-resume.mjs.txt",
+      "bytes": 7410,
+      "sha256": "dfa5be50dd854b4841ae690f8adb6a05abf249db75fb95a0bca62ef3e7ddef64",
+      "sourceOriginalSha256": "dfa5be50dd854b4841ae690f8adb6a05abf249db75fb95a0bca62ef3e7ddef64"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/r14-admin-cms-resume-worker.mjs.txt",
+      "bytes": 11599,
+      "sha256": "e027b77371832376a0b3a6a2ea4036f22e759b7125cdd4e0db6c42236219e9d4",
+      "sourceOriginalSha256": "e027b77371832376a0b3a6a2ea4036f22e759b7125cdd4e0db6c42236219e9d4"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/diagnose-r14-cms-public.mjs.txt",
+      "bytes": 7706,
+      "sha256": "68968da762d719c255c2272f387233fcc89c72a97476b2a1cebd54cd6cfab4dd",
+      "sourceOriginalSha256": "68968da762d719c255c2272f387233fcc89c72a97476b2a1cebd54cd6cfab4dd"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/r13-ci-completed.json",
+      "bytes": 14713,
+      "sha256": "abd572228f3be0bb541506d55388482ac016103d5e7bd5e6ea8741e6a660b18f"
+    },
+    {
+      "path": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/scoped-proof.json",
+      "bytes": 2223,
+      "sha256": "5f3ae637fb7a1422997891144de253bc7a718f229b2d850f219fb81406cde3c2"
+    }
+  ]
+}

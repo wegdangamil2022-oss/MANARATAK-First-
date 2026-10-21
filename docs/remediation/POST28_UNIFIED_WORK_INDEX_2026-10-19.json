@@ -225,7 +225,17 @@
       "latestCandidateCiRun": 39506916987,
       "fullBuiltAdminCmsMfaJourneyAccepted": false,
       "certificateProviderDeliveryGrantAccepted": false,
-      "ownerPriorityDecision": "OWNER_ACCEPTS_PRACTICAL_CLOSURE_WITHOUT_FULL_MATRIX_ACCEPTANCE"
+      "ownerPriorityDecision": "OWNER_ACCEPTS_PRACTICAL_CLOSURE_WITHOUT_FULL_MATRIX_ACCEPTANCE",
+      "latestAdminCmsLocalDiagnostic": {
+        "completed": true,
+        "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+        "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+        "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+        "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+        "formalAcceptance": false,
+        "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+      }
     },
     {
       "id": "R10",
@@ -289,7 +299,7 @@
       "adminMfaBuiltLoginDiagnostic": true,
       "adminLoginBootstrapRaceFixedAt": "50e109e3ece76c6b5acb832be9fcd747450821cb",
       "adminMfaEnrollmentUiTested": true,
-      "fullCmsBuiltLifecycleTested": false,
+      "fullCmsBuiltLifecycleTested": true,
       "linuxContention": {
         "implementedAt": "4aed744292ce9bd1a1698f006aa18c894bcac160",
         "sourceGuardFixedAt": "33b6daa41ed162e35461961aa39d92119c6d640c",
@@ -317,7 +327,18 @@
         "E3",
         "E4",
         "E5"
-      ]
+      ],
+      "latestAdminCmsLocalDiagnostic": {
+        "completed": true,
+        "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+        "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+        "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+        "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+        "formalAcceptance": false,
+        "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+      },
+      "fullCmsBuiltLifecycleScope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART"
     },
     {
       "id": "R12",
@@ -427,9 +448,22 @@
       "latestReviewEvidence": "docs/reviews/evidence/post28/cbe2ff2d0e3ba881361fcbe42133af500cd4c331/r13-current-review/evidence-index.json",
       "runtimeRecoveryNumericGuardHardened": true,
       "latestFixCi": {
+        "sourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
         "runId": 39516645007,
-        "lastObservedStatus": "in_progress",
-        "result": null
+        "lastObservedStatus": "completed",
+        "result": "success",
+        "passedJobs": 6,
+        "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/r13-ci-completed.json"
+      },
+      "latestAdminCmsLocalDiagnostic": {
+        "completed": true,
+        "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+        "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+        "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+        "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+        "formalAcceptance": false,
+        "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
       }
     },
     {
@@ -442,7 +476,17 @@
       "productionAuthorized": false,
       "promotionInvoked": false,
       "releaseDecision": "NO_GO",
-      "nextFunctionalStep": "FULL_ADMIN_CMS_MFA_JOURNEY_IN_NEW_SYNTHETIC_LAB_AFTER_CURRENT_CI"
+      "nextFunctionalStep": "BUILT_API_PRIVATE_ASSET_CERTIFICATE_SECURE_DELIVERY_IN_ISOLATED_LAB",
+      "latestAdminCmsLocalDiagnostic": {
+        "completed": true,
+        "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+        "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+        "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+        "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+        "formalAcceptance": false,
+        "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+        "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+      }
     }
   ],
   "validation": {
@@ -604,5 +648,15 @@
     },
     "providerDeliveryGrantExercised": false,
     "freshEapProcessing": false
+  },
+  "latestAdminCmsLocalDiagnostic": {
+    "completed": true,
+    "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+    "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+    "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+    "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+    "formalAcceptance": false,
+    "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
   }
 }

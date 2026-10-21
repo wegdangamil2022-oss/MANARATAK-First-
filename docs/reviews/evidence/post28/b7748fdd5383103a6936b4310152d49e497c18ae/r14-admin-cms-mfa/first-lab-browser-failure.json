@@ -1,0 +1,887 @@
+{
+  "message": "locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').filter({ has: getByLabel('العنوان العربي', { exact: true }) }).getByLabel('التصنيف', { exact: true })\u001b[22m\n",
+  "stack": "locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').filter({ has: getByLabel('العنوان العربي', { exact: true }) }).getByLabel('التصنيف', { exact: true })\u001b[22m\n\n    at C:\\Users\\HP\\Documents\\Codex\\2026-10-17\\files-pasted-by-the-user-17\\work\\r14-admin-cms-worker.mjs:46:289",
+  "network": [
+    {
+      "path": "/admin/login",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/cms",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/security",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/mfa",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/mfa/enroll",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/mfa/confirm",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/admin/login",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/cms",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/mfa",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/login",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/navigation",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/redirects",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/blocks",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/announcements",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/cms",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/security",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/mfa",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/mfa/enroll",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/mfa/confirm",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/admin/login",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/cms",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/mfa",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/navigation",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/redirects",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/blocks",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/login",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/announcements",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/cms",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/security",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/mfa",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/mfa/enroll",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/mfa/confirm",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/admin/login",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 401,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/cms",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/mfa",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/cms",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-Y2KYC6eE.css",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/redirects",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/navigation",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/blocks",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/announcements",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/index-lk5bf8Kb.js",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-0-CJWMIGCx.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/admin/assets/cairo-2-PfPtmrPZ.woff2",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/brand/manaratak-logo.png",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/redirects",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/navigation",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/block-schemas",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/blocks",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/announcements",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/categories",
+      "status": 201,
+      "method": "POST"
+    },
+    {
+      "path": "/api/v1/admin/cms/categories",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/content",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/v1/admin/cms/tags",
+      "status": 200,
+      "method": "GET"
+    }
+  ],
+  "pageErrors": []
+}

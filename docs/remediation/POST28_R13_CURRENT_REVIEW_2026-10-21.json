@@ -19,9 +19,12 @@
     "passedJobs": 6
   },
   "currentFixCi": {
+    "sourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
     "runId": 39516645007,
-    "lastObservedStatus": "in_progress",
-    "result": null
+    "lastObservedStatus": "completed",
+    "result": "success",
+    "passedJobs": 6,
+    "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/r13-ci-completed.json"
   },
   "sourceSection27Closed": false,
   "formalR13Acceptance": false,
@@ -39,5 +42,15 @@
     "R13-E05"
   ],
   "evidence": "docs/reviews/evidence/post28/cbe2ff2d0e3ba881361fcbe42133af500cd4c331/r13-current-review/evidence-index.json",
-  "next": "CURRENT_FIX_CI_THEN_RELEASE_BLOCKER_REMEDIATION_NO_AUTOMATIC_R14_GO"
+  "next": "SECURE_PRIVATE_DELIVERY_THEN_REMAINING_RELEASE_BLOCKERS_NO_AUTOMATIC_GO",
+  "latestAdminCmsLocalDiagnostic": {
+    "completed": true,
+    "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+    "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+    "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+    "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+    "formalAcceptance": false,
+    "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+  }
 }

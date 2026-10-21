@@ -1,0 +1,9 @@
+{
+  "kind": "CMS_PUBLISHED_PAGE_READ_ONLY_DIAGNOSTIC",
+  "status": 503,
+  "contentType": "application/problem+json; charset=utf-8",
+  "body": "{\"type\":\"https://api.manaratak.local/problems/cms-sitemap-unavailable\",\"title\":\"Service Unavailable\",\"status\":503,\"detail\":\"CMS_SITEMAP_UNAVAILABLE\",\"instance\":\"/api/v1/public/cms/pages/http-resolve?path=%2Far%2Farticles%2Fr14-241280ff-3dd6-42c9-8157-2837c48b3d2c\",\"code\":\"CMS_SITEMAP_UNAVAILABLE\",\"traceId\":\"cbaa955a-1c9c-4abc-bf9c-05a8e5fd4844\"}",
+  "configuredPublicOrigin": "https://127.0.0.1:64162",
+  "apiSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+  "mfaOrContentMutated": false
+}
