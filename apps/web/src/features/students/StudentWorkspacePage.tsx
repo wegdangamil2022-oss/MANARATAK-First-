@@ -1258,6 +1258,7 @@ function SummaryView({
       {invoices.length > 0 && (
         <div className="mn-student-summary-invoices">
           <InvoicePanel
+            compactSummary
             invoices={invoices}
             paymentsByInvoice={paymentsByInvoice}
             onToggle={onTogglePayments}
@@ -4046,26 +4047,30 @@ function InvoicePanel({
   invoices,
   paymentsByInvoice,
   onToggle,
+  compactSummary = false,
 }: {
   invoices: StudentFinanceInvoiceDto[];
   paymentsByInvoice: Record<string, StudentFinancePaymentDto[]>;
   onToggle: (id: string) => void;
+  compactSummary?: boolean;
 }) {
-  return (
-    <Panel title="الفواتير والدفعات">
+  const content = (
+    <>
       {invoices.length ? (
-        <div className="space-y-3">
+        <div className={compactSummary ? 'space-y-3.5' : 'space-y-3'}>
           {invoices.map((invoice) => (
-            <div key={invoice.id} className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4">
+            <div key={invoice.id} className={compactSummary
+              ? "rounded-xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2.5"
+              : "rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4"}>
               <div className="flex justify-between gap-3">
                 <div>
-                  <h3 className="font-bold">{invoice.invoiceNumber}</h3>
-                  <p className="mt-1 text-sm text-[var(--mn-text-muted)]">
+                  <h3 className={compactSummary ? "text-xs sm:text-sm font-bold leading-5 text-[var(--mn-heading)] break-words" : "font-bold"}>{invoice.invoiceNumber}</h3>
+                  <p className={compactSummary ? "mt-0.5 text-[11px] sm:text-xs leading-5 text-[var(--mn-text-muted)]" : "mt-1 text-sm text-[var(--mn-text-muted)]"}>
                     المستحق {formatMoney(invoice.amountDue)}
                   </p>
                 </div>
                 <span
-                  className={`h-fit rounded-full px-3 py-1 text-xs font-bold ${invoice.status === 'PAID' ? 'border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] text-[var(--mn-success-text)]' : 'border border-[var(--mn-warning-border)] bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]'}`}
+                  className={`h-fit rounded-full ${compactSummary ? 'px-2 py-0.5 text-[10px] sm:text-[11px]' : 'px-3 py-1 text-xs'} font-bold font-['Cairo',sans-serif] ${invoice.status === 'PAID' ? 'border border-[var(--mn-success-border)] bg-[var(--mn-success-soft)] text-[var(--mn-success-text)]' : 'border border-[var(--mn-warning-border)] bg-[var(--mn-warning-soft)] text-[var(--mn-warning-text)]'}`}
                 >
                   {arabicStatus(invoice.status)}
                 </span>
@@ -4073,12 +4078,14 @@ function InvoicePanel({
               <button
                 type="button"
                 onClick={() => onToggle(invoice.id)}
-                className="mt-3 text-xs font-semibold text-[var(--mn-secondary)]"
+                className={compactSummary
+                  ? "mn-student-summary-primary-action mt-2 inline-flex items-center justify-center rounded-lg bg-[#142B5F] px-3 py-1.5 font-semibold text-white dark:bg-[#D6A43B] dark:text-[#142B5F] hover:bg-[#203D74] dark:hover:bg-[#E5B54F] transition-colors font-['Cairo',sans-serif]"
+                  : "mt-3 text-xs font-semibold text-[var(--mn-secondary)]"}
               >
                 {paymentsByInvoice[invoice.id] ? 'إخفاء الدفعات' : 'عرض الدفعات'}
               </button>
               {paymentsByInvoice[invoice.id] && (
-                <div className="mt-3 space-y-2 border-t pt-3">
+                <div className="mt-3 space-y-2 border-t border-[var(--mn-border)] pt-3">
                   {paymentsByInvoice[invoice.id].length ? (
                     paymentsByInvoice[invoice.id].map((payment) => (
                       <p key={payment.id} className="rounded-lg bg-[var(--mn-surface-muted)] p-2 text-xs">
@@ -4098,7 +4105,26 @@ function InvoicePanel({
           لا توجد فواتير حالية.
         </p>
       )}
-    </Panel>
+    </>
+  );
+
+  if (!compactSummary) {
+    return <Panel title="الفواتير والدفعات">{content}</Panel>;
+  }
+
+  return (
+    <section
+      aria-label="الفواتير والدفعات"
+      className="relative -mx-[2px] w-[calc(100%+4px)] sm:mx-0 sm:w-full rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3.5 sm:p-4 shadow-2xs mn-panel font-['Cairo',sans-serif]"
+    >
+      <div className="mb-3 flex min-w-0 items-center gap-2">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+          <Receipt className="h-4 w-4 text-[#E5B54F]" />
+        </span>
+        <h2 className="mn-student-summary-heading text-[14px] font-bold font-['Cairo',sans-serif] text-[var(--mn-heading)]">الفواتير والدفعات</h2>
+      </div>
+      {content}
+    </section>
   );
 }
 
