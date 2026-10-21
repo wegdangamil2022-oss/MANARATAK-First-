@@ -3,6 +3,7 @@ const ApiClient = import.meta.env.VITE_PUBLIC_TEMPLATE_DATA_MODE === 'prototype'
 import {StudentDocumentUpload} from './StudentDocumentUpload';
 import { applicationCycleLabel } from './ApplicationCycleLabel';
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { ChevronDown, FileCheck2 } from 'lucide-react';
 import {
   ApiClient as LiveApiClient,
   type StudentApplicationTrackerDto,
@@ -17,6 +18,7 @@ export function StudentApplicationDocuments({
   onChanged: () => void;
 }) {
   const generation = useRef(0);
+  const detailsId = `mn-student-application-documents-${tracker.id}`;
   const { language } = useTranslation();
   const text = useCallback((ar: string, en: string) => (language === 'en' ? en : ar), [language]);
   const [open, setOpen] = useState(false),
@@ -92,12 +94,25 @@ export function StudentApplicationDocuments({
         )
       : null;
   return (
-    <section className="my-3 rounded-xl border p-3">
-      <button type="button" onClick={() => setOpen((v) => !v)}>
-        {text('مستندات ودورة التقديم', 'Documents and application cycle')}
+    <section className="mn-student-application-documents mt-3 overflow-hidden rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)]">
+      <button
+        type="button"
+        className="mn-student-documents-toggle flex w-full min-h-[64px] items-center gap-2.5 px-3 py-2.5 text-start text-[var(--mn-heading)] transition-colors hover:bg-[var(--mn-surface-muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0E7C86]"
+        aria-expanded={open}
+        aria-controls={detailsId}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <FileCheck2 className="h-4.5 w-4.5 shrink-0 text-[var(--mn-secondary)]" aria-hidden="true" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-[13px] leading-5 font-bold">{text('مستندات ودورة التقديم', 'Documents and application cycle')}</span>
+          <span className="mt-0.5 block text-[11px] leading-[1.7] font-medium text-[var(--mn-text-muted)]">
+            {text('مراجعة المتطلبات، رفع المستندات، ومعرفة دورة التقديم.', 'Review requirements, upload documents, and view the application cycle.')}
+          </span>
+        </span>
+        <ChevronDown className={`h-4 w-4 shrink-0 text-[var(--mn-text-muted)] transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
       {open && (
-        <div className="space-y-2">
+        <div id={detailsId} className="mn-student-documents-detail space-y-3 border-t border-[var(--mn-border)] px-3 py-3 text-[11px] leading-[1.9] text-[var(--mn-text)]">
           <p>
             {text(
               'هذه متابعة شخصية وليست تقديمًا رسميًا. الربط وحده لا يوثق المستند؛ تظهر نتيجة المراجعة البشرية مستقلة إن طلبتها.',
