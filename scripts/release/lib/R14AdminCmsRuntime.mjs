@@ -3,6 +3,8 @@ import path from 'node:path';
 import { randomBytes, randomUUID, scryptSync, createHash } from 'node:crypto';
 import { totp } from '../../../packages/infrastructure/src/auth/mfa/Totp.ts';
 import { createDiagnosticRequestBudget } from './DiagnosticRequestBudget.mjs';
+import { PUBLIC_TEMPLATE_LOCALES } from '@manaratak/shared';
+import { assertCmsDiagnosticLocale } from './CmsDiagnosticLocaleContract.mjs';
 
 /** Only the setup principal in the already verified new DB-T calls this helper. */
 export async function seedR14AdminCmsFixture(setup, secrets) {
@@ -91,20 +93,28 @@ export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof,
       const denied = await author.evaluate(async ({ id, locale }) => { const token = await fetch('/api/v1/auth/csrf-token', { credentials: 'include' }); return (await fetch('/api/v1/admin/cms/content/' + id + '/approve', { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/json', 'idempotency-key': crypto.randomUUID(), 'x-csrf-token': token.headers.get('x-csrf-token') }, body: JSON.stringify({ locale, expectedVersion: 1 }) })).status; }, { id: content.id, locale });
       assert.equal(denied, 403);
       await open(reviewer, locale); assert.equal(await reviewer.getByRole('button', { name: 'نشر الآن', exact: true }).isDisabled(), true); await action(reviewer, content.id, 'اعتماد كناشر', 'approve');
-      await open(publisher, locale); await action(publisher, content.id, 'نشر الآن', 'publish'); assert.equal((await publicPage.goto(publicUrl)).status(), 200); await publicPage.getByRole('heading', { name: title, exact: true }).waitFor();
-      assert((await publicPage.locator('body').innerText()).includes(body));
-      await webPage.goto(origin + '/' + locale + '/articles/' + fixture.slug); await webPage.getByRole('heading', { name: title, exact: true }).waitFor();
-      assert((await webPage.locator('body').innerText()).includes(body));
+      await open(publisher, locale); await action(publisher, content.id, 'نشر الآن', 'publish');
+      const delivered = await publicPage.goto(publicUrl);
+      const publicLocaleEnabled = assertCmsDiagnosticLocale({ locale, enabledLocales: PUBLIC_TEMPLATE_LOCALES, status: delivered.status(), robots: delivered.headers()['x-robots-tag'] });
+      const owner = () => publicPage.evaluate(async ({ slug, locale }) => { const result = await fetch('/api/v1/public/cms/content/' + slug + '?locale=' + locale); return { status: result.status, data: await result.json() }; }, { slug: fixture.slug, locale });
+      let snapshot = await owner(); assert.equal(snapshot.status, 200); assert.equal(snapshot.data.title, title); assert(snapshot.data.body.includes(body));
+      if (publicLocaleEnabled) { await publicPage.getByRole('heading', { name: title, exact: true }).waitFor(); assert((await publicPage.locator('body').innerText()).includes(body)); }
+      await webPage.goto(origin + '/' + locale + '/articles/' + fixture.slug);
+      if (publicLocaleEnabled) { await webPage.getByRole('heading', { name: title, exact: true }).waitFor(); assert((await webPage.locator('body').innerText()).includes(body)); }
+      else { await webPage.waitForURL(origin + '/ar/articles/' + fixture.slug); assert(!(await webPage.locator('body').innerText()).includes(body)); }
       await open(author, locale); await author.getByLabel('نص المحتوى').fill('<p>R14_UNPUBLISHED_' + locale + '</p>'); await action(author, content.id, 'حفظ النسخة على الخادم', 'localized', 'PUT');
-      assert.equal((await publicPage.reload()).status(), 200); assert(!(await publicPage.locator('body').innerText()).includes('R14_UNPUBLISHED_' + locale));
-      await webPage.reload(); await webPage.getByRole('heading', { name: title, exact: true }).waitFor(); assert(!(await webPage.locator('body').innerText()).includes('R14_UNPUBLISHED_' + locale));
+      const reloaded = await publicPage.reload(); assertCmsDiagnosticLocale({ locale, enabledLocales: PUBLIC_TEMPLATE_LOCALES, status: reloaded.status(), robots: reloaded.headers()['x-robots-tag'] });
+      snapshot = await owner(); assert.equal(snapshot.status, 200); assert(snapshot.data.body.includes(body)); assert(!snapshot.data.body.includes('R14_UNPUBLISHED_' + locale));
+      assert(!(await publicPage.locator('body').innerText()).includes('R14_UNPUBLISHED_' + locale));
+      await webPage.reload(); if (publicLocaleEnabled) await webPage.getByRole('heading', { name: title, exact: true }).waitFor(); assert(!(await webPage.locator('body').innerText()).includes('R14_UNPUBLISHED_' + locale));
       await open(publisher, locale); await action(publisher, content.id, 'أرشفة', 'archive'); await publicPage.goto(origin + '/admin/login'); await publicPage.goBack();
       assert(!(await publicPage.locator('body').innerText()).includes(body)); assert.equal((await publicPage.reload()).status(), 404);
       const missing = webPage.waitForResponse(result => new URL(result.url()).pathname === '/api/v1/public/cms/content/' + fixture.slug && result.status() === 404);
       await webPage.reload(); await missing; await webPage.getByRole('heading', { name: title, exact: true }).waitFor({ state: 'hidden' });
       assert(!(await webPage.locator('body').innerText()).includes(body));
+      assert.equal((await owner()).status, 404);
       assert.equal(await db.cmsPublishedContent.count({ where: { contentId: content.id, locale, status: 'PUBLISHED' } }), 0);
-      locales.push({ locale, authoredReviewedPublishedWithdrawnViaUi: true, publicWebBundleRendered: true, withdrawnWebOwnerStatus: 404, authorApprovalDenied: 403, reviewerPublishDisabled: true, unpublishedDraftHidden: true, withdrawnStatus: 404 });
+      locales.push({ locale, authoredReviewedPublishedWithdrawnViaUi: true, publicTemplateLocaleEnabled: publicLocaleEnabled, publicWebBundleRendered: publicLocaleEnabled, disabledLocalePublicationStillBlocked: !publicLocaleEnabled, publishedOwnerSnapshotVerified: true, withdrawnOwnerSnapshotStatus: 404, withdrawnWebOwnerStatus: 404, authorApprovalDenied: 403, reviewerPublishDisabled: true, unpublishedDraftHidden: true, withdrawnStatus: 404 });
     }
     await publisher.screenshot({ path: path.join(proof, 'r14-cms-withdrawn-admin.png'), fullPage: true });
     for (const actor of fixture.actors) {
@@ -112,7 +122,7 @@ export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof,
       assert.equal(status, 200); assert.equal(await db.sessionRecord.count({ where: { identityId: actor.id, revokedAt: null } }), 0);
     }
     assert.deepEqual(await fingerprint(), baseline); assert.equal(errors.length, 0); assert.equal(network.filter(row => row.status >= 500 || row.status === 429).length, 0);
-    return { sourceSha, builtThreeUnitsAtOneSha: true, locales, observations, requestBudget: requestBudget.snapshot(), protectedBeforeAndAfter: baseline, noExternalEffects: true, blockedExternalOrigins: [...blocked], pageErrors: errors, network, allActorSessionsRevoked: true, formalAcceptance: false };
+    return { sourceSha, builtThreeUnitsAtOneSha: true, publicTemplateLocales: [...PUBLIC_TEMPLATE_LOCALES], publicEnglishReleaseAccepted: false, locales, observations, requestBudget: requestBudget.snapshot(), protectedBeforeAndAfter: baseline, noExternalEffects: true, blockedExternalOrigins: [...blocked], pageErrors: errors, network, allActorSessionsRevoked: true, formalAcceptance: false };
   } finally {
     // Synthetic sessions only; cleanup must also revoke sessions after a failed journey.
     await db.sessionRecord.updateMany({ where: { identityId: { in: fixture.actors.map(actor => actor.id) }, revokedAt: null }, data: { revokedAt: new Date() } });
