@@ -162,6 +162,50 @@
   font-family: 'Cairo', sans-serif !important;
 }
 
+/* Scholarship application document details stay compact and legible with
+ * Cairo typography. Only tools within the Opportunities tab are affected. */
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(p, label) {
+  font-size: 11px;
+  line-height: 1.85;
+}
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(form > label, div > label) {
+  display: block;
+  font-weight: 600;
+  color: var(--mn-heading);
+}
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(select, input[type='date'], textarea) {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 36px;
+  margin-top: 4px;
+  padding: 6px 9px;
+  border: 1px solid var(--mn-border);
+  border-radius: 9px;
+  background: var(--mn-surface);
+  color: var(--mn-text);
+  font-size: 11px;
+}
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(form > button, p > button, div > button) {
+  min-height: 34px;
+  margin-top: 5px;
+  margin-inline-end: 5px;
+  padding: 5px 9px;
+  border: 1px solid var(--mn-border);
+  border-radius: 8px;
+  background: var(--mn-surface);
+  color: var(--mn-heading);
+  font-size: 11px;
+  font-weight: 700;
+}
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(button:disabled) {
+  opacity: .6;
+  cursor: not-allowed;
+}
+.mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(p[role='alert']) {
+  color: var(--mn-danger-text);
+}
+
 /* Summary section titles: gold line immediately touching the title box,
    following the intrinsic text width rather than spanning the card. */
 .mn-student-workspace .mn-student-summary-heading,
