@@ -195,6 +195,8 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 22.16.0
@@ -240,6 +242,26 @@ jobs:
         with:
           name: r14-admin-cms-${{ github.sha }}
           path: ${{ runner.temp }}/r14-linux/linux-runtime-proof
+          if-no-files-found: warn
+      - name: Retrieve the independently reviewed previous rollback artifacts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir "$RUNNER_TEMP/r14-rollback"
+          cp -a "$RUNNER_TEMP/r07-linux/artifacts" "$RUNNER_TEMP/r07-linux/linux-image-probe.json" "$RUNNER_TEMP/r14-rollback/"
+          gh run download 39599847197 --repo "$GITHUB_REPOSITORY" -n "manaratak-release-artifacts-fb1a375eba5d09d3f7a01d5515270ed2cf011280" -D "$RUNNER_TEMP/r14-rollback/previous-artifacts"
+      - name: Exercise scoped Linux API rollback and forward recovery with real signals
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        env:
+          POST28_LINUX_RUNTIME_REVIEW: 'YES'
+        run: node scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r14-rollback" --r14-rollback
+      - name: Retain Linux rollback observations and cleanup without private lab files
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r14-rollback-${{ github.sha }}
+          path: ${{ runner.temp }}/r14-rollback/linux-runtime-proof
           if-no-files-found: warn
       - name: Build configuration needed by the new source-router workflow profile
         if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'

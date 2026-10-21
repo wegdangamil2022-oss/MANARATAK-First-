@@ -5,7 +5,7 @@ import net from 'node:net';
 import https from 'node:https';
 import assert from 'node:assert/strict';
 import {spawn, spawnSync, execFileSync} from 'node:child_process';
-import {randomUUID, randomBytes, scryptSync, createHash, X509Certificate} from 'node:crypto';
+import {randomUUID, randomBytes, scryptSync, createHash, X509Certificate, generateKeyPairSync} from 'node:crypto';
 import {PrismaClient} from '@prisma/client';
 import {chromium} from 'playwright';
 import {verifyReleaseManifest} from './lib/ReleaseContracts.mjs';
@@ -22,11 +22,13 @@ const r08Combined=process.argv[3]==='--r08-combined';
 const r09Learner=process.argv[3]==='--r09-learner';
 const r09Public=process.argv[3]==='--r09-public';
 const r14AdminCms=process.argv[3]==='--r14-admin-cms';
+const r14Rollback=process.argv[3]==='--r14-rollback';
 const r11Diagnostic=process.argv[4]==='--r11-contention';
-if(process.argv.length>5||(process.argv[4]&&!r11Diagnostic)||(r11Diagnostic&&!r09Public)||(process.argv[3]&&!r08Combined&&!r09Learner&&!r09Public&&!r14AdminCms))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
+if(process.argv.length>5||(process.argv[4]&&!r11Diagnostic)||(r11Diagnostic&&!r09Public)||(process.argv[3]&&!r08Combined&&!r09Learner&&!r09Public&&!r14AdminCms&&!r14Rollback))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
 if(process.platform!=='linux'||process.arch!=='x64'||Number(process.versions.node.split('.')[0])!==22||process.env.POST28_LINUX_RUNTIME_REVIEW!=='YES')throw Error('POST28_LINUX_RUNTIME_REVIEW_NOT_AUTHORIZED');
 const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 const r14Cms=r14AdminCms?await import('./lib/R14AdminCmsRuntime.mjs'):null;
+const rollbackTools=r14Rollback?await import('./lib/R14LinuxRollback.mjs'):null;
 if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())throw Error('POST28_CLEAN_SOURCE_REQUIRED');
 if(run===repo||run.startsWith(repo+path.sep))throw Error('POST28_RUNTIME_OUTSIDE_CHECKOUT_REQUIRED');
 const manifest=verifyReleaseManifest(path.join(run,'artifacts'),sha);
@@ -41,10 +43,11 @@ const hash=value=>createHash('sha256').update(value).digest('hex');
 const dockerEnv={...process.env};for(const key of ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'])delete dockerEnv[key];
 const docker=args=>execFileSync('docker',['--host=unix:///var/run/docker.sock',...args],{env:dockerEnv,encoding:'utf8',timeout:45000,maxBuffer:4*1024*1024}).trim();
 const baseEnv={PATH:process.env.PATH,HOME:process.env.HOME,NODE_ENV:'test',POST28_LOCAL_LAB_CREATE:'YES',POST28_LOCAL_LAB_PROFILE:'transactions',POST28_LOCAL_LAB_STORAGE:'tmpfs',POST28_LAB_ROOT:path.join(run,'private-labs')};
-let state,env={},db,apiId,browser,gateway,forwarder,combined,failure=null;
+let state,env={},db,apiId,browser,gateway,forwarder,combined,rollbackImage,apiTarget,failure=null;
 const secrets=[],observations=[],network=[],pageErrors=[],consoleErrors=[],children=[];
 const redact=value=>secrets.reduce((text,secret)=>text.replaceAll(secret,'[REDACTED]'),String(value)).replace(/postgres(?:ql)?:\/\/[^\s'"<>]+/g,'[REDACTED_POSTGRES_URL]');
 const report={kind:'POST28_R07_LINUX_ARTIFACT_RUNTIME',sourceSha:sha,imageId:image.imageId,node:process.version,environment:'DISPOSABLE',providerMode:'NO_EXTERNAL_EGRESS',observations,network,pageErrors,consoleErrors,productionAcceptance:false,formalR07Acceptance:false,promotionAuthorized:false};
+if(r14Rollback)report.kind='POST28_R14_LINUX_API_ROLLBACK';
 const execute=(args,extra,log)=>{
   const result=spawnSync(process.execPath,args,{cwd:repo,env:{...baseEnv,...extra},encoding:'utf8',timeout:240000,maxBuffer:4*1024*1024});
   fs.writeFileSync(path.join(proof,log),redact((result.stdout??'')+(result.stderr??'')),{flag:'wx'});
@@ -54,6 +57,10 @@ const execute=(args,extra,log)=>{
 const freePort=()=>new Promise((resolve,reject)=>{const server=net.createServer();server.on('error',reject);server.listen(0,'127.0.0.1',()=>{const port=server.address().port;server.close(()=>resolve(port));});});
 const bounded=async(test,label)=>{for(let i=0;i<100;i++){if(await test())return;await new Promise(resolve=>setTimeout(resolve,200));}throw Error(label);};
 try{
+  if(r14Rollback){
+    const {prepareRollbackImage}=await import('./lib/R14RollbackImage.mjs');
+    rollbackImage=prepareRollbackImage({run,manifest,image,docker});report.rollbackImage=rollbackImage;
+  }
   // The creator's write-once state also allows safe cleanup after partial setup.
   try{state=JSON.parse(execute(['scripts/database/create-post28-lab.mjs'],{},'create.log'));}
   finally{if(!state&&fs.existsSync(baseEnv.POST28_LAB_ROOT)){const dirs=fs.readdirSync(baseEnv.POST28_LAB_ROOT);if(dirs.length===1){const file=path.join(baseEnv.POST28_LAB_ROOT,dirs[0],'lab-state.json');if(fs.existsSync(file))state=JSON.parse(fs.readFileSync(file,'utf8'));}}}
@@ -88,6 +95,11 @@ try{
   const url=new URL(env.DATABASE_URL);url.hostname=state.containerName;url.port='5432';
   const apiEnv={NODE_ENV:'test',PORT:'3000',DATABASE_URL:url.href,DIRECT_URL:url.href,DATABASE_REQUIRED:'true',RELEASE_SOURCE_SHA:sha,HEALTH_DEPLOYMENT_REVISION:sha,CORS_ORIGIN:origin,PUBLIC_WEB_URL:origin,ADMIN_WEB_URL:origin+'/admin',TRUST_PROXY_HOPS:'1',SECURE_COOKIE:'true',BACKGROUND_WORKER_ENABLED:'false',STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED:'false',OWNER_DOMAIN_OUTBOX_WORKER_ENABLED:'false',CERTIFICATE_COMPLETION_WORKER_ENABLED:'false'};
   if(r14AdminCms){apiEnv.MANARATAK_MFA_ENCRYPTION_KEY=randomBytes(32).toString('hex');secrets.push(apiEnv.MANARATAK_MFA_ENCRYPTION_KEY);apiEnv.PUBLIC_WEB_URL='https://r14.example.invalid';}
+  if(r14Rollback){
+    const keys=generateKeyPairSync('rsa',{modulusLength:2048,privateKeyEncoding:{type:'pkcs8',format:'pem'},publicKeyEncoding:{type:'spki',format:'pem'}});
+    Object.assign(apiEnv,{JWT_ACTIVE_KEY_ID:'r14-synthetic-rollback',JWT_PRIVATE_KEY_PEM:keys.privateKey.replaceAll('\n','\\n'),JWT_PUBLIC_KEY_PEM:keys.publicKey.replaceAll('\n','\\n'),CSRF_SECRET:randomBytes(32).toString('hex'),SESSION_SECRET:randomBytes(32).toString('hex')});
+    secrets.push(keys.privateKey,apiEnv.JWT_PRIVATE_KEY_PEM,apiEnv.CSRF_SECRET,apiEnv.SESSION_SECRET);
+  }
   if(r08Combined){combined=new R08CombinedRuntime({docker,state,imageId:image.imageId,secrets});Object.assign(apiEnv,combined.prepare());report.kind='POST28_R08_COMBINED_ARTIFACT_RUNTIME';}
   secrets.push(url.href);const apiEnvFile=path.join(state.directory,'api.env');fs.writeFileSync(apiEnvFile,Object.entries(apiEnv).map(([key,value])=>key+'='+value).join('\n')+'\n',{mode:0o600,flag:'wx'});
   apiId=docker(['run','-d','--label','codex.post28.run='+state.runId,'--network',state.network,'--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','--memory=768m','--pids-limit=128','--tmpfs','/opt/manaratak/storage:rw,uid=1000,gid=1000,mode=0700,size=67108864','--tmpfs','/tmp:rw,nosuid,noexec,size=16777216','--env-file',apiEnvFile,image.imageId]);
@@ -96,7 +108,7 @@ try{
   const address=apiIdentity.NetworkSettings.Networks[state.network].IPAddress;assert.equal(net.isIP(address),4);
   let apiPort;
   if(combined)apiPort=await combined.route(address,apiEnvFile);
-  else{apiPort=await freePort();forwarder=createLoopbackForwarder({host:address,port:3000},apiPort);await forwarder.listen();}
+  else{apiPort=await freePort();apiTarget={host:address,port:3000};forwarder=createLoopbackForwarder(apiTarget,apiPort);await forwarder.listen();}
   const apiOrigin='http://127.0.0.1:'+apiPort;
   await bounded(async()=>{try{return(await fetch(apiOrigin+'/api/v1/monitoring/health/readiness',{signal:AbortSignal.timeout(1000)})).status===200;}catch{return false;}},'POST28_LINUX_API_NOT_READY');
   const cert=path.join(state.directory,'tls.crt'),key=path.join(state.directory,'tls.key');
@@ -135,6 +147,10 @@ try{
     report.kind='POST28_R14_ADMIN_CMS_ARTIFACT_RUNTIME';
     report.adminCmsJourney=await r14Cms.exerciseR14AdminCms({browser,origin,db,fixture:r14Fixture,proof,secrets,sourceSha:sha});
     observations.push({step:'R14_SAME_SHA_THREE_ACTOR_MFA_AR_EN_CMS_LIFECYCLE',passed:true});report.redisConfigured=false;
+  }else if(r14Rollback){
+    const switcher=rollbackTools.linuxApiSwitcher({docker,state,apiEnv,apiEnvFile,target:apiTarget,proof,redact,initialId:apiId,onStarted:id=>{apiId=id;}});
+    report.rollbackJourney=await rollbackTools.exerciseLinuxRollback({page,origin,db,email,password,fixtureId,current:{sourceSha:sha,imageId:image.imageId},previous:{sourceSha:rollbackImage.previousSourceSha,imageId:rollbackImage.imageId},switcher});
+    observations.push({step:'R14_REAL_SIGTERM_CURRENT_PREVIOUS_CURRENT_SESSION_CSRF_RECEIPT_CONTINUITY',passed:true});report.redisConfigured=false;
   }else if(combined){
     report.combinedAuth=await combined.exercise({page,origin,email,password,db,fixtureId});
     observations.push({step:'TWO_BUILT_APIS_SHARED_PG_REDIS_TLS_AUTH',passed:true});report.redisConfigured=true;

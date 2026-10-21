@@ -1,0 +1,15 @@
+# R14 — scoped Linux API rollback
+
+Implementation prepared; Linux execution is pending. No formal acceptance or production authorization is claimed.
+
+The diagnostic retains the current Web/Admin bundles and replaces only the API, current → previous → current, in a newly owned synthetic PostgreSQL16 lab. The previous release is `fb1a375eba5d09d3f7a01d5515270ed2cf011280`, successful run39599847197, with independently retrieved manifest SHA256 `f17c7d7a33efa90f51618fcb602e0f6a414cd62bef45e6bb43ffdfade0397c71`. It retains the authenticated certificate delivery and worker health fixes.
+
+Before creating a lab, the runner verifies every previous artifact, pins that manifest, requires ancestor provenance, and rejects changes in API/Web/Admin/packages/vendor, lockfile, schema or external runtime modules. The old API tar supplies all old API bytes; only the identical locked Linux dependency layer is shared, with both provenance SHAs recorded. This does not demonstrate compatibility with a different API implementation.
+
+Both switches require the old owned API to receive real SIGTERM, exit0, emit its graceful-shutdown log, and stop before replacement. The replacement must run as node in a read-only container on the owned internal network and become ready with its exact SHA. TLS, origin, signing keys and CSRF/session secrets stay fixed within this synthetic lab. Private keys are generated per lab and redacted; private lab files are excluded from uploaded evidence.
+
+The canary is bounded to24 sequential API requests and60 seconds after setup. It logs in, writes a workspace preference once, switches to the old API, verifies the existing session and idempotent replay, rejects missing CSRF and student Admin access, switches forward again and repeats the saved receipt. Workspace version and receipt count must show only one effect. It logs out and verifies session revocation. Existing migration/consent/binding/financial/certificate/CMS rows are compared by hash; append-only audit/outbox/receipt additions are allowed without altering earlier rows. Empty protected tables do not prove historical data preservation.
+
+Workers and external providers stay disabled. No financial effect-once, full worker compatibility, representative load, hosting controls, trust signatures or production rollout is claimed. No down migration, existing database, Neon or main is touched.
+
+Two focused tests cover artifact/runtime rejection and refusal to stop another lab or start after an unsuccessful drain. The CI boundary negative cases also reject missing branch authorization, missing runtime authorization and extra rollback arguments. These tests passed locally, together with lint and the environment contract. Actual Linux execution and its retained cleanup result are still required before calling this scope complete.
