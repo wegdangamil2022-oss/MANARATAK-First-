@@ -805,32 +805,6 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
         {tab === 'CAREERS' && <StudentCareerWorkspace />}
         {tab === 'SERVICES' && (
           <div className="mn-student-services-page space-y-5 font-['Cairo',sans-serif]">
-            <section aria-label="تصفية طلبات الخدمات" className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-2xs mn-panel dark:border-white/10 sm:p-4">
-              <div className="mb-3 flex min-w-0 items-center gap-2">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
-                  <Settings2 className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />
-                </span>
-                <h2 className="mn-student-services-heading text-[14px] font-bold text-[var(--mn-heading)]">تصفية الطلبات</h2>
-              </div>
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <label className="min-w-[185px] flex-1 text-[11px] font-semibold text-[var(--mn-heading)] sm:max-w-[290px]">
-                  حالة الطلب
-                  <select
-                    value={serviceStatus}
-                    onChange={(event) => setServiceStatus(event.target.value)}
-                    className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[12px] font-semibold text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
-                  >
-                    <option value="">جميع الحالات</option>
-                    {['REQUESTED','ACCEPTED','IN_PROGRESS','AWAITING_PAYMENT','ACTION_REQUIRED','NEEDS_INPUT','COMPLETED','CANCELLED'].map((status) => (
-                      <option key={status} value={status}>{getServiceRequestStatusBadge(status).label}</option>
-                    ))}
-                  </select>
-                </label>
-                <span role="status" className="text-[11px] font-semibold leading-[1.8] text-[var(--mn-text-muted)]">
-                  {serviceLoading ? 'جارٍ تحميل الطلبات…' : `عرض ${serviceRequests.length} من ${serviceTotal} طلب`}
-                </span>
-              </div>
-            </section>
 
             {serviceError && (
               <div className="space-y-2">
@@ -849,6 +823,9 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
             {!serviceLoading && !serviceError && (
               <ServiceRequestsView
                 requests={serviceRequests}
+                statusFilter={serviceStatus}
+                onStatusFilterChange={setServiceStatus}
+                totalRequests={serviceTotal}
                 selected={selectedServiceRequest}
                 requestedNotFoundId={requestedNotFoundId}
                 saving={saving}
@@ -2387,6 +2364,9 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 function ServiceRequestsView({
   requests,
+  statusFilter,
+  onStatusFilterChange,
+  totalRequests,
   selected,
   requestedNotFoundId,
   saving,
@@ -2396,6 +2376,9 @@ function ServiceRequestsView({
   onTogglePayments,
 }: {
   requests: StudentServiceRequestDto[];
+  statusFilter: string;
+  onStatusFilterChange: (nextStatus: string) => void;
+  totalRequests: number;
   selected: StudentServiceRequestDto | null;
   requestedNotFoundId?: string | null;
   saving: boolean;
@@ -2469,6 +2452,33 @@ function ServiceRequestsView({
             <Sparkles className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]" aria-hidden="true" />
             <span>استكشف الخدمات</span>
           </Link>
+        </div>
+      </section>
+
+      <section aria-label="تصفية طلبات الخدمات" className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-2xs mn-panel dark:border-white/10 sm:p-4">
+        <div className="mb-3 flex min-w-0 items-center gap-2">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+            <Settings2 className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />
+          </span>
+          <h3 className="mn-student-services-heading text-[14px] font-bold text-[var(--mn-heading)]">تصفية الطلبات</h3>
+        </div>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <label className="min-w-[185px] flex-1 text-[11px] font-semibold text-[var(--mn-heading)] sm:max-w-[290px]">
+            حالة الطلب
+            <select
+              value={statusFilter}
+              onChange={(event) => onStatusFilterChange(event.target.value)}
+              className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[12px] font-semibold text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+            >
+              <option value="">جميع الحالات</option>
+              {['REQUESTED','ACCEPTED','IN_PROGRESS','AWAITING_PAYMENT','ACTION_REQUIRED','NEEDS_INPUT','COMPLETED','CANCELLED'].map((status) => (
+                <option key={status} value={status}>{getServiceRequestStatusBadge(status).label}</option>
+              ))}
+            </select>
+          </label>
+          <span role="status" className="text-[11px] font-semibold leading-[1.8] text-[var(--mn-text-muted)]">
+            {totalRequests === requests.length ? `${requests.length} طلب` : `عرض ${requests.length} من ${totalRequests} طلب`}
+          </span>
         </div>
       </section>
 
