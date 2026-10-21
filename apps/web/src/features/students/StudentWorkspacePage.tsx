@@ -2772,8 +2772,8 @@ function ServiceRequestsView({
                                   <div className="font-bold text-[var(--mn-heading)]">{formatMoney(payment.amount)}</div>
                                   <div className="text-[10px] text-[var(--mn-text-muted)]">{formatDate(payment.createdAt)} · {payment.paymentMethod}</div>
                                 </div>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border border-[var(--mn-success-border)]">
-                                  {payment.status === 'CAPTURED' || payment.status === 'SUCCESS' ? 'ناجحة' : payment.status}
+                                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${['CAPTURED', 'SUCCESS', 'PAID'].includes(payment.status.toUpperCase()) ? 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]' : getInvoiceStatusBadge(payment.status).className}`}>
+                                  {['CAPTURED', 'SUCCESS', 'PAID'].includes(payment.status.toUpperCase()) ? 'ناجحة' : getInvoiceStatusBadge(payment.status).label}
                                 </span>
                               </div>
                             ))
@@ -2907,8 +2907,8 @@ function ServiceRequestsView({
                                   <div className="font-bold text-[var(--mn-heading)]">{formatMoney(payment.amount)}</div>
                                   <div className="text-[10px] text-[var(--mn-text-muted)]">{formatDate(payment.createdAt)} · {payment.paymentMethod}</div>
                                 </div>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border border-[var(--mn-success-border)]">
-                                  {payment.status === 'CAPTURED' || payment.status === 'SUCCESS' ? 'ناجحة' : payment.status}
+                                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${['CAPTURED', 'SUCCESS', 'PAID'].includes(payment.status.toUpperCase()) ? 'bg-[var(--mn-success-soft)] text-[var(--mn-success-text)] border-[var(--mn-success-border)]' : getInvoiceStatusBadge(payment.status).className}`}>
+                                  {['CAPTURED', 'SUCCESS', 'PAID'].includes(payment.status.toUpperCase()) ? 'ناجحة' : getInvoiceStatusBadge(payment.status).label}
                                 </span>
                               </div>
                             ))
