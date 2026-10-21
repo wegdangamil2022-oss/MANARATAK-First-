@@ -2403,7 +2403,7 @@ export class PrismaFinanceRepository implements IFinanceRepository {
               COALESCE((SELECT SUM("amountMinorUnits"::numeric) FROM "FinancePaymentRecord" WHERE "invoiceId"=${row.id} AND status IN ('CAPTURED','PARTIALLY_REFUNDED','REFUNDED')),0)::text AS paid,
               COALESCE((SELECT SUM(r."amountMinorUnits"::numeric) FROM "FinanceRefundRecord" r JOIN "FinancePaymentRecord" p ON p.id=r."paymentId" WHERE p."invoiceId"=${row.id} AND r.status='COMPLETED'),0)::text AS refunded,
               COALESCE((SELECT SUM("amountMinorUnits"::numeric) FROM "FinanceDocumentRecord" WHERE "invoiceId"=${row.id} AND type='CREDIT_NOTE'),0)::text AS credited,
-              COALESCE((SELECT SUM("amountMinorUnits"::numeric) FROM "FinanceWalletHoldRecord" WHERE "businessReferenceId" IN (${row.id},${row.publicId}) AND status='CAPTURED'),0)::text AS walletPaid`;
+              COALESCE((SELECT SUM("amountMinorUnits"::numeric) FROM "FinanceWalletHoldRecord" WHERE "businessReferenceId" IN (${row.id},${row.publicId}) AND status='CAPTURED'),0)::text AS "walletPaid"`;
             const totalsRow = totals[0];
             if (
               BigInt(row.totalMinorUnits) -
