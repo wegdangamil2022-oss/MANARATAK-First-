@@ -72,22 +72,29 @@ export class CertificateAdminRouter {
     const router = Router();
     const useCases = cradle.certificateUseCases;
     const evaluator = cradle.authEvaluatorService;
-    const permit = (requiredPermission: string) => async (req: Request, res: Response, next: NextFunction) => {
+    const permit = (requiredPermission: string, alternatePermission?: string) => async (req: Request, res: Response, next: NextFunction) => {
       const principalId = req.authUserId;
       if (!principalId) return res.status(401).json({ error: { code: 'ADMIN_AUTH_REQUIRED', message: 'Admin authentication is required.' } });
       try {
-        const decision = await evaluator.evaluatePermission(principalId, requiredPermission, {
+        const securityContext = {
           ip: req.ip || req.socket?.remoteAddress || undefined, requestTime: new Date(),
           userAgent: req.headers['user-agent'], correlationId: req.headers['x-correlation-id'],
-        });
-        if (!decision.isGranted) return res.status(403).json({ error: { code: 'ADMIN_PERMISSION_DENIED', message: 'Admin permission is denied.' }, meta: { requiredPermission } });
-        res.setHeader('X-Admin-Required-Permission', requiredPermission);
+        };
+        const primary = await evaluator.evaluatePermission(principalId, requiredPermission, securityContext);
+        const alternate = !primary.isGranted && alternatePermission
+          ? await evaluator.evaluatePermission(principalId, alternatePermission, securityContext)
+          : null;
+        if (!primary.isGranted && !alternate?.isGranted)
+          return res.status(403).json({ error: { code: 'ADMIN_PERMISSION_DENIED', message: 'Admin permission is denied.' }, meta: { requiredPermission } });
+        res.setHeader('X-Admin-Required-Permission', primary.isGranted ? requiredPermission : alternatePermission!);
         return next();
       } catch {
         return res.status(403).json({ error: { code: 'ADMIN_PERMISSION_DENIED', message: 'Admin permission evaluation failed.' }, meta: { requiredPermission } });
       }
     };
     const transitionPermission = (req: Request, res: Response, next: NextFunction) => {
+      // Enforce the displayed owner revision first, before reviewer-reason validation.
+      try { templateCondition(req); } catch (error) { return next(error); }
       const parsed = transitionSchema.safeParse(req.body);
       if (!parsed.success) return next(parsed.error);
       const checkerStates = new Set([CertificateTemplateStatus.APPROVED, CertificateTemplateStatus.ACTIVE, CertificateTemplateStatus.DEPRECATED, CertificateTemplateStatus.ARCHIVED]);
@@ -145,7 +152,7 @@ export class CertificateAdminRouter {
       const input=z.object({expectedVersion:z.number().int().positive(),status:z.enum(['APPROVED','REVOKED']),ownershipVerified:z.boolean().optional(),delegationVerified:z.boolean().optional(),reason:z.string().trim().min(8).max(2000)}).strict().parse(req.body);
       const {reason,...fields}=input;res.json(await authorityDirectory().review(z.string().uuid().parse(req.params.id),fields,mutationContext(req,reason)));
     }));
-    router.post('/delegations/:id/evidence-delivery-grant',delegationReader,asyncHandler(async(req:Request,res:Response)=>{
+    router.post('/delegations/:id/evidence-delivery-grant',permit('admin:certificates:issuers:manage','admin:certificates:issuers:approve'),asyncHandler(async(req:Request,res:Response)=>{
       const assetId=await authorityDirectory().evidenceAsset(z.string().uuid().parse(req.params.id));
       const grants=(cradle as unknown as {processAssetLifecycleUseCase:{requestDeliveryGrant(input:{assetId:string;expiresInSeconds:number}):Promise<unknown>}}).processAssetLifecycleUseCase;
       res.setHeader('Cache-Control','no-store');res.json(await grants.requestDeliveryGrant({assetId,expiresInSeconds:60}));

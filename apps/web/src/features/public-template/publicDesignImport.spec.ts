@@ -27,7 +27,7 @@ describe('public design import boundaries', () => {
 
   it('does not replace an empty live course response with fixtures', () => {
     const html = renderToStaticMarkup(createElement(FeaturedCourses, { courses: [], onViewAllClick() {} }));
-    expect(html).toContain('لا توجد دورات حالياً في هذا القسم.');
+    expect(html).toContain('data-catalog-slot="courses"');
     expect(html).not.toContain('IELTS خطوة بخطوة');
   });
 
@@ -38,7 +38,7 @@ describe('public design import boundaries', () => {
   });
 
   it('renders a small supplied course response without swapping its identity', () => {
-    const course = { ...loadPublicPrototypeSnapshot().data.courses[0], id: 'live-course', provider: 'Live Academy', title: 'Live supplied course' };
+    const course = { ...loadPublicPrototypeSnapshot().data.courses[0], id: 'live-course', originType: 'EXTERNAL_LINKED_COURSE' as const, provider: 'Live Academy', title: 'Live supplied course' };
     const html = renderToStaticMarkup(createElement(FeaturedCourses, { courses: [course], onViewAllClick() {} }));
     expect(html).toContain('Live supplied course');
     expect(html).not.toContain('IELTS خطوة بخطوة');

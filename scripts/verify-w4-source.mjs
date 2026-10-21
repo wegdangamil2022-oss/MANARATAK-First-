@@ -116,9 +116,10 @@ const checks = [
     files.repository.includes('FINANCE_REFUND_COMPLETED') &&
     files.repository.includes("businessReferenceType: 'REFUND'")],
   ['P19-INSTALL-017',
-    files.useCases.includes('Installment plan requires an issued invoice with outstanding value') &&
-    files.useCases.includes('validateInstallmentPlan(invoice.amountDue') &&
-    files.useCases.includes('First installment due date must be in the future')],
+    files.repository.includes('Installment plan requires an issued invoice with outstanding value') &&
+    files.repository.includes('validateInstallmentPlan(total, payload.installments)') &&
+    files.repository.includes('First installment due date must be in the future') &&
+    files.repository.includes('this.checkVersion(invoice.version, ctx)')],
   ['P19-COMM-018',
     files.useCases.includes('basisPoints') &&
     files.repository.includes('calculationBasisPoints') &&

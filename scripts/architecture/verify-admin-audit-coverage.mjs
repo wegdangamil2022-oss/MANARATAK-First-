@@ -64,6 +64,33 @@ function staticRoutePaths(argument, call, ast) {
   return safe ? keys.map(key => argument.head.text + key + span.literal.text) : null;
 }
 
+
+// Study destination RBAC is composed from a finite action suffix rather than
+// hard-coded route literals. Verify the actual evaluator factory before crediting
+// its permissions in the reviewed mutation ledger. Never trust a bare guard name.
+function verifiedStudyDestinationPermission(ast, routeText) {
+  const match = routeText.match(/\bguard\(\s*['"](edit|verify|publish)['"]\s*\)/);
+  if (!match) throw new Error('STUDY_DESTINATION_PERMISSION_GUARD_MISSING');
+  let guardNode = null;
+  visit(ast, node => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === 'guard'
+      && node.initializer && ts.isArrowFunction(node.initializer)) guardNode = node.initializer;
+  });
+  if (!guardNode || guardNode.parameters.length !== 1 || guardNode.parameters[0].name.getText(ast) !== 'action')
+    throw new Error('STUDY_DESTINATION_PERMISSION_GUARD_UNVERIFIED');
+  const body = guardNode.body;
+  if (!ts.isCallExpression(body) || body.expression.getText(ast) !== 'SecurityMiddlewareFactory.createAdminPermissionGuard'
+    || body.arguments.length !== 2
+    || !ts.isBinaryExpression(body.arguments[0]) || body.arguments[0].operatorToken.kind !== ts.SyntaxKind.PlusToken
+    || !ts.isStringLiteralLike(body.arguments[0].left)
+    || body.arguments[0].left.text !== 'admin:study-destinations:'
+    || body.arguments[0].right.getText(ast) !== 'action'
+    || body.arguments[1].getText(ast) !== 'evaluatorOverride')
+    throw new Error('STUDY_DESTINATION_PERMISSION_GUARD_UNVERIFIED');
+  return { permission: 'admin:study-destinations:' + match[1],
+    fingerprint: createHash('sha256').update(guardNode.getText(ast)).digest('hex') };
+}
+
 export function buildAuditInventory({ appSource, containerSource, routerSources, policySource }) {
   const app = parse('app.ts', appSource);
   const container = parse('container.ts', containerSource);
@@ -173,9 +200,11 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
         const fullPath = mount.prefix + (route === '/' ? '' : route);
         const text = node.getText(ast);
         const inlinePermissions = [...text.matchAll(/['"](admin:[a-z0-9:*_-]+)['"]/g)].map(match => match[1]);
+        const studyDestinationGuard = mount.owner === 'StudyDestinationAdminRouter'
+          ? verifiedStudyDestinationPermission(ast, text) : null;
         const inheritedPolicies = conditionalGuards.filter(guard => guard.position < node.pos && guard.router === node.expression.expression.getText(ast))
           .map(({ position: _position, router: _router, ...policy }) => policy);
-        const permissionEvidence = [...new Set([...mount.permissions, ...inlinePermissions, ...inheritedPolicies.flatMap(policy => policy.permissions)])];
+        const permissionEvidence = [...new Set([...mount.permissions, ...inlinePermissions, ...(studyDestinationGuard ? [studyDestinationGuard.permission] : []), ...inheritedPolicies.flatMap(policy => policy.permissions)])];
         // A conditional per-route guard is recorded explicitly, rather than claiming
         // that a class-wide evaluator import proves the authorization of every route.
         const conditional = routePaths.length > 1 || inheritedPolicies.length > 0 || /\b(permit|transitionPermission|requireSupportMutation)\b/.test(text);
@@ -188,6 +217,7 @@ export function buildAuditInventory({ appSource, containerSource, routerSources,
           validationEvidence: validation, idempotency: method === 'DELETE' ? 'DELETE_SEMANTICS_OWNER_VERIFICATION_REQUIRED'
             : fullPath === '/admin/student-tools/:toolKey/test' ? 'OWNER_ENCRYPTED_EXECUTION_REQUIRED' : 'GLOBAL_ADMIN_REQUIRED',
           ...(inheritedPolicies.length ? { conditionalPermissionPolicies: inheritedPolicies } : {}),
+          ...(studyDestinationGuard ? { guardPolicyFingerprint: studyDestinationGuard.fingerprint } : {}),
           auditEvidence: classification === 'NO_AUDIT_REQUIRED' ? 'REVIEWED_NON_MUTATING_POST_EXEMPTION' : 'REQUEST_INTENT_AND_BEST_EFFORT_HTTP_OUTCOME',
           atomicBusinessAudit: 'OWNER_VERIFICATION_REQUIRED', atomicOutbox: 'OWNER_VERIFICATION_REQUIRED',
           source: `apps/api/src/presentation/api/router/${mount.owner}.ts`,

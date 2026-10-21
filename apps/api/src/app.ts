@@ -1,4 +1,4 @@
-import { createTranslationWorkspaceRouter } from './presentation/api/router/TranslationWorkspaceRouter.js';
+import { TranslationWorkspaceRouter } from './presentation/api/router/TranslationWorkspaceRouter.js';
 import { PrismaTranslationWorkspaceReadGateway, PrismaTranslationImportGateway } from '@manaratak/infrastructure';
 import { freshWorkerEvidence, successfulPublicWebStatus } from './presentation/monitoring/RuntimeHealthPolicy.js';
 import * as awilix from '@manaratak-vendor/awilix-core';
@@ -915,7 +915,7 @@ export async function createApiApp(options?: CreateApiAppOptions): Promise<Expre
     v1Router.use('/admin', new MutationAuditMiddleware(auditRecordRepository, 'ADMIN').generate());
       const requireAdminPermission = SecurityMiddlewareFactory.createAdminPermissionGuard;
 
-    v1Router.use('/admin/translations', createTranslationWorkspaceRouter(new PrismaTranslationWorkspaceReadGateway(container.resolve('prisma')), container.resolve('authEvaluatorService'), new PrismaTranslationImportGateway(container.resolve('prisma'),container.resolve('authEvaluatorService'))));
+    v1Router.use('/admin/translations', TranslationWorkspaceRouter.create(new PrismaTranslationWorkspaceReadGateway(container.resolve('prisma')), container.resolve('authEvaluatorService'), new PrismaTranslationImportGateway(container.resolve('prisma'),container.resolve('authEvaluatorService'))));
 
     // Core Admin Domain Routers (Identity & Audit)
     v1Router.use('/admin/identities', requireAdminPermission('admin:identities:manage'), container.resolve<Router>('identityRouter'));

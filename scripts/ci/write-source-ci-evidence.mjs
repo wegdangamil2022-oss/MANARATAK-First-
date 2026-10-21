@@ -16,6 +16,11 @@ const requiredSteps = [
   'unit',
   'artifacts',
 ];
+const sourceClosureManifestPath = 'scripts/ci/source-closure-manifest.json';
+const manifestBytes = fs.readFileSync(sourceClosureManifestPath);
+const manifest = JSON.parse(manifestBytes.toString('utf8'));
+if (!manifest.runtimePendingManifest || !fs.existsSync(manifest.runtimePendingManifest))
+  throw new Error('SOURCE_RUNTIME_PENDING_AUTHORITY_UNAVAILABLE');
 const sha = requireSha(process.env.GITHUB_SHA),
   steps = JSON.parse(process.env.SOURCE_CI_STEPS_JSON ?? '{}');
 const pass = requiredSteps.every((id) => steps[id] === 'success');
@@ -36,6 +41,10 @@ const report = {
   })),
   pass,
   databaseConnectionRequired: false,
+  // Evidence is indexed by the exact tracked manifest; no runtime verification is implied.
+  sourceClosureManifest: { path: sourceClosureManifestPath, sha256: hash(manifestBytes) },
+  runtimePendingManifest: manifest.runtimePendingManifest,
+  sourceValidationCommands: ['test:unit'],
 };
 const out = 'p12-ci-evidence';
 fs.mkdirSync(out, { recursive: true });

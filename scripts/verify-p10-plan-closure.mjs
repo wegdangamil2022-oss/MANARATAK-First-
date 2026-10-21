@@ -18,6 +18,9 @@ const hook = read('apps/web/src/features/public-template/usePublicLiveData.ts');
 const prototype = read('apps/web/src/features/public-template/publicPrototypeDataSource.ts');
 const scholarships = read('apps/web/src/features/public-template/publicScholarshipDataSource.ts');
 const graphHook = read('apps/web/src/features/public-template/usePublicRelationshipGraph.ts');
+const graphRoutes = read('apps/web/src/features/public-template/PublicGraphNavigationPolicy.ts');
+const homeShowcase = read('apps/web/src/features/public-template/components/HomeShowcaseFrame.tsx');
+const localeAr = read('apps/web/src/i18n/ar.ts');
 const majorDetail = read('apps/web/src/features/public-template/components/MajorDetailModal.tsx');
 const countryDetail = read('apps/web/src/features/public-template/components/CountryDetailModal.tsx');
 const countriesPage = read('apps/web/src/features/public-template/components/CountriesSearchPage.tsx');
@@ -55,7 +58,7 @@ for (const [n, fn] of [
 ]) check(n, has(live, `function ${fn}`));
 check('P10-020 scholarships adapter is owner-backed', has(live, 'ApiClient.getScholarships') && has(live, 'mapPublicScholarshipDto'));
 
-check('P10-021 published study destinations only', has(live, 'collectOffsetPages((page) => ApiClient.getStudyDestinations({ page, pageSize: 100 }))') && has(studyDestinationPublic, 'repository.listPublished(filters)') && !has(live, 'getReferenceCountries({ activeOnly: true })'));
+check('P10-021 published study destinations only', has(live, 'ApiClient.getStudyDestinations({ page: 1, pageSize: 20 })') && has(live, 'ApiClient.getStudyDestinations({ page: 1, pageSize: 8, isFeatured: true })') && has(studyDestinationPublic, 'repository.listPublished(filters)') && !has(live, 'getReferenceCountries({ activeOnly: true })'));
 check('P10-022 university canonical geography retained', has(live, 'countryReferenceId: dto.countryReferenceId') && has(live, 'regionReferenceId: dto.regionReferenceId') && has(live, 'cityReferenceId: dto.cityReferenceId'));
 check('P10-023 university program major link canonical', has(live, "program.majorMappingState === 'CANONICALLY_MAPPED'") && has(live, 'majorId: String(program.majorId)'));
 check('P10-024 course stable identity retained', has(live, 'ownerId: dto.ownerId') && has(live, 'publicId: dto.publicId') && has(live, 'slug: dto.slug'));
@@ -82,17 +85,23 @@ check('P10-042 graph router exposes country', has(graphRouter, "router.get('/cou
 check('P10-043 major graph is owner-read-model backed', has(graphHook, 'ApiClient.getMajorGraph') && has(graphHook, 'state.major.relationships.universities.data'));
 check('P10-044 university graph is owner-read-model backed', has(graphHook, 'ApiClient.getUniversityGraph'));
 check('P10-045 scholarship graph is owner-read-model backed', has(graphHook, 'ApiClient.getScholarshipGraph'));
-check('P10-046 graph route identity prefers stable slug/public/owner', has(graphHook, 'identity.slug || identity.publicId || identity.ownerId'));
+check('P10-046 graph route identity prefers stable slug/public/owner', has(graphHook, 'publicRelationshipRouteKey(identity)') && has(graphRoutes, 'identity.slug?.trim()') && has(graphRoutes, 'slug.length <= 240') && has(graphRoutes, 'test(slug)'));
 check('P10-047 graph service declares no reverse persistence', has(graphService, 'read') || has(graphService, 'Read'));
 
 check('P10-048 Major detail has no hardcoded relationship demos', !has(majorDetail, 'MAJOR_RELATIONSHIP_DEMOS') && !has(majorDetail, 'DEFAULT_RELATIONSHIPS'));
 check('P10-049 Major detail consumes relationshipGraph', has(majorDetail, 'relationshipGraph?.universities') && has(majorDetail, 'relationshipGraph?.scholarships') && has(majorDetail, 'relationshipGraph?.courses'));
-check('P10-050 Major graph failure explicitly does not show demo', has(majorDetail, 'لم يتم عرض علاقات تجريبية بديلة'));
+check('P10-050 Major graph failure explicitly does not show demo', has(majorDetail, "publicT('public_could_not_load_the_live_relationship_graph_no')") && has(localeAr, 'لم يتم عرض علاقات تجريبية بديلة'));
 check('P10-051 App wires Major graph', has(app, 'relationshipGraph={publicGraph.majorView}'));
 check('P10-052 App exposes graph unavailable state', has(app, "publicGraph.error ? 'unavailable'"));
 
 check('P10-053 App displays API failure explicitly', has(app, 'unavailableDomains.length > 0'));
-check('P10-054 App states no experimental replacement', has(app, 'لم يتم استبدالها ببيانات تجريبية'));
+check('P10-054 homepage design preview is inert and no API or graph replacement occurs',
+  has(app, 'HomeShowcaseFrame active={homeDesignUniversities}') &&
+  has(app, "publicDataMode === 'api' && !(activeTab === 'home' && selectedCategory === 'all') && unavailableDomains.length > 0") &&
+  has(homeShowcase, 'inert={active}') &&
+  has(homeShowcase, 'معاينة تصميم فقط') &&
+  has(localeAr, 'لم يتم استبدالها ببيانات تجريبية') &&
+  !has(live, 'publicPrototypeDataSource'));
 check('P10-055 App has explicit retry control', has(app, 'onClick={publicLive.reload}'));
 check('P10-056 App displays loading state', has(app, 'loadingDomains.length > 0'));
 
@@ -102,7 +111,7 @@ check('P10-059 scholarship country filter uses canonical ref', has(app, 'country
 check('P10-060 no CountryDetail name identity callback', !has(countryDetail, 'onBrowseScholarships(country.name)'));
 
 check('P10-061 University locale contract in API client', has(client, "export interface UniversityFilters {\n  locale?: 'ar' | 'en';"));
-check('P10-062 Major locale contract in API client', has(client, "export interface MajorFilters {\n  locale?: 'ar' | 'en';"));
+check('P10-062 Major locale contract in API client', /export interface MajorFilters\s*\{[^}]*locale\?: 'ar' \| 'en';/s.test(client));
 check('P10-063 International Test locale contract in API client', /export interface InternationalTestFilters\s*\{[^}]*locale\?: 'ar' \| 'en';/s.test(client));
 check('P10-064 owner locale sent to universities', has(live, 'ApiClient.getUniversities({ locale,'));
 check('P10-065 owner locale sent to majors', has(live, 'ApiClient.getMajors({ locale,'));

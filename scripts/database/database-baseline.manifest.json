@@ -7,6 +7,38 @@
   },
   "defaultCounterPolicy": "REQUIRED_UNCHANGED_UNLESS_DECLARED",
   "models": {
+    "AcademicStandardMapping": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyAlias": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyEdge": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyImportReview": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AcademicTaxonomyNode": {
+      "owner": "academic_taxonomy",
+      "required": true
+    },
+    "AccountRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "AdminEmergencyAccessRecord": {
+      "owner": "identity",
+      "required": true
+    },
+    "AdministrativeRegion": {
+      "owner": "reference",
+      "required": true
+    },
     "AIAsyncJobRecord": {
       "owner": "ai",
       "required": true
@@ -79,38 +111,6 @@
       "owner": "ai",
       "required": true
     },
-    "AcademicStandardMapping": {
-      "owner": "academic_taxonomy",
-      "required": true
-    },
-    "AcademicTaxonomyAlias": {
-      "owner": "academic_taxonomy",
-      "required": true
-    },
-    "AcademicTaxonomyEdge": {
-      "owner": "academic_taxonomy",
-      "required": true
-    },
-    "AcademicTaxonomyImportReview": {
-      "owner": "academic_taxonomy",
-      "required": true
-    },
-    "AcademicTaxonomyNode": {
-      "owner": "academic_taxonomy",
-      "required": true
-    },
-    "AccountRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "AdminEmergencyAccessRecord": {
-      "owner": "identity",
-      "required": true
-    },
-    "AdministrativeRegion": {
-      "owner": "reference",
-      "required": true
-    },
     "ApiIdempotencyRecord": {
       "owner": "foundation_control_plane",
       "required": true
@@ -131,7 +131,19 @@
       "owner": "assets",
       "required": true
     },
+    "AssetRenditionRecord": {
+      "owner": "assets",
+      "required": true
+    },
+    "AuditAlertOccurrenceRecord": {
+      "owner": "audit",
+      "required": true
+    },
     "AuditRecord": {
+      "owner": "audit",
+      "required": true
+    },
+    "AuditWorkspaceRecord": {
       "owner": "audit",
       "required": true
     },
@@ -168,6 +180,10 @@
       "required": true
     },
     "Certificate": {
+      "owner": "certificates",
+      "required": true
+    },
+    "CertificateAuthorityDelegation": {
       "owner": "certificates",
       "required": true
     },
@@ -651,6 +667,10 @@
       "owner": "majors",
       "required": true
     },
+    "MajorImportOwnerReview": {
+      "owner": "majors",
+      "required": true
+    },
     "MajorLevelProfile": {
       "owner": "majors",
       "required": true
@@ -693,6 +713,10 @@
     },
     "NotificationTemplateRecord": {
       "owner": "notifications",
+      "required": true
+    },
+    "OwnerTranslationTransferReceipt": {
+      "owner": "import",
       "required": true
     },
     "PasswordResetTokenRecord": {
@@ -795,6 +819,10 @@
       "owner": "scholarships",
       "required": true
     },
+    "ScholarshipReferenceTransition": {
+      "owner": "scholarships",
+      "required": true
+    },
     "ScholarshipRequiredDocument": {
       "owner": "scholarships",
       "required": true
@@ -875,6 +903,10 @@
       "owner": "services",
       "required": true
     },
+    "ServiceTestDiscoveryLink": {
+      "owner": "services",
+      "required": true
+    },
     "ServiceWorkflowDefinitionRecord": {
       "owner": "services",
       "required": true
@@ -895,11 +927,15 @@
       "owner": "settings",
       "required": true
     },
-    "SettingVersionRecord": {
+    "Settings": {
       "owner": "settings",
       "required": true
     },
-    "Settings": {
+    "SettingsGovernanceRecord": {
+      "owner": "settings",
+      "required": true
+    },
+    "SettingVersionRecord": {
       "owner": "settings",
       "required": true
     },
@@ -912,6 +948,10 @@
       "required": true
     },
     "StudentApplicationChecklistItem": {
+      "owner": "student",
+      "required": true
+    },
+    "StudentApplicationDocumentBinding": {
       "owner": "student",
       "required": true
     },
@@ -959,6 +999,10 @@
       "owner": "student",
       "required": true
     },
+    "StudentSupportOwnerReadObservation": {
+      "owner": "student",
+      "required": true
+    },
     "StudentTimelineEntry": {
       "owner": "student",
       "required": true
@@ -972,6 +1016,10 @@
       "required": true
     },
     "StudentToolExecutionRecord": {
+      "owner": "student_tools",
+      "required": true
+    },
+    "StudentToolTestDiscoveryLink": {
       "owner": "student_tools",
       "required": true
     },
@@ -1040,6 +1088,18 @@
       "required": true
     },
     "UniversityProgramCampus": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityProgramIntake": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityProgramStudyLanguage": {
+      "owner": "universities",
+      "required": true
+    },
+    "UniversityProgramStudyProfile": {
       "owner": "universities",
       "required": true
     },

@@ -14,7 +14,7 @@ import { CrossModuleIntegrityRouter } from '../../presentation/api/router/CrossM
 import { CertificateVerificationPolicy, VaultTransitCertificateSignatureService, HttpCertificateAuthorityResolver, CertificateArtifactReadinessProbe, CertificateArtifactRecovery, PrismaCertificateAuthorityDirectory } from '@manaratak/infrastructure';
 import { UniversityProgramWorkspaceUseCases } from '@manaratak/application';
 import { PrismaUniversityProgramWorkspaceGateway } from '@manaratak/infrastructure';
-import { UniversityProgramWorkspaceRouter } from '../../presentation/api/router/UniversityProgramWorkspaceRouter';
+import { UniversityProgramWorkspaceRouter } from '../../presentation/api/router/UniversityProgramWorkspaceRouter.js';
 import { SettingsGovernanceUseCases } from '@manaratak/application';
 import { PrismaSettingsGovernanceGateway } from '@manaratak/infrastructure';
 import { GovernanceApprovalUseCases } from '@manaratak/application';

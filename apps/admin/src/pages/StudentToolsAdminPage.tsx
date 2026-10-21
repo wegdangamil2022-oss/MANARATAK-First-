@@ -752,6 +752,8 @@ function ToolDetail({ toolKey }: { toolKey: string }) {
                 className={inputClass}
                 value={traceFilter}
                 onChange={(event) => {
+                  setExecutions({ data: [], total: 0, page: 1, pageSize: 25 });
+                  setAudit({ data: [], total: 0, page: 1, pageSize: 25 });
                   setTraceFilter(event.target.value);
                   setExecutionPage(1);
                   setAuditPage(1);

@@ -30,7 +30,9 @@ describe('audit investigation view model', () => {
 
   it('offers owner links only with the matching permission and escapes IDs', () => {
     expect(auditTargetLink('UNIVERSITY', 'uni/1', () => false)).toBeNull();
-    expect(auditTargetLink('UNIVERSITY', 'uni/1', permission => permission === 'admin:universities:manage')).toBe('/universities/uni%2F1');
+    // Unsafe slash IDs must never become admin navigation targets.
+    expect(auditTargetLink('UNIVERSITY', 'uni/1', permission => permission === 'admin:universities:manage')).toBeNull();
+    expect(auditTargetLink('UNIVERSITY', 'uni-1', permission => permission === 'admin:universities:manage')).toBe('/universities/uni-1');
     expect(auditTargetLink('IDENTITY', 'user&admin', () => true)).toBe('/identities?search=user%26admin');
     expect(auditTargetLink('UNKNOWN', '1', () => true)).toBeNull();
   });

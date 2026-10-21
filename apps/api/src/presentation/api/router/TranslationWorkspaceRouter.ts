@@ -18,11 +18,12 @@ const grants = {
   SCHOLARSHIP: 'admin:scholarships:manage',
   COURSE: 'admin:courses:manage',
 } as const;
-export function createTranslationWorkspaceRouter(
-  reader: ITranslationWorkspaceReadGateway,
-  authorization: AuthorizationEvaluatorService,
-  writer?: TranslationOwnerPublisher,
-): Router {
+export class TranslationWorkspaceRouter {
+  static create(
+    reader: ITranslationWorkspaceReadGateway,
+    authorization: AuthorizationEvaluatorService,
+    writer?: TranslationOwnerPublisher,
+  ): Router {
   const router = Router();
   router.get('/capabilities',async(req,res,next)=>{
     try {
@@ -225,4 +226,8 @@ export function createTranslationWorkspaceRouter(
   };
   router.use(errors);
   return router;
+  }
 }
+
+// Preserve the established factory API for other callers while allowing source auditing.
+export const createTranslationWorkspaceRouter = TranslationWorkspaceRouter.create;

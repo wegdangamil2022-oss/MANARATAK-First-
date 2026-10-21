@@ -2,7 +2,7 @@ import { Router, type RequestHandler } from 'express';
 import { ManageSearchUseCase, INTERNAL_SEARCH_SCOPE, type IPublicSearchGateway, type MfaUseCases } from '@manaratak/application';
 import type { AuthorizationEvaluatorService } from '@manaratak/domain';
 import type { ITokenProvider, ISessionManager, IPrincipalAccessValidator } from '@manaratak/core';
-import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory';
+import { SecurityMiddlewareFactory } from '../../security/SecurityMiddlewareFactory.js';
 import { z } from 'zod';
 
 const searchScalar = z.union([z.string().max(500), z.number().finite(), z.boolean(), z.null()]);
