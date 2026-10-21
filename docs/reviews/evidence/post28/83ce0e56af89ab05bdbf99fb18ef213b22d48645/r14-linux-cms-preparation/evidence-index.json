@@ -35,6 +35,11 @@
       "sha256": "82855219da5c7b95c48e4b21516d6791b773efd2e27d97503859f5001b1407fd"
     },
     {
+      "file": "fresh-import-candidate-ci.json",
+      "bytes": 1399,
+      "sha256": "7999f728ef25aa2185409e8efcafcdd64fccc519ed813802bc34f3b01f79847e"
+    },
+    {
       "file": "initial-profile-cleanup.json",
       "bytes": 78,
       "sha256": "f878942a0c69a0239bb87afb221d1d36093e61ca400d650cbaa2bfce6edee00e"
@@ -48,6 +53,11 @@
       "file": "locale-candidate-ci.json",
       "bytes": 1399,
       "sha256": "dbecbd8b92e1ebdcb90fc6ea6a54215610d279fa219399e1d0eccb4e6e223461"
+    },
+    {
+      "file": "locale-import-failure.json",
+      "bytes": 780,
+      "sha256": "2dbb2454ff5709d6a9fa7e9dbe62b122ba9bd5878c0bcc00c8b4d37eb3a725c9"
     },
     {
       "file": "native-profile-cleanup.json",

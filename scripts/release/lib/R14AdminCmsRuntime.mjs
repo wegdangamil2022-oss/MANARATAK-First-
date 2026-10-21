@@ -110,7 +110,9 @@ export async function exerciseR14AdminCms({ browser, origin, db, fixture, proof,
       await open(publisher, locale); await action(publisher, content.id, 'أرشفة', 'archive'); await publicPage.goto(origin + '/admin/login'); await publicPage.goBack();
       assert(!(await publicPage.locator('body').innerText()).includes(body)); assert.equal((await publicPage.reload()).status(), 404);
       const missing = webPage.waitForResponse(result => new URL(result.url()).pathname === '/api/v1/public/cms/content/' + fixture.slug && result.status() === 404);
-      await webPage.reload(); await missing; await webPage.getByRole('heading', { name: title, exact: true }).waitFor({ state: 'hidden' });
+      // A disabled locale can already have reached the fallback page after its
+      // Arabic owner returned 404. Reloading that page never requests the article.
+      await webPage.goto(origin + '/' + locale + '/articles/' + fixture.slug); await missing; await webPage.getByRole('heading', { name: title, exact: true }).waitFor({ state: 'hidden' });
       assert(!(await webPage.locator('body').innerText()).includes(body));
       assert.equal((await owner()).status, 404);
       assert.equal(await db.cmsPublishedContent.count({ where: { contentId: content.id, locale, status: 'PUBLISHED' } }), 0);

@@ -2,7 +2,7 @@
   "kind": "POST28_R14_NO_GO_PREPARATION",
   "localDate": "2026-10-21",
   "reviewSha": "83e210e0eb9505c875129948bd52171986f458b3",
-  "candidateSourceSha": "d927710984de2fb7ffbf56e71cd742eaeb44536a",
+  "candidateSourceSha": "81666a9535f2516529372fd70077e1ea46564df8",
   "branch": "feat/post28-r07-artifact-preparation",
   "releaseDecision": "NO_GO",
   "decisionScope": "PREPARATION_MEMO_NOT_PRODUCTION_AUTHORIZATION",
@@ -32,51 +32,51 @@
     "R13-E05"
   ],
   "candidateCi": {
-    "sourceSha": "d927710984de2fb7ffbf56e71cd742eaeb44536a",
-    "runId": 39628696516,
+    "sourceSha": "81666a9535f2516529372fd70077e1ea46564df8",
+    "runId": 39631278019,
     "status": "completed",
     "result": "failure",
     "allSixJobsSucceeded": false,
-    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39628696516",
-    "observedAt": "2026-10-21T16:00:17.479Z",
+    "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39631278019",
+    "observedAt": "2026-10-21T16:29:39.412Z",
     "jobs": [
       {
-        "id": 119320728225,
-        "name": "Full source closure gates",
-        "status": "completed",
-        "conclusion": "success",
-        "currentOrFailedSteps": []
-      },
-      {
-        "id": 119320728625,
-        "name": "Deployment configuration",
-        "status": "completed",
-        "conclusion": "success",
-        "currentOrFailedSteps": []
-      },
-      {
-        "id": 119320728649,
-        "name": "Translation quality gates",
-        "status": "completed",
-        "conclusion": "success",
-        "currentOrFailedSteps": []
-      },
-      {
-        "id": 119320728739,
+        "id": 119329803771,
         "name": "R08 isolated Redis and Linux worker shutdown",
         "status": "completed",
         "conclusion": "success",
         "currentOrFailedSteps": []
       },
       {
-        "id": 119326626813,
+        "id": 119329804187,
+        "name": "Deployment configuration",
+        "status": "completed",
+        "conclusion": "success",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119329804339,
+        "name": "Full source closure gates",
+        "status": "completed",
+        "conclusion": "success",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119329804340,
+        "name": "Translation quality gates",
+        "status": "completed",
+        "conclusion": "success",
+        "currentOrFailedSteps": []
+      },
+      {
+        "id": 119335739662,
         "name": "Retrieve and verify immutable artifacts from Actions storage",
         "status": "completed",
         "conclusion": "success",
         "currentOrFailedSteps": []
       },
       {
-        "id": 119326814171,
+        "id": 119335901750,
         "name": "Linux x64 review image and native runtime",
         "status": "completed",
         "conclusion": "failure",
@@ -85,7 +85,7 @@
         ]
       }
     ],
-    "evidence": "docs/reviews/evidence/post28/83ce0e56af89ab05bdbf99fb18ef213b22d48645/r14-linux-cms-preparation/locale-candidate-ci.json"
+    "evidence": "docs/reviews/evidence/post28/83ce0e56af89ab05bdbf99fb18ef213b22d48645/r14-linux-cms-preparation/fresh-import-candidate-ci.json"
   },
   "nextFunctionalStep": "UNIFIED_EXACT_SHA_LINUX_ADMIN_CMS_AND_SCOPED_ROLLBACK_WITH_RETAINED_ARTIFACTS",
   "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
@@ -235,15 +235,15 @@
     "runtimeSourceUnchangedAfterInventoryFix": true
   },
   "latestAdminCmsLinuxDiagnostic": {
-    "sourceSha": "282a7aa791cb1363f8a0cc29ee661fb3acf5cb9e",
+    "sourceSha": "81666a9535f2516529372fd70077e1ea46564df8",
     "passed": false,
     "scope": "LINUX_X64_NODE22_PG16_SAME_SHA_BUILT_API_WEB_ADMIN_THREE_ACTOR_MFA_AR_EN",
     "cleanupPassed": true,
-    "drainMilliseconds": 153,
+    "drainMilliseconds": 120,
     "allActorSessionsRevoked": false,
     "requestBudget": null,
     "report": "docs/remediation/POST28_R14_LINUX_CMS_2026-10-21.md",
-    "evidence": "docs/reviews/evidence/post28/282a7aa791cb1363f8a0cc29ee661fb3acf5cb9e/r14-linux-cms-runtime/evidence-index.json",
+    "evidence": "docs/reviews/evidence/post28/81666a9535f2516529372fd70077e1ea46564df8/r14-linux-cms-runtime/evidence-index.json",
     "formalAcceptance": false
   },
   "repetitionScope": "Affected local profile and boundary tests plus automatic full source CI after tooling commits; no manual repeat of unaffected local R05-R13 suites",

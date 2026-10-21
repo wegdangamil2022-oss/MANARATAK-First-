@@ -49,3 +49,10 @@
 تعطيل الإنجليزية استثناء قبول رسمي باقٍ: لا يمنع تشغيل المختبر العربي أو سير التحرير الإنجليزي، ويمنع وصف الإصدار العام بأنه ثنائي اللغة مكتمل. فتحها يحتاج إكمال جاهزية النصوص ومراجعة بوابة اللغة؛ لا تُفعّل قيمة readiness لتجاوز فحص.
 
 توقف CI39628696516 قبل إنشاء مختبر CMS لأن استيراد `@manaratak/shared` طلب shared/dist غير المبني في وظيفة Linux المستقلة. وظيفة المصدر واسترجاع الحزم وبقية الوظائف الخمس نجحت؛ لا ملف نتيجة CMS لهذا المصدر. صُحح الاستيراد إلى ملف سياسة readiness.ts مباشرة عبر tsx الموجود، ونجح تحميل الوحدة والتحقق من قائمة ar محليًا دون بناء shared أو تغيير السياسة. الدليل يحتفظ بخطأ الاستيراد وحده، دون سجل environment. هذه معالجة أداة تشغيل؛ لا تُسجل نجاح رحلة المتصفح حتى فحص المرشح اللاحق.
+## Follow-up: explicit article navigation after disabled-locale fallback
+
+CI 39631278019 at source 81666a9535f2516529372fd70077e1ea46564df8 completed five jobs successfully. The Linux CMS journey failed its final response wait, so its retained result remains `passed: false`. API observations show real Arabic and English editorial publish and archive responses of 200, author approval denials of 403, and Arabic withdrawal responses of 404. These observations do not replace the failed end-to-end result.
+
+The disabled English route had already redirected to the Arabic fallback. Reloading the resulting fallback page did not request the article again, so the diagnostic waited for an event that navigation could not produce. The corrected check explicitly navigates to the original localized article URL before requiring the owner response of 404 and absence of the published heading/body. No assertion, locale policy, MFA freshness, server rate limit, or product guard was relaxed. Two directly related profile/locale tests and the helper lint passed; the full browser journey still requires the subsequent Linux run.
+
+The failed lab shut down cleanly: API exit 0, drain 120 ms, owned API/PostgreSQL containers and network removed, no existing database touched. Artifact bytes were verified before extraction. Formal R14 acceptance and production authorization remain false.
