@@ -107,7 +107,7 @@
 .mn-student-workspace .mn-student-summary-header-link,
 .mn-student-workspace .mn-student-summary-header-link span {
   font-family: 'Cairo', sans-serif !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
   line-height: 18px !important;
   -webkit-text-size-adjust: 100%;
@@ -131,6 +131,19 @@
   min-height: 32px;
   padding: 6px 12px;
   white-space: nowrap;
+}
+
+/* Only the recent-activity records toggle: reduce the visible button box.
+ * Leave the other summary actions and section titles unchanged.
+ */
+.mn-student-workspace button[aria-controls='student-summary-activity-timeline'] {
+  box-sizing: border-box;
+  min-height: 28px !important;
+  height: 28px;
+  padding: 2px 6px !important;
+  gap: 4px;
+  border-radius: 6px;
+  font-family: 'Cairo', sans-serif !important;
 }
 
 /* Summary section titles: gold line immediately touching the title box,
