@@ -2469,6 +2469,8 @@ export const en = {
   "public_published_apply_for_scholarship": "Apply for scholarship",
   "public_published_participating_universities": "Participating universities",
   "public_published_required_exams": "Required exams",
+  "public_view_linked_test": "View linked test",
+  "public_requirements_partial": "Some linked requirements are unavailable. Check the official scholarship source before applying.",
   "public_published_scholarship_notes": "Scholarship notes",
   "public_tool_smart": "Smart tool",
   "public_tool_calculator": "Calculator",

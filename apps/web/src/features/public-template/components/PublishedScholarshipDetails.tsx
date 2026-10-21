@@ -46,7 +46,12 @@ export function PublishedScholarshipDetails({ scholarship, onOpenUniversity, onO
   const documents = dto.requiredDocumentItems || [];
   const benefits = dto.benefits || [];
   const list = (items: string[]) => items.length ? <ul className="space-y-2">{items.map((item, index) => <li key={index} className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)]"><Text value={item} /></li>)}</ul> : <Text />;
+  const requirementList = (items: Array<{ key: string; text: string; testId?: string | null }>) => <ul className="space-y-2">{items.map(item => <li key={item.key} className="p-2.5 rounded-xl bg-[var(--mn-surface-muted)] border border-[var(--mn-border)]">
+    <Text value={item.text} />
+    {item.testId && onOpenExam && <button type="button" aria-label={`${publicT('public_view_linked_test')}: ${item.text}`} onClick={() => onOpenExam(item.testId!)} className="mt-2 rounded-lg border border-[var(--mn-border-brand)] p-2 text-[var(--mn-primary)]">{publicT('public_view_linked_test')}</button>}
+  </li>)}</ul>;
   return <div className="px-1.5 sm:px-2 space-y-2.5 z-20 relative -mt-2.5 sm:-mt-3">
+    {dto.hasUnavailableRequirements && <p role="status" className="rounded-xl border border-[var(--mn-border)] p-3 text-[var(--mn-heading)]">{publicT('public_requirements_partial')}</p>}
     {section('scholarship-donor', publicT('public_published_funding_organization'), Building2, <Text value={dto.providerName || dto.sponsorName} />)}
     {section('scholarship-country', publicT('public_published_country_and_scholarship_scope'), Globe, <><Text value={dto.studyCountryLabel || dto.countrySourceLabel || dto.studyCountry} />{dto.countryScope && <Text value={dto.countryScope} />}</>)}
     {section('scholarship-overview', publicT('public_published_scholarship_overview'), BookOpen, <Text value={dto.description || scholarship.description} />)}
@@ -62,10 +67,10 @@ export function PublishedScholarshipDetails({ scholarship, onOpenUniversity, onO
       {canonicalAmount && <p>{canonicalAmount}</p>}
       {dto.duration && <Text value={dto.duration} />}
     </>)}
-    {section('scholarship-eligibility', publicT('public_published_eligibility_and_admission_requirements'), ShieldCheck, eligibility.length ? list(eligibility.map(item => [item.valueText || item.itemTypeCode, item.countryLabel, item.countryLabel ? item.operatorCode : undefined,
+    {section('scholarship-eligibility', publicT('public_published_eligibility_and_admission_requirements'), ShieldCheck, eligibility.length ? requirementList(eligibility.map((item, index) => ({ key: item.itemKey || `eligibility-${index}`, testId: item.internationalTestId, text: [item.valueText || item.itemTypeCode, item.countryLabel, item.countryLabel ? item.operatorCode : undefined,
       item.minimumValue != null ? publicT('public_minimum_value', { v0: item.minimumValue }) : '', item.maximumValue != null ? publicT('public_maximum_value', { v0: item.maximumValue }) : '',
-      item.isRequired === false ? publicT('public_published_optional') : ''].filter(Boolean).join(' — '))) : <Text value={dto.eligibilityCriteria} />)}
-    {section('scholarship-documents', publicT('public_published_required_documents'), FileText, documents.length ? list(documents.map(item => [item.displayName, item.description, item.isRequired === false ? publicT('public_published_optional') : ''].filter(Boolean).join(' — '))) : <Text value={dto.requiredDocuments} />)}
+      item.isRequired === false ? publicT('public_published_optional') : ''].filter(Boolean).join(' — ') }))) : <Text value={dto.eligibilityCriteria} />)}
+    {section('scholarship-documents', publicT('public_published_required_documents'), FileText, documents.length ? requirementList(documents.map((item, index) => ({ key: item.documentKey || `document-${index}`, testId: item.internationalTestId, text: [item.displayName, item.description, item.isRequired === false ? publicT('public_published_optional') : ''].filter(Boolean).join(' — ') }))) : <Text value={dto.requiredDocuments} />)}
     {section('scholarship-language', publicT('public_published_study_language'), Languages, list((dto.fundedProgramPairs ?? []).map(pair => `${pair.programName}: ${pair.studyLanguages?.map(item=>item.name).join('، ') || (language === 'ar' ? 'غير محددة' : 'Unspecified')}`)))}
     {section('scholarship-deadlines', publicT('public_published_deadlines_and_application_round'), Calendar, <>
       <Text value={scholarship.deadline || (dto.deadlineType === 'OPEN_ALL_YEAR' ? publicT('public_applications_accepted_throughout_the_year') : undefined)} />

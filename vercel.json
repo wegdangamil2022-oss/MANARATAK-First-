@@ -2,8 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "main": true,
-      "feat/post28-r07-artifact-preparation": false
+      "main": false,
+      "feat/post28-r07-artifact-preparation": false,
+      "fix/relationship-audit-20261022": false
     }
   },
   "rewrites": [

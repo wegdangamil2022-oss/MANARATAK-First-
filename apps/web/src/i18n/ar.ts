@@ -2469,6 +2469,8 @@ export const ar = {
   "public_published_apply_for_scholarship": "التقديم للمنحة",
   "public_published_participating_universities": "الجامعات المشاركة",
   "public_published_required_exams": "الاختبارات المطلوبة",
+  "public_view_linked_test": "عرض الاختبار المرتبط",
+  "public_requirements_partial": "بعض المتطلبات المرتبطة غير متاحة حاليًا؛ راجع المصدر الرسمي للمنحة قبل التقديم.",
   "public_published_scholarship_notes": "ملاحظات المنحة",
   "public_tool_smart": "أداة ذكية",
   "public_tool_calculator": "حسابية",

@@ -19,7 +19,7 @@ const hash = (bytes: Uint8Array | string) => createHash('sha256').update(bytes).
 const json = (value: unknown) => JSON.stringify(value, null, 2) + '\n';
 const jsonl = (rows: readonly unknown[]) => rows.map(row => JSON.stringify(row)).join('\n') + '\n';
 const text = (value: unknown) => String(value ?? '').trim();
-type Dataset = { datasetId: string; entityType: string; sourcePath: string; sha256: string; importOrder: number; recordCount: number };
+type Dataset = { datasetId: string; entityType: string; sourcePath: string; sha256: string; importOrder: number; recordCount: number; declaredImportedCount?: number | null };
 
 /** Offline source derivation only. No HTTP, Prisma, mutation gateway or DB env. */
 export async function prepareSourceQuality(rootInput: string) {
@@ -140,7 +140,8 @@ export async function prepareSourceQuality(rootInput: string) {
   const laterById = new Map(laterRows.map(row => [row.sourceReferenceId, row]));
 
   const scholarshipDataset = dataset('SCHOLARSHIP');
-  const scholarships = reconcileScholarshipGuide(read(scholarshipDataset.sourcePath, scholarshipDataset.sha256).toString('utf8'), scholarshipDataset.sha256, 359);
+  if (scholarshipDataset.declaredImportedCount === undefined) throw new Error('SOURCE_QC_SCHOLARSHIP_DECLARED_COUNT_REQUIRED');
+  const scholarships = reconcileScholarshipGuide(read(scholarshipDataset.sourcePath, scholarshipDataset.sha256).toString('utf8'), scholarshipDataset.sha256, scholarshipDataset.declaredImportedCount);
   const courseRows: CourseSourceRow[] = [];
   for (const source of manifest.datasets.filter(item => item.entityType === 'COURSE').sort((a, b) => a.importOrder - b.importOrder)) {
     const bytes = read(source.sourcePath, source.sha256);

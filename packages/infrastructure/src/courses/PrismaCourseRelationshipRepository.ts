@@ -790,6 +790,7 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         some: {
           taxonomyNodeId: filters.taxonomyNodeId,
           reviewState: 'APPROVED',
+          taxonomyNode: { is: { status: 'ACTIVE' } },
         },
       };
     }
@@ -814,6 +815,13 @@ export class PrismaCourseRelationshipRepository implements ICourseRelationshipRe
         some: {
           internationalTestId: filters.internationalTestId,
           reviewState: 'APPROVED',
+          internationalTest: { is: {
+            isPubliclyVisible: true,
+            status: { notIn: ['ARCHIVED', 'REJECTED'] },
+            currentPublishedVersion: { is: {
+              status: 'PUBLISHED', testId: filters.internationalTestId,
+            } },
+          } },
         },
       };
     }

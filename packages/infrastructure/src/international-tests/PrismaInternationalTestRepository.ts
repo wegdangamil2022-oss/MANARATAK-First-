@@ -257,6 +257,14 @@ export class PrismaInternationalTestRepository implements ITransactionalInternat
     return record ? this.publishedSnapshot(record) : null;
   }
 
+  async findPublishedById(id: string): Promise<InternationalTestDto | null> {
+    const record = await this.prisma.internationalTest.findFirst({
+      where: { id, isPubliclyVisible: true, status: { notIn: ['ARCHIVED', 'REJECTED'] } },
+      select: { id: true, currentPublishedVersionId: true },
+    });
+    return record ? this.publishedSnapshot(record) : null;
+  }
+
   async findByDedupKey(key: string): Promise<InternationalTestDto | null> {
     const record = await this.prisma.internationalTest.findUnique({
       where: { canonicalDedupKey: key },

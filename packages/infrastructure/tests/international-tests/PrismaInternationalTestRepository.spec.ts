@@ -139,6 +139,27 @@ describe('PrismaInternationalTestRepository', () => {
     );
   });
 
+  it('reads a canonical reference from its immutable publication without loading the admin entity', async () => {
+    mockPrisma.internationalTest.findFirst.mockResolvedValue({ id: 'test', currentPublishedVersionId: 'release' });
+    mockPrisma.$queryRaw.mockResolvedValue([{ payload: { id: 'test', status: 'PUBLISHED', displayName: 'Frozen TOEFL' } }]);
+    expect(await repository.findPublishedById('test')).toMatchObject({ id: 'test', displayName: 'Frozen TOEFL' });
+    expect(mockPrisma.internationalTest.findFirst).toHaveBeenCalledWith({
+      where: { id: 'test', isPubliclyVisible: true, status: { notIn: ['ARCHIVED', 'REJECTED'] } },
+      select: { id: true, currentPublishedVersionId: true },
+    });
+    expect(mockPrisma.internationalTest.findUnique).not.toHaveBeenCalled();
+    const sql = mockPrisma.$queryRaw.mock.calls[0][0];
+    expect(sql.text).toContain('v."testId"=s."testId"');
+    expect(sql.values).toContain('test');
+  });
+
+  it('refuses a canonical reference without a valid owner publication snapshot', async () => {
+    mockPrisma.internationalTest.findFirst.mockResolvedValue({ id: 'test', currentPublishedVersionId: 'foreign-version' });
+    mockPrisma.$queryRaw.mockResolvedValue([]);
+    expect(await repository.findPublishedById('test')).toBeNull();
+    expect(mockPrisma.internationalTest.findUnique).not.toHaveBeenCalled();
+  });
+
   it('should persist root canonical relationships into normalized nested writes', async () => {
     mockPrisma.internationalTest.create.mockResolvedValue({
       id: 'test-rel',

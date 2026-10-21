@@ -13,6 +13,7 @@ import { usePublicRelationshipGraph } from './usePublicRelationshipGraph';
 import { ApiClient, type StablePublicGraphIdentity } from '../../api/client';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { mapPublicScholarshipDto } from './publicScholarshipDataSource';
+import { loadPublishedTestReference } from './publishedTestReference';
 import {
   mapArticle, mapCareer, mapCountry, mapCourse, mapExam, mapPublicMajorDto, mapPublicUniversityDto, mapService,
 } from './publicLiveDataSource';
@@ -537,6 +538,41 @@ export default function App() {
   const byIdentity = <T extends { id: string; publicId?: string; slug?: string; ownerId?: string }>(items: T[], identity: string): T | undefined =>
     items.find((item) => item.id === identity || item.publicId === identity || item.slug === identity || item.ownerId === identity);
 
+  const testNavigationRequest = useRef(0);
+  const [testNavigationUnavailable, setTestNavigationUnavailable] = useState(false);
+  useEffect(() => {
+    testNavigationRequest.current += 1;
+    setTestNavigationUnavailable(false);
+  }, [selectedScholarship, selectedUniversity, selectedMajor, selectedCourse, selectedImportedCourse, selectedExam, selectedArticle, selectedCategory, countryNavigationName, activeTab, language, publicDataMode]);
+  useEffect(() => () => { testNavigationRequest.current += 1; }, []);
+
+  const openPublishedExamByIdentity = async (identity: string) => {
+    const requestId = ++testNavigationRequest.current;
+    setTestNavigationUnavailable(false);
+    try {
+      const exam = publicDataMode === 'prototype'
+        ? byIdentity(exams, identity)
+        : mapExam(await loadPublishedTestReference(
+          byIdentity(exams, identity)?.ownerId || identity,
+          id => ApiClient.getInternationalTestById(id, language),
+        ));
+      if (!exam || requestId !== testNavigationRequest.current) return;
+      setCountryNavigationName('');
+      setSelectedScholarship(null);
+      setSelectedUniversity(null);
+      setSelectedMajor(null);
+      setSelectedArticle(null);
+      setSelectedImportedCourse(null);
+      setSelectedCourse(null);
+      setSelectedExam(exam);
+      setActiveTab('search');
+      setSelectedCategory('exams');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } catch {
+      if (requestId === testNavigationRequest.current) setTestNavigationUnavailable(true);
+    }
+  };
+
   const graphIdentityTarget = <T extends { id: string; publicId?: string; slug?: string; ownerId?: string },
   >(
     items: T[],
@@ -1046,6 +1082,11 @@ export default function App() {
         {cycleIntent.cycles.map(c=><button type="button" className="block border rounded p-2" key={c.id} disabled={cycleBusy} onClick={()=>{setCycleBusy(true);void ApiClient.createMyStudentApplicationTracker({...cycleIntent.input,cycleId:c.id}).then(finishCycleTracking).catch(error=>triggerInstantPush({title:t('public_template_tracker_error'),body:error instanceof Error?error.message:t('public_template_retry'),type:'system'})).finally(()=>setCycleBusy(false));}}>{applicationCycleLabel(c.cycleKey,language==='en'?'en':'ar')}</button>)}
         <button type="button" disabled={cycleBusy} onClick={()=>setCycleIntent(null)}>{language==='en'?'Cancel':'إلغاء'}</button>
       </div></div>}
+      {testNavigationUnavailable && (
+        <p role="alert" className="px-4 py-2 text-sm bg-amber-50 text-amber-900">
+          {t('public_detailed_content_is_currently_unavailable_in_this_release')}
+        </p>
+      )}
       {(publicGraph.error ||
         publicGraph.stale ||
         publicGraph.partial ||
@@ -1228,16 +1269,8 @@ export default function App() {
               setSelectedMajor(major);
               window.scrollTo({ top: 0, behavior: 'instant' });
             }}
-            onOpenExam={(id) => {
-              const exam = exams.find((item) => item.id === id);
-              if (!exam) return;
-              setSelectedArticle(null);
-              setSelectedScholarship(null);
-              setSelectedUniversity(null);
-              setSelectedMajor(null);
-              setSelectedImportedCourse(null);
-              setSelectedExam(exam);
-              window.scrollTo({ top: 0, behavior: 'instant' });
+            onOpenExam={(examId) => {
+              void openPublishedExamByIdentity(examId);
             }}
             onOpenCourse={(id) => {
               const course = importedCourses.find((item) => item.id === id);
@@ -1284,13 +1317,7 @@ export default function App() {
               setActiveTab('search');
             }}
             onOpenExam={(examId) => {
-              const exam = byIdentity(exams, examId);
-              if (!exam) return;
-              setSelectedScholarship(null);
-              setSelectedUniversity(null);
-              setSelectedMajor(null);
-              setSelectedExam(exam);
-              window.scrollTo({ top: 0, behavior: 'instant' });
+              void openPublishedExamByIdentity(examId);
             }}
             onOpenScholarship={(scholarshipId) => {
               const related = byIdentity(scholarships, scholarshipId);
@@ -1353,13 +1380,7 @@ export default function App() {
               window.scrollTo({ top: 0, behavior: 'instant' });
             }}
             onOpenExam={(examId) => {
-              const exam = byIdentity(exams, examId);
-              if (!exam) return;
-              setSelectedUniversity(null);
-              setSelectedScholarship(null);
-              setSelectedMajor(null);
-              setSelectedExam(exam);
-              window.scrollTo({ top: 0, behavior: 'instant' });
+              void openPublishedExamByIdentity(examId);
             }}
             onOpenArticle={(articleId) => {
               const article = articles.find((item) => item.id === articleId);
@@ -1514,14 +1535,7 @@ export default function App() {
               window.scrollTo({ top: 0, behavior: 'instant' });
             }}
             onOpenExam={(examId) => {
-              const exam = byIdentity(exams, examId);
-              if (!exam) return;
-              setSelectedImportedCourse(null);
-              setSelectedMajor(null);
-              setSelectedUniversity(null);
-              setSelectedScholarship(null);
-              setSelectedExam(exam);
-              window.scrollTo({ top: 0, behavior: 'instant' });
+              void openPublishedExamByIdentity(examId);
             }}
           />
         ) : selectedExam ? (
@@ -1898,14 +1912,7 @@ export default function App() {
                   void openPublishedMajorByIdentity(majorId);
                 }}
                 onOpenExam={(examId) => {
-                  const exam = exams.find((item) => item.id === examId);
-                  if (!exam) return;
-                  setCountryNavigationName('');
-                  setSelectedUniversity(null);
-                  setSelectedScholarship(null);
-                  setSelectedMajor(null);
-                  setSelectedExam(exam);
-                  window.scrollTo({ top: 0, behavior: 'instant' });
+                  void openPublishedExamByIdentity(examId);
                 }}
                 onOpenArticle={(articleId) => {
                   const article = articles.find((item) => item.id === articleId);

@@ -379,7 +379,10 @@ export type PublicScholarshipDto = Omit<
   | 'sourceEvidence'
   | 'metadata'
   | 'notes'
->;
+> & {
+  /** Some owner-linked requirements are unavailable; no private target identities are exposed. */
+  hasUnavailableRequirements?: boolean;
+};
 
 export interface PublishedProgramScholarshipIdentity {id:string;publicId:string;slug:string;displayName:string;localizedNames?:Record<string,string>;}
 export interface PublishedProgramScholarshipPage {data:PublishedProgramScholarshipIdentity[];total:number;hasMore:boolean;nextCursor:string|null;}

@@ -1,5 +1,7 @@
 # Cross-Phase Relationship Closure Matrix
 
+> **2026-10-22 source review:** [complete declared-model inventory, owner trace and scoped navigation fixes](../reviews/RELATIONSHIP_ARCHITECTURE_REVIEW_2026-10-22.md). P12 requirement → P09 navigation now has a canonical-ID public snapshot read independent of catalog pagination; P13 test/taxonomy filters retain current owner visibility, and incomplete requirements have an explicit safe availability signal. This is source evidence, not blanket runtime closure. Database migrations/imports are paused by the owner's latest instruction pending the new scholarship file and review.
+
 > **Current checkpoint (2026-10-15 / B14):** [P01–P24 source/verification/runtime/production](ARCHITECTURAL_SECURITY_PHASE_STATUS_2026-10-15.md) and [approved finding dispositions](ARCHITECTURAL_SECURITY_CLOSURE_REGISTER_2026-10-15.json) supersede old progress summaries for their scope. The relationship rows below retain their scoped evidence and deferred limits; this reconciliation does not promote them to runtime or production acceptance. Section27/28 remain explicitly open.
 
 **Status:** ACTIVE — SOURCE_REBASELINED / RUNTIME_EVIDENCE_PENDING  

@@ -42,4 +42,13 @@ export class LocalizedInternationalTestPublicUseCases {
     }
     return this.projection.projectInternationalTest(publicInternationalTest(test), locale);
   }
+
+  public async getPublishedById(
+    id: string,
+    locale: SupportedLocale = DEFAULT_LOCALE,
+  ): Promise<InternationalTestDto> {
+    const test = await this.repository.findPublishedById?.(id);
+    if (!test || test.id !== id) throw new Error('International test not found');
+    return this.projection.projectInternationalTest(publicInternationalTest(test), locale);
+  }
 }

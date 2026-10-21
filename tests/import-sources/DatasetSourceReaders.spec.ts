@@ -20,11 +20,18 @@ describe('staged Markdown dataset readers', () => {
       .toThrow('UNIVERSITY_STAGE34_ID_MISMATCH');
   });
 
-  it('selects only explicitly imported scholarship records from the mixed guide', () => {
-    const records = readScholarshipMasterGuide(source('workspace/import-sources/scholarships/MANARATAK_Scholarship_Import_Master_Guide_v3.21(1).md'));
-    expect(records).toHaveLength(514);
-    expect(new Set(records.map(record => record.sourceRecordId)).size).toBe(514);
-    expect(records.filter(record => record.explicitlyImported)).toHaveLength(349);
+  it('preserves the 947 degree scholarship identities and source screening states', () => {
+    const raw = source('workspace/import-sources/scholarships/MANARATAK_Degree_Scholarships_Master_v6_6_2027_Audit_001_010_947.md');
+    const records = readScholarshipMasterGuide(raw);
+    expect(records).toHaveLength(947);
+    expect(new Set(records.map(record => record.sourceRecordId)).size).toBe(947);
+    expect(records.filter(record => record.explicitlyImported)).toHaveLength(703);
+    expect(records.filter(record => !record.explicitlyImported)).toHaveLength(244);
+    expect(records.filter(record => Object.keys(record.fields).length === 12)).toHaveLength(900);
+    expect(records.filter(record => Object.keys(record.fields).length === 13)).toHaveLength(47);
+    expect(records[0]?.sourceRecordId).toBe('SCH-OC-0006');
+    expect(records[946]?.sourceRecordId).toBe('SCH-CN-420-444-0947');
+    expect(raw.slice(raw.indexOf('### منحة رقم 0001'))).toBe(records.map(record => record.rawContent).join(''));
     expect(records.filter(record => record.explicitlyImported).every(record =>
       Boolean(record.fields['1. اسم المنحة'] && record.fields['2. الجهة المانحة']))).toBe(true);
   });

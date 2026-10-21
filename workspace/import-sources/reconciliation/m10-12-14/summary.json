@@ -25,20 +25,16 @@
     }
   },
   "scholarships": {
-    "artifactHash": "bcca756349fc16873ea9758f95708c8b1d5b11a9a1c35a7b44c2b2d02854c337",
-    "totalSections": 514,
-    "uniqueSourceIds": 514,
+    "artifactHash": "f09c81d8a58c79ff05ef69a6009d181e31fe34d37f2c010ee566cd77e22902fd",
+    "totalSections": 947,
+    "uniqueSourceIds": 947,
     "counts": {
-      "EXPLICIT_IMPORTED_CANDIDATE": 349,
-      "REVIEW": 2,
-      "EXCLUDED": 1,
-      "UNMARKED": 156,
-      "MERGED_DUPLICATE": 5,
-      "CONTROL_ONLY": 1
+      "EXPLICIT_IMPORTED_CANDIDATE": 703,
+      "UNKNOWN_MARKER": 244
     },
-    "declaredImportedCount": 359,
-    "explicitImportedCandidates": 349,
-    "summaryDifference": 10,
+    "declaredImportedCount": null,
+    "explicitImportedCandidates": 703,
+    "summaryDifference": null,
     "differencePolicy": "SUMMARY_IS_NOT_RECORD_EVIDENCE; NO_SYNTHETIC_RECORDS; UNMARKED_AND_UNKNOWN_REMAIN_HELD",
     "databaseWrites": 0,
     "runtime": "RUNTIME_UNTESTED"
