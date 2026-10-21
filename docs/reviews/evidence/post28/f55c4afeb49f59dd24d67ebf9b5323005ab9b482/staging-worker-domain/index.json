@@ -1,0 +1,38 @@
+{
+  "sourceSha": "f55c4afeb49f59dd24d67ebf9b5323005ab9b482",
+  "scope": "REAL_CERTIFICATE_ISSUANCE_OUTBOX_REDELIVERY_AFTER_EFFECT_FAILURE_NO_PROCESS_CRASH_OR_PDF_RENDER",
+  "fullProfileAcceptance": false,
+  "productionAuthorized": false,
+  "files": [
+    {
+      "file": "result.json",
+      "bytes": 374,
+      "sha256": "7603ff794d1890c9ba751c18402d4e444bbc18c0e116fe953616b4bca4734fcc"
+    },
+    {
+      "file": "setup.json",
+      "bytes": 5157,
+      "sha256": "45b0f805b250ffde6eb2672d24817e698ec8f5e2bb8a2331beee846f3c319a70"
+    },
+    {
+      "file": "discovery.json",
+      "bytes": 5391,
+      "sha256": "dc11626fd858e03342680c515165ba458ed2cdddf016ad163a0a600502b7177f"
+    },
+    {
+      "file": "selection.json",
+      "bytes": 285,
+      "sha256": "7f6c5cc04aed85d8616230dff1b916d75bb77ba87caf7dd9fd24ffdc4298e9ed"
+    },
+    {
+      "file": "summary.json",
+      "bytes": 1404,
+      "sha256": "7b605caeff13f85596c02886ae2cb77c1287a2f5c91375cc5163a57594573abe"
+    },
+    {
+      "file": "vitest.json",
+      "bytes": 7590,
+      "sha256": "5109475039a5b6bf78bcdf1f8c138d97f5c02869ea0033dc16245f2aa05ed962"
+    }
+  ]
+}

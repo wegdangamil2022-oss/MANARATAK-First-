@@ -22,7 +22,7 @@ jobs:
   r08-runtime-diagnostics:
     name: R08 isolated Redis and Linux worker shutdown
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -238,8 +238,19 @@ jobs:
       - name: Verify rich text sanitization in Chromium without external requests
         if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
         run: node scripts/security/verify-cms-rich-text-browser.mjs "$RUNNER_TEMP/r07-linux/cms-rich-text-proof.json"
-      - name: Retrieve the independently reviewed previous rollback artifacts
+      - name: Record whether the pinned rollback pair remains eligible before creating its lab
+        id: rollback-eligibility
         if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        run: node scripts/release/assess-r14-rollback-eligibility.mjs "$RUNNER_TEMP/r14-rollback-eligibility/receipt.json" "$GITHUB_OUTPUT" "$GITHUB_STEP_SUMMARY"
+      - name: Retain rollback eligibility including an explicit blocked result
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: r14-rollback-eligibility-${{ github.sha }}
+          path: ${{ runner.temp }}/r14-rollback-eligibility/receipt.json
+          if-no-files-found: error
+      - name: Retrieve the independently reviewed previous rollback artifacts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation' && steps.rollback-eligibility.outputs.eligible == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -247,12 +258,12 @@ jobs:
           cp -a "$RUNNER_TEMP/r07-linux/artifacts" "$RUNNER_TEMP/r07-linux/linux-image-probe.json" "$RUNNER_TEMP/r14-rollback/"
           gh run download 39599847197 --repo "$GITHUB_REPOSITORY" -n "manaratak-release-artifacts-fb1a375eba5d09d3f7a01d5515270ed2cf011280" -D "$RUNNER_TEMP/r14-rollback/previous-artifacts"
       - name: Exercise scoped Linux API rollback and forward recovery with real signals
-        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation' && steps.rollback-eligibility.outputs.eligible == 'true'
         env:
           POST28_LINUX_RUNTIME_REVIEW: 'YES'
         run: node scripts/release/post28-linux-artifact-runtime.mjs "$RUNNER_TEMP/r14-rollback" --r14-rollback
       - name: Retain Linux rollback observations and cleanup without private lab files
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation' && steps.rollback-eligibility.outputs.eligible == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: r14-rollback-${{ github.sha }}

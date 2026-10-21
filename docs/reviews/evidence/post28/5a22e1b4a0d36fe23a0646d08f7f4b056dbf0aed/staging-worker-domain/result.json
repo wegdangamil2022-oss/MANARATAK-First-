@@ -1,0 +1,11 @@
+{
+  "sourceSha": "5a22e1b4a0d36fe23a0646d08f7f4b056dbf0aed",
+  "newIsolatedCluster": true,
+  "serverIdentity": "7699196553306742296",
+  "postgresMajor": 16,
+  "ordinaryRole": "post28_app",
+  "passed": true,
+  "stopped": true,
+  "existingDatabasesTouched": false,
+  "scope": "REAL_FINANCIAL_WORKER_SIGNED_LOOPBACK_NATURAL_DEADLINE_ACK_RETRY_NO_PROCESS_CRASH_OR_REAL_CHARGES"
+}

@@ -1,0 +1,19 @@
+{
+  "identity": {
+    "role": "post28_app",
+    "server_id": "7699195020503299924"
+  },
+  "jobs": [
+    {
+      "status": "FAILED",
+      "attempt": 2,
+      "lastErrorCode": "BACKGROUND_JOB_HANDLER_FAILED",
+      "lastErrorText": "Cannot convert undefined to a BigInt"
+    }
+  ],
+  "aliasNames": [
+    "walletpaid",
+    "walletPaid"
+  ],
+  "readOnlyInspection": true
+}

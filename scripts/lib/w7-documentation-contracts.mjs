@@ -53,7 +53,8 @@ export function sourceCiBrowserBoundaryDeclared(text) {
   const gate="if: github.event_name == 'push' && github.ref == 'refs/heads/feat/post28-r07-artifact-preparation'";
   const runtimeSteps=steps.filter(step=>/post28-linux-artifact-runtime/.test(step));
   const permittedRuntime=step=>{
-    if(!step.split(/\r?\n/).some(line=>line.trim()===gate)
+    const requiredGate=step.includes(' --r14-rollback')?gate+" && steps.rollback-eligibility.outputs.eligible == 'true'":gate;
+    if(!step.split(/\r?\n/).some(line=>line.trim()===requiredGate)
       ||!/^          POST28_LINUX_RUNTIME_REVIEW: 'YES'\s*$/m.test(step))return false;
     const commands=step.split(/\r?\n/).filter(line=>/post28-linux-artifact-runtime/.test(line));
     if(commands.length!==1)return false;

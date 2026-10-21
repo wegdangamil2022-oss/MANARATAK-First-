@@ -1,0 +1,6 @@
+{
+  "caseExact": "Post28 actual synthetic certificate owner issuance and verification workflow > replays a real certificate worker delivery after a lost acknowledgement without duplicating issuance",
+  "fullDiscoveryCases": 15,
+  "selectedCases": 1,
+  "fullProfileAcceptance": false
+}

@@ -86,7 +86,7 @@
     "url": "https://github.com/wegdangamil2022-oss/MANARATAK-First-/actions/runs/39648892069",
     "evidence": "docs/reviews/evidence/post28/aaf932e17c10e71d37d7f69a50dfe1c20e7c4b1b/r14-linux-rollback/ci-observation.json"
   },
-  "nextFunctionalStep": "REMAINING_RELEASE_TARGET_PROVIDER_TRUST_AND_CAPACITY_GATES_NO_AUTOMATIC_GO",
+  "nextFunctionalStep": "BUILD_NEW_REPAIRED_RUNTIME_CANDIDATE_AND_OBSERVE_LINUX_WORKER_PROOFS_THEN_COMPLETE_ROUTE_RECOVERY_AND_TARGET_GATES",
   "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
   "latestAdminCmsLocalDiagnostic": {
     "completed": true,
@@ -362,5 +362,31 @@
       "conditional": "Only for public English release.",
       "requirement": "Editorial approval and public readiness source policy before enabling English. Arabic-only public profile remains supported."
     }
-  ]
+  ],
+  "latestSelectedWorkerDomainDiagnostics": {
+    "certificate": {
+      "sourceSha": "f55c4afeb49f59dd24d67ebf9b5323005ab9b482",
+      "passed": true,
+      "selectedCases": 1,
+      "totalDiscovered": 15
+    },
+    "finance": {
+      "sourceSha": "5a22e1b4a0d36fe23a0646d08f7f4b056dbf0aed",
+      "passed": true,
+      "selectedCases": 1,
+      "totalDiscovered": 5,
+      "runtimeRepair": "Quote walletPaid SQL alias in invoice reconciliation"
+    },
+    "runtime": "NEW_ISOLATED_NATIVE_POSTGRESQL_16_ORDINARY_ROLE",
+    "clustersStopped": true,
+    "existingDatabasesTouched": false,
+    "injectedFailure": "AFTER_REAL_DOMAIN_EFFECT_BEFORE_ACKNOWLEDGEMENT",
+    "processCrashDemonstrated": false,
+    "pdfRenderDemonstrated": false,
+    "linuxCiResult": "PENDING_NEW_PUSHED_SOURCE_OBSERVATION",
+    "fullWorkerAcceptance": false,
+    "report": "docs/remediation/POST28_STAGING_REAL_WORKER_DOMAINS_2026-10-21.md"
+  },
+  "currentRuntimeRequiresNewCandidate": true,
+  "pinnedRollbackPairCurrentStatus": "BLOCKED_RUNTIME_COMPATIBILITY_REVIEW_REQUIRED"
 }
