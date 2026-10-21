@@ -287,6 +287,37 @@
   outline-offset: 2px;
 }
 
+/* Career workspace: same Cairo hierarchy and icon/card identity as Summary,
+ * Opportunities, Learning, and Vault. Only affects the Career tab. */
+.mn-student-workspace .mn-student-career-page,
+.mn-student-workspace .mn-student-career-page :where(*) {
+  font-family: 'Cairo', sans-serif !important;
+}
+.mn-student-workspace .mn-student-career-heading {
+  display: inline-block;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border-bottom: 2px solid #D6A43B;
+  font-family: 'Cairo', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.22;
+  overflow-wrap: anywhere;
+}
+.mn-student-workspace .mn-student-career-section :where(input, textarea, select) {
+  font-family: 'Cairo', sans-serif !important;
+}
+.mn-student-workspace .mn-student-career-page :where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid #0E7C86;
+  outline-offset: 2px;
+}
+.mn-student-workspace .mn-student-career-section {
+  min-width: 0;
+}
+
 /* Scholarship application document details stay compact and legible with
  * Cairo typography. Only tools within the Opportunities tab are affected. */
 .mn-student-workspace .mn-student-opportunities-page .mn-student-documents-detail :where(p, label) {
