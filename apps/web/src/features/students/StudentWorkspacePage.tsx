@@ -2887,6 +2887,7 @@ function ServiceRequestsView({
   );
 }
 
+
 function VaultView({
   dashboard,
   hydratedSavedItems,
@@ -2906,47 +2907,47 @@ function VaultView({
   onMoveSavedItem: (itemId: string, collectionId: string | null) => void;
   onRemoveSavedItem: (item: StudentSavedItemDto) => void;
 }) {
-  const {language}=useTranslation();
-  const [typeFilter, setTypeFilter] = useState<'ALL' | string>('ALL');
-  const [collectionFilter, setCollectionFilter] = useState<'ALL' | 'UNCOLLECTED' | string>('ALL');
+  const { language } = useTranslation();
+  const [typeFilter, setTypeFilter] = useState('ALL');
+  const [collectionFilter, setCollectionFilter] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
-
-  const hydratedBySavedItemId = useMemo(() => {
-    return new Map(hydratedSavedItems.map((item) => [item.savedItem.id, item.owner]));
-  }, [hydratedSavedItems]);
 
   const savedItems = dashboard.savedItems;
   const collections = dashboard.collections;
-  useEffect(() => { if (collectionFilter !== 'ALL' && collectionFilter !== 'UNCOLLECTED' && !collections.some(collection => collection.id === collectionFilter)) setCollectionFilter('ALL'); }, [collections, collectionFilter]);
+  const hydratedBySavedItemId = useMemo(
+    () => new Map(hydratedSavedItems.map((item) => [item.savedItem.id, item.owner])),
+    [hydratedSavedItems],
+  );
 
-  const filteredItems = useMemo(() => {
-    return savedItems.filter((item) => {
-      if (typeFilter !== 'ALL' && item.entityType !== typeFilter) return false;
-      if (collectionFilter === 'UNCOLLECTED') {
-        if (item.collectionId) return false;
-      } else if (collectionFilter !== 'ALL') {
-        if (item.collectionId !== collectionFilter) return false;
-      }
-      return true;
-    });
-  }, [savedItems, typeFilter, collectionFilter]);
+  useEffect(() => {
+    if (collectionFilter !== 'ALL' && collectionFilter !== 'UNCOLLECTED' &&
+        !collections.some((collection) => collection.id === collectionFilter)) {
+      setCollectionFilter('ALL');
+    }
+  }, [collections, collectionFilter]);
+
+  const toolTitles: Record<string, string> = {
+    'gpa-calculator': 'حاسبة المعدل التراكمي',
+    'university-comparison': 'مقارنة الجامعات',
+    'motivation-letter-generator': 'خطاب الدافع',
+    'scholarship-recommendation': 'توصية المنح',
+  };
+  const getSavedTitle = (item: StudentSavedItemDto) => {
+    const owner = hydratedBySavedItemId.get(item.id);
+    return (item.entityType === 'STUDENT_TOOL' && owner?.visibility === 'STUDENT_PRIVATE'
+      ? (language === 'en' ? 'Retained private tool result' : 'نتيجة أداة محفوظة خاصة')
+      : owner?.displayName)
+      || item.displayName
+      || (item.entityType === 'STUDENT_TOOL' ? toolTitles[item.entitySlug ?? ''] : undefined)
+      || item.entityId;
+  };
 
   const typeCounts = useMemo(() => {
-    const counts: Record<string, number> = {
-      ALL: savedItems.length,
-      SCHOLARSHIP: 0,
-      UNIVERSITY: 0,
-      MAJOR: 0,
-      COURSE: 0,
-      STUDENT_TOOL: 0,
-    };
-    for (const item of savedItems) {
-      if (counts[item.entityType] !== undefined) {
-        counts[item.entityType]++;
-      } else {
-        counts[item.entityType] = (counts[item.entityType] || 0) + 1;
-      }
-    }
+    const counts: Record<string, number> = { ALL: savedItems.length };
+    savedItems.forEach((item) => {
+      counts[item.entityType] = (counts[item.entityType] || 0) + 1;
+    });
     return counts;
   }, [savedItems]);
 
@@ -2956,191 +2957,207 @@ function VaultView({
     { id: 'UNIVERSITY', label: 'الجامعات' },
     { id: 'MAJOR', label: 'التخصصات' },
     { id: 'COURSE', label: 'الدورات' },
-    {id:'INTERNATIONAL_TEST',label:'الاختبارات'},
-    {id:'CMS_CONTENT',label:'المقالات والمحتوى'},
-    {id:'SERVICE',label:'الخدمات'},
-    {id:'STUDENT_TOOL',label:'أدوات الطالب'},
+    { id: 'INTERNATIONAL_TEST', label: 'الاختبارات' },
+    { id: 'CERTIFICATE', label: 'الشهادات' },
+    { id: 'CMS_CONTENT', label: 'المقالات والمحتوى' },
+    { id: 'SERVICE', label: 'الخدمات' },
+    { id: 'STUDENT_TOOL', label: 'أدوات الطالب' },
   ];
+  const visibleTypes = supportedTypes.filter((type) =>
+    type.id === 'ALL' || (typeCounts[type.id] || 0) > 0 || type.id === typeFilter
+  );
 
-  function getEntityIcon(type: string) {
+  const filteredItems = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase();
+    return savedItems.filter((item) => {
+      if (typeFilter !== 'ALL' && item.entityType !== typeFilter) return false;
+      if (collectionFilter === 'UNCOLLECTED' && item.collectionId) return false;
+      if (collectionFilter !== 'ALL' && collectionFilter !== 'UNCOLLECTED' && item.collectionId !== collectionFilter) return false;
+      if (query && !getSavedTitle(item).toLocaleLowerCase().includes(query) &&
+          !arabicEntityType(item.entityType).toLocaleLowerCase().includes(query)) return false;
+      return true;
+    });
+  }, [savedItems, typeFilter, collectionFilter, searchQuery, hydratedBySavedItemId, language]);
+
+  const getEntityIcon = (type: string) => {
+    const iconStyle = 'h-4 w-4 text-[#E5B54F]';
     switch (type) {
-      case 'SCHOLARSHIP':
-        return <GraduationCap className="w-4 h-4 text-[#E5B54F]" />;
-      case 'UNIVERSITY':
-        return <Compass className="w-4 h-4 text-[#E5B54F]" />;
-      case 'MAJOR':
-        return <BookOpen className="w-4 h-4 text-[#E5B54F]" />;
-      case 'COURSE':
-        return <Clock3 className="w-4 h-4 text-[#E5B54F]" />;
-      case 'STUDENT_TOOL':
-        return <Sparkles className="w-4 h-4 text-[#E5B54F]" />;
-      default:
-        return <Star className="w-4 h-4 text-[#E5B54F]" />;
+      case 'SCHOLARSHIP': return <GraduationCap className={iconStyle} aria-hidden="true" />;
+      case 'UNIVERSITY': return <Compass className={iconStyle} aria-hidden="true" />;
+      case 'MAJOR': return <BookOpen className={iconStyle} aria-hidden="true" />;
+      case 'COURSE': return <Clock3 className={iconStyle} aria-hidden="true" />;
+      case 'INTERNATIONAL_TEST': return <ClipboardList className={iconStyle} aria-hidden="true" />;
+      case 'CERTIFICATE': return <Award className={iconStyle} aria-hidden="true" />;
+      case 'CMS_CONTENT': return <FileText className={iconStyle} aria-hidden="true" />;
+      case 'SERVICE': return <Receipt className={iconStyle} aria-hidden="true" />;
+      case 'STUDENT_TOOL': return <Sparkles className={iconStyle} aria-hidden="true" />;
+      default: return <Star className={iconStyle} aria-hidden="true" />;
     }
-  }
+  };
 
-  function handleCreateSubmit(event: FormEvent<HTMLFormElement>) {
+  const handleCreateSubmit = (event: FormEvent<HTMLFormElement>) => {
     onCreateCollection(event);
     setShowCreateModal(false);
-  }
+  };
 
   return (
-    <div className="space-y-5">
-      {/* 1. Header Banner & Quick Counters */}
-      <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="inline-flex items-center gap-2">
-              <span className="text-[10px] font-bold text-[#142B5F] dark:text-[#E5B54F]">خزنة المحفوظات</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#D6A43B]/10 text-[#D6A43B] font-semibold">مساحة الطالب</span>
-            </div>
-            <h2 className="text-base sm:text-lg font-bold text-[var(--mn-heading)] mt-0.5">محفوظاتي ومجموعاتي</h2>
-            <p className="text-[11px] leading-relaxed text-[var(--mn-text-muted)] font-medium mt-1">
-              مساحة موحدة لكل ما تحفظه من منح، جامعات، تخصصات ودورات للرجوع إليها في أي وقت وتنظيمها في مجموعات.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowCreateModal((v) => !v)}
-              className="px-3.5 py-1.5 rounded-xl border border-[#D6A43B]/40 bg-[var(--mn-page)] text-xs font-bold text-[var(--mn-heading)] hover:border-[#D6A43B] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
-            >
-              <Folder className="w-3.5 h-3.5 text-[#D6A43B]" />
-              <span>{showCreateModal ? 'إغلاق النموذج' : 'مجموعة جديدة'}</span>
-            </button>
-            <Link
-              to="/scholarships"
-              className="px-3.5 py-1.5 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all shadow-2xs flex items-center gap-1.5"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
-              <span>استكشف المزيد</span>
-            </Link>
-          </div>
+    <div className="mn-student-vault-page space-y-6 font-['Cairo',sans-serif]">
+      {/* Hero: same right-hand gold stripe and left-hand discovery action as فرصي/تعليمي. */}
+      <section
+        aria-label="محفوظاتي ومجموعاتي"
+        className="relative overflow-hidden rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel dark:border-white/10 sm:p-5"
+      >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[3.5px] bg-gradient-to-b from-[#B78622] via-[#D6A43B] to-[#E5B54F]" />
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+            <Heart className="h-[18px] w-[18px] text-[#E5B54F]" aria-hidden="true" />
+          </span>
+          <h2 className="text-[14px] font-bold leading-[1.35] text-[var(--mn-heading)]">محفوظاتي ومجموعاتي</h2>
+        </div>
+        <div className="mt-3 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2.5 dark:bg-[var(--mn-surface-elevated)]">
+          <p className="text-[12px] font-bold leading-5 text-[var(--mn-heading)]">كل ما يهمك في مكان واحد</p>
+          <p className="mt-0.5 text-[11px] font-medium leading-[1.85] text-[var(--mn-text-muted)] sm:text-[12px]">
+            {savedItems.length
+              ? `لديك ${savedItems.length} عنصر محفوظ و${collections.length} مجموعة. نظّم المنح والجامعات والدورات وغيرها، وارجع إليها متى احتجت.`
+              : 'احفظ المنح والجامعات والتخصصات والدورات وغيرها، ثم نظّم ما حفظته في مجموعاتك الشخصية.'}
+          </p>
         </div>
 
-        {/* Quick Stats Row - Only shown when saved items exist */}
-        {savedItems.length > 0 && (
-          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel">
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{savedItems.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">إجمالي المحفوظات</div>
-            </div>
-            <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel">
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{collections.length}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">مجموعات شخصية</div>
-            </div>
-            <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel">
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">{typeCounts.SCHOLARSHIP || 0}</div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">منح محفوظة</div>
-            </div>
-            <div className="rounded-xl bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] p-2.5 sm:p-3 text-center mn-panel">
-              <div className="text-base sm:text-lg font-bold text-[var(--mn-heading)]">
-                {(typeCounts.UNIVERSITY || 0) + (typeCounts.MAJOR || 0) + (typeCounts.COURSE || 0)}
+        {(savedItems.length > 0 || collections.length > 0) && (
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              { number: savedItems.length, label: 'إجمالي المحفوظات' },
+              { number: collections.length, label: 'مجموعات شخصية' },
+              { number: typeCounts.SCHOLARSHIP || 0, label: 'منح محفوظة' },
+              { number: (typeCounts.UNIVERSITY || 0) + (typeCounts.MAJOR || 0) + (typeCounts.COURSE || 0), label: 'جامعات وتخصصات ودورات' },
+            ].map((stat) => (
+              <div key={stat.label} className="min-w-0 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-2.5 text-center dark:bg-[var(--mn-surface-elevated)] sm:p-3">
+                <span className="block text-[17px] font-bold leading-6 text-[var(--mn-heading)] sm:text-[18px]">{stat.number}</span>
+                <span className="mt-0.5 block text-[10px] font-semibold leading-[1.6] text-[var(--mn-text-muted)] sm:text-[11px]">{stat.label}</span>
               </div>
-              <div className="text-[9.5px] sm:text-[10px] font-semibold text-[var(--mn-text-muted)] mt-0.5">جامعات وبرامج</div>
-            </div>
+            ))}
           </div>
         )}
-      </div>
+        <div dir="rtl" className="mt-4 flex w-full flex-wrap items-center gap-3">
+          <p className="text-[11px] font-medium leading-[1.7] text-[var(--mn-text-muted)]">محفوظاتك ومجموعاتك في مكان واحد</p>
+          <Link
+            to="/scholarships"
+            className="ms-auto inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#142B5F] px-3.5 py-2 text-[12px] font-bold text-white shadow-2xs transition-colors hover:bg-[#203D74] dark:bg-[#D6A43B] dark:text-[#142B5F] dark:hover:bg-[#E5B54F]"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-[#E5B54F] dark:text-[#142B5F]" aria-hidden="true" />
+            <span>استكشف المنح</span>
+          </Link>
+        </div>
+      </section>
 
-      {/* 2. Create Collection Inline Card */}
-      {showCreateModal && (
-        <form
-          onSubmit={handleCreateSubmit}
-          className="rounded-2xl border border-[#D6A43B]/40 bg-[var(--mn-surface)] p-4 sm:p-5 shadow-2xs mn-panel animate-in fade-in duration-200"
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F]">
-              <Folder className="w-3.5 h-3.5 text-[#E5B54F]" />
-            </div>
-            <h3 className="text-xs sm:text-sm font-bold text-[var(--mn-heading)]">إنشاء مجموعة مخصصة جديدة</h3>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="block text-xs font-semibold text-[var(--mn-text-muted)] mb-1" htmlFor="newCollectionName">
+      {/* Collections: creation, selection, rename, and deletion remain intact. */}
+      <VaultSectionCard
+        title="مجموعاتي الشخصية"
+        icon={<Folder className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
+        count={`${collections.length} مجموعة`}
+        action={
+          <button
+            type="button"
+            onClick={() => setShowCreateModal((value) => !value)}
+            aria-expanded={showCreateModal}
+            aria-controls="mn-vault-create-collection"
+            className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2.5 py-1.5 text-[11px] font-bold text-[var(--mn-heading)] transition-colors hover:border-[#D6A43B]"
+          >
+            <Folder className="h-3.5 w-3.5 text-[#B78622]" aria-hidden="true" />
+            <span>{showCreateModal ? 'إغلاق النموذج' : 'مجموعة جديدة'}</span>
+          </button>
+        }
+      >
+        <p className="mb-3 text-[11px] leading-[1.8] text-[var(--mn-text-muted)]">أنشئ مجموعاتك لتنظيم المحفوظات، ثم اختر أي مجموعة لعرض عناصرها.</p>
+
+        {showCreateModal && (
+          <form
+            id="mn-vault-create-collection"
+            onSubmit={handleCreateSubmit}
+            className="mb-3 rounded-xl border border-[#D6A43B]/40 bg-[var(--mn-page)] p-3 dark:bg-[var(--mn-surface-elevated)]"
+          >
+            <h4 className="mb-3 text-[13px] font-bold text-[var(--mn-heading)]">إنشاء مجموعة جديدة</h4>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="block text-[11px] font-semibold text-[var(--mn-heading)]">
                 اسم المجموعة *
+                <input
+                  name="collectionName"
+                  required
+                  maxLength={80}
+                  placeholder="مثال: منح أوروبا 2027"
+                  className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-[12px] text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+                />
               </label>
-              <input
-                id="newCollectionName"
-                name="collectionName"
-                required
-                maxLength={80}
-                placeholder="مثال: منح أوروبا 2026"
-                className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2 text-xs font-semibold text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-[var(--mn-text-muted)] mb-1" htmlFor="newCollectionDesc">
+              <label className="block text-[11px] font-semibold text-[var(--mn-heading)]">
                 الوصف (اختياري)
+                <input
+                  name="collectionDescription"
+                  maxLength={240}
+                  placeholder="ملاحظة حول أهداف المجموعة..."
+                  className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3 py-2 text-[12px] text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+                />
               </label>
-              <input
-                id="newCollectionDesc"
-                name="collectionDescription"
-                maxLength={240}
-                placeholder="ملاحظة حول أهداف المجموعة..."
-                className="w-full rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] dark:bg-[var(--mn-surface-elevated)] px-3 py-2 text-xs text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
-              />
             </div>
-          </div>
-          <div className="mt-3 flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(false)}
-              className="px-3 py-1.5 rounded-xl border text-xs font-semibold text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)] cursor-pointer"
-            >
-              إلغاء
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-4 py-1.5 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] disabled:opacity-50 cursor-pointer shadow-2xs"
-            >
-              حفظ المجموعة
-            </button>
-          </div>
-        </form>
-      )}
+            <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="min-h-9 rounded-lg border border-[var(--mn-border)] px-3 py-1.5 text-[12px] font-semibold text-[var(--mn-text-muted)]"
+              >
+                إلغاء
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="min-h-9 rounded-lg bg-[var(--mn-primary)] px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-50"
+              >
+                حفظ المجموعة
+              </button>
+            </div>
+          </form>
+        )}
 
-      {/* 3. Collections Badges / Filter Bar */}
-      {collections.length > 0 && (
-        <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-3 sm:p-4 shadow-2xs mn-panel">
-          <div className="flex items-center justify-between gap-2 mb-2.5">
-            <span className="text-xs font-bold text-[var(--mn-heading)]">مجموعاتي الشخصية ({collections.length})</span>
-            <span className="text-[10px] text-[var(--mn-text-muted)]">اضغط لتصفية العناصر حسب المجموعة</span>
-          </div>
+        {collections.length === 0 ? (
+          <p className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3 text-[11px] leading-[1.85] text-[var(--mn-text-muted)] dark:bg-[var(--mn-surface-elevated)]">
+            لا توجد مجموعات شخصية بعد. يمكنك إنشاء مجموعة جديدة الآن، أو حفظ العناصر دون مجموعة.
+          </p>
+        ) : (
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setCollectionFilter('ALL')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              aria-pressed={collectionFilter === 'ALL'}
+              className={`min-h-9 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
                 collectionFilter === 'ALL'
-                  ? 'bg-[#142B5F] text-[#E5B54F] border-[#D6A43B]/40 shadow-2xs'
-                  : 'bg-[var(--mn-page)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:border-[#D6A43B]/30'
+                  ? 'border-[#142B5F] bg-[#142B5F] text-white dark:border-[#D6A43B] dark:bg-[#D6A43B] dark:text-[#142B5F]'
+                  : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-heading)] hover:border-[#D6A43B]'
               }`}
             >
               جميع المجموعات ({savedItems.length})
             </button>
-            {collections.map((coll) => (
-              <div key={coll.id} className="inline-flex items-center rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] overflow-hidden">
+            {collections.map((collection) => (
+              <div key={collection.id} className="inline-flex min-w-0 items-center overflow-hidden rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)]">
                 <button
                   type="button"
-                  onClick={() => setCollectionFilter(coll.id)}
-                  className={`px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                    collectionFilter === coll.id
-                      ? 'bg-[#142B5F] text-[#E5B54F]'
-                      : 'text-[var(--mn-heading)] hover:text-[#D6A43B]'
+                  onClick={() => setCollectionFilter(collection.id)}
+                  aria-pressed={collectionFilter === collection.id}
+                  className={`min-h-9 min-w-0 break-words px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
+                    collectionFilter === collection.id
+                      ? 'bg-[#142B5F] text-white dark:bg-[#D6A43B] dark:text-[#142B5F]'
+                      : 'text-[var(--mn-heading)] hover:text-[#B78622]'
                   }`}
                 >
-                  {coll.name} ({coll.itemCount})
+                  {collection.name} ({collection.itemCount})
                 </button>
-                {coll.type === 'PERSONAL' && (
-                  <div className="flex items-center px-1 bg-[var(--mn-surface)] border-r border-[var(--mn-border)] gap-1">
+                {collection.type === 'PERSONAL' && (
+                  <div className="flex items-center gap-1 border-r border-[var(--mn-border)] px-1">
                     <button
                       type="button"
                       disabled={saving}
                       title="تعديل اسم المجموعة"
-                      onClick={() => onRenameCollection(coll.id, coll.name)}
-                      className="p-1 text-[10px] text-[var(--mn-text-muted)] hover:text-[#D6A43B] cursor-pointer"
+                      aria-label={`تعديل اسم المجموعة ${collection.name}`}
+                      onClick={() => onRenameCollection(collection.id, collection.name)}
+                      className="min-h-9 px-1 text-[11px] font-semibold text-[var(--mn-text-muted)] hover:text-[#B78622] disabled:opacity-50"
                     >
                       تعديل
                     </button>
@@ -3148,10 +3165,11 @@ function VaultView({
                       type="button"
                       disabled={saving}
                       title="حذف المجموعة"
-                      onClick={() => onDeleteCollection(coll.id, coll.name)}
-                      className="p-1 text-[10px] text-[var(--mn-danger-text)] hover:brightness-75 cursor-pointer"
+                      aria-label={`حذف المجموعة ${collection.name}`}
+                      onClick={() => onDeleteCollection(collection.id, collection.name)}
+                      className="grid h-9 w-8 place-items-center rounded-md text-[var(--mn-danger-text)] hover:bg-[var(--mn-danger-soft)] disabled:opacity-50"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
                   </div>
                 )}
@@ -3160,202 +3178,211 @@ function VaultView({
             <button
               type="button"
               onClick={() => setCollectionFilter('UNCOLLECTED')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              aria-pressed={collectionFilter === 'UNCOLLECTED'}
+              className={`min-h-9 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
                 collectionFilter === 'UNCOLLECTED'
-                  ? 'bg-[#142B5F] text-[#E5B54F] border-[#D6A43B]/40 shadow-2xs'
-                  : 'bg-[var(--mn-page)] text-[var(--mn-text-muted)] border-[var(--mn-border)] hover:border-[#D6A43B]/30'
+                  ? 'border-[#142B5F] bg-[#142B5F] text-white dark:border-[#D6A43B] dark:bg-[#D6A43B] dark:text-[#142B5F]'
+                  : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-heading)] hover:border-[#D6A43B]'
               }`}
             >
               دون مجموعة
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </VaultSectionCard>
 
-      {/* 4. Entity Type Filter Pills - Only shown when saved items exist */}
-      {savedItems.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[var(--mn-surface)] border border-[var(--mn-border)] dark:border-white/10 w-fit text-xs font-medium">
-          {supportedTypes.map((type) => {
-            const count = typeCounts[type.id] || 0;
-            return (
-              <button
-                key={type.id}
-                type="button"
-                onClick={() => setTypeFilter(type.id)}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
-                  typeFilter === type.id
-                    ? 'bg-[var(--mn-primary)] text-white shadow-2xs'
-                    : 'text-[var(--mn-text-muted)] hover:bg-[var(--mn-page)]'
-                }`}
-              >
-                {type.label} ({count})
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* 5. Main Saved Items List or Useful Empty State */}
-      {savedItems.length === 0 ? (
-        collections.length > 0 ? (
-          <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 sm:p-8 text-center mn-panel shadow-2xs">
-            <div className="w-12 h-12 rounded-2xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 flex items-center justify-center text-[#E5B54F] mx-auto mb-3.5 shadow-xs">
-              <Folder className="w-6 h-6 text-[#E5B54F]" />
+      {/* Search and type filters affect only saved items; no changes to API writes. */}
+      <VaultSectionCard
+        title="العناصر المحفوظة"
+        icon={<Bookmark className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />}
+        count={`${filteredItems.length} من ${savedItems.length}`}
+      >
+        {savedItems.length > 0 && (
+          <div className="mb-4 space-y-3">
+            <label className="block text-[11px] font-semibold text-[var(--mn-heading)]" htmlFor="mn-vault-search">
+              البحث في محفوظاتي
+              <input
+                id="mn-vault-search"
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="ابحث عن اسم منحة أو جامعة أو دورة..."
+                className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[12px] font-medium text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+              />
+            </label>
+            <div aria-label="تصفية حسب النوع" className="flex flex-wrap gap-1.5">
+              {visibleTypes.map((type) => (
+                <button
+                  key={type.id}
+                  type="button"
+                  onClick={() => setTypeFilter(type.id)}
+                  aria-pressed={typeFilter === type.id}
+                  className={`min-h-9 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold transition-colors ${
+                    typeFilter === type.id
+                      ? 'border-[#142B5F] bg-[#142B5F] text-white dark:border-[#D6A43B] dark:bg-[#D6A43B] dark:text-[#142B5F]'
+                      : 'border-[var(--mn-border)] bg-[var(--mn-page)] text-[var(--mn-text-muted)] hover:border-[#D6A43B]'
+                  }`}
+                >
+                  {type.label} ({typeCounts[type.id] || 0})
+                </button>
+              ))}
             </div>
-            <h3 className="text-sm sm:text-base font-bold text-[var(--mn-heading)]">مجموعتك جاهزة لاستقبال المحفوظات</h3>
-            <p className="text-xs text-[var(--mn-text-muted)] mt-2 leading-relaxed max-w-md mx-auto">
-              لديك <strong className="text-[var(--mn-heading)]">{collections.length === 1 ? `مجموعة «${collections[0].name}»` : `${collections.length} مجموعات شخصية`}</strong> منشأة وجاهزة، ولكنها فارغة حاليًا. يمكنك تصفح المنح والجامعات والدورات والضغط على رمز القلب في صفحات الموقع لحفظها وإضافتها مباشرة إليها.
+          </div>
+        )}
+
+        {savedItems.length === 0 ? (
+          <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-5 text-center dark:bg-[var(--mn-surface-elevated)]">
+            <Heart className="mx-auto h-7 w-7 text-[#B78622]" aria-hidden="true" />
+            <h4 className="mt-2 text-[13px] font-bold text-[var(--mn-heading)]">
+              {collections.length > 0 ? 'مجموعاتك جاهزة لاستقبال المحفوظات' : 'لا توجد عناصر محفوظة بعد'}
+            </h4>
+            <p className="mt-1 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">
+              تصفح المنح والجامعات والدورات، واضغط رمز القلب في صفحاتها لإضافتها إلى محفوظاتك.
             </p>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-              <Link
-                to="/scholarships"
-                className="px-4 py-2 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all shadow-2xs inline-flex items-center gap-1.5"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
-                <span>استكشف المنح والفرص لحفظها</span>
-              </Link>
-            </div>
+            <Link
+              to="/scholarships"
+              className="mt-3 inline-flex min-h-9 items-center justify-center rounded-lg bg-[var(--mn-primary)] px-3 py-1.5 text-[12px] font-bold text-white"
+            >
+              استكشف المنح
+            </Link>
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-5 text-center dark:bg-[var(--mn-surface-elevated)]">
+            <h4 className="text-[13px] font-bold text-[var(--mn-heading)]">لا توجد عناصر مطابقة للتصفية</h4>
+            <p className="mt-1 text-[11px] leading-[1.85] text-[var(--mn-text-muted)]">جرّب بحثًا آخر أو اعرض جميع المحفوظات.</p>
+            <button
+              type="button"
+              onClick={() => { setTypeFilter('ALL'); setCollectionFilter('ALL'); setSearchQuery(''); }}
+              className="mt-3 min-h-9 rounded-lg bg-[var(--mn-primary)] px-3 py-1.5 text-[12px] font-bold text-white"
+            >
+              إعادة ضبط التصفية
+            </button>
           </div>
         ) : (
-          <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-6 sm:p-8 text-center mn-panel shadow-2xs">
-            <div className="w-12 h-12 rounded-2xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/40 flex items-center justify-center text-[#E5B54F] mx-auto mb-3.5 shadow-xs">
-              <Heart className="w-6 h-6 text-[#E5B54F]" />
-            </div>
-            <h3 className="text-sm sm:text-base font-bold text-[var(--mn-heading)]">خزنة محفوظاتك فارغة حاليًا</h3>
-            <p className="text-xs text-[var(--mn-text-muted)] mt-2 leading-relaxed max-w-md mx-auto">
-              استكشف دليل المنح والجامعات والتخصصات والدورات، واضغط على علامة القلب لحفظ ما يهمك هنا وتنظيمه في مجموعات مخصصة.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-              <Link
-                to="/scholarships"
-                className="px-4 py-2 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all shadow-2xs inline-flex items-center gap-1.5"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#E5B54F]" />
-                <span>استكشف المنح والفرص</span>
-              </Link>
-            </div>
-          </div>
-        )
-      ) : filteredItems.length === 0 ? (
-        <div className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-8 text-center mn-panel">
-          <Heart className="w-8 h-8 mx-auto text-[var(--mn-text-muted)] mb-2" />
-          <h3 className="font-bold text-sm text-[var(--mn-heading)]">لا توجد عناصر مطابقة للتصفية المختارة</h3>
-          <p className="text-xs text-[var(--mn-text-muted)] mt-1 max-w-sm mx-auto">
-            جرّب تغيير نوع العنصر أو اختيار «جميع المجموعات» لعرض باقي المحفوظات.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setTypeFilter('ALL');
-              setCollectionFilter('ALL');
-            }}
-            className="mt-3 px-3.5 py-1.5 rounded-xl bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all cursor-pointer"
-          >
-            إعادة ضبط التصفية
-          </button>
-        </div>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {filteredItems.map((item) => {
-            const owner = hydratedBySavedItemId.get(item.id);
-            const toolTitles: Record<string, string> = { 'gpa-calculator': 'حاسبة المعدل التراكمي', 'university-comparison': 'مقارنة الجامعات', 'motivation-letter-generator': 'خطاب الدافع', 'scholarship-recommendation': 'توصية المنح' };
-            const displayName = (item.entityType==='STUDENT_TOOL'&&owner?.visibility==='STUDENT_PRIVATE'?(language==='en'?'Retained private tool result':'نتيجة أداة محفوظة خاصة'):owner?.displayName) || item.displayName || (item.entityType === 'STUDENT_TOOL' ? toolTitles[item.entitySlug ?? ''] : undefined) || item.entityId;
-            const slug = owner?.slug || item.entitySlug || undefined;
-            const available = owner ? owner.available : null;
-            const targetUrl = owner?.visibility==='STUDENT_PRIVATE'?item.entityType==='CERTIFICATE'?'/student?tab=learning#certificates':null:available !== true ? null : slug
-              ? buildEntityLink(item.entityType, slug)
-              : item.entityType === 'STUDENT_TOOL'
-                ? '/tools'
-                : null;
+          <div className="grid gap-3.5 sm:grid-cols-2">
+            {filteredItems.map((item) => {
+              const owner = hydratedBySavedItemId.get(item.id);
+              const displayName = getSavedTitle(item);
+              const slug = owner?.slug || item.entitySlug || undefined;
+              const available = owner ? owner.available : null;
+              const targetUrl = owner?.visibility === 'STUDENT_PRIVATE'
+                ? (item.entityType === 'CERTIFICATE' ? '/student?tab=learning#certificates' : null)
+                : available !== true ? null
+                : slug ? buildEntityLink(item.entityType, slug)
+                : item.entityType === 'STUDENT_TOOL' ? '/tools' : null;
 
-            return (
-              <div
-                key={item.id}
-                className="rounded-2xl border border-[var(--mn-border)] dark:border-white/10 bg-[var(--mn-surface)] p-4 shadow-2xs mn-panel flex flex-col justify-between hover:border-[#D6A43B]/40 transition-all"
-              >
-                <div>
-                  {/* Top Badges Row */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-[#142B5F] dark:bg-[#0c1a3b] border border-[#D6A43B]/30 flex items-center justify-center text-[#E5B54F] shrink-0">
-                        {getEntityIcon(item.entityType)}
-                      </div>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--mn-page)] text-[var(--mn-heading)] border border-[var(--mn-border)]">
+              return (
+                <article
+                  key={item.id}
+                  className="mn-student-vault-item flex min-w-0 flex-col justify-between rounded-xl border border-[var(--mn-border)] bg-[var(--mn-page)] p-3.5 transition-colors hover:border-[#D6A43B]/50 dark:bg-[var(--mn-surface-elevated)]"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+                          {getEntityIcon(item.entityType)}
+                        </span>
+                        <span className="rounded-md border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-0.5 text-[11px] font-semibold text-[var(--mn-text-muted)]">
                           {arabicEntityType(item.entityType)}
                         </span>
                       </div>
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => onRemoveSavedItem(item)}
+                        title="إزالة من المحفوظات"
+                        aria-label={`إزالة ${displayName} من المحفوظات`}
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-[var(--mn-danger-text)] transition-colors hover:bg-[var(--mn-danger-soft)] disabled:opacity-50"
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      </button>
                     </div>
+                    <h4 className="mt-2.5 break-words text-[14px] font-bold leading-[1.65] text-[var(--mn-heading)]">{displayName}</h4>
 
-                    <button
-                      type="button"
-                      disabled={saving}
-                      onClick={() => onRemoveSavedItem(item)}
-                      title="إزالة من المحفوظات"
-                      className="text-[var(--mn-text-muted)] hover:text-red-500 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {!available && item.entityType !== 'STUDENT_TOOL' && (
+                      <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-[var(--mn-warning-soft)] p-2 text-[11px] font-medium leading-[1.7] text-[var(--mn-warning-text)]">
+                        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span>{available === false ? 'غير معروض حاليًا لدى المصدر؛ وسجلك محفوظ.' : 'تعذر تأكيد حالة المصدر حاليًا؛ وسجلك محفوظ.'}</span>
+                      </div>
+                    )}
+                    <OwnerReferenceNotice reference={owner?.referenceState} />
+                    {item.entityType === 'STUDENT_TOOL' && (
+                      <StudentPrivateToolResult
+                        savedReference={owner?.privateReference ?? item.id}
+                        available={owner?.visibility === 'STUDENT_PRIVATE' && available === true}
+                      />
+                    )}
+                    <p className="mt-2 text-[11px] font-medium text-[var(--mn-text-muted)]">
+                      حُفظ في: <strong>{formatDate(item.savedAt)}</strong>
+                    </p>
                   </div>
 
-                  {/* Title & Date */}
-                  <h3 className="text-sm font-bold text-[var(--mn-heading)] mt-2.5 line-clamp-2">
-                    {displayName}
-                  </h3>
-
-                  {/* Unavailability Notice */}
-                  {!available && item.entityType !== 'STUDENT_TOOL' && (
-                    <div className="mt-2 rounded-lg bg-[var(--mn-warning-soft)] p-2 text-[10.5px] font-medium text-[var(--mn-warning-text)] flex items-center gap-1.5">
-                      <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{available === false ? 'غير معروض حاليًا لدى المصدر؛ وسجلك محفوظ.' : 'تعذر تأكيد حالة المصدر حالياً؛ وسجلك محفوظ.'}</span>
-                    </div>
-                  )}
-
-                  <OwnerReferenceNotice reference={owner?.referenceState}/>
-                  {item.entityType==='STUDENT_TOOL'&&<StudentPrivateToolResult savedReference={owner?.privateReference??item.id} available={owner?.visibility==='STUDENT_PRIVATE'&&available===true}/>}
-                  {/* Saved Date */}
-                  <div className="mt-2 text-[10.5px] text-[var(--mn-text-muted)]">
-                    حُفظ في: <strong>{formatDate(item.savedAt)}</strong>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--mn-border)] pt-3">
+                    <label className="min-w-0 flex-1 text-[11px] font-semibold text-[var(--mn-text-muted)]">
+                      <span className="sr-only">نقل إلى مجموعة</span>
+                      <select
+                        aria-label={`نقل ${displayName} إلى مجموعة`}
+                        value={item.collectionId ?? ''}
+                        disabled={saving}
+                        onChange={(event) => onMoveSavedItem(item.id, event.target.value || null)}
+                        className="min-h-9 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-2 py-1.5 text-[11px] font-medium text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+                      >
+                        <option value="">دون مجموعة</option>
+                        {collections.map((collection) => (
+                          <option key={collection.id} value={collection.id}>{collection.name}</option>
+                        ))}
+                      </select>
+                    </label>
+                    {targetUrl && (
+                      <Link
+                        to={targetUrl}
+                        className="ms-auto inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--mn-primary)] px-3 py-1.5 text-[12px] font-bold text-white transition-colors hover:bg-[var(--mn-primary-hover)]"
+                      >
+                        <span>فتح</span>
+                        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                      </Link>
+                    )}
                   </div>
-                </div>
-
-                {/* Bottom Actions: Move to collection + Direct Link */}
-                <div className="mt-4 pt-3 border-t border-[var(--mn-border)] dark:border-white/10 flex items-center justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <label className="sr-only" htmlFor={`move-${item.id}`}>نقل إلى مجموعة</label>
-                    <select
-                      id={`move-${item.id}`}
-                      aria-label="نقل العنصر إلى مجموعة"
-                      value={item.collectionId ?? ''}
-                      disabled={saving}
-                      onChange={(event) => onMoveSavedItem(item.id, event.target.value || null)}
-                      className="w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-2 py-1 text-[11px] font-medium text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
-                    >
-                      <option value="">دون مجموعة</option>
-                      {collections.map((coll) => (
-                        <option key={coll.id} value={coll.id}>
-                          📁 {coll.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {targetUrl && (
-                    <Link
-                      to={targetUrl}
-                      className="shrink-0 inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[var(--mn-primary)] text-white text-xs font-bold hover:bg-[var(--mn-primary-hover)] transition-all shadow-2xs"
-                    >
-                      <span>فتح</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </Link>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </VaultSectionCard>
     </div>
+  );
+}
+
+/** Matches the cards and gold-underlined 14px headers in ملخصي/فرصي/تعليمي. */
+function VaultSectionCard({
+  title,
+  icon,
+  count,
+  action,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  count?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section aria-label={title} className="mn-student-vault-section relative -mx-[2px] w-[calc(100%+4px)] rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-2xs mn-panel dark:border-white/10 sm:mx-0 sm:w-full sm:p-4">
+      <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+            {icon}
+          </span>
+          <h3 className="mn-student-vault-heading min-w-0 text-[14px] font-bold leading-[1.22] text-[var(--mn-heading)]">{title}</h3>
+        </div>
+        <div className="flex min-w-0 items-center gap-2">
+          {count && <span className="text-[11px] font-semibold text-[var(--mn-text-muted)]">{count}</span>}
+          {action}
+        </div>
+      </div>
+      {children}
+    </section>
   );
 }
 
