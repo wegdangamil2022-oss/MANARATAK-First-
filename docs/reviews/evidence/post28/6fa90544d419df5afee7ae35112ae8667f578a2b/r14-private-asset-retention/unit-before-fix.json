@@ -1,0 +1,164 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 0,
+  "numFailedTestSuites": 2,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 9,
+  "numPassedTests": 1,
+  "numFailedTests": 8,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1792542653094,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline denies expired temporary retention before granting or reading bytes",
+          "status": "failed",
+          "title": "denies expired temporary retention before granting or reading bytes",
+          "duration": 14.092000000000553,
+          "failureMessages": [
+            "Error: promise resolved \"{ assetId: 'delivery-expiry', …(3) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetDeliveryRetention.spec.ts:42:80\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline denies invalid temporary retention before granting or reading bytes",
+          "status": "failed",
+          "title": "denies invalid temporary retention before granting or reading bytes",
+          "duration": 1.6939999999995052,
+          "failureMessages": [
+            "Error: promise resolved \"{ assetId: 'delivery-expiry', …(3) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetDeliveryRetention.spec.ts:42:80\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline denies missing temporary retention before granting or reading bytes",
+          "status": "failed",
+          "title": "denies missing temporary retention before granting or reading bytes",
+          "duration": 1.6421000000009371,
+          "failureMessages": [
+            "Error: promise resolved \"{ assetId: 'delivery-expiry', …(3) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetDeliveryRetention.spec.ts:42:80\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline limits a private grant to remaining whole retention seconds",
+          "status": "failed",
+          "title": "limits a private grant to remaining whole retention seconds",
+          "duration": 2.220900000000256,
+          "failureMessages": [
+            "AssertionError: expected 1792562700000 to be 1792562410000 // Object.is equality\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetDeliveryRetention.spec.ts:52:42\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline rejects a provider grant extending beyond the retention deadline",
+          "status": "failed",
+          "title": "rejects a provider grant extending beyond the retention deadline",
+          "duration": 1.1653999999998632,
+          "failureMessages": [
+            "Error: promise resolved \"{ assetId: 'delivery-expiry', …(3) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetDeliveryRetention.spec.ts:57:78\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline rejects a grant when the asset expires during provider IO",
+          "status": "failed",
+          "title": "rejects a grant when the asset expires during provider IO",
+          "duration": 1.1554999999989377,
+          "failureMessages": [
+            "Error: promise resolved \"{ assetId: 'delivery-expiry', …(3) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetDeliveryRetention.spec.ts:62:78\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline rejects a grant when the asset is withdrawn during provider IO",
+          "status": "failed",
+          "title": "rejects a grant when the asset is withdrawn during provider IO",
+          "duration": 1.0963000000010652,
+          "failureMessages": [
+            "Error: promise resolved \"{ assetId: 'delivery-expiry', …(3) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetDeliveryRetention.spec.ts:68:78\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline rejects authenticated bytes if retention expires during the read",
+          "status": "failed",
+          "title": "rejects authenticated bytes if retention expires during the read",
+          "duration": 2.4962000000014086,
+          "failureMessages": [
+            "Error: promise resolved \"{ …(3) }\" instead of rejecting\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/chai/index.js:1696:22)\n    at C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetDeliveryRetention.spec.ts:74:72\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ],
+          "meta": {},
+          "tags": []
+        },
+        {
+          "ancestorTitles": [
+            "private asset delivery retention deadline"
+          ],
+          "fullName": "private asset delivery retention deadline keeps an explicitly permanent asset without expiry deliverable",
+          "status": "passed",
+          "title": "keeps an explicitly permanent asset without expiry deliverable",
+          "duration": 1.2049999999999272,
+          "failureMessages": [],
+          "meta": {},
+          "tags": []
+        }
+      ],
+      "startTime": 1792542665235,
+      "endTime": 1792542665262.205,
+      "status": "failed",
+      "message": "",
+      "name": "C:/Users/HP/Documents/Codex/2026-10-17/files-pasted-by-the-user-17/work/r07-filtered/packages/application/tests/asset-platform/AssetDeliveryRetention.spec.ts"
+    }
+  ]
+}

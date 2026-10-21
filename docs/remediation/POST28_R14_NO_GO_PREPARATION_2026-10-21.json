@@ -2,7 +2,7 @@
   "kind": "POST28_R14_NO_GO_PREPARATION",
   "localDate": "2026-10-21",
   "reviewSha": "83e210e0eb9505c875129948bd52171986f458b3",
-  "candidateSourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+  "candidateSourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
   "branch": "feat/post28-r07-artifact-preparation",
   "releaseDecision": "NO_GO",
   "decisionScope": "PREPARATION_MEMO_NOT_PRODUCTION_AUTHORIZATION",
@@ -19,7 +19,7 @@
   "hostingBudgetApproved": false,
   "localRemainingWork": [
     "Unified exact-SHA Linux Admin CMS lifecycle and English coverage; Arabic mixed-source Windows journey completed locally",
-    "Built API private asset/certificate secure delivery with isolated authorized provider",
+    "Built reviewer consent-gated stream and signed certificate delivery; student-owned private PDF grant demonstrated locally on6fa9054",
     "Required financial/certificate/import worker route fault proofs",
     "Scoped Linux rollback with selected exact artifacts and actual signal transport",
     "Representative launch dataset and prior SLO/resource budget; pool checkout instrumentation"
@@ -32,6 +32,91 @@
     "R13-E05"
   ],
   "candidateCi": {
+    "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+    "runId": 39522846173,
+    "lastObservedStatus": "in_progress",
+    "result": null,
+    "observedAt": "2026-10-21T00:44:31.964Z",
+    "jobs": [
+      {
+        "name": "Translation quality gates",
+        "status": "completed",
+        "result": "success"
+      },
+      {
+        "name": "Full source closure gates",
+        "status": "in_progress",
+        "result": null
+      },
+      {
+        "name": "Deployment configuration",
+        "status": "completed",
+        "result": "success"
+      },
+      {
+        "name": "R08 isolated Redis and Linux worker shutdown",
+        "status": "completed",
+        "result": "success"
+      }
+    ],
+    "passedJobs": 3,
+    "allSixJobsSucceeded": false
+  },
+  "nextFunctionalStep": "BUILT_REVIEWER_AUTHENTICATED_CONTENT_WITH_CURRENT_CONSENT_THEN_SIGNED_CERTIFICATE_DELIVERY",
+  "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
+  "latestAdminCmsLocalDiagnostic": {
+    "completed": true,
+    "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
+    "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
+    "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
+    "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
+    "formalAcceptance": false,
+    "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
+  },
+  "latestPrivateAssetDeliveryDiagnostic": {
+    "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+    "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+    "passed": true,
+    "report": "docs/remediation/POST28_PRIVATE_ASSET_RETENTION_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/evidence-index.json",
+    "certificateDeliveryExercised": false,
+    "reviewerConsentDeliveryExercised": false,
+    "instantPreIssuedUrlRevocationProved": false,
+    "formalAcceptance": false,
+    "ci": {
+      "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+      "runId": 39522846173,
+      "lastObservedStatus": "in_progress",
+      "result": null,
+      "observedAt": "2026-10-21T00:44:31.964Z",
+      "jobs": [
+        {
+          "name": "Translation quality gates",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Full source closure gates",
+          "status": "in_progress",
+          "result": null
+        },
+        {
+          "name": "Deployment configuration",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "R08 isolated Redis and Linux worker shutdown",
+          "status": "completed",
+          "result": "success"
+        }
+      ],
+      "passedJobs": 3
+    }
+  },
+  "previousCandidateSourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
+  "previousCandidateCi": {
     "sourceSha": "cbe2ff2d0e3ba881361fcbe42133af500cd4c331",
     "runId": 39516645007,
     "lastObservedStatus": "completed",
@@ -71,17 +156,5 @@
         "result": "success"
       }
     ]
-  },
-  "nextFunctionalStep": "BUILT_API_PRIVATE_ASSET_CERTIFICATE_SECURE_DELIVERY_IN_ISOLATED_LAB",
-  "evidence": "docs/reviews/evidence/post28/83e210e0eb9505c875129948bd52171986f458b3/r14-no-go-preparation/evidence-index.json",
-  "latestAdminCmsLocalDiagnostic": {
-    "completed": true,
-    "scope": "ARABIC_MIXED_SOURCE_LOCAL_DIAGNOSTIC_ACROSS_OWNED_RESTART",
-    "operatorSourceSha": "b7748fdd5383103a6936b4310152d49e497c18ae",
-    "apiWebSourceSha": "c8afe5f253d132f671ecd035a0330de7794b6ee8",
-    "adminSourceSha": "50e109e3ece76c6b5acb832be9fcd747450821cb",
-    "formalAcceptance": false,
-    "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
-    "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
   }
 }

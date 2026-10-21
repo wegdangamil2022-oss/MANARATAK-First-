@@ -1,0 +1,74 @@
+{
+  "kind": "R14_BUILT_API_PRIVATE_ASSET_DIAGNOSTIC",
+  "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+  "apiBundleSha256": "13f042467b11f4b9d8615d1e021ca1c982fe8b928e4cc98faace4a990e20e7c2",
+  "cleanReleaseArtifact": false,
+  "syntheticOnly": true,
+  "freshEapProcessing": false,
+  "certificateDeliveryExercised": false,
+  "reviewerConsentDeliveryExercised": false,
+  "productionAcceptance": false,
+  "passed": false,
+  "observations": [
+    {
+      "phase": "login-owner",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "login-owner",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "login-foreign",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "login-foreign",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "foreign-owner-denied",
+      "method": "POST",
+      "path": "/api/v1/student/assets/abd6b9bc-bc69-46cb-91e3-ffc2d360e2a5/delivery-grant",
+      "status": 404
+    },
+    {
+      "phase": "expired-before-provider",
+      "method": "POST",
+      "path": "/api/v1/student/assets/bdac8657-d871-41ab-80e6-52198fd981c2/delivery-grant",
+      "status": 400
+    },
+    {
+      "phase": "owner-grant-download",
+      "method": "POST",
+      "path": "/api/v1/student/assets/abd6b9bc-bc69-46cb-91e3-ffc2d360e2a5/delivery-grant",
+      "status": 400
+    }
+  ],
+  "calls": [],
+  "role": {
+    "role": "post28_r11_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "providerFailure": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'a51832605df0229ce171a96b9d9d6e09a4fc54f58337656f5a4249a98dc8d012'\n- 'c0d0dad307073d3ba5bded6e0ff41e1dda116cfd62d93cdd2f18fe3efda48229'\n",
+  "failure": {
+    "phase": "owner-grant-download",
+    "message": "Expected values to be strictly equal:\n\n400 !== 200\n"
+  },
+  "cleanup": {
+    "apiStopped": true,
+    "providerStopped": true
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "kind": "POST28_PRIVATE_ASSET_RETENTION_FIX_AND_RUNTIME_PROOF",
+  "localDate": "2026-10-21",
+  "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+  "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+  "status": "FIX_AND_SCOPED_BUILT_API_RUNTIME_VERIFIED",
+  "newTests": 9,
+  "beforeFixFailed": 8,
+  "beforeFixPassed": 1,
+  "afterFixPassed": 73,
+  "relatedTestsRechecked": 64,
+  "typecheck": "PASS_DOMAIN_APPLICATION",
+  "eslint": "PASS_THREE_CHANGED_FILES",
+  "apiOnlyDiagnosticBuild": true,
+  "apiBundleSha256": "13f042467b11f4b9d8615d1e021ca1c982fe8b928e4cc98faace4a990e20e7c2",
+  "fullBuildRepeated": false,
+  "fullSuiteLocallyRepeated": false,
+  "proofUsesActualBuiltApi": true,
+  "provider": "SIGNED_LOOPBACK_HTTPS_SYNTHETIC_ONLY",
+  "existingDbTouched": false,
+  "migrationsChanged": false,
+  "newCluster": {
+    "runId": "4ea853d5-969d-4a29-8846-1199e5e35378",
+    "serverIdentity": "7698914435768439504",
+    "binarySha256": "19e73deb1152b3b505f2e1fd579191427f9eb3b3f800754968e7214b24edf31d",
+    "ordinaryRole": {
+      "role": "post28_r11_actor",
+      "rolsuper": false,
+      "rolcreatedb": false,
+      "rolcreaterole": false,
+      "rolbypassrls": false,
+      "rolreplication": false
+    },
+    "database": "manaratak_r11_load_71a12fb295ac983d"
+  },
+  "retentionLegalHoldConsentOrBindingMutated": false,
+  "protectedRowCounts": {
+    "StudentPrivacyConsentDecision": 0,
+    "StudentApplicationDocumentBinding": 1,
+    "FinancialLedgerEntryRecord": 10,
+    "FinanceInvoiceRecord": 3
+  },
+  "consentLimitation": "No Consent rows in this fixture: unchanged empty set only",
+  "reviewerConsentDeliveryExercised": false,
+  "certificateDeliveryExercised": false,
+  "freshEapProcessing": false,
+  "instantRevocationOfAlreadyDistributedProviderUrlProved": false,
+  "productionAcceptance": false,
+  "formalR13Acceptance": false,
+  "formalR14Acceptance": false,
+  "releaseDecision": "NO_GO",
+  "ci": {
+    "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+    "runId": 39522846173,
+    "lastObservedStatus": "in_progress",
+    "result": null,
+    "observedAt": "2026-10-21T00:44:31.964Z",
+    "jobs": [
+      {
+        "name": "Translation quality gates",
+        "status": "completed",
+        "result": "success"
+      },
+      {
+        "name": "Full source closure gates",
+        "status": "in_progress",
+        "result": null
+      },
+      {
+        "name": "Deployment configuration",
+        "status": "completed",
+        "result": "success"
+      },
+      {
+        "name": "R08 isolated Redis and Linux worker shutdown",
+        "status": "completed",
+        "result": "success"
+      }
+    ],
+    "passedJobs": 3
+  },
+  "remaining": [
+    "Built reviewer authenticated content path with existing consent, expiry and withdrawal, including storage IO race",
+    "Signed certificate PDF/preview delivery through actual built API",
+    "Instant revocation guarantee for already distributed provider URLs, if required; provider fencing or authenticated delivery review",
+    "Unified immutable Linux release candidate and outstanding R13 release gates"
+  ],
+  "evidence": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/evidence-index.json"
+}

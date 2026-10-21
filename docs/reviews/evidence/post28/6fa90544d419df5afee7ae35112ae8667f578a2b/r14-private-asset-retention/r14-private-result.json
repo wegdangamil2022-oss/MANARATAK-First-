@@ -1,0 +1,162 @@
+{
+  "kind": "R14_BUILT_API_PRIVATE_ASSET_DIAGNOSTIC",
+  "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+  "apiBundleSha256": "13f042467b11f4b9d8615d1e021ca1c982fe8b928e4cc98faace4a990e20e7c2",
+  "cleanReleaseArtifact": false,
+  "syntheticOnly": true,
+  "freshEapProcessing": false,
+  "certificateDeliveryExercised": false,
+  "reviewerConsentDeliveryExercised": false,
+  "productionAcceptance": false,
+  "passed": true,
+  "observations": [
+    {
+      "phase": "login-owner",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "login-owner",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "login-foreign",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "phase": "login-foreign",
+      "method": "GET",
+      "path": "/api/v1/auth/csrf-token",
+      "status": 200
+    },
+    {
+      "phase": "foreign-owner-denied",
+      "method": "POST",
+      "path": "/api/v1/student/assets/4c9c6998-70b8-4bf0-ae8a-6ff355bd0393/delivery-grant",
+      "status": 404
+    },
+    {
+      "phase": "expired-before-provider",
+      "method": "POST",
+      "path": "/api/v1/student/assets/41db0fa3-93df-4980-9c6c-e532b9433dde/delivery-grant",
+      "status": 400
+    },
+    {
+      "phase": "owner-grant-download",
+      "method": "POST",
+      "path": "/api/v1/student/assets/4c9c6998-70b8-4bf0-ae8a-6ff355bd0393/delivery-grant",
+      "status": 200
+    },
+    {
+      "phase": "retention-clamped",
+      "method": "POST",
+      "path": "/api/v1/student/assets/4b81a617-d92c-4339-857d-4643ff53cc9e/delivery-grant",
+      "status": 200
+    },
+    {
+      "phase": "provider-excessive-ttl",
+      "method": "POST",
+      "path": "/api/v1/student/assets/4c9c6998-70b8-4bf0-ae8a-6ff355bd0393/delivery-grant",
+      "status": 400
+    },
+    {
+      "phase": "withdrawn-during-provider",
+      "method": "POST",
+      "path": "/api/v1/student/assets/4c9c6998-70b8-4bf0-ae8a-6ff355bd0393/delivery-grant",
+      "status": 400
+    },
+    {
+      "phase": "withdrawn-during-provider",
+      "method": "POST",
+      "path": "/api/v1/student/assets/4c9c6998-70b8-4bf0-ae8a-6ff355bd0393/delivery-grant",
+      "status": 400
+    },
+    {
+      "phase": "logout",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200
+    },
+    {
+      "phase": "logout",
+      "method": "POST",
+      "path": "/api/v1/auth/logout",
+      "status": 200
+    }
+  ],
+  "calls": [
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/capabilities/readiness",
+      "method": "GET",
+      "signed": true
+    },
+    {
+      "path": "/v1/assets/delivery-grants",
+      "method": "POST",
+      "signed": true
+    },
+    {
+      "path": "/v1/assets/delivery-grants",
+      "method": "POST",
+      "signed": true
+    },
+    {
+      "path": "/v1/assets/delivery-grants",
+      "method": "POST",
+      "signed": true
+    },
+    {
+      "path": "/v1/assets/delivery-grants",
+      "method": "POST",
+      "signed": true
+    }
+  ],
+  "role": {
+    "role": "post28_r11_actor",
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolbypassrls": false,
+    "rolreplication": false
+  },
+  "ownerDownloadedMatchingPdf": true,
+  "actualExpiredGrantDenied": true,
+  "withdrawalRecheckedBeforeGrantReturned": true,
+  "historicalRowsPreserved": true,
+  "foreignDeniedBeforeProvider": true,
+  "expiredDeniedBeforeProvider": true,
+  "providerExcessiveTtlRejected": true,
+  "tls": {
+    "exactSyntheticCa": true,
+    "hostnameVerified": true,
+    "globalTlsVerificationDisabled": false,
+    "apiTransport": "LOOPBACK_HTTP_ONLY",
+    "providerTransport": "LOOPBACK_HTTPS"
+  },
+  "preIssuedGrantInstantRevocationProved": false,
+  "preIssuedGrantLimit": "Provider bearer capabilities may remain usable until their original expiry; grant issuance recheck does not revoke an already distributed URL",
+  "cleanup": {
+    "apiStopped": true,
+    "providerStopped": true
+  }
+}

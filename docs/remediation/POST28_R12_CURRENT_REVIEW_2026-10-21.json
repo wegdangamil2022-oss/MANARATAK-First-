@@ -1,26 +1,80 @@
 {
-  "kind":"POST28_R12_CURRENT_PRACTICAL_REVIEW",
-  "localDate":"2026-10-21",
-  "reviewSourceSha":"0b13ba91ea8fc3d008d0ced45187d880cf88eb12",
-  "status":"LOCAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_RELEASE_BLOCKERS",
-  "historicalCandidates":{"current":"4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b","previous":"c8afe5f253d132f671ecd035a0330de7794b6ee8"},
-  "retainedEvidenceFilesMatched":48,
-  "frozenAssetSourceFilesMatched":29,
-  "artifactUnitsDigestVerified":6,
-  "sbomDigestsVerified":2,
-  "applicationSourceChanged":false,
-  "testsOrBuildOrRehearsalRepeated":false,
-  "historicalEvidenceRebound":false,
-  "generalPreviousWorkerRuntimeCompatible":false,
-  "previousStudentWorkspaceWorkerScopedEvidencePreserved":true,
-  "allWorkerRoutesAccepted":false,
-  "assetBuiltHttpDeliveryAccepted":false,
-  "linuxRollbackRehearsalAccepted":false,
-  "formalR12Acceptance":false,
-  "productionAcceptance":false,
-  "databaseConnected":false,
-  "releaseBlockers":["R12-E01","R12-E02","R12-E03","R12-E04"],
-  "r11FixCi":{"sourceSha":"2934821ae7de16fd65531c5df41684eb104a8e5c","runId":39514942840,"lastObservedStatus":"in_progress","result":null},
-  "evidence":"docs/reviews/evidence/post28/0b13ba91ea8fc3d008d0ced45187d880cf88eb12/r12-current-review/evidence-index.json",
-  "next":"R11_FIX_CI_THEN_R13_REVIEW"
+  "kind": "POST28_R12_CURRENT_PRACTICAL_REVIEW",
+  "localDate": "2026-10-21",
+  "reviewSourceSha": "0b13ba91ea8fc3d008d0ced45187d880cf88eb12",
+  "status": "LOCAL_DIAGNOSTIC_SCOPE_COMPLETE_WITH_DOCUMENTED_RELEASE_BLOCKERS",
+  "historicalCandidates": {
+    "current": "4b8e22f4cad6c5cdca384cf3e273c6d5cf97d61b",
+    "previous": "c8afe5f253d132f671ecd035a0330de7794b6ee8"
+  },
+  "retainedEvidenceFilesMatched": 48,
+  "frozenAssetSourceFilesMatched": 29,
+  "artifactUnitsDigestVerified": 6,
+  "sbomDigestsVerified": 2,
+  "applicationSourceChanged": false,
+  "testsOrBuildOrRehearsalRepeated": false,
+  "historicalEvidenceRebound": false,
+  "generalPreviousWorkerRuntimeCompatible": false,
+  "previousStudentWorkspaceWorkerScopedEvidencePreserved": true,
+  "allWorkerRoutesAccepted": false,
+  "assetBuiltHttpDeliveryAccepted": false,
+  "linuxRollbackRehearsalAccepted": false,
+  "formalR12Acceptance": false,
+  "productionAcceptance": false,
+  "databaseConnected": false,
+  "releaseBlockers": [
+    "R12-E01",
+    "R12-E02",
+    "R12-E03",
+    "R12-E04"
+  ],
+  "r11FixCi": {
+    "sourceSha": "2934821ae7de16fd65531c5df41684eb104a8e5c",
+    "runId": 39514942840,
+    "lastObservedStatus": "in_progress",
+    "result": null
+  },
+  "evidence": "docs/reviews/evidence/post28/0b13ba91ea8fc3d008d0ced45187d880cf88eb12/r12-current-review/evidence-index.json",
+  "next": "R11_FIX_CI_THEN_R13_REVIEW",
+  "latestPrivateAssetDeliveryDiagnostic": {
+    "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+    "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+    "passed": true,
+    "report": "docs/remediation/POST28_PRIVATE_ASSET_RETENTION_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/evidence-index.json",
+    "certificateDeliveryExercised": false,
+    "reviewerConsentDeliveryExercised": false,
+    "instantPreIssuedUrlRevocationProved": false,
+    "formalAcceptance": false,
+    "ci": {
+      "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+      "runId": 39522846173,
+      "lastObservedStatus": "in_progress",
+      "result": null,
+      "observedAt": "2026-10-21T00:44:31.964Z",
+      "jobs": [
+        {
+          "name": "Translation quality gates",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Full source closure gates",
+          "status": "in_progress",
+          "result": null
+        },
+        {
+          "name": "Deployment configuration",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "R08 isolated Redis and Linux worker shutdown",
+          "status": "completed",
+          "result": "success"
+        }
+      ],
+      "passedJobs": 3
+    }
+  }
 }

@@ -61,5 +61,46 @@
     "report": "docs/remediation/POST28_ADMIN_CMS_MFA_JOURNEY_2026-10-21.md",
     "evidence": "docs/reviews/evidence/post28/b7748fdd5383103a6936b4310152d49e497c18ae/r14-admin-cms-mfa/evidence-index.json"
   },
-  "fullBuiltAdminCmsMfaJourneyLocallyDemonstrated": true
+  "fullBuiltAdminCmsMfaJourneyLocallyDemonstrated": true,
+  "latestPrivateAssetDeliveryDiagnostic": {
+    "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+    "scope": "STUDENT_OWNED_PRIVATE_PDF_GRANT_DIAGNOSTIC_WINDOWS_ONLY",
+    "passed": true,
+    "report": "docs/remediation/POST28_PRIVATE_ASSET_RETENTION_2026-10-21.md",
+    "evidence": "docs/reviews/evidence/post28/6fa90544d419df5afee7ae35112ae8667f578a2b/r14-private-asset-retention/evidence-index.json",
+    "certificateDeliveryExercised": false,
+    "reviewerConsentDeliveryExercised": false,
+    "instantPreIssuedUrlRevocationProved": false,
+    "formalAcceptance": false,
+    "ci": {
+      "sourceSha": "6fa90544d419df5afee7ae35112ae8667f578a2b",
+      "runId": 39522846173,
+      "lastObservedStatus": "in_progress",
+      "result": null,
+      "observedAt": "2026-10-21T00:44:31.964Z",
+      "jobs": [
+        {
+          "name": "Translation quality gates",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "Full source closure gates",
+          "status": "in_progress",
+          "result": null
+        },
+        {
+          "name": "Deployment configuration",
+          "status": "completed",
+          "result": "success"
+        },
+        {
+          "name": "R08 isolated Redis and Linux worker shutdown",
+          "status": "completed",
+          "result": "success"
+        }
+      ],
+      "passedJobs": 3
+    }
+  }
 }
