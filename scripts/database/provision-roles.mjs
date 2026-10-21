@@ -33,7 +33,19 @@ const statement = [
   'REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC;',
 ];
 for (const [name, password] of roles) {
-  statement.push(`DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = ${literal(name)}) THEN CREATE ROLE ${name} LOGIN; END IF; END $$;`);
+  // PostgreSQL 16 grants a non-superuser role creator ADMIN, but neither SET
+  // nor INHERIT. Only the new migrator needs SET for its own default ACLs.
+  statement.push(`DO $$ DECLARE previous_self_grant text; BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = ${literal(name)}) THEN
+      IF ${literal(name)} = ${literal(migrator)} AND current_setting('server_version_num')::integer >= 160000 THEN
+        previous_self_grant := current_setting('createrole_self_grant');
+        PERFORM set_config('createrole_self_grant', 'set', true);
+        CREATE ROLE ${name} LOGIN;
+        PERFORM set_config('createrole_self_grant', previous_self_grant, true);
+      ELSE CREATE ROLE ${name} LOGIN;
+      END IF;
+    END IF;
+  END $$;`);
   // New roles default to unprivileged attributes. Managed CREATEROLE operators
   // cannot ALTER SUPERUSER, even to false. Reject unsafe existing identities
   // instead of requiring a superuser to silently strip their privileges.
@@ -54,9 +66,11 @@ statement.push(`REVOKE ALL ON ALL TABLES IN SCHEMA public FROM ${probe}, ${app};
 statement.push(`GRANT SELECT ON ALL TABLES IN SCHEMA public TO ${probe};`);
 statement.push(`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${app};`);
 statement.push(`GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ${app};`);
+statement.push(`SET LOCAL ROLE ${migrator};`);
 statement.push(`ALTER DEFAULT PRIVILEGES FOR ROLE ${migrator} IN SCHEMA public GRANT SELECT ON TABLES TO ${probe};`);
 statement.push(`ALTER DEFAULT PRIVILEGES FOR ROLE ${migrator} IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ${app};`);
 statement.push(`ALTER DEFAULT PRIVILEGES FOR ROLE ${migrator} IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO ${app};`);
+statement.push('RESET ROLE;');
 const childEnv = { ...env, PGHOST: direct.hostname, PGPORT: direct.port || '5432', PGDATABASE: database,
   PGUSER: decodeURIComponent(direct.username), PGPASSWORD: decodeURIComponent(direct.password),
   PGSSLMODE: direct.searchParams.get('sslmode') || 'prefer' };
