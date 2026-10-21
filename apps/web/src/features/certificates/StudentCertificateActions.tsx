@@ -36,17 +36,7 @@ export function StudentCertificateActions({
     const controller = new AbortController();
     requestRef.current = controller;
     try {
-      const grant = await ApiClient.getMyCertificateArtifactDeliveryGrant(
-        certificate.id,
-        'preview',
-      );
-      if (!/^https?:\/\//i.test(grant.url)) throw new Error(copy('رابط ملف الشهادة غير صالح.'));
-      const response = await fetch(grant.url, {
-        headers: grant.headers,
-        signal: controller.signal,
-      });
-      if (!response.ok) throw new Error(copy('تعذر تحميل الشهادة'));
-      const blob = await response.blob();
+      const blob = await ApiClient.getMyCertificateArtifactBlob(certificate.id, 'preview', controller.signal);
       if (!['image/svg+xml', 'image/png', 'image/jpeg'].includes(blob.type))
         throw new Error(copy('رابط ملف الشهادة غير صالح.'));
       if (controller.signal.aborted) return;
@@ -77,11 +67,7 @@ export function StudentCertificateActions({
     setBusy(true);
     setError('');
     try {
-      const grant = await ApiClient.getMyCertificateArtifactDeliveryGrant(certificate.id, 'pdf');
-      if (!/^https?:\/\//i.test(grant.url)) throw new Error(copy('رابط ملف الشهادة غير صالح.'));
-      const response = await fetch(grant.url, { headers: grant.headers });
-      if (!response.ok) throw new Error(copy('تعذر تنزيل الشهادة.'));
-      const blob = await response.blob();
+      const blob = await ApiClient.getMyCertificateArtifactBlob(certificate.id, 'pdf');
       if (blob.type !== 'application/pdf') throw new Error(copy('تعذر تنزيل الشهادة.'));
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement('a');

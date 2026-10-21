@@ -1,3 +1,4 @@
+import {readCertificateArtifact} from '@manaratak/application';
 import type {StudentDocumentUploadUseCases,StudentDocumentReviewUseCases} from '@manaratak/application';
 import { Router, Request, Response, NextFunction } from 'express';
 import { careerStudentRouter } from './CareerStudentRouter.js';
@@ -197,11 +198,22 @@ export class StudentWorkspaceRouter {
       const data=await cradle.certificateReadModelService.listForStudent(ownStudent(req),cursor);
       res.json({data,nextCursor:data.length===50 ? data[data.length-1].certificateId : null});
     }));
+    router.get('/certificates/:certificateId/artifacts/:kind/content', asyncHandler(async (req: Request, res: Response) => {
+      res.setHeader('Cache-Control', 'no-store');
+      const ownerId = ownStudent(req), kind = z.enum(['pdf', 'preview']).parse(req.params.kind);
+      const content = await readCertificateArtifact(kind,
+        () => cradle.certificateReadModelService.deliveryArtifact(req.params.certificateId, kind, ownerId),
+        processAssetLifecycleUseCase);
+      res.setHeader('Content-Type', content.mimeType);
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Disposition', kind === 'pdf' ? 'attachment; filename="certificate.pdf"' : 'inline; filename="preview"');
+      res.send(Buffer.from(content.bytes));
+    }));
     router.post('/certificates/:certificateId/artifacts/:kind/delivery-grant', asyncHandler(async (req: Request, res: Response) => {
-      const ownerId = ownStudent(req);
+      res.setHeader('Cache-Control', 'no-store');
       const kind = z.enum(['pdf', 'preview']).parse(req.params.kind);
-      const assetId = await cradle.certificateReadModelService.deliveryArtifact(req.params.certificateId, kind, ownerId);
-      res.json(await processAssetLifecycleUseCase.requestDeliveryGrant({assetId,expiresInSeconds:300}));
+      await cradle.certificateReadModelService.deliveryArtifact(req.params.certificateId, kind, ownStudent(req));
+      res.status(410).json({error: 'CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'});
     }));
 
     router.post(

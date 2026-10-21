@@ -266,6 +266,7 @@ export class ProcessAssetLifecycleUseCase {
     if (!this.storageGateway.generateDeliveryGrant) {
       throw new Error('ASSET_SECURE_DELIVERY_NOT_CONFIGURED');
     }
+    await this.assertCertificateGrantAllowed(record);
     const deadline = this.deliveryDeadline(record);
     const ttl = Math.min(dto.expiresInSeconds ?? 300, Math.floor((deadline - Date.now()) / 1000));
     if (ttl < 1) throw new Error('ASSET_DELIVERY_GRANT_EXCEEDS_DEADLINE');
@@ -280,6 +281,7 @@ export class ProcessAssetLifecycleUseCase {
         current.classification !== snapshot.classification || current.owner.ownerId !== snapshot.ownerId ||
         current.owner.ownerType !== snapshot.ownerType)
       throw new Error('ASSET_DELIVERY_CHANGED');
+    await this.assertCertificateGrantAllowed(current);
     const expiresAt = grant.expiresAt.getTime();
     if (!Number.isFinite(expiresAt) || expiresAt <= Date.now() ||
         expiresAt > Math.min(deadline, this.deliveryDeadline(current)))
@@ -290,6 +292,15 @@ export class ProcessAssetLifecycleUseCase {
       headers: grant.headers,
       expiresAt: grant.expiresAt.toISOString(),
     };
+  }
+
+  private async assertCertificateGrantAllowed(record: AssetRecord): Promise<void> {
+    if (record.owner.ownerType !== 'Certificate' || record.classification === 'PUBLIC') return;
+    if (!this.usageRegistry.findUsages) throw new Error('CERTIFICATE_DELIVERY_USAGE_UNAVAILABLE');
+    const usages = await this.usageRegistry.findUsages(record.id);
+    if (usages.some(usage => ['CERTIFICATE_PDF', 'CERTIFICATE_PREVIEW',
+      'STUDENT_CERTIFICATE_PDF', 'STUDENT_CERTIFICATE_PREVIEW'].includes(usage.consumer)))
+      throw new Error('CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED');
   }
 
   private deliveryDeadline(record: AssetRecord): number {

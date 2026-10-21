@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { z } from 'zod';
-import { CertificateUseCases } from '@manaratak/application';
+import { CertificateUseCases, readCertificateArtifact, type ProcessAssetLifecycleUseCase } from '@manaratak/application';
 import { AuthorizationEvaluatorService, CertificateStatus, CertificateTemplateStatus, type ICertificateAuthorityDirectory } from '@manaratak/domain';
 
 const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) =>
@@ -68,7 +68,7 @@ const issuerBody = z.object({
 
 const transitionSchema = z.object({ status: z.nativeEnum(CertificateTemplateStatus), reason: z.string().max(2000).optional() });
 export class CertificateAdminRouter {
-  public static create(cradle: { certificateUseCases: CertificateUseCases; authEvaluatorService: AuthorizationEvaluatorService; certificateAuthorityDirectory?:ICertificateAuthorityDirectory; certificateVerificationPolicy?:{read():Promise<{retentionDays:number|null;ipPerMinute:number;codePerMinute:number}>} }): Router {
+  public static create(cradle: { certificateUseCases: CertificateUseCases; processAssetLifecycleUseCase?: Pick<ProcessAssetLifecycleUseCase, 'readAuthenticatedDelivery'>; authEvaluatorService: AuthorizationEvaluatorService; certificateAuthorityDirectory?:ICertificateAuthorityDirectory; certificateVerificationPolicy?:{read():Promise<{retentionDays:number|null;ipPerMinute:number;codePerMinute:number}>} }): Router {
     const router = Router();
     const useCases = cradle.certificateUseCases;
     const evaluator = cradle.authEvaluatorService;
@@ -216,12 +216,22 @@ export class CertificateAdminRouter {
       if (!certificate) return res.status(404).json({error: 'CERTIFICATE_NOT_FOUND'});
       res.json({...await useCases.verifyByCode(certificate.verificationCode, false), checkedAt: new Date().toISOString()});
     }));
-    router.post('/:id/artifacts/:kind/delivery-grant', permit('admin:certificates:download'), asyncHandler(async (req: Request, res: Response) => {
+    router.get('/:id/artifacts/:kind/content', permit('admin:certificates:download'), asyncHandler(async (req: Request, res: Response) => {
+      res.setHeader('Cache-Control', 'no-store');
       const kind = z.enum(['pdf', 'preview']).parse(req.params.kind);
-      const assetId = await useCases.deliveryArtifact(req.params.id, kind);
-      const grants = (cradle as unknown as {processAssetLifecycleUseCase?: {requestDeliveryGrant(input: {assetId: string; expiresInSeconds: number}): Promise<unknown>}}).processAssetLifecycleUseCase;
-      if (!grants) throw new Error('CERTIFICATE_DELIVERY_NOT_CONFIGURED');
-      res.json(await grants.requestDeliveryGrant({assetId,expiresInSeconds:300}));
+      const content = await readCertificateArtifact(kind, () => useCases.deliveryArtifact(req.params.id, kind), cradle.processAssetLifecycleUseCase);
+      const decision = await evaluator.evaluatePermission(actor(req), 'admin:certificates:download', {ip: req.ip, requestTime: new Date()});
+      if (!decision.isGranted) return void res.status(403).json({error: 'CERTIFICATE_PERMISSION_DENIED'});
+      res.setHeader('Content-Type', content.mimeType);
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Disposition', kind === 'pdf' ? 'attachment; filename="certificate.pdf"' : 'inline; filename="preview"');
+      res.send(Buffer.from(content.bytes));
+    }));
+    router.post('/:id/artifacts/:kind/delivery-grant', permit('admin:certificates:download'), asyncHandler(async (req: Request, res: Response) => {
+      res.setHeader('Cache-Control', 'no-store');
+      const kind = z.enum(['pdf', 'preview']).parse(req.params.kind);
+      await useCases.deliveryArtifact(req.params.id, kind);
+      res.status(410).json({error: 'CERTIFICATE_AUTHENTICATED_DELIVERY_REQUIRED'});
     }));
     router.get('/:id/ledger', permit('admin:certificates:view'), asyncHandler(async (req: Request, res: Response) =>
       res.json({ data: await useCases.listLedger(req.params.id, z.coerce.number().int().min(1).max(100000).default(1).parse(req.query.page), z.string().uuid().optional().parse(req.query.cursor)) }),

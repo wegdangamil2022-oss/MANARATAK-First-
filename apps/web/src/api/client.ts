@@ -2209,6 +2209,13 @@ export class ApiClient {
     };
   }
 
+  static async getMyCertificateArtifactBlob(certificateId: string, kind: 'pdf' | 'preview', signal?: AbortSignal): Promise<Blob> {
+    const res = await apiFetch(API_BASE_URL + '/student/certificates/' + encodeURIComponent(certificateId) + '/artifacts/' + kind + '/content',
+      {headers: getStudentHeaders(), credentials: 'include', redirect: 'error', cache: 'no-store', signal});
+    if (!res.ok) throw new Error('تعذر تحميل ملف الشهادة');
+    return res.blob();
+  }
+
   static async getMyCertificateArtifactDeliveryGrant(
     certificateId: string,
     kind: 'pdf' | 'preview',
