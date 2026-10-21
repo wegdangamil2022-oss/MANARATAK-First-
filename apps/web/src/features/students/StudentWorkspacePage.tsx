@@ -804,31 +804,73 @@ export function StudentWorkspacePage({ initialTab = 'SUMMARY' }: { initialTab?: 
         )}
         {tab === 'CAREERS' && <StudentCareerWorkspace />}
         {tab === 'SERVICES' && (
-          <div className="space-y-4">
-          <div className="mn-panel flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--mn-border)] p-4">
-            <label className="text-xs font-bold">حالة الطلب <select value={serviceStatus} onChange={event => setServiceStatus(event.target.value)} className="mr-2 rounded-xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-2 text-[var(--mn-text)]">
-              <option value="">الكل</option>{['REQUESTED','ACCEPTED','IN_PROGRESS','AWAITING_PAYMENT','COMPLETED','CANCELLED'].map(status => <option key={status} value={status}>{getServiceRequestStatusBadge(status).label}</option>)}
-            </select></label>
-            <span className="text-xs text-[var(--mn-text-muted)]">{serviceLoading ? 'جارٍ تحميل الطلبات…' : `${serviceRequests.length} من ${serviceTotal} طلب`}</span>
-          </div>
-          {serviceError && <div className="space-y-2"><Alert tone="error" message={serviceError} /><button type="button" onClick={() => setRetryKey(value => value + 1)} className="text-sm font-bold text-[var(--mn-primary)] underline">إعادة تحميل الطلبات</button></div>}
-          {selectedServiceRequest && <StudentServiceBookingPanel requestId={selectedServiceRequest.id} />}
-          {invoiceError && <Alert tone="error" message={invoiceError} />}
-          {serviceError && !sectionFailures.includes('الفواتير') && <InvoicePanel invoices={invoices} paymentsByInvoice={paymentsByInvoice} onToggle={toggleInvoicePayments} />}
-          {!serviceLoading && !serviceError && (
-          <ServiceRequestsView
-            requests={serviceRequests}
-            selected={selectedServiceRequest}
-            requestedNotFoundId={requestedNotFoundId}
-            saving={saving}
-            onOpen={openServiceRequest}
-            invoices={invoices}
-            paymentsByInvoice={paymentsByInvoice}
-            onTogglePayments={toggleInvoicePayments}
-          />
-          )}
-          {serviceHasMore && <button type="button" disabled={serviceLoading} onClick={() => void loadMoreServices()} className="rounded-xl bg-[var(--mn-primary)] px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{serviceLoading ? 'جارٍ التحميل…' : 'تحميل طلبات إضافية'}</button>}
-          {invoices.length < invoiceTotal && <button type="button" disabled={invoiceLoading} onClick={() => void loadMoreInvoices()} className="mr-2 rounded-xl border border-[var(--mn-border)] px-4 py-2 text-sm disabled:opacity-50">{invoiceLoading ? 'جارٍ تحميل الفواتير…' : `تحميل فواتير إضافية (${invoices.length} من ${invoiceTotal})`}</button>}
+          <div className="mn-student-services-page space-y-5 font-['Cairo',sans-serif]">
+            <section aria-label="تصفية طلبات الخدمات" className="rounded-2xl border border-[var(--mn-border)] bg-[var(--mn-surface)] p-3.5 shadow-2xs mn-panel dark:border-white/10 sm:p-4">
+              <div className="mb-3 flex min-w-0 items-center gap-2">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[#D6A43B]/30 bg-[#142B5F] dark:bg-[#0c1a3b]">
+                  <Settings2 className="h-4 w-4 text-[#E5B54F]" aria-hidden="true" />
+                </span>
+                <h2 className="mn-student-services-heading text-[14px] font-bold text-[var(--mn-heading)]">تصفية الطلبات</h2>
+              </div>
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <label className="min-w-[185px] flex-1 text-[11px] font-semibold text-[var(--mn-heading)] sm:max-w-[290px]">
+                  حالة الطلب
+                  <select
+                    value={serviceStatus}
+                    onChange={(event) => setServiceStatus(event.target.value)}
+                    className="mt-1 block min-h-10 w-full rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-2 text-[12px] font-semibold text-[var(--mn-heading)] outline-none focus:border-[#D6A43B]"
+                  >
+                    <option value="">جميع الحالات</option>
+                    {['REQUESTED','ACCEPTED','IN_PROGRESS','AWAITING_PAYMENT','ACTION_REQUIRED','NEEDS_INPUT','COMPLETED','CANCELLED'].map((status) => (
+                      <option key={status} value={status}>{getServiceRequestStatusBadge(status).label}</option>
+                    ))}
+                  </select>
+                </label>
+                <span role="status" className="text-[11px] font-semibold leading-[1.8] text-[var(--mn-text-muted)]">
+                  {serviceLoading ? 'جارٍ تحميل الطلبات…' : `عرض ${serviceRequests.length} من ${serviceTotal} طلب`}
+                </span>
+              </div>
+            </section>
+
+            {serviceError && (
+              <div className="space-y-2">
+                <Alert tone="error" message={serviceError} />
+                <button type="button" onClick={() => setRetryKey(value => value + 1)} className="inline-flex min-h-9 items-center rounded-lg border border-[var(--mn-border)] bg-[var(--mn-page)] px-3 py-1.5 text-[12px] font-bold text-[var(--mn-heading)]">
+                  إعادة تحميل الطلبات
+                </button>
+              </div>
+            )}
+            {invoiceError && <Alert tone="error" message={invoiceError} />}
+            {serviceError && !sectionFailures.includes('الفواتير') && (
+              <div className="mn-student-services-fallback-invoices">
+                <InvoicePanel invoices={invoices} paymentsByInvoice={paymentsByInvoice} onToggle={toggleInvoicePayments} compactSummary />
+              </div>
+            )}
+            {!serviceLoading && !serviceError && (
+              <ServiceRequestsView
+                requests={serviceRequests}
+                selected={selectedServiceRequest}
+                requestedNotFoundId={requestedNotFoundId}
+                saving={saving}
+                onOpen={openServiceRequest}
+                invoices={invoices}
+                paymentsByInvoice={paymentsByInvoice}
+                onTogglePayments={toggleInvoicePayments}
+              />
+            )}
+            {selectedServiceRequest && <StudentServiceBookingPanel requestId={selectedServiceRequest.id} />}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {serviceHasMore && (
+                <button type="button" disabled={serviceLoading} onClick={() => void loadMoreServices()} className="min-h-9 rounded-lg bg-[var(--mn-primary)] px-3.5 py-1.5 text-[12px] font-bold text-white disabled:opacity-50">
+                  {serviceLoading ? 'جارٍ التحميل…' : 'تحميل طلبات إضافية'}
+                </button>
+              )}
+              {invoices.length < invoiceTotal && (
+                <button type="button" disabled={invoiceLoading} onClick={() => void loadMoreInvoices()} className="min-h-9 rounded-lg border border-[var(--mn-border)] bg-[var(--mn-surface)] px-3.5 py-1.5 text-[12px] font-bold text-[var(--mn-heading)] disabled:opacity-50">
+                  {invoiceLoading ? 'جارٍ تحميل الفواتير…' : `تحميل فواتير إضافية (${invoices.length} من ${invoiceTotal})`}
+                </button>
+              )}
+            </div>
           </div>
         )}
         {tab === 'PROFILE' && (
