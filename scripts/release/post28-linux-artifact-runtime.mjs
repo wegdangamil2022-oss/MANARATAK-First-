@@ -21,10 +21,12 @@ const repo=fs.realpathSync(process.cwd()), run=fs.realpathSync(process.argv[2]);
 const r08Combined=process.argv[3]==='--r08-combined';
 const r09Learner=process.argv[3]==='--r09-learner';
 const r09Public=process.argv[3]==='--r09-public';
+const r14AdminCms=process.argv[3]==='--r14-admin-cms';
 const r11Diagnostic=process.argv[4]==='--r11-contention';
-if(process.argv.length>5||(process.argv[4]&&!r11Diagnostic)||(r11Diagnostic&&!r09Public)||(process.argv[3]&&!r08Combined&&!r09Learner&&!r09Public))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
+if(process.argv.length>5||(process.argv[4]&&!r11Diagnostic)||(r11Diagnostic&&!r09Public)||(process.argv[3]&&!r08Combined&&!r09Learner&&!r09Public&&!r14AdminCms))throw Error('POST28_RUNTIME_ARGUMENT_INVALID');
 if(process.platform!=='linux'||process.arch!=='x64'||Number(process.versions.node.split('.')[0])!==22||process.env.POST28_LINUX_RUNTIME_REVIEW!=='YES')throw Error('POST28_LINUX_RUNTIME_REVIEW_NOT_AUTHORIZED');
 const sha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+const r14Cms=r14AdminCms?await import('./lib/R14AdminCmsRuntime.mjs'):null;
 if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())throw Error('POST28_CLEAN_SOURCE_REQUIRED');
 if(run===repo||run.startsWith(repo+path.sep))throw Error('POST28_RUNTIME_OUTSIDE_CHECKOUT_REQUIRED');
 const manifest=verifyReleaseManifest(path.join(run,'artifacts'),sha);
@@ -58,19 +60,20 @@ try{
   assert.equal(state.sourceSha,sha);assert.equal(state.storage,'tmpfs');
   env=Object.fromEntries(fs.readFileSync(state.envFile,'utf8').trim().split(/\r?\n/).map(line=>{const i=line.indexOf('=');return[line.slice(0,i),line.slice(i+1)];}));
   secrets.push(env.DATABASE_URL,env.POST28_TRANSACTION_SETUP_URL,...[env.DATABASE_URL,env.POST28_TRANSACTION_SETUP_URL].map(value=>decodeURIComponent(new URL(value).password)));
-  execute(['scripts/database/initialize-post28-transactions.mjs',...(r09Learner?['--r09-learner-fixtures']:[])],env,'initialize.log');
+  execute(['scripts/database/initialize-post28-transactions.mjs',...(r09Learner?['--r09-learner-fixtures']:r14AdminCms?['--r14-admin-cms-fixtures']:[])],env,'initialize.log');
   const contract=JSON.parse(fs.readFileSync(state.contractFile,'utf8'));
   report.databaseIdentity=await preflightTargets(contract,[{label:'DB-T',url:env.DATABASE_URL}],env,sha,readDatabaseIdentity,{requireValidatedCatalog:true});
   const setup=new PrismaClient({datasources:{db:{url:env.POST28_TRANSACTION_SETUP_URL}},log:[],errorFormat:'minimal'});
   const fixtureId=randomUUID(),email=fixtureId+'@example.invalid',password=randomBytes(24).toString('base64url'),salt=randomBytes(16),passwordHash=scryptSync(password,salt,64);
   secrets.push(password);
-  let r09Fixture;
+  let r09Fixture,r14Fixture;
   try{
     await setup.roleRecord.create({data:{id:'student',name:'Student',description:'Synthetic Linux review student',permissions:[],policyIds:[]}});
     await setup.identityRecord.create({data:{id:fixtureId,type:'Human',status:'ACTIVE',createdBy:'R07_LINUX_SYNTHETIC_FIXTURE',user:{create:{displayName:'R07 Linux learner',primaryEmail:email,isEmailVerified:true}},account:{create:{accessState:'Active'}},credentials:{create:{type:'password',passwordHash:'scrypt:16384:8:1:'+salt.toString('hex')+':'+passwordHash.toString('hex')}},roleAssignments:{create:{id:randomUUID(),roleId:'student'}}}});
     await setup.studentWorkspace.create({data:{studentReferenceId:fixtureId,status:'ACTIVE',displayName:'R07 Linux learner'}});
     if(r09Learner)r09Fixture=await seedR09LearnerFixture(setup,'scrypt:16384:8:1:'+salt.toString('hex')+':'+passwordHash.toString('hex'));
     if(r09Public)r09Fixture=await seedR09PublicFixture(setup);
+    if(r14AdminCms)r14Fixture=await r14Cms.seedR14AdminCmsFixture(setup,secrets);
   }finally{await setup.$disconnect();}
   db=new PrismaClient({datasources:{db:{url:env.DATABASE_URL}},log:[],errorFormat:'minimal'});
   const roles=await db.$queryRaw`SELECT current_user AS role, rolsuper, rolcreatedb, rolcreaterole, rolreplication, rolbypassrls FROM pg_roles WHERE rolname=current_user`;
@@ -84,6 +87,7 @@ try{
   const gatewayPort=await freePort(),origin='https://127.0.0.1:'+gatewayPort;
   const url=new URL(env.DATABASE_URL);url.hostname=state.containerName;url.port='5432';
   const apiEnv={NODE_ENV:'test',PORT:'3000',DATABASE_URL:url.href,DIRECT_URL:url.href,DATABASE_REQUIRED:'true',RELEASE_SOURCE_SHA:sha,HEALTH_DEPLOYMENT_REVISION:sha,CORS_ORIGIN:origin,PUBLIC_WEB_URL:origin,ADMIN_WEB_URL:origin+'/admin',TRUST_PROXY_HOPS:'1',SECURE_COOKIE:'true',BACKGROUND_WORKER_ENABLED:'false',STUDENT_WORKSPACE_OUTBOX_WORKER_ENABLED:'false',OWNER_DOMAIN_OUTBOX_WORKER_ENABLED:'false',CERTIFICATE_COMPLETION_WORKER_ENABLED:'false'};
+  if(r14AdminCms){apiEnv.MANARATAK_MFA_ENCRYPTION_KEY=randomBytes(32).toString('hex');secrets.push(apiEnv.MANARATAK_MFA_ENCRYPTION_KEY);}
   if(r08Combined){combined=new R08CombinedRuntime({docker,state,imageId:image.imageId,secrets});Object.assign(apiEnv,combined.prepare());report.kind='POST28_R08_COMBINED_ARTIFACT_RUNTIME';}
   secrets.push(url.href);const apiEnvFile=path.join(state.directory,'api.env');fs.writeFileSync(apiEnvFile,Object.entries(apiEnv).map(([key,value])=>key+'='+value).join('\n')+'\n',{mode:0o600,flag:'wx'});
   apiId=docker(['run','-d','--label','codex.post28.run='+state.runId,'--network',state.network,'--read-only','--cap-drop=ALL','--security-opt=no-new-privileges','--memory=768m','--pids-limit=128','--tmpfs','/opt/manaratak/storage:rw,uid=1000,gid=1000,mode=0700,size=67108864','--tmpfs','/tmp:rw,nosuid,noexec,size=16777216','--env-file',apiEnvFile,image.imageId]);
@@ -127,7 +131,11 @@ try{
       record:value=>fs.writeFileSync(path.join(proof,'r11-contention.json'),JSON.stringify(value,null,2)+'\n',{flag:'wx'})});
     observations.push({step:'R11_TWO_CONCURRENT_WRITES_ONE_PERSISTED_WINNER_AND_REPLAY',passed:true});
   }
-  if(combined){
+  if(r14AdminCms){
+    report.kind='POST28_R14_ADMIN_CMS_ARTIFACT_RUNTIME';
+    report.adminCmsJourney=await r14Cms.exerciseR14AdminCms({browser,origin,db,fixture:r14Fixture,proof,secrets,sourceSha:sha});
+    observations.push({step:'R14_SAME_SHA_THREE_ACTOR_MFA_AR_EN_CMS_LIFECYCLE',passed:true});report.redisConfigured=false;
+  }else if(combined){
     report.combinedAuth=await combined.exercise({page,origin,email,password,db,fixtureId});
     observations.push({step:'TWO_BUILT_APIS_SHARED_PG_REDIS_TLS_AUTH',passed:true});report.redisConfigured=true;
     assert(network.filter(row=>row.status>=500).every(row=>row.path==='/api/v1/auth/login'&&row.status===500));

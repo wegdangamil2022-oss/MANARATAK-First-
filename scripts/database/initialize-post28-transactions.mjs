@@ -8,7 +8,7 @@ import {readDatabaseIdentity} from './post28-preflight.mjs';
 import {preflightTargets} from './post28-isolation.mjs';
 import {preflightTransactionProvisioning,TRANSACTION_APPLICATION_TABLES,CERTIFICATE_FIXTURE_APPLICATION_TABLES,COURSE_FIXTURE_APPLICATION_TABLES,LEARNING_PATH_FIXTURE_APPLICATION_TABLES,R08_OUTBOX_FIXTURE_APPLICATION_TABLES,R08_SESSION_FIXTURE_APPLICATION_TABLES,R08_PROVIDER_FIXTURE_APPLICATION_TABLES,R09_LEARNER_APPLICATION_TABLES} from './post28-transaction-provisioning.mjs';
 import {requireScopedR06Authorization} from './post28-r06-authorization.mjs';
-import {R09_WORKFLOW_APPLICATION_TABLES} from './post28-transaction-provisioning.mjs';
+import {R09_WORKFLOW_APPLICATION_TABLES,R14_ADMIN_CMS_APPLICATION_TABLES} from './post28-transaction-provisioning.mjs';
 import {assertAdmissionNullIdentity} from './post28-admission-null-identity.mjs';
 import {requireDatabaseMutationGate} from '../lib/database-mutation-gate.mjs';
 import {digest,migrationInventory,verifyMigrationLedger} from './post28-migration-inventory.mjs';
@@ -20,10 +20,11 @@ try{
  const r08ProviderFixtures=process.argv.length===3&&process.argv[2]==='--r08-provider-fixtures';
  const r09LearnerFixtures=process.argv.length===3&&process.argv[2]==='--r09-learner-fixtures';
  const r09WorkflowFixtures=process.argv.length===3&&process.argv[2]==='--r09-workflow-fixtures';
+ const r14AdminCmsFixtures=process.argv.length===3&&process.argv[2]==='--r14-admin-cms-fixtures';
  const certificateFixtures=(process.argv.length===3&&process.argv[2]==='--certificate-fixtures')||credentialFixtures;
  const courseFixtures=process.argv.length===3&&process.argv[2]==='--course-fixtures';
  const learningPathFixtures=(process.argv.length===3&&process.argv[2]==='--learning-path-fixtures')||credentialFixtures;
- if((process.argv.length!==2&&!certificateFixtures&&!courseFixtures&&!learningPathFixtures&&!r08Fixtures&&!r08SessionFixtures&&!r08ProviderFixtures&&!r09LearnerFixtures&&!r09WorkflowFixtures)||Number(process.versions.node.split('.')[0])!==22)fail('POST28_NODE22_REQUIRED');
+ if((process.argv.length!==2&&!certificateFixtures&&!courseFixtures&&!learningPathFixtures&&!r08Fixtures&&!r08SessionFixtures&&!r08ProviderFixtures&&!r09LearnerFixtures&&!r09WorkflowFixtures&&!r14AdminCmsFixtures)||Number(process.versions.node.split('.')[0])!==22)fail('POST28_NODE22_REQUIRED');
  const root=fs.realpathSync(process.cwd()),sourceSha=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
  if(execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim())fail('POST28_CLEAN_SOURCE_REQUIRED');
  const authorization=requireScopedR06Authorization(root);
@@ -56,6 +57,7 @@ try{
   if(models.length!==281||[...TRANSACTION_APPLICATION_TABLES,...CERTIFICATE_FIXTURE_APPLICATION_TABLES,...COURSE_FIXTURE_APPLICATION_TABLES,...LEARNING_PATH_FIXTURE_APPLICATION_TABLES,...R08_OUTBOX_FIXTURE_APPLICATION_TABLES,...R08_SESSION_FIXTURE_APPLICATION_TABLES,...R08_PROVIDER_FIXTURE_APPLICATION_TABLES,...R09_LEARNER_APPLICATION_TABLES].some(t=>!models.includes(t)))fail('POST28_TRANSACTION_GRANT_TABLE_SET_INVALID');
   const quoted=names=>names.map(n=>'public."'+n+'"').join(',');
   if(R09_WORKFLOW_APPLICATION_TABLES.some(table=>!models.includes(table)))fail('POST28_TRANSACTION_GRANT_TABLE_SET_INVALID');
+  if(R14_ADMIN_CMS_APPLICATION_TABLES.some(table=>!models.includes(table)))fail('POST28_TRANSACTION_GRANT_TABLE_SET_INVALID');
   await setup.$executeRawUnsafe('GRANT SELECT ON '+quoted(models)+' TO post28_app');
   await setup.$executeRawUnsafe('GRANT INSERT,UPDATE,DELETE ON '+quoted(TRANSACTION_APPLICATION_TABLES)+' TO post28_app');
   // SELECT FOR UPDATE requires UPDATE privilege even for an absent reference.
@@ -69,6 +71,7 @@ try{
   if(r08ProviderFixtures)await setup.$executeRawUnsafe('GRANT INSERT,UPDATE,DELETE ON '+quoted(R08_PROVIDER_FIXTURE_APPLICATION_TABLES)+' TO post28_app');
   if(r09LearnerFixtures)await setup.$executeRawUnsafe('GRANT INSERT,UPDATE ON '+quoted(R09_LEARNER_APPLICATION_TABLES)+' TO post28_app');
   if(r09WorkflowFixtures)await setup.$executeRawUnsafe('GRANT INSERT,UPDATE,DELETE ON '+quoted(R09_WORKFLOW_APPLICATION_TABLES)+' TO post28_app');
+  if(r14AdminCmsFixtures)await setup.$executeRawUnsafe('GRANT INSERT,UPDATE,DELETE ON '+quoted(R14_ADMIN_CMS_APPLICATION_TABLES)+' TO post28_app');
  }finally{await setup.$disconnect();}
  const finalIdentity=await preflightTargets(contract,[{label:'DB-T',url:process.env.DATABASE_URL}],process.env,sourceSha,readDatabaseIdentity,{requireValidatedCatalog:true});
  const result={kind:'POST28_R06_LOCAL_DB_T_SETUP',sourceSha,runId:contract.runId,authorization,identities,finalIdentity,ledger,certificateFixtureWriteTables:certificateFixtures?CERTIFICATE_FIXTURE_APPLICATION_TABLES:[],courseFixtureWriteTables:courseFixtures?COURSE_FIXTURE_APPLICATION_TABLES:[],applicationReadTables:281,applicationUpdateOnlyReferenceLockTables:certificateFixtures?[]:['CertificateTemplate','CertificateIssuer'],applicationWriteTables:TRANSACTION_APPLICATION_TABLES,ledgerGranted:false,DDLGranted:false,schemaDiffExitCode:0,R06Accepted:false};
@@ -78,5 +81,6 @@ try{
  result.r08ProviderFixtureWriteTables=r08ProviderFixtures?R08_PROVIDER_FIXTURE_APPLICATION_TABLES:[];
  result.r09LearnerFixtureWriteTables=r09LearnerFixtures?R09_LEARNER_APPLICATION_TABLES:[];
  result.r09WorkflowFixtureWriteTables=r09WorkflowFixtures?R09_WORKFLOW_APPLICATION_TABLES:[];
+ result.r14AdminCmsFixtureWriteTables=r14AdminCmsFixtures?R14_ADMIN_CMS_APPLICATION_TABLES:[];
  fs.writeFileSync(path.join(directory,'result.json'),JSON.stringify(result,null,2)+'\n',{mode:0o600});console.log(JSON.stringify(result));
 }catch(error){console.error(error.message?.match(/^POST28_[A-Z_]+$/)?.[0]??'POST28_TRANSACTION_SETUP_FAILED');process.exitCode=1;}
